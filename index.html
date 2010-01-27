@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" manifest="tvmanager.manifest">
+<head>
+    <title>TV Manager</title>
+    <!-- Framework -->
+    <script src="framework/iscroll.js" type="text/javascript"></script>
+    <script src="framework/prototype-1.6.0.3.js" type="text/javascript"></script>
+    <script src="framework/sw/spinningwheel.js" type="text/javascript"></script>
+
+    <!-- Components -->
+    <script src="components/list.js" type="text/javascript"></script>
+		<script src="components/progressBar.js" type="text/javascript"></script>
+
+    <!-- Models -->
+    <script src="models/program-model.js" type="text/javascript"></script>
+    <script src="models/series-model.js" type="text/javascript"></script>
+    <script src="models/episode-model.js" type="text/javascript"></script>
+
+    <!-- Controllers -->
+    <script src="controllers/database-controller.js" type="text/javascript"></script>
+    <script src="controllers/dataSync-controller.js" type="text/javascript"></script>
+    <script src="controllers/schedule-controller.js" type="text/javascript"></script>
+    <script src="controllers/programs-controller.js" type="text/javascript"></script>
+    <script src="controllers/program-controller.js" type="text/javascript"></script>
+    <script src="controllers/seriesList-controller.js" type="text/javascript"></script>
+    <script src="controllers/series-controller.js" type="text/javascript"></script>
+    <script src="controllers/episodes-controller.js" type="text/javascript"></script>
+    <script src="controllers/episode-controller.js" type="text/javascript"></script>
+    <script src="controllers/settings-controller.js" type="text/javascript"></script>
+
+    <!-- StyleSheets -->
+    <!--<link href="stylesheets/default.css" media="only screen and (max-device-width: 480px)" rel="stylesheet" type="text/css" />-->
+    <link href="stylesheets/default.css" media="screen" rel="stylesheet" type="text/css"/>
+    <link href="framework/sw/spinningwheel.css" media="screen" rel="stylesheet" type="text/css"/>
+
+    <!-- Icon -->
+    <link href="apple-touch-icon.png" rel="apple-touch-icon"/>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+</head>
+<body id="mainBody">
+    <div id="header">
+        <a id="headerLeftButton"></a>
+        <h1 id="headerLabel"></h1>
+        <a id="headerRightButton"></a>
+    </div>
+		<div id="contentWrapper">
+			<div id="content"></div>
+		</div>
+    <div id="footer">
+        <a id="footerLeftButton"></a>
+        <footer id="footerLabel"></footer>
+        <a id="footerRightButton"></a>
+    </div>
+    <div id="notice">
+        <label id="noticeLabel"></label>
+        <a id="noticeLeftButton"></a>
+        <a id="noticeRightButton"></a>
+    </div>
+</body>
+<script src="controllers/application-controller.js" type="text/javascript"></script>
+</html>
