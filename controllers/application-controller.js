@@ -68,6 +68,7 @@ ApplicationController.prototype.popView = function(args) {
 }
 
 ApplicationController.prototype.viewPopped = function(args) {
+	this.scroller.enabled = true;
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	this.setHeader();
 }
