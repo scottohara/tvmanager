@@ -18,6 +18,7 @@ function iScroll(el)
 	this.refresh();
 	this.element.style.webkitTransitionTimingFunction = 'cubic-bezier(0, 0, 0.2, 1)';
 	this.acceleration = 0.009;
+	this.enabled = true;
 
 	this.events = {
 		touchstart: "touchstart",
@@ -67,26 +68,28 @@ iScroll.prototype = {
 	},
 	
 	onTouchStart: function(e) {
-		e.preventDefault();
+		if (this.events.touchstart == "touchstart" || this.enabled ) {
+			e.preventDefault();
 
-		this.element.style.webkitTransitionDuration = '0';	// Remove any transition
-		var theTransform = window.getComputedStyle(this.element).webkitTransform;
-		theTransform = new WebKitCSSMatrix(theTransform).m42;
-		if( theTransform!=this.position )
-			this.position = theTransform;
+			this.element.style.webkitTransitionDuration = '0';	// Remove any transition
+			var theTransform = window.getComputedStyle(this.element).webkitTransform;
+			theTransform = new WebKitCSSMatrix(theTransform).m42;
+			if( theTransform!=this.position )
+				this.position = theTransform;
 
-		var source = e;
-		if (e.targetTouches) {
-			source = e.targetTouches[0];
+			var source = e;
+			if (e.targetTouches) {
+				source = e.targetTouches[0];
+			}
+
+			this.startY = source.clientY;
+			this.scrollStartY = this.position;
+			this.scrollStartTime = e.timeStamp;
+			this.moved = false;
+
+			this.element.addEventListener(this.events.touchmove, this, false);
+			this.element.addEventListener(this.events.touchend, this, false);
 		}
-
-		this.startY = source.clientY;
-		this.scrollStartY = this.position;
-		this.scrollStartTime = e.timeStamp;
-		this.moved = false;
-
-		this.element.addEventListener(this.events.touchmove, this, false);
-		this.element.addEventListener(this.events.touchend, this, false);
 
 		return false;
 	},
