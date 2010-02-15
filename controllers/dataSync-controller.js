@@ -28,21 +28,12 @@ DataSyncController.prototype.dataExport = function(callback) {
 }
 
 DataSyncController.prototype.dataImport = function(statusBar, callback) {
-
-console.log("in dataImport, about to get export.txt");
-
 	new Ajax.Request("export/export.txt", {method: "get", contentType: "text/plain",
 		onSuccess:	function(response) {
-
-console.log("got export.txt");
-
-			var importObj = JSON.parse(response.responseText);
+			var importObj = String(response.responseText).evalJSON();
 			var programsCompleted = 0;
 
 			if (importObj.programs.length > 0) {
-
-console.log("got some programs to load");
-
 				statusBar.value = "Imported " + programsCompleted + " of " + importObj.programs.length;
 				db.transaction(
 					function(tx) {
@@ -52,9 +43,6 @@ console.log("got some programs to load");
 					}.bind(this),
 					function() {}.bind(this),
 					function() {
-
-console.log("purged existing data");
-
 						for (var i = 0; i < importObj.programs.length; i++) {
 							var importProgram = importObj.programs[i];
 							var program = new Program(null, importProgram.programName);
@@ -97,9 +85,6 @@ console.log("purged existing data");
 											}
 										}
 									} else {
-
-console.log("error saving program " + importProgram.programName);
-
 										callback(false);
 									}
 								}.bind(this);
@@ -108,16 +93,10 @@ console.log("error saving program " + importProgram.programName);
 					}.bind(this)
 				);
 			} else {
-
-console.log("got no programs to load");
-
 				callback(false);
 			}
 		}.bind(this),
 		onFailure: function() {
-
-console.log("couldn't get export.txt");
-
 			callback(false);
 		}.bind(this)
 	});

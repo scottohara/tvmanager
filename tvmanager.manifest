@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# Version 1.0.9
+# Version 1.0.33
 
 components/list.js
 components/progressBar.js
@@ -26,6 +26,7 @@ framework/sw/sw-header.png
 framework/sw/sw-slot-border.png
 framework/iscroll.js
 framework/prototype-1.6.0.3.js
+framework/toucheventproxy.js
 
 images/backButton.png
 images/blueButton.png

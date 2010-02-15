@@ -1,4 +1,36 @@
 Vertically centre list items
 Manual sorting (or use 01, 02, etc..)
 Completed progs to bottom (option?)
+Fix Import finished notification
+	- schedule reload appears to be blocked by pending inserts
+	- pehaps we use a select... statement to wait for completion
+Add Export status messages
+Need "Other" option in now showing list
+Prevent horizontal scrolling on phone (remove hack when implemented in iScroll)
+Programs list letter groupings
+Need "Missed" status?
+Scroll to newly added program/series
+"Unconfirmed" indicator (for recorded/expected status)
+Editing a series clears the progress graph on programs list
 Show when last imported and if changed since
+	- prevent import or warn if changes since last import
+
+IMPORT/EXPORT
+Last Export: dd-mmm-yyyy
+Last Import: dd-mmm-yyyy
+Import file created: dd-mmm-yyyy
+
+STATISTICS
+Total Programs: xx
+Total Series: xx
+Total Episodes: xx
+
+Imported Programs: xx
+Imported Series: xx
+Imported Episodes: xx
+
+Data changed since import? Yes
+
+VERSIONS
+Database: v1.3
+Application: v1.0.9

@@ -33,7 +33,7 @@ EpisodeController.prototype.setup = function() {
 	$("statusDate").value = this.listItem.episode.statusDate;
 	$("statusDate").addEventListener('click', this.getStatusDate.bind(this));
 
-	appController.scroller.enabled = false;
+	appController.toucheventproxy.enabled = false;
 }
 
 EpisodeController.prototype.save = function() {

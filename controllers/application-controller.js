@@ -4,7 +4,7 @@ function ApplicationController() {
 	this.viewStack = [];
 	$("contentWrapper").addEventListener('webkitTransitionEnd', this.contentShown.bind(this));
 	$("notice").addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
-	window.onload = function() { setTimeout(function(){ this.scroller = new iScroll($("content")) }.bind(this), 100) }.bind(this);
+	window.onload = function() { setTimeout(function(){ this.scroller = new iScroll($("content"), "y"); this.toucheventproxy = new TouchEventProxy($("content")); }.bind(this), 100) }.bind(this);
 
 	if (window.applicationCache) {
 		window.applicationCache.addEventListener('updateready', function() {
@@ -68,7 +68,7 @@ ApplicationController.prototype.popView = function(args) {
 }
 
 ApplicationController.prototype.viewPopped = function(args) {
-	this.scroller.enabled = true;
+	this.toucheventproxy.enabled = true;
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	this.setHeader();
 }
@@ -79,7 +79,8 @@ ApplicationController.prototype.show = function(onSuccess, args) {
 		onComplete: function() {
 			$("contentWrapper").className = "loading";
 			onSuccess(args);
-		}
+			setTimeout(function(){ this.scroller.refresh(); this.scroller.scrollTo(0, 0); }.bind(this), 1000);
+		}.bind(this)
 	});
 }
 
@@ -91,12 +92,6 @@ ApplicationController.prototype.contentShown = function() {
 
 		case "loaded":
 			$("contentWrapper").className = "";
-
-			if (this.scroller) {
-				this.scroller.refresh();
-				this.scroller.scrollTo();
-			}
-
 			break;
 	}
 }
