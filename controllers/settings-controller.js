@@ -57,9 +57,10 @@ SettingsController.prototype.doImport = function(e) {
 SettingsController.prototype.doExport = function() {
 	if (!this.exporting) {
 		this.exporting = true;
+		$("status").value = "Starting export";
 
 		var sync = new DataSyncController();
-		sync.dataExport(
+		sync.dataExport($("status"),
 			function(successful) {
 				var label = "Database has been successfully exported.";
 				if (!successful) {
@@ -78,6 +79,8 @@ SettingsController.prototype.doExport = function() {
 				this.exporting = false;
 			}.bind(this)
 		);
+	} else {
+		//$("status").value = "An export is already running";
 	}
 }
 

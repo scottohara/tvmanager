@@ -26,6 +26,8 @@ TouchEventProxy.prototype = {
 		//touchEvent.targetTouches[0].clientX = e.clientX;
 		touchEvent.targetTouches[0].clientX = 0;
 		touchEvent.targetTouches[0].clientY = e.clientY;
+		touchEvent.changedTouches = [{}];
+		touchEvent.changedTouches[0].target = e.target;
 		touchEvent.target = e.target;
 		touchEvent.timeStamp = e.timeStamp;
 		e.target.dispatchEvent(touchEvent);

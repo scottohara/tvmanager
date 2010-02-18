@@ -2,7 +2,7 @@ function DataSyncController() {
 
 }
 
-DataSyncController.prototype.dataExport = function(callback) {
+DataSyncController.prototype.dataExport = function(statusBar, callback) {
 	Program.list(function(programs) {
 		var json = { programs: [] };
 
@@ -12,13 +12,19 @@ DataSyncController.prototype.dataExport = function(callback) {
 			var completed = 0;
 
 			for (var i = 0; i < programs.length; i++) {
+				statusBar.value = "Prepared " + completed + " of " + programs.length + " for export";
 				json.programs.push({});
 				programs[i].toJson(function(index) {
 					return function(programJson) {
 						json.programs[index] = programJson;
 						completed++;
+						statusBar.value = "Prepared " + completed + " of " + programs.length + " for export";
 						if (completed === programs.length) {
-							new Ajax.Request("export.asp", {contentType: "text/plain", postBody: Object.toJSON(json), onComplete: function() { callback(true); }.bind(this) });
+							statusBar.value = "Sending data to server";
+							new Ajax.Request("export.asp", {contentType: "text/plain", postBody: Object.toJSON(json),
+								onSuccess: function() { statusBar.value = "Sent data to server"; callback(true); }.bind(this),
+								onFailure: function(response) { console.log(Object.toJSON(json)); statusBar.value = "Export failed: " + response.statusText; callback(false); }.bind(this)
+							});
 						}
 					}.bind(this);
 				}.bind(this)(i));

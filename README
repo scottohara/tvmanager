@@ -8,10 +8,18 @@ Add Export status messages
 Need "Other" option in now showing list
 Prevent horizontal scrolling on phone (remove hack when implemented in iScroll)
 Programs list letter groupings
+Need colour coding for my programs?
 Need "Missed" status?
 Scroll to newly added program/series
 "Unconfirmed" indicator (for recorded/expected status)
 Editing a series clears the progress graph on programs list
+Need an "are you sure?" prompt on import
+
+Import/Export verification:
+ - Metadata service (.asp) to return timestamp/version & total of current export.txt file on server
+ - Export calculates local metadata before upload, compares it to results of metadata service
+ - Import calculates local metadata after download, compares it to results of metadata service
+
 Show when last imported and if changed since
 	- prevent import or warn if changes since last import
 
