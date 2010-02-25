@@ -46,11 +46,13 @@ ApplicationController.prototype.pushView = function(view, args) {
 	if (this.viewStack.length > 0) {
 		this.clearHeader();
 		this.clearFooter();
+		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller._yPos;
 	}
 
 	this.viewStack.push({
 		name: view,
-		controller: new window[view.charAt(0).toUpperCase() + view.substr(1) + "Controller"](args)
+		controller: new window[view.charAt(0).toUpperCase() + view.substr(1) + "Controller"](args),
+		scrollPos: 0
 	});
 	this.show(this.viewPushed.bind(this));
 }
@@ -79,7 +81,13 @@ ApplicationController.prototype.show = function(onSuccess, args) {
 		onComplete: function() {
 			$("contentWrapper").className = "loading";
 			onSuccess(args);
-			setTimeout(function(){ this.scroller.refresh(); this.scroller.scrollTo(0, 0); }.bind(this), 1000);
+			setTimeout(function(){
+				this.scroller.refresh();
+				if (this.viewStack[this.viewStack.length - 1].scrollPos === -1) {
+					this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
+				}
+				this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos);
+			}.bind(this), 1000);
 		}.bind(this)
 	});
 }

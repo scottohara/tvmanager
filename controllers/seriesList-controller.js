@@ -56,6 +56,10 @@ SeriesListController.prototype.addItem = function() {
 }
 
 SeriesListController.prototype.editItem = function(itemIndex) {
+    this.origEpisodeCount = this.seriesList.items[itemIndex].episodeCount;
+    this.origWatchedCount = this.seriesList.items[itemIndex].watchedCount;
+    this.origRecordedCount = this.seriesList.items[itemIndex].recordedCount;
+    this.origExpectedCount = this.seriesList.items[itemIndex].expectedCount;
     appController.pushView("series", { listIndex: itemIndex, series: this.seriesList.items[itemIndex] });
 }
 

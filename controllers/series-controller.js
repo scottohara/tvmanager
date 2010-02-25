@@ -29,6 +29,9 @@ SeriesController.prototype.setup = function() {
 SeriesController.prototype.save = function() {
 	this.listItem.series.seriesName = $("seriesName").value;
 	this.listItem.series.save();
+	if (!this.listItem.listIndex >= 0) {
+		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
+	}
 	appController.popView(this.listItem);
 }
 

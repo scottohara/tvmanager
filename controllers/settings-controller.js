@@ -27,14 +27,12 @@ SettingsController.prototype.doImport = function(e) {
 		$("status").value = "Starting import";
 
 		var sync = new DataSyncController();
-		console.log("created DataSyncController");
-
 		sync.dataImport($("status"),
 			function(successful) {
 				var label = "Database has been successfully imported.";
 
 				if (!successful) {
-					label = "Nothing to import.";
+					label = "Import failed.";
 				}
 
 				appController.showNotice({
@@ -64,7 +62,7 @@ SettingsController.prototype.doExport = function() {
 			function(successful) {
 				var label = "Database has been successfully exported.";
 				if (!successful) {
-					label = "Nothing to export.";
+					label = "Export failed.";
 				}
 
 				appController.showNotice({
@@ -91,6 +89,20 @@ SettingsController.prototype.cacheUpdate = function() {
 		var label = "Application cache has been successfully updated.";
 
 		if (window.applicationCache) {
+			var cacheStatusValues = [];
+			cacheStatusValues[0] = 'uncached';
+			cacheStatusValues[1] = 'idle';
+			cacheStatusValues[2] = 'checking';
+			cacheStatusValues[3] = 'downloading';
+			cacheStatusValues[4] = 'updateready';
+			cacheStatusValues[5] = 'obsolete';
+
+			window.applicationCache.addEventListener('updateready', function(e){
+				if (cacheStatusValues[window.applicationCache.status] != 'idle') {
+					window.applicationCache.swapCache();
+				}
+      }, false);
+			
 			window.applicationCache.update();
 		} else {
 			label = "This browser does not support application caching."

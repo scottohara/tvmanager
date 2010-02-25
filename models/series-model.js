@@ -159,7 +159,7 @@ Series.listByProgram = function(programId, callback) {
 }
 
 Series.listByNowShowing = function(callback) {
-	var filter = "WHERE s.NowShowing IS NOT NULL GROUP BY s.rowid ORDER BY s.NowShowing";
+	var filter = "GROUP BY s.rowid HAVING s.NowShowing IS NOT NULL OR COUNT(e3.rowid) > 0 OR COUNT(e4.rowid) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name";
 	var params = [];
 	Series.list(filter, params, callback);
 }

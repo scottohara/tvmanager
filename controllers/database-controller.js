@@ -6,7 +6,7 @@ function DatabaseController(callback, errorCallback) {
 	this.errorCallback = errorCallback;
 	this.initialVersion = "";
 
-	this.expectedVersion = "1.3";
+	this.expectedVersion = "1.4";
 
 	this.upgrades = [
 		{
@@ -24,6 +24,10 @@ function DatabaseController(callback, errorCallback) {
 		{
 			version: "1.2",
 			upgradeHandler: this.v1_3.bind(this)
+		},
+		{
+			version: "1.3",
+			upgradeHandler: this.v1_4.bind(this)
 		}
 	];
 
@@ -91,4 +95,8 @@ DatabaseController.prototype.v1_2 = function(tx) {
 
 DatabaseController.prototype.v1_3 = function(tx) {
 	tx.executeSql("ALTER TABLE Series ADD COLUMN NowShowing");
+}
+
+DatabaseController.prototype.v1_4 = function(tx) {
+	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unverified");
 }

@@ -1,24 +1,12 @@
+Scrollheight issue
+
+Programs list letter groupings
 Vertically centre list items
 Manual sorting (or use 01, 02, etc..)
 Completed progs to bottom (option?)
-Fix Import finished notification
-	- schedule reload appears to be blocked by pending inserts
-	- pehaps we use a select... statement to wait for completion
-Add Export status messages
-Need "Other" option in now showing list
+Colour coding for my programs?
+Colour coding of Fox vs FTA?
 Prevent horizontal scrolling on phone (remove hack when implemented in iScroll)
-Programs list letter groupings
-Need colour coding for my programs?
-Need "Missed" status?
-Scroll to newly added program/series
-"Unconfirmed" indicator (for recorded/expected status)
-Editing a series clears the progress graph on programs list
-Need an "are you sure?" prompt on import
-
-Import/Export verification:
- - Metadata service (.asp) to return timestamp/version & total of current export.txt file on server
- - Export calculates local metadata before upload, compares it to results of metadata service
- - Import calculates local metadata after download, compares it to results of metadata service
 
 Show when last imported and if changed since
 	- prevent import or warn if changes since last import

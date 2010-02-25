@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# Version 1.0.38
+# Version 1.0.46
 
 components/list.js
 components/progressBar.js
@@ -17,6 +17,7 @@ controllers/series-controller.js
 controllers/seriesList-controller.js
 controllers/settings-controller.js
 
+framework/jshash-2.2/md5-min.js
 framework/sw/spinningwheel.css
 framework/sw/spinningwheel.js
 framework/sw/sw-alpha.png
@@ -27,14 +28,19 @@ framework/sw/sw-slot-border.png
 framework/iscroll.js
 framework/prototype-1.6.0.3.js
 framework/toucheventproxy.js
+framework/webtoolkit.md5.js
 
 images/backButton.png
 images/blueButton.png
 images/cancel.png
 images/expected.png
+images/expected_unverified.png
 images/listArrow.png
 images/listArrowSel.png
 images/listGroup.png
+images/missed.png
+images/missed_unverified.png
+images/on_off.png
 images/percentImage.png
 images/percentImage_back1.png
 images/percentImage_back2.png
@@ -42,6 +48,7 @@ images/percentImage_back3.png
 images/percentImage_back4.png
 images/pinstripes.png
 images/recorded.png
+images/recorded_unverified.png
 images/redButton.png
 images/toolButton.png
 images/toolbar.png
@@ -82,3 +89,4 @@ export/export.txt.6
 export/export.txt.7
 export/export.txt.8
 export/export.txt.9
+getChecksum.asp

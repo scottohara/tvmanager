@@ -25,6 +25,7 @@ EpisodeController.prototype.setup = function() {
 	$("watched").addEventListener('click', function() { this.setStatus("Watched") }.bind(this));
 	$("recorded").addEventListener('click', function() { this.setStatus("Recorded") }.bind(this));
 	$("expected").addEventListener('click', function() { this.setStatus("Expected") }.bind(this));
+	$("missed").addEventListener('click', function() { this.setStatus("Missed") }.bind(this));
 
 	var status = this.listItem.episode.status;
 	this.listItem.episode.setStatus("");
@@ -32,13 +33,18 @@ EpisodeController.prototype.setup = function() {
 
 	$("statusDate").value = this.listItem.episode.statusDate;
 	$("statusDate").addEventListener('click', this.getStatusDate.bind(this));
+	$("unverified").checked = this.listItem.episode.unverified;
 
 	appController.toucheventproxy.enabled = false;
 }
 
 EpisodeController.prototype.save = function() {
 	this.listItem.episode.episodeName = $("episodeName").value;
+	this.listItem.episode.setUnverified($("unverified").checked);
 	this.listItem.episode.save();
+	if (!this.listItem.listIndex >= 0) {
+		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
+	}
 	appController.popView(this.listItem);
 }
 
@@ -53,7 +59,9 @@ EpisodeController.prototype.setStatus = function(status) {
 		$("watched").className = "";
 		$("recorded").className = "";
 		$("expected").className = "";
+		$("missed").className = "";
 		$("statusDateRow").style.display = "none";
+		$("unverifiedRow").style.display = "none";
 
 		if (this.listItem.episode.status === status) {
 			this.listItem.episode.setStatus("");
@@ -67,6 +75,7 @@ EpisodeController.prototype.setStatus = function(status) {
 				case "Recorded":
 					$("recorded").className = "status";
 					$("statusDateRow").style.display = "block";
+					$("unverifiedRow").style.display = "block";
 					if ("" === this.listItem.episode.statusDate) {
 						this.getStatusDate();
 					}
@@ -75,6 +84,16 @@ EpisodeController.prototype.setStatus = function(status) {
 				case "Expected":
 					$("expected").className = "status";
 					$("statusDateRow").style.display = "block";
+					$("unverifiedRow").style.display = "block";
+					if ("" === this.listItem.episode.statusDate) {
+						this.getStatusDate();
+					}
+					break;
+
+				case "Missed":
+					$("missed").className = "status";
+					$("statusDateRow").style.display = "block";
+					$("unverifiedRow").style.display = "block";
 					if ("" === this.listItem.episode.statusDate) {
 						this.getStatusDate();
 					}
@@ -105,6 +124,6 @@ EpisodeController.prototype.getStatusDate = function() {
 }
 
 EpisodeController.prototype.setStatusDate = function() {
-	this.listItem.episode.statusDate = SpinningWheel.getSelectedValues().values.join('-');
+	this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join('-'));
 	$("statusDate").value = this.listItem.episode.statusDate;
 }

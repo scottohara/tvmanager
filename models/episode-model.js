@@ -1,10 +1,11 @@
 var Episode = Class.create({
-	initialize: function(id, episodeName, seriesId, status, statusDate) {
+	initialize: function(id, episodeName, seriesId, status, statusDate, unverified) {
 		this.id = id;
 		this.episodeName = episodeName;
 		this.seriesId = seriesId;
 		this.statusDate = statusDate;
 		this.setStatus(status);
+		this.setUnverified(unverified);
 	},
 
 	save: function() {
@@ -13,11 +14,11 @@ var Episode = Class.create({
 			var params;
 
 			if (this.id) {
-				sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ? WHERE rowid = ?";
-				params = [this.episodeName, this.status, this.statusDate, this.id];
+				sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ?, Unverified = ? WHERE rowid = ?";
+				params = [this.episodeName, this.status, this.statusDate, this.unverified, this.id];
 			} else {
-				sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate) VALUES (?, ?, ?, ?)";
-				params = [this.episodeName, this.seriesId, this.status, this.statusDate];
+				sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified) VALUES (?, ?, ?, ?, ?)";
+				params = [this.episodeName, this.seriesId, this.status, this.unverified, this.statusDate];
 			}
 
 			tx.executeSql(sql, params,
@@ -60,11 +61,25 @@ var Episode = Class.create({
 
 	setStatus: function(status) {
 		this.status = status;
+		this.setStatusDate(this.statusDate);
+	},
 
-		if (("Recorded" === this.status || "Expected" === this.status) && this.statusDate != "") {
+	setStatusDate: function(statusDate) {
+		this.statusDate = statusDate;
+
+		if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status) && this.statusDate != "") {
 			this.statusDateDisplay = "(" + this.statusDate + ")";
 		} else {
 			this.statusDateDisplay = "";
+		}
+	},
+
+	setUnverified: function(unverified) {
+		this.unverified = unverified;
+		if (this.unverified) {
+			this.unverifiedDisplay = "Unverified";
+		} else {
+			this.unverifiedDisplay = "";
 		}
 	}
 });
@@ -73,11 +88,11 @@ Episode.list = function(seriesId, callback) {
 	var episodeList = [];
 
 	db.transaction(function(tx) {
-		tx.executeSql("SELECT rowid, Name, Status, StatusDate FROM Episode WHERE SeriesID = ?", [seriesId],
+		tx.executeSql("SELECT rowid, Name, Status, StatusDate, Unverified FROM Episode WHERE SeriesID = ?", [seriesId],
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var ep = resultSet.rows.item(i);
-					episodeList.push(new Episode(ep.rowid, ep.Name, seriesId, ep.Status, ep.StatusDate));
+					episodeList.push(new Episode(ep.rowid, ep.Name, seriesId, ep.Status, ep.StatusDate, (ep.Unverified === "true")));
 				}
 				callback(episodeList);
 			},
