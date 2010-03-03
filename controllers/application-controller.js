@@ -5,12 +5,8 @@ function ApplicationController() {
 	$("contentWrapper").addEventListener('webkitTransitionEnd', this.contentShown.bind(this));
 	$("notice").addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
 	window.onload = function() { setTimeout(function(){ this.scroller = new iScroll($("content"), "y"); this.toucheventproxy = new TouchEventProxy($("content")); }.bind(this), 100) }.bind(this);
-
-	if (window.applicationCache) {
-		window.applicationCache.addEventListener('updateready', function() {
-			window.applicationCache.swapCache();
-		});
-	}
+	this.cache = new CacheController();
+	this.cache.update();
 }
 
 ApplicationController.prototype.start = function() {
@@ -76,26 +72,29 @@ ApplicationController.prototype.viewPopped = function(args) {
 }
 
 ApplicationController.prototype.show = function(onSuccess, args) {
+	$("nowLoading").className = "loading";
 	new Ajax.Updater("content", "views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", {
 		method: 'get',
 		onComplete: function() {
 			$("contentWrapper").className = "loading";
 			onSuccess(args);
-			setTimeout(function(){
-				this.scroller.refresh();
-				if (this.viewStack[this.viewStack.length - 1].scrollPos === -1) {
-					this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
-				}
-				this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos);
-			}.bind(this), 1000);
 		}.bind(this)
 	});
+}
+
+ApplicationController.prototype.refreshScroller = function() {
+	this.scroller.refresh();
+	if (this.viewStack[this.viewStack.length - 1].scrollPos === -1) {
+		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
+	}
+	this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos);
 }
 
 ApplicationController.prototype.contentShown = function() {
 	switch ($("contentWrapper").className) {
 		case "loading":
 			$("contentWrapper").className = "loaded";
+			$("nowLoading").className = "";
 			break;
 
 		case "loaded":

@@ -129,7 +129,7 @@ DataSyncController.prototype.dataImport = function(statusBar, callback) {
 															if (seriesId) {
 																for (var k = 0; k < importSeries.episodes.length; k++) {
 																	var importEpisode = importSeries.episodes[k];
-																	var episode = new Episode(null, importEpisode.episodeName, seriesId, importEpisode.status, importEpisode.statusDate);
+																	var episode = new Episode(null, importEpisode.episodeName, seriesId, importEpisode.status, importEpisode.statusDate, importEpisode.unverified);
 																	episode.save();
 																}
 																seriesCompleted++;

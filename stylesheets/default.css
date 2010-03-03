@@ -20,13 +20,29 @@ body {
 }
 
 #contentWrapper.loading {
-		visibility: hidden;
-		-webkit-transform: translateX(100%);
+	visibility: hidden;
+	-webkit-transform: translateX(100%);
 }
 
 #contentWrapper.loaded {
-		visibility: visible;
-		-webkit-transform: translateX(0%);
+	visibility: visible;
+	-webkit-transform: translateX(0%);
+}
+
+#nowLoading {
+	margin: 20px auto;
+	background: url(../images/loading.gif) no-repeat;
+	height: 40px;
+	padding-left: 40px;
+	width: 200px;
+	position: relative;
+	display: none;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#nowLoading.loading {
+	display: block;
 }
 
 /*********************** Header/footer ****************************/
@@ -361,6 +377,20 @@ fieldset > .row:last-child {
 
 .row #missed {
 	background-image: url(../images/missed.png);
+}
+
+.row #import {
+	margin-left: 110px;
+	background-image: url(../images/import.png);
+}
+
+.row #export {
+	background-image: url(../images/export.png);
+}
+
+.row #update {
+	margin-left: 110px;
+	background-image: url(../images/update.png);
 }
 
 .row div.toggle {

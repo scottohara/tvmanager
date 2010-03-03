@@ -1,7 +1,7 @@
 <%@language=Javascript EnableSessionState=False%>
 <script runat="server" language="JavaScript" src="framework/jshash-2.2/md5-min.js"></script>
 <%
-	var oFSO = Server.CreateObject("Scripting.FilesystemObject");
+	var oFSO = Server.CreateObject("Scripting.FileSystemObject");
 	var sExportFile = "export/export.txt";
 	var sSource = Server.MapPath(sExportFile);
 	oExportFile = oFSO.OpenTextFile(sSource, 1);

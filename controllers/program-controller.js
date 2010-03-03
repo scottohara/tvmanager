@@ -22,12 +22,15 @@ ProgramController.prototype.setup = function() {
 	};
 
 	$("programName").value = this.listItem.program.programName;
+
+	appController.toucheventproxy.enabled = false;
+	appController.refreshScroller();
 }
 
 ProgramController.prototype.save = function() {
 	this.listItem.program.programName = $("programName").value;
 	this.listItem.program.save();
-	if (!this.listItem.listIndex >= 0) {
+	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);

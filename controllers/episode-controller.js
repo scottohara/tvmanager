@@ -36,13 +36,14 @@ EpisodeController.prototype.setup = function() {
 	$("unverified").checked = this.listItem.episode.unverified;
 
 	appController.toucheventproxy.enabled = false;
+	appController.refreshScroller();
 }
 
 EpisodeController.prototype.save = function() {
 	this.listItem.episode.episodeName = $("episodeName").value;
 	this.listItem.episode.setUnverified($("unverified").checked);
 	this.listItem.episode.save();
-	if (!this.listItem.listIndex >= 0) {
+	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);

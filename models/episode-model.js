@@ -18,7 +18,7 @@ var Episode = Class.create({
 				params = [this.episodeName, this.status, this.statusDate, this.unverified, this.id];
 			} else {
 				sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified) VALUES (?, ?, ?, ?, ?)";
-				params = [this.episodeName, this.seriesId, this.status, this.unverified, this.statusDate];
+				params = [this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified];
 			}
 
 			tx.executeSql(sql, params,
@@ -55,7 +55,8 @@ var Episode = Class.create({
 		return {
 			episodeName: this.episodeName,
 			status: this.status,
-			statusDate: this.statusDate
+			statusDate: this.statusDate,
+			unverified: this.unverified
 		}
 	},
 

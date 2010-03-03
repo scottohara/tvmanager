@@ -24,12 +24,15 @@ SeriesController.prototype.setup = function() {
 	$("seriesName").value = this.listItem.series.seriesName;
 	$("nowShowing").value = this.listItem.series.nowShowingDisplay;
 	$("nowShowing").addEventListener('click', this.getNowShowing.bind(this));
+
+	appController.toucheventproxy.enabled = false;
+	appController.refreshScroller();
 }
 
 SeriesController.prototype.save = function() {
 	this.listItem.series.seriesName = $("seriesName").value;
 	this.listItem.series.save();
-	if (!this.listItem.listIndex >= 0) {
+	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);

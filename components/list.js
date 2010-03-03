@@ -41,6 +41,7 @@ List.prototype.populateItem = function(response) {
 		listItem.addEventListener('click', function(itemIndex) { return function() { if (!appController.scroller.moved) { this.tap(itemIndex); }}.bind(this);}.bind(this)(i));
 		$(this.container).appendChild(listItem);
 	}
+	appController.refreshScroller();
 }
 
 List.prototype.setAction = function(action) {

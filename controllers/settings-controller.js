@@ -15,6 +15,9 @@ SettingsController.prototype.setup = function() {
 		$("import").addEventListener('click', this.doImport.bind(this));
 		$("export").addEventListener('click', this.doExport.bind(this));
 		$("update").addEventListener('click', this.cacheUpdate.bind(this));
+
+		appController.toucheventproxy.enabled = false;
+		appController.refreshScroller();
 }
 
 SettingsController.prototype.goBack = function() {
@@ -78,33 +81,16 @@ SettingsController.prototype.doExport = function() {
 			}.bind(this)
 		);
 	} else {
-		//$("status").value = "An export is already running";
+		$("status").value = "An export is already running";
 	}
 }
 
 SettingsController.prototype.cacheUpdate = function() {
 	if (!this.updating) {
 		this.updating = true;
-
 		var label = "Application cache has been successfully updated.";
 
-		if (window.applicationCache) {
-			var cacheStatusValues = [];
-			cacheStatusValues[0] = 'uncached';
-			cacheStatusValues[1] = 'idle';
-			cacheStatusValues[2] = 'checking';
-			cacheStatusValues[3] = 'downloading';
-			cacheStatusValues[4] = 'updateready';
-			cacheStatusValues[5] = 'obsolete';
-
-			window.applicationCache.addEventListener('updateready', function(e){
-				if (cacheStatusValues[window.applicationCache.status] != 'idle') {
-					window.applicationCache.swapCache();
-				}
-      }, false);
-			
-			window.applicationCache.update();
-		} else {
+		if (!appController.cache.update()) {
 			label = "This browser does not support application caching."
 		}
 
