@@ -7,6 +7,7 @@ function TouchEventProxy(el)
 		var testEvent = document.createEvent("TouchEvent");
 	} catch (e) {
 		this.element.addEventListener("mousedown", this, false);
+		this.element.addEventListener("click", this, true);
 	}
 }
 
@@ -16,6 +17,7 @@ TouchEventProxy.prototype = {
 			case "mousedown": this.onTouchStart(e); break;
 			case "mousemove": this.onTouchMove(e); break;
 			case "mouseup": this.onTouchEnd(e); break;
+			case "click": this.captureBrowserEvent(e); break;
 		}
 	},
 
@@ -54,6 +56,13 @@ TouchEventProxy.prototype = {
 		this.element.removeEventListener("mouseup", this, false);
 		this.dispatchTouchEvent(e, "touchend");
 		return false;
-	}
+	},
 
+	captureBrowserEvent: function(e) {
+		if (this.enabled && e.cancelable) {
+			e.stopPropagation();
+		}
+
+		return false;
+	}
 }

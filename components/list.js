@@ -67,7 +67,9 @@ List.prototype.tap = function(itemIndex) {
 			break;
 
 		case "delete":
-			this.deleteEventHandler(itemIndex);
+			if (window.confirm("Delete this item?")) {
+				this.deleteEventHandler(itemIndex);
+			}
 			break;
 	}
 }

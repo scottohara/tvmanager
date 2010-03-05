@@ -359,7 +359,7 @@ iScroll.prototype = {
 		if (!this.moved) {
 			var theEvent = document.createEvent("MouseEvents");
 			theEvent.initEvent('click', true, false);
-			e.changedTouches[0].target.dispatchEvent(theEvent);		
+			e.changedTouches[0].target.dispatchEvent(theEvent);
 			return false;
 		}
 
