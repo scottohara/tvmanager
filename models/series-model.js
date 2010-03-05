@@ -184,6 +184,20 @@ Series.list = function(filter, params, callback) {
 	});
 };
 
+Series.count = function(callback) {
+	db.transaction(function(tx) {
+		tx.executeSql("SELECT COUNT(*) AS SeriesCount FROM Series", [],
+			function(tx, resultSet) {
+				callback(resultSet.rows.item(0).SeriesCount);
+			},
+			function(tx, error) {
+				throw new Error("Series.count: " + error.message);
+				callback(0);
+			}
+		);
+	});
+}
+
 Series.NOW_SHOWING = {
 	0: "Not Showing",
 	1: "Mondays",

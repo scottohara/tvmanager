@@ -2,15 +2,131 @@ function DataSyncController() {
 
 }
 
-DataSyncController.prototype.dataExport = function(statusBar, callback) {
-	this.statusBar = statusBar;
-	this.callback = callback;
+DataSyncController.prototype.setup = function() {
+    this.header = {
+        label: "Import/Export",
+        leftButton: {
+            eventHandler: this.goBack.bind(this),
+            style: "backButton",
+            label: "Settings"
+        }
+    };
 
-	if (window.confirm("Are you sure you want to export?")) {
-		this.toJson("Exported", this.doExport.bind(this));
+		this.activate();
+}
+
+DataSyncController.prototype.activate = function() {
+		$("import").addEventListener('click', this.dataImport.bind(this));
+		$("export").addEventListener('click', this.dataExport.bind(this));
+		$("localChanges").value = "Checking...";
+
+		Setting.get("LastSyncHash", this.gotLastSyncHash.bind(this));
+
+		appController.toucheventproxy.enabled = false;
+		appController.refreshScroller();
+}
+
+DataSyncController.prototype.goBack = function() {
+    appController.popView();
+}
+
+DataSyncController.prototype.gotLastSyncHash = function(lastSyncHash) {
+	if (lastSyncHash) {
+		this.lastSyncHash = lastSyncHash;
+		this.toJson("", this.checkForLocalChanges.bind(this));
 	} else {
-		this.statusBar.value = "Export aborted";
-		this.callback(false);
+		this.callback(false)
+	}
+}
+
+DataSyncController.prototype.checkForLocalChanges = function(data) {
+	this.localChanges = (data.hash != this.lastSyncHash.settingValue);
+	
+	if (this.localChanges) {
+		$("localChanges").value = "Data changed since last sync";
+	} else {
+		$("localChanges").value = "No changes since last sync";
+	}
+}
+
+DataSyncController.prototype.dataExport = function() {
+	if (!this.exporting) {
+		this.exporting = true;
+		$("statusRow").style.display = "block";
+		$("status").value = "Starting export";
+
+		this.callback =	function(successful) {
+			var label = "Database has been successfully exported.";
+
+			if (successful) {
+				$("statusRow").style.display = "none";
+			} else {
+				label = "Export failed.";
+			}
+
+			appController.showNotice({
+				label: label,
+				leftButton: {
+					eventHandler: appController.hideNotice.bind(this),
+					style: "redButton",
+					label: "OK"
+				}
+			});
+
+			this.exporting = false;
+		}.bind(this)
+
+		if (window.confirm("Are you sure you want to export?")) {
+			this.toJson("Exported", this.doExport.bind(this));
+		} else {
+			$("status").value = "Export aborted";
+			this.callback(false);
+		}
+	} else {
+		$("status").value = "An export is already running";
+	}
+}
+
+DataSyncController.prototype.dataImport = function() {
+	if (!this.importing) {
+		this.importing = true;
+		$("statusRow").style.display = "block";
+		$("status").value = "Starting import";
+
+		this.callback = function(successful) {
+			var label = "Database has been successfully imported.";
+
+			if (successful) {
+				$("statusRow").style.display = "none";
+			} else {
+				label = "Import failed.";
+			}
+
+			appController.showNotice({
+				label: label,
+				leftButton: {
+					eventHandler: appController.hideNotice.bind(this),
+					style: "redButton",
+					label: "OK"
+				}
+			});
+
+			this.importing = false;
+		}.bind(this)
+
+		var prompt = "";
+		if (this.localChanges) {
+			prompt = "Warning: Local changes have been made. ";
+		}
+
+		if (window.confirm(prompt + "Are you sure you want to import?")) {
+			this.doImport();
+		} else {
+			$("status").value = "Import aborted";
+			this.callback(false);
+		}
+	} else {
+		$("status").value = "An import is already running";
 	}
 }
 
@@ -24,15 +140,15 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 			var completed = 0;
 
 			for (var i = 0; i < programs.length; i++) {
-				this.statusBar.value = statusBarAction + " " + completed + " of " + programs.length;
+				$("status").value = statusBarAction + " " + completed + " of " + programs.length;
 				exportObj.programs.push({});
 				programs[i].toJson(function(index) {
 					return function(programJson) {
 						exportObj.programs[index] = programJson;
 						completed++;
-						this.statusBar.value = statusBarAction + " " + completed + " of " + programs.length;
+						$("status").value = statusBarAction + " " + completed + " of " + programs.length;
 						if (completed === programs.length) {
-							this.statusBar.value = "Calculating checksum";
+							$("status").value = "Calculating checksum";
 							var json = Object.toJSON(exportObj);
 							var pos = 0
 							var hash = "";
@@ -56,125 +172,118 @@ DataSyncController.prototype.verifyData = function(data) {
 			method: "get",
 			contentType: "text/plain",
 			onSuccess: function(response) {
-				this.statusBar.value = "Verifying data";
+				$("status").value = "Verifying data";
 				if (data.hash.valueOf() === response.responseText) {
-					this.statusBar.value = "Verify complete";
-					this.callback(true);
+					$("status").value = "Verify complete";
+					var lastSyncHash = new Setting("LastSyncHash", data.hash);
+					lastSyncHash.save(this.callback);
 				} else {
-					this.statusBar.value = "Verify failed: Checksum mismatch";
+					$("status").value = "Verify failed: Checksum mismatch";
 					this.callback(false);
 				}
 			}.bind(this),
 			onFailure: function(response) {
-				this.statusBar.value = "Verify failed: " + response.statusText;
+				$("status").value = "Verify failed: " + response.statusText;
 				this.callback(false);
 			}.bind(this)
 		});
 	} else {
-		this.statusBar.value = "Verify failed: No programs found";
+		$("status").value = "Verify failed: No programs found";
 		this.callback(false);
 	}
 }
 
 DataSyncController.prototype.doExport = function(data) {
-	this.statusBar.value = "Sending data to server";
+	$("status").value = "Sending data to server";
 	new Ajax.Request("export.asp", {
 		contentType: "text/plain",
 		postBody: data.json,
 		onSuccess: function() {
-			this.statusBar.value = "Sent data to server";
+			$("status").value = "Sent data to server";
 			this.verifyData(data);
 		}.bind(this),
 		onFailure: function(response) {
-			this.statusBar.value = "Export failed: " + response.statusText;
+			$("status").value = "Export failed: " + response.statusText;
 			this.callback(false);
 		}.bind(this)
 	});
 }
 
-DataSyncController.prototype.dataImport = function(statusBar, callback) {
-	this.statusBar = statusBar;
-	this.callback = callback;
+DataSyncController.prototype.doImport = function() {
+	new Ajax.Request("export/export.txt", {method: "get", contentType: "text/plain",
+		onSuccess:	function(response) {
+			var importObj = String(response.responseText).evalJSON();
+			var programsCompleted = 0;
 
-	if (window.confirm("Are you sure you want to import?")) {
-		new Ajax.Request("export/export.txt", {method: "get", contentType: "text/plain",
-			onSuccess:	function(response) {
-				var importObj = String(response.responseText).evalJSON();
-				var programsCompleted = 0;
+			if (importObj.programs.length > 0) {
+				$("status").value = "Imported " + programsCompleted + " of " + importObj.programs.length;
+				db.transaction(
+					function(tx) {
+						tx.executeSql("DELETE FROM Episode", []);
+						tx.executeSql("DELETE FROM Series", []);
+						tx.executeSql("DELETE FROM Program", []);
+					}.bind(this),
+					function() {}.bind(this),
+					function() {
+						for (var i = 0; i < importObj.programs.length; i++) {
+							var importProgram = importObj.programs[i];
+							var program = new Program(null, importProgram.programName);
+							program.save(function(importProgram) {
+								return function(programId) {
+									if (programId) {
+										var seriesCompleted = 0;
 
-				if (importObj.programs.length > 0) {
-					this.statusBar.value = "Imported " + programsCompleted + " of " + importObj.programs.length;
-					db.transaction(
-						function(tx) {
-							tx.executeSql("DELETE FROM Episode", []);
-							tx.executeSql("DELETE FROM Series", []);
-							tx.executeSql("DELETE FROM Program", []);
-						}.bind(this),
-						function() {}.bind(this),
-						function() {
-							for (var i = 0; i < importObj.programs.length; i++) {
-								var importProgram = importObj.programs[i];
-								var program = new Program(null, importProgram.programName);
-								program.save(function(importProgram) {
-									return function(programId) {
-										if (programId) {
-											var seriesCompleted = 0;
-
-											if (importProgram.seriesList.length > 0) {
-												for (var j = 0; j < importProgram.seriesList.length; j++) {
-													var importSeries = importProgram.seriesList[j];
-													var series = new Series(null, importSeries.seriesName, importSeries.nowShowing, programId);
-													series.save(function(importSeries) {
-														return function(seriesId) {
-															if (seriesId) {
-																for (var k = 0; k < importSeries.episodes.length; k++) {
-																	var importEpisode = importSeries.episodes[k];
-																	var episode = new Episode(null, importEpisode.episodeName, seriesId, importEpisode.status, importEpisode.statusDate, importEpisode.unverified);
-																	episode.save();
-																}
-																seriesCompleted++;
-																if (seriesCompleted === importProgram.seriesList.length) {
-																	programsCompleted++;
-																	this.statusBar.value = "Imported " + programsCompleted + " of " + importObj.programs.length;
-																	if (programsCompleted === importObj.programs.length) {
-																		this.toJson("Verifiying", this.verifyData.bind(this));
-																	}
-																}
-															} else {
-																this.statusBar.value = "Error saving series: " + series.seriesName;
-																this.callback(false);
+										if (importProgram.seriesList.length > 0) {
+											for (var j = 0; j < importProgram.seriesList.length; j++) {
+												var importSeries = importProgram.seriesList[j];
+												var series = new Series(null, importSeries.seriesName, importSeries.nowShowing, programId);
+												series.save(function(importSeries) {
+													return function(seriesId) {
+														if (seriesId) {
+															for (var k = 0; k < importSeries.episodes.length; k++) {
+																var importEpisode = importSeries.episodes[k];
+																var episode = new Episode(null, importEpisode.episodeName, seriesId, importEpisode.status, importEpisode.statusDate, importEpisode.unverified);
+																episode.save();
 															}
-														}.bind(this);
-													}.bind(this)(importSeries));
-												}
-											} else {
-												programsCompleted++;
-												this.statusBar.value = "Imported " + programsCompleted + " of " + importObj.programs.length;
-												if (programsCompleted === importObj.programs.length) {
-													this.toJson("Verifiying", this.verifyData.bind(this));
-												}
+															seriesCompleted++;
+															if (seriesCompleted === importProgram.seriesList.length) {
+																programsCompleted++;
+																$("status").value = "Imported " + programsCompleted + " of " + importObj.programs.length;
+																if (programsCompleted === importObj.programs.length) {
+																	this.toJson("Verifiying", this.verifyData.bind(this));
+																}
+															}
+														} else {
+															$("status").value = "Error saving series: " + series.seriesName;
+															this.callback(false);
+														}
+													}.bind(this);
+												}.bind(this)(importSeries));
 											}
 										} else {
-											this.statusBar.value = "Error saving program: " + program.programName;
-											this.callback(false);
+											programsCompleted++;
+											$("status").value = "Imported " + programsCompleted + " of " + importObj.programs.length;
+											if (programsCompleted === importObj.programs.length) {
+												this.toJson("Verifiying", this.verifyData.bind(this));
+											}
 										}
-									}.bind(this);
-								}.bind(this)(importProgram));
-							}
-						}.bind(this)
-					);
-				} else {
-					this.statusBar.value = "Import failed: No programs found";
-					this.callback(false);
-				}
-			}.bind(this),
-			onFailure: function(response) {
-				this.statusBar.value = "Import failed: " + response.statusText;
+									} else {
+										$("status").value = "Error saving program: " + program.programName;
+										this.callback(false);
+									}
+								}.bind(this);
+							}.bind(this)(importProgram));
+						}
+					}.bind(this)
+				);
+			} else {
+				$("status").value = "Import failed: No programs found";
 				this.callback(false);
-			}.bind(this)
-		});
-	} else {
-		this.statusBar.value = "Import aborted";
-		this.callback(false);
-	}
+			}
+		}.bind(this),
+		onFailure: function(response) {
+			$("status").value = "Import failed: " + response.statusText;
+			this.callback(false);
+		}.bind(this)
+	});
 }

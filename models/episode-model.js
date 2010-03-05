@@ -104,3 +104,17 @@ Episode.list = function(seriesId, callback) {
 		);
 	});
 };
+
+Episode.count = function(callback) {
+	db.transaction(function(tx) {
+		tx.executeSql("SELECT COUNT(*) AS EpisodeCount FROM Episode", [],
+			function(tx, resultSet) {
+				callback(resultSet.rows.item(0).EpisodeCount);
+			},
+			function(tx, error) {
+				throw new Error("Episode.count: " + error.message);
+				callback(0);
+			}
+		);
+	});
+}

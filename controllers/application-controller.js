@@ -6,7 +6,20 @@ function ApplicationController() {
 	$("notice").addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
 	window.onload = function() { setTimeout(function(){ this.scroller = new iScroll($("content"), "y"); this.toucheventproxy = new TouchEventProxy($("content")); }.bind(this), 100) }.bind(this);
 	this.cache = new CacheController();
-	this.cache.update();
+	this.cache.update(
+		function(updated, message) {
+			if (updated) {
+				this.showNotice({
+					label: message,
+					leftButton: {
+						eventHandler: this.hideNotice.bind(this),
+						style: "redButton",
+						label: "OK"
+					}
+				});
+			}
+		}.bind(this)
+	);
 }
 
 ApplicationController.prototype.start = function() {

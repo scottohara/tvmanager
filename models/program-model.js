@@ -166,3 +166,17 @@ Program.list = function(callback) {
 		);
 	});
 };
+
+Program.count = function(callback) {
+	db.transaction(function(tx) {
+		tx.executeSql("SELECT COUNT(*) AS ProgramCount FROM Program", [],
+			function(tx, resultSet) {
+				callback(resultSet.rows.item(0).ProgramCount);
+			},
+			function(tx, error) {
+				throw new Error("Program.count: " + error.message);
+				callback(0);
+			}
+		);
+	});
+}

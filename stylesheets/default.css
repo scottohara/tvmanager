@@ -422,6 +422,14 @@ fieldset > .row:last-child {
 	left: -55px;
 }
 
+.toView {
+	background: url(../images/listArrow.png) no-repeat right;
+}
+
+#statusRow {
+	display: none;
+}
+
 /*************************** Notices ******************************/
 
 
