@@ -14,7 +14,7 @@ function CacheController() {
 				window.applicationCache.swapCache();
 				this.callback(true, "Application has been updated to the latest version. Please restart the application.");
 			}
-    }, false);
+    }.bind(this), false);
 
 		window.applicationCache.addEventListener('error', function() {
 			if (navigator.onLine) {
@@ -22,11 +22,13 @@ function CacheController() {
 				console.log(error);
 				this.callback(false, error);
 			}
-		});
+		}.bind(this));
 
 		window.applicationCache.addEventListener('noupdate', function() {
-			this.callback(false, "You are currently running the latest version. No updates are available at this time.");
-		});
+			if (this.callback) {
+				this.callback(false, "You are currently running the latest version. No updates are available at this time.");
+			}
+		}.bind(this));
 	}
 }
 
