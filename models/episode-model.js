@@ -1,11 +1,15 @@
 var Episode = Class.create({
-	initialize: function(id, episodeName, seriesId, status, statusDate, unverified) {
+	initialize: function(id, episodeName, status, statusDate, unverified, unscheduled, seriesId, seriesName, programId, programName) {
 		this.id = id;
 		this.episodeName = episodeName;
-		this.seriesId = seriesId;
 		this.statusDate = statusDate;
 		this.setStatus(status);
 		this.setUnverified(unverified);
+		this.unscheduled = unscheduled;
+		this.seriesId = seriesId;
+		this.seriesName = seriesName;
+		this.programId = programId;
+		this.programName = programName;
 	},
 
 	save: function() {
@@ -14,11 +18,11 @@ var Episode = Class.create({
 			var params;
 
 			if (this.id) {
-				sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ?, Unverified = ? WHERE rowid = ?";
-				params = [this.episodeName, this.status, this.statusDate, this.unverified, this.id];
+				sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ?, Unverified = ?, Unscheduled = ? WHERE rowid = ?";
+				params = [this.episodeName, this.status, this.statusDate, this.unverified, this.unscheduled, this.id];
 			} else {
-				sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified) VALUES (?, ?, ?, ?, ?)";
-				params = [this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified];
+				sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified, Unscheduled) VALUES (?, ?, ?, ?, ?, ?)";
+				params = [this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled];
 			}
 
 			tx.executeSql(sql, params,
@@ -56,7 +60,8 @@ var Episode = Class.create({
 			episodeName: this.episodeName,
 			status: this.status,
 			statusDate: this.statusDate,
-			unverified: this.unverified
+			unverified: this.unverified,
+			unscheduled: this.unscheduled
 		}
 	},
 
@@ -77,7 +82,7 @@ var Episode = Class.create({
 
 	setUnverified: function(unverified) {
 		this.unverified = unverified;
-		if (this.unverified) {
+		if ("Watched" != this.status && this.unverified) {
 			this.unverifiedDisplay = "Unverified";
 		} else {
 			this.unverifiedDisplay = "";
@@ -85,15 +90,28 @@ var Episode = Class.create({
 	}
 });
 
-Episode.list = function(seriesId, callback) {
+Episode.listBySeries = function(seriesId, callback) {
+	var filter = "WHERE e.SeriesID = ?";
+	var params = [seriesId];
+	Episode.list(filter, params, callback);
+}
+
+Episode.listByUnscheduled = function(callback) {
+	var filter = "WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)";
+	var params = [];
+	Episode.list(filter, params, callback);
+}
+
+
+Episode.list = function(filter, params, callback) {
 	var episodeList = [];
 
 	db.transaction(function(tx) {
-		tx.executeSql("SELECT rowid, Name, Status, StatusDate, Unverified FROM Episode WHERE SeriesID = ?", [seriesId],
+		tx.executeSql("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var ep = resultSet.rows.item(i);
-					episodeList.push(new Episode(ep.rowid, ep.Name, seriesId, ep.Status, ep.StatusDate, (ep.Unverified === "true")));
+					episodeList.push(new Episode(ep.rowid, ep.Name, ep.Status, ep.StatusDate, (ep.Unverified === "true"), (ep.Unscheduled === "true"), ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
 				}
 				callback(episodeList);
 			},

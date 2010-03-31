@@ -1,8 +1,10 @@
 function EpisodeController(listItem) {
 	if (listItem.listIndex >= 0) {
 		this.listItem = listItem;
+		this.originalStatus = this.listItem.episode.status;
+		this.originalStatusDate = this.listItem.episode.statusDate;
 	} else {
-		this.listItem = { episode: new Episode(null, "", listItem.series.id, "", "") };
+		this.listItem = { episode: new Episode(null, "", "", "", false, false, listItem.series.id) };
 	}
 }
 
@@ -34,6 +36,7 @@ EpisodeController.prototype.setup = function() {
 	$("statusDate").value = this.listItem.episode.statusDate;
 	$("statusDate").addEventListener('click', this.getStatusDate.bind(this));
 	$("unverified").checked = this.listItem.episode.unverified;
+	$("unscheduled").checked = this.listItem.episode.unscheduled;
 
 	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
@@ -42,6 +45,7 @@ EpisodeController.prototype.setup = function() {
 EpisodeController.prototype.save = function() {
 	this.listItem.episode.episodeName = $("episodeName").value;
 	this.listItem.episode.setUnverified($("unverified").checked);
+	this.listItem.episode.unscheduled = $("unscheduled").checked;
 	this.listItem.episode.save();
 	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
@@ -50,6 +54,8 @@ EpisodeController.prototype.save = function() {
 }
 
 EpisodeController.prototype.cancel = function() {
+	this.listItem.episode.status = this.originalStatus;
+	this.listItem.episode.statusDate = this.originalStatusDate;
 	appController.popView();
 }
 
@@ -63,6 +69,7 @@ EpisodeController.prototype.setStatus = function(status) {
 		$("missed").className = "";
 		$("statusDateRow").style.display = "none";
 		$("unverifiedRow").style.display = "none";
+		$("unscheduledRow").style.display = "none";
 
 		if (this.listItem.episode.status === status) {
 			this.listItem.episode.setStatus("");
@@ -77,6 +84,7 @@ EpisodeController.prototype.setStatus = function(status) {
 					$("recorded").className = "status";
 					$("statusDateRow").style.display = "block";
 					$("unverifiedRow").style.display = "block";
+					$("unscheduledRow").style.display = "block";
 					if ("" === this.listItem.episode.statusDate) {
 						this.getStatusDate();
 					}
@@ -86,6 +94,7 @@ EpisodeController.prototype.setStatus = function(status) {
 					$("expected").className = "status";
 					$("statusDateRow").style.display = "block";
 					$("unverifiedRow").style.display = "block";
+					$("unscheduledRow").style.display = "block";
 					if ("" === this.listItem.episode.statusDate) {
 						this.getStatusDate();
 					}
@@ -95,6 +104,7 @@ EpisodeController.prototype.setStatus = function(status) {
 					$("missed").className = "status";
 					$("statusDateRow").style.display = "block";
 					$("unverifiedRow").style.display = "block";
+					$("unscheduledRow").style.display = "block";
 					if ("" === this.listItem.episode.statusDate) {
 						this.getStatusDate();
 					}
@@ -111,9 +121,10 @@ EpisodeController.prototype.getStatusDate = function() {
 	var parts = this.listItem.episode.statusDate.split('-');
 	if (parts.length < 2) {
 		var today = new Date();
-		parts[0] = "0" + today.getDate();
-		parts[0] = parts[0].substr(parts[0].length - 2);
+		parts[0] = today.getDate();
 		parts[1] = months[today.getMonth()];
+	} else {
+		parts[0] = Number(parts[0]);
 	}
 
 	SpinningWheel.addSlot({1: "01", 2: "02", 3: "03", 4: "04", 5: "05", 6: "06", 7: "07", 8: "08", 9: "09", 10: "10", 11: "11", 12: "12",

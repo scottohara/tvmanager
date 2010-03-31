@@ -1,6 +1,7 @@
 function SeriesController(listItem) {
 	if (listItem.listIndex >= 0) {
 		this.listItem = listItem;
+		this.originalNowShowing = this.listItem.series.nowShowing;
 	} else {
 		this.listItem = { series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0) };
 	}
@@ -39,6 +40,7 @@ SeriesController.prototype.save = function() {
 }
 
 SeriesController.prototype.cancel = function() {
+	this.listItem.series.setNowShowing(this.originalNowShowing);
 	appController.popView();
 }
 

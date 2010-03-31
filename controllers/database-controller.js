@@ -6,7 +6,7 @@ function DatabaseController(callback, errorCallback) {
 	this.errorCallback = errorCallback;
 	this.initialVersion = "";
 
-	this.expectedVersion = "1.5";
+	this.expectedVersion = "1.6";
 
 	this.upgrades = [
 		{
@@ -32,6 +32,10 @@ function DatabaseController(callback, errorCallback) {
 		{
 			version: "1.4",
 			upgradeHandler: this.v1_5.bind(this)
+		},
+		{
+			version: "1.5",
+			upgradeHandler: this.v1_6.bind(this)
 		}
 	];
 
@@ -107,4 +111,8 @@ DatabaseController.prototype.v1_4 = function(tx) {
 
 DatabaseController.prototype.v1_5 = function(tx) {
 	tx.executeSql("CREATE TABLE IF NOT EXISTS Setting (Name, Value)");
+}
+
+DatabaseController.prototype.v1_6 = function(tx) {
+	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unscheduled");
 }

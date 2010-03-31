@@ -5,6 +5,11 @@ function ScheduleController() {
 ScheduleController.prototype.setup = function() {
 	this.header = {
 		label: "Schedule",
+		leftButton: {
+			eventHandler: this.viewUnscheduled.bind(this),
+			style: "toolButton",
+			label: "Unscheduled"
+		},
 		rightButton: {
 			eventHandler: this.viewPrograms.bind(this),
 			style: "toolButton",
@@ -28,6 +33,10 @@ ScheduleController.prototype.listRetrieved = function(scheduleList) {
 
 ScheduleController.prototype.viewItem = function(itemIndex) {
 	appController.pushView("episodes", { source: "Schedule", listIndex: itemIndex, series: this.scheduleList.items[itemIndex] });
+}
+
+ScheduleController.prototype.viewUnscheduled = function() {
+	appController.pushView("unscheduled");
 }
 
 ScheduleController.prototype.viewPrograms = function() {

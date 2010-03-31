@@ -18,7 +18,7 @@ EpisodesController.prototype.setup = function() {
     };
 
     this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
-    Episode.list(this.listItem.series.id, this.listRetrieved.bind(this));
+    Episode.listBySeries(this.listItem.series.id, this.listRetrieved.bind(this));
 }
 
 EpisodesController.prototype.activate = function(listItem) {

@@ -242,5 +242,28 @@ ApplicationController.prototype.noticeHidden = function(event) {
 	}
 }
 
+ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
+	if (lastSyncTime.settingValue) {
+		var MAX_DATA_AGE_DAYS = 7;
+		var MILLISECONDS_IN_ONE_DAY = 1000 * 60 * 60 * 24;
+
+		var now = new Date();
+		var lastSync = new Date(lastSyncTime.settingValue);
+
+		if (Math.round(Math.abs(now.getTime() - lastSync.getTime()) / MILLISECONDS_IN_ONE_DAY) > MAX_DATA_AGE_DAYS) {
+			this.showNotice({
+				label: "The last data sync was over " + MAX_DATA_AGE_DAYS + " days ago",
+				leftButton: {
+					eventHandler: this.hideNotice.bind(this),
+					style: "redButton",
+					label: "OK"
+				}
+			});
+		}
+	}
+}
+
 var appController = new ApplicationController();
 appController.start();
+
+Setting.get("LastSyncTime", appController.gotLastSyncTime.bind(appController));

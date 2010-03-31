@@ -20,6 +20,7 @@ DataSyncController.prototype.activate = function() {
 		$("export").addEventListener('click', this.dataExport.bind(this));
 		$("localChanges").value = "Checking...";
 
+		Setting.get("LastSyncTime", this.gotLastSyncTime.bind(this));
 		Setting.get("LastSyncHash", this.gotLastSyncHash.bind(this));
 
 		appController.toucheventproxy.enabled = false;
@@ -28,6 +29,17 @@ DataSyncController.prototype.activate = function() {
 
 DataSyncController.prototype.goBack = function() {
     appController.popView();
+}
+
+DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
+	if (lastSyncTime.settingValue) {
+		var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" }
+		var lastSyncDisplay = new Date(lastSyncTime.settingValue);
+		lastSyncDisplay = lastSyncDisplay.getDate() + "-" + months[lastSyncDisplay.getMonth()] + "-" + lastSyncDisplay.getFullYear() + " " + lastSyncDisplay.getHours() + ":" + lastSyncDisplay.getMinutes() + ":" + lastSyncDisplay.getSeconds();
+		$("lastSyncTime").value = lastSyncDisplay;
+	} else {
+		$("lastSyncTime").value = "Unknown";
+	}
 }
 
 DataSyncController.prototype.gotLastSyncHash = function(lastSyncHash) {
@@ -175,6 +187,7 @@ DataSyncController.prototype.verifyData = function(data) {
 				$("status").value = "Verifying data";
 				if (data.hash.valueOf() === response.responseText) {
 					$("status").value = "Verify complete";
+					this.setLastSyncTime();
 					var lastSyncHash = new Setting("LastSyncHash", data.hash);
 					lastSyncHash.save(this.callback);
 				} else {
@@ -191,6 +204,13 @@ DataSyncController.prototype.verifyData = function(data) {
 		$("status").value = "Verify failed: No programs found";
 		this.callback(false);
 	}
+}
+
+DataSyncController.prototype.setLastSyncTime = function() {
+	var now = new Date();
+	var lastSyncTime = new Setting("LastSyncTime", now);
+	lastSyncTime.save();
+	this.gotLastSyncTime(lastSyncTime);
 }
 
 DataSyncController.prototype.doExport = function(data) {
@@ -242,7 +262,7 @@ DataSyncController.prototype.doImport = function() {
 														if (seriesId) {
 															for (var k = 0; k < importSeries.episodes.length; k++) {
 																var importEpisode = importSeries.episodes[k];
-																var episode = new Episode(null, importEpisode.episodeName, seriesId, importEpisode.status, importEpisode.statusDate, importEpisode.unverified);
+																var episode = new Episode(null, importEpisode.episodeName, importEpisode.status, importEpisode.statusDate, importEpisode.unverified, importEpisode.unscheduled, seriesId);
 																episode.save();
 															}
 															seriesCompleted++;
