@@ -24,19 +24,21 @@ EpisodeController.prototype.setup = function() {
 	};
     
 	$("episodeName").value = this.listItem.episode.episodeName;
+	$("unverified").checked = this.listItem.episode.unverified;
+	$("unscheduled").checked = this.listItem.episode.unscheduled;
+
 	$("watched").addEventListener('click', function() { this.setStatus("Watched") }.bind(this));
 	$("recorded").addEventListener('click', function() { this.setStatus("Recorded") }.bind(this));
 	$("expected").addEventListener('click', function() { this.setStatus("Expected") }.bind(this));
 	$("missed").addEventListener('click', function() { this.setStatus("Missed") }.bind(this));
+	$("statusDate").addEventListener('click', this.getStatusDate.bind(this));
+	$("unscheduled").addEventListener('click', this.toggleStatusDateRow.bind(this));
 
 	var status = this.listItem.episode.status;
 	this.listItem.episode.setStatus("");
 	this.setStatus(status);
 
 	$("statusDate").value = this.listItem.episode.statusDate;
-	$("statusDate").addEventListener('click', this.getStatusDate.bind(this));
-	$("unverified").checked = this.listItem.episode.unverified;
-	$("unscheduled").checked = this.listItem.episode.unscheduled;
 
 	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
@@ -67,9 +69,7 @@ EpisodeController.prototype.setStatus = function(status) {
 		$("recorded").className = "";
 		$("expected").className = "";
 		$("missed").className = "";
-		$("statusDateRow").style.display = "none";
 		$("unverifiedRow").style.display = "none";
-		$("unscheduledRow").style.display = "none";
 
 		if (this.listItem.episode.status === status) {
 			this.listItem.episode.setStatus("");
@@ -82,36 +82,22 @@ EpisodeController.prototype.setStatus = function(status) {
 
 				case "Recorded":
 					$("recorded").className = "status";
-					$("statusDateRow").style.display = "block";
 					$("unverifiedRow").style.display = "block";
-					$("unscheduledRow").style.display = "block";
-					if ("" === this.listItem.episode.statusDate) {
-						this.getStatusDate();
-					}
 					break;
 
 				case "Expected":
 					$("expected").className = "status";
-					$("statusDateRow").style.display = "block";
 					$("unverifiedRow").style.display = "block";
-					$("unscheduledRow").style.display = "block";
-					if ("" === this.listItem.episode.statusDate) {
-						this.getStatusDate();
-					}
 					break;
 
 				case "Missed":
 					$("missed").className = "status";
-					$("statusDateRow").style.display = "block";
 					$("unverifiedRow").style.display = "block";
-					$("unscheduledRow").style.display = "block";
-					if ("" === this.listItem.episode.statusDate) {
-						this.getStatusDate();
-					}
 					break;
 			}
 		}
 		
+		this.toggleStatusDateRow();
 		this.settingStatus = false;
 	}
 }
@@ -138,4 +124,15 @@ EpisodeController.prototype.getStatusDate = function() {
 EpisodeController.prototype.setStatusDate = function() {
 	this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join('-'));
 	$("statusDate").value = this.listItem.episode.statusDate;
+}
+
+EpisodeController.prototype.toggleStatusDateRow = function() {
+	$("statusDateRow").style.display = "none";
+
+	if ($("unscheduled").checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Watched" === this.listItem.episode.status) {
+		$("statusDateRow").style.display = "block";
+		if ("" === this.listItem.episode.statusDate) {
+			this.getStatusDate();
+		}
+	}
 }

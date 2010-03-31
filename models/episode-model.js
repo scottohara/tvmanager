@@ -3,9 +3,9 @@ var Episode = Class.create({
 		this.id = id;
 		this.episodeName = episodeName;
 		this.statusDate = statusDate;
+		this.unscheduled = unscheduled;
 		this.setStatus(status);
 		this.setUnverified(unverified);
-		this.unscheduled = unscheduled;
 		this.seriesId = seriesId;
 		this.seriesName = seriesName;
 		this.programId = programId;
@@ -73,7 +73,7 @@ var Episode = Class.create({
 	setStatusDate: function(statusDate) {
 		this.statusDate = statusDate;
 
-		if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status) && this.statusDate != "") {
+		if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate != "") {
 			this.statusDateDisplay = "(" + this.statusDate + ")";
 		} else {
 			this.statusDateDisplay = "";
