@@ -129,7 +129,7 @@ EpisodeController.prototype.setStatusDate = function() {
 EpisodeController.prototype.toggleStatusDateRow = function() {
 	$("statusDateRow").style.display = "none";
 
-	if ($("unscheduled").checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Watched" === this.listItem.episode.status) {
+	if ($("unscheduled").checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
 		$("statusDateRow").style.display = "block";
 		if ("" === this.listItem.episode.statusDate) {
 			this.getStatusDate();
