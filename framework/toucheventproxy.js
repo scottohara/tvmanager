@@ -25,8 +25,7 @@ TouchEventProxy.prototype = {
 		var touchEvent = document.createEvent("Event");
 		touchEvent.initEvent(type, true, true);
 		touchEvent.targetTouches = [{}];
-		//touchEvent.targetTouches[0].clientX = e.clientX;
-		touchEvent.targetTouches[0].clientX = 0;
+		touchEvent.targetTouches[0].clientX = e.clientX;
 		touchEvent.targetTouches[0].clientY = e.clientY;
 		touchEvent.changedTouches = [{}];
 		touchEvent.changedTouches[0].target = e.target;

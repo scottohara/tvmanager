@@ -4,7 +4,16 @@ function ApplicationController() {
 	this.viewStack = [];
 	$("contentWrapper").addEventListener('webkitTransitionEnd', this.contentShown.bind(this));
 	$("notice").addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
-	window.onload = function() { setTimeout(function(){ this.scroller = new iScroll($("content"), "y"); this.toucheventproxy = new TouchEventProxy($("content")); }.bind(this), 100) }.bind(this);
+
+	window.onload = function() {
+		setTimeout( function() {
+			this.scroller = new iScroll($("content"), "y");
+			this.toucheventproxy = new TouchEventProxy($("content"));
+			this.abc = new abc($("abc"), this.scroller);
+			this.abctoucheventproxy = new TouchEventProxy($("abc"));
+		}.bind(this), 100)
+	}.bind(this);
+
 	this.cache = new CacheController();
 	this.cache.update(
 		function(updated, message) {
@@ -85,6 +94,7 @@ ApplicationController.prototype.viewPopped = function(args) {
 }
 
 ApplicationController.prototype.show = function(onSuccess, args) {
+	this.hideScrollHelper();
 	$("nowLoading").className = "loading";
 	new Ajax.Updater("content", "views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", {
 		method: 'get',
@@ -147,7 +157,7 @@ ApplicationController.prototype.clearHeader = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
 		$("headerRightButton").removeEventListener('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
 	}
-	
+
 	$("headerLeftButton").style.display = "none";
 	$("headerLabel").display = "none";
 	$("headerRightButton").style.display = "none";
@@ -240,6 +250,14 @@ ApplicationController.prototype.noticeHidden = function(event) {
 	if ($("noticeLabel").style.display === "none") {
 		$("notice").style.visibility = "hidden";
 	}
+}
+
+ApplicationController.prototype.showScrollHelper = function() {
+	$("abc").style.display = "block";
+}
+
+ApplicationController.prototype.hideScrollHelper = function() {
+	$("abc").style.display = "none";
 }
 
 ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {

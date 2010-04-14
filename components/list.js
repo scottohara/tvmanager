@@ -1,4 +1,4 @@
-function List(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler) {
+function List(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
 	this.container = container;
 	this.itemTemplate = itemTemplate;
 	this.groupBy = groupBy;
@@ -6,6 +6,7 @@ function List(container, itemTemplate, groupBy, items, viewEventHandler, editEve
 	this.viewEventHandler = viewEventHandler;
 	this.editEventHandler = editEventHandler;
 	this.deleteEventHandler = deleteEventHandler;
+	this.populateItemEventHandler = populateItemEventHandler;
 	this.setAction("view");
 }
 
@@ -23,6 +24,7 @@ List.prototype.populateItem = function(response) {
 		if (this.groupBy && group != item[this.groupBy]){
 			var groupItem = document.createElement("LI");
 			groupItem.className = "group";
+			groupItem.id = item[this.groupBy];
 			groupItem.textContent = item[this.groupBy];
 			$(this.container).appendChild(groupItem);
 			group = item[this.groupBy];
@@ -40,7 +42,12 @@ List.prototype.populateItem = function(response) {
 		listItem.innerHTML = itemHTML;
 		listItem.addEventListener('click', function(itemIndex) { return function() { if (!appController.scroller.moved) { this.tap(itemIndex); }}.bind(this);}.bind(this)(i));
 		$(this.container).appendChild(listItem);
+
+		if (this.populateItemEventHandler) {
+			this.populateItemEventHandler(item);
+		}
 	}
+
 	appController.refreshScroller();
 }
 

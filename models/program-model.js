@@ -1,7 +1,7 @@
 var Program = Class.create({
 	initialize: function(id, programName, seriesCount, episodeCount, watchedCount, recordedCount, expectedCount) {
 		this.id = id;
-		this.programName = programName;
+		this.setProgramName(programName);
 		this.seriesCount = seriesCount;
 		this.progressBar = new ProgressBar(episodeCount, []);
 		this.setEpisodeCount(episodeCount);
@@ -33,7 +33,7 @@ var Program = Class.create({
 							return false;
 						}
 					}
-  
+
 					if (!this.id) {
 						this.id = resultSet.insertId;
 					}
@@ -77,7 +77,7 @@ var Program = Class.create({
 				callback(json);
 			} else {
 				var completed = 0;
-				
+
 				for (var i = 0; i < seriesList.length; i++) {
 					json.seriesList.push({});
 					seriesList[i].toJson(function(index) {
@@ -93,7 +93,12 @@ var Program = Class.create({
 			}
 		}.bind(this));
 	},
-	
+
+	setProgramName: function(programName) {
+		this.programName = programName;
+		this.programGroup = programName.substring(0,1).toUpperCase();
+	},
+
 	setEpisodeCount: function(count) {
 		this.episodeCount = count;
 		this.progressBar.setTotal(this.episodeCount);

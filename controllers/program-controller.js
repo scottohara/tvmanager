@@ -28,7 +28,7 @@ ProgramController.prototype.setup = function() {
 }
 
 ProgramController.prototype.save = function() {
-	this.listItem.program.programName = $("programName").value;
+	this.listItem.program.setProgramName($("programName").value);
 	this.listItem.program.save();
 	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;

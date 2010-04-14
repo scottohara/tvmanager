@@ -17,7 +17,7 @@ ProgramsController.prototype.setup = function() {
 		}
 	};
 
-	this.programList = new List("list", "views/programListTemplate.html", null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
+	this.programList = new List("list", "views/programListTemplate.html", "programGroup", [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
 	Program.list(this.listRetrieved.bind(this));
 }
 
@@ -29,8 +29,10 @@ ProgramsController.prototype.activate = function(listItem) {
 			this.programList.items.push(listItem.program);
 		}
 	}
+
 	this.programList.refresh();
 	this.viewItems();
+	appController.showScrollHelper();
 }
 
 ProgramsController.prototype.listRetrieved = function(programList) {
