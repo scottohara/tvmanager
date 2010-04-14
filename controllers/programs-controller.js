@@ -32,7 +32,6 @@ ProgramsController.prototype.activate = function(listItem) {
 
 	this.programList.refresh();
 	this.viewItems();
-	appController.showScrollHelper();
 }
 
 ProgramsController.prototype.listRetrieved = function(programList) {
@@ -59,6 +58,7 @@ ProgramsController.prototype.deleteItem = function(itemIndex) {
 }
 
 ProgramsController.prototype.deleteItems = function() {
+	appController.hideScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("delete");
 	$("list").className = "delete";
@@ -75,6 +75,7 @@ ProgramsController.prototype.deleteItems = function() {
 }
 
 ProgramsController.prototype.editItems = function() {
+	appController.hideScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("edit");
 	$("list").className = "edit";
@@ -91,9 +92,10 @@ ProgramsController.prototype.editItems = function() {
 }
 
 ProgramsController.prototype.viewItems = function() {
+	appController.showScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("view");
-	$("list").className = "";
+	$("list").className = "withHelper";
 	this.footer = {
 		label: "v" + db.version,
 		leftButton: {
