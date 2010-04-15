@@ -1,5 +1,5 @@
 var Series = Class.create({
-	initialize: function(id, seriesName, nowShowing, programId, programName, episodeCount, watchedCount, recordedCount, expectedCount) {
+	initialize: function(id, seriesName, nowShowing, programId, programName, episodeCount, watchedCount, recordedCount, expectedCount, missedCount) {
 		this.id = id;
 		this.seriesName = seriesName;
 		this.setNowShowing(nowShowing);
@@ -10,6 +10,7 @@ var Series = Class.create({
 		this.setWatchedCount(watchedCount);
 		this.setRecordedCount(recordedCount);
 		this.setExpectedCount(expectedCount);
+		this.setMissedCount(missedCount);
 	},
 
 	save: function(callback) {
@@ -149,30 +150,62 @@ var Series = Class.create({
 			percent: expectedPercent,
 			style: "expected"
 		});
+	},
+
+	setMissedCount: function(count) {
+		this.missedCount = count;
+		var missedPercent = 0;
+		if (this.missedCount && this.missedCount > 0) {
+			missedPercent = this.missedCount / this.episodeCount * 100;
+		}
+
+		this.progressBarDisplay = this.progressBar.setSection(3, {
+			label: this.missedCount,
+			percent: missedPercent,
+			style: "missed"
+		});
 	}
 });
 
 Series.listByProgram = function(programId, callback) {
 	var filter = "WHERE ProgramID = ? GROUP BY s.rowid ORDER BY s.Name";
 	var params = [programId];
-	Series.list(filter, params, callback);
+	Series.standardList(filter, params, callback);
 }
 
 Series.listByNowShowing = function(callback) {
 	var filter = "GROUP BY s.rowid HAVING s.NowShowing IS NOT NULL OR COUNT(e3.rowid) > 0 OR COUNT(e4.rowid) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name";
 	var params = [];
-	Series.list(filter, params, callback);
+	Series.standardList(filter, params, callback);
 }
 
-Series.list = function(filter, params, callback) {
+Series.listByStatus = function(callback, status) {
+	var query = "SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e.rowid) AS " + status + "Count FROM Program p JOIN Series s ON p.rowid = s.ProgramID JOIN Episode e ON s.rowid = e.SeriesID";
+	var filter = "WHERE e.Status = ? GROUP BY s.rowid ORDER BY p.Name, s.Name";
+	var params = [status];
+	Series.list(query, filter, params, callback);
+}
+
+Series.listByIncomplete = function(callback) {
+	var filter = "GROUP BY s.rowid HAVING COUNT(e.rowid) > COUNT(e2.rowid) ORDER BY p.Name, s.Name";
+	var params = [];
+	Series.standardList(filter, params, callback);
+}
+
+Series.standardList = function(filter, params, callback) {
+	var query = "SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected'";
+	Series.list(query, filter, params, callback);
+}
+
+Series.list = function(query, filter, params, callback) {
 	var seriesList = [];
 
 	db.transaction(function(tx) {
-		tx.executeSql("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' " + filter, params,
+		tx.executeSql(query + " " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var series = resultSet.rows.item(i);
-					seriesList.push(new Series(series.rowid, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount));
+					seriesList.push(new Series(series.rowid, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount));
 				}
 				callback(seriesList);
 			},
