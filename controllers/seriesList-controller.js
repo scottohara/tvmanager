@@ -24,11 +24,15 @@ SeriesListController.prototype.setup = function() {
 SeriesListController.prototype.activate = function(listItem) {
     if (listItem) {
         if (listItem.listIndex >= 0) {
-            this.seriesList.items[listItem.listIndex] = listItem.series;
-            this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount + (listItem.series.episodeCount - this.origEpisodeCount));
-            this.listItem.program.setWatchedCount(this.listItem.program.watchedCount + (listItem.series.watchedCount - this.origWatchedCount));
-            this.listItem.program.setRecordedCount(this.listItem.program.recordedCount + (listItem.series.recordedCount - this.origRecordedCount));
-            this.listItem.program.setExpectedCount(this.listItem.program.expectedCount + (listItem.series.expectedCount - this.origExpectedCount));
+						if (listItem.series.programId != this.listItem.program.id) {
+							this.deleteItem(listItem.listIndex, true);
+						} else {
+							this.seriesList.items[listItem.listIndex] = listItem.series;
+							this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount + (listItem.series.episodeCount - this.origEpisodeCount));
+							this.listItem.program.setWatchedCount(this.listItem.program.watchedCount + (listItem.series.watchedCount - this.origWatchedCount));
+							this.listItem.program.setRecordedCount(this.listItem.program.recordedCount + (listItem.series.recordedCount - this.origRecordedCount));
+							this.listItem.program.setExpectedCount(this.listItem.program.expectedCount + (listItem.series.expectedCount - this.origExpectedCount));
+						}
         } else {
             this.seriesList.items.push(listItem.series);
             this.listItem.program.seriesCount++;
@@ -63,13 +67,15 @@ SeriesListController.prototype.editItem = function(itemIndex) {
     appController.pushView("series", { listIndex: itemIndex, series: this.seriesList.items[itemIndex] });
 }
 
-SeriesListController.prototype.deleteItem = function(itemIndex) {
+SeriesListController.prototype.deleteItem = function(itemIndex, dontRemove) {
     this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount - this.seriesList.items[itemIndex].episodeCount);
     this.listItem.program.setWatchedCount(this.listItem.program.watchedCount - this.seriesList.items[itemIndex].watchedCount);
     this.listItem.program.setRecordedCount(this.listItem.program.recordedCount - this.seriesList.items[itemIndex].recordedCount);
     this.listItem.program.setExpectedCount(this.listItem.program.expectedCount - this.seriesList.items[itemIndex].expectedCount);
     this.listItem.program.seriesCount--;
-    this.seriesList.items[itemIndex].remove();
+		if (!dontRemove) {
+			this.seriesList.items[itemIndex].remove();
+		}
     this.seriesList.items.splice(itemIndex,1);
     this.seriesList.refresh();
 }

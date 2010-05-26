@@ -336,7 +336,7 @@ fieldset > .row:last-child {
     font-weight: bold;
 }
 
-.row > input:not(input[type|=radio]) {
+.row > input:not([type="radio"]) {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;

@@ -19,8 +19,8 @@ var Series = Class.create({
 			var params;
 
 			if (this.id) {
-				sql = "UPDATE Series SET Name = ?, NowShowing = ? WHERE rowid = ?";
-				params = [this.seriesName, this.nowShowing, this.id];
+				sql = "UPDATE Series SET Name = ?, NowShowing = ?, ProgramID = ? WHERE rowid = ?";
+				params = [this.seriesName, this.nowShowing, this.programId, this.id];
 			} else {
 				sql = "INSERT INTO Series (Name, NowShowing, ProgramID) VALUES (?, ?, ?)";
 				params = [this.seriesName, this.nowShowing, this.programId];

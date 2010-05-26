@@ -78,6 +78,7 @@ ApplicationController.prototype.pushView = function(view, args) {
 ApplicationController.prototype.viewPushed = function() {
 	this.viewStack[this.viewStack.length - 1].controller.setup();
 	this.setHeader();
+	setTimeout(this.contentShown.bind(this), 1000);
 }
 
 ApplicationController.prototype.popView = function(args) {
@@ -91,6 +92,7 @@ ApplicationController.prototype.viewPopped = function(args) {
 	this.toucheventproxy.enabled = true;
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	this.setHeader();
+	setTimeout(this.contentShown.bind(this), 1000);
 }
 
 ApplicationController.prototype.show = function(onSuccess, args) {

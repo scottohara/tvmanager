@@ -1,3 +1,10 @@
+When moving a series to a different program, need to refresh the progressBar for the new program
+Schedule->Episode List, need easy way to get to Series List (to view other series for the same program)
+	- maybe use Program name in header as a link, but managing the view stack will be tricky
+Ending soon report
+  - series with < 2 unwatched/unrecorded episodes
+Expected date passed report
+Guide searcher (online, using XMLTV)
 Vertically centre list items
 Manual sorting (or use 01, 02, etc..)
 Colour coding for my programs?
