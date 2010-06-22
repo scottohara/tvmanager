@@ -205,6 +205,10 @@ ul li a {
     background: url(../images/listArrow.png) no-repeat right center;
 }
 
+ul li a.warning {
+		background-color: #FFFFEA;
+}
+
 ul.withHelper li a {
     background-image: none;
 }
