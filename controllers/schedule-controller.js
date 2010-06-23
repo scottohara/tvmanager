@@ -21,8 +21,18 @@ ScheduleController.prototype.setup = function() {
 	this.activate();
 }
 
-ScheduleController.prototype.activate = function() {
-	Series.listByNowShowing(this.listRetrieved.bind(this));
+ScheduleController.prototype.activate = function(listItem) {
+	if (listItem) {
+		if ((!listItem.series.nowShowing) && listItem.series.recordedCount == 0 && listItem.series.expectedCount == 0) {
+			this.scheduleList.items.splice(listItem.listIndex,1);
+		} else {
+			this.scheduleList.items[listItem.listIndex] = listItem.series;
+		}
+		this.scheduleList.refresh();
+		this.viewItems();
+	} else {
+		Series.listByNowShowing(this.listRetrieved.bind(this));
+	}
 }
 
 ScheduleController.prototype.listRetrieved = function(scheduleList) {

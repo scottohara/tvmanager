@@ -4,7 +4,7 @@ function SeriesController(listItem) {
 		this.originalNowShowing = this.listItem.series.nowShowing;
 		this.originalProgramId = this.listItem.series.programId;
 	} else {
-		this.listItem = { series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0) };
+		this.listItem = { series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0, 0, 0) };
 	}
 }
 

@@ -168,7 +168,8 @@ var Series = Class.create({
 	},
 
 	setStatusWarning: function(count) {
-		if (count > 0) {
+		this.statusWarningCount = count;
+		if (this.statusWarningCount > 0) {
 			this.statusWarning = 'warning';
 		}	else {
 			this.statusWarning = '';

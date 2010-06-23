@@ -78,6 +78,32 @@ var Episode = Class.create({
 		} else {
 			this.statusDateDisplay = "";
 		}
+
+		this.statusWarning = '';
+		if ("Expected" === this.status && this.statusDate != "") {
+			var today = new Date();
+			var currDay = "0" + today.getDate();
+			var startMonth = "0" + (today.getMonth() + 1);
+			var endMonth = "0";
+			if (today.getMonth() < 3) {
+				endMonth += String(14 - today.getMonth());
+			} else {
+				endMonth +=  String(today.getMonth() - 2);
+			}
+
+			var start = startMonth.substr(startMonth.length-2) + currDay.substr(currDay.length-2);
+			var end = endMonth.substr(endMonth.length-2) + currDay.substr(currDay.length-2);
+
+			var months = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
+			var parts = this.statusDate.split("-");
+			var tempStatusDate = months[parts[1]] + parts[0];
+
+			if (today.getMonth() < 3) {
+				this.statusWarning = (tempStatusDate <= start || tempStatusDate >= end ? 'warning' : '');
+			} else {
+				this.statusWarning = (tempStatusDate <= start && tempStatusDate >= end ? 'warning' : '');
+			}
+		}
 	},
 
 	setUnverified: function(unverified) {
