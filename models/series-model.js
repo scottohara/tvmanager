@@ -214,7 +214,7 @@ Series.listByIncomplete = function(callback) {
 Series.list = function(query, filter, params, callback) {
 	var seriesList = [];
 
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql(query + " " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
@@ -232,7 +232,7 @@ Series.list = function(query, filter, params, callback) {
 };
 
 Series.count = function(callback) {
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql("SELECT COUNT(*) AS SeriesCount FROM Series", [],
 			function(tx, resultSet) {
 				callback(resultSet.rows.item(0).SeriesCount);

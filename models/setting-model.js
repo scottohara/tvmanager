@@ -44,7 +44,7 @@ var Setting = Class.create({
 });
 
 Setting.get = function(settingName, callback) {
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql("SELECT Value AS SettingValue FROM Setting WHERE Name = ?", [settingName],
 			function(tx, resultSet) {
 				var settingValue;

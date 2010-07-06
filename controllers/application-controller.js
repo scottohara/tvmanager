@@ -2,8 +2,12 @@ var db;
 
 function ApplicationController() {
 	this.viewStack = [];
+	this.noticeStack = {
+		height: 0,
+		notice: []
+	};
+
 	$("contentWrapper").addEventListener('webkitTransitionEnd', this.contentShown.bind(this));
-	$("notice").addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
 
 	window.onload = function() {
 		setTimeout( function() {
@@ -16,16 +20,20 @@ function ApplicationController() {
 
 	this.cache = new CacheController();
 	this.cache.update(
-		function(updated, message) {
+		function(updated, message, noticeId) {
 			if (updated) {
-				this.showNotice({
-					label: message,
-					leftButton: {
-						eventHandler: this.hideNotice.bind(this),
-						style: "redButton",
-						label: "OK"
-					}
-				});
+				if ($(noticeId)) {
+					$(noticeId).innerHTML = message;
+				} else {
+					this.showNotice({
+						id: noticeId,
+						label: message,
+						leftButton: {
+							style: "redButton",
+							label: "OK"
+						}
+					});
+				}
 			}
 		}.bind(this)
 	);
@@ -38,7 +46,6 @@ ApplicationController.prototype.start = function() {
 				this.showNotice({
 					label: "Database has been successfully upgraded from version " + version.initial + " to version " + version.current + ". Please restart the application.",
 					leftButton: {
-						eventHandler: this.hideNotice.bind(this),
 						style: "redButton",
 						label: "OK"
 					}
@@ -51,7 +58,6 @@ ApplicationController.prototype.start = function() {
 			this.showNotice({
 				label: error.message,
 				leftButton: {
-					eventHandler: this.hideNotice.bind(this),
 					style: "redButton",
 					label: "OK"
 				}
@@ -215,42 +221,74 @@ ApplicationController.prototype.setContentHeight = function() {
 }
 
 ApplicationController.prototype.showNotice = function(notice) {
+	var noticeContainer = document.createElement("DIV");
+
+	var noticeLeftButton = document.createElement("A");
 	if (notice.leftButton) {
-		$("noticeLeftButton").onclick = notice.leftButton.eventHandler;
-		$("noticeLeftButton").className = "button footer left " + notice.leftButton.style;
-		$("noticeLeftButton").textContent = notice.leftButton.label;
-		$("noticeLeftButton").style.display = "inline";
+		if (notice.leftButton.eventHandler) {
+			noticeLeftButton.addEventListener('click', notice.leftButton.eventHandler);
+		}
+		noticeLeftButton.addEventListener('click', function(notice) { return function() { this.hideNotice(notice); }.bind(this);}.bind(this)(noticeContainer));
+		noticeLeftButton.className = "button footer left " + notice.leftButton.style;
+		noticeLeftButton.textContent = notice.leftButton.label;
+		noticeLeftButton.style.display = "inline";
 	}
 
-	$("noticeLabel").textContent = notice.label;
-	$("noticeLabel").style.display = "block";
+	var noticeLabel = document.createElement("P");
+	noticeLabel.innerHTML = notice.label;
+	if (notice.id) {
+		noticeLabel.id = notice.id
+	}
 
+	var noticeRightButton = document.createElement("A");
 	if (notice.rightButton) {
-		$("noticeRightButton").onclick = notice.rightButton.eventHandler;
-		$("noticeRightButton").className = "button footer right " + notice.rightButton.style;
-		$("noticeRightButton").textContent = notice.rightButton.label;
-		$("noticeRightButton").style.display = "inline";
+		if (notice.rightButton.eventHandler) {
+			noticeRightButton.addEventListener('click', notice.rightButton.eventHandler);
+		}
+		noticeRightButton.className = "button footer right " + notice.rightButton.style;
+		noticeRightButton.textContent = notice.rightButton.label;
+		noticeRightButton.style.display = "inline";
 	}
 
-	$("notice").style.top = window.innerHeight + window.pageYOffset + 'px';
-	$("notice").style.visibility = "visible";
-	$("notice").style.webkitTransitionTimingFunction = 'ease-out';
-	$("notice").style.webkitTransform = 'translate3d(0, -' + ($("notice").offsetHeight) + 'px, 0)';
+	noticeContainer.className = "notice";
+	noticeContainer.appendChild(noticeLabel);
+	noticeContainer.appendChild(noticeLeftButton);
+	noticeContainer.appendChild(noticeRightButton);
+	noticeContainer.addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
+	$("notices").appendChild(noticeContainer);
+
+	if (0 === this.noticeStack.notice.length) {
+		$("notices").style.top = window.innerHeight + window.pageYOffset + 'px';
+		$("notices").style.visibility = "visible";
+		$("notices").webkitTransitionTimingFunction = 'ease-out';
+		$("notices").addEventListener('webkitTransitionEnd', this.noticesMoved.bind(this));
+	}
+
+	this.noticeStack.height -= noticeContainer.clientHeight;
+	this.noticeStack.notice.push(noticeContainer);
+	$("notices").style.webkitTransform = 'translate3d(0, ' + this.noticeStack.height + 'px, 0)';
 }
 
-ApplicationController.prototype.hideNotice = function() {
-	$("noticeLeftButton").onclick = null;
-	$("noticeLeftButton").style.display = "none";
-	$("noticeLabel").style.display = "none";
-	$("noticeRightButton").onclick = null;
-	$("noticeRightButton").style.display = "none";
-	$("notice").style.webkitTransitionTimingFunction = 'ease-in';
-	$("notice").style.webkitTransform = 'translate3d(0, 0, 0)';
+ApplicationController.prototype.hideNotice = function(notice) {
+	this.noticeStack.height += notice.clientHeight;
+	notice.acknowledged = true;
+	notice.style.webkitTransform = 'scaleY(0)';
 }
 
 ApplicationController.prototype.noticeHidden = function(event) {
-	if ($("noticeLabel").style.display === "none") {
-		$("notice").style.visibility = "hidden";
+	$("notices").style.webkitTransform = 'translate3d(0, ' + this.noticeStack.height + 'px, 0)';
+}
+
+ApplicationController.prototype.noticesMoved = function(event) {
+	for (var i = this.noticeStack.notice.length - 1; i >= 0; i--) {
+		if (this.noticeStack.notice[i].acknowledged) {
+			$("notices").removeChild(this.noticeStack.notice[i]);
+			this.noticeStack.notice.splice(i,1);
+		}
+	}
+
+	if (this.noticeStack.notice.length == 0) {
+		$("notices").style.visibility = "hidden";
 	}
 }
 
@@ -274,7 +312,6 @@ ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
 			this.showNotice({
 				label: "The last data sync was over " + MAX_DATA_AGE_DAYS + " days ago",
 				leftButton: {
-					eventHandler: this.hideNotice.bind(this),
 					style: "redButton",
 					label: "OK"
 				}

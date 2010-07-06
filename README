@@ -1,3 +1,8 @@
+ProgressEvent properties in appCache updates (waiting for WebKit update)
+Better feedback in import/export
+	import - delay after "Imported 57 of 57"
+	export - delay after "Sent data to server" (in verifyData()), incorrect count of "exporting 56 of 57"
+
 When moving a series to a different program, need to refresh the progressBar for the new program
 Schedule->Episode List, need easy way to get to Series List (to view other series for the same program)
 	- maybe use Program name in header as a link, but managing the view stack will be tricky

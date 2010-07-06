@@ -53,7 +53,6 @@ AboutController.prototype.updateChecked = function(updated, message) {
 	appController.showNotice({
 		label: message,
 		leftButton: {
-			eventHandler: appController.hideNotice.bind(this),
 			style: "redButton",
 			label: "OK"
 		}

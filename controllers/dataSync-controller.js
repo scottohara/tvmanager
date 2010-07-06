@@ -79,7 +79,6 @@ DataSyncController.prototype.dataExport = function() {
 			appController.showNotice({
 				label: label,
 				leftButton: {
-					eventHandler: appController.hideNotice.bind(this),
 					style: "redButton",
 					label: "OK"
 				}
@@ -117,7 +116,6 @@ DataSyncController.prototype.dataImport = function() {
 			appController.showNotice({
 				label: label,
 				leftButton: {
-					eventHandler: appController.hideNotice.bind(this),
 					style: "redButton",
 					label: "OK"
 				}
@@ -180,11 +178,11 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 
 DataSyncController.prototype.verifyData = function(data) {
 	if (data) {
+		$("status").value = "Verifying data";
 		new Ajax.Request("getChecksum.asp", {
 			method: "get",
 			contentType: "text/plain",
 			onSuccess: function(response) {
-				$("status").value = "Verifying data";
 				if (data.hash.valueOf() === response.responseText) {
 					$("status").value = "Verify complete";
 					this.setLastSyncTime();

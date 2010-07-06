@@ -9,10 +9,21 @@ function CacheController() {
 	];
 
 	if (window.applicationCache) {
+		var NOTICE_ID = "appCacheUpdateNotice";
+
+		window.applicationCache.addEventListener('downloading', function() {
+			this.callback(true, "Updating application to the latest version...<br/>Please Wait.", NOTICE_ID);
+    }.bind(this), false);
+
+		window.applicationCache.addEventListener('progress', function(event) {
+			console.log(event)
+			this.callback(true, "Updating application to the latest version...<br/>Downloaded " + event.loaded + "/" + event.total, NOTICE_ID);
+    }.bind(this), false);
+
 		window.applicationCache.addEventListener('updateready', function() {
 			if (this.cacheStatusValues[window.applicationCache.status] != 'idle') {
 				window.applicationCache.swapCache();
-				this.callback(true, "Application has been updated to the latest version. Please restart the application.");
+				this.callback(true, "Application has been updated to the latest version. Please restart the application.", NOTICE_ID);
 			}
     }.bind(this), false);
 

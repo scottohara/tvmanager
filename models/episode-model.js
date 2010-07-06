@@ -132,7 +132,7 @@ Episode.listByUnscheduled = function(callback) {
 Episode.list = function(filter, params, callback) {
 	var episodeList = [];
 
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
@@ -150,7 +150,7 @@ Episode.list = function(filter, params, callback) {
 };
 
 Episode.count = function(callback) {
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql("SELECT COUNT(*) AS EpisodeCount FROM Episode", [],
 			function(tx, resultSet) {
 				callback(resultSet.rows.item(0).EpisodeCount);

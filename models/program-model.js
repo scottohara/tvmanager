@@ -155,7 +155,7 @@ var Program = Class.create({
 Program.list = function(callback) {
 	var programList = [];
 
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql("SELECT p.rowid, p.Name, COUNT(DISTINCT s.rowid) AS SeriesCount, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.rowid = s.ProgramID LEFT OUTER JOIN Episode e on s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY p.rowid ORDER BY p.Name", [],
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
@@ -173,7 +173,7 @@ Program.list = function(callback) {
 };
 
 Program.count = function(callback) {
-	db.transaction(function(tx) {
+	db.readTransaction(function(tx) {
 		tx.executeSql("SELECT COUNT(*) AS ProgramCount FROM Program", [],
 			function(tx, resultSet) {
 				callback(resultSet.rows.item(0).ProgramCount);
