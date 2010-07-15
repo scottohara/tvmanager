@@ -27,6 +27,11 @@ ScheduleController.prototype.activate = function(listItem) {
 			this.scheduleList.items.splice(listItem.listIndex,1);
 		} else {
 			this.scheduleList.items[listItem.listIndex] = listItem.series;
+			if (listItem.series.seriesName != this.origSeriesName || listItem.series.nowShowing != this.origNowShowing) {
+				this.scheduleList.items = this.scheduleList.items.sortBy(function(item) {
+					return (item.nowShowing ? item.nowShowing : "Z") + "-" + item.programName;
+				});
+			}
 		}
 		this.scheduleList.refresh();
 		this.viewItems();
@@ -58,6 +63,8 @@ ScheduleController.prototype.viewSettings = function() {
 }
 
 ScheduleController.prototype.editItem = function(itemIndex) {
+	this.origSeriesName = this.scheduleList.items[itemIndex].seriesName;
+	this.origNowShowing = this.scheduleList.items[itemIndex].nowShowing;
 	appController.pushView("series", { listIndex: itemIndex, series: this.scheduleList.items[itemIndex] });
 }
 
