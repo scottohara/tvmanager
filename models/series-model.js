@@ -205,8 +205,8 @@ Series.listByStatus = function(callback, status) {
 }
 
 Series.listByIncomplete = function(callback) {
-	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + ", " + Series.standardQuery.entityList;
-	var filter = "GROUP BY s.rowid HAVING COUNT(e.rowid) > COUNT(e2.rowid) ORDER BY p.Name, s.Name";
+	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + " " + Series.standardQuery.entityList;
+	var filter = "GROUP BY s.rowid HAVING COUNT(e.rowid) > COUNT(e2.rowid) AND COUNT(e2.rowid) > 0 ORDER BY p.Name, s.Name";
 	var params = [];
 	Series.list(query, filter, params, callback);
 }

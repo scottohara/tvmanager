@@ -1,4 +1,3 @@
-When updating the Series.NowShowing, Schedule view needs to be resorted
 ProgressEvent properties in appCache updates (waiting for WebKit update)
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
