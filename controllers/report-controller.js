@@ -6,19 +6,19 @@ ReportController.prototype.setup = function() {
 	this.header = {
 		label: this.report.reportName,
 		leftButton: {
-			eventHandler: function() {appController.popView();}.bind(this),
+			eventHandler: function() {appController.popView();},
 			style: "backButton",
 			label: "Settings"
 		}
 	};
 
-	this.reportList = new List("list", "views/reportListTemplate.html", null, [], this.viewItem.bind(this));
+	this.reportList = new List("list", "views/reportListTemplate.html", null, [], $.proxy(this.viewItem, this));
 	appController.toucheventproxy.enabled = true;
 	this.activate();
 }
 
 ReportController.prototype.activate = function() {
-	this.report.dataSource(this.listRetrieved.bind(this), this.report.args);
+	this.report.dataSource($.proxy(this.listRetrieved, this), this.report.args);
 }
 
 ReportController.prototype.listRetrieved = function(reportList) {
@@ -34,9 +34,9 @@ ReportController.prototype.viewItem = function(itemIndex) {
 ReportController.prototype.viewItems = function() {
 	appController.clearFooter();
 	this.reportList.setAction("view");
-	$("list").className = "";
+	$("#list").removeClass();
 	this.footer = {
-		label: "v" + db.version
+		label: "v" + appController.db.version
 	};
 
 	appController.setFooter();

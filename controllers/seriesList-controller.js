@@ -6,19 +6,19 @@ SeriesListController.prototype.setup = function() {
     this.header = {
         label: this.listItem.program.programName,
         leftButton: {
-            eventHandler: function(listItem) { return function() {appController.popView(listItem);}.bind(this);}.bind(this)(this.listItem),
+            eventHandler: function(listItem) { return function() {appController.popView(listItem);}}(this.listItem),
             style: "backButton",
             label: "Programs"
         },
         rightButton: {
-            eventHandler: this.addItem.bind(this),
+            eventHandler: $.proxy(this.addItem, this),
             style: "toolButton",
             label: "+"
         }
     };
 
-    this.seriesList = new List("list", "views/seriesListTemplate.html", null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
-    Series.listByProgram(this.listItem.program.id, this.listRetrieved.bind(this));
+    this.seriesList = new List("list", "views/seriesListTemplate.html", null, [], $.proxy(this.viewItem, this), $.proxy(this.editItem, this), $.proxy(this.deleteItem, this));
+    Series.listByProgram(this.listItem.program.id, $.proxy(this.listRetrieved, this));
 }
 
 SeriesListController.prototype.activate = function(listItem) {
@@ -83,11 +83,11 @@ SeriesListController.prototype.deleteItem = function(itemIndex, dontRemove) {
 SeriesListController.prototype.deleteItems = function() {
     appController.clearFooter();
     this.seriesList.setAction("delete");
-    $("list").className = "delete";
+    $("#list").removeClass().addClass("delete");
     this.footer = {
-        label: "v" + db.version,
+        label: "v" + appController.db.version,
         rightButton: {
-            eventHandler: this.viewItems.bind(this),
+            eventHandler: $.proxy(this.viewItems, this),
             style: "blueButton",
             label: "Done"
         }
@@ -99,11 +99,11 @@ SeriesListController.prototype.deleteItems = function() {
 SeriesListController.prototype.editItems = function() {
     appController.clearFooter();
     this.seriesList.setAction("edit");
-    $("list").className = "edit";
+    $("#list").removeClass().addClass("edit");
     this.footer = {
-        label: "v" + db.version,
+        label: "v" + appController.db.version,
         leftButton: {
-            eventHandler: this.viewItems.bind(this),
+            eventHandler: $.proxy(this.viewItems, this),
             style: "blueButton",
             label: "Done"
         }
@@ -115,16 +115,16 @@ SeriesListController.prototype.editItems = function() {
 SeriesListController.prototype.viewItems = function() {
     appController.clearFooter();
     this.seriesList.setAction("view");
-    $("list").className = "";
+    $("#list").removeClass();
     this.footer = {
-        label: "v" + db.version,
+        label: "v" + appController.db.version,
         leftButton: {
-            eventHandler: this.editItems.bind(this),
+            eventHandler: $.proxy(this.editItems, this),
             style: "toolButton",
             label: "Edit"
         },
         rightButton: {
-            eventHandler: this.deleteItems.bind(this),
+            eventHandler: $.proxy(this.deleteItems, this),
             style: "redButton",
             label: "Delete"
         }

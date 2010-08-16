@@ -1,5 +1,3 @@
-var db;
-
 function ApplicationController() {
 	this.viewStack = [];
 	this.noticeStack = {
@@ -7,41 +5,37 @@ function ApplicationController() {
 		notice: []
 	};
 
-	$("contentWrapper").addEventListener('webkitTransitionEnd', this.contentShown.bind(this));
+	$("#contentWrapper").bind('webkitTransitionEnd', this.contentShown);
 
-	window.onload = function() {
-		setTimeout( function() {
-			this.scroller = new iScroll($("content"), "y");
-			this.toucheventproxy = new TouchEventProxy($("content"));
-			this.abc = new abc($("abc"), this.scroller);
-			this.abctoucheventproxy = new TouchEventProxy($("abc"));
-		}.bind(this), 100)
-	}.bind(this);
+	window.setTimeout($.proxy(function() {
+		this.scroller = new iScroll($("#content").get(0), "y");
+		this.toucheventproxy = new TouchEventProxy($("#content").get(0));
+		this.abc = new abc($("#abc").get(0), this.scroller);
+		this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
+	}, this),	100);
 
 	this.cache = new CacheController();
-	this.cache.update(
-		function(updated, message, noticeId) {
-			if (updated) {
-				if ($(noticeId)) {
-					$(noticeId).innerHTML = message;
-				} else {
-					this.showNotice({
-						id: noticeId,
-						label: message,
-						leftButton: {
-							style: "redButton",
-							label: "OK"
-						}
-					});
-				}
+	this.cache.update($.proxy(function(updated, message, noticeId) {
+		if (updated) {
+			if ($("#" + noticeId)) {
+				$("#" + noticeId).html = message;
+			} else {
+				this.showNotice({
+					id: noticeId,
+					label: message,
+					leftButton: {
+						style: "redButton",
+						label: "OK"
+					}
+				});
 			}
-		}.bind(this)
-	);
+		}
+	}, this));
 }
 
 ApplicationController.prototype.start = function() {
-	db = new DatabaseController(
-		function(version) {
+	this.db = new DatabaseController(
+		$.proxy(function(version) {
 			if (version.initial != version.current) {
 				this.showNotice({
 					label: "Database has been successfully upgraded from version " + version.initial + " to version " + version.current + ". Please restart the application.",
@@ -53,8 +47,8 @@ ApplicationController.prototype.start = function() {
 			} else {
 				this.pushView("schedule");
 			}
-		}.bind(this),
-		function(error) {
+		}, this),
+		$.proxy(function(error) {
 			this.showNotice({
 				label: error.message,
 				leftButton: {
@@ -62,7 +56,7 @@ ApplicationController.prototype.start = function() {
 					label: "OK"
 				}
 			});
-		}.bind(this)
+		}, this)
 	);
 }
 
@@ -78,38 +72,35 @@ ApplicationController.prototype.pushView = function(view, args) {
 		controller: new window[view.charAt(0).toUpperCase() + view.substr(1) + "Controller"](args),
 		scrollPos: 0
 	});
-	this.show(this.viewPushed.bind(this));
+	this.show($.proxy(this.viewPushed, this));
 }
 
 ApplicationController.prototype.viewPushed = function() {
 	this.viewStack[this.viewStack.length - 1].controller.setup();
 	this.setHeader();
-	setTimeout(this.contentShown.bind(this), 1000);
+	window.setTimeout(this.contentShown, 1000);
 }
 
 ApplicationController.prototype.popView = function(args) {
 	this.clearHeader();
 	this.clearFooter();
 	this.viewStack.pop();
-	this.show(this.viewPopped.bind(this), args);
+	this.show($.proxy(this.viewPopped, this), args);
 }
 
 ApplicationController.prototype.viewPopped = function(args) {
 	this.toucheventproxy.enabled = true;
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	this.setHeader();
-	setTimeout(this.contentShown.bind(this), 1000);
+	window.setTimeout(this.contentShown, 1000);
 }
 
 ApplicationController.prototype.show = function(onSuccess, args) {
 	this.hideScrollHelper();
-	$("nowLoading").className = "loading";
-	new Ajax.Updater("content", "views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", {
-		method: 'get',
-		onComplete: function() {
-			$("contentWrapper").className = "loading";
-			onSuccess(args);
-		}.bind(this)
+	$("#nowLoading").addClass("loading");
+	$("#content").load("views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", function() {
+		$("#contentWrapper").addClass("loading");
+		onSuccess(args);
 	});
 }
 
@@ -122,36 +113,37 @@ ApplicationController.prototype.refreshScroller = function() {
 }
 
 ApplicationController.prototype.contentShown = function() {
-	switch ($("contentWrapper").className) {
-		case "loading":
-			$("contentWrapper").className = "loaded";
-			$("nowLoading").className = "";
+	switch (true) {
+		case $("#contentWrapper").hasClass("loading"):
+			$("#contentWrapper").removeClass("loading");
+			$("#contentWrapper").addClass("loaded");
+			$("#nowLoading").removeClass("loading");
 			break;
 
-		case "loaded":
-			$("contentWrapper").className = "";
+		case $("#contentWrapper").hasClass("loaded"):
+			$("#contentWrapper").removeClass("loaded");
 			break;
 	}
 }
 
 ApplicationController.prototype.setHeader = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
-		$("headerLeftButton").addEventListener('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
-		$("headerLeftButton").className = "button header left " + this.viewStack[this.viewStack.length - 1].controller.header.leftButton.style;
-		$("headerLeftButton").textContent = this.viewStack[this.viewStack.length - 1].controller.header.leftButton.label;
-		$("headerLeftButton").style.display = "inline";
+		$("#headerLeftButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
+		$("#headerLeftButton").removeClass().addClass("button header left " + this.viewStack[this.viewStack.length - 1].controller.header.leftButton.style);
+		$("#headerLeftButton").text(this.viewStack[this.viewStack.length - 1].controller.header.leftButton.label);
+		$("#headerLeftButton").show();
 	}
 
 	if (this.viewStack[this.viewStack.length - 1].controller.header) {
-		$("headerLabel").textContent = this.viewStack[this.viewStack.length - 1].controller.header.label;
-		$("headerLabel").style.display = "block";
+		$("#headerLabel").text(this.viewStack[this.viewStack.length - 1].controller.header.label);
+		$("#headerLabel").show();
 	}
 
 	if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
-		$("headerRightButton").addEventListener('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
-		$("headerRightButton").className = "button header right " + this.viewStack[this.viewStack.length - 1].controller.header.rightButton.style;
-		$("headerRightButton").textContent = this.viewStack[this.viewStack.length - 1].controller.header.rightButton.label;
-		$("headerRightButton").style.display = "inline";
+		$("#headerRightButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
+		$("#headerRightButton").removeClass().addClass("button header right " + this.viewStack[this.viewStack.length - 1].controller.header.rightButton.style);
+		$("#headerRightButton").text(this.viewStack[this.viewStack.length - 1].controller.header.rightButton.label);
+		$("#headerRightButton").show();
 	}
 
 	this.setContentHeight();
@@ -159,16 +151,16 @@ ApplicationController.prototype.setHeader = function() {
 
 ApplicationController.prototype.clearHeader = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
-		$("headerLeftButton").removeEventListener('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
+		$("#headerLeftButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
 	}
 
 	if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
-		$("headerRightButton").removeEventListener('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
+		$("#headerRightButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
 	}
 
-	$("headerLeftButton").style.display = "none";
-	$("headerLabel").display = "none";
-	$("headerRightButton").style.display = "none";
+	$("#headerLeftButton").hide();
+	$("#headerLabel").hide();
+	$("#headerRightButton").hide();
 
 	this.setContentHeight();
 }
@@ -176,22 +168,22 @@ ApplicationController.prototype.clearHeader = function() {
 ApplicationController.prototype.setFooter = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
-			$("footerLeftButton").addEventListener('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
-			$("footerLeftButton").className = "button footer left " + this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.style;
-			$("footerLeftButton").textContent = this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.label;
-			$("footerLeftButton").style.display = "inline";
+			$("#footerLeftButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
+			$("#footerLeftButton").removeClass().addClass("button footer left " + this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.style);
+			$("#footerLeftButton").text(this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.label);
+			$("#footerLeftButton").show();
 		}
 
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.label) {
-			$("footerLabel").textContent = this.viewStack[this.viewStack.length - 1].controller.footer.label;
+			$("#footerLabel").text(this.viewStack[this.viewStack.length - 1].controller.footer.label);
 		}
-		$("footerLabel").style.display = "block";
+		$("#footerLabel").show();
 
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
-			$("footerRightButton").addEventListener('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
-			$("footerRightButton").className = "button footer right " + this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.style;
-			$("footerRightButton").textContent = this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.label;
-			$("footerRightButton").style.display = "inline";
+			$("#footerRightButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
+			$("#footerRightButton").removeClass().addClass("button footer right " + this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.style);
+			$("#footerRightButton").text(this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.label);
+			$("#footerRightButton").show();
 		}
 
 		this.setContentHeight();
@@ -201,103 +193,93 @@ ApplicationController.prototype.setFooter = function() {
 ApplicationController.prototype.clearFooter = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
-			$("footerLeftButton").removeEventListener('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
+			$("#footerLeftButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
 		}
 
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
-			$("footerRightButton").removeEventListener('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
+			$("#footerRightButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
 		}
 	}
 
-	$("footerLeftButton").style.display = "none";
-	$("footerLabel").textContent = "";
-	$("footerLabel").style.display = "none";
-	$("footerRightButton").style.display = "none";
+	$("#footerLeftButton").hide();
+	$("#footerLabel").val("");
+	$("#footerLabel").hide();
+	$("#footerRightButton").hide();
 	this.setContentHeight();
 }
 
 ApplicationController.prototype.setContentHeight = function() {
-	$("contentWrapper").style.height = window.innerHeight - $("header").offsetHeight - $("footer").offsetHeight + 'px';
+	$("#contentWrapper").height(window.innerHeight - $("#header").height() - $("#footer").height());
 }
 
 ApplicationController.prototype.showNotice = function(notice) {
-	var noticeContainer = document.createElement("DIV");
+	var noticeContainer = $("<div>").addClass("notice").appendTo($("#notices"));
 
-	var noticeLeftButton = document.createElement("A");
+	var noticeLeftButton = $("<a>").appendTo(noticeContainer);
 	if (notice.leftButton) {
 		if (notice.leftButton.eventHandler) {
-			noticeLeftButton.addEventListener('click', notice.leftButton.eventHandler);
+			noticeLeftButton.bind('click', notice.leftButton.eventHandler);
 		}
-		noticeLeftButton.addEventListener('click', function(notice) { return function() { this.hideNotice(notice); }.bind(this);}.bind(this)(noticeContainer));
-		noticeLeftButton.className = "button footer left " + notice.leftButton.style;
-		noticeLeftButton.textContent = notice.leftButton.label;
-		noticeLeftButton.style.display = "inline";
+		noticeLeftButton.bind('click', $.proxy(function(notice) { return $.proxy(function() { this.hideNotice(notice); }, this);}, this)(noticeContainer));
+		noticeLeftButton.removeClass().addClass("button footer left " + notice.leftButton.style);
+		noticeLeftButton.text(notice.leftButton.label);
+		noticeLeftButton.show();
 	}
 
-	var noticeLabel = document.createElement("P");
-	noticeLabel.innerHTML = notice.label;
+	var noticeLabel = $("<p>").html(notice.label).appendTo(noticeContainer);
 	if (notice.id) {
-		noticeLabel.id = notice.id
+		noticeLabel.attr("id", notice.id);
 	}
 
-	var noticeRightButton = document.createElement("A");
+	var noticeRightButton = $("<a>").appendTo(noticeContainer);
 	if (notice.rightButton) {
 		if (notice.rightButton.eventHandler) {
-			noticeRightButton.addEventListener('click', notice.rightButton.eventHandler);
+			noticeRightButton.bind('click', notice.rightButton.eventHandler);
 		}
-		noticeRightButton.className = "button footer right " + notice.rightButton.style;
-		noticeRightButton.textContent = notice.rightButton.label;
-		noticeRightButton.style.display = "inline";
+		noticeRightButton.removeClass().addClass("button footer right " + notice.rightButton.style);
+		noticeRightButton.text(notice.rightButton.label);
+		noticeRightButton.show();
 	}
-
-	noticeContainer.className = "notice";
-	noticeContainer.appendChild(noticeLabel);
-	noticeContainer.appendChild(noticeLeftButton);
-	noticeContainer.appendChild(noticeRightButton);
-	noticeContainer.addEventListener('webkitTransitionEnd', this.noticeHidden.bind(this));
-	$("notices").appendChild(noticeContainer);
 
 	if (0 === this.noticeStack.notice.length) {
-		$("notices").style.top = window.innerHeight + window.pageYOffset + 'px';
-		$("notices").style.visibility = "visible";
-		$("notices").webkitTransitionTimingFunction = 'ease-out';
-		$("notices").addEventListener('webkitTransitionEnd', this.noticesMoved.bind(this));
+		$("#notices").css('top', window.innerHeight + window.pageYOffset + 'px');
+		$("#notices").css("visibility", "visible");
 	}
 
-	this.noticeStack.height -= noticeContainer.clientHeight;
+	this.noticeStack.height -= noticeContainer.height();
 	this.noticeStack.notice.push(noticeContainer);
-	$("notices").style.webkitTransform = 'translate3d(0, ' + this.noticeStack.height + 'px, 0)';
+	$("#notices").animate({top: $(window).height() + this.noticeStack.height}, $.proxy(this.noticesMoved, this));
 }
 
 ApplicationController.prototype.hideNotice = function(notice) {
-	this.noticeStack.height += notice.clientHeight;
-	notice.acknowledged = true;
-	notice.style.webkitTransform = 'scaleY(0)';
+	this.noticeStack.height += notice.height();
+	notice.attr("acknowledged", true);
+	notice.animate({height: 0}, $.proxy(this.noticeHidden, this));
 }
 
 ApplicationController.prototype.noticeHidden = function(event) {
-	$("notices").style.webkitTransform = 'translate3d(0, ' + this.noticeStack.height + 'px, 0)';
+	$("#notices").animate({top: "-=" + this.noticeStack.height}, $.proxy(this.noticesMoved, this));
 }
 
 ApplicationController.prototype.noticesMoved = function(event) {
 	for (var i = this.noticeStack.notice.length - 1; i >= 0; i--) {
-		if (this.noticeStack.notice[i].acknowledged) {
-			$("notices").removeChild(this.noticeStack.notice[i]);
+		if (this.noticeStack.notice[i].attr("acknowledged")) {
+			this.noticeStack.notice[i].remove();
 			this.noticeStack.notice.splice(i,1);
 		}
 	}
 
 	if (this.noticeStack.notice.length == 0) {
-		$("notices").style.visibility = "hidden";
+		$("#notices").css("visibility", "hidden");
 	}
 }
 
 ApplicationController.prototype.showScrollHelper = function() {
-	$("abc").style.display = "block";
+	$("#abc").show();
 }
 
 ApplicationController.prototype.hideScrollHelper = function() {
-	$("abc").style.display = "none";
+	$("#abc").hide();
 }
 
 ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
@@ -320,7 +302,8 @@ ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
 	}
 }
 
-var appController = new ApplicationController();
-appController.start();
-
-Setting.get("LastSyncTime", appController.gotLastSyncTime.bind(appController));
+$(function() {
+	window.appController = new ApplicationController();
+	appController.start();
+	Setting.get("LastSyncTime", $.proxy(appController.gotLastSyncTime, appController));
+});

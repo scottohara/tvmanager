@@ -11,44 +11,41 @@ function List(container, itemTemplate, groupBy, items, viewEventHandler, editEve
 }
 
 List.prototype.refresh = function() {
-	new Ajax.Request(this.itemTemplate, {method: 'get', onComplete: this.populateItem.bind(this)});
-}
+	$.get(this.itemTemplate, $.proxy(function(template) {
+		$("#" + this.container).html("");
+		var itemHTML;
+		var group = "";
+		for (var i = 0; i < this.items.length; i++) {
+			var item = this.items[i];
 
-List.prototype.populateItem = function(response) {
-	$(this.container).innerHTML = "";
-	var itemHTML;
-	var group = "";
-	for (var i = 0; i < this.items.length; i++) {
-		item = this.items[i];
+			if (this.groupBy && group != item[this.groupBy]){
+				$("<li>").attr("id", item[this.groupBy]).addClass("group").text(item[this.groupBy]).appendTo($("#" + this.container));
+				group = item[this.groupBy];
+			}
 
-		if (this.groupBy && group != item[this.groupBy]){
-			var groupItem = document.createElement("LI");
-			groupItem.className = "group";
-			groupItem.id = item[this.groupBy];
-			groupItem.textContent = item[this.groupBy];
-			$(this.container).appendChild(groupItem);
-			group = item[this.groupBy];
-		}
+			itemHTML = template;
 
-		itemHTML = response.responseText;
+			for (var prop in item) {
+				if (item.hasOwnProperty(prop)) {
+					itemHTML = itemHTML.replace("#{" + prop + "}", item[prop]);
+				}
+			}
 
-		for (var prop in item) {
-			if (item.hasOwnProperty(prop)) {
-				itemHTML = itemHTML.replace("#{" + prop + "}", item[prop]);
+			$("<li>").html(itemHTML).bind('click', $.proxy(function(itemIndex) {
+				return $.proxy(function() {
+					if (!appController.scroller.moved) {
+						this.tap(itemIndex);
+					}
+				}, this);
+			}, this)(i)).appendTo($("#" + this.container));
+
+			if (this.populateItemEventHandler) {
+				this.populateItemEventHandler(item);
 			}
 		}
 
-		var listItem = document.createElement("LI");
-		listItem.innerHTML = itemHTML;
-		listItem.addEventListener('click', function(itemIndex) { return function() { if (!appController.scroller.moved) { this.tap(itemIndex); }}.bind(this);}.bind(this)(i));
-		$(this.container).appendChild(listItem);
-
-		if (this.populateItemEventHandler) {
-			this.populateItemEventHandler(item);
-		}
-	}
-
-	appController.refreshScroller();
+		appController.refreshScroller();
+	}, this));
 }
 
 List.prototype.setAction = function(action) {

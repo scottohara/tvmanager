@@ -1,50 +1,48 @@
-var Setting = Class.create({
-	initialize: function(settingName, settingValue) {
+function Setting(settingName, settingValue) {
 		this.settingName = settingName;
 		this.settingValue = settingValue;
-	},
+}
 
-	save: function(callback) {
-		db.transaction(function(tx) {
-			tx.executeSql("DELETE FROM Setting WHERE Name = ?", [this.settingName]);
-			tx.executeSql("INSERT INTO Setting (Name, Value) VALUES (?, ?)", [this.settingName, this.settingValue],
-				function(tx, resultSet) {
-					if (!resultSet.rowsAffected) {
-						if (callback) {
-							callback(false);
-						} else {
-							throw new Error("Setting.save: no rows affected");
-							return false;
-						}
-					}
-
-					if (callback) {
-						callback(true);
-					}
-				}.bind(this),
-				function(tx, error) {
+Setting.prototype.save = function(callback) {
+	appController.db.transaction($.proxy(function(tx) {
+		tx.executeSql("DELETE FROM Setting WHERE Name = ?", [this.settingName]);
+		tx.executeSql("INSERT INTO Setting (Name, Value) VALUES (?, ?)", [this.settingName, this.settingValue],
+			function(tx, resultSet) {
+				if (!resultSet.rowsAffected) {
 					if (callback) {
 						callback(false);
 					} else {
-						throw new Error("Setting.save: " + error.message);
+						throw new Error("Setting.save: no rows affected");
 						return false;
 					}
-				}.bind(this)
-			);
-		}.bind(this));
-	},
+				}
 
-	remove: function() {
-		db.transaction(function(tx) {
-			tx.executeSql("DELETE FROM Setting WHERE Name = ?", [this.settingName]);
-			this.settingName = null;
-			this.setingValue = null;
-		}.bind(this));
-	}
-});
+				if (callback) {
+					callback(true);
+				}
+			},
+			function(tx, error) {
+				if (callback) {
+					callback(false);
+				} else {
+					throw new Error("Setting.save: " + error.message);
+					return false;
+				}
+			}
+		);
+	}, this));
+}
+
+Setting.prototype.remove = function() {
+	appController.db.transaction($.proxy(function(tx) {
+		tx.executeSql("DELETE FROM Setting WHERE Name = ?", [this.settingName]);
+		this.settingName = null;
+		this.setingValue = null;
+	}, this));
+}
 
 Setting.get = function(settingName, callback) {
-	db.readTransaction(function(tx) {
+	appController.db.readTransaction(function(tx) {
 		tx.executeSql("SELECT Value AS SettingValue FROM Setting WHERE Name = ?", [settingName],
 			function(tx, resultSet) {
 				var settingValue;

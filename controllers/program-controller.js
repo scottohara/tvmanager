@@ -10,25 +10,25 @@ ProgramController.prototype.setup = function() {
 	this.header = {
 		label: "Add/Edit Program",
 		leftButton: {
-			eventHandler: this.cancel.bind(this),
+			eventHandler: this.cancel,
 			style: "toolButton",
 			label: "Cancel"
 		},
 		rightButton: {
-			eventHandler: this.save.bind(this),
+			eventHandler: $.proxy(this.save, this),
 			style: "blueButton",
 			label: "Save"
 		}
 	};
 
-	$("programName").value = this.listItem.program.programName;
+	$("#programName").val(this.listItem.program.programName);
 
 	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 
 ProgramController.prototype.save = function() {
-	this.listItem.program.setProgramName($("programName").value);
+	this.listItem.program.setProgramName($("#programName").val());
 	this.listItem.program.save();
 	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;

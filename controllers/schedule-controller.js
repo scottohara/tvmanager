@@ -6,18 +6,18 @@ ScheduleController.prototype.setup = function() {
 	this.header = {
 		label: "Schedule",
 		leftButton: {
-			eventHandler: this.viewUnscheduled.bind(this),
+			eventHandler: this.viewUnscheduled,
 			style: "toolButton",
 			label: "Unscheduled"
 		},
 		rightButton: {
-			eventHandler: this.viewPrograms.bind(this),
+			eventHandler: this.viewPrograms,
 			style: "toolButton",
 			label: "Programs"
 		}
 	};
 
-	this.scheduleList = new List("list", "views/scheduleListTemplate.html", "nowShowingDisplay", [], this.viewItem.bind(this), this.editItem.bind(this));
+	this.scheduleList = new List("list", "views/scheduleListTemplate.html", "nowShowingDisplay", [], $.proxy(this.viewItem, this), $.proxy(this.editItem, this));
 	this.activate();
 }
 
@@ -28,15 +28,17 @@ ScheduleController.prototype.activate = function(listItem) {
 		} else {
 			this.scheduleList.items[listItem.listIndex] = listItem.series;
 			if (listItem.series.seriesName != this.origSeriesName || listItem.series.nowShowing != this.origNowShowing) {
-				this.scheduleList.items = this.scheduleList.items.sortBy(function(item) {
-					return (item.nowShowing ? item.nowShowing : "Z") + "-" + item.programName;
+				this.scheduleList.items = this.scheduleList.items.sort(function(a, b) {
+					var x = (a.nowShowing ? a.nowShowing : "Z") + "-" + a.programName;
+					var y = (b.nowShowing ? b.nowShowing : "Z") + "-" + b.programName;
+					return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 				});
 			}
 		}
 		this.scheduleList.refresh();
 		this.viewItems();
 	} else {
-		Series.listByNowShowing(this.listRetrieved.bind(this));
+		Series.listByNowShowing($.proxy(this.listRetrieved, this));
 	}
 }
 
@@ -71,11 +73,11 @@ ScheduleController.prototype.editItem = function(itemIndex) {
 ScheduleController.prototype.editItems = function() {
 	appController.clearFooter();
 	this.scheduleList.setAction("edit");
-	$("list").className = "edit";
+	$("#list").removeClass().addClass("edit");
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: this.viewItems.bind(this),
+			eventHandler: $.proxy(this.viewItems, this),
 			style: "blueButton",
 			label: "Done"
 		}
@@ -87,16 +89,16 @@ ScheduleController.prototype.editItems = function() {
 ScheduleController.prototype.viewItems = function() {
 	appController.clearFooter();
 	this.scheduleList.setAction("view");
-	$("list").className = "";
+	$("#list").removeClass();
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: this.editItems.bind(this),
+			eventHandler: $.proxy(this.editItems, this),
 			style: "toolButton",
 			label: "Edit"
 		},
 		rightButton: {
-			eventHandler: this.viewSettings.bind(this),
+			eventHandler: this.viewSettings,
 			style: "toolButton",
 			label: "Settings"
 		}

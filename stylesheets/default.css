@@ -446,8 +446,6 @@ fieldset > .row:last-child {
 	width: 100%;
 	z-index: 1000;
 	padding: 0;
-	-webkit-transition-duration: 400ms;
-	-webkit-transition-property: -webkit-transform;
 }
 
 div.notice {
@@ -462,10 +460,6 @@ div.notice {
 	text-align: center;
 	color: #FFF;
 	text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
-	-webkit-transition-duration: 400ms;
-	-webkit-transition-property: -webkit-transform;
-	-webkit-transition-timing-function: ease-in;
-	-webkit-transform-origin-y: bottom;
 }
 
 div.notice p {

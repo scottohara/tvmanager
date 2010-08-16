@@ -12,28 +12,28 @@ SeriesController.prototype.setup = function() {
 	this.header = {
 		label: "Add/Edit Series",
 		leftButton: {
-			eventHandler: this.cancel.bind(this),
+			eventHandler: $.proxy(this.cancel, this),
 			style: "toolButton",
 			label: "Cancel"
 		},
 		rightButton: {
-			eventHandler: this.save.bind(this),
+			eventHandler: $.proxy(this.save, this),
 			style: "blueButton",
 			label: "Save"
 		}
 	};
 
-	$("seriesName").value = this.listItem.series.seriesName;
-	$("nowShowing").value = this.listItem.series.nowShowingDisplay;
-	$("nowShowing").addEventListener('click', this.getNowShowing.bind(this));
-	$("moveTo").addEventListener('click', this.getProgramId.bind(this));
+	$("#seriesName").val(this.listItem.series.seriesName);
+	$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
+	$("#nowShowing").bind('click', $.proxy(this.getNowShowing, this));
+	$("#moveTo").bind('click', $.proxy(this.getProgramId, this));
 
 	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 
 SeriesController.prototype.save = function() {
-	this.listItem.series.seriesName = $("seriesName").value;
+	this.listItem.series.seriesName = $("#seriesName").val();
 	this.listItem.series.save();
 	if (!(this.listItem.listIndex >= 0)) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
@@ -57,7 +57,7 @@ SeriesController.prototype.getNowShowing = function() {
 		}
 
 		SpinningWheel.addSlot(Series.NOW_SHOWING, "left", nowShowing);
-		SpinningWheel.setDoneAction(this.setNowShowing.bind(this));
+		SpinningWheel.setDoneAction($.proxy(this.setNowShowing, this));
 		SpinningWheel.open();
 
 		this.gettingNowShowing = false;
@@ -66,13 +66,13 @@ SeriesController.prototype.getNowShowing = function() {
 
 SeriesController.prototype.setNowShowing = function() {
 	this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues().keys[0]);
-	$("nowShowing").value = this.listItem.series.nowShowingDisplay;
+	$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
 }
 
 SeriesController.prototype.getProgramId = function() {
 	if (!this.gettingProgramId) {
 		this.gettingProgramId = true;
-		Program.list(this.listRetrieved.bind(this));
+		Program.list($.proxy(this.listRetrieved, this));
 	}
 }
 
@@ -83,12 +83,12 @@ SeriesController.prototype.listRetrieved = function(programList) {
 	}
 
 	SpinningWheel.addSlot(programs, "left", this.listItem.series.programId);
-	SpinningWheel.setDoneAction(this.setProgramId.bind(this));
+	SpinningWheel.setDoneAction($.proxy(this.setProgramId, this));
 	SpinningWheel.open();
 	this.gettingProgramId = false;
 }
 
 SeriesController.prototype.setProgramId = function() {
 	this.listItem.series.programId = Number(SpinningWheel.getSelectedValues().keys[0]);
-	$("moveTo").value = SpinningWheel.getSelectedValues().values[0];
+	$("#moveTo").val(SpinningWheel.getSelectedValues().values[0]);
 }

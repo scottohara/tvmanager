@@ -1,4 +1,9 @@
-ProgressEvent properties in appCache updates (waiting for WebKit update)
+Manual sorting (or use 01, 02, etc..)
+- just for episode lists
+- add Episode.Sequence column
+- on 
+
+
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
 	export - delay after "Sent data to server" (in verifyData()), incorrect count of "exporting 56 of 57"
@@ -9,7 +14,20 @@ Ending soon report
   - series with < 2 unwatched/unrecorded episodes
 Guide searcher (online, using XMLTV)
 Vertically centre list items
-Manual sorting (or use 01, 02, etc..)
 Colour coding for my programs?
 Colour coding of Fox vs FTA?
 Prevent horizontal scrolling on phone (remove hack when implemented in iScroll)
+
+Pending standards:
+- Native JSON encoding/decoding (to replace json2.js).  Already in Chrome/Safari, but not Mobile Safari.
+- function.bind(context) to replace $.proxy(function, context)
+- ProgressEvent properties in appCache updates (waiting for WebKit update)
+
+Minified sw
+- document touchstart/touchmove events (in create/destroy)
+- sw-cancel/sw-done/sw-frame events (in create/destroy) - can be easily wrapped in TouchEventProxy
+
+Migrate from Prototype to jQuery:
+- Setup staging site?
+- QUnit tests
+- Plugins for MD5 & templates

@@ -6,19 +6,19 @@ ProgramsController.prototype.setup = function() {
 	this.header = {
 		label: "Programs",
 		leftButton: {
-			eventHandler: function() {appController.popView();}.bind(this),
+			eventHandler: function() {appController.popView();},
 			style: "backButton",
 			label: "Schedule"
 		},
 		rightButton: {
-			eventHandler: this.addItem.bind(this),
+			eventHandler: this.addItem,
 			style: "toolButton",
 			label: "+"
 		}
 	};
 
-	this.programList = new List("list", "views/programListTemplate.html", "programGroup", [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
-	Program.list(this.listRetrieved.bind(this));
+	this.programList = new List("list", "views/programListTemplate.html", "programGroup", [], $.proxy(this.viewItem, this), $.proxy(this.editItem, this), $.proxy(this.deleteItem, this));
+	Program.list($.proxy(this.listRetrieved, this));
 }
 
 ProgramsController.prototype.activate = function(listItem) {
@@ -61,11 +61,11 @@ ProgramsController.prototype.deleteItems = function() {
 	appController.hideScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("delete");
-	$("list").className = "delete";
+	$("#list").removeClass().addClass("delete");
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		rightButton: {
-			eventHandler: this.viewItems.bind(this),
+			eventHandler: $.proxy(this.viewItems, this),
 			style: "blueButton",
 			label: "Done"
 		}
@@ -78,11 +78,11 @@ ProgramsController.prototype.editItems = function() {
 	appController.hideScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("edit");
-	$("list").className = "edit";
+	$("#list").removeClass().addClass("edit");
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: this.viewItems.bind(this),
+			eventHandler: $.proxy(this.viewItems, this),
 			style: "blueButton",
 			label: "Done"
 		}
@@ -95,16 +95,16 @@ ProgramsController.prototype.viewItems = function() {
 	appController.showScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("view");
-	$("list").className = "withHelper";
+	$("#list").removeClass().addClass("withHelper");
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: this.editItems.bind(this),
+			eventHandler: $.proxy(this.editItems, this),
 			style: "toolButton",
 			label: "Edit"
 		},
 		rightButton: {
-			eventHandler: this.deleteItems.bind(this),
+			eventHandler: $.proxy(this.deleteItems, this),
 			style: "redButton",
 			label: "Delete"
 		}

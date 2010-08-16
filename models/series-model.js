@@ -1,5 +1,4 @@
-var Series = Class.create({
-	initialize: function(id, seriesName, nowShowing, programId, programName, episodeCount, watchedCount, recordedCount, expectedCount, missedCount, statusWarningCount) {
+function Series(id, seriesName, nowShowing, programId, programName, episodeCount, watchedCount, recordedCount, expectedCount, missedCount, statusWarningCount) {
 		this.id = id;
 		this.seriesName = seriesName;
 		this.setNowShowing(nowShowing);
@@ -12,170 +11,169 @@ var Series = Class.create({
 		this.setExpectedCount(expectedCount);
 		this.setMissedCount(missedCount);
 		this.setStatusWarning(statusWarningCount);
-	},
+}
 
-	save: function(callback) {
-		db.transaction(function(tx) {
-			var sql;
-			var params;
+Series.prototype.save = function(callback) {
+	appController.db.transaction($.proxy(function(tx) {
+		var sql;
+		var params;
 
-			if (this.id) {
-				sql = "UPDATE Series SET Name = ?, NowShowing = ?, ProgramID = ? WHERE rowid = ?";
-				params = [this.seriesName, this.nowShowing, this.programId, this.id];
-			} else {
-				sql = "INSERT INTO Series (Name, NowShowing, ProgramID) VALUES (?, ?, ?)";
-				params = [this.seriesName, this.nowShowing, this.programId];
-			}
+		if (this.id) {
+			sql = "UPDATE Series SET Name = ?, NowShowing = ?, ProgramID = ? WHERE rowid = ?";
+			params = [this.seriesName, this.nowShowing, this.programId, this.id];
+		} else {
+			sql = "INSERT INTO Series (Name, NowShowing, ProgramID) VALUES (?, ?, ?)";
+			params = [this.seriesName, this.nowShowing, this.programId];
+		}
 
-			tx.executeSql(sql, params,
-				function(tx, resultSet) {
-					if (!resultSet.rowsAffected) {
-						if (callback) {
-							callback();
-						} else {
-							throw new Error("Series.save: no rows affected");
-							return false;
-						}
-					}
-  
-					if (!this.id) {
-						this.id = resultSet.insertId;
-					}
-
-					if (callback) {
-						callback(this.id);
-					}
-				}.bind(this),
-				function(tx, error) {
+		tx.executeSql(sql, params,
+			$.proxy(function(tx, resultSet) {
+				if (!resultSet.rowsAffected) {
 					if (callback) {
 						callback();
 					} else {
-						throw new Error("Series.save: " + error.message);
+						throw new Error("Series.save: no rows affected");
 						return false;
 					}
-				}.bind(this)
-			);
-		}.bind(this));
-	},
+				}
 
-	remove: function() {
-		if (this.id) {
-			db.transaction(function(tx) {
-				tx.executeSql("DELETE FROM Episode WHERE SeriesID = ?", [this.id]);
-				tx.executeSql("DELETE FROM Series WHERE rowid = ?", [this.id]);
-				this.id = null;
-				this.seriesName = null;
-				this.nowShowing = null;
-				this.programId = null;
-			}.bind(this));
-		}
-	},
+				if (!this.id) {
+					this.id = resultSet.insertId;
+				}
 
-	toJson: function(callback) {
-		Episode.listBySeries(this.id, function(episodes) {
-			var json = {
-				seriesName: this.seriesName,
-				nowShowing: this.nowShowing,
-				episodes: []
+				if (callback) {
+					callback(this.id);
+				}
+			}, this),
+			function(tx, error) {
+				if (callback) {
+					callback();
+				} else {
+					throw new Error("Series.save: " + error.message);
+					return false;
+				}
 			}
+		);
+	}, this));
+}
 
-			for (var i = 0; i < episodes.length; i++) {
-				json.episodes.push(episodes[i].toJson());
-			}
-
-			callback(json);
-		}.bind(this));
-	},
-
-	setNowShowing: function(nowShowing) {
-		if (!nowShowing) {
-			nowShowing = 0;
-		}
-
-		if (nowShowing == 0) {
+Series.prototype.remove = function() {
+	if (this.id) {
+		appController.db.transaction($.proxy(function(tx) {
+			tx.executeSql("DELETE FROM Episode WHERE SeriesID = ?", [this.id]);
+			tx.executeSql("DELETE FROM Series WHERE rowid = ?", [this.id]);
+			this.id = null;
+			this.seriesName = null;
 			this.nowShowing = null;
-		} else {
-			this.nowShowing = nowShowing;
-		}
-
-		this.nowShowingDisplay = Series.NOW_SHOWING[nowShowing];
-	},
-
-	setEpisodeCount: function(count) {
-		this.episodeCount = count;
-		this.progressBar.setTotal(this.episodeCount);
-		this.setWatchedProgress();
-	},
-
-	setWatchedCount: function(count) {
-		this.watchedCount = count;
-		this.setWatchedProgress();
-	},
-
-	setWatchedProgress: function() {
-		var watchedPercent = 0;
-		if (this.watchedCount && this.watchedCount > 0) {
-			watchedPercent = this.watchedCount / this.episodeCount * 100;
-		}
-
-		this.progressBarDisplay = this.progressBar.setSection(0, {
-			label: this.watchedCount,
-			percent: watchedPercent,
-			style: "watched"
-		});
-	},
-
-	setRecordedCount: function(count) {
-		this.recordedCount = count;
-		var recordedPercent = 0;
-		if (this.recordedCount && this.recordedCount > 0) {
-			recordedPercent = this.recordedCount / this.episodeCount * 100;
-		}
-
-		this.progressBarDisplay = this.progressBar.setSection(1, {
-			label: this.recordedCount,
-			percent: recordedPercent,
-			style: "recorded"
-		});
-	},
-
-	setExpectedCount: function(count) {
-		this.expectedCount = count;
-		var expectedPercent = 0;
-		if (this.expectedCount && this.expectedCount > 0) {
-			expectedPercent = this.expectedCount / this.episodeCount * 100;
-		}
-
-		this.progressBarDisplay = this.progressBar.setSection(2, {
-			label: this.expectedCount,
-			percent: expectedPercent,
-			style: "expected"
-		});
-	},
-
-	setMissedCount: function(count) {
-		this.missedCount = count;
-		var missedPercent = 0;
-		if (this.missedCount && this.missedCount > 0) {
-			missedPercent = this.missedCount / this.episodeCount * 100;
-		}
-
-		this.progressBarDisplay = this.progressBar.setSection(3, {
-			label: this.missedCount,
-			percent: missedPercent,
-			style: "missed"
-		});
-	},
-
-	setStatusWarning: function(count) {
-		this.statusWarningCount = count;
-		if (this.statusWarningCount > 0) {
-			this.statusWarning = 'warning';
-		}	else {
-			this.statusWarning = '';
-		}
+			this.programId = null;
+		}, this));
 	}
-});
+}
+
+Series.prototype.toJson = function(callback) {
+	Episode.listBySeries(this.id, $.proxy(function(episodes) {
+		var json = {
+			seriesName: this.seriesName,
+			nowShowing: this.nowShowing,
+			episodes: []
+		}
+
+		for (var i = 0; i < episodes.length; i++) {
+			json.episodes.push(episodes[i].toJson());
+		}
+
+		callback(json);
+	}, this));
+}
+
+Series.prototype.setNowShowing = function(nowShowing) {
+	if (!nowShowing) {
+		nowShowing = 0;
+	}
+
+	if (nowShowing == 0) {
+		this.nowShowing = null;
+	} else {
+		this.nowShowing = nowShowing;
+	}
+
+	this.nowShowingDisplay = Series.NOW_SHOWING[nowShowing];
+}
+
+Series.prototype.setEpisodeCount = function(count) {
+	this.episodeCount = count;
+	this.progressBar.setTotal(this.episodeCount);
+	this.setWatchedProgress();
+}
+
+Series.prototype.setWatchedCount = function(count) {
+	this.watchedCount = count;
+	this.setWatchedProgress();
+}
+
+Series.prototype.setWatchedProgress = function() {
+	var watchedPercent = 0;
+	if (this.watchedCount && this.watchedCount > 0) {
+		watchedPercent = this.watchedCount / this.episodeCount * 100;
+	}
+
+	this.progressBarDisplay = this.progressBar.setSection(0, {
+		label: this.watchedCount,
+		percent: watchedPercent,
+		style: "watched"
+	});
+}
+
+Series.prototype.setRecordedCount = function(count) {
+	this.recordedCount = count;
+	var recordedPercent = 0;
+	if (this.recordedCount && this.recordedCount > 0) {
+		recordedPercent = this.recordedCount / this.episodeCount * 100;
+	}
+
+	this.progressBarDisplay = this.progressBar.setSection(1, {
+		label: this.recordedCount,
+		percent: recordedPercent,
+		style: "recorded"
+	});
+}
+
+Series.prototype.setExpectedCount = function(count) {
+	this.expectedCount = count;
+	var expectedPercent = 0;
+	if (this.expectedCount && this.expectedCount > 0) {
+		expectedPercent = this.expectedCount / this.episodeCount * 100;
+	}
+
+	this.progressBarDisplay = this.progressBar.setSection(2, {
+		label: this.expectedCount,
+		percent: expectedPercent,
+		style: "expected"
+	});
+}
+
+Series.prototype.setMissedCount = function(count) {
+	this.missedCount = count;
+	var missedPercent = 0;
+	if (this.missedCount && this.missedCount > 0) {
+		missedPercent = this.missedCount / this.episodeCount * 100;
+	}
+
+	this.progressBarDisplay = this.progressBar.setSection(3, {
+		label: this.missedCount,
+		percent: missedPercent,
+		style: "missed"
+	});
+}
+
+Series.prototype.setStatusWarning = function(count) {
+	this.statusWarningCount = count;
+	if (this.statusWarningCount > 0) {
+		this.statusWarning = 'warning';
+	}	else {
+		this.statusWarning = '';
+	}
+}
 
 Series.standardQuery = {
 	baseData: "SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID",
@@ -214,7 +212,7 @@ Series.listByIncomplete = function(callback) {
 Series.list = function(query, filter, params, callback) {
 	var seriesList = [];
 
-	db.readTransaction(function(tx) {
+	appController.db.readTransaction(function(tx) {
 		tx.executeSql(query + " " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
@@ -232,7 +230,7 @@ Series.list = function(query, filter, params, callback) {
 };
 
 Series.count = function(callback) {
-	db.readTransaction(function(tx) {
+	appController.db.readTransaction(function(tx) {
 		tx.executeSql("SELECT COUNT(*) AS SeriesCount FROM Series", [],
 			function(tx, resultSet) {
 				callback(resultSet.rows.item(0).SeriesCount);

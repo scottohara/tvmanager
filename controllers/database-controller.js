@@ -11,31 +11,31 @@ function DatabaseController(callback, errorCallback) {
 	this.upgrades = [
 		{
 			version: "",
-			upgradeHandler: this.v1_0.bind(this)
+			upgradeHandler: this.v1_0
 		},
 		{
 			version: "1.0",
-			upgradeHandler: this.v1_1.bind(this)
+			upgradeHandler: this.v1_1
 		},
 		{
 			version: "1.1",
-			upgradeHandler: this.v1_2.bind(this)
+			upgradeHandler: this.v1_2
 		},
 		{
 			version: "1.2",
-			upgradeHandler: this.v1_3.bind(this)
+			upgradeHandler: this.v1_3
 		},
 		{
 			version: "1.3",
-			upgradeHandler: this.v1_4.bind(this)
+			upgradeHandler: this.v1_4
 		},
 		{
 			version: "1.4",
-			upgradeHandler: this.v1_5.bind(this)
+			upgradeHandler: this.v1_5
 		},
 		{
 			version: "1.5",
-			upgradeHandler: this.v1_6.bind(this)
+			upgradeHandler: this.v1_6
 		}
 	];
 
@@ -57,13 +57,13 @@ function DatabaseController(callback, errorCallback) {
 			}
 
 			this.db.changeVersion(this.initialVersion, this.expectedVersion,
-				function(tx) {
+				$.proxy(function(tx) {
 					for (var i = startIndex; i < endIndex; i++) {
 						this.upgrades[i].upgradeHandler(tx);
 					}
-				}.bind(this),
+				}, this),
 				this.errorCallback,
-				this.versionOK.bind(this)
+				$.proxy(this.versionOK, this)
 			);
 		} else {
 			this.versionOK();

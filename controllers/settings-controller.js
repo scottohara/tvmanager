@@ -6,7 +6,7 @@ SettingsController.prototype.setup = function() {
 	this.header = {
 		label: "Settings",
 		leftButton: {
-			eventHandler: this.goBack.bind(this),
+			eventHandler: this.goBack,
 			style: "backButton",
 			label: "Schedule"
 		}
@@ -16,12 +16,12 @@ SettingsController.prototype.setup = function() {
 }
 
 SettingsController.prototype.activate = function() {
-	$("dataSyncRow").addEventListener('click', this.viewDataSync.bind(this));
-	$("aboutRow").addEventListener('click', this.viewAbout.bind(this));
-	$("recordedReportRow").addEventListener('click', this.viewRecordedReport.bind(this));
-	$("expectedReportRow").addEventListener('click', this.viewExpectedReport.bind(this));
-	$("missedReportRow").addEventListener('click', this.viewMissedReport.bind(this));
-	$("incompleteReportRow").addEventListener('click', this.viewIncompleteReport.bind(this));
+	$("#dataSyncRow").bind('click', this.viewDataSync);
+	$("#aboutRow").bind('click', this.viewAbout);
+	$("#recordedReportRow").bind('click', this.viewRecordedReport);
+	$("#expectedReportRow").bind('click', this.viewExpectedReport);
+	$("#missedReportRow").bind('click', this.viewMissedReport);
+	$("#incompleteReportRow").bind('click', this.viewIncompleteReport);
 
 	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();

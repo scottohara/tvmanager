@@ -7,19 +7,19 @@ EpisodesController.prototype.setup = function() {
 	this.header = {
 		label: this.listItem.series.programName + " : " + this.listItem.series.seriesName,
 		leftButton: {
-			eventHandler: function(listItem) { return function() {appController.popView(listItem);}.bind(this);}.bind(this)(this.listItem),
+			eventHandler: function(listItem) { return function() {appController.popView(listItem);}}(this.listItem),
 			style: "backButton",
 			label: (this.listItem.source ? this.listItem.source : "Series")
 		},
 		rightButton: {
-			eventHandler: this.addItem.bind(this),
+			eventHandler: $.proxy(this.addItem, this),
 			style: "toolButton",
 			label: "+"
 		}
 	};
 
-	this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this), this.onPopulateListItem.bind(this));
-	Episode.listBySeries(this.listItem.series.id, this.listRetrieved.bind(this));
+	this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], $.proxy(this.viewItem, this), null, $.proxy(this.deleteItem, this), $.proxy(this.onPopulateListItem, this));
+	Episode.listBySeries(this.listItem.series.id, $.proxy(this.listRetrieved, this));
 }
 
 EpisodesController.prototype.activate = function(listItem) {
@@ -50,7 +50,7 @@ EpisodesController.prototype.activate = function(listItem) {
 EpisodesController.prototype.onPopulateListItem = function(episode) {
 	if (this.scrollToFirstUnwatched) {
 		if ("Watched" === episode.status) {
-			appController.viewStack[appController.viewStack.length - 1].scrollPos -= $(String(episode.id)).clientHeight;
+			appController.viewStack[appController.viewStack.length - 1].scrollPos -= $("#" + String(episode.id)).innerHeight;
 		} else {
 			this.scrollToFirstUnwatched = false;
 		}
@@ -92,11 +92,11 @@ EpisodesController.prototype.deleteItem = function(itemIndex) {
 EpisodesController.prototype.deleteItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("delete");
-	$("list").className = "delete";
+	$("#list").removeClass().addClass("delete");
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		rightButton: {
-			eventHandler: this.viewItems.bind(this),
+			eventHandler: $.proxy(this.viewItems, this),
 			style: "blueButton",
 			label: "Done"
 		}
@@ -108,11 +108,11 @@ EpisodesController.prototype.deleteItems = function() {
 EpisodesController.prototype.editItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("edit");
-	$("list").className = "edit";
+	$("#list").removeClass().addClass("edit");
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: this.viewItems.bind(this),
+			eventHandler: $.proxy(this.viewItems, this),
 			style: "blueButton",
 			label: "Done"
 		}
@@ -124,16 +124,16 @@ EpisodesController.prototype.editItems = function() {
 EpisodesController.prototype.viewItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("view");
-	$("list").className = "";
+	$("#list").removeClass();
 	this.footer = {
-		label: "v" + db.version,
+		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: this.editItems.bind(this),
+			eventHandler: $.proxy(this.editItems, this),
 			style: "toolButton",
 			label: "Edit"
 		},
 		rightButton: {
-			eventHandler: this.deleteItems.bind(this),
+			eventHandler: $.proxy(this.deleteItems, this),
 			style: "redButton",
 			label: "Delete"
 		}
