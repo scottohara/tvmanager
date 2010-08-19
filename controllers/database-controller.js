@@ -1,12 +1,12 @@
 function DatabaseController(callback, errorCallback) {
-	this.name = "TVManager";
+	this.name = appController.config.databaseName;
 	this.displayName = "TV Manager";
 	this.estimatedSize = "10000";
 	this.successCallback = callback;
 	this.errorCallback = errorCallback;
 	this.initialVersion = "";
 
-	this.expectedVersion = "1.6";
+	this.expectedVersion = "1.7";
 
 	this.upgrades = [
 		{
@@ -36,6 +36,10 @@ function DatabaseController(callback, errorCallback) {
 		{
 			version: "1.5",
 			upgradeHandler: this.v1_6
+		},
+		{
+			version: "1.6",
+			upgradeHandler: this.v1_7
 		}
 	];
 
@@ -115,4 +119,23 @@ DatabaseController.prototype.v1_5 = function(tx) {
 
 DatabaseController.prototype.v1_6 = function(tx) {
 	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unscheduled");
+}
+
+DatabaseController.prototype.v1_7 = function(tx) {
+	tx.executeSql("ALTER TABLE Episode ADD COLUMN Sequence");
+	tx.executeSql("SELECT rowid, SeriesID FROM Episode ORDER BY SeriesID", [],
+		function(tx, resultSet) {
+			var seriesId;
+			var sequence = 0;
+			for (var i = 0; i < resultSet.rows.length; i++) {
+				var ep = resultSet.rows.item(i);
+				if (seriesId != ep.SeriesID) {
+					sequence = 0;
+					seriesId = ep.SeriesID;
+				}
+				tx.executeSql("UPDATE Episode SET Sequence = ? WHERE rowid = ?", [sequence, ep.rowid]);
+				sequence++;
+			}
+		}
+	);
 }

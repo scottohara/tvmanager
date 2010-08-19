@@ -6,6 +6,7 @@ function ApplicationController() {
 	};
 
 	$("#contentWrapper").bind('webkitTransitionEnd', this.contentShown);
+	SpinningWheel.cellHeight = 45;
 
 	window.setTimeout($.proxy(function() {
 		this.scroller = new iScroll($("#content").get(0), "y");
@@ -34,30 +35,35 @@ function ApplicationController() {
 }
 
 ApplicationController.prototype.start = function() {
-	this.db = new DatabaseController(
-		$.proxy(function(version) {
-			if (version.initial != version.current) {
+	$.get("config.json", $.proxy(function(config) {
+		this.config = config;
+		this.db = new DatabaseController(
+			$.proxy(function(version) {
+				if (version.initial != version.current) {
+					this.showNotice({
+						label: "Database has been successfully upgraded from version " + version.initial + " to version " + version.current + ". Please restart the application.",
+						leftButton: {
+							style: "redButton",
+							label: "OK"
+						}
+					});
+				} else {
+					this.pushView("schedule");
+				}
+			}, this),
+			$.proxy(function(error) {
 				this.showNotice({
-					label: "Database has been successfully upgraded from version " + version.initial + " to version " + version.current + ". Please restart the application.",
+					label: error.message,
 					leftButton: {
 						style: "redButton",
 						label: "OK"
 					}
 				});
-			} else {
-				this.pushView("schedule");
-			}
-		}, this),
-		$.proxy(function(error) {
-			this.showNotice({
-				label: error.message,
-				leftButton: {
-					style: "redButton",
-					label: "OK"
-				}
-			});
-		}, this)
-	);
+			}, this)
+		);
+
+		Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
+	}, this), "json");
 }
 
 ApplicationController.prototype.pushView = function(view, args) {
@@ -129,7 +135,9 @@ ApplicationController.prototype.contentShown = function() {
 ApplicationController.prototype.setHeader = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
 		$("#headerLeftButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
-		$("#headerLeftButton").removeClass().addClass("button header left " + this.viewStack[this.viewStack.length - 1].controller.header.leftButton.style);
+		$("#headerLeftButton")
+			.removeClass()
+			.addClass("button header left " + this.viewStack[this.viewStack.length - 1].controller.header.leftButton.style);
 		$("#headerLeftButton").text(this.viewStack[this.viewStack.length - 1].controller.header.leftButton.label);
 		$("#headerLeftButton").show();
 	}
@@ -141,7 +149,9 @@ ApplicationController.prototype.setHeader = function() {
 
 	if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
 		$("#headerRightButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
-		$("#headerRightButton").removeClass().addClass("button header right " + this.viewStack[this.viewStack.length - 1].controller.header.rightButton.style);
+		$("#headerRightButton")
+			.removeClass()
+			.addClass("button header right " + this.viewStack[this.viewStack.length - 1].controller.header.rightButton.style);
 		$("#headerRightButton").text(this.viewStack[this.viewStack.length - 1].controller.header.rightButton.label);
 		$("#headerRightButton").show();
 	}
@@ -169,7 +179,9 @@ ApplicationController.prototype.setFooter = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
 			$("#footerLeftButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
-			$("#footerLeftButton").removeClass().addClass("button footer left " + this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.style);
+			$("#footerLeftButton")
+				.removeClass()
+				.addClass("button footer left " + this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.style);
 			$("#footerLeftButton").text(this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.label);
 			$("#footerLeftButton").show();
 		}
@@ -181,7 +193,9 @@ ApplicationController.prototype.setFooter = function() {
 
 		if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
 			$("#footerRightButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
-			$("#footerRightButton").removeClass().addClass("button footer right " + this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.style);
+			$("#footerRightButton")
+				.removeClass()
+				.addClass("button footer right " + this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.style);
 			$("#footerRightButton").text(this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.label);
 			$("#footerRightButton").show();
 		}
@@ -213,7 +227,9 @@ ApplicationController.prototype.setContentHeight = function() {
 }
 
 ApplicationController.prototype.showNotice = function(notice) {
-	var noticeContainer = $("<div>").addClass("notice").appendTo($("#notices"));
+	var noticeContainer = $("<div>")
+		.addClass("notice")
+		.appendTo($("#notices"));
 
 	var noticeLeftButton = $("<a>").appendTo(noticeContainer);
 	if (notice.leftButton) {
@@ -221,12 +237,16 @@ ApplicationController.prototype.showNotice = function(notice) {
 			noticeLeftButton.bind('click', notice.leftButton.eventHandler);
 		}
 		noticeLeftButton.bind('click', $.proxy(function(notice) { return $.proxy(function() { this.hideNotice(notice); }, this);}, this)(noticeContainer));
-		noticeLeftButton.removeClass().addClass("button footer left " + notice.leftButton.style);
+		noticeLeftButton
+			.removeClass()
+			.addClass("button footer left " + notice.leftButton.style);
 		noticeLeftButton.text(notice.leftButton.label);
 		noticeLeftButton.show();
 	}
 
-	var noticeLabel = $("<p>").html(notice.label).appendTo(noticeContainer);
+	var noticeLabel = $("<p>")
+		.html(notice.label)
+		.appendTo(noticeContainer);
 	if (notice.id) {
 		noticeLabel.attr("id", notice.id);
 	}
@@ -236,7 +256,9 @@ ApplicationController.prototype.showNotice = function(notice) {
 		if (notice.rightButton.eventHandler) {
 			noticeRightButton.bind('click', notice.rightButton.eventHandler);
 		}
-		noticeRightButton.removeClass().addClass("button footer right " + notice.rightButton.style);
+		noticeRightButton
+			.removeClass()
+			.addClass("button footer right " + notice.rightButton.style);
 		noticeRightButton.text(notice.rightButton.label);
 		noticeRightButton.show();
 	}
@@ -253,7 +275,7 @@ ApplicationController.prototype.showNotice = function(notice) {
 
 ApplicationController.prototype.hideNotice = function(notice) {
 	this.noticeStack.height += notice.height();
-	notice.attr("acknowledged", true);
+	notice.data("acknowledged", true);
 	notice.animate({height: 0}, $.proxy(this.noticeHidden, this));
 }
 
@@ -263,7 +285,7 @@ ApplicationController.prototype.noticeHidden = function(event) {
 
 ApplicationController.prototype.noticesMoved = function(event) {
 	for (var i = this.noticeStack.notice.length - 1; i >= 0; i--) {
-		if (this.noticeStack.notice[i].attr("acknowledged")) {
+		if (this.noticeStack.notice[i].data("acknowledged")) {
 			this.noticeStack.notice[i].remove();
 			this.noticeStack.notice.splice(i,1);
 		}
@@ -305,5 +327,4 @@ ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
 $(function() {
 	window.appController = new ApplicationController();
 	appController.start();
-	Setting.get("LastSyncTime", $.proxy(appController.gotLastSyncTime, appController));
 });

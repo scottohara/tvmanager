@@ -59,7 +59,7 @@ SeriesController.prototype.getNowShowing = function() {
 		SpinningWheel.addSlot(Series.NOW_SHOWING, "left", nowShowing);
 		SpinningWheel.setDoneAction($.proxy(this.setNowShowing, this));
 		SpinningWheel.open();
-
+		this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
 		this.gettingNowShowing = false;
 	}
 }
@@ -67,6 +67,7 @@ SeriesController.prototype.getNowShowing = function() {
 SeriesController.prototype.setNowShowing = function() {
 	this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues().keys[0]);
 	$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
+	this.swtoucheventproxy = null;
 }
 
 SeriesController.prototype.getProgramId = function() {
@@ -85,10 +86,12 @@ SeriesController.prototype.listRetrieved = function(programList) {
 	SpinningWheel.addSlot(programs, "left", this.listItem.series.programId);
 	SpinningWheel.setDoneAction($.proxy(this.setProgramId, this));
 	SpinningWheel.open();
+	this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
 	this.gettingProgramId = false;
 }
 
 SeriesController.prototype.setProgramId = function() {
 	this.listItem.series.programId = Number(SpinningWheel.getSelectedValues().keys[0]);
 	$("#moveTo").val(SpinningWheel.getSelectedValues().values[0]);
+	this.swtoucheventproxy = null;
 }

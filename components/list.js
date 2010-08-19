@@ -19,7 +19,11 @@ List.prototype.refresh = function() {
 			var item = this.items[i];
 
 			if (this.groupBy && group != item[this.groupBy]){
-				$("<li>").attr("id", item[this.groupBy]).addClass("group").text(item[this.groupBy]).appendTo($("#" + this.container));
+				$("<li>")
+					.attr("id", item[this.groupBy])
+					.addClass("group")
+					.text(item[this.groupBy])
+					.appendTo($("#" + this.container));
 				group = item[this.groupBy];
 			}
 
@@ -31,13 +35,16 @@ List.prototype.refresh = function() {
 				}
 			}
 
-			$("<li>").html(itemHTML).bind('click', $.proxy(function(itemIndex) {
-				return $.proxy(function() {
-					if (!appController.scroller.moved) {
-						this.tap(itemIndex);
-					}
-				}, this);
-			}, this)(i)).appendTo($("#" + this.container));
+			$("<li>")
+				.html(itemHTML)
+				.appendTo($("#" + this.container))
+				.bind('click', $.proxy(function(itemIndex) {
+					return $.proxy(function() {
+						if (!appController.scroller.moved) {
+							this.tap(itemIndex);
+						}
+					}, this);
+				}, this)(i));
 
 			if (this.populateItemEventHandler) {
 				this.populateItemEventHandler(item);
@@ -63,16 +70,22 @@ List.prototype.setAction = function(action) {
 List.prototype.tap = function(itemIndex) {
 	switch (this.action) {
 		case "view":
-			this.viewEventHandler(itemIndex);
+			if (this.viewEventHandler) {
+				this.viewEventHandler(itemIndex);
+			}
 			break;
 
 		case "edit":
-			this.editEventHandler(itemIndex);
+			if (this.editEventHandler) {
+				this.editEventHandler(itemIndex);
+			}
 			break;
 
 		case "delete":
-			if (window.confirm("Delete this item?")) {
-				this.deleteEventHandler(itemIndex);
+			if (this.deleteEventHandler) {
+				if (window.confirm("Delete this item?")) {
+					this.deleteEventHandler(itemIndex);
+				}
 			}
 			break;
 	}

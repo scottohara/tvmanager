@@ -73,7 +73,9 @@ ScheduleController.prototype.editItem = function(itemIndex) {
 ScheduleController.prototype.editItems = function() {
 	appController.clearFooter();
 	this.scheduleList.setAction("edit");
-	$("#list").removeClass().addClass("edit");
+	$("#list")
+		.removeClass()
+		.addClass("edit");
 	this.footer = {
 		label: "v" + appController.db.version,
 		leftButton: {

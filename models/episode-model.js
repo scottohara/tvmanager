@@ -1,8 +1,9 @@
-function Episode(id, episodeName, status, statusDate, unverified, unscheduled, seriesId, seriesName, programId, programName) {
+function Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId, seriesName, programId, programName) {
 	this.id = id;
 	this.episodeName = episodeName;
 	this.statusDate = statusDate;
 	this.unscheduled = unscheduled;
+	this.sequence = sequence;
 	this.setStatus(status);
 	this.setUnverified(unverified);
 	this.seriesId = seriesId;
@@ -17,11 +18,11 @@ Episode.prototype.save = function() {
 		var params;
 
 		if (this.id) {
-			sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ?, Unverified = ?, Unscheduled = ? WHERE rowid = ?";
-			params = [this.episodeName, this.status, this.statusDate, this.unverified, this.unscheduled, this.id];
+			sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ?, Unverified = ?, Unscheduled = ?, Sequence = ? WHERE rowid = ?";
+			params = [this.episodeName, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence, this.id];
 		} else {
-			sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified, Unscheduled) VALUES (?, ?, ?, ?, ?, ?)";
-			params = [this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled];
+			sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			params = [this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence];
 		}
 
 		tx.executeSql(sql, params,
@@ -60,7 +61,8 @@ Episode.prototype.toJson = function() {
 		status: this.status,
 		statusDate: this.statusDate,
 		unverified: this.unverified,
-		unscheduled: this.unscheduled
+		unscheduled: this.unscheduled,
+		sequence: this.sequence
 	}
 }
 
@@ -115,7 +117,7 @@ Episode.prototype.setUnverified = function(unverified) {
 }
 
 Episode.listBySeries = function(seriesId, callback) {
-	var filter = "WHERE e.SeriesID = ?";
+	var filter = "WHERE e.SeriesID = ? ORDER BY e.Sequence, e.rowid";
 	var params = [seriesId];
 	Episode.list(filter, params, callback);
 }
@@ -130,11 +132,11 @@ Episode.list = function(filter, params, callback) {
 	var episodeList = [];
 
 	appController.db.readTransaction(function(tx) {
-		tx.executeSql("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid " + filter, params,
+		tx.executeSql("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var ep = resultSet.rows.item(i);
-					episodeList.push(new Episode(ep.rowid, ep.Name, ep.Status, ep.StatusDate, (ep.Unverified === "true"), (ep.Unscheduled === "true"), ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
+					episodeList.push(new Episode(ep.rowid, ep.Name, ep.Status, ep.StatusDate, (ep.Unverified === "true"), (ep.Unscheduled === "true"), ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
 				}
 				callback(episodeList);
 			},

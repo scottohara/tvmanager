@@ -83,7 +83,9 @@ SeriesListController.prototype.deleteItem = function(itemIndex, dontRemove) {
 SeriesListController.prototype.deleteItems = function() {
     appController.clearFooter();
     this.seriesList.setAction("delete");
-    $("#list").removeClass().addClass("delete");
+    $("#list")
+			.removeClass()
+			.addClass("delete");
     this.footer = {
         label: "v" + appController.db.version,
         rightButton: {
@@ -99,7 +101,9 @@ SeriesListController.prototype.deleteItems = function() {
 SeriesListController.prototype.editItems = function() {
     appController.clearFooter();
     this.seriesList.setAction("edit");
-    $("#list").removeClass().addClass("edit");
+    $("#list")
+			.removeClass()
+			.addClass("edit");
     this.footer = {
         label: "v" + appController.db.version,
         leftButton: {

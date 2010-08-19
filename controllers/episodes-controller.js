@@ -71,7 +71,7 @@ EpisodesController.prototype.viewItem = function(itemIndex) {
 }
 
 EpisodesController.prototype.addItem = function() {
-	appController.pushView("episode", { series: this.listItem.series });
+	appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
 }
 
 EpisodesController.prototype.deleteItem = function(itemIndex) {
@@ -86,13 +86,16 @@ EpisodesController.prototype.deleteItem = function(itemIndex) {
 	this.listItem.series.setStatusWarning(this.listItem.series.statusWarningCount - newStatusWarningCount);
 	this.episodeList.items[itemIndex].remove();
 	this.episodeList.items.splice(itemIndex,1);
+	this.resequenceItems();
 	this.episodeList.refresh();
 }
 
 EpisodesController.prototype.deleteItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("delete");
-	$("#list").removeClass().addClass("delete");
+	$("#list")
+		.removeClass()
+		.addClass("delete");
 	this.footer = {
 		label: "v" + appController.db.version,
 		rightButton: {
@@ -105,14 +108,44 @@ EpisodesController.prototype.deleteItems = function() {
 	appController.setFooter();
 }
 
+EpisodesController.prototype.resequenceItems = function() {
+	var that = this;
+	$("#list li a").each(function(index) {
+		if ($(this).attr("id") != that.episodeList.items[index].id) {
+			for (var i = 0; i < that.episodeList.items.length; i++) {
+				if (that.episodeList.items[i].id == $(this).attr("id")) {
+					that.episodeList.items[i].sequence = index;
+					that.episodeList.items[i].save();
+					break;
+				}
+			}
+		}
+	});
+
+	this.episodeList.items = this.episodeList.items.sort(function(a, b) {
+		var x = a.sequence;
+		var y = b.sequence;
+		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+	});
+}
+
 EpisodesController.prototype.editItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("edit");
-	$("#list").removeClass().addClass("edit");
+	appController.toucheventproxy.enabled = false;
+	$("#list")
+		.removeClass()
+		.addClass("edit")
+		.sortable()
+		.addTouch();
 	this.footer = {
 		label: "v" + appController.db.version,
 		leftButton: {
-			eventHandler: $.proxy(this.viewItems, this),
+			eventHandler: $.proxy(function() {
+				this.resequenceItems();
+				this.viewItems();
+				appController.toucheventproxy.enabled = true;
+			}, this),
 			style: "blueButton",
 			label: "Done"
 		}
@@ -124,13 +157,16 @@ EpisodesController.prototype.editItems = function() {
 EpisodesController.prototype.viewItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("view");
-	$("#list").removeClass();
+	$("#list")
+		.removeClass()
+		.sortable("destroy")
+		.removeTouch();
 	this.footer = {
 		label: "v" + appController.db.version,
 		leftButton: {
 			eventHandler: $.proxy(this.editItems, this),
 			style: "toolButton",
-			label: "Edit"
+			label: "Sort"
 		},
 		rightButton: {
 			eventHandler: $.proxy(this.deleteItems, this),

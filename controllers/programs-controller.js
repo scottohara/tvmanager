@@ -61,7 +61,9 @@ ProgramsController.prototype.deleteItems = function() {
 	appController.hideScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("delete");
-	$("#list").removeClass().addClass("delete");
+	$("#list")
+		.removeClass()
+		.addClass("delete");
 	this.footer = {
 		label: "v" + appController.db.version,
 		rightButton: {
@@ -78,7 +80,9 @@ ProgramsController.prototype.editItems = function() {
 	appController.hideScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("edit");
-	$("#list").removeClass().addClass("edit");
+	$("#list")
+		.removeClass()
+		.addClass("edit");
 	this.footer = {
 		label: "v" + appController.db.version,
 		leftButton: {
@@ -95,7 +99,9 @@ ProgramsController.prototype.viewItems = function() {
 	appController.showScrollHelper();
 	appController.clearFooter();
 	this.programList.setAction("view");
-	$("#list").removeClass().addClass("withHelper");
+	$("#list")
+		.removeClass()
+		.addClass("withHelper");
 	this.footer = {
 		label: "v" + appController.db.version,
 		leftButton: {

@@ -4,7 +4,7 @@ function EpisodeController(listItem) {
 		this.originalStatus = this.listItem.episode.status;
 		this.originalStatusDate = this.listItem.episode.statusDate;
 	} else {
-		this.listItem = { episode: new Episode(null, "", "", "", false, false, listItem.series.id) };
+		this.listItem = { episode: new Episode(null, "", "", "", false, false, listItem.sequence, listItem.series.id) };
 	}
 }
 
@@ -119,11 +119,13 @@ EpisodeController.prototype.getStatusDate = function() {
 	SpinningWheel.addSlot({"Jan": "Jan", "Feb": "Feb", "Mar": "Mar", "Apr": "Apr", "May": "May", "Jun": "Jun", "Jul": "Jul", "Aug": "Aug", "Sep": "Sep", "Oct": "Oct", "Nov": "Nov", "Dec": "Dec" }, null, parts[1]);
 	SpinningWheel.setDoneAction($.proxy(this.setStatusDate, this));
 	SpinningWheel.open();
+	this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
 }
 
 EpisodeController.prototype.setStatusDate = function() {
 	this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join('-'));
 	$("#statusDate").val(this.listItem.episode.statusDate);
+	this.swtoucheventproxy = null;
 }
 
 EpisodeController.prototype.toggleStatusDateRow = function() {

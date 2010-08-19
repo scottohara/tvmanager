@@ -1,9 +1,3 @@
-Manual sorting (or use 01, 02, etc..)
-- just for episode lists
-- add Episode.Sequence column
-- on 
-
-
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
 	export - delay after "Sent data to server" (in verifyData()), incorrect count of "exporting 56 of 57"
@@ -22,12 +16,8 @@ Pending standards:
 - Native JSON encoding/decoding (to replace json2.js).  Already in Chrome/Safari, but not Mobile Safari.
 - function.bind(context) to replace $.proxy(function, context)
 - ProgressEvent properties in appCache updates (waiting for WebKit update)
-
-Minified sw
-- document touchstart/touchmove events (in create/destroy)
-- sw-cancel/sw-done/sw-frame events (in create/destroy) - can be easily wrapped in TouchEventProxy
+- Replace jquery.iphoneui.js with JQuery Mobile when released
 
 Migrate from Prototype to jQuery:
-- Setup staging site?
 - QUnit tests
 - Plugins for MD5 & templates
