@@ -9,8 +9,11 @@ function ApplicationController() {
 	SpinningWheel.cellHeight = 45;
 
 	window.setTimeout($.proxy(function() {
-		this.scroller = new iScroll($("#content").get(0), "y");
-		this.toucheventproxy = new TouchEventProxy($("#content").get(0));
+		$(document).bind("touchmove", function(e) {
+			e.preventDefault();
+		});
+
+		this.initScroller();
 		this.abc = new abc($("#abc").get(0), this.scroller);
 		this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
 	}, this),	100);
@@ -70,7 +73,7 @@ ApplicationController.prototype.pushView = function(view, args) {
 	if (this.viewStack.length > 0) {
 		this.clearHeader();
 		this.clearFooter();
-		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller._yPos;
+		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.y;
 	}
 
 	this.viewStack.push({
@@ -95,7 +98,6 @@ ApplicationController.prototype.popView = function(args) {
 }
 
 ApplicationController.prototype.viewPopped = function(args) {
-	this.toucheventproxy.enabled = true;
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	this.setHeader();
 	window.setTimeout(this.contentShown, 1000);
@@ -110,12 +112,19 @@ ApplicationController.prototype.show = function(onSuccess, args) {
 	});
 }
 
+ApplicationController.prototype.initScroller = function() {
+	this.scroller = new iScroll($("#content").get(0), {
+		desktopCompatibility: true,
+		checkDOMChanges: false
+	});
+}
+
 ApplicationController.prototype.refreshScroller = function() {
 	this.scroller.refresh();
 	if (this.viewStack[this.viewStack.length - 1].scrollPos === -1) {
 		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
 	}
-	this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos);
+	this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos, "0ms");
 }
 
 ApplicationController.prototype.contentShown = function() {
@@ -223,7 +232,7 @@ ApplicationController.prototype.clearFooter = function() {
 }
 
 ApplicationController.prototype.setContentHeight = function() {
-	$("#contentWrapper").height(window.innerHeight - $("#header").height() - $("#footer").height());
+	$("#contentWrapper").height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
 }
 
 ApplicationController.prototype.showNotice = function(notice) {

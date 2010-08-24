@@ -50,7 +50,7 @@ EpisodesController.prototype.activate = function(listItem) {
 EpisodesController.prototype.onPopulateListItem = function(episode) {
 	if (this.scrollToFirstUnwatched) {
 		if ("Watched" === episode.status) {
-			appController.viewStack[appController.viewStack.length - 1].scrollPos -= $("#" + String(episode.id)).innerHeight;
+			appController.viewStack[appController.viewStack.length - 1].scrollPos -= $("#" + String(episode.id)).parent().outerHeight();
 		} else {
 			this.scrollToFirstUnwatched = false;
 		}
@@ -84,10 +84,10 @@ EpisodesController.prototype.deleteItem = function(itemIndex) {
 	this.listItem.series.setRecordedCount(this.listItem.series.recordedCount - newRecordedCount);
 	this.listItem.series.setExpectedCount(this.listItem.series.expectedCount - newExpectedCount);
 	this.listItem.series.setStatusWarning(this.listItem.series.statusWarningCount - newStatusWarningCount);
+	$("#list li a#" + this.episodeList.items[itemIndex].id).remove();
 	this.episodeList.items[itemIndex].remove();
 	this.episodeList.items.splice(itemIndex,1);
 	this.resequenceItems();
-	this.episodeList.refresh();
 }
 
 EpisodesController.prototype.deleteItems = function() {
@@ -127,24 +127,32 @@ EpisodesController.prototype.resequenceItems = function() {
 		var y = b.sequence;
 		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 	});
+
+	this.episodeList.refresh();
 }
 
 EpisodesController.prototype.editItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("edit");
-	appController.toucheventproxy.enabled = false;
+	appController.viewStack[appController.viewStack.length - 1].scrollPos = appController.scroller.y;
+	appController.scroller.destroy();
 	$("#list")
 		.removeClass()
 		.addClass("edit")
-		.sortable()
+		.sortable({
+			axis: "y",
+			sort: function(e, ui) {
+				$(ui.helper).offset({top: e.clientY - 20});
+			}
+		})
 		.addTouch();
 	this.footer = {
 		label: "v" + appController.db.version,
 		leftButton: {
 			eventHandler: $.proxy(function() {
+				appController.initScroller();
 				this.resequenceItems();
 				this.viewItems();
-				appController.toucheventproxy.enabled = true;
 			}, this),
 			style: "blueButton",
 			label: "Done"

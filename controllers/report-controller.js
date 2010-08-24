@@ -13,7 +13,6 @@ ReportController.prototype.setup = function() {
 	};
 
 	this.reportList = new List("list", "views/reportListTemplate.html", null, [], $.proxy(this.viewItem, this));
-	appController.toucheventproxy.enabled = true;
 	this.activate();
 }
 

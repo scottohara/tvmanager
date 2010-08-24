@@ -28,7 +28,6 @@ SeriesController.prototype.setup = function() {
 	$("#nowShowing").bind('click', $.proxy(this.getNowShowing, this));
 	$("#moveTo").bind('click', $.proxy(this.getProgramId, this));
 
-	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 

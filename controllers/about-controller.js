@@ -20,8 +20,6 @@ AboutController.prototype.setup = function() {
 	$("#appVersion").val("");
 	$("#update").bind('click', $.proxy(this.checkForUpdate, this));
 
-
-	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 

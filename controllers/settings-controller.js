@@ -23,7 +23,6 @@ SettingsController.prototype.activate = function() {
 	$("#missedReportRow").bind('click', this.viewMissedReport);
 	$("#incompleteReportRow").bind('click', this.viewIncompleteReport);
 
-	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 

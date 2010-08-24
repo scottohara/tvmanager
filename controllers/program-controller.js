@@ -23,7 +23,6 @@ ProgramController.prototype.setup = function() {
 
 	$("#programName").val(this.listItem.program.programName);
 
-	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 

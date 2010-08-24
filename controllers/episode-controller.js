@@ -40,7 +40,6 @@ EpisodeController.prototype.setup = function() {
 
 	$("#statusDate").val(this.listItem.episode.statusDate);
 
-	appController.toucheventproxy.enabled = false;
 	appController.refreshScroller();
 }
 

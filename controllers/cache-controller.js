@@ -16,7 +16,6 @@ function CacheController() {
     }, this), false);
 
 		window.applicationCache.addEventListener('progress', $.proxy(function(event) {
-			console.log(event)
 			this.callback(true, "Updating application to the latest version...<br/>Downloaded " + event.loaded + "/" + event.total, NOTICE_ID);
     }, this), false);
 
