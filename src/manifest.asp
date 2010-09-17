@@ -19,7 +19,9 @@
 			file = files.item();
 			if ((!reExclusions.test(file.Name)) && reNetwork.test(file.Name) === network) {
 				Response.Write(cleanName(file.Path) + "\r\n");
-				hash += file.DateLastModified;
+				if (!network) {
+					hash += file.DateLastModified;
+				}
 			}
 			files.moveNext();
 		}

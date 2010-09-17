@@ -1,5 +1,3 @@
-Changes to export.txt cause cache manifest to change
-
 Migration from BitBucket to GitHub:
  - Convert README to README.md
  - Code comments
