@@ -1,4 +1,4 @@
-function CacheController() {
+var CacheController = function () {
 	this.cacheStatusValues = [
 		'uncached',
 		'idle',
@@ -20,7 +20,7 @@ function CacheController() {
     }, this), false);
 
 		window.applicationCache.addEventListener('updateready', $.proxy(function() {
-			if (this.cacheStatusValues[window.applicationCache.status] != 'idle') {
+			if ("idle" !== this.cacheStatusValues[window.applicationCache.status]) {
 				window.applicationCache.swapCache();
 				this.callback(true, "Application has been updated to the latest version. Please restart the application.", NOTICE_ID);
 			}
@@ -40,7 +40,7 @@ function CacheController() {
 			}
 		}, this));
 	}
-}
+};
 
 CacheController.prototype.update = function(callback) {
 	if (window.applicationCache) {
@@ -49,4 +49,4 @@ CacheController.prototype.update = function(callback) {
 	} else {
 		callback(false, "This browser does not support application caching.");
 	}
-}
+};

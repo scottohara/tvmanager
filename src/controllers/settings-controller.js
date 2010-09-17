@@ -1,6 +1,6 @@
-function SettingsController() {
+var SettingsController = function () {
 
-}
+};
 
 SettingsController.prototype.setup = function() {
 	this.header = {
@@ -13,7 +13,7 @@ SettingsController.prototype.setup = function() {
 	};
 
 	this.activate();
-}
+};
 
 SettingsController.prototype.activate = function() {
 	$("#dataSyncRow").bind('click', this.viewDataSync);
@@ -24,32 +24,32 @@ SettingsController.prototype.activate = function() {
 	$("#incompleteReportRow").bind('click', this.viewIncompleteReport);
 
 	appController.refreshScroller();
-}
+};
 
 SettingsController.prototype.goBack = function() {
 	appController.popView();
-}
+};
 
 SettingsController.prototype.viewDataSync = function() {
 	appController.pushView("dataSync");
-}
+};
 
 SettingsController.prototype.viewAbout = function() {
 	appController.pushView("about");
-}
+};
 
 SettingsController.prototype.viewRecordedReport = function() {
 	appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus, args: 'Recorded' });
-}
+};
 
 SettingsController.prototype.viewExpectedReport = function() {
 	appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus, args: 'Expected' });
-}
+};
 
 SettingsController.prototype.viewMissedReport = function() {
 	appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus, args: 'Missed' });
-}
+};
 
 SettingsController.prototype.viewIncompleteReport = function() {
 	appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete, args: null });
-}
+};

@@ -48,11 +48,11 @@ test("render", function() {
 		this.progressBar.sections = testParams[i].sections;
 		equals(this.progressBar.render(), testParams[i].result, testParams[i].description + " - html");
 	}
-})
+});
 
 test("setTotal", 1, function() {
 	this.total = 2;
-	this.progressBar.setTotal(this.total)
+	this.progressBar.setTotal(this.total);
 	equals(this.progressBar.total, this.total, "total property");
 });
 

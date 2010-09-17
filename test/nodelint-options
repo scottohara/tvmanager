@@ -1,0 +1,76 @@
+var options = {
+	predef: [
+		/* browser */
+		"window",
+		"openDatabase",
+
+		/* Qunit */
+		"equals",
+		"ok",
+		"same",
+		"test",
+		"asyncTest",
+		"module",
+		"expect",
+		"start",
+
+		/* Framework */
+		"$",
+		"SpinningWheel",
+		"abc",
+		"iScroll",
+		"hex_md5",
+
+		/* Models */
+		"Program",
+		"Series",
+		"Episode",
+		"Setting",
+
+		/* Compoents */
+		"List",
+		"ProgressBar",
+		"TouchEventProxy",
+
+		/* Controllers */
+		"AboutController",
+		"ApplicationController",
+		"appController",
+		"CacheController",
+		"DatabaseController",
+		"DataSyncController",
+		"EpisodeController",
+		"EpisodesController",
+		"ProgramController",
+		"ProgramsController",
+		"ReportController",
+		"ScheduleController",
+		"SeriesController",
+		"SeriesListController",
+		"SettingsController",
+		"UnscheduledController",
+
+		/* Mocks */
+		"ApplicationControllerMock",
+		"CacheControllerMock",
+		"DatabaseControllerMock",
+		"DatabaseControllerMockFail",
+		"DatabaseControllerMockUpgrade",
+		"DatabaseMock",
+		"EpisodeMock",
+		"ListMock",
+		"ProgramMock",
+		"ProgressBarMock",
+		"SeriesMock",
+		"SettingMock",
+		"SpinningWheelMock",
+		"TestController",
+		"TransactionMock"
+	],
+	browser: true,
+	devel: true,
+	plusplus: false,
+	onevar: false,	// disable var checks (for now)
+	white: false,		// disable white space checking to deal with tab issues
+	newcap: false		// disable check for constructor capitalisation, to deal with abc/iScroll objects
+};

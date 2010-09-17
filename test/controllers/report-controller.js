@@ -30,8 +30,8 @@ test("setup", 6, function() {
 	List = ListMock;
 
 	this.reportController.viewItem = function() {
-		ok(true, "Bind list view event handler")
-	}
+		ok(true, "Bind list view event handler");
+	};
 	this.reportController.goBack = function() {
 		ok(true, "Bind back button event listener");
 	};

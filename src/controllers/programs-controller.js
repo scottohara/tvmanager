@@ -1,6 +1,6 @@
-function ProgramsController() {
+var ProgramsController = function () {
 
-}
+};
 
 ProgramsController.prototype.setup = function() {
 	this.header = {
@@ -19,7 +19,7 @@ ProgramsController.prototype.setup = function() {
 
 	this.programList = new List("list", "views/programListTemplate.html", "programGroup", [], $.proxy(this.viewItem, this), $.proxy(this.editItem, this), $.proxy(this.deleteItem, this));
 	Program.list($.proxy(this.listRetrieved, this));
-}
+};
 
 ProgramsController.prototype.activate = function(listItem) {
 	if (listItem) {
@@ -32,34 +32,34 @@ ProgramsController.prototype.activate = function(listItem) {
 
 	this.programList.refresh();
 	this.viewItems();
-}
+};
 
 ProgramsController.prototype.listRetrieved = function(programList) {
 	this.programList.items = programList;
 	this.activate();
-}
+};
 
 ProgramsController.prototype.goBack = function() {
 	appController.popView();
-}
+};
 
 ProgramsController.prototype.viewItem = function(itemIndex) {
 	appController.pushView("seriesList", { listIndex: itemIndex, program: this.programList.items[itemIndex] });
-}
+};
 
 ProgramsController.prototype.addItem = function() {
 	appController.pushView("program");
-}
+};
 
 ProgramsController.prototype.editItem = function(itemIndex) {
 	appController.pushView("program", { listIndex: itemIndex, program: this.programList.items[itemIndex] });
-}
+};
 
 ProgramsController.prototype.deleteItem = function(itemIndex) {
 	this.programList.items[itemIndex].remove();
 	this.programList.items.splice(itemIndex,1);
 	this.programList.refresh();
-}
+};
 
 ProgramsController.prototype.deleteItems = function() {
 	appController.hideScrollHelper();
@@ -78,7 +78,7 @@ ProgramsController.prototype.deleteItems = function() {
 	};
 
 	appController.setFooter();
-}
+};
 
 ProgramsController.prototype.editItems = function() {
 	appController.hideScrollHelper();
@@ -97,7 +97,7 @@ ProgramsController.prototype.editItems = function() {
 	};
 
 	appController.setFooter();
-}
+};
 
 ProgramsController.prototype.viewItems = function() {
 	appController.showScrollHelper();
@@ -121,4 +121,4 @@ ProgramsController.prototype.viewItems = function() {
 	};
 
 	appController.setFooter();
-}
+};

@@ -40,22 +40,22 @@ test("setup", 8, function() {
 	Series.series = this.items;
 
 	this.scheduleController.viewItem = function() {
-		ok(true, "Bind list view event handler")
+		ok(true, "Bind list view event handler");
 	};
 	this.scheduleController.editItem = function() {
-		ok(true, "Bind list edit event handler")
+		ok(true, "Bind list edit event handler");
 	};
 	this.scheduleController.editItems = function() {
-		ok(true, "Bind edit action event handler")
+		ok(true, "Bind edit action event handler");
 	};
 	this.scheduleController.viewUnscheduled = function() {
-		ok(true, "Bind view unscheduled event handler")
+		ok(true, "Bind view unscheduled event handler");
 	};
 	this.scheduleController.viewPrograms = function() {
-		ok(true, "Bind view programs event handler")
+		ok(true, "Bind view programs event handler");
 	};
 	this.scheduleController.viewSettings = function() {
-		ok(true, "Bind view settings event handler")
+		ok(true, "Bind view settings event handler");
 	};
 
 	this.scheduleController.setup();
@@ -162,7 +162,7 @@ test("editItems", 3, function() {
 		.appendTo(document.body);
 
 	this.scheduleController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.scheduleController.scheduleList = new ListMock();

@@ -1,7 +1,7 @@
-function EpisodesController(listItem) {
+var EpisodesController = function (listItem) {
   this.listItem = listItem;
 	this.scrollToFirstUnwatched = true;
-}
+};
 
 EpisodesController.prototype.setup = function() {
 	this.header = {
@@ -20,7 +20,7 @@ EpisodesController.prototype.setup = function() {
 
 	this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], $.proxy(this.viewItem, this), null, $.proxy(this.deleteItem, this), $.proxy(this.onPopulateListItem, this));
 	Episode.listBySeries(this.listItem.series.id, $.proxy(this.listRetrieved, this));
-}
+};
 
 EpisodesController.prototype.activate = function(listItem) {
 	if (listItem) {
@@ -45,7 +45,7 @@ EpisodesController.prototype.activate = function(listItem) {
 	}
 	this.episodeList.refresh();
 	this.viewItems();
-}
+};
 
 EpisodesController.prototype.onPopulateListItem = function(episode) {
 	if (this.scrollToFirstUnwatched) {
@@ -55,16 +55,16 @@ EpisodesController.prototype.onPopulateListItem = function(episode) {
 			this.scrollToFirstUnwatched = false;
 		}
 	}
-}
+};
 
 EpisodesController.prototype.listRetrieved = function(episodeList) {
 	this.episodeList.items = episodeList;
 	this.activate();
-}
+};
 
 EpisodesController.prototype.goBack = function() {
 	appController.popView(this.listItem);
-}
+};
 
 EpisodesController.prototype.viewItem = function(itemIndex) {
 	this.origWatchedCount = ("Watched" === this.episodeList.items[itemIndex].status ? 1 : 0);
@@ -72,11 +72,11 @@ EpisodesController.prototype.viewItem = function(itemIndex) {
 	this.origExpectedCount = ("Expected" === this.episodeList.items[itemIndex].status ? 1 : 0);
 	this.origStatusWarningCount = (this.episodeList.items[itemIndex].statusWarning ? 1 : 0);
 	appController.pushView("episode", { listIndex: itemIndex, episode: this.episodeList.items[itemIndex] });
-}
+};
 
 EpisodesController.prototype.addItem = function() {
 	appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
-}
+};
 
 EpisodesController.prototype.deleteItem = function(itemIndex) {
 	var newWatchedCount = ("Watched" === this.episodeList.items[itemIndex].status ? 1 : 0);
@@ -92,7 +92,7 @@ EpisodesController.prototype.deleteItem = function(itemIndex) {
 	this.episodeList.items[itemIndex].remove();
 	this.episodeList.items.splice(itemIndex,1);
 	this.resequenceItems();
-}
+};
 
 EpisodesController.prototype.deleteItems = function() {
 	appController.clearFooter();
@@ -110,14 +110,14 @@ EpisodesController.prototype.deleteItems = function() {
 	};
 
 	appController.setFooter();
-}
+};
 
 EpisodesController.prototype.resequenceItems = function() {
 	var that = this;
 	$("#list li a").each(function(index) {
-		if ($(this).attr("id") != that.episodeList.items[index].id) {
+		if ($(this).attr("id") !== that.episodeList.items[index].id) {
 			for (var i = 0; i < that.episodeList.items.length; i++) {
-				if (that.episodeList.items[i].id == $(this).attr("id")) {
+				if (that.episodeList.items[i].id === $(this).attr("id")) {
 					that.episodeList.items[i].sequence = index;
 					that.episodeList.items[i].save();
 					break;
@@ -133,7 +133,7 @@ EpisodesController.prototype.resequenceItems = function() {
 	});
 
 	this.episodeList.refresh();
-}
+};
 
 EpisodesController.prototype.editItems = function() {
 	appController.clearFooter();
@@ -164,7 +164,7 @@ EpisodesController.prototype.editItems = function() {
 	};
 
 	appController.setFooter();
-}
+};
 
 EpisodesController.prototype.viewItems = function() {
 	appController.clearFooter();
@@ -188,4 +188,4 @@ EpisodesController.prototype.viewItems = function() {
 	};
 
 	appController.setFooter();
-}
+};

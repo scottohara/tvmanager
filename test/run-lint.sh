@@ -1,0 +1,1 @@
+find ../ -name *.js -not -path "*framework*" -exec nodelint '{}' --config nodelint-options \;

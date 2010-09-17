@@ -21,7 +21,7 @@ EpisodeMock = {
 	count: function(callback) {
 		callback(1);
 	}
-}
+};
 
 
 

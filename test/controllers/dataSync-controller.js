@@ -255,7 +255,7 @@ asyncTest("toJson", function() {
 	var json = JSON.stringify({
 		databaseVersion: appController.db.version,
 		programs: programs
-	})
+	});
 
 	var testParams = [
 		{
@@ -290,7 +290,7 @@ asyncTest("toJson", function() {
 	expect(testParams.length * 2);
 	for (var i = 0; i < testParams.length; i++) {
 		Program.programs = testParams[i].programs;
-		this.dataSyncController.toJson(statusBarAction, function(index) {
+		this.dataSyncController.toJson(statusBarAction, (function(index) {
 			return function(data) {
 				same(data, testParams[index].result, testParams[index].description + " - Export data");
 				equals(that.status.val(), testParams[index].status, testParams[index].description + " - Status");
@@ -301,7 +301,7 @@ asyncTest("toJson", function() {
 					start();
 				}
 			};
-		}(i));
+		}(i)));
 	}
 });
 
@@ -338,6 +338,12 @@ asyncTest("verifyData - checksum mismatch", 2, function() {
 });
 
 asyncTest("verifyData - success", 3, function() {
+	var originalDate = Date;
+	var fakeDate = new Date(1900, 0, 1, 12, 0, 0);
+	Date = function() {
+		return fakeDate;
+	};
+
 	this.dataSyncController.callback = $.proxy(function(success) {
 		Date = originalDate;
 		ok(success, "Invoke callback with true");
@@ -345,12 +351,6 @@ asyncTest("verifyData - success", 3, function() {
 		equals(this.lastSyncTime.val(), "1-Jan-1900 12:00:00", "Last Sync");
 		start();
 	}, this);
-
-	var originalDate = Date;
-	var fakeDate = new Date(1900, 0, 1, 12, 0, 0);
-	Date = function() {
-		return fakeDate;
-	};
 
 	this.dataSyncController.verifyData({ hash: "test-hash" });
 });
@@ -375,7 +375,7 @@ asyncTest("doExport - success", 2, function() {
 		equals(this.status.val(), "Sent data to server", "Status");
 		same(data, testData, "Data");
 		start();
-	}, this)
+	}, this);
 
 	this.dataSyncController.doExport(testData);
 });
@@ -497,7 +497,7 @@ test("doImport - no series", 2, function() {
 	this.dataSyncController.verifyData = $.proxy(function(data) {
 		equals(this.status.val(), "Imported 1 of 1", "Status");
 		equals(this.dataSyncController.statusBarAction, "Verifiying", "Status bar action");
-	}, this)
+	}, this);
 
 	this.dataSyncController.doImport();
 	$.ajax = originalAjax;
@@ -618,7 +618,7 @@ asyncTest("doImport - success", 5, function() {
 			}
 		], "Episodes");
 		start();
-	}, this)
+	}, this);
 
 	this.dataSyncController.doImport();
 });

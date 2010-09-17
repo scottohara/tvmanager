@@ -15,7 +15,7 @@ module("series-controller", {
 					this.nowShowingDisplay = Series.NOW_SHOWING[this.nowShowing];
 				}
 			}
-		}
+		};
 
 		this.seriesName = $("<input>")
 			.attr("id", "seriesName")
@@ -67,7 +67,7 @@ test("constructor - add", 2, function() {
 
 	var listItem = {
 		series: new Series(null, "", "", program.id, program.programName, 0, 0, 0, 0, 0, 0)
-	}
+	};
 
 	this.seriesController = new SeriesController({ program: program });
 	ok(this.seriesController, "Instantiate SeriesController object");
@@ -76,16 +76,16 @@ test("constructor - add", 2, function() {
 
 test("setup", 7, function() {
 	this.seriesController.cancel = function() {
-		ok(true, "Bind back button event handler")
+		ok(true, "Bind back button event handler");
 	};
 	this.seriesController.save = function() {
-		ok(true, "Bind save button event handler")
+		ok(true, "Bind save button event handler");
 	};
 	this.seriesController.getNowShowing = function() {
-		ok(true, "Bind now showing click event listener")
+		ok(true, "Bind now showing click event listener");
 	};
 	this.seriesController.getProgramId = function() {
-		ok(true, "Bind move to click event listener")
+		ok(true, "Bind move to click event listener");
 	};
 
 	this.seriesController.setup();
@@ -98,7 +98,7 @@ test("setup", 7, function() {
 });
 
 test("save", 4, function() {
-	var seriesName = "test-series-2"
+	var seriesName = "test-series-2";
 	this.seriesName.val(seriesName);
 	appController.viewStack = [
 		{ scrollPos: 0 },
@@ -126,7 +126,7 @@ test("getNowShowing - getting", 1, function() {
 
 test("getNowShowing - not getting", 3, function() {
 	this.seriesController.setNowShowing = function() {
-		ok(true, "Set done action callback")
+		ok(true, "Set done action callback");
 	};
 
 	this.seriesController.getNowShowing();
@@ -152,7 +152,7 @@ test("getProgramId - getting", 1, function() {
 
 test("getProgramId - not getting", 3, function() {
 	this.seriesController.setProgramId = function() {
-		ok(true, "Set done action callback")
+		ok(true, "Set done action callback");
 	};
 
 	var originalProgram = Program;

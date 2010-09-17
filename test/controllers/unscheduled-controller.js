@@ -17,8 +17,8 @@ test("setup", 4, function() {
 	Episode = EpisodeMock;
 
 	this.unscheduledController.viewItem = function() {
-		ok(true, "Bind list view event handler")
-	}
+		ok(true, "Bind list view event handler");
+	};
 	this.unscheduledController.goBack = function() {
 		ok(true, "Bind back button event listener");
 	};

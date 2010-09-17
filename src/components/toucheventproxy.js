@@ -1,4 +1,4 @@
-function TouchEventProxy(el)
+var TouchEventProxy = function (el)
 {
 	this.element = el;
 	this.enabled = true;
@@ -9,7 +9,7 @@ function TouchEventProxy(el)
 		this.element.addEventListener("mousedown", this, false);
 		this.element.addEventListener("click", this, true);
 	}
-}
+};
 
 TouchEventProxy.prototype = {
 	handleEvent: function(e) {
@@ -64,4 +64,4 @@ TouchEventProxy.prototype = {
 
 		return false;
 	}
-}
+};

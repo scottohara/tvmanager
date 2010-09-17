@@ -1,6 +1,6 @@
-function DataSyncController() {
+var DataSyncController = function () {
 
-}
+};
 
 DataSyncController.prototype.setup = function() {
     this.header = {
@@ -13,7 +13,7 @@ DataSyncController.prototype.setup = function() {
     };
 
 		this.activate();
-}
+};
 
 DataSyncController.prototype.activate = function() {
 		$("#import").bind('click', $.proxy(this.dataImport, this));
@@ -24,15 +24,15 @@ DataSyncController.prototype.activate = function() {
 		Setting.get("LastSyncHash", $.proxy(this.gotLastSyncHash, this));
 
 		appController.refreshScroller();
-}
+};
 
 DataSyncController.prototype.goBack = function() {
     appController.popView();
-}
+};
 
 DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
 	if (lastSyncTime.settingValue) {
-		var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" }
+		var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" };
 		var lastSyncDisplay = new Date(lastSyncTime.settingValue);
 		var lastSyncHours = "0" + lastSyncDisplay.getHours();
 		var lastSyncMinutes = "0" + lastSyncDisplay.getMinutes();
@@ -42,7 +42,7 @@ DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
 	} else {
 		$("#lastSyncTime").val("Unknown");
 	}
-}
+};
 
 DataSyncController.prototype.gotLastSyncHash = function(lastSyncHash) {
 	if (lastSyncHash) {
@@ -51,17 +51,17 @@ DataSyncController.prototype.gotLastSyncHash = function(lastSyncHash) {
 	} else {
 		$("#localChanges").val("Unknown");
 	}
-}
+};
 
 DataSyncController.prototype.checkForLocalChanges = function(data) {
-	this.localChanges = (data.hash != this.lastSyncHash.settingValue);
+	this.localChanges = (data.hash !== this.lastSyncHash.settingValue);
 	
 	if (this.localChanges) {
 		$("#localChanges").val("Data changed since last sync");
 	} else {
 		$("#localChanges").val("No changes since last sync");
 	}
-}
+};
 
 DataSyncController.prototype.dataExport = function() {
 	if (!this.exporting) {
@@ -87,7 +87,7 @@ DataSyncController.prototype.dataExport = function() {
 			});
 
 			this.exporting = false;
-		}, this)
+		}, this);
 
 		if (window.confirm("Are you sure you want to export?")) {
 			this.toJson("Exported", $.proxy(this.doExport, this));
@@ -98,7 +98,7 @@ DataSyncController.prototype.dataExport = function() {
 	} else {
 		$("#status").val("An export is already running");
 	}
-}
+};
 
 DataSyncController.prototype.dataImport = function() {
 	if (!this.importing) {
@@ -124,7 +124,7 @@ DataSyncController.prototype.dataImport = function() {
 			});
 
 			this.importing = false;
-		}, this)
+		}, this);
 
 		var prompt = "";
 		if (this.localChanges) {
@@ -140,7 +140,7 @@ DataSyncController.prototype.dataImport = function() {
 	} else {
 		$("#status").val("An import is already running");
 	}
-}
+};
 
 DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 	Program.list(function(programs) {
@@ -157,7 +157,7 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 			for (var i = 0; i < programs.length; i++) {
 				$("#status").val(statusBarAction + " " + completed + " of " + programs.length);
 				exportObj.programs.push({});
-				programs[i].toJson(function(index) {
+				programs[i].toJson((function(index) {
 					return function(programJson) {
 						exportObj.programs[index] = programJson;
 						completed++;
@@ -165,7 +165,7 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 						if (completed === programs.length) {
 							$("#status").val("Calculating checksum");
 							var json = JSON.stringify(exportObj);
-							var pos = 0
+							var pos = 0;
 							var hash = "";
 							while (pos < json.length) {
 								hash += hex_md5(json.substr(pos, 10000));
@@ -175,11 +175,11 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 							callback({json: json, hash: hash});
 						}
 					};
-				}(i));
+				}(i)));
 			}
 		}
 	});
-}
+};
 
 DataSyncController.prototype.verifyData = function(data) {
 	if (data) {
@@ -208,14 +208,14 @@ DataSyncController.prototype.verifyData = function(data) {
 		$("#status").val("Verify failed: No programs found");
 		this.callback(false);
 	}
-}
+};
 
 DataSyncController.prototype.setLastSyncTime = function() {
 	var now = new Date();
 	var lastSyncTime = new Setting("LastSyncTime", now);
 	lastSyncTime.save();
 	this.gotLastSyncTime(lastSyncTime);
-}
+};
 
 DataSyncController.prototype.doExport = function(data) {
 	$("#status").val("Sending data to server");
@@ -233,7 +233,7 @@ DataSyncController.prototype.doExport = function(data) {
 			this.callback(false);
 		}
 	});
-}
+};
 
 DataSyncController.prototype.doImport = function() {
 	$.ajax({
@@ -322,4 +322,4 @@ DataSyncController.prototype.doImport = function() {
 			this.callback(false);
 		}
 	});
-}
+};

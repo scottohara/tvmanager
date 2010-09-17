@@ -1,4 +1,4 @@
-function ApplicationController() {
+var ApplicationController = function () {
 	this.viewStack = [];
 	this.noticeStack = {
 		height: 0,
@@ -34,13 +34,13 @@ function ApplicationController() {
 			}
 		}
 	}, this));
-}
+};
 
 ApplicationController.prototype.start = function() {
 	$.get("config.json", $.proxy(function(config) {
 		this.db = new DatabaseController(config.databaseName,
 			$.proxy(function(version) {
-				if (version.initial != version.current) {
+				if (version.initial !== version.current) {
 					this.showNotice({
 						label: "Database has been successfully upgraded from version " + version.initial + " to version " + version.current + ". Please restart the application.",
 						leftButton: {
@@ -67,7 +67,7 @@ ApplicationController.prototype.start = function() {
 			Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
 		}
 	}, this), "json");
-}
+};
 
 ApplicationController.prototype.pushView = function(view, args) {
 	if (this.viewStack.length > 0) {
@@ -82,26 +82,26 @@ ApplicationController.prototype.pushView = function(view, args) {
 		scrollPos: 0
 	});
 	this.show($.proxy(this.viewPushed, this));
-}
+};
 
 ApplicationController.prototype.viewPushed = function() {
 	this.viewStack[this.viewStack.length - 1].controller.setup();
 	this.setHeader();
 	window.setTimeout(this.contentShown, 1000);
-}
+};
 
 ApplicationController.prototype.popView = function(args) {
 	this.clearHeader();
 	this.clearFooter();
 	this.viewStack.pop();
 	this.show($.proxy(this.viewPopped, this), args);
-}
+};
 
 ApplicationController.prototype.viewPopped = function(args) {
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	this.setHeader();
 	window.setTimeout(this.contentShown, 1000);
-}
+};
 
 ApplicationController.prototype.show = function(onSuccess, args) {
 	this.hideScrollHelper();
@@ -110,14 +110,14 @@ ApplicationController.prototype.show = function(onSuccess, args) {
 		$("#contentWrapper").addClass("loading");
 		onSuccess(args);
 	});
-}
+};
 
 ApplicationController.prototype.initScroller = function() {
 	this.scroller = new iScroll($("#content").get(0), {
 		desktopCompatibility: true,
 		checkDOMChanges: false
 	});
-}
+};
 
 ApplicationController.prototype.refreshScroller = function() {
 	this.scroller.refresh();
@@ -125,21 +125,17 @@ ApplicationController.prototype.refreshScroller = function() {
 		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
 	}
 	this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos, "0ms");
-}
+};
 
 ApplicationController.prototype.contentShown = function() {
-	switch (true) {
-		case $("#contentWrapper").hasClass("loading"):
-			$("#contentWrapper").removeClass("loading");
-			$("#contentWrapper").addClass("loaded");
-			$("#nowLoading").removeClass("loading");
-			break;
-
-		case $("#contentWrapper").hasClass("loaded"):
-			$("#contentWrapper").removeClass("loaded");
-			break;
+	if ($("#contentWrapper").hasClass("loading")) {
+		$("#contentWrapper").removeClass("loading");
+		$("#contentWrapper").addClass("loaded");
+		$("#nowLoading").removeClass("loading");
+	} else if ($("#contentWrapper").hasClass("loaded")) {
+		$("#contentWrapper").removeClass("loaded");
 	}
-}
+};
 
 ApplicationController.prototype.setHeader = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
@@ -166,7 +162,7 @@ ApplicationController.prototype.setHeader = function() {
 	}
 
 	this.setContentHeight();
-}
+};
 
 ApplicationController.prototype.clearHeader = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
@@ -182,7 +178,7 @@ ApplicationController.prototype.clearHeader = function() {
 	$("#headerRightButton").hide();
 
 	this.setContentHeight();
-}
+};
 
 ApplicationController.prototype.setFooter = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
@@ -211,7 +207,7 @@ ApplicationController.prototype.setFooter = function() {
 
 		this.setContentHeight();
 	}
-}
+};
 
 ApplicationController.prototype.clearFooter = function() {
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
@@ -229,11 +225,11 @@ ApplicationController.prototype.clearFooter = function() {
 	$("#footerLabel").hide();
 	$("#footerRightButton").hide();
 	this.setContentHeight();
-}
+};
 
 ApplicationController.prototype.setContentHeight = function() {
 	$("#contentWrapper").height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
-}
+};
 
 ApplicationController.prototype.showNotice = function(notice) {
 	var noticeContainer = $("<div>")
@@ -280,17 +276,17 @@ ApplicationController.prototype.showNotice = function(notice) {
 	this.noticeStack.height -= noticeContainer.height();
 	this.noticeStack.notice.push(noticeContainer);
 	$("#notices").animate({top: $(window).height() + this.noticeStack.height}, $.proxy(this.noticesMoved, this));
-}
+};
 
 ApplicationController.prototype.hideNotice = function(notice) {
 	this.noticeStack.height += notice.height();
 	notice.data("acknowledged", true);
 	notice.animate({height: 0}, $.proxy(this.noticeHidden, this));
-}
+};
 
 ApplicationController.prototype.noticeHidden = function(event) {
 	$("#notices").animate({top: "-=" + this.noticeStack.height}, $.proxy(this.noticesMoved, this));
-}
+};
 
 ApplicationController.prototype.noticesMoved = function(event) {
 	for (var i = this.noticeStack.notice.length - 1; i >= 0; i--) {
@@ -300,18 +296,18 @@ ApplicationController.prototype.noticesMoved = function(event) {
 		}
 	}
 
-	if (this.noticeStack.notice.length == 0) {
+	if (0 === this.noticeStack.notice.length) {
 		$("#notices").css("visibility", "hidden");
 	}
-}
+};
 
 ApplicationController.prototype.showScrollHelper = function() {
 	$("#abc").show();
-}
+};
 
 ApplicationController.prototype.hideScrollHelper = function() {
 	$("#abc").hide();
-}
+};
 
 ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
 	if (lastSyncTime.settingValue) {
@@ -331,4 +327,4 @@ ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
 			});
 		}
 	}
-}
+};

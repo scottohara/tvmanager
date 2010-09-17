@@ -1,10 +1,10 @@
-function ProgramController(listItem) {
+var ProgramController = function (listItem) {
 	if (listItem) {
 		this.listItem = listItem;
 	} else {
 		this.listItem = { program: new Program(null, "", 0, 0, 0, 0, 0) };
 	}
-}
+};
 
 ProgramController.prototype.setup = function() {
 	this.header = {
@@ -24,7 +24,7 @@ ProgramController.prototype.setup = function() {
 	$("#programName").val(this.listItem.program.programName);
 
 	appController.refreshScroller();
-}
+};
 
 ProgramController.prototype.save = function() {
 	this.listItem.program.setProgramName($("#programName").val());
@@ -33,8 +33,8 @@ ProgramController.prototype.save = function() {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);
-}
+};
 
 ProgramController.prototype.cancel = function() {
 	appController.popView();
-}
+};

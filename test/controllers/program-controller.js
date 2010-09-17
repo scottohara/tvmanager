@@ -10,7 +10,7 @@ module("program-controller", {
 					this.programName = programName;
 				}
 			}
-		}
+		};
 
 		this.programName = $("<input>")
 			.attr("id", "programName")
@@ -32,7 +32,7 @@ test("constructor - update", 2, function() {
 test("constructor - add", 2, function() {
 	var listItem = {
 		program: new Program(null, "", 0, 0, 0, 0, 0)
-	}
+	};
 
 	this.programController = new ProgramController();
 	ok(this.programController, "Instantiate ProgramController object");
@@ -41,10 +41,10 @@ test("constructor - add", 2, function() {
 
 test("setup", 4, function() {
 	this.programController.cancel = function() {
-		ok(true, "Bind back button event handler")
+		ok(true, "Bind back button event handler");
 	};
 	this.programController.save = function() {
-		ok(true, "Bind save button event handler")
+		ok(true, "Bind save button event handler");
 	};
 
 	this.programController.setup();
@@ -54,7 +54,7 @@ test("setup", 4, function() {
 });
 
 test("save", 4, function() {
-	var programName = "test-program-2"
+	var programName = "test-program-2";
 	this.programName.val(programName);
 	appController.viewStack = [
 		{ scrollPos: 0 },

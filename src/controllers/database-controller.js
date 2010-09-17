@@ -1,4 +1,4 @@
-function DatabaseController(databaseName, callback, errorCallback) {
+var DatabaseController = function (databaseName, callback, errorCallback) {
 	this.name = databaseName;
 	this.displayName = "TV Manager";
 	this.estimatedSize = "10000";
@@ -47,7 +47,7 @@ function DatabaseController(databaseName, callback, errorCallback) {
 
 	if (this.db) {
 		this.initialVersion = this.db.version;
-		if (this.initialVersion != this.expectedVersion) {
+		if (this.initialVersion !== this.expectedVersion) {
 			var startIndex = 0;
 			var endIndex = this.upgrades.length;
 			for (var i = 0; i < this.upgrades.length; i++) {
@@ -80,49 +80,49 @@ function DatabaseController(databaseName, callback, errorCallback) {
 	}
 
 	return this.db;
-}
+};
 
 DatabaseController.prototype.openDb = function() {
 	this.db = openDatabase(this.name, "", this.displayName, this.estimatedSize);
-}
+};
 
 DatabaseController.prototype.versionOK = function() {
-	if (this.initialVersion != this.expectedVersion) {
+	if (this.initialVersion !== this.expectedVersion) {
 		this.openDb();
 	}
 
 	this.successCallback({initial: this.initialVersion, current: this.expectedVersion});
-}
+};
 
 DatabaseController.prototype.v1_0 = function(tx) {
 	tx.executeSql("CREATE TABLE IF NOT EXISTS Program (Name)");
 	tx.executeSql("CREATE TABLE IF NOT EXISTS Series (Name, ProgramID)");
 	tx.executeSql("CREATE TABLE IF NOT EXISTS Episode (Name, SeriesID)");
-}
+};
 
 DatabaseController.prototype.v1_1 = function(tx) {
 	tx.executeSql("ALTER TABLE Episode ADD COLUMN Status");
-}
+};
 
 DatabaseController.prototype.v1_2 = function(tx) {
 	tx.executeSql("ALTER TABLE Episode ADD COLUMN StatusDate");
-}
+};
 
 DatabaseController.prototype.v1_3 = function(tx) {
 	tx.executeSql("ALTER TABLE Series ADD COLUMN NowShowing");
-}
+};
 
 DatabaseController.prototype.v1_4 = function(tx) {
 	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unverified");
-}
+};
 
 DatabaseController.prototype.v1_5 = function(tx) {
 	tx.executeSql("CREATE TABLE IF NOT EXISTS Setting (Name, Value)");
-}
+};
 
 DatabaseController.prototype.v1_6 = function(tx) {
 	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unscheduled");
-}
+};
 
 DatabaseController.prototype.v1_7 = function(tx) {
 	tx.executeSql("ALTER TABLE Episode ADD COLUMN Sequence");
@@ -132,7 +132,7 @@ DatabaseController.prototype.v1_7 = function(tx) {
 			var sequence = 0;
 			for (var i = 0; i < resultSet.rows.length; i++) {
 				var ep = resultSet.rows.item(i);
-				if (seriesId != ep.SeriesID) {
+				if (seriesId !== ep.SeriesID) {
 					sequence = 0;
 					seriesId = ep.SeriesID;
 				}
@@ -141,4 +141,4 @@ DatabaseController.prototype.v1_7 = function(tx) {
 			}
 		}
 	);
-}
+};

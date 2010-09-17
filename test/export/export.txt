@@ -6,7 +6,7 @@
 			"seriesList": [
 				{
 					"seriesName": "test-series-1",
-					"nowShowing": "0",
+					"nowShowing": null,
 					"episodes": [
 						{
 							"episodeName": "test-episode-1",

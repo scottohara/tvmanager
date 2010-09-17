@@ -4,7 +4,7 @@ SeriesMock = {
 	series: [],
 	save: function(callback) {
 		this.toJson(function(json) {
-			SeriesMock.seriesJson.push(json)
+			SeriesMock.seriesJson.push(json);
 		});
 		
 		if (SeriesMock.saved) {
@@ -23,7 +23,7 @@ SeriesMock = {
 					toJson: function(jsonCallback) {
 						jsonCallback({});
 					}
-				}
+				};
 			}
 			callback(seriesList);
 		}
@@ -34,4 +34,4 @@ SeriesMock = {
 	count: function(callback) {
 		callback(1);
 	}
-}
+};

@@ -4,7 +4,7 @@ ProgramMock = {
 	programs: [],
 	save: function(callback) {
 		this.toJson(function(json) {
-			ProgramMock.programJson.push(json)
+			ProgramMock.programJson.push(json);
 		});
 		
 		if (ProgramMock.saved) {
@@ -16,16 +16,16 @@ ProgramMock = {
 	list: function(callback) {
 		var that = this;
 		for (var i = 0; i < this.programs.length; i++) {
-			this.programs[i].toJson = function(index) {
+			this.programs[i].toJson = (function(index) {
 				var name = that.programs[index].name;
 				return function(jsonCallback) {
 					jsonCallback({ name: name });
 				};
-			}(i);
+			}(i));
 		}
 		callback(this.programs);
 	},
 	count: function(callback) {
 		callback(1);
 	}
-}
+};

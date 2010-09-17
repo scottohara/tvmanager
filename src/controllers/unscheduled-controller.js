@@ -1,6 +1,6 @@
-function UnscheduledController() {
+var UnscheduledController = function () {
 
-}
+};
 
 UnscheduledController.prototype.setup = function() {
 	this.header = {
@@ -14,25 +14,25 @@ UnscheduledController.prototype.setup = function() {
 
 	this.unscheduledList = new List("list", "views/unscheduledListTemplate.html", null, [], $.proxy(this.viewItem, this), null);
 	this.activate();
-}
+};
 
 UnscheduledController.prototype.activate = function() {
 	Episode.listByUnscheduled($.proxy(this.listRetrieved, this));
-}
+};
 
 UnscheduledController.prototype.listRetrieved = function(unscheduledList) {
 	this.unscheduledList.items = unscheduledList;
 	this.unscheduledList.refresh();
   this.viewItems();
-}
+};
 
 UnscheduledController.prototype.goBack = function() {
 	appController.popView();
-}
+};
 
 UnscheduledController.prototype.viewItem = function(itemIndex) {
 	appController.pushView("episode", { listIndex: itemIndex, episode: this.unscheduledList.items[itemIndex] });
-}
+};
 
 UnscheduledController.prototype.viewItems = function() {
 	appController.clearFooter();
@@ -43,4 +43,4 @@ UnscheduledController.prototype.viewItems = function() {
 	};
 
 	appController.setFooter();
-}
+};

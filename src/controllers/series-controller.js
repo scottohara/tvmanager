@@ -1,4 +1,4 @@
-function SeriesController(listItem) {
+var SeriesController = function (listItem) {
 	if (listItem.listIndex >= 0) {
 		this.listItem = listItem;
 		this.originalNowShowing = this.listItem.series.nowShowing;
@@ -6,7 +6,7 @@ function SeriesController(listItem) {
 	} else {
 		this.listItem = { series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0, 0, 0) };
 	}
-}
+};
 
 SeriesController.prototype.setup = function() {
 	this.header = {
@@ -29,7 +29,7 @@ SeriesController.prototype.setup = function() {
 	$("#moveTo").bind('click', $.proxy(this.getProgramId, this));
 
 	appController.refreshScroller();
-}
+};
 
 SeriesController.prototype.save = function() {
 	this.listItem.series.seriesName = $("#seriesName").val();
@@ -38,13 +38,13 @@ SeriesController.prototype.save = function() {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);
-}
+};
 
 SeriesController.prototype.cancel = function() {
 	this.listItem.series.setNowShowing(this.originalNowShowing);
 	this.listItem.series.programId = (this.originalProgramId);
 	appController.popView();
-}
+};
 
 SeriesController.prototype.getNowShowing = function() {
 	if (!this.gettingNowShowing) {
@@ -61,20 +61,20 @@ SeriesController.prototype.getNowShowing = function() {
 		this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
 		this.gettingNowShowing = false;
 	}
-}
+};
 
 SeriesController.prototype.setNowShowing = function() {
 	this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues().keys[0]);
 	$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
 	this.swtoucheventproxy = null;
-}
+};
 
 SeriesController.prototype.getProgramId = function() {
 	if (!this.gettingProgramId) {
 		this.gettingProgramId = true;
 		Program.list($.proxy(this.listRetrieved, this));
 	}
-}
+};
 
 SeriesController.prototype.listRetrieved = function(programList) {
 	var programs = {};
@@ -87,10 +87,10 @@ SeriesController.prototype.listRetrieved = function(programList) {
 	SpinningWheel.open();
 	this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
 	this.gettingProgramId = false;
-}
+};
 
 SeriesController.prototype.setProgramId = function() {
 	this.listItem.series.programId = Number(SpinningWheel.getSelectedValues().keys[0]);
 	$("#moveTo").val(SpinningWheel.getSelectedValues().values[0]);
 	this.swtoucheventproxy = null;
-}
+};

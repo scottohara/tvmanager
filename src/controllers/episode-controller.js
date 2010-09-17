@@ -1,4 +1,4 @@
-function EpisodeController(listItem) {
+var EpisodeController = function (listItem) {
 	if (listItem.listIndex >= 0) {
 		this.listItem = listItem;
 		this.originalStatus = this.listItem.episode.status;
@@ -6,7 +6,7 @@ function EpisodeController(listItem) {
 	} else {
 		this.listItem = { episode: new Episode(null, "", "", "", false, false, listItem.sequence, listItem.series.id) };
 	}
-}
+};
 
 EpisodeController.prototype.setup = function() {
 	this.header = {
@@ -27,10 +27,10 @@ EpisodeController.prototype.setup = function() {
 	$("#unverified").attr('checked', this.listItem.episode.unverified);
 	$("#unscheduled").attr('checked', this.listItem.episode.unscheduled);
 
-	$("#watched").bind('click', $.proxy(function() { this.setStatus("Watched") }, this));
-	$("#recorded").bind('click', $.proxy(function() { this.setStatus("Recorded") }, this));
-	$("#expected").bind('click', $.proxy(function() { this.setStatus("Expected") }, this));
-	$("#missed").bind('click', $.proxy(function() { this.setStatus("Missed") }, this));
+	$("#watched").bind('click', $.proxy(function() { this.setStatus("Watched"); }, this));
+	$("#recorded").bind('click', $.proxy(function() { this.setStatus("Recorded"); }, this));
+	$("#expected").bind('click', $.proxy(function() { this.setStatus("Expected"); }, this));
+	$("#missed").bind('click', $.proxy(function() { this.setStatus("Missed"); }, this));
 	$("#statusDate").bind('click', $.proxy(this.getStatusDate, this));
 	$("#unscheduled").bind('click', $.proxy(this.toggleStatusDateRow, this));
 
@@ -41,7 +41,7 @@ EpisodeController.prototype.setup = function() {
 	$("#statusDate").val(this.listItem.episode.statusDate);
 
 	appController.refreshScroller();
-}
+};
 
 EpisodeController.prototype.save = function() {
 	this.listItem.episode.episodeName = $("#episodeName").val();
@@ -52,13 +52,13 @@ EpisodeController.prototype.save = function() {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);
-}
+};
 
 EpisodeController.prototype.cancel = function() {
 	this.listItem.episode.status = this.originalStatus;
 	this.listItem.episode.statusDate = this.originalStatusDate;
 	appController.popView();
-}
+};
 
 EpisodeController.prototype.setStatus = function(status) {
 	if (!this.settingStatus) {
@@ -99,10 +99,10 @@ EpisodeController.prototype.setStatus = function(status) {
 		this.toggleStatusDateRow();
 		this.settingStatus = false;
 	}
-}
+};
 
 EpisodeController.prototype.getStatusDate = function() {
-	var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" }
+	var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" };
 	var parts = this.listItem.episode.statusDate.split('-');
 	if (parts.length < 2) {
 		var today = new Date();
@@ -119,13 +119,13 @@ EpisodeController.prototype.getStatusDate = function() {
 	SpinningWheel.setDoneAction($.proxy(this.setStatusDate, this));
 	SpinningWheel.open();
 	this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
-}
+};
 
 EpisodeController.prototype.setStatusDate = function() {
 	this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join('-'));
 	$("#statusDate").val(this.listItem.episode.statusDate);
 	this.swtoucheventproxy = null;
-}
+};
 
 EpisodeController.prototype.toggleStatusDateRow = function() {
 	$("#statusDateRow").hide();
@@ -136,4 +136,4 @@ EpisodeController.prototype.toggleStatusDateRow = function() {
 			this.getStatusDate();
 		}
 	}
-}
+};

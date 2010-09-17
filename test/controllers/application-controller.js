@@ -227,10 +227,11 @@ test("refreshScroller", function() {
 		}
 	];
 
-	expect(testParams.length);
 	this.appController.scroller.scrollTo = function(x, y, duration) {
-		equals(y, testParams[i].expectedPos, testParams[i].description)
-	}
+		equals(y, testParams[i].expectedPos, testParams[i].description);
+	};
+
+	expect(testParams.length);
 	for (var i = 0; i < testParams.length; i++) {
 		this.appController.viewStack[0].scrollPos = testParams[i].scrollPos;
 		this.appController.refreshScroller();
@@ -326,12 +327,12 @@ asyncTest("showNotice", 14, function() {
 			style: "right-button-style",
 			label: "right-button"
 		}
-	}
+	};
 
 	this.appController.showNotice = this.originalShowNotice;
 	this.appController.hideNotice = function(noticeContainer) {
 		ok(noticeContainer.hasClass("notice"), "Bind hideNotice event listener");
-	}
+	};
 	window.innerHeight = 1;
 
 	var originalAnimate = $.fn.animate;
@@ -353,7 +354,7 @@ asyncTest("showNotice", 14, function() {
 
 		var noticeContainer = $("#notices div");
 		equals(this.appController.noticeStack.height, -noticeContainer.height(), "noticeStack height");
-		equals(this.appController.noticeStack.notice[0].html(), noticeContainer.html(), "Notice")
+		equals(this.appController.noticeStack.notice[0].html(), noticeContainer.html(), "Notice");
 
 		$("#notices div a." + notice.rightButton.style).trigger("click", "right");
 		$("#notices div a." + notice.leftButton.style).trigger("click", "left");
@@ -372,7 +373,7 @@ asyncTest("hideNotice", 5, function() {
 		},
 		data: function(key, value) {
 			equals(key, "acknowledged", "Notice data key");
-			equals(value, true, "Notice data value")
+			equals(value, true, "Notice data value");
 		},
 		animate: function(args, callback) {
 			same(args, { height: 0 }, "Animate arguments");

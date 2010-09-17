@@ -63,25 +63,25 @@ test("setup", 11, function() {
 		.appendTo(document.body);
 
 	this.episodesController.viewItem = function() {
-		ok(true, "Bind list view event handler")
+		ok(true, "Bind list view event handler");
 	};
 	this.episodesController.deleteItem = function() {
-		ok(true, "Bind list delete event handler")
+		ok(true, "Bind list delete event handler");
 	};
 	this.episodesController.onPopulateListItem = function() {
-		ok(true, "Bind list populate event handler")
+		ok(true, "Bind list populate event handler");
 	};
 	this.episodesController.goBack = function() {
-		ok(true, "Bind back button event handler")
+		ok(true, "Bind back button event handler");
 	};
 	this.episodesController.addItem = function() {
-		ok(true, "Bind add action event handler")
+		ok(true, "Bind add action event handler");
 	};
 	this.episodesController.editItems = function() {
-		ok(true, "Bind edit action event handler")
+		ok(true, "Bind edit action event handler");
 	};
 	this.episodesController.deleteItems = function() {
-		ok(true, "Bind delete action event handler")
+		ok(true, "Bind delete action event handler");
 	};
 
 	this.episodesController.setup();
@@ -256,7 +256,7 @@ test("deleteItems", 3, function() {
 		.appendTo(document.body);
 
 	this.episodesController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.episodesController.episodeList = new ListMock();
@@ -327,7 +327,7 @@ test("editItems", 4, function() {
 	this.episodesController.resequenceItems = function() {
 	};
 	this.episodesController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.episodesController.episodeList = new ListMock();

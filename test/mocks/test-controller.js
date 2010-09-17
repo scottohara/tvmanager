@@ -30,15 +30,15 @@ TestController = function(args) {
 
 TestController.prototype.buttonClicked = function(e, button) {
 	ok(true, "Bind " + button + " button " + e.type + " event listener");
-}
+};
 
 TestController.prototype.setup = function() {
 	equals($("#content").html(), "<div></div>", "content");
 	start();
-}
+};
 
 TestController.prototype.activate = function(args) {
 	equals(args, "Activated", "Activate arguments");
 	equals($("#content").html(), "<div></div>", "content");
 	start();
-}
+};

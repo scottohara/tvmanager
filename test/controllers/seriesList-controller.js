@@ -59,25 +59,25 @@ test("setup", 10, function() {
 		.appendTo(document.body);
 
 	this.seriesListController.viewItem = function() {
-		ok(true, "Bind list view event handler")
+		ok(true, "Bind list view event handler");
 	};
 	this.seriesListController.editItem = function() {
-		ok(true, "Bind list edit event handler")
+		ok(true, "Bind list edit event handler");
 	};
 	this.seriesListController.deleteItem = function() {
-		ok(true, "Bind list delete event handler")
+		ok(true, "Bind list delete event handler");
 	};
 	this.seriesListController.goBack = function() {
-		ok(true, "Bind back button event handler")
+		ok(true, "Bind back button event handler");
 	};
 	this.seriesListController.addItem = function() {
-		ok(true, "Bind add action event handler")
+		ok(true, "Bind add action event handler");
 	};
 	this.seriesListController.editItems = function() {
-		ok(true, "Bind edit action event handler")
+		ok(true, "Bind edit action event handler");
 	};
 	this.seriesListController.deleteItems = function() {
-		ok(true, "Bind delete action event handler")
+		ok(true, "Bind delete action event handler");
 	};
 
 	this.seriesListController.setup();
@@ -106,7 +106,7 @@ test("activate - move", 2, function() {
 
 	this.seriesListController.deleteItem = function(index, dontRemove) {
 		equals(index, listItem.listIndex, "List index to delete");
-		ok(dontRemove, "Skip database delete")
+		ok(dontRemove, "Skip database delete");
 	};
 
 	this.seriesListController.seriesList = new ListMock(null, null, null, this.items);
@@ -220,7 +220,7 @@ test("deleteItems", 3, function() {
 		.appendTo(document.body);
 
 	this.seriesListController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.seriesListController.seriesList = new ListMock();
@@ -239,7 +239,7 @@ test("editItems", 3, function() {
 		.appendTo(document.body);
 
 	this.seriesListController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.seriesListController.seriesList = new ListMock();

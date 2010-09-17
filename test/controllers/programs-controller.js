@@ -30,25 +30,25 @@ test("setup", 10, function() {
 		.appendTo(document.body);
 
 	this.programsController.viewItem = function() {
-		ok(true, "Bind list view event handler")
+		ok(true, "Bind list view event handler");
 	};
 	this.programsController.editItem = function() {
-		ok(true, "Bind list edit event handler")
+		ok(true, "Bind list edit event handler");
 	};
 	this.programsController.deleteItem = function() {
-		ok(true, "Bind list delete event handler")
+		ok(true, "Bind list delete event handler");
 	};
 	this.programsController.goBack = function() {
-		ok(true, "Bind back button event handler")
+		ok(true, "Bind back button event handler");
 	};
 	this.programsController.addItem = function() {
-		ok(true, "Bind add action event handler")
+		ok(true, "Bind add action event handler");
 	};
 	this.programsController.editItems = function() {
-		ok(true, "Bind edit action event handler")
+		ok(true, "Bind edit action event handler");
 	};
 	this.programsController.deleteItems = function() {
-		ok(true, "Bind delete action event handler")
+		ok(true, "Bind delete action event handler");
 	};
 
 	this.programsController.setup();
@@ -127,7 +127,7 @@ test("deleteItems", 4, function() {
 		.appendTo(document.body);
 
 	this.programsController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.programsController.programList = new ListMock();
@@ -147,7 +147,7 @@ test("editItems", 4, function() {
 		.appendTo(document.body);
 
 	this.programsController.viewItems = function() {
-		ok(true, "Bind done action event handler")
+		ok(true, "Bind done action event handler");
 	};
 
 	this.programsController.programList = new ListMock();

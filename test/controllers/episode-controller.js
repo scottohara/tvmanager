@@ -21,7 +21,7 @@ module("episode-controller", {
 					this.unverified = unverified;
 				}
 			}
-		}
+		};
 
 		this.episodeName = $("<input>")
 			.attr("id", "episodeName")
@@ -101,7 +101,7 @@ test("constructor - add", 2, function() {
 
 	var listItem = {
 		episode: new Episode(null, "", "", "", false, false, sequence, series.id)
-	}
+	};
 
 	this.episodeController = new EpisodeController({
 		series: series,
@@ -114,19 +114,19 @@ test("constructor - add", 2, function() {
 
 test("setup", 14, function() {
 	this.episodeController.cancel = function() {
-		ok(true, "Bind back button event handler")
+		ok(true, "Bind back button event handler");
 	};
 	this.episodeController.save = function() {
-		ok(true, "Bind save button event handler")
+		ok(true, "Bind save button event handler");
 	};
 	this.episodeController.setStatus = function(status) {
-		ok(true, "Bind " + status + " click event listener")
+		ok(true, "Bind " + status + " click event listener");
 	};
 	this.episodeController.getStatusDate = function() {
-		ok(true, "Bind status date click event listener")
+		ok(true, "Bind status date click event listener");
 	};
 	this.episodeController.toggleStatusDateRow = function() {
-		ok(true, "Bind unscheduled click event listener")
+		ok(true, "Bind unscheduled click event listener");
 	};
 
 	this.episodeController.setup();
@@ -247,7 +247,7 @@ test("getStatusDate - without date", 3, function() {
 
 	this.episodeController.listItem.episode.statusDate = "";
 	this.episodeController.setStatusDate = function() {
-		ok(true, "Set done action callback")
+		ok(true, "Set done action callback");
 	};
 
 	this.episodeController.getStatusDate();
@@ -258,7 +258,7 @@ test("getStatusDate - without date", 3, function() {
 
 test("getStatusDate - with date", 3, function() {
 	this.episodeController.setStatusDate = function() {
-		ok(true, "Set done action callback")
+		ok(true, "Set done action callback");
 	};
 
 	this.episodeController.getStatusDate();
@@ -267,7 +267,7 @@ test("getStatusDate - with date", 3, function() {
 });
 
 test("setStatusDate", 2, function() {
-	var statusDateDay = "02"
+	var statusDateDay = "02";
 	var statusDateMonth = "Feb";
 	SpinningWheel.selectedValues.values = [statusDateDay, statusDateMonth];
 	this.episodeController.setStatusDate();
@@ -316,14 +316,14 @@ test("toggleStatusDateRow", function() {
 		.appendTo(document.body);
 
 	this.episodeController.getStatusDate = function() {
-		ok(true, testParams[i].description + " - Show spinning wheel")
+		ok(true, testParams[i].description + " - Show spinning wheel");
 	};
 
 	expect(testParams.length + 1);
 	for (var i = 0; i < testParams.length; i++) {
 		this.unscheduled.attr("checked", testParams[i].unscheduled);
 		this.episodeController.listItem.episode.status = testParams[i].status;
-		if ("undefined" != testParams[i].statusDate) {
+		if ("undefined" !== testParams[i].statusDate) {
 			this.episodeController.listItem.episode.statusDate = testParams[i].statusDate;
 		}
 		this.episodeController.toggleStatusDateRow();

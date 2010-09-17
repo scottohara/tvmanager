@@ -1,4 +1,4 @@
-function Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId, seriesName, programId, programName) {
+var Episode = function (id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId, seriesName, programId, programName) {
 	this.id = id;
 	this.episodeName = episodeName;
 	this.statusDate = statusDate;
@@ -10,7 +10,7 @@ function Episode(id, episodeName, status, statusDate, unverified, unscheduled, s
 	this.seriesName = seriesName;
 	this.programId = programId;
 	this.programName = programName;
-}
+};
 
 Episode.prototype.save = function() {
 	appController.db.transaction($.proxy(function(tx) {
@@ -40,7 +40,7 @@ Episode.prototype.save = function() {
 			}
 		);
 	}, this));
-}
+};
 
 Episode.prototype.remove = function() {
 	if (this.id) {
@@ -54,7 +54,7 @@ Episode.prototype.remove = function() {
 			this.seriesId = null;
 		}, this));
 	}
-}
+};
 
 Episode.prototype.toJson = function() {
 	return {
@@ -64,25 +64,25 @@ Episode.prototype.toJson = function() {
 		unverified: this.unverified,
 		unscheduled: this.unscheduled,
 		sequence: this.sequence
-	}
-}
+	};
+};
 
 Episode.prototype.setStatus = function(status) {
 	this.status = status;
 	this.setStatusDate(this.statusDate);
-}
+};
 
 Episode.prototype.setStatusDate = function(statusDate) {
 	this.statusDate = statusDate;
 
-	if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate != "") {
+	if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate !== "") {
 		this.statusDateDisplay = "(" + this.statusDate + ")";
 	} else {
 		this.statusDateDisplay = "";
 	}
 
 	this.statusWarning = '';
-	if ("Expected" === this.status && this.statusDate != "") {
+	if ("Expected" === this.status && this.statusDate !== "") {
 		var today = new Date();
 		var currDay = "0" + today.getDate();
 		var startMonth = "0" + (today.getMonth() + 1);
@@ -106,28 +106,28 @@ Episode.prototype.setStatusDate = function(statusDate) {
 			this.statusWarning = (tempStatusDate <= start && tempStatusDate >= end ? 'warning' : '');
 		}
 	}
-}
+};
 
 Episode.prototype.setUnverified = function(unverified) {
 	this.unverified = unverified;
-	if ("Watched" != this.status && this.unverified) {
+	if ("Watched" !== this.status && this.unverified) {
 		this.unverifiedDisplay = "Unverified";
 	} else {
 		this.unverifiedDisplay = "";
 	}
-}
+};
 
 Episode.listBySeries = function(seriesId, callback) {
 	var filter = "WHERE e.SeriesID = ? ORDER BY e.Sequence, e.rowid";
 	var params = [seriesId];
 	Episode.list(filter, params, callback);
-}
+};
 
 Episode.listByUnscheduled = function(callback) {
 	var filter = "WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)";
 	var params = [];
 	Episode.list(filter, params, callback);
-}
+};
 
 Episode.list = function(filter, params, callback) {
 	var episodeList = [];
@@ -161,4 +161,4 @@ Episode.count = function(callback) {
 			}
 		);
 	});
-}
+};

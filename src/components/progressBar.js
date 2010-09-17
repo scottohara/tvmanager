@@ -1,7 +1,7 @@
-function ProgressBar(total, sections) {
+var ProgressBar = function (total, sections) {
 	this.sections = sections;
 	this.setTotal(total);
-}
+};
 
 ProgressBar.prototype.render = function() {
 	if (this.total > 0) {
@@ -29,14 +29,14 @@ ProgressBar.prototype.render = function() {
 	} else {
 		return "";
 	}
-}
+};
 
 ProgressBar.prototype.setTotal = function(total) {
 	this.total = total;
 	return this.render();
-}
+};
 
 ProgressBar.prototype.setSection = function(index, section) {
 	this.sections[index] = section;
 	return this.render();
-}
+};

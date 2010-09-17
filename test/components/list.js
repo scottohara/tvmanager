@@ -36,7 +36,7 @@ module("list", {
 			equals($("#" + this.container).html(), this.renderHtml, "list items");
 			$("#" + this.container + " li:not([id])").each($.proxy(function(index, element) {
 				this.currentItem = index;
-				$(element).trigger("click")
+				$(element).trigger("click");
 			}, this));
 			start();
 		}, this);
@@ -69,12 +69,12 @@ asyncTest("refresh - without grouping", 7, function() {
 	this.list.groupBy = null;
 	this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
 	this.list.refresh();
-})
+});
 
 asyncTest("refresh - with grouping", 7, function() {
 	this.renderHtml = '<li id="group-one" class="group">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id="group-two" class="group">group-two</li><li><a>group-two:item-three</a></li>';
 	this.list.refresh();
-})
+});
 
 test("setAction - valid", function() {
 	expect(this.validActions.length);
@@ -83,7 +83,7 @@ test("setAction - valid", function() {
 		this.list.setAction(this.validActions[i]);
 		equals(this.list.action, this.validActions[i], this.validActions[i] + " - action property");
 	}
-})
+});
 
 test("setAction - invalid", 2, function() {
 	var originalAlert = alert;
@@ -94,7 +94,7 @@ test("setAction - invalid", 2, function() {
 	this.list.setAction("invalid");
 	equals(this.list.action, "", "action property");
 	alert = originalAlert;
-})
+});
 
 test("tap - without event handlers", 0, function() {
 	this.list.viewEventHandler = null;
@@ -104,7 +104,7 @@ test("tap - without event handlers", 0, function() {
 		this.list.action = this.validActions[i];
 		this.list.tap(0);
 	}
-})
+});
 
 test("tap - with event handlers", function() {
 	expect(this.validActions.length + 1);
@@ -113,7 +113,7 @@ test("tap - with event handlers", function() {
 	window.confirm = function(message) {
 		equals(message, "Delete this item?", "confirm");
 		return true;
-	}
+	};
 
 	for (var i = 0; i < this.validActions.length; i++) {
 		this.list.action = this.validActions[i];
@@ -121,4 +121,4 @@ test("tap - with event handlers", function() {
 	}
 
 	window.confirm = originalConfirm;
-})
+});

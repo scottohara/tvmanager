@@ -1,7 +1,7 @@
-function Setting(settingName, settingValue) {
+var Setting = function (settingName, settingValue) {
 		this.settingName = settingName;
 		this.settingValue = settingValue;
-}
+};
 
 Setting.prototype.save = function(callback) {
 	appController.db.transaction($.proxy(function(tx) {
@@ -27,7 +27,7 @@ Setting.prototype.save = function(callback) {
 			}
 		);
 	}, this));
-}
+};
 
 Setting.prototype.remove = function() {
 	appController.db.transaction($.proxy(function(tx) {
@@ -38,7 +38,7 @@ Setting.prototype.remove = function() {
 		this.settingName = null;
 		this.settingValue = null;
 	}, this));
-}
+};
 
 Setting.get = function(settingName, callback) {
 	appController.db.readTransaction(function(tx) {

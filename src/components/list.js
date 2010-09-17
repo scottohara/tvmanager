@@ -1,4 +1,4 @@
-function List(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
+var List = function (container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
 	this.container = container;
 	this.itemTemplate = itemTemplate;
 	this.groupBy = groupBy;
@@ -8,17 +8,20 @@ function List(container, itemTemplate, groupBy, items, viewEventHandler, editEve
 	this.deleteEventHandler = deleteEventHandler;
 	this.populateItemEventHandler = populateItemEventHandler;
 	this.setAction("view");
-}
+};
 
-List.prototype.refresh = function() {
-	$.get(this.itemTemplate, $.proxy(function(template) {
+List.prototype.refresh = function () {
+	$.get(this.itemTemplate, $.proxy(function (template) {
 		$("#" + this.container).html("");
-		var itemHTML;
-		var group = "";
-		for (var i = 0; i < this.items.length; i++) {
-			var item = this.items[i];
 
-			if (this.groupBy && group != item[this.groupBy]){
+		var itemHTML,
+				group = "",
+				item;
+
+		for (var i = 0; i < this.items.length; i++) {
+			item = this.items[i];
+
+			if (this.groupBy && group !== item[this.groupBy]) {
 				$("<li>")
 					.attr("id", item[this.groupBy])
 					.addClass("group")
@@ -38,8 +41,8 @@ List.prototype.refresh = function() {
 			$("<li>")
 				.html(itemHTML)
 				.appendTo($("#" + this.container))
-				.bind('click', $.proxy(function(itemIndex) {
-					return $.proxy(function() {
+				.bind('click', $.proxy(function (itemIndex) {
+					return $.proxy(function () {
 						if (!appController.scroller.moved) {
 							this.tap(itemIndex);
 						}
@@ -53,9 +56,9 @@ List.prototype.refresh = function() {
 
 		appController.refreshScroller();
 	}, this));
-}
+};
 
-List.prototype.setAction = function(action) {
+List.prototype.setAction = function (action) {
 	switch (action) {
 		case "view":
 		case "edit":
@@ -65,9 +68,9 @@ List.prototype.setAction = function(action) {
 		default:
 			alert(action + " is not a valid action");
 	}
-}
+};
 
-List.prototype.tap = function(itemIndex) {
+List.prototype.tap = function (itemIndex) {
 	switch (this.action) {
 		case "view":
 			if (this.viewEventHandler) {
@@ -89,4 +92,4 @@ List.prototype.tap = function(itemIndex) {
 			}
 			break;
 	}
-}
+};

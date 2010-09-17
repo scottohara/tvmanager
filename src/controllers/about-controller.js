@@ -1,6 +1,6 @@
-function AboutController() {
+var AboutController = function () {
 
-}
+};
 
 AboutController.prototype.setup = function() {
 	this.header = {
@@ -21,23 +21,23 @@ AboutController.prototype.setup = function() {
 	$("#update").bind('click', $.proxy(this.checkForUpdate, this));
 
 	appController.refreshScroller();
-}
+};
 
 AboutController.prototype.goBack = function() {
 	appController.popView();
-}
+};
 
 AboutController.prototype.programCount = function(count) {
 	$("#totalPrograms").val(count);
-}
+};
 
 AboutController.prototype.seriesCount = function(count) {
 	$("#totalSeries").val(count);
-}
+};
 
 AboutController.prototype.episodeCount = function(count) {
 	$("#totalEpisodes").val(count);
-}
+};
 
 AboutController.prototype.checkForUpdate = function() {
 	if (!this.updating) {
@@ -45,7 +45,7 @@ AboutController.prototype.checkForUpdate = function() {
 		appController.cache.update(this.updateChecked);
 		this.updating = false;
 	}
-}
+};
 
 AboutController.prototype.updateChecked = function(updated, message) {
 	appController.showNotice({
@@ -55,4 +55,4 @@ AboutController.prototype.updateChecked = function(updated, message) {
 			label: "OK"
 		}
 	});
-}
+};

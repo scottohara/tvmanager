@@ -26,18 +26,18 @@ module("series-model", {
 
 test("constructor", 13, function() {
 	ok(this.series, "Instantiate Series object");
-	equals(this.series.id, this.id, "id property")
-	equals(this.series.seriesName, this.seriesName, "seriesName property")
-	equals(this.series.nowShowing, this.nowShowing, "nowShowing property")
-	equals(this.series.programId, this.programId, "programId property")
-	equals(this.series.programName, this.programName, "programName property")
+	equals(this.series.id, this.id, "id property");
+	equals(this.series.seriesName, this.seriesName, "seriesName property");
+	equals(this.series.nowShowing, this.nowShowing, "nowShowing property");
+	equals(this.series.programId, this.programId, "programId property");
+	equals(this.series.programName, this.programName, "programName property");
 	equals(this.series.progressBar.total, this.episodeCount, "progressBar.total property");
-	equals(this.series.episodeCount, this.episodeCount, "episodeCount property")
-	equals(this.series.watchedCount, this.watchedCount, "watchedCount property")
-	equals(this.series.recordedCount, this.recordedCount, "recordedCount property")
-	equals(this.series.expectedCount, this.expectedCount, "expectedCount property")
-	equals(this.series.missedCount, this.missedCount, "missedCount property")
-	equals(this.series.statusWarningCount, this.statusWarningCount, "statusWarningCount property")
+	equals(this.series.episodeCount, this.episodeCount, "episodeCount property");
+	equals(this.series.watchedCount, this.watchedCount, "watchedCount property");
+	equals(this.series.recordedCount, this.recordedCount, "recordedCount property");
+	equals(this.series.expectedCount, this.expectedCount, "expectedCount property");
+	equals(this.series.missedCount, this.missedCount, "missedCount property");
+	equals(this.series.statusWarningCount, this.statusWarningCount, "statusWarningCount property");
 });
 
 test("save - update fail", 4, function() {
@@ -46,7 +46,7 @@ test("save - update fail", 4, function() {
 		equals(id, null, "Invoke callback");
 	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
-	equals(appController.db.errorMessage, "Series.save: Force failed", "Error message")
+	equals(appController.db.errorMessage, "Series.save: Force failed", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
@@ -56,7 +56,7 @@ test("save - update no rows affected", 4, function() {
 		equals(id, null, "Invoke callback");
 	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
-	equals(appController.db.errorMessage, "Series.save: no rows affected", "Error message")
+	equals(appController.db.errorMessage, "Series.save: no rows affected", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
@@ -65,8 +65,8 @@ test("save - update success", 5, function() {
 		equals(id, this.id, "Invoke callback");
 	}, this));
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
-	equals(appController.db.errorMessage, null, "Error message")
-	equals(this.series.id, this.id, "id property")
+	equals(appController.db.errorMessage, null, "Error message");
+	equals(this.series.id, this.id, "id property");
 	ok(appController.db.commit, "Commit transaction");
 });
 
@@ -77,7 +77,7 @@ test("save - insert fail", 4, function() {
 		equals(id, null, "Invoke callback");
 	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
-	equals(appController.db.errorMessage, "Series.save: Force failed", "Error message")
+	equals(appController.db.errorMessage, "Series.save: Force failed", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
@@ -88,7 +88,7 @@ test("save - insert no rows affected", 4, function() {
 		equals(id, null, "Invoke callback");
 	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
-	equals(appController.db.errorMessage, "Series.save: no rows affected", "Error message")
+	equals(appController.db.errorMessage, "Series.save: no rows affected", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 

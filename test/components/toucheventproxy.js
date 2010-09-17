@@ -47,8 +47,8 @@ test("constructor", 2, function() {
 test("constructor - without TouchEvent", 2, function() {
 	var originalCreateEvent = document.createEvent;
 	document.createEvent = function() {
-		throw Error();
-	}
+		throw new Error();
+	};
 	this.toucheventproxy = new TouchEventProxy(this.element.get(0));
 	document.createEvent = originalCreateEvent;
 	this.toucheventproxy.onTouchStart = this.emptyEventHandler;
@@ -65,7 +65,7 @@ test("constructor - with TouchEvent", 0, function() {
 	var originalCreateEvent = document.createEvent;
 	document.createEvent = function() {
 		return;
-	}
+	};
 
 	this.toucheventproxy = new TouchEventProxy(this.element.get(0));
 	document.createEvent = originalCreateEvent;
@@ -155,7 +155,7 @@ test("handleEvent - click", function() {
 		}
 	];
 
-	expect(testParams.length + 1)
+	expect(testParams.length + 1);
 	this.event.type = "click";
 
 	for (var i = 0; i < testParams.length; i++) {

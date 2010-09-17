@@ -1,4 +1,4 @@
-function Program(id, programName, seriesCount, episodeCount, watchedCount, recordedCount, expectedCount) {
+var Program = function (id, programName, seriesCount, episodeCount, watchedCount, recordedCount, expectedCount) {
 	this.id = id;
 	this.setProgramName(programName);
 	this.seriesCount = seriesCount;
@@ -7,7 +7,7 @@ function Program(id, programName, seriesCount, episodeCount, watchedCount, recor
 	this.setWatchedCount(watchedCount);
 	this.setRecordedCount(recordedCount);
 	this.setExpectedCount(expectedCount);
-}
+};
 
 Program.prototype.save = function(callback) {
 	appController.db.transaction($.proxy(function(tx) {
@@ -47,7 +47,7 @@ Program.prototype.save = function(callback) {
 			}
 		);
 	}, this));
-}
+};
 
 Program.prototype.remove = function() {
 	if (this.id) {
@@ -62,14 +62,14 @@ Program.prototype.remove = function() {
 			this.programName = null;
 		}, this));
 	}
-}
+};
 
 Program.prototype.toJson = function(callback) {
 	Series.listByProgram(this.id, $.proxy(function(seriesList) {
 		var json = {
 			programName: this.programName,
 			seriesList: []
-		}
+		};
 
 		if (seriesList.length === 0) {
 			callback(json);
@@ -78,7 +78,7 @@ Program.prototype.toJson = function(callback) {
 
 			for (var i = 0; i < seriesList.length; i++) {
 				json.seriesList.push({});
-				seriesList[i].toJson(function(index) {
+				seriesList[i].toJson((function(index) {
 					return function(seriesJson) {
 						json.seriesList[index] = seriesJson;
 						completed++;
@@ -86,27 +86,27 @@ Program.prototype.toJson = function(callback) {
 							callback(json);
 						}
 					};
-				}(i));
+				}(i)));
 			}
 		}
 	}, this));
-}
+};
 
 Program.prototype.setProgramName = function(programName) {
 	this.programName = programName;
 	this.programGroup = programName.substring(0,1).toUpperCase();
-}
+};
 
 Program.prototype.setEpisodeCount = function(count) {
 	this.episodeCount = count;
 	this.progressBar.setTotal(this.episodeCount);
 	this.setWatchedProgress();
-}
+};
 
 Program.prototype.setWatchedCount = function(count) {
 	this.watchedCount = count;
 	this.setWatchedProgress();
-}
+};
 
 Program.prototype.setWatchedProgress = function() {
 	var watchedPercent = 0;
@@ -119,7 +119,7 @@ Program.prototype.setWatchedProgress = function() {
 		percent: watchedPercent,
 		style: "watched"
 	});
-}
+};
 
 Program.prototype.setRecordedCount = function(count) {
 	this.recordedCount = count;
@@ -133,7 +133,7 @@ Program.prototype.setRecordedCount = function(count) {
 		percent: recordedPercent,
 		style: "recorded"
 	});
-}
+};
 
 Program.prototype.setExpectedCount = function(count) {
 	this.expectedCount = count;
@@ -147,7 +147,7 @@ Program.prototype.setExpectedCount = function(count) {
 		percent: expectedPercent,
 		style: "expected"
 	});
-}
+};
 
 Program.list = function(callback) {
 	var programList = [];
@@ -181,4 +181,4 @@ Program.count = function(callback) {
 			}
 		);
 	});
-}
+};
