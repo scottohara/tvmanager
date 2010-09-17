@@ -27,10 +27,8 @@ Program.prototype.save = function(callback) {
 				if (!resultSet.rowsAffected) {
 					if (callback) {
 						callback();
-					} else {
-						throw new Error("Program.save: no rows affected");
-						return false;
 					}
+					throw new Error("Program.save: no rows affected");
 				}
 
 				if (!this.id) {
@@ -44,10 +42,8 @@ Program.prototype.save = function(callback) {
 			function(tx, error) {
 				if (callback) {
 					callback();
-				} else {
-					throw new Error("Program.save: " + error.message);
-					return false;
 				}
+				return "Program.save: " + error.message;
 			}
 		);
 	}, this));
@@ -59,6 +55,9 @@ Program.prototype.remove = function() {
 			tx.executeSql("DELETE FROM Episode WHERE SeriesID IN (SELECT rowid FROM Series WHERE ProgramID = ?)", [this.id]);
 			tx.executeSql("DELETE FROM Series WHERE ProgramID = ?", [this.id]);
 			tx.executeSql("DELETE FROM Program WHERE rowid = ?", [this.id]);
+		}, this),
+		null,
+		$.proxy(function() {
 			this.id = null;
 			this.programName = null;
 		}, this));
@@ -163,8 +162,8 @@ Program.list = function(callback) {
 				callback(programList);
 			},
 			function(tx, error) {
-				throw new Error("Program.list: " + error.message);
 				callback(programList);
+				return "Program.list: " + error.message;
 			}
 		);
 	});
@@ -177,8 +176,8 @@ Program.count = function(callback) {
 				callback(resultSet.rows.item(0).ProgramCount);
 			},
 			function(tx, error) {
-				throw new Error("Program.count: " + error.message);
 				callback(0);
+				return "Program.count: " + error.message;
 			}
 		);
 	});

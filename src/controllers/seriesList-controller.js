@@ -6,7 +6,7 @@ SeriesListController.prototype.setup = function() {
     this.header = {
         label: this.listItem.program.programName,
         leftButton: {
-            eventHandler: function(listItem) { return function() {appController.popView(listItem);}}(this.listItem),
+            eventHandler: $.proxy(this.goBack, this),
             style: "backButton",
             label: "Programs"
         },
@@ -45,6 +45,10 @@ SeriesListController.prototype.activate = function(listItem) {
 SeriesListController.prototype.listRetrieved = function(seriesList) {
     this.seriesList.items = seriesList;
     this.activate();
+}
+
+SeriesListController.prototype.goBack = function() {
+	appController.popView(this.listItem);
 }
 
 SeriesListController.prototype.viewItem = function(itemIndex) {

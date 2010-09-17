@@ -31,10 +31,8 @@ Series.prototype.save = function(callback) {
 				if (!resultSet.rowsAffected) {
 					if (callback) {
 						callback();
-					} else {
-						throw new Error("Series.save: no rows affected");
-						return false;
 					}
+					throw new Error("Series.save: no rows affected");
 				}
 
 				if (!this.id) {
@@ -48,10 +46,8 @@ Series.prototype.save = function(callback) {
 			function(tx, error) {
 				if (callback) {
 					callback();
-				} else {
-					throw new Error("Series.save: " + error.message);
-					return false;
 				}
+				return "Series.save: " + error.message;
 			}
 		);
 	}, this));
@@ -62,6 +58,9 @@ Series.prototype.remove = function() {
 		appController.db.transaction($.proxy(function(tx) {
 			tx.executeSql("DELETE FROM Episode WHERE SeriesID = ?", [this.id]);
 			tx.executeSql("DELETE FROM Series WHERE rowid = ?", [this.id]);
+		}, this),
+		null,
+		$.proxy(function() {
 			this.id = null;
 			this.seriesName = null;
 			this.nowShowing = null;
@@ -222,8 +221,8 @@ Series.list = function(query, filter, params, callback) {
 				callback(seriesList);
 			},
 			function(tx, error) {
-				throw new Error("Series.list: " + error.message);
 				callback(seriesList);
+				return "Series.list: " + error.message;
 			}
 		);
 	});
@@ -236,8 +235,8 @@ Series.count = function(callback) {
 				callback(resultSet.rows.item(0).SeriesCount);
 			},
 			function(tx, error) {
-				throw new Error("Series.count: " + error.message);
 				callback(0);
+				return "Series.count: " + error.message;
 			}
 		);
 	});

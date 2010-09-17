@@ -6,7 +6,7 @@ UnscheduledController.prototype.setup = function() {
 	this.header = {
 		label: "Unscheduled",
 		leftButton: {
-				eventHandler: function() {appController.popView();},
+				eventHandler: this.goBack,
 				style: "backButton",
 				label: "Schedule"
 		}
@@ -24,6 +24,10 @@ UnscheduledController.prototype.listRetrieved = function(unscheduledList) {
 	this.unscheduledList.items = unscheduledList;
 	this.unscheduledList.refresh();
   this.viewItems();
+}
+
+UnscheduledController.prototype.goBack = function() {
+	appController.popView();
 }
 
 UnscheduledController.prototype.viewItem = function(itemIndex) {

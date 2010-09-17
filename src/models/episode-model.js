@@ -29,7 +29,6 @@ Episode.prototype.save = function() {
 			$.proxy(function(tx, resultSet) {
 				if (!resultSet.rowsAffected) {
 					throw new Error("Episode.save: no rows affected");
-					return false;
 				}
 
 				if (!this.id) {
@@ -37,8 +36,7 @@ Episode.prototype.save = function() {
 				}
 			}, this),
 			function(tx, error) {
-				throw new Error("Episode.save: " + error.message);
-				return false;
+				return "Episode.save: " + error.message;
 			}
 		);
 	}, this));
@@ -48,6 +46,9 @@ Episode.prototype.remove = function() {
 	if (this.id) {
 		appController.db.transaction($.proxy(function(tx) {
 			tx.executeSql("DELETE FROM Episode WHERE rowid = ?", [this.id]);
+		}, this),
+		null,
+		$.proxy(function() {
 			this.id = null;
 			this.episodeName = null;
 			this.seriesId = null;
@@ -87,9 +88,9 @@ Episode.prototype.setStatusDate = function(statusDate) {
 		var startMonth = "0" + (today.getMonth() + 1);
 		var endMonth = "0";
 		if (today.getMonth() < 3) {
-			endMonth += String(14 - today.getMonth());
+			endMonth = String(10 + today.getMonth());
 		} else {
-			endMonth +=  String(today.getMonth() - 2);
+			endMonth += String(today.getMonth() - 2);
 		}
 
 		var start = startMonth.substr(startMonth.length-2) + currDay.substr(currDay.length-2);
@@ -141,8 +142,8 @@ Episode.list = function(filter, params, callback) {
 				callback(episodeList);
 			},
 			function(tx, error) {
-				throw new Error("Episode.list: " + error.message);
 				callback(episodeList);
+				return "Episode.list: " + error.message;
 			}
 		);
 	});
@@ -155,8 +156,8 @@ Episode.count = function(callback) {
 				callback(resultSet.rows.item(0).EpisodeCount);
 			},
 			function(tx, error) {
-				throw new Error("Episode.count: " + error.message);
 				callback(0);
+				return "Episode.count: " + error.message;
 			}
 		);
 	});

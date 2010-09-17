@@ -6,7 +6,7 @@ ReportController.prototype.setup = function() {
 	this.header = {
 		label: this.report.reportName,
 		leftButton: {
-			eventHandler: function() {appController.popView();},
+			eventHandler: this.goBack,
 			style: "backButton",
 			label: "Settings"
 		}
@@ -24,6 +24,10 @@ ReportController.prototype.listRetrieved = function(reportList) {
 	this.reportList.items = reportList;
 	this.reportList.refresh();
   this.viewItems();
+}
+
+ReportController.prototype.goBack = function() {
+	appController.popView();
 }
 
 ReportController.prototype.viewItem = function(itemIndex) {

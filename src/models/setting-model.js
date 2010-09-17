@@ -11,10 +11,8 @@ Setting.prototype.save = function(callback) {
 				if (!resultSet.rowsAffected) {
 					if (callback) {
 						callback(false);
-					} else {
-						throw new Error("Setting.save: no rows affected");
-						return false;
 					}
+					throw new Error("Setting.save: no rows affected");
 				}
 
 				if (callback) {
@@ -24,10 +22,8 @@ Setting.prototype.save = function(callback) {
 			function(tx, error) {
 				if (callback) {
 					callback(false);
-				} else {
-					throw new Error("Setting.save: " + error.message);
-					return false;
 				}
+				return "Setting.save: " + error.message;
 			}
 		);
 	}, this));
@@ -36,8 +32,11 @@ Setting.prototype.save = function(callback) {
 Setting.prototype.remove = function() {
 	appController.db.transaction($.proxy(function(tx) {
 		tx.executeSql("DELETE FROM Setting WHERE Name = ?", [this.settingName]);
+	}, this),
+	null,
+	$.proxy(function () {
 		this.settingName = null;
-		this.setingValue = null;
+		this.settingValue = null;
 	}, this));
 }
 
@@ -54,8 +53,8 @@ Setting.get = function(settingName, callback) {
 				callback(setting);
 			},
 			function(tx, error) {
-				throw new Error("Setting.get: " + error.message);
 				callback();
+				return "Setting.get: " + error.message;
 			}
 		);
 	});

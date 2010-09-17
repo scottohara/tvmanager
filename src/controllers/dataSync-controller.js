@@ -34,7 +34,10 @@ DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
 	if (lastSyncTime.settingValue) {
 		var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" }
 		var lastSyncDisplay = new Date(lastSyncTime.settingValue);
-		lastSyncDisplay = lastSyncDisplay.getDate() + "-" + months[lastSyncDisplay.getMonth()] + "-" + lastSyncDisplay.getFullYear() + " " + lastSyncDisplay.getHours() + ":" + lastSyncDisplay.getMinutes() + ":" + lastSyncDisplay.getSeconds();
+		var lastSyncHours = "0" + lastSyncDisplay.getHours();
+		var lastSyncMinutes = "0" + lastSyncDisplay.getMinutes();
+		var lastSyncSeconds = "0" + lastSyncDisplay.getSeconds();
+		lastSyncDisplay = lastSyncDisplay.getDate() + "-" + months[lastSyncDisplay.getMonth()] + "-" + lastSyncDisplay.getFullYear() + " " + lastSyncHours.substr(lastSyncHours.length-2) + ":" + lastSyncMinutes.substr(lastSyncMinutes.length-2) + ":" + lastSyncSeconds.substr(lastSyncSeconds.length-2);
 		$("#lastSyncTime").val(lastSyncDisplay);
 	} else {
 		$("#lastSyncTime").val("Unknown");
@@ -46,7 +49,7 @@ DataSyncController.prototype.gotLastSyncHash = function(lastSyncHash) {
 		this.lastSyncHash = lastSyncHash;
 		this.toJson("", $.proxy(this.checkForLocalChanges, this));
 	} else {
-		this.callback(false)
+		$("#localChanges").val("Unknown");
 	}
 }
 
@@ -197,7 +200,7 @@ DataSyncController.prototype.verifyData = function(data) {
 				}
 			},
 			error: function(request, statusText) {
-				$("#status").val("Verify failed: " + statusText);
+				$("#status").val("Verify failed: " + statusText + ", " + request.status + " (" + request.statusText + ")");
 				this.callback(false);
 			}
 		});
@@ -226,7 +229,7 @@ DataSyncController.prototype.doExport = function(data) {
 			this.verifyData(data);
 		},
 		error: function(request, statusText) {
-			$("#status").val("Export failed: " + statusText);
+			$("#status").val("Export failed: " + statusText + ", " + request.status + " (" + request.statusText + ")");
 			this.callback(false);
 		}
 	});
@@ -249,7 +252,10 @@ DataSyncController.prototype.doImport = function() {
 							tx.executeSql("DELETE FROM Series", []);
 							tx.executeSql("DELETE FROM Program", []);
 						},
-						function() {},
+						$.proxy(function(error) {
+							$("#status").val("Import failed: " + error.message);
+							this.callback(false);
+						}, this),
 						$.proxy(function() {
 							for (var i = 0; i < importObj.programs.length; i++) {
 								var importProgram = importObj.programs[i];
@@ -312,7 +318,7 @@ DataSyncController.prototype.doImport = function() {
 			}
 		},
 		error: function(request, statusText) {
-			$("#status").val("Import failed: " + statusText);
+			$("#status").val("Import failed: " + statusText + ", " + request.status + " (" + request.statusText + ")");
 			this.callback(false);
 		}
 	});

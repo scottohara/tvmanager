@@ -8,21 +8,20 @@ function ApplicationController() {
 	$("#contentWrapper").bind('webkitTransitionEnd', this.contentShown);
 	SpinningWheel.cellHeight = 45;
 
-	window.setTimeout($.proxy(function() {
-		$(document).bind("touchmove", function(e) {
-			e.preventDefault();
-		});
+	$(document).bind("touchmove", function(e) {
+		e.preventDefault();
+	});
 
-		this.initScroller();
-		this.abc = new abc($("#abc").get(0), this.scroller);
-		this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
-	}, this),	100);
+	this.initScroller();
+
+	this.abc = new abc($("#abc").get(0), this.scroller);
+	this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
 
 	this.cache = new CacheController();
 	this.cache.update($.proxy(function(updated, message, noticeId) {
 		if (updated) {
-			if ($("#" + noticeId)) {
-				$("#" + noticeId).html = message;
+			if ($("#" + noticeId).length > 0) {
+				$("#" + noticeId).html(message);
 			} else {
 				this.showNotice({
 					id: noticeId,
@@ -39,8 +38,7 @@ function ApplicationController() {
 
 ApplicationController.prototype.start = function() {
 	$.get("config.json", $.proxy(function(config) {
-		this.config = config;
-		this.db = new DatabaseController(
+		this.db = new DatabaseController(config.databaseName,
 			$.proxy(function(version) {
 				if (version.initial != version.current) {
 					this.showNotice({
@@ -65,7 +63,9 @@ ApplicationController.prototype.start = function() {
 			}, this)
 		);
 
-		Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
+		if (this.db.version) {
+			Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
+		}
 	}, this), "json");
 }
 
@@ -332,8 +332,3 @@ ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
 		}
 	}
 }
-
-$(function() {
-	window.appController = new ApplicationController();
-	appController.start();
-});

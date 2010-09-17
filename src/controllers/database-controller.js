@@ -1,5 +1,5 @@
-function DatabaseController(callback, errorCallback) {
-	this.name = appController.config.databaseName;
+function DatabaseController(databaseName, callback, errorCallback) {
+	this.name = databaseName;
 	this.displayName = "TV Manager";
 	this.estimatedSize = "10000";
 	this.successCallback = callback;
@@ -73,7 +73,10 @@ function DatabaseController(callback, errorCallback) {
 			this.versionOK();
 		}
 	} else {
-		this.errorCallback({code: 0, message: "Unable to open database" + this.name});
+		this.errorCallback({
+			code: 0,
+			message: "Unable to open database " + this.name
+		});
 	}
 
 	return this.db;

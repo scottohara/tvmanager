@@ -1,3 +1,8 @@
+Changes to export.txt cause cache manifest to change
+Two taps required on schedule?
+Namespace for globals?
+Private properties & methods?
+
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
 	export - delay after "Sent data to server" (in verifyData()), incorrect count of "exporting 56 of 57"
@@ -19,5 +24,4 @@ Pending standards:
 - Replace jquery.iphoneui.js with JQuery Mobile when released
 
 Migrate from Prototype to jQuery:
-- QUnit tests
 - Plugins for MD5 & templates

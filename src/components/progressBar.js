@@ -5,26 +5,27 @@ function ProgressBar(total, sections) {
 
 ProgressBar.prototype.render = function() {
 	if (this.total > 0) {
-		var bar = document.createElement("DIV");
-		bar.className = "progressBar";
+		var bar = $("<div>")
+			.addClass("progressBar");
 
 		if (this.sections) {
 			for (var i = 0; i < this.sections.length; i++) {
 				if (this.sections[i].percent > 0) {
-					var section = document.createElement("DIV");
-					section.className = this.sections[i].style;
-					section.style.width = this.sections[i].percent + "%";
-					section.textContent = this.sections[i].label;
-					bar.appendChild(section);
+					$("<div>")
+						.addClass(this.sections[i].style)
+						.width(this.sections[i].percent + "%")
+						.text(this.sections[i].label)
+						.appendTo(bar);
 				}
 			}
 		}
 
-		var total = document.createElement("DIV");
-		total.className = "total";
-		total.textContent = this.total;
-		bar.appendChild(total);
-		return bar.outerHTML;
+		$("<div>")
+			.addClass("total")
+			.text(this.total)
+			.appendTo(bar);
+
+		return bar.get(0).outerHTML;
 	} else {
 		return "";
 	}

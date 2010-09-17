@@ -6,7 +6,7 @@ ProgramsController.prototype.setup = function() {
 	this.header = {
 		label: "Programs",
 		leftButton: {
-			eventHandler: function() {appController.popView();},
+			eventHandler: this.goBack,
 			style: "backButton",
 			label: "Schedule"
 		},
@@ -37,6 +37,10 @@ ProgramsController.prototype.activate = function(listItem) {
 ProgramsController.prototype.listRetrieved = function(programList) {
 	this.programList.items = programList;
 	this.activate();
+}
+
+ProgramsController.prototype.goBack = function() {
+	appController.popView();
 }
 
 ProgramsController.prototype.viewItem = function(itemIndex) {

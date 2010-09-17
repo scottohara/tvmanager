@@ -1,0 +1,1 @@
+jscoverage --no-instrument=src/framework --no-instrument=test/framework ../ ../../webkitTestCoverage
