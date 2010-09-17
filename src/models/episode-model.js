@@ -75,14 +75,14 @@ Episode.prototype.setStatus = function(status) {
 Episode.prototype.setStatusDate = function(statusDate) {
 	this.statusDate = statusDate;
 
-	if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate !== "") {
+	if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && "" !== this.statusDate) {
 		this.statusDateDisplay = "(" + this.statusDate + ")";
 	} else {
 		this.statusDateDisplay = "";
 	}
 
 	this.statusWarning = '';
-	if ("Expected" === this.status && this.statusDate !== "") {
+	if ("Expected" === this.status && "" !== this.statusDate) {
 		var today = new Date();
 		var currDay = "0" + today.getDate();
 		var startMonth = "0" + (today.getMonth() + 1);
@@ -137,7 +137,7 @@ Episode.list = function(filter, params, callback) {
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var ep = resultSet.rows.item(i);
-					episodeList.push(new Episode(ep.rowid, ep.Name, ep.Status, ep.StatusDate, (ep.Unverified === "true"), (ep.Unscheduled === "true"), ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
+					episodeList.push(new Episode(ep.rowid, ep.Name, ep.Status, ep.StatusDate, ("true" === ep.Unverified), ("true" === ep.Unscheduled), ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
 				}
 				callback(episodeList);
 			},

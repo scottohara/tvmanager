@@ -115,9 +115,9 @@ EpisodesController.prototype.deleteItems = function() {
 EpisodesController.prototype.resequenceItems = function() {
 	var that = this;
 	$("#list li a").each(function(index) {
-		if ($(this).attr("id") !== that.episodeList.items[index].id) {
+		if (Number($(this).attr("id")) !== that.episodeList.items[index].id) {
 			for (var i = 0; i < that.episodeList.items.length; i++) {
-				if (that.episodeList.items[i].id === $(this).attr("id")) {
+				if (that.episodeList.items[i].id === Number($(this).attr("id"))) {
 					that.episodeList.items[i].sequence = index;
 					that.episodeList.items[i].save();
 					break;

@@ -71,7 +71,7 @@ Program.prototype.toJson = function(callback) {
 			seriesList: []
 		};
 
-		if (seriesList.length === 0) {
+		if (0 === seriesList.length) {
 			callback(json);
 		} else {
 			var completed = 0;

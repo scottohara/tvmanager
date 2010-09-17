@@ -23,7 +23,7 @@ ScheduleController.prototype.setup = function() {
 
 ScheduleController.prototype.activate = function(listItem) {
 	if (listItem) {
-		if ((!listItem.series.nowShowing) && listItem.series.recordedCount === 0 && listItem.series.expectedCount === 0) {
+		if ((!listItem.series.nowShowing) && 0 === listItem.series.recordedCount && 0 === listItem.series.expectedCount) {
 			this.scheduleList.items.splice(listItem.listIndex,1);
 		} else {
 			this.scheduleList.items[listItem.listIndex] = listItem.series;

@@ -121,7 +121,7 @@ ApplicationController.prototype.initScroller = function() {
 
 ApplicationController.prototype.refreshScroller = function() {
 	this.scroller.refresh();
-	if (this.viewStack[this.viewStack.length - 1].scrollPos === -1) {
+	if (-1 === this.viewStack[this.viewStack.length - 1].scrollPos) {
 		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
 	}
 	this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos, "0ms");

@@ -149,7 +149,7 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 			programs: []
 		};
 
-		if (programs.length === 0) {
+		if (0 === programs.length) {
 			callback();
 		} else {
 			var completed = 0;

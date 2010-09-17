@@ -1,7 +1,11 @@
 Changes to export.txt cause cache manifest to change
-Two taps required on schedule?
-Namespace for globals?
-Private properties & methods?
+
+Migration from BitBucket to GitHub:
+ - Convert README to README.md
+ - Code comments
+ - Fix up commit logs
+ - .gitignores
+ -
 
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"

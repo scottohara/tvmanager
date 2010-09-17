@@ -174,7 +174,7 @@ test("setNowShowing", function() {
 	expect(testParams.length * 2);
 	for (var i = 0; i < testParams.length; i++) {
 		this.series.setNowShowing(testParams[i].nowShowing);
-		equals(this.series.nowShowing, (testParams[i].nowShowing === 0 ? null : testParams[i].nowShowing), testParams[i].description + " - nowShowing property");
+		equals(this.series.nowShowing, (0 === testParams[i].nowShowing ? null : testParams[i].nowShowing), testParams[i].description + " - nowShowing property");
 		equals(this.series.nowShowingDisplay, testParams[i].nowShowingDisplay, testParams[i].description + " - nowShowingDisplay property");
 	}
 });
