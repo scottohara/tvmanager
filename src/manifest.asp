@@ -40,8 +40,8 @@
 	var root = String(Server.MapPath("."));
 	var hash = "";
 
-	var reExclusions = /^\.|README|manifest|index.html|\.py|\~$/		// exclude items that start with . or end with ~
-	var reNetwork = /^export$|export.txt|\.asp$/								// all items in export folder, and all ASP pages
+	var reExclusions = /^\.|manifest|index.html|\.py|\~$/		// exclude items that start with . or end with ~
+	var reNetwork = /^export$|export.txt|\.asp$/						// all items in export folder, and all ASP pages
 
 	Response.ContentType = "text/cache-manifest";
 	Response.Write("CACHE MANIFEST\r\n\r\n");

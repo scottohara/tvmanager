@@ -2,8 +2,7 @@ Migration from BitBucket to GitHub:
  - Convert README to README.md
  - Code comments
  - Fix up commit logs
- - .gitignores
- -
+ - .gitignores & submodules
 
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
