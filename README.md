@@ -23,10 +23,10 @@ The rest of the app consists of data management views (add/edit/delete programs,
 Screenshots
 ===========
 
-[Schedule](schedule.png)
-[Program List](program-list.png)
-[Episode List](episode-list.png)
-[Edit Episode](episode-edit.png)
+[Schedule](tvmanager/blob/master/schedule.png)
+[Program List](tvmanager/blob/master/program-list.png)
+[Episode List](tvmanager/blob/master/episode-list.png)
+[Edit Episode](tvmanager/blob/master/episode-edit.png)
 
 Architecture
 ============
