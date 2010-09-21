@@ -20,6 +20,14 @@ The other main view is **Unscheduled**, which lists any upcoming episodes that f
 
 The rest of the app consists of data management views (add/edit/delete programs, series & episodes), basic reports (eg. "All recorded", "All Expected", "All Missed" etc.), and some utility functions such as importing/exporting the database to/from a JSON file etc.
 
+Screenshots
+===========
+
+[Schedule](schedule.png)
+[Program List](program-list.png)
+[Episode List](episode-list.png)
+[Edit Episode](episode-edit.png)
+
 Architecture
 ============
 As mentioned above, the app is purely a HTML5 web application.
