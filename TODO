@@ -1,9 +1,3 @@
-Migration from BitBucket to GitHub:
- - Convert README to README.md
- - Code comments
- - Fix up commit logs
- - .gitignores & submodules
-
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
 	export - delay after "Sent data to server" (in verifyData()), incorrect count of "exporting 56 of 57"
@@ -14,8 +8,8 @@ Ending soon report
   - series with < 2 unwatched/unrecorded episodes
 Guide searcher (online, using XMLTV)
 Vertically centre list items
-Colour coding for my programs?
-Colour coding of Fox vs FTA?
+Colour coding by person (your shows vs your wifes vs your kids)
+Colour coding by source (Cable vs broadcast vs download)
 Prevent horizontal scrolling on phone (remove hack when implemented in iScroll)
 
 Pending standards:
@@ -23,6 +17,3 @@ Pending standards:
 - function.bind(context) to replace $.proxy(function, context)
 - ProgressEvent properties in appCache updates (waiting for WebKit update)
 - Replace jquery.iphoneui.js with JQuery Mobile when released
-
-Migrate from Prototype to jQuery:
-- Plugins for MD5 & templates

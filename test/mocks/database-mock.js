@@ -50,7 +50,7 @@ DatabaseMock.prototype.addResultRows = function(rows) {
 		item: function(index) {
 			return this.data[index];
 		}
-	}
+	};
 };
 
 TransactionMock = function(db) {
