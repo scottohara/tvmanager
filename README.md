@@ -23,10 +23,10 @@ The rest of the app consists of data management views (add/edit/delete programs,
 Screenshots
 ===========
 
-![Schedule](schedule.png)
-![Program List](program-list.png)
-![Episode List](episode-list.png)
-![Edit Episode](episode-edit.png)
+![Schedule](http://github.com/scotto74/tvmanager/schedule.png)
+![Program List](http://github.com/scotto74/tvmanager/program-list.png)
+![Episode List](http://github.com/scotto74/tvmanager/episode-list.png)
+![Edit Episode](http://github.com/scotto74/tvmanager/episode-edit.png)
 
 Architecture
 ============
