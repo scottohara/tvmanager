@@ -11,7 +11,9 @@ The data model is very simple:
 **Programs consist of zero or more Series, which consist of zero or more Episodes.**
 
 **Programs** simply have a name (eg. "Lost")
+
 **Series** have a name (eg. "Series 1" or "Season 1") and optionally a broadcast frequency (eg. "Daily" or "Mondays" or "Tuesdays", etc.)
+
 **Episodes** have a name, a status (eg. Watched/Recorded/Expected/Missed), a date (ie. *when* the episode was recorded/expected/missed), plus some attributes to indicate whether it is unverified (eg. you *think* this is the eposide you recorded, but you're not 100% sure) or unscheduled (don't forget to set your DVR!)
 
 The main view is the **Schedule**, which lists all series that are currently airing (ie. have a frequency other than "Not Showing"), plus any other series that may not be currently airing but have one or more recorded or upcoming episodes expected.
@@ -23,10 +25,13 @@ The rest of the app consists of data management views (add/edit/delete programs,
 Screenshots
 ===========
 
-![Schedule](http://github.com/scotto74/tvmanager/schedule.png)
-![Program List](http://github.com/scotto74/tvmanager/program-list.png)
-![Episode List](http://github.com/scotto74/tvmanager/episode-list.png)
-![Edit Episode](http://github.com/scotto74/tvmanager/episode-edit.png)
+![Schedule](http://scotto74.github.com/tvmanager/schedule.png "Schedule")
+
+![Program List](http://scotto74.github.com/tvmanager/program-list.png "Program List")
+
+![Episode List](http://scotto74.github.com/tvmanager/episode-list.png "Episode List")
+
+![Edit Episode](http://scotto74.github.com/tvmanager/episode-edit.png "Edit Episode")
 
 Architecture
 ============
@@ -79,4 +84,4 @@ Restoring the database does the reverse, pulling the latest JSON file (export.tx
 
 An MD5 checksum veries that the data was imported/exported succesfully.
 
-Again, just like the dynamically generated cache manifest above, the export & checksum server-side code is implemented in ASP, which requires the site tho be hosted on an IIS server.
+Again, just like the dynamically generated cache manifest above, the export & checksum server-side code is implemented in ASP, which requires the site to be hosted on an IIS server.
