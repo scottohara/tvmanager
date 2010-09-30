@@ -90,7 +90,7 @@ Series.prototype.setNowShowing = function(nowShowing) {
 		nowShowing = 0;
 	}
 
-	if (0 === nowShowing) {
+	if (0 === parseInt(nowShowing)) {
 		this.nowShowing = null;
 	} else {
 		this.nowShowing = nowShowing;
