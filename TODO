@@ -1,3 +1,6 @@
+On iOS, dismissing the Import/Export Successful notification triggers another import/export
+	- can't replicate in Chrome on desktop
+	- caused by combination of window.confirm() & iScroll
 Better feedback in import/export
 	import - delay after "Imported 57 of 57"
 	export - delay after "Sent data to server" (in verifyData()), incorrect count of "exporting 56 of 57"
@@ -9,11 +12,18 @@ Ending soon report
 Guide searcher (online, using XMLTV)
 Vertically centre list items
 Colour coding by person (your shows vs your wifes vs your kids)
+		- Add Viewer table ( Name, Colour )
+		- On Settings view, add "Viewers" option to "Data" section
+		- Add Viewers view (standard CRUD list)
+		- Include Viewers in JSON import/export
+		- Add ViewerID to Program table
+		- Add Viewer row Program view (tap opens an iScroll populated with "Everyone" plus a list of the viewers)
+		- Modify Program model to update ViewerID
+		- Modify Schedule/Unscheduled/Programs/Reports views to be colour coded
 Colour coding by source (Cable vs broadcast vs download)
 Prevent horizontal scrolling on phone (remove hack when implemented in iScroll)
 
 Pending standards:
-- Native JSON encoding/decoding (to replace json2.js).  Already in Chrome/Safari, but not Mobile Safari.
 - function.bind(context) to replace $.proxy(function, context)
 - ProgressEvent properties in appCache updates (waiting for WebKit update)
 - Replace jquery.iphoneui.js with JQuery Mobile when released
