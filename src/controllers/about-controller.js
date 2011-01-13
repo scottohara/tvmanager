@@ -14,7 +14,7 @@ AboutController.prototype.setup = function() {
 
 	Program.count(this.programCount);
 	Series.count(this.seriesCount);
-	Episode.count(this.episodeCount);
+	Episode.totalCount($.proxy(this.episodeCount, this));
 
 	$("#databaseVersion").val("v" + appController.db.version);
 	$("#appVersion").val("");
@@ -36,7 +36,13 @@ AboutController.prototype.seriesCount = function(count) {
 };
 
 AboutController.prototype.episodeCount = function(count) {
-	$("#totalEpisodes").val(count);
+	this.episodeTotalCount = count;
+	Episode.countByStatus("Watched", $.proxy(this.watchedCount, this));
+};
+
+AboutController.prototype.watchedCount = function(count) {
+	var watchedPercent = Math.round(count / this.episodeTotalCount * 100, 2);
+	$("#totalEpisodes").val(this.episodeTotalCount + " (" + watchedPercent + "% watched)");
 };
 
 AboutController.prototype.checkForUpdate = function() {

@@ -149,9 +149,21 @@ Episode.list = function(filter, params, callback) {
 	});
 };
 
-Episode.count = function(callback) {
+Episode.totalCount = function(callback) {
+	var filter = "";
+	var params = [];
+	Episode.count(filter, params, callback);
+};
+
+Episode.countByStatus = function(status, callback) {
+	var filter = "WHERE Status = ?";
+	var params = [status];
+	Episode.count(filter, params, callback);
+};
+
+Episode.count = function(filter, params, callback) {
 	appController.db.readTransaction(function(tx) {
-		tx.executeSql("SELECT COUNT(*) AS EpisodeCount FROM Episode", [],
+		tx.executeSql("SELECT COUNT(*) AS EpisodeCount FROM Episode " + filter, params,
 			function(tx, resultSet) {
 				callback(resultSet.rows.item(0).EpisodeCount);
 			},
