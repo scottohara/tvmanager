@@ -17,7 +17,7 @@ AboutController.prototype.setup = function() {
 	Episode.totalCount($.proxy(this.episodeCount, this));
 
 	$("#databaseVersion").val("v" + appController.db.version);
-	$("#appVersion").val("");
+	$("#appVersion").val("v" + appController.appVersion);
 	$("#update").bind('click', $.proxy(this.checkForUpdate, this));
 
 	appController.refreshScroller();

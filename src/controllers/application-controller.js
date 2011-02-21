@@ -66,6 +66,8 @@ ApplicationController.prototype.start = function() {
 		if (this.db.version) {
 			Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
 		}
+
+		this.appVersion = config.appVersion;
 	}, this), "json");
 };
 
