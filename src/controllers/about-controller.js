@@ -41,7 +41,7 @@ AboutController.prototype.episodeCount = function(count) {
 };
 
 AboutController.prototype.watchedCount = function(count) {
-	var watchedPercent = Math.round(count / this.episodeTotalCount * 100, 2);
+	var watchedPercent = this.episodeTotalCount > 0 ? Math.round(count / this.episodeTotalCount * 100, 2) : 0;
 	$("#totalEpisodes").val(this.episodeTotalCount + " (" + watchedPercent + "% watched)");
 };
 
