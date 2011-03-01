@@ -85,3 +85,28 @@ Restoring the database does the reverse, pulling the latest JSON file (export.tx
 An MD5 checksum veries that the data was imported/exported succesfully.
 
 Again, just like the dynamically generated cache manifest above, the export & checksum server-side code is implemented in ASP, which requires the site to be hosted on an IIS server.
+
+Test Suite
+==========
+To run the entire QUnit test suite, simply browse the test/index.html page
+
+To run a single QUnit test module, browse test/index.html?module-name  (eg. test/index.html?application-controller)
+
+Once the test suite is passing cleanly, to check the test suite coverage:
+
+* install [JSCoverage](http://siliconforks.com/jscoverage/)
+* create a sibling folder to your repository, called {REPO_NAME}Coverage (eg. if your repo is in ~/tvmanager, create a folder called ~/tvmanagerCoverage)
+* execute the test/generate-coverage.sh shell script, which creates an 'instrumented' copy of the code in the above location
+* browse to ../{REPO_NAME}Coverage/jscoverage.html?test/index.html&missing=true
+* on the Summary tab, check that we have >=99% total coverage
+
+Coverage Exceptions:
+
+* database-controller.js (96%): 2 lines that handle upgrading to an earlier version are not tested
+* episodes-controller.js (98%): 1 line that sets the jQueryUI sortable helper offset is not tested
+* database-mock.js (97%): 2 lines that handle malformed SQL commands (mismatched parameters & tokens) are not tested
+
+To run lint:
+
+* install [nodelint](http://github.com/tav/nodelint)
+* exec the test/run-lint.sh shell script
