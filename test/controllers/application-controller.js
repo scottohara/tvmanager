@@ -17,6 +17,7 @@ module("application-controller", {
 
 		this.notices = $("<div>")
 			.attr("id", "notices")
+			.css("position", "absolute")
 			.hide()
 			.appendTo(document.body);
 
@@ -179,7 +180,7 @@ asyncTest("start - database upgrade", 1, function() {
 		}
 	};
 	this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
-	Setting.setting["LastSyncTime"] = new Date();
+	Setting.setting.LastSyncTime = new Date();
 	this.appController.start();
 });
 
@@ -192,7 +193,7 @@ asyncTest("start - sync warning", 2, function() {
 		}
 	};
 	this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
-	Setting.setting["LastSyncTime"] = new Date(1900, 0, 1);
+	Setting.setting.LastSyncTime = new Date(1900, 0, 1);
 	this.appController.start();
 });
 
@@ -227,12 +228,14 @@ test("refreshScroller", function() {
 		}
 	];
 
+	var i;
+	
 	this.appController.scroller.scrollTo = function(x, y, duration) {
 		equals(y, testParams[i].expectedPos, testParams[i].description);
 	};
 
 	expect(testParams.length);
-	for (var i = 0; i < testParams.length; i++) {
+	for (i = 0; i < testParams.length; i++) {
 		this.appController.viewStack[0].scrollPos = testParams[i].scrollPos;
 		this.appController.refreshScroller();
 	}
