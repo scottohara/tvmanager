@@ -18,6 +18,14 @@ List.prototype.refresh = function () {
 				group = "",
 				item;
 
+		var itemClicked = $.proxy(function (itemIndex) {
+			return $.proxy(function () {
+				if (!appController.scroller.moved) {
+					this.tap(itemIndex);
+				}
+			}, this);
+		}, this);
+
 		for (var i = 0; i < this.items.length; i++) {
 			item = this.items[i];
 
@@ -41,13 +49,7 @@ List.prototype.refresh = function () {
 			$("<li>")
 				.html(itemHTML)
 				.appendTo($("#" + this.container))
-				.bind('click', $.proxy(function (itemIndex) {
-					return $.proxy(function () {
-						if (!appController.scroller.moved) {
-							this.tap(itemIndex);
-						}
-					}, this);
-				}, this)(i));
+				.bind('click', itemClicked(i));
 
 			if (this.populateItemEventHandler) {
 				this.populateItemEventHandler(item);

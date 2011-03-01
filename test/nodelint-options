@@ -3,6 +3,7 @@ var options = {
 		/* browser */
 		"window",
 		"openDatabase",
+		"Date",
 
 		/* Qunit */
 		"equals",
@@ -27,7 +28,7 @@ var options = {
 		"Episode",
 		"Setting",
 
-		/* Compoents */
+		/* Components */
 		"List",
 		"ProgressBar",
 		"TouchEventProxy",

@@ -29,7 +29,7 @@ ProgramController.prototype.setup = function() {
 ProgramController.prototype.save = function() {
 	this.listItem.program.setProgramName($("#programName").val());
 	this.listItem.program.save();
-	if (!(this.listItem.listIndex >= 0)) {
+	if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);

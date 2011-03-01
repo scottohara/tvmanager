@@ -166,28 +166,30 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 		} else {
 			var completed = 0;
 
+			var programRetrieved = function(index) {
+				return function(programJson) {
+					exportObj.programs[index] = programJson;
+					completed++;
+					$("#status").val(statusBarAction + " " + completed + " of " + programs.length);
+					if (completed === programs.length) {
+						$("#status").val("Calculating checksum");
+						var json = JSON.stringify(exportObj);
+						var pos = 0;
+						var hash = "";
+						while (pos < json.length) {
+							hash += hex_md5(json.substr(pos, 10000));
+							pos += 10000;
+						}
+
+						callback({json: json, hash: hash});
+					}
+				};
+			};
+
 			for (var i = 0; i < programs.length; i++) {
 				$("#status").val(statusBarAction + " " + completed + " of " + programs.length);
 				exportObj.programs.push({});
-				programs[i].toJson((function(index) {
-					return function(programJson) {
-						exportObj.programs[index] = programJson;
-						completed++;
-						$("#status").val(statusBarAction + " " + completed + " of " + programs.length);
-						if (completed === programs.length) {
-							$("#status").val("Calculating checksum");
-							var json = JSON.stringify(exportObj);
-							var pos = 0;
-							var hash = "";
-							while (pos < json.length) {
-								hash += hex_md5(json.substr(pos, 10000));
-								pos += 10000;
-							}
-
-							callback({json: json, hash: hash});
-						}
-					};
-				}(i)));
+				programs[i].toJson(programRetrieved(i));
 			}
 		}
 	});
@@ -269,54 +271,62 @@ DataSyncController.prototype.doImport = function() {
 							this.callback(false);
 						}, this),
 						$.proxy(function() {
-							for (var i = 0; i < importObj.programs.length; i++) {
-								var importProgram = importObj.programs[i];
-								var program = new Program(null, importProgram.programName);
-								program.save($.proxy(function(importProgram) {
-									return $.proxy(function(programId) {
-										if (programId) {
-											var seriesCompleted = 0;
+							var program;
 
-											if (importProgram.seriesList.length > 0) {
-												for (var j = 0; j < importProgram.seriesList.length; j++) {
-													var importSeries = importProgram.seriesList[j];
-													var series = new Series(null, importSeries.seriesName, importSeries.nowShowing, programId);
-													series.save($.proxy(function(importSeries) {
-														return $.proxy(function(seriesId) {
-															if (seriesId) {
-																for (var k = 0; k < importSeries.episodes.length; k++) {
-																	var importEpisode = importSeries.episodes[k];
-																	var episode = new Episode(null, importEpisode.episodeName, importEpisode.status, importEpisode.statusDate, importEpisode.unverified, importEpisode.unscheduled, importEpisode.sequence, seriesId);
-																	episode.save();
-																}
-																seriesCompleted++;
-																if (seriesCompleted === importProgram.seriesList.length) {
-																	programsCompleted++;
-																	$("#status").val("Imported " + programsCompleted + " of " + importObj.programs.length);
-																	if (programsCompleted === importObj.programs.length) {
-																		this.toJson("Verifiying", $.proxy(this.verifyData, this));
-																	}
-																}
-															} else {
-																$("#status").val("Error saving series: " + series.seriesName);
-																this.callback(false);
+							var programSaved = $.proxy(function(importProgram) {
+								return $.proxy(function(programId) {
+									if (programId) {
+										var seriesCompleted = 0;
+
+										if (importProgram.seriesList.length > 0) {
+											var series;
+
+											var seriesSaved = $.proxy(function(importSeries) {
+												return $.proxy(function(seriesId) {
+													if (seriesId) {
+														for (var k = 0; k < importSeries.episodes.length; k++) {
+															var importEpisode = importSeries.episodes[k];
+															var episode = new Episode(null, importEpisode.episodeName, importEpisode.status, importEpisode.statusDate, importEpisode.unverified, importEpisode.unscheduled, importEpisode.sequence, seriesId);
+															episode.save();
+														}
+														seriesCompleted++;
+														if (seriesCompleted === importProgram.seriesList.length) {
+															programsCompleted++;
+															$("#status").val("Imported " + programsCompleted + " of " + importObj.programs.length);
+															if (programsCompleted === importObj.programs.length) {
+																this.toJson("Verifiying", $.proxy(this.verifyData, this));
 															}
-														}, this);
-													}, this)(importSeries));
-												}
-											} else {
-												programsCompleted++;
-												$("#status").val("Imported " + programsCompleted + " of " + importObj.programs.length);
-												if (programsCompleted === importObj.programs.length) {
-													this.toJson("Verifiying", $.proxy(this.verifyData, this));
-												}
+														}
+													} else {
+														$("#status").val("Error saving series: " + series.seriesName);
+														this.callback(false);
+													}
+												}, this);
+											}, this);
+
+											for (var j = 0; j < importProgram.seriesList.length; j++) {
+												var importSeries = importProgram.seriesList[j];
+												series = new Series(null, importSeries.seriesName, importSeries.nowShowing, programId);
+												series.save(seriesSaved(importSeries));
 											}
 										} else {
-											$("#status").val("Error saving program: " + program.programName);
-											this.callback(false);
+											programsCompleted++;
+											$("#status").val("Imported " + programsCompleted + " of " + importObj.programs.length);
+											if (programsCompleted === importObj.programs.length) {
+												this.toJson("Verifiying", $.proxy(this.verifyData, this));
+											}
 										}
-									}, this);
-								}, this)(importProgram));
+									} else {
+										$("#status").val("Error saving program: " + program.programName);
+										this.callback(false);
+									}
+								}, this);
+							}, this);
+
+							for (var i = 0; i < importObj.programs.length; i++) {
+								var importProgram = importObj.programs[i];
+								program = new Program(null, importProgram.programName);
+								program.save(programSaved(importProgram));
 							}
 						}, this)
 					);

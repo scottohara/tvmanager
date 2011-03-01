@@ -76,17 +76,19 @@ Program.prototype.toJson = function(callback) {
 		} else {
 			var completed = 0;
 
+			var seriesRetrieved = function(index) {
+				return function(seriesJson) {
+					json.seriesList[index] = seriesJson;
+					completed++;
+					if (completed === seriesList.length) {
+						callback(json);
+					}
+				};
+			};
+
 			for (var i = 0; i < seriesList.length; i++) {
 				json.seriesList.push({});
-				seriesList[i].toJson((function(index) {
-					return function(seriesJson) {
-						json.seriesList[index] = seriesJson;
-						completed++;
-						if (completed === seriesList.length) {
-							callback(json);
-						}
-					};
-				}(i)));
+				seriesList[i].toJson(seriesRetrieved(i));
 			}
 		}
 	}, this));

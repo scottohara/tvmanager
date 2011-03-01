@@ -86,14 +86,14 @@ test("setAction - valid", function() {
 });
 
 test("setAction - invalid", 2, function() {
-	var originalAlert = alert;
-	alert = function(message) {
+	var originalAlert = window.alert;
+	window.alert = function(message) {
 		equals(message, "invalid is not a valid action", "alert");
 	};
 	this.list.action = "";
 	this.list.setAction("invalid");
 	equals(this.list.action, "", "action property");
-	alert = originalAlert;
+	window.alert = originalAlert;
 });
 
 test("tap - without event handlers", 0, function() {

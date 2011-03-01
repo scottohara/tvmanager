@@ -59,6 +59,8 @@ TransactionMock = function(db) {
 
 TransactionMock.prototype.executeSql = function(sql, params, successCallback, errorCallback) {
 	if (this.db.commit) {
+		var commit = false;
+
 		try {
 			var tokens = sql.match(/\?/g);
 			if (tokens && tokens.length !== params.length) {
@@ -80,7 +82,6 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 				parsedSql: parsedSql
 			};
 
-			var commit = false;
 			if (this.db.failAtSql === parsedSql) {
 				this.executeError("Force failed");
 			} else {
@@ -100,8 +101,8 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 							insertId: 999
 						});
 						commit = true;
-					} catch(e) {
-						this.db.errorMessage = e.message;
+					} catch(successError) {
+						this.db.errorMessage = successError.message;
 					} finally {
 						this.db.commit = commit;
 					}

@@ -67,13 +67,15 @@ test("constructor", function() {
 	this.cacheController = new CacheController();
 	ok(this.cacheController, "Instantiate CacheController object");
 
+	var i;
+
 	this.cacheController.callback = function(updated, message, noticeId) {
 		equals(updated, testParams[i].updated, testParams[i].eventType + " - updated");
 		equals(message, testParams[i].message, testParams[i].eventType + " - message");
 		equals(noticeId, testParams[i].noticeId, testParams[i].eventType + " - noticeId");
 	};
 
-	for (var i = 0; i < testParams.length; i++) {
+	for (i = 0; i < testParams.length; i++) {
 		var originalStatus = window.applicationCache.status;
 		if (testParams[i].status) {
 			window.applicationCache.status = testParams[i].status;

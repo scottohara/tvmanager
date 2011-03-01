@@ -48,7 +48,7 @@ EpisodeController.prototype.save = function() {
 	this.listItem.episode.setUnverified($("#unverified").attr('checked'));
 	this.listItem.episode.unscheduled = $("#unscheduled").attr('checked');
 	this.listItem.episode.save();
-	if (!(this.listItem.listIndex >= 0)) {
+	if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 	}
 	appController.popView(this.listItem);

@@ -15,13 +15,16 @@ ProgramMock = {
 	},
 	list: function(callback) {
 		var that = this;
+		
+		var programToJson = function(index) {
+			var name = that.programs[index].name;
+			return function(jsonCallback) {
+				jsonCallback({ name: name });
+			};
+		};
+
 		for (var i = 0; i < this.programs.length; i++) {
-			this.programs[i].toJson = (function(index) {
-				var name = that.programs[index].name;
-				return function(jsonCallback) {
-					jsonCallback({ name: name });
-				};
-			}(i));
+			this.programs[i].toJson = programToJson(i);
 		}
 		callback(this.programs);
 	},

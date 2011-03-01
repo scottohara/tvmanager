@@ -150,14 +150,19 @@ test("toJson", function() {
 	];
 
 	expect(testParams.length);
-	for (var i = 0; i < testParams.length; i++) {
+
+	var i;
+
+	var programRetrieved = $.proxy(function(json) {
+		same(json, {
+			programName: this.programName,
+			seriesList: testParams[i].seriesJson
+		}, testParams[i].description + " - program JSON");
+	}, this);
+
+	for (i = 0; i < testParams.length; i++) {
 		Series.seriesJson = testParams[i].seriesJson;
-		this.program.toJson($.proxy(function(json) {
-			same(json, {
-				programName: this.programName,
-				seriesList: testParams[i].seriesJson
-			}, testParams[i].description + " - program JSON");
-		}, this));
+		this.program.toJson(programRetrieved);
 	}
 });
 

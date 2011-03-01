@@ -315,12 +315,14 @@ test("toggleStatusDateRow", function() {
 		.hide()
 		.appendTo(document.body);
 
+	var i;
+
 	this.episodeController.getStatusDate = function() {
 		ok(true, testParams[i].description + " - Show spinning wheel");
 	};
 
 	expect(testParams.length + 1);
-	for (var i = 0; i < testParams.length; i++) {
+	for (i = 0; i < testParams.length; i++) {
 		this.unscheduled.attr("checked", testParams[i].unscheduled);
 		this.episodeController.listItem.episode.status = testParams[i].status;
 		if ("undefined" !== testParams[i].statusDate) {

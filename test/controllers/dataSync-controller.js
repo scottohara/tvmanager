@@ -85,8 +85,8 @@ test("setup", 8, function() {
 		.hide()
 		.appendTo(document.body);
 
-	Setting.setting["LastSyncTime"] = new Date(1900, 0, 1, 12, 0, 0);
-	Setting.setting["LastSyncHash"] = this.lastSyncHash;
+	Setting.setting.LastSyncTime = new Date(1900, 0, 1, 12, 0, 0);
+	Setting.setting.LastSyncHash = this.lastSyncHash;
 
 	this.dataSyncController.dataImport = function() {
 		ok(true, "Bind import click event listener");
@@ -158,6 +158,8 @@ test("dataExport - not exporting", function() {
 
 	expect(testParams.length * 5 + 2);
 
+	var i;
+
 	var originalConfirm = window.confirm;
 	window.confirm = function(message) {
 		equals(message, "Are you sure you want to export?", "confirm");
@@ -170,7 +172,7 @@ test("dataExport - not exporting", function() {
 		this.callback(true);
 	};
 
-	for (var i = 0; i < testParams.length; i++) {
+	for (i = 0; i < testParams.length; i++) {
 		this.dataSyncController.dataExport();
 		equals(this.status.val(), testParams[i].status, testParams[i].description + " - Status");
 		equals($("#statusRow").is(":hidden"), testParams[i].proceed, testParams[i].description + " - Hide status row");
@@ -212,6 +214,8 @@ test("dataImport - not importing", function() {
 
 	expect(testParams.length * 5 + 1);
 
+	var i;
+
 	var originalConfirm = window.confirm;
 	window.confirm = function(message) {
 		equals(message, "Warning: Local changes have been made. Are you sure you want to import?", "confirm");
@@ -224,7 +228,7 @@ test("dataImport - not importing", function() {
 		this.callback(true);
 	};
 
-	for (var i = 0; i < testParams.length; i++) {
+	for (i = 0; i < testParams.length; i++) {
 		this.dataSyncController.dataImport();
 		equals(this.status.val(), testParams[i].status, testParams[i].description + " - Status");
 		equals($("#statusRow").is(":hidden"), testParams[i].proceed, testParams[i].description + " - Hide status row");
@@ -288,20 +292,23 @@ asyncTest("toJson", function() {
 	var programsCompleted = 0;
 
 	expect(testParams.length * 2);
+
+	var exportData = function(index) {
+		return function(data) {
+			same(data, testParams[index].result, testParams[index].description + " - Export data");
+			equals(that.status.val(), testParams[index].status, testParams[index].description + " - Status");
+			programsCompleted++;
+			if (programsCompleted === testParams.length) {
+				Program = originalProgram;
+				hex_md5 = originalMD5;
+				start();
+			}
+		};
+	};
+
 	for (var i = 0; i < testParams.length; i++) {
 		Program.programs = testParams[i].programs;
-		this.dataSyncController.toJson(statusBarAction, (function(index) {
-			return function(data) {
-				same(data, testParams[index].result, testParams[index].description + " - Export data");
-				equals(that.status.val(), testParams[index].status, testParams[index].description + " - Status");
-				programsCompleted++;
-				if (programsCompleted === testParams.length) {
-					Program = originalProgram;
-					hex_md5 = originalMD5;
-					start();
-				}
-			};
-		}(i)));
+		this.dataSyncController.toJson(statusBarAction, exportData(i));
 	}
 });
 

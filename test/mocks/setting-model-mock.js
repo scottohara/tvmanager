@@ -8,7 +8,7 @@ SettingMock.prototype.save = function(callback) {
 	}
 };
 
-SettingMock.setting = [];
+SettingMock.setting = {};
 
 SettingMock.get = function(settingName, callback) {
 	callback({
