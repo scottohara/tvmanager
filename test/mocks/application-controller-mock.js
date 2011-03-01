@@ -5,6 +5,7 @@ ApplicationControllerMock = function() {
 		destroy: function() {}
 	};
 	this.notice = [];
+	this.appVersion = "1.0";
 };
 
 ApplicationControllerMock.prototype.refreshScroller = function() {

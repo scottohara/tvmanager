@@ -18,7 +18,10 @@ EpisodeMock = {
 	listByUnscheduled: function(callback) {
 		callback([{}]);
 	},
-	count: function(callback) {
+	totalCount: function(callback) {
+		callback(1);
+	},
+	countByStatus: function(status, callback) {
 		callback(1);
 	}
 };

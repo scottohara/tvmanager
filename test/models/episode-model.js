@@ -330,16 +330,21 @@ test("setStatusDate", function() {
 	];
 
 	expect(testParams.length * 3);
+
+	var realDate = new Date();
+	var fakeDate;
+
+	var fakeDateConstructor = function() {
+		return fakeDate;
+	};
+
 	for (var i = 0; i < testParams.length; i++) {
 		var originalDate = Date;
 		this.episode.status = testParams[i].status;
 		this.episode.unscheduled = testParams[i].unscheduled;
 		if (testParams[i].today) {
-			var realDate = new Date();
-			var fakeDate = new Date(realDate.getFullYear(), testParams[i].today.month, testParams[i].today.day);
-			Date = function() {
-				return fakeDate;
-			};
+			fakeDate = new Date(realDate.getFullYear(), testParams[i].today.month, testParams[i].today.day);
+			Date = fakeDateConstructor;
 		}
 		this.episode.setStatusDate(testParams[i].statusDate);
 		equals(this.episode.statusDate, testParams[i].statusDate, testParams[i].description + " - statusDate property");
@@ -470,9 +475,9 @@ test("listByUnscheduled - success", 4, function() {
 	ok(appController.db.commit, "Commit transaction");
 });
 
-test("count - fail", 4, function() {
-	appController.db.failAt("SELECT COUNT(*) AS EpisodeCount FROM Episode");
-	Episode.count(function(count) {
+test("totalCount - fail", 4, function() {
+	appController.db.failAt("SELECT COUNT(*) AS EpisodeCount FROM Episode ");
+	Episode.totalCount(function(count) {
 		equals(count, 0, "Invoke callback");
 	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
@@ -480,11 +485,33 @@ test("count - fail", 4, function() {
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
-test("count - success", 4, function() {
+test("totalCount - success", 4, function() {
 	appController.db.addResultRows([{
 		EpisodeCount: 1
 	}]);
-	Episode.count($.proxy(function(count) {
+	Episode.totalCount($.proxy(function(count) {
+		equals(count, 1, "Invoke callback");
+	}, this));
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("countByStatus - fail", 4, function() {
+	appController.db.failAt("SELECT COUNT(*) AS EpisodeCount FROM Episode WHERE Status = " + this.status);
+	Episode.countByStatus(this.status, function(count) {
+		equals(count, 0, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Episode.count: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("countByStatus - success", 4, function() {
+	appController.db.addResultRows([{
+		EpisodeCount: 1
+	}]);
+	Episode.countByStatus(this.status, $.proxy(function(count) {
 		equals(count, 1, "Invoke callback");
 	}, this));
 	equals(appController.db.commands.length, 1, "Number of SQL commands");

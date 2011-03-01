@@ -57,9 +57,9 @@ test("setup", 8, function() {
 	this.aboutController.setup();
 	equals(totalPrograms.val(), "1", "Total Programs");
 	equals(totalSeries.val(), "1", "Total Series");
-	equals(totalEpisodes.val(), "1", "Total Episodes");
+	equals(totalEpisodes.val(), "1 (100% watched)", "Total Episodes");
 	equals(databaseVersion.val(), "v1.0", "Database Version");
-	equals(appVersion.val(), "", "App Version");
+	equals(appVersion.val(), "v1.0", "App Version");
 	update.trigger("click");
 	this.aboutController.header.leftButton.eventHandler();
 
