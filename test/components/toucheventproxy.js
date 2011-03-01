@@ -24,7 +24,7 @@ module("toucheventproxy", {
 			equals(e.originalEvent.targetTouches[0].clientY, this.event.clientY, "targetTouches clientY property");
 			equals(e.originalEvent.changedTouches[0].target, this.event.target, "changedTouches target property");
 			same(e.originalEvent.target, this.event.target, "target property");
-			equals(e.originalEvent.timeStamp.toString(), this.event.timeStamp.toString(), "timeStamp property");
+			equals(Date(e.originalEvent.timeStamp).toString(), this.event.timeStamp.toString(), "timeStamp property");
 		}, this);
 
 		this.emptyEventHandler = function(e) {
