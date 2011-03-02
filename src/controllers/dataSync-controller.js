@@ -54,12 +54,17 @@ DataSyncController.prototype.gotLastSyncHash = function(lastSyncHash) {
 };
 
 DataSyncController.prototype.checkForLocalChanges = function(data) {
-	this.localChanges = (data.hash !== this.lastSyncHash.settingValue);
+  if (data) {
+		this.localChanges = (data.hash !== this.lastSyncHash.settingValue);
 	
-	if (this.localChanges) {
-		$("#localChanges").val("Data changed since last sync");
+		if (this.localChanges) {
+			$("#localChanges").val("Data changed since last sync");
+		} else {
+			$("#localChanges").val("No changes since last sync");
+		}
 	} else {
-		$("#localChanges").val("No changes since last sync");
+		this.localChanges = false;
+		$("#localChanges").val("No data");
 	}
 };
 

@@ -126,7 +126,14 @@ test("gotLastSyncHash", 1, function() {
 	equals(this.localChanges.val(), "Unknown", "Changes");
 });
 
-test("checkForLocalChanges", 2, function() {
+test("checkForLocalChanges - no data", 2, function() {
+	this.dataSyncController.lastSyncHash = { settingValue: this.lastSyncHash };
+	this.dataSyncController.checkForLocalChanges();
+	ok(!this.dataSyncController.localChanges, "Detect no changes");
+	equals(this.localChanges.val(), "No data", "Changes");
+});
+
+test("checkForLocalChanges - with data", 2, function() {
 	this.dataSyncController.lastSyncHash = { settingValue: this.lastSyncHash };
 	this.dataSyncController.checkForLocalChanges({ hash: "test" });
 	ok(this.dataSyncController.localChanges, "Detect changes");
