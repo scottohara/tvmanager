@@ -106,6 +106,7 @@ module("application-controller", {
 		ApplicationController.prototype.contentShown = this.originalContentShown;
 		ApplicationController.prototype.pushView = this.originalPushView;
 		ApplicationController.prototype.noticesMoved = this.originalNoticesMoved;
+		$.fn.load = jQueryMock.originalLoad;
 	}
 });
 
@@ -157,6 +158,12 @@ test("constructor - cache update progress", 1, function() {
 	CacheControllerMock.prototype.updated = false;
 });
 
+asyncTest("start - dbConfig.json 304 Not Modified", 1, function() {
+	$.get = jQueryMock.get;
+	DatabaseController = DatabaseControllerMockNotModified;
+	this.appController.start();
+});
+
 asyncTest("start - fail", 1, function() {
 	DatabaseController = DatabaseControllerMockFail;
 	this.expectedNotice = {
@@ -205,6 +212,13 @@ asyncTest("pushView", 3, function() {
 	equals(this.appController.viewStack[0].scrollPos, this.appController.scroller.y, "Previous scroll position");
 	this.testView.scrollPos = 0;
 	same(this.appController.viewStack[1], this.testView, "viewStack property");
+});
+
+asyncTest("pushView - 304 Not Modified", 1, function() {
+	$.fn.load = jQueryMock.load;
+	this.appController.pushView = this.originalPushView;
+	this.appController.contentShown = this.originalContentShown;
+	this.appController.pushView("test", {});
 });
 
 asyncTest("popView", 3, function() {

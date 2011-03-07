@@ -37,7 +37,11 @@ var ApplicationController = function () {
 };
 
 ApplicationController.prototype.start = function() {
-	$.get("config.json", $.proxy(function(config) {
+	$.get("config.json", $.proxy(function(config, status, jqXHR) {
+		if (config === undefined) {
+			config = $.parseJSON(jqXHR.responseText);
+		}
+
 		this.db = new DatabaseController(config.databaseName,
 			$.proxy(function(version) {
 				if (version.initial !== version.current) {
@@ -108,7 +112,11 @@ ApplicationController.prototype.viewPopped = function(args) {
 ApplicationController.prototype.show = function(onSuccess, args) {
 	this.hideScrollHelper();
 	$("#nowLoading").addClass("loading");
-	$("#content").load("views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", function() {
+	$("#content").load("views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", function(responseText, status, jqXHR) {
+		if (responseText === undefined) {
+			$(this).html(jqXHR.responseText);
+		}
+
 		$("#contentWrapper").addClass("loading");
 		onSuccess(args);
 	});

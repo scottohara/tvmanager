@@ -65,6 +65,13 @@ test("constructor", 10, function() {
 	equals(this.list.action, this.action, "action property");
 });
 
+asyncTest("refresh - 304 not modified", 7, function() {
+	$.get = jQueryMock.get;
+	this.list.groupBy = null;
+	this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
+	this.list.refresh();
+});
+
 asyncTest("refresh - without grouping", 7, function() {
 	this.list.groupBy = null;
 	this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";

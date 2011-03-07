@@ -369,6 +369,16 @@ asyncTest("verifyData - success", 3, function() {
 	this.dataSyncController.verifyData({ hash: "test-hash" });
 });
 
+asyncTest("verifyData - 304 Not Modified", 1, function() {
+	$.ajax = jQueryMock.ajax;
+	this.dataSyncController.callback = $.proxy(function(success) {
+		ok(success, "Invoke callback with true");
+		start();
+	}, this);
+
+	this.dataSyncController.verifyData({ hash: "test-hash" });
+});
+
 test("doExport - ajax fail", 2, function() {
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
@@ -631,6 +641,17 @@ asyncTest("doImport - success", 5, function() {
 				"sequence": 2
 			}
 		], "Episodes");
+		start();
+	}, this);
+
+	this.dataSyncController.doImport();
+});
+
+asyncTest("doImport - 304 Not Modified", 1, function() {
+	$.ajax = jQueryMock.ajax;
+
+	this.dataSyncController.verifyData = $.proxy(function(data) {
+		equals(this.status.val(), "Imported 2 of 2", "Status");
 		start();
 	}, this);
 

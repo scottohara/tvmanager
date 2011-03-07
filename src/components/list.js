@@ -11,7 +11,11 @@ var List = function (container, itemTemplate, groupBy, items, viewEventHandler, 
 };
 
 List.prototype.refresh = function () {
-	$.get(this.itemTemplate, $.proxy(function (template) {
+	$.get(this.itemTemplate, $.proxy(function (template, status, jqXHR) {
+		if (template === undefined) {
+			template = jqXHR.responseText;
+		}
+
 		$("#" + this.container).html("");
 
 		var itemHTML,

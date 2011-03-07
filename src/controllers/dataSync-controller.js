@@ -207,7 +207,11 @@ DataSyncController.prototype.verifyData = function(data) {
 			url: "getChecksum.asp",
 			context: this,
 			dataType: "text",
-			success: function(checkSum) {
+			success: function(checkSum, status, jqXHR) {
+				if (checkSum === undefined) {
+					checkSum = jqXHR.responseText;
+				}
+
 				if (data.hash.valueOf() === checkSum) {
 					$("#status").val("Verify complete");
 					this.setLastSyncTime();
@@ -259,7 +263,11 @@ DataSyncController.prototype.doImport = function() {
 		url: "export/export.txt",
 		context: this,
 		dataType: "json",
-		success: function(importObj) {
+		success: function(importObj, status, jqXHR) {
+			if (importObj === undefined) {
+				importObj = $.parseJSON(jqXHR.responseText);
+			}
+			
 			if (importObj.databaseVersion === appController.db.version) {
 				var programsCompleted = 0;
 

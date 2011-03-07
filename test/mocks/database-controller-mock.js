@@ -3,6 +3,12 @@ DatabaseControllerMock = function(databaseName, callback, errorCallback) {
 	return { version: "1.1" };
 };
 
+DatabaseControllerMockNotModified = function(databaseName, callback, errorCallback) {
+	$.get = jQueryMock.originalGet;
+	equals(databaseName, "TVManager", "databaseName property");
+	start();
+};
+
 DatabaseControllerMockFail = function(databaseName, callback, errorCallback) {
 	errorCallback({message: "Error"});
 	return {};
