@@ -37,7 +37,7 @@ var ApplicationController = function () {
 };
 
 ApplicationController.prototype.start = function() {
-	$.get("config.json", $.proxy(function(config, status, jqXHR) {
+	$.get("dbConfig.json", $.proxy(function(config, status, jqXHR) {
 		if (config === undefined) {
 			config = $.parseJSON(jqXHR.responseText);
 		}
@@ -70,9 +70,17 @@ ApplicationController.prototype.start = function() {
 		if (this.db.version) {
 			Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
 		}
-
-		this.appVersion = config.appVersion;
 	}, this), "json");
+
+	$.get("appConfig.json", $.proxy(this.gotAppConfig, this), "json");
+};
+
+ApplicationController.prototype.gotAppConfig = function(config, status, jqXHR) {
+	if (config === undefined) {
+		config = $.parseJSON(jqXHR.responseText);
+	}
+
+	this.appVersion = config.appVersion;
 };
 
 ApplicationController.prototype.pushView = function(view, args) {

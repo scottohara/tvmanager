@@ -204,6 +204,12 @@ asyncTest("start - sync warning", 2, function() {
 	this.appController.start();
 });
 
+test("gotAppConfig - 304 Not Modified", 1, function() {
+	var appVersion = "1.0";
+	this.appController.gotAppConfig(undefined, "notmodified", { responseText: JSON.stringify({ "appVersion": appVersion }) });
+	equals(this.appController.appVersion, appVersion, "appVersion property");
+});
+
 asyncTest("pushView", 3, function() {
 	this.appController.scroller.y = 1;
 	this.appController.pushView = this.originalPushView;
