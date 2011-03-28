@@ -131,10 +131,7 @@ ApplicationController.prototype.show = function(onSuccess, args) {
 };
 
 ApplicationController.prototype.initScroller = function() {
-	this.scroller = new iScroll($("#content").get(0), {
-		desktopCompatibility: true,
-		checkDOMChanges: false
-	});
+	this.scroller = new iScroll($("#contentWrapper").get(0));
 };
 
 ApplicationController.prototype.refreshScroller = function() {
