@@ -148,7 +148,7 @@ EpisodesController.prototype.editItems = function() {
 		.sortable({
 			axis: "y",
 			sort: function(e, ui) {
-				$(ui.helper).offset({top: e.clientY - 20});
+				$(ui.helper).offset({top: e.clientY - appController.scroller.y - 20});
 			}
 		})
 		.addTouch();
