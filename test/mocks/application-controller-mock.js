@@ -2,7 +2,12 @@ ApplicationControllerMock = function() {
 	this.db = new DatabaseMock();
 	this.cache = new CacheControllerMock();
 	this.scroller = {
-		destroy: function() {}
+		destroy: function() {},
+		scroller: {
+			style: {
+				webkitTransform: ""
+			}
+		}
 	};
 	this.notice = [];
 	this.appVersion = "1.0";
