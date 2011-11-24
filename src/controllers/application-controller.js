@@ -8,13 +8,7 @@ var ApplicationController = function () {
 	$("#contentWrapper").bind('webkitTransitionEnd', this.contentShown);
 	SpinningWheel.cellHeight = 45;
 
-	$(document).bind("touchmove", function(e) {
-		e.preventDefault();
-	});
-
-	this.initScroller();
-
-	this.abc = new abc($("#abc").get(0), this.scroller);
+	this.abc = new abc($("#abc").get(0), $("#content"));
 	this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
 
 	this.cache = new CacheController();
@@ -85,9 +79,9 @@ ApplicationController.prototype.gotAppConfig = function(config, status, jqXHR) {
 
 ApplicationController.prototype.pushView = function(view, args) {
 	if (this.viewStack.length > 0) {
+		this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").scrollTop();
 		this.clearHeader();
 		this.clearFooter();
-		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.y;
 	}
 
 	this.viewStack.push({
@@ -119,27 +113,25 @@ ApplicationController.prototype.viewPopped = function(args) {
 
 ApplicationController.prototype.show = function(onSuccess, args) {
 	this.hideScrollHelper();
-	$("#nowLoading").addClass("loading");
+	//TODO: Fixed conflict with webkit-transform and webkit-overflow-scrolling
+	//$("#nowLoading").addClass("loading");
 	$("#content").load("views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", function(responseText, status, jqXHR) {
 		if (responseText === undefined) {
 			$(this).html(jqXHR.responseText);
 		}
 
-		$("#contentWrapper").addClass("loading");
+		//TODO: Fixed conflict with webkit-transform and webkit-overflow-scrolling
+		//$("#contentWrapper").addClass("loading");
 		onSuccess(args);
 	});
 };
 
-ApplicationController.prototype.initScroller = function() {
-	this.scroller = new iScroll($("#contentWrapper").get(0));
-};
-
+//TODO: Rename to setScrollPosition  (update all references)
 ApplicationController.prototype.refreshScroller = function() {
-	this.scroller.refresh();
 	if (-1 === this.viewStack[this.viewStack.length - 1].scrollPos) {
-		this.viewStack[this.viewStack.length - 1].scrollPos = this.scroller.maxScrollY;
+		this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").children(":last").position().top;
 	}
-	this.scroller.scrollTo(0, this.viewStack[this.viewStack.length - 1].scrollPos, "0ms");
+	$("#content").children(":first").scrollTop(this.viewStack[this.viewStack.length - 1].scrollPos);
 };
 
 ApplicationController.prototype.contentShown = function() {
@@ -243,7 +235,7 @@ ApplicationController.prototype.clearFooter = function() {
 };
 
 ApplicationController.prototype.setContentHeight = function() {
-	$("#contentWrapper").height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
+	$("#content").children(":first").height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
 };
 
 ApplicationController.prototype.showNotice = function(notice) {

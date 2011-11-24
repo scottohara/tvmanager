@@ -94,18 +94,12 @@ DataSyncController.prototype.dataExport = function() {
 			this.exporting = false;
 		}, this);
 
-		// Hack for iOS/iScoll issue with window.confirm() triggering a second click event
-		appController.scroller.enabled = false;
-
 		if (window.confirm("Are you sure you want to export?")) {
 			this.toJson("Exported", $.proxy(this.doExport, this));
 		} else {
 			$("#status").val("Export aborted");
 			this.callback(false);
 		}
-
-		// End hack for iOS/iScoll issue with window.confirm() triggering a second click event
-		appController.scroller.enabled = true;
 	} else {
 		$("#status").val("An export is already running");
 	}
@@ -142,18 +136,12 @@ DataSyncController.prototype.dataImport = function() {
 			prompt = "Warning: Local changes have been made. ";
 		}
 
-		// Hack for iOS/iScoll issue with window.confirm() triggering a second click event
-		appController.scroller.enabled = false;
-
 		if (window.confirm(prompt + "Are you sure you want to import?")) {
 			this.doImport();
 		} else {
 			$("#status").val("Import aborted");
 			this.callback(false);
 		}
-
-		// End hack for iOS/iScoll issue with window.confirm() triggering a second click event
-		appController.scroller.enabled = true;
 	} else {
 		$("#status").val("An import is already running");
 	}

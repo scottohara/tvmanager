@@ -2,6 +2,9 @@ jQueryMock = {
 	originalGet: $.get,
 	originalLoad: $.fn.load,
 	originalAjax: $.ajax,
+	originalScrollTop: $.fn.scrollTop,
+	originalPosition: $.fn.position,
+	scrollPos: 0,
 	get: function(url, success) {
 		$.get = jQueryMock.originalGet;
 
@@ -30,5 +33,17 @@ jQueryMock = {
 		};
 
 		$.ajax(options);
+	},
+	scrollTop: function(position) {
+		if (position) {
+			jQueryMock.scrollPos = position;
+		} else {
+			return jQueryMock.scrollPos;
+		}
+	},
+	position: function() {
+		return {
+			top: 999
+		};
 	}
 };

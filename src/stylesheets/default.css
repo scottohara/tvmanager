@@ -12,21 +12,20 @@ body {
 /************************** Content *******************************/
 
 #contentWrapper {
-	height: 375px;
 	position: relative;
 	z-index: 1;
 	-webkit-transition-duration: 300ms;
-	-webkit-transition-property: -webkit-transform;
+	/*-webkit-transition-property: -webkit-transform;*/
 }
 
 #contentWrapper.loading {
 	visibility: hidden;
-	-webkit-transform: translateX(100%);
+	/*-webkit-transform: translateX(100%);*/
 }
 
 #contentWrapper.loaded {
 	visibility: visible;
-	-webkit-transform: translateX(0%);
+	/*-webkit-transform: translateX(0%);*/
 }
 
 #nowLoading {
@@ -166,10 +165,11 @@ a.toggle {
 ul {
 	padding:0;
 	margin: 0;
+	overflow-y: scroll;
+	-webkit-overflow-scrolling: touch;
 }
 
 ul li {
-	position: relative;
 	margin: 0;
 	border-bottom: 1px solid #E0E0E0;
 	padding: 8px 0 8px 10px;

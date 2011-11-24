@@ -11,10 +11,10 @@
  *
  */
 
-// SOH: Pass a reference to an existing scroller
-function abc(el, scroller) {
+// SOH: Pass a reference to an element whose first child will be scrolled
+function abc(el, scrollEl) {
 	this.element = el;
-	this.scroller = scroller;
+	this.scrollElement = scrollEl;
 	this.element.addEventListener('touchstart', this, false);
 }
 
@@ -36,7 +36,7 @@ abc.prototype = {
 		theTarget = theTarget.innerText;
 
 		if( document.getElementById(theTarget) )
-			this.scroller.scrollTo(0, -document.getElementById(theTarget).offsetTop, '100ms');
+			this.scrollElement.children(":first").scrollTop(-document.getElementById(theTarget).offsetTop);
 
 		this.element.addEventListener('touchmove', this, false);
 		this.element.addEventListener('touchend', this, false);
@@ -64,10 +64,10 @@ abc.prototype = {
 
 		if( document.getElementById(theTarget) ) {
 			theTarget = -document.getElementById(theTarget).offsetTop;
-			if( theTarget<this.scroller.maxScrollY )
-				theTarget = this.scroller.maxScrollY;
+			if( theTarget<this.scrollElement.children(":first")[0].scrollHeight )
+				theTarget = this.scrollElement.children(":first")[0].scrollHeight;
 
-			this.scroller.scrollTo(0, theTarget, '0s');
+			this.scrollElement.children(":first").scrollTop(theTarget);
 		}
 
 		return false;

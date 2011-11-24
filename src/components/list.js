@@ -24,9 +24,7 @@ List.prototype.refresh = function () {
 
 		var itemClicked = $.proxy(function (itemIndex) {
 			return $.proxy(function () {
-				if (!appController.scroller.moved) {
-					this.tap(itemIndex);
-				}
+				this.tap(itemIndex);
 			}, this);
 		}, this);
 

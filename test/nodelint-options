@@ -19,7 +19,6 @@ var options = {
 		"$",
 		"SpinningWheel",
 		"abc",
-		"iScroll",
 		"hex_md5",
 
 		/* Models */
@@ -72,8 +71,9 @@ var options = {
 	],
 	browser: true,
 	devel: true,
-	plusplus: false,
-	onevar: false,	// disable var checks (for now)
-	white: false,		// disable white space checking to deal with tab issues
-	newcap: false		// disable check for constructor capitalisation, to deal with abc/iScroll objects
+	plusplus: true,
+	maxlen: 512,
+	vars: true,			// disable var checks (for now)
+	white: true,		// disable white space checking to deal with tab issues
+	newcap: true		// disable check for constructor capitalisation, to deal with abc objects
 };

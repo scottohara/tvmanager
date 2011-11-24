@@ -1,14 +1,6 @@
 ApplicationControllerMock = function() {
 	this.db = new DatabaseMock();
 	this.cache = new CacheControllerMock();
-	this.scroller = {
-		destroy: function() {},
-		scroller: {
-			style: {
-				webkitTransform: ""
-			}
-		}
-	};
 	this.notice = [];
 	this.appVersion = "1.0";
 };
@@ -57,9 +49,5 @@ ApplicationControllerMock.prototype.showScrollHelper = function() {
 };
 
 ApplicationControllerMock.prototype.hideScrollHelper = function() {
-
-};
-
-ApplicationControllerMock.prototype.initScroller = function() {
 
 };

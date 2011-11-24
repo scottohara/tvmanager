@@ -318,7 +318,7 @@ test("requenceItems", function() {
 	list.remove();
 });
 
-test("editItems", 4, function() {
+test("editItems", 3, function() {
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()
@@ -331,12 +331,9 @@ test("editItems", 4, function() {
 	};
 
 	this.episodesController.episodeList = new ListMock();
-	appController.viewStack = [{ scrollPos: 0 }];
-	appController.scroller.y = 1;
 	this.episodesController.editItems();
 	equals(this.episodesController.episodeList.action, "edit", "List action");
 	ok($("#list").hasClass("edit"), "Set list edit style");
-	equals(appController.viewStack[0].scrollPos, 1, "Scroll position");
 	this.episodesController.footer.leftButton.eventHandler();
 	list.remove();
 });

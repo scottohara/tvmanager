@@ -107,10 +107,12 @@ module("application-controller", {
 		ApplicationController.prototype.pushView = this.originalPushView;
 		ApplicationController.prototype.noticesMoved = this.originalNoticesMoved;
 		$.fn.load = jQueryMock.originalLoad;
+		$.fn.scrollTop = jQueryMock.originalScrollTop;
+		$.fn.position = jQueryMock.originalPosition;
 	}
 });
 
-test("constructor", 9, function() {
+test("constructor", 8, function() {
 	ok(this.appController, "Instantiate ApplicationController object");
 	same(this.appController.viewStack, [this.testView], "viewStack property");
 	same(this.appController.noticeStack, {
@@ -121,13 +123,8 @@ test("constructor", 9, function() {
 	this.contentWrapper.trigger("webkitTransitionEnd");
 	equals(SpinningWheel.cellHeight, 45, "SpinningWheel.cellHeight property");
 
-	$(document).bind("touchmove", function(e) {
-		ok(e.isDefaultPrevented(), "Prevent default document touchmove events");
-	});
-	$(document).trigger($.Event("touchmove"));
-	
 	same(this.appController.abc.element, this.abc.get(0), "abc.element property");
-	same(this.appController.abc.scroller, this.appController.scroller, "abc.scroller property");
+	same(this.appController.abc.scrollElement, $("#content"), "abc.scrollElement property");
 	same(this.appController.abctoucheventproxy.element, this.appController.abc.element, "abctoucheventproxy.element property");
 });
 
@@ -211,11 +208,11 @@ test("gotAppConfig - 304 Not Modified", 1, function() {
 });
 
 asyncTest("pushView", 3, function() {
-	this.appController.scroller.y = 1;
+	$("#content").children(":first").scrollTop(1);
 	this.appController.pushView = this.originalPushView;
 	this.appController.contentShown = this.originalContentShown;
 	this.appController.pushView("test", {});
-	equals(this.appController.viewStack[0].scrollPos, this.appController.scroller.y, "Previous scroll position");
+	equals(this.appController.viewStack[0].scrollPos, $("#content").children(":first").scrollTop(), "Previous scroll position");
 	this.testView.scrollPos = 0;
 	same(this.appController.viewStack[1], this.testView, "viewStack property");
 });
@@ -234,7 +231,11 @@ asyncTest("popView", 3, function() {
 	same(this.appController.viewStack, [this.testView], "viewStack property");
 });
 
+//TODO: Rename to setScrollPosition
 test("refreshScroller", function() {
+	$.fn.scrollTop = jQueryMock.scrollTop;
+	$.fn.position = jQueryMock.position;
+
 	var testParams = [
 		{
 			description: "scroll to position",
@@ -244,20 +245,18 @@ test("refreshScroller", function() {
 		{
 			description: "scroll to end",
 			scrollPos: -1,
-			expectedPos: 0
+			expectedPos: jQueryMock.position().top
 		}
 	];
 
 	var i;
 	
-	this.appController.scroller.scrollTo = function(x, y, duration) {
-		equals(y, testParams[i].expectedPos, testParams[i].description);
-	};
-
 	expect(testParams.length);
 	for (i = 0; i < testParams.length; i++) {
 		this.appController.viewStack[0].scrollPos = testParams[i].scrollPos;
+		//TODO: Rename to setScrollPosition
 		this.appController.refreshScroller();
+		equals($("#content").children(":first").scrollTop(), testParams[i].expectedPos, testParams[i].description);
 	}
 });
 
@@ -325,11 +324,13 @@ test("clearFooter", 4, function() {
 });
 
 test("setContentHeight", 1, function() {
+	var list = $("<ul>").appendTo(this.content);
 	$("#header").outerHeight(1);
 	$("#footer").outerHeight(1);
 	window.innerHeight = 3;
 	this.appController.setContentHeight();
-	equals($("#contentWrapper").height(), 1, "Content height");
+	equals($("#content").children(":first").height(), 1, "Content height");
+	list.remove();
 });
 
 asyncTest("showNotice", 14, function() {

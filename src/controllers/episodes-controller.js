@@ -138,17 +138,13 @@ EpisodesController.prototype.resequenceItems = function() {
 EpisodesController.prototype.editItems = function() {
 	appController.clearFooter();
 	this.episodeList.setAction("edit");
-	appController.viewStack[appController.viewStack.length - 1].scrollPos = appController.scroller.y;
-	var origTransform = appController.scroller.scroller.style.webkitTransform;
-	appController.scroller.destroy();
-	appController.scroller.scroller.style.webkitTransform = origTransform;
 	$("#list")
 		.removeClass()
 		.addClass("edit")
 		.sortable({
 			axis: "y",
 			sort: function(e, ui) {
-				$(ui.helper).offset({top: e.clientY - appController.scroller.y - 20});
+				$(ui.helper).offset({top: e.clientY - 20});
 			}
 		})
 		.addTouch();
@@ -156,7 +152,6 @@ EpisodesController.prototype.editItems = function() {
 		label: "v" + appController.db.version,
 		leftButton: {
 			eventHandler: $.proxy(function() {
-				appController.initScroller();
 				this.resequenceItems();
 				this.viewItems();
 			}, this),
