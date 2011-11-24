@@ -22,8 +22,6 @@ DataSyncController.prototype.activate = function() {
 
 		Setting.get("LastSyncTime", this.gotLastSyncTime);
 		Setting.get("LastSyncHash", $.proxy(this.gotLastSyncHash, this));
-
-		appController.refreshScroller();
 };
 
 DataSyncController.prototype.goBack = function() {

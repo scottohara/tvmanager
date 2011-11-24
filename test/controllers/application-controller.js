@@ -231,8 +231,7 @@ asyncTest("popView", 3, function() {
 	same(this.appController.viewStack, [this.testView], "viewStack property");
 });
 
-//TODO: Rename to setScrollPosition
-test("refreshScroller", function() {
+test("setScrollPosition", function() {
 	$.fn.scrollTop = jQueryMock.scrollTop;
 	$.fn.position = jQueryMock.position;
 
@@ -254,8 +253,7 @@ test("refreshScroller", function() {
 	expect(testParams.length);
 	for (i = 0; i < testParams.length; i++) {
 		this.appController.viewStack[0].scrollPos = testParams[i].scrollPos;
-		//TODO: Rename to setScrollPosition
-		this.appController.refreshScroller();
+		this.appController.setScrollPosition();
 		equals($("#content").children(":first").scrollTop(), testParams[i].expectedPos, testParams[i].description);
 	}
 });

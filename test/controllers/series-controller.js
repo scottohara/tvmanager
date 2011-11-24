@@ -74,7 +74,7 @@ test("constructor - add", 2, function() {
 	same(this.seriesController.listItem, listItem, "listItem property");
 });
 
-test("setup", 7, function() {
+test("setup", 6, function() {
 	this.seriesController.cancel = function() {
 		ok(true, "Bind back button event handler");
 	};

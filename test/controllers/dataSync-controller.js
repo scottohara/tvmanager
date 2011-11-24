@@ -74,7 +74,7 @@ test("constructor", 1, function() {
 	ok(this.dataSyncController, "Instantiate DataSyncController object");
 });
 
-test("setup", 8, function() {
+test("setup", 7, function() {
 	var importButton = $("<div>")
 		.attr("id", "import")
 		.hide()

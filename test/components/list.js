@@ -31,8 +31,8 @@ module("list", {
 			"edit",
 			"delete"
 		];
-		this.originalRefreshScroller = appController.refreshScroller;
-		appController.refreshScroller = $.proxy(function() {
+		this.originalSetScrollPosition = appController.setScrollPosition;
+		appController.setScrollPosition = $.proxy(function() {
 			equals($("#" + this.container).html(), this.renderHtml, "list items");
 			$("#" + this.container + " li:not([id])").each($.proxy(function(index, element) {
 				this.currentItem = index;
@@ -48,7 +48,7 @@ module("list", {
 	},
 	teardown: function() {
 		$("#" + this.container).remove();
-		appController.refreshScroller = this.originalRefreshScroller;
+		appController.setScrollPosition = this.originalSetScrollPosition;
 	}
 });
 

@@ -8,7 +8,7 @@ test("constructor", 1, function() {
 	ok(this.settingsController, "Instantiate SettingsController object");
 });
 
-test("setup", 12, function() {
+test("setup", 11, function() {
 	var dataSyncRow = $("<div>")
 		.attr("id", "dataSyncRow")
 		.hide()

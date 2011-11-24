@@ -165,7 +165,7 @@ test("onPopulateListItem", 1, function() {
 		{
 			description: "watched",
 			status: "Watched",
-			scrollPos: -1,
+			scrollPos: 1,
 			scrollToFirstUnwatched: true
 		},
 		{

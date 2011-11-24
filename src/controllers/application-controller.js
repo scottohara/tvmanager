@@ -79,9 +79,9 @@ ApplicationController.prototype.gotAppConfig = function(config, status, jqXHR) {
 
 ApplicationController.prototype.pushView = function(view, args) {
 	if (this.viewStack.length > 0) {
-		this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").scrollTop();
-		this.clearHeader();
+		this.getScrollPosition();
 		this.clearFooter();
+		this.clearHeader();
 	}
 
 	this.viewStack.push({
@@ -99,8 +99,8 @@ ApplicationController.prototype.viewPushed = function() {
 };
 
 ApplicationController.prototype.popView = function(args) {
-	this.clearHeader();
 	this.clearFooter();
+	this.clearHeader();
 	this.viewStack.pop();
 	this.show($.proxy(this.viewPopped, this), args);
 };
@@ -126,8 +126,11 @@ ApplicationController.prototype.show = function(onSuccess, args) {
 	});
 };
 
-//TODO: Rename to setScrollPosition  (update all references)
-ApplicationController.prototype.refreshScroller = function() {
+ApplicationController.prototype.getScrollPosition = function() {
+	this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").scrollTop();
+};
+
+ApplicationController.prototype.setScrollPosition = function() {
 	if (-1 === this.viewStack[this.viewStack.length - 1].scrollPos) {
 		this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").children(":last").position().top;
 	}

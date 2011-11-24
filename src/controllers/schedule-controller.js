@@ -71,8 +71,8 @@ ScheduleController.prototype.editItem = function(itemIndex) {
 };
 
 ScheduleController.prototype.editItems = function() {
-	appController.clearFooter();
 	this.scheduleList.setAction("edit");
+	appController.clearFooter();
 	$("#list")
 		.removeClass()
 		.addClass("edit");
@@ -89,8 +89,8 @@ ScheduleController.prototype.editItems = function() {
 };
 
 ScheduleController.prototype.viewItems = function() {
-	appController.clearFooter();
 	this.scheduleList.setAction("view");
+	appController.clearFooter();
 	$("#list").removeClass();
 	this.footer = {
 		label: "v" + appController.db.version,

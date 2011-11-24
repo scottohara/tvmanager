@@ -22,8 +22,6 @@ SettingsController.prototype.activate = function() {
 	$("#expectedReportRow").bind('click', this.viewExpectedReport);
 	$("#missedReportRow").bind('click', this.viewMissedReport);
 	$("#incompleteReportRow").bind('click', this.viewIncompleteReport);
-
-	appController.refreshScroller();
 };
 
 SettingsController.prototype.goBack = function() {

@@ -85,8 +85,8 @@ SeriesListController.prototype.deleteItem = function(itemIndex, dontRemove) {
 };
 
 SeriesListController.prototype.deleteItems = function() {
-    appController.clearFooter();
     this.seriesList.setAction("delete");
+    appController.clearFooter();
     $("#list")
 			.removeClass()
 			.addClass("delete");
@@ -103,8 +103,8 @@ SeriesListController.prototype.deleteItems = function() {
 };
 
 SeriesListController.prototype.editItems = function() {
-    appController.clearFooter();
     this.seriesList.setAction("edit");
+    appController.clearFooter();
     $("#list")
 			.removeClass()
 			.addClass("edit");
@@ -121,8 +121,8 @@ SeriesListController.prototype.editItems = function() {
 };
 
 SeriesListController.prototype.viewItems = function() {
-    appController.clearFooter();
     this.seriesList.setAction("view");
+    appController.clearFooter();
     $("#list").removeClass();
     this.footer = {
         label: "v" + appController.db.version,

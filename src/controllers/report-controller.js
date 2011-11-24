@@ -35,8 +35,8 @@ ReportController.prototype.viewItem = function(itemIndex) {
 };
 
 ReportController.prototype.viewItems = function() {
-	appController.clearFooter();
 	this.reportList.setAction("view");
+	appController.clearFooter();
 	$("#list").removeClass();
 	this.footer = {
 		label: "v" + appController.db.version

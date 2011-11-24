@@ -62,9 +62,9 @@ ProgramsController.prototype.deleteItem = function(itemIndex) {
 };
 
 ProgramsController.prototype.deleteItems = function() {
+	this.programList.setAction("delete");
 	appController.hideScrollHelper();
 	appController.clearFooter();
-	this.programList.setAction("delete");
 	$("#list")
 		.removeClass()
 		.addClass("delete");
@@ -81,9 +81,9 @@ ProgramsController.prototype.deleteItems = function() {
 };
 
 ProgramsController.prototype.editItems = function() {
+	this.programList.setAction("edit");
 	appController.hideScrollHelper();
 	appController.clearFooter();
-	this.programList.setAction("edit");
 	$("#list")
 		.removeClass()
 		.addClass("edit");
@@ -100,9 +100,9 @@ ProgramsController.prototype.editItems = function() {
 };
 
 ProgramsController.prototype.viewItems = function() {
+	this.programList.setAction("view");
 	appController.showScrollHelper();
 	appController.clearFooter();
-	this.programList.setAction("view");
 	$("#list")
 		.removeClass()
 		.addClass("withHelper");

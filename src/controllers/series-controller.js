@@ -27,8 +27,6 @@ SeriesController.prototype.setup = function() {
 	$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
 	$("#nowShowing").bind('click', $.proxy(this.getNowShowing, this));
 	$("#moveTo").bind('click', $.proxy(this.getProgramId, this));
-
-	appController.refreshScroller();
 };
 
 SeriesController.prototype.save = function() {

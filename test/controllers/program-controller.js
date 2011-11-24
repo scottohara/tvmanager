@@ -39,7 +39,7 @@ test("constructor - add", 2, function() {
 	same(this.programController.listItem, listItem, "listItem property");
 });
 
-test("setup", 4, function() {
+test("setup", 3, function() {
 	this.programController.cancel = function() {
 		ok(true, "Bind back button event handler");
 	};

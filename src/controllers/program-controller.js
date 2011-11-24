@@ -22,8 +22,6 @@ ProgramController.prototype.setup = function() {
 	};
 
 	$("#programName").val(this.listItem.program.programName);
-
-	appController.refreshScroller();
 };
 
 ProgramController.prototype.save = function() {

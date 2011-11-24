@@ -39,8 +39,6 @@ EpisodeController.prototype.setup = function() {
 	this.setStatus(status);
 
 	$("#statusDate").val(this.listItem.episode.statusDate);
-
-	appController.refreshScroller();
 };
 
 EpisodeController.prototype.save = function() {

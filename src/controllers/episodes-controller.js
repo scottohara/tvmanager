@@ -50,7 +50,7 @@ EpisodesController.prototype.activate = function(listItem) {
 EpisodesController.prototype.onPopulateListItem = function(episode) {
 	if (this.scrollToFirstUnwatched) {
 		if ("Watched" === episode.status) {
-			appController.viewStack[appController.viewStack.length - 1].scrollPos -= $("#" + String(episode.id)).parent().outerHeight();
+			appController.viewStack[appController.viewStack.length - 1].scrollPos += $("#" + String(episode.id)).parent().outerHeight();
 		} else {
 			this.scrollToFirstUnwatched = false;
 		}
@@ -95,8 +95,8 @@ EpisodesController.prototype.deleteItem = function(itemIndex) {
 };
 
 EpisodesController.prototype.deleteItems = function() {
-	appController.clearFooter();
 	this.episodeList.setAction("delete");
+	appController.clearFooter();
 	$("#list")
 		.removeClass()
 		.addClass("delete");
@@ -136,8 +136,8 @@ EpisodesController.prototype.resequenceItems = function() {
 };
 
 EpisodesController.prototype.editItems = function() {
-	appController.clearFooter();
 	this.episodeList.setAction("edit");
+	appController.clearFooter();
 	$("#list")
 		.removeClass()
 		.addClass("edit")
@@ -164,8 +164,8 @@ EpisodesController.prototype.editItems = function() {
 };
 
 EpisodesController.prototype.viewItems = function() {
-	appController.clearFooter();
 	this.episodeList.setAction("view");
+	appController.clearFooter();
 	$("#list")
 		.removeClass()
 		.sortable("destroy")

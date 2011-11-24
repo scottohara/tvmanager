@@ -35,8 +35,8 @@ UnscheduledController.prototype.viewItem = function(itemIndex) {
 };
 
 UnscheduledController.prototype.viewItems = function() {
-	appController.clearFooter();
 	this.unscheduledList.setAction("view");
+	appController.clearFooter();
 	$("#list").removeClass();
 	this.footer = {
 		label: "v" + appController.db.version

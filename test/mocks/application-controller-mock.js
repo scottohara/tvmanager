@@ -5,8 +5,11 @@ ApplicationControllerMock = function() {
 	this.appVersion = "1.0";
 };
 
-ApplicationControllerMock.prototype.refreshScroller = function() {
-	ok(true, "Refresh scroller");
+ApplicationControllerMock.prototype.getScrollPosition = function() {
+};
+
+ApplicationControllerMock.prototype.setScrollPosition = function() {
+	ok(true, "Set scroll position");
 };
 
 ApplicationControllerMock.prototype.pushView = function(view, args) {

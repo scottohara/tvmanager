@@ -58,15 +58,16 @@ List.prototype.refresh = function () {
 			}
 		}
 
-		appController.refreshScroller();
+		appController.setScrollPosition();
 	}, this));
 };
 
 List.prototype.setAction = function (action) {
 	switch (action) {
-		case "view":
 		case "edit":
 		case "delete":
+			appController.getScrollPosition();
+		case "view":
 			this.action = action;
 			break;
 		default:

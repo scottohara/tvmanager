@@ -20,7 +20,7 @@ AboutController.prototype.setup = function() {
 	$("#appVersion").val("v" + appController.appVersion);
 	$("#update").bind('click', $.proxy(this.checkForUpdate, this));
 
-	appController.refreshScroller();
+	appController.setScrollPosition();
 };
 
 AboutController.prototype.goBack = function() {
