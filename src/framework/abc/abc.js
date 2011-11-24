@@ -36,7 +36,7 @@ abc.prototype = {
 		theTarget = theTarget.innerText;
 
 		if( document.getElementById(theTarget) )
-			this.scrollElement.children(":first").scrollTop(-document.getElementById(theTarget).offsetTop);
+			this.scrollElement.children(":first").scrollTop(document.getElementById(theTarget).offsetTop);
 
 		this.element.addEventListener('touchmove', this, false);
 		this.element.addEventListener('touchend', this, false);
@@ -63,10 +63,7 @@ abc.prototype = {
 		theTarget = theTarget.innerText;
 
 		if( document.getElementById(theTarget) ) {
-			theTarget = -document.getElementById(theTarget).offsetTop;
-			if( theTarget<this.scrollElement.children(":first")[0].scrollHeight )
-				theTarget = this.scrollElement.children(":first")[0].scrollHeight;
-
+			theTarget = document.getElementById(theTarget).offsetTop;
 			this.scrollElement.children(":first").scrollTop(theTarget);
 		}
 
