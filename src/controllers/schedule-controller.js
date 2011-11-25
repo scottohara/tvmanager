@@ -29,8 +29,8 @@ ScheduleController.prototype.activate = function(listItem) {
 			this.scheduleList.items[listItem.listIndex] = listItem.series;
 			if (listItem.series.seriesName !== this.origSeriesName || listItem.series.nowShowing !== this.origNowShowing) {
 				this.scheduleList.items = this.scheduleList.items.sort(function(a, b) {
-					var x = (a.nowShowing ? a.nowShowing : "Z") + "-" + a.programName;
-					var y = (b.nowShowing ? b.nowShowing : "Z") + "-" + b.programName;
+					var x = (a.nowShowing || "Z") + "-" + a.programName;
+					var y = (b.nowShowing || "Z") + "-" + b.programName;
 					return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 				});
 			}

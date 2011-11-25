@@ -72,7 +72,7 @@ var options = {
 	browser: true,
 	devel: true,
 	plusplus: true,
-	maxlen: 512,
+	maxlen: 1024,
 	vars: true,			// disable var checks (for now)
 	white: true,		// disable white space checking to deal with tab issues
 	newcap: true		// disable check for constructor capitalisation, to deal with abc objects

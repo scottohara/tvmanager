@@ -9,7 +9,7 @@ EpisodesController.prototype.setup = function() {
 		leftButton: {
 			eventHandler: $.proxy(this.goBack, this),
 			style: "backButton",
-			label: (this.listItem.source ? this.listItem.source : "Series")
+			label: this.listItem.source || "Series"
 		},
 		rightButton: {
 			eventHandler: $.proxy(this.addItem, this),
