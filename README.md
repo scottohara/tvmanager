@@ -1,6 +1,6 @@
 What is TV Manager?
 =======================
-TV Manager is a simple HTML5 webapp that keeps track of which episodes of your favourite TV shows you:
+TV Manager is a HTML5 webapp that keeps track of which episodes of your favourite TV shows you:
 
 * have seen,
 * have recorded to your DVR (or downloaded by other means),
@@ -45,6 +45,8 @@ The code uses an MVC-style architecture, with a custom "view stack" for navigati
 
 Database schema changes are managed via an upgrade routine on startup (similar to Rails-style migrations).
 
+On the server side, it's a Ruby Sinatra app.  There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO Amazon S3 account).
+
 [jQuery](http://jquery.com/) is used throughout, for DOM manipulation & AJAX calls.
 
 [QUnit](http://docs.jquery.com/Qunit) is used for unit testing.
@@ -56,11 +58,11 @@ Database schema changes are managed via an upgrade routine on startup (similar t
 Requirements
 ============
 * WebKit-based browser, with HTML5 database support
-* Somewhere to host the HTML/JS/CSS files  (any web server will do, however see the notes below regarding caching/importing/exporting)
+* Somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
 
 Installation
-============
-1. Drop the contents of the src/ directory onto your server.
+==========================
+1. Deploy the application to your chosen server (eg. git push heroku master)
 2. Point your browser at /index.html
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
 
@@ -70,21 +72,52 @@ Offline Mode
 ============
 HTML5 application caching uses a manifest file to indicate which files are allowed to be cached.  If the manifest file changes (in any way), all cached resources are refreshed from the server.
 
-To avoid having to manually keep the manifest file up to date with new/changed files, it is dynamically generated using some server-side script implemented in ASP. This means that (currently) you need to host the site on an IIS server if you want to use application caching.
+To avoid having to manually keep the manifest file up to date with new/changed files, it is dynamically generated on the server using the [Manifesto gem](https://github.com/johntopley/manifesto).
 
 You can test that the application cache is working by disconnecting from the network (or turning your mobile device to flight mode); and if everything goes well you should be able to continue using the app even though you're disconnected.
 
 Import/Export
 =============
-The app includes a rudimentary backup/restore facility.  Backing up the database simply serializes all of the data to a JSON-respresentation, and saves it to the /export directory on the server.
+The app includes a rudimentary backup/restore facility.  Backing up the database simply serializes all of the data to a JSON-respresentation, and saves it to an Amazon S3 account that you configure on the server.
 
-The last 10 versions are retained on the server (as export.txt.0....export.txt.9).
+The S3 bucket is configured with versioning enabled, meaning that each exported version is retained in S3 (Note: this means it is up to you to purge any old versions that you no longer wish to keep, as the app itself does not expire or remove previous backups).
 
-Restoring the database does the reverse, pulling the latest JSON file (export.txt) from the server, clearing any existing data from the database and reloading it from the JSON.
+Restoring the database does the reverse, pulling the latest JSON file (database.json) from S3 (via the server), clearing any existing data from the database and reloading it from the JSON.
 
 An MD5 checksum veries that the data was imported/exported succesfully.
 
-Again, just like the dynamically generated cache manifest above, the export & checksum server-side code is implemented in ASP, which requires the site to be hosted on an IIS server.
+To enable the Import/Export functionality, you will need to declare the following environment variables:
+
+* AMAZON_ACCESS_KEY_ID={your AWS access credentials}
+* AMAZON_SECRET_ACCESS_KEY={your AWS secret key}
+* S3_ENDPOINT={optional, the S3 region to use. Defaults to s3.amazonaws.com if none specified}
+* S3_BACKUP_BUCKET={the bucket to use for storing backup data. Will be created automatically if doesn't exist. See important note below.}
+* S3_BACKUP_OBJECT={the object key for the backup, eg. 'production/database.json'.  See note below.}
+
+**IMPORTANT NOTE REGARDING S3 BUCKET:** Versioning will be automatically enabled on the bucket specified above.  If you choose to backup to an existing bucket, please be aware that any other keys in this bucket will become version-enabled. Each version of an S3 object is counted when calculating your storage usage, so if you have a large bucket and/or it is written to frequently; then be aware that your storage could increase dramatically.  Recommend that you specify a bucket that will be used exclusively by TV Manager, to avoid any issues.
+
+For the object key, you may wish to include the deploy/environment as part of the key. This enables you to have development, staging and production databases backed up to a single bucket (eg. 'development/database.json', 'staging/database.json', 'production/database.json').
+
+In development, the above environment variables can be saved to a file (eg. ~/.aws), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
+
+**~/.aws**
+	export AMAZON_ACCESS_KEY_ID='your AWS access credentials'
+	export AMAZON_SECRET_ACCESS_KEY='your AWS secret key'
+	export S3_ENDPOINT='s3-ap-southeast-1.amazonaws.com'
+	export S3_BACKUP_BUCKET='tvmanager-yourdomain.com'
+	export S3_BACKUP_OBJECT='development/database.json'
+
+**~/.profile**
+	AWS=~/.aws
+	if [ -f $AWS ]; then
+		. $AWS
+	fi
+
+For staging/production, if you use Heroku you can specify these config vars using the heroku CLI gem, eg.
+	heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=staging/database.json --remote staging
+	heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=production/database.json --remote production
+
+(Assumes you have setup two Heroku remotes, one for staging and one for production)
 
 Test Suite
 ==========

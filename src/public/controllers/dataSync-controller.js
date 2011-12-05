@@ -165,13 +165,7 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 					if (completed === programs.length) {
 						$("#status").val("Calculating checksum");
 						var json = JSON.stringify(exportObj);
-						var pos = 0;
-						var hash = "";
-						while (pos < json.length) {
-							hash += hex_md5(json.substr(pos, 10000));
-							pos += 10000;
-						}
-
+						hash = hex_md5(json);
 						callback({json: json, hash: hash});
 					}
 				};
@@ -186,33 +180,18 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 	});
 };
 
-DataSyncController.prototype.verifyData = function(data) {
+DataSyncController.prototype.verifyData = function(data, hash) {
 	if (data) {
 		$("#status").val("Verifying data");
-		$.ajax({
-			url: "getChecksum.asp",
-			context: this,
-			dataType: "text",
-			success: function(checkSum, status, jqXHR) {
-				if (checkSum === undefined) {
-					checkSum = jqXHR.responseText;
-				}
-
-				if (data.hash.valueOf() === checkSum) {
-					$("#status").val("Verify complete");
-					this.setLastSyncTime();
-					var lastSyncHash = new Setting("LastSyncHash", data.hash);
-					lastSyncHash.save(this.callback);
-				} else {
-					$("#status").val("Verify failed: Checksum mismatch");
-					this.callback(false);
-				}
-			},
-			error: function(request, statusText) {
-				$("#status").val("Verify failed: " + statusText + ", " + request.status + " (" + request.statusText + ")");
-				this.callback(false);
-			}
-		});
+		if (data.hash.valueOf() === hash.valueOf()) {
+			$("#status").val("Verify complete");
+			this.setLastSyncTime();
+			var lastSyncHash = new Setting("LastSyncHash", data.hash);
+			lastSyncHash.save(this.callback);
+		} else {
+			$("#status").val("Verify failed: Checksum mismatch (" + data.hash + " != " + hash + ")");
+			this.callback(false);
+		}
 	} else {
 		$("#status").val("Verify failed: No programs found");
 		this.callback(false);
@@ -229,13 +208,14 @@ DataSyncController.prototype.setLastSyncTime = function() {
 DataSyncController.prototype.doExport = function(data) {
 	$("#status").val("Sending data to server");
 	$.ajax({
-		url: "export.asp",
+		url: "export",
 		context: this,
 		type: "POST",
+		headers: { "Content-MD5": data.hash },
 		data: data.json,
-		success: function() {
+		success: function(exportResponse, status, jqXHR) {
 			$("#status").val("Sent data to server");
-			this.verifyData(data);
+			this.verifyData(data, jqXHR.getResponseHeader("Etag").replace(/\"/g, ""));
 		},
 		error: function(request, statusText) {
 			$("#status").val("Export failed: " + statusText + ", " + request.status + " (" + request.statusText + ")");
@@ -246,7 +226,7 @@ DataSyncController.prototype.doExport = function(data) {
 
 DataSyncController.prototype.doImport = function() {
 	$.ajax({
-		url: "export/export.txt",
+		url: "import",
 		context: this,
 		dataType: "json",
 		success: function(importObj, status, jqXHR) {
@@ -293,7 +273,9 @@ DataSyncController.prototype.doImport = function() {
 															programsCompleted++;
 															$("#status").val("Imported " + programsCompleted + " of " + importObj.programs.length);
 															if (programsCompleted === importObj.programs.length) {
-																this.toJson("Verifiying", $.proxy(this.verifyData, this));
+																this.toJson("Verifiying", $.proxy(function(data) {
+																	this.verifyData(data, jqXHR.getResponseHeader("Etag").replace(/\"/g, ""));
+																}, this));
 															}
 														}
 													} else {
@@ -312,7 +294,9 @@ DataSyncController.prototype.doImport = function() {
 											programsCompleted++;
 											$("#status").val("Imported " + programsCompleted + " of " + importObj.programs.length);
 											if (programsCompleted === importObj.programs.length) {
-												this.toJson("Verifiying", $.proxy(this.verifyData, this));
+												this.toJson("Verifiying", $.proxy(function(data) {
+													this.verifyData(data, jqXHR.getResponseHeader("Etag").replace(/\"/g, ""));
+												}, this));
 											}
 										}
 									} else {
@@ -338,7 +322,7 @@ DataSyncController.prototype.doImport = function() {
 					this.callback(false);
 			}
 		},
-		error: function(request, statusText) {
+		error: function(request, statusText, errorThrown) {
 			$("#status").val("Import failed: " + statusText + ", " + request.status + " (" + request.statusText + ")");
 			this.callback(false);
 		}
