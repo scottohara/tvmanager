@@ -120,6 +120,7 @@ fi
 ```
 
 For staging/production, if you use Heroku you can specify these config vars using the heroku CLI gem, eg.
+
 ```
 heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=staging/database.json --remote staging
 heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=production/database.json --remote production
