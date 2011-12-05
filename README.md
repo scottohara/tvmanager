@@ -101,17 +101,17 @@ For the object key, you may wish to include the deploy/environment as part of th
 In development, the above environment variables can be saved to a file (eg. ~/.aws), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
 
 **~/.aws**
-	export AMAZON_ACCESS_KEY_ID='your AWS access credentials'
-	export AMAZON_SECRET_ACCESS_KEY='your AWS secret key'
-	export S3_ENDPOINT='s3-ap-southeast-1.amazonaws.com'
-	export S3_BACKUP_BUCKET='tvmanager-yourdomain.com'
-	export S3_BACKUP_OBJECT='development/database.json'
+```export AMAZON_ACCESS_KEY_ID='your AWS access credentials'
+export AMAZON_SECRET_ACCESS_KEY='your AWS secret key'
+export S3_ENDPOINT='s3-ap-southeast-1.amazonaws.com'
+export S3_BACKUP_BUCKET='tvmanager-yourdomain.com'
+export S3_BACKUP_OBJECT='development/database.json'```
 
 **~/.profile**
-	AWS=~/.aws
-	if [ -f $AWS ]; then
-		. $AWS
-	fi
+```AWS=~/.aws
+if [ -f $AWS ]; then
+	. $AWS
+fi```
 
 For staging/production, if you use Heroku you can specify these config vars using the heroku CLI gem, eg.
 	heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=staging/database.json --remote staging
