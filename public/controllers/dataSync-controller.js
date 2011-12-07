@@ -165,7 +165,7 @@ DataSyncController.prototype.toJson = function(statusBarAction, callback) {
 					if (completed === programs.length) {
 						$("#status").val("Calculating checksum");
 						var json = JSON.stringify(exportObj);
-						hash = hex_md5(json);
+						var hash = hex_md5(json);
 						callback({json: json, hash: hash});
 					}
 				};
@@ -189,7 +189,7 @@ DataSyncController.prototype.verifyData = function(data, hash) {
 			var lastSyncHash = new Setting("LastSyncHash", data.hash);
 			lastSyncHash.save(this.callback);
 		} else {
-			$("#status").val("Verify failed: Checksum mismatch (" + data.hash + " != " + hash + ")");
+			$("#status").val("Verify failed: Checksum mismatch");
 			this.callback(false);
 		}
 	} else {
@@ -208,7 +208,7 @@ DataSyncController.prototype.setLastSyncTime = function() {
 DataSyncController.prototype.doExport = function(data) {
 	$("#status").val("Sending data to server");
 	$.ajax({
-		url: "export",
+		url: "/export",
 		context: this,
 		type: "POST",
 		headers: { "Content-MD5": data.hash },
@@ -226,7 +226,7 @@ DataSyncController.prototype.doExport = function(data) {
 
 DataSyncController.prototype.doImport = function() {
 	$.ajax({
-		url: "import",
+		url: "/import",
 		context: this,
 		dataType: "json",
 		success: function(importObj, status, jqXHR) {

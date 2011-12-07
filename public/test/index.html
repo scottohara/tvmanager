@@ -10,40 +10,40 @@
 		-->
 
 		<!-- Framework -->
-		<script src="../src/framework/jquery-1.5.min.js" type="text/javascript"></script>
-		<script src="../src/framework/jquery-ui-1.8.7.custom.min.js" type="text/javascript"></script>
-		<script src="../src/framework/jquery.iphoneui.js" type="text/javascript"></script>
-		<script src="../src/framework/jshash-2.2/md5-min.js" type="text/javascript"></script>
-		<script src="../src/framework/sw/spinningwheel-min.js" type="text/javascript"></script>
-		<script src="../src/framework/abc/abc.js" type="text/javascript"></script>
+		<script src="../framework/jquery-1.5.min.js" type="text/javascript"></script>
+		<script src="../framework/jquery-ui-1.8.7.custom.min.js" type="text/javascript"></script>
+		<script src="../framework/jquery.iphoneui.js" type="text/javascript"></script>
+		<script src="../framework/jshash-2.2/md5-min.js" type="text/javascript"></script>
+		<script src="../framework/sw/spinningwheel-min.js" type="text/javascript"></script>
+		<script src="../framework/abc/abc.js" type="text/javascript"></script>
 
 		<!-- Components -->
-		<script src="../src/components/list.js" type="text/javascript"></script>
-		<script src="../src/components/progressBar.js" type="text/javascript"></script>
-		<script src="../src/components/toucheventproxy.js" type="text/javascript"></script>
+		<script src="../components/list.js" type="text/javascript"></script>
+		<script src="../components/progressBar.js" type="text/javascript"></script>
+		<script src="../components/toucheventproxy.js" type="text/javascript"></script>
 
 		<!-- Models -->
-		<script src="../src/models/program-model.js" type="text/javascript"></script>
-		<script src="../src/models/series-model.js" type="text/javascript"></script>
-		<script src="../src/models/episode-model.js" type="text/javascript"></script>
-		<script src="../src/models/setting-model.js" type="text/javascript"></script>
+		<script src="../models/program-model.js" type="text/javascript"></script>
+		<script src="../models/series-model.js" type="text/javascript"></script>
+		<script src="../models/episode-model.js" type="text/javascript"></script>
+		<script src="../models/setting-model.js" type="text/javascript"></script>
 
 		<!-- Controllers -->
-		<script src="../src/controllers/application-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/cache-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/database-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/dataSync-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/schedule-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/unscheduled-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/programs-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/program-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/seriesList-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/series-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/episodes-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/episode-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/settings-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/about-controller.js" type="text/javascript"></script>
-		<script src="../src/controllers/report-controller.js" type="text/javascript"></script>
+		<script src="../controllers/application-controller.js" type="text/javascript"></script>
+		<script src="../controllers/cache-controller.js" type="text/javascript"></script>
+		<script src="../controllers/database-controller.js" type="text/javascript"></script>
+		<script src="../controllers/dataSync-controller.js" type="text/javascript"></script>
+		<script src="../controllers/schedule-controller.js" type="text/javascript"></script>
+		<script src="../controllers/unscheduled-controller.js" type="text/javascript"></script>
+		<script src="../controllers/programs-controller.js" type="text/javascript"></script>
+		<script src="../controllers/program-controller.js" type="text/javascript"></script>
+		<script src="../controllers/seriesList-controller.js" type="text/javascript"></script>
+		<script src="../controllers/series-controller.js" type="text/javascript"></script>
+		<script src="../controllers/episodes-controller.js" type="text/javascript"></script>
+		<script src="../controllers/episode-controller.js" type="text/javascript"></script>
+		<script src="../controllers/settings-controller.js" type="text/javascript"></script>
+		<script src="../controllers/about-controller.js" type="text/javascript"></script>
+		<script src="../controllers/report-controller.js" type="text/javascript"></script>
 
 		<!--
 			Test Files
@@ -98,7 +98,28 @@
 		<!-- Main Entry Point -->
 		<script type="text/javascript">
 			$(function() {
-				window.appController = new ApplicationControllerMock();
+				QUnit.config.autostart = false;
+
+				$.ajax({
+					url: "../test",
+					type: "HEAD",
+					success: function() {
+						window.appController = new ApplicationControllerMock();
+						start();
+					},
+					statusCode: {
+						403: function() {
+							if (window.confirm("WARNING: Server is not configured in test mode. Running the test suite now will export TEST data to the server storage (S3). Are you sure you want to do this?")) {
+								window.appController = new ApplicationControllerMock();
+								start();
+							} else {
+								$("<li>")
+									.html("Testing aborted at users request")
+									.appendTo("#qunit-tests");
+							}
+						}
+					}
+				});
 			});
 		</script>
 

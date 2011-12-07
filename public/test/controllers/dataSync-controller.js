@@ -22,9 +22,17 @@ module("dataSync-controller", {
 
 		this.lastSyncHash = "";
 
+		this.testHash = "test-hash";
+
 		this.ajaxMock = $.proxy(function(options) {
 			if (this.importData) {
-				options.success.apply(options.context, [this.importData]);
+				options.success.apply(options.context, [
+					this.importData,
+					200,
+					{
+						getResponseHeader: function() { return ""; } 
+					}
+				]);
 			} else {
 				options.error.apply(options.context, [{
 					status: "404",
@@ -328,19 +336,6 @@ test("verifyData - no programs", 2, function() {
 	equals(this.status.val(), "Verify failed: No programs found", "Status");
 });
 
-test("verifyData - ajax fail", 2, function() {
-	var originalAjax = $.ajax;
-	$.ajax = this.ajaxMock;
-
-	this.dataSyncController.callback = $.proxy(function(success) {
-		ok(!success, "Invoke callback with false");
-		equals(this.status.val(), "Verify failed: Force failed, 404 (Not found)", "Status");
-	}, this);
-
-	this.dataSyncController.verifyData({ hash: "" });
-	$.ajax = originalAjax;
-});
-
 asyncTest("verifyData - checksum mismatch", 2, function() {
 	this.dataSyncController.callback = $.proxy(function(success) {
 		ok(!success, "Invoke callback with false");
@@ -348,7 +343,7 @@ asyncTest("verifyData - checksum mismatch", 2, function() {
 		start();
 	}, this);
 
-	this.dataSyncController.verifyData({ hash: "" });
+	this.dataSyncController.verifyData({ hash: "" }, this.testHash);
 });
 
 asyncTest("verifyData - success", 3, function() {
@@ -366,7 +361,7 @@ asyncTest("verifyData - success", 3, function() {
 		start();
 	}, this);
 
-	this.dataSyncController.verifyData({ hash: "test-hash" });
+	this.dataSyncController.verifyData({ hash: this.testHash }, this.testHash);
 });
 
 asyncTest("verifyData - 304 Not Modified", 1, function() {
@@ -376,7 +371,7 @@ asyncTest("verifyData - 304 Not Modified", 1, function() {
 		start();
 	}, this);
 
-	this.dataSyncController.verifyData({ hash: "test-hash" });
+	this.dataSyncController.verifyData({ hash: this.testHash }, this.testHash);
 });
 
 test("doExport - ajax fail", 2, function() {
@@ -392,12 +387,13 @@ test("doExport - ajax fail", 2, function() {
 	$.ajax = originalAjax;
 });
 
-asyncTest("doExport - success", 2, function() {
-	var testData = { json: "test-data" };
+asyncTest("doExport - success", 3, function() {
+	var testData = { json: "test-data", hash: this.testHash };
 
-	this.dataSyncController.verifyData = $.proxy(function(data) {
+	this.dataSyncController.verifyData = $.proxy(function(data, hash) {
 		equals(this.status.val(), "Sent data to server", "Status");
 		same(data, testData, "Data");
+		equals(hash, this.testHash, "Hash");
 		start();
 	}, this);
 
@@ -539,8 +535,8 @@ asyncTest("doImport - save Series fail", 2, function() {
 	this.dataSyncController.doImport();
 });
 
-asyncTest("doImport - success", 5, function() {
-	this.dataSyncController.verifyData = $.proxy(function(data) {
+asyncTest("doImport - success", 6, function() {
+	this.dataSyncController.verifyData = $.proxy(function(data, hash) {
 		equals(this.status.val(), "Imported 2 of 2", "Status");
 		equals(this.dataSyncController.statusBarAction, "Verifiying", "Status bar action");
 		same(ProgramMock.programJson, [
@@ -641,6 +637,7 @@ asyncTest("doImport - success", 5, function() {
 				"sequence": 2
 			}
 		], "Episodes");
+		equals(hash, this.testHash, "Hash");
 		start();
 	}, this);
 

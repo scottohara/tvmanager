@@ -58,15 +58,22 @@ On the server side, it's a Ruby Sinatra app.  There's not much happening on the 
 Requirements
 ============
 * WebKit-based browser, with HTML5 database support
-* Somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
+* In development, Ruby/RubyGems/Bundler (recommend [RVM](http://beginrescueend.com/))
+* In production/staging, somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
 
-Installation
+Installation (Development)
 ==========================
-1. Deploy the application to your chosen server (eg. git push heroku master)
+1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
+2. Install the dependencies (`cd tvmanager && bundle install`)
+3. Start the server (`rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes)
 2. Point your browser at /index.html
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
 
 The first time it runs it will create the database (you should receive a message saying that the database has been upgraded, and to restart the app).
+
+Deployment (Staging/Production)
+===============================
+If you use use heroku, it's a simple `git push heroku master`.
 
 Offline Mode
 ============
@@ -96,7 +103,7 @@ To enable the Import/Export functionality, you will need to declare the followin
 
 **IMPORTANT NOTE REGARDING S3 BUCKET:** Versioning will be automatically enabled on the bucket specified above.  If you choose to backup to an existing bucket, please be aware that any other keys in this bucket will become version-enabled. Each version of an S3 object is counted when calculating your storage usage, so if you have a large bucket and/or it is written to frequently; then be aware that your storage could increase dramatically.  Recommend that you specify a bucket that will be used exclusively by TV Manager, to avoid any issues.
 
-For the object key, you may wish to include the deploy/environment as part of the key. This enables you to have development, staging and production databases backed up to a single bucket (eg. 'development/database.json', 'staging/database.json', 'production/database.json').
+For the object key, you may wish to include the deploy/environment name as part of the key. This enables you to have development, staging and production databases all sharing a single bucket (eg. 'development/database.json', 'staging/database.json', 'production/database.json').
 
 In development, the above environment variables can be saved to a file (eg. ~/.aws), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
 
@@ -130,6 +137,10 @@ heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET
 
 Test Suite
 ==========
+Before running the tests, ensure that the server is configured for testing (this prevents, for example, the unit tests for exporting/importing inadvertently overwriting your actual backups on S3 with test data, as test mode doesn't touch S3 at all).
+
+To run the server in test mode, use the -E argument (eg. `rackup -E test` or `shotgun -E test`). If you try running the unit tests when the server is not in test mode, you will be warned and prompted by your browser whether or not to continue.
+
 To run the entire QUnit test suite, simply browse the test/index.html page
 
 To run a single QUnit test module, browse test/index.html?module-name  (eg. test/index.html?application-controller)
@@ -137,9 +148,9 @@ To run a single QUnit test module, browse test/index.html?module-name  (eg. test
 Once the test suite is passing cleanly, to check the test suite coverage:
 
 * install [JSCoverage](http://siliconforks.com/jscoverage/)
-* create a sibling folder to your repository, called {REPO_NAME}Coverage (eg. if your repo is in ~/tvmanager, create a folder called ~/tvmanagerCoverage)
-* execute the test/generate-coverage.sh shell script, which creates an 'instrumented' copy of the code in the above location
-* browse to ../{REPO_NAME}Coverage/jscoverage.html?test/index.html&missing=true
+* execute the test/generate-coverage.sh shell script, which creates an 'instrumented' copy of the code in the testCoverage directory
+* restart the server in testCoverage mode (eg. `rackup -E testCoverage` or `shotgun -E testCoverage`)
+* browse to /jscoverage.html?test/index.html&missing=true
 * on the Summary tab, check that we have >=99% total coverage
 
 Coverage Exceptions:
