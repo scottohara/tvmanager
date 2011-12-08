@@ -148,8 +148,7 @@ To run a single QUnit test module, browse test/index.html?module-name  (eg. test
 Once the test suite is passing cleanly, to check the test suite coverage:
 
 * install [JSCoverage](http://siliconforks.com/jscoverage/)
-* execute the test/generate-coverage.sh shell script, which creates an 'instrumented' copy of the code in the testCoverage directory
-* restart the server in testCoverage mode (eg. `rackup -E testCoverage` or `shotgun -E testCoverage`)
+* restart the server in testCoverage mode (eg. `rackup -E testCoverage`). Note the use of `rackup` here instead of `shotgun`, as for some reason shotgun doesn't send output from config.ru script to stdout.  The testCoverage mode generates an instrumented copy of the code for tracking coverage.
 * browse to /jscoverage.html?test/index.html&missing=true
 * on the Summary tab, check that we have >=99% total coverage
 
