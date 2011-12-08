@@ -31,7 +31,7 @@ var ApplicationController = function () {
 };
 
 ApplicationController.prototype.start = function() {
-	$.get("dbConfig.json", $.proxy(function(config, status, jqXHR) {
+	$.get("/dbConfig", $.proxy(function(config, status, jqXHR) {
 		if (config === undefined) {
 			config = $.parseJSON(jqXHR.responseText);
 		}

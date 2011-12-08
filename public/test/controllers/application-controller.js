@@ -155,7 +155,7 @@ test("constructor - cache update progress", 1, function() {
 	CacheControllerMock.prototype.updated = false;
 });
 
-asyncTest("start - dbConfig.json 304 Not Modified", 1, function() {
+asyncTest("start - dbConfig 304 Not Modified", 1, function() {
 	$.get = jQueryMock.get;
 	DatabaseController = DatabaseControllerMockNotModified;
 	this.appController.start();

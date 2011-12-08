@@ -75,6 +75,16 @@ Deployment (Staging/Production)
 ===============================
 If you use use heroku, it's a simple `git push heroku master`.
 
+By default, the name of the client-side HTML5 database is "TVManager". Database names must be unique for the domain (origin), so in the event that you are hosting multiple environments under the same domain (eg. tvmanager.mydomain.com/production and tvmanager.mydomain.com/staging), you can override the default database name for one or both environments using an environment variable. For example, in development:
+
+`export DATABASE_NAME='TVManagerDev'`
+
+For staging/production, if you use Heroku:
+
+`heroku config:add DATABASE_NAME=TVManagerStaging --remote staging`
+
+The default database name doesn't need to be overriden if each environment is hosted under a separate domain (eg. tvmanager.mydomain.com and tvmanagerstaging.mydomain.com)
+
 Offline Mode
 ============
 HTML5 application caching uses a manifest file to indicate which files are allowed to be cached.  If the manifest file changes (in any way), all cached resources are refreshed from the server.

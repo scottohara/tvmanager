@@ -2,6 +2,7 @@ require 'sinatra'
 require 'manifesto'
 require 'aws-sdk'
 require 'digest/md5'
+require 'json'
 
 # Routing condition (true if :test configuration)
 set(:isTest) do |env|
@@ -10,9 +11,20 @@ set(:isTest) do |env|
 	end
 end
 
+# Returns the client database name (if specified)
+def databaseName
+	ENV[:DATABASE_NAME.to_s] || "TVManager"
+end
+
 # Default route, redirects to /public/index.html
 get '/' do
 	redirect 'index.html'
+end
+
+# Route for database configuration settings
+get '/dbConfig' do
+	content_type :json
+	{ :databaseName => databaseName }.to_json
 end
 
 # Route for HTML5 cache manifest
@@ -33,6 +45,10 @@ get '/manifest' do
 		# Subtract any entries in test from manifest
 		manifest = (manifest.to_a - test.to_a).join
 	end
+
+	# Add a cache entry for dbConfig
+	manifest << "/dbConfig\n"
+	manifest << "# databaseName: #{databaseName}\n"
 
 	# Need to explicitly list any routes called via Ajax as network resources
 	manifest << "\nNETWORK:\n"
@@ -91,7 +107,7 @@ post '/export' do
 		backup_objectversion = backup_object.write :data => request.body.read, :content_length => request.content_length.to_i, :content_type => 'application/json', :content_md5 => md5_base64
 
 		# Double check that the etag returned still matches the MD5 digest
-		raise InternalServerError, "Checksum mismatch on stored backup (" + backup_objectversion.etag.gsub(/\"/, '') + " != " + md5_hex + ")" unless backup_objectversion.etag.gsub(/\"/, '') == md5_hex
+		raise InternalServerError, "Checksum mismatch on stored backup (#{backup_objectversion.etag.gsub(/\"/, '')} != #{md5_hex})" unless backup_objectversion.etag.gsub(/\"/, '') == md5_hex
 
 		# Return the MD5 digest as the response etag
 		etag md5_hex

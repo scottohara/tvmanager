@@ -14,6 +14,8 @@ configure :testCoverage do
 
 		set :environment, :test
 		set :public_folder, Proc.new { dest_dir }
+
+		puts "Public folder: #{settings.public_folder}"
 end
 
 run Sinatra::Application
