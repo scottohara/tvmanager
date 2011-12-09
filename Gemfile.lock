@@ -35,6 +35,7 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk
+  json
   manifesto
   sinatra
   thin
