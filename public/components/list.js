@@ -63,15 +63,31 @@ List.prototype.refresh = function () {
 };
 
 List.prototype.setAction = function (action) {
+	var	bValidAction = false,
+			bSavePosition = false;
+
 	switch (action) {
 		case "edit":
+			bValidAction = true;
+			bSavePosition = true;
+			break;
 		case "delete":
-			appController.getScrollPosition();
+			bValidAction = true;
+			bSavePosition = true;
+			break;
 		case "view":
-			this.action = action;
+			bValidAction = true;
 			break;
 		default:
 			alert(action + " is not a valid action");
+	}
+
+	if (bSavePosition) {
+		appController.getScrollPosition();
+	}
+
+	if (bValidAction) {
+		this.action = action;
 	}
 };
 

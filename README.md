@@ -53,7 +53,7 @@ On the server side, it's a Ruby Sinatra app.  There's not much happening on the 
 
 [JSCoverage](http://siliconforks.com/jscoverage/) is used to measure unit test code coverage.
 
-[nodelint](http://github.com/tav/nodelint) is used to run JSLint over the entire code base.
+[jslint_on_rails](https://github.com/psionides/jslint_on_rails) is used to run JSLint over the entire code base.
 
 Requirements
 ============
@@ -149,17 +149,21 @@ Test Suite
 ==========
 Before running the tests, ensure that the server is configured for testing (this prevents, for example, the unit tests for exporting/importing inadvertently overwriting your actual backups on S3 with test data, as test mode doesn't touch S3 at all).
 
-To run the server in test mode, use the -E argument (eg. `rackup -E test` or `shotgun -E test`). If you try running the unit tests when the server is not in test mode, you will be warned and prompted by your browser whether or not to continue.
+To run the server in test mode:
 
-To run the entire QUnit test suite, simply browse the test/index.html page
+* `rake test:client`
 
-To run a single QUnit test module, browse test/index.html?module-name  (eg. test/index.html?application-controller)
+Alternatively, you can start the server manually using the -E argument (eg. `rackup -E test` or `shotgun -E test`). If you try running the unit tests when the server is not in test mode, you will be warned and prompted by your browser whether or not to continue.
+
+To run the entire QUnit test suite, simply browse to [http://localhost:9393/test/index.html](http://localhost:9393/test/index.html)
+
+To run a single QUnit test module, append '?module-name'  (eg. [http://localhost:9393/test/index.html?application-controller](http://localhost:9393/test/index.html?application-controller))
 
 Once the test suite is passing cleanly, to check the test suite coverage:
 
 * install [JSCoverage](http://siliconforks.com/jscoverage/)
-* restart the server in testCoverage mode (eg. `rackup -E testCoverage`). Note the use of `rackup` here instead of `shotgun`, as for some reason shotgun doesn't send output from config.ru script to stdout.  The testCoverage mode generates an instrumented copy of the code for tracking coverage.
-* browse to /jscoverage.html?test/index.html&missing=true
+* run the test:coverage rake task (eg. `rake test:coverage`). This generates generates an instrumented copy of the code for tracking coverage.
+* browse to [http://localhost:9292/jscoverage.html?test/index.html&missing=true](http://localhost:9292/jscoverage.html?test/index.html&missing=true) (Note: unlike the test:client task, which uses shotgun to start the server on a default port of 9393; the test:coverage task uses rackup on port 9292. For some reason, jscoverage wouldn't run properly using shotgun)
 * on the Summary tab, check that we have >=99% total coverage
 
 Coverage Exceptions:
@@ -170,5 +174,6 @@ Coverage Exceptions:
 
 To run lint:
 
-* install [nodelint](http://github.com/tav/nodelint)
-* exec the test/run-lint.sh shell script
+* `rake jslint`
+
+JSlint configuration options are set in config/jslint.yml

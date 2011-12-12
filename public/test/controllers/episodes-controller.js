@@ -294,7 +294,7 @@ test("requenceItems", function() {
 	var sortedItems = [
 		items[1],
 		items[0],
-		items[2],
+		items[2]
 	];
 
 	var list = $("<ul>")
