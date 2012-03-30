@@ -15,49 +15,42 @@ var Series = function (id, seriesName, nowShowing, programId, programName, episo
 
 Series.prototype.save = function(callback) {
 	appController.db.transaction($.proxy(function(tx) {
-		var sql;
-		var params;
-
-		if (this.id) {
-			sql = "UPDATE Series SET Name = ?, NowShowing = ?, ProgramID = ? WHERE rowid = ?";
-			params = [this.seriesName, this.nowShowing, this.programId, this.id];
-		} else {
-			sql = "INSERT INTO Series (Name, NowShowing, ProgramID) VALUES (?, ?, ?)";
-			params = [this.seriesName, this.nowShowing, this.programId];
+		if (!this.id) {
+			this.id = uuid.v4();
 		}
 
-		tx.executeSql(sql, params,
-			$.proxy(function(tx, resultSet) {
-				if (!resultSet.rowsAffected) {
-					if (callback) {
-						callback();
-					}
-					throw new Error("Series.save: no rows affected");
-				}
-
-				if (!this.id) {
-					this.id = resultSet.insertId;
-				}
-
-				if (callback) {
-					callback(this.id);
-				}
-			}, this),
-			function(tx, error) {
-				if (callback) {
-					callback();
-				}
-				return "Series.save: " + error.message;
+		tx.executeSql("REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID) VALUES (?, ?, ?, ?)", [this.id, this.seriesName, this.nowShowing, this.programId],	$.proxy(function(tx, resultSet) {
+			if (!resultSet.rowsAffected) {
+				throw new Error("no rows affected");
 			}
-		);
-	}, this));
+
+			tx.executeSql("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Series', ?, 'modified')", [this.id],
+				$.proxy(function() {
+					if (callback) {
+						callback(this.id);
+					}
+				}, this),
+				function(tx, error) {
+					throw error;
+				}
+			);
+		}, this));
+	}, this),
+	function(error) {
+		if (callback) {
+			callback();
+		}
+		return "Series.save: " + error.message;
+	});
 };
 
 Series.prototype.remove = function() {
 	if (this.id) {
 		appController.db.transaction($.proxy(function(tx) {
+			tx.executeSql("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID = ?", [this.id]);
 			tx.executeSql("DELETE FROM Episode WHERE SeriesID = ?", [this.id]);
-			tx.executeSql("DELETE FROM Series WHERE rowid = ?", [this.id]);
+			tx.executeSql("REPLACE INTO Sync (Type, ID, Action) VALUES ('Series', ?, 'deleted')", [this.id]);
+			tx.executeSql("DELETE FROM Series WHERE SeriesID = ?", [this.id]);
 		}, this),
 		null,
 		$.proxy(function() {
@@ -69,20 +62,13 @@ Series.prototype.remove = function() {
 	}
 };
 
-Series.prototype.toJson = function(callback) {
-	Episode.listBySeries(this.id, $.proxy(function(episodes) {
-		var json = {
-			seriesName: this.seriesName,
-			nowShowing: this.nowShowing,
-			episodes: []
-		};
-
-		for (var i = 0; i < episodes.length; i++) {
-			json.episodes.push(episodes[i].toJson());
-		}
-
-		callback(json);
-	}, this));
+Series.prototype.toJson = function() {
+	return {
+		id: this.id,
+		seriesName: this.seriesName,
+		nowShowing: this.nowShowing,
+		programId: this.programId
+	};
 };
 
 Series.prototype.setNowShowing = function(nowShowing) {
@@ -175,35 +161,35 @@ Series.prototype.setStatusWarning = function(count) {
 };
 
 Series.standardQuery = {
-	baseData: "SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID",
-	summaryData: "COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount",
-	entityList: "FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected'"
+	baseData: "SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID",
+	summaryData: "COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount",
+	entityList: "FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'"
 };
 
 Series.listByProgram = function(programId, callback) {
 	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + " " + Series.standardQuery.entityList;
-	var filter = "WHERE ProgramID = ? GROUP BY s.rowid ORDER BY s.Name";
+	var filter = "WHERE p.ProgramID = ? GROUP BY s.SeriesID ORDER BY s.Name";
 	var params = [programId];
 	Series.list(query, filter, params, callback);
 };
 
 Series.listByNowShowing = function(callback) {
 	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + ", SUM(CASE WHEN e4.StatusDate IS NULL THEN 0 WHEN STRFTIME('%m', 'now') < '04' THEN CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END ELSE CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END END) AS StatusWarningCount " + Series.standardQuery.entityList;
-	var filter = "GROUP BY s.rowid HAVING s.NowShowing IS NOT NULL OR COUNT(e3.rowid) > 0 OR COUNT(e4.rowid) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name";
+	var filter = "GROUP BY s.SeriesID HAVING s.NowShowing IS NOT NULL OR COUNT(e3.EpisodeID) > 0 OR COUNT(e4.EpisodeID) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name";
 	var params = [];
 	Series.list(query, filter, params, callback);
 };
 
 Series.listByStatus = function(callback, status) {
-	var query = Series.standardQuery.baseData + ", COUNT(e.rowid) AS EpisodeCount, COUNT(e.rowid) AS " + status + "Count FROM Program p JOIN Series s ON p.rowid = s.ProgramID JOIN Episode e ON s.rowid = e.SeriesID";
-	var filter = "WHERE e.Status = ? GROUP BY s.rowid ORDER BY p.Name, s.Name";
+	var query = Series.standardQuery.baseData + ", COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e.EpisodeID) AS " + status + "Count FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID JOIN Episode e ON s.SeriesID = e.SeriesID";
+	var filter = "WHERE e.Status = ? GROUP BY s.SeriesID ORDER BY p.Name, s.Name";
 	var params = [status];
 	Series.list(query, filter, params, callback);
 };
 
 Series.listByIncomplete = function(callback) {
 	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + " " + Series.standardQuery.entityList;
-	var filter = "GROUP BY s.rowid HAVING COUNT(e.rowid) > COUNT(e2.rowid) AND COUNT(e2.rowid) > 0 ORDER BY p.Name, s.Name";
+	var filter = "GROUP BY s.SeriesID HAVING COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND COUNT(e2.EpisodeID) > 0 ORDER BY p.Name, s.Name";
 	var params = [];
 	Series.list(query, filter, params, callback);
 };
@@ -216,13 +202,28 @@ Series.list = function(query, filter, params, callback) {
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var series = resultSet.rows.item(i);
-					seriesList.push(new Series(series.rowid, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount));
+					seriesList.push(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount));
 				}
 				callback(seriesList);
 			},
 			function(tx, error) {
 				callback(seriesList);
 				return "Series.list: " + error.message;
+			}
+		);
+	});
+};
+
+Series.find = function(id, callback) {
+	appController.db.readTransaction(function(tx) {
+		tx.executeSql("SELECT SeriesID, Name, ProgramID, NowShowing FROM Series WHERE SeriesID = ?", [id],
+			function(tx, resultSet) {
+				var series = resultSet.rows.item(0);
+				callback(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID));
+			},
+			function(tx, error) {
+				callback(null);
+				return "Series.find: " + error.message;
 			}
 		);
 	});
@@ -240,6 +241,25 @@ Series.count = function(callback) {
 			}
 		);
 	});
+};
+
+Series.removeAll = function(callback) {
+	appController.db.transaction(function(tx) {
+		tx.executeSql("DELETE FROM Series", [],
+			function(tx, resultSet) {
+				callback();
+			},
+			function(tx, error) {
+				var message = "Series.removeAll: " + error.message;
+				callback(message);
+				return message;
+			}
+		);
+	});
+};
+
+Series.fromJson = function(series) {
+	return new Series(series.id, series.seriesName, series.nowShowing, series.programId);
 };
 
 Series.NOW_SHOWING = {

@@ -31,54 +31,86 @@ test("constructor", 12, function() {
 	equals(this.episode.programName, this.programName, "programName property");
 });
 
-test("save - update fail", 3, function() {
-	appController.db.failAt("UPDATE Episode SET Name = " + this.episodeName + ", Status = " + this.status + ", StatusDate = " + this.statusDate + ", Unverified = " + this.unverified + ", Unscheduled = " + this.unscheduled + ", Sequence = " + this.sequence + " WHERE rowid = " + this.id);
-	this.episode.save();
+test("save - update fail", 4, function() {
+	appController.db.failAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.id + ", " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
+	this.episode.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, "Episode.save: Force failed", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
-test("save - update no rows affected", 3, function() {
-	appController.db.noRowsAffectedAt("UPDATE Episode SET Name = " + this.episodeName + ", Status = " + this.status + ", StatusDate = " + this.statusDate + ", Unverified = " + this.unverified + ", Unscheduled = " + this.unscheduled + ", Sequence = " + this.sequence + " WHERE rowid = " + this.id);
-	this.episode.save();
+test("save - update no rows affected", 4, function() {
+	appController.db.noRowsAffectedAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.id + ", " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
+	this.episode.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, "Episode.save: no rows affected", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
-test("save - update success", 4, function() {
-	this.episode.save();
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+test("save - update Sync fail", 4, function() {
+	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Episode', " + this.id + ", 'modified')");
+	this.episode.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Episode.save: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("save - update success", 5, function() {
+	this.episode.save($.proxy(function(id) {
+		equals(id, this.id, "Invoke callback");
+	}, this));
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	equals(this.episode.id, this.id, "id property");
 	ok(appController.db.commit, "Commit transaction");
 });
 
-test("save - insert fail", 3, function() {
+test("save - insert fail", 4, function() {
 	this.episode.id = null;
-	appController.db.failAt("INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
-	this.episode.save();
+	appController.db.failAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (%, " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
+	this.episode.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, "Episode.save: Force failed", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
-test("save - insert no rows affected", 3, function() {
+test("save - insert no rows affected", 4, function() {
 	this.episode.id = null;
-	appController.db.noRowsAffectedAt("INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
-	this.episode.save();
+	appController.db.noRowsAffectedAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (%, " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
+	this.episode.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, "Episode.save: no rows affected", "Error message");
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
-test("save - insert success", 4, function() {
+test("save - insert Sync fail", 4, function() {
+	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Episode', %, 'modified')");
+	this.episode.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Episode.save: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("save - insert success", 5, function() {
 	this.episode.id = null;
-	this.episode.save();
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	this.episode.save($.proxy(function(id) {
+		notEqual(id, null, "Invoke callback");
+	}, this));
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
-	equals(this.episode.id, 999, "id property");
+	notEqual(this.episode.id, null, "id property");
 	ok(appController.db.commit, "Commit transaction");
 });
 
@@ -88,8 +120,8 @@ test("remove - no rows affected", 1, function() {
 	equals(appController.db.commands.length, 0, "Number of SQL commands");
 });
 
-test("remove - fail", 5, function() {
-	appController.db.failAt("DELETE FROM Episode WHERE rowid = " + this.id);
+test("remove - insert Sync fail", 5, function() {
+	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) VALUES ('Episode', " + this.id + ", 'deleted')");
 	this.episode.remove();
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	ok(!appController.db.commit, "Rollback transaction");
@@ -98,9 +130,19 @@ test("remove - fail", 5, function() {
 	equals(this.episode.seriesId, this.seriesId, "seriesId property");
 });
 
+test("remove - fail", 5, function() {
+	appController.db.failAt("DELETE FROM Episode WHERE EpisodeID = " + this.id);
+	this.episode.remove();
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	ok(!appController.db.commit, "Rollback transaction");
+	equals(this.episode.id, this.id, "id property");
+	equals(this.episode.episodeName, this.episodeName, "episodeName property");
+	equals(this.episode.seriesId, this.seriesId, "seriesId property");
+});
+
 test("remove - success", 6, function() {
 	this.episode.remove();
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
 	equals(this.episode.id, null, "id property");
@@ -110,7 +152,9 @@ test("remove - success", 6, function() {
 
 test("toJson", 1, function() {
 	same(this.episode.toJson(), {
+		id: this.id,
 		episodeName: this.episodeName,
+		seriesId: this.seriesId,
 		status: this.status,
 		statusDate: this.statusDate,
 		unverified: this.unverified,
@@ -392,7 +436,7 @@ test("setUnverified", function() {
 });
 
 test("listBySeries - fail", 4, function() {
-	appController.db.failAt("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid WHERE e.SeriesID = " + this.seriesId + " ORDER BY e.Sequence, e.rowid");
+	appController.db.failAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE e.SeriesID = " + this.seriesId + " ORDER BY e.Sequence, e.EpisodeID");
 	Episode.listBySeries(this.seriesId, function(episodeList) {
 		same(episodeList, [], "Invoke callback");
 	});
@@ -402,7 +446,7 @@ test("listBySeries - fail", 4, function() {
 });
 
 test("listBySeries - no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid WHERE e.SeriesID = " + this.seriesId + " ORDER BY e.Sequence, e.rowid");
+	appController.db.noRowsAffectedAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE e.SeriesID = " + this.seriesId + " ORDER BY e.Sequence, e.EpisodeID");
 	Episode.listBySeries(this.seriesId, function(episodeList) {
 		same(episodeList, [], "Invoke callback");
 	});
@@ -413,7 +457,7 @@ test("listBySeries - no rows affected", 4, function() {
 
 test("listBySeries - success", 4, function() {
 	appController.db.addResultRows([{
-		rowid: this.id,
+		EpisodeID: this.id,
 		Name: this.episodeName,
 		Status: this.status,
 		StatusDate: this.statusDate,
@@ -434,7 +478,7 @@ test("listBySeries - success", 4, function() {
 });
 
 test("listByUnscheduled - fail", 4, function() {
-	appController.db.failAt("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)");
+	appController.db.failAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)");
 	Episode.listByUnscheduled(function(episodeList) {
 		same(episodeList, [], "Invoke callback");
 	});
@@ -444,7 +488,7 @@ test("listByUnscheduled - fail", 4, function() {
 });
 
 test("listByUnscheduled - no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)");
+	appController.db.noRowsAffectedAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)");
 	Episode.listByUnscheduled(function(episodeList) {
 		same(episodeList, [], "Invoke callback");
 	});
@@ -455,7 +499,7 @@ test("listByUnscheduled - no rows affected", 4, function() {
 
 test("listByUnscheduled - success", 4, function() {
 	appController.db.addResultRows([{
-		rowid: this.id,
+		EpisodeID: this.id,
 		Name: this.episodeName,
 		Status: this.status,
 		StatusDate: this.statusDate,
@@ -469,6 +513,40 @@ test("listByUnscheduled - success", 4, function() {
 	}]);
 	Episode.listByUnscheduled($.proxy(function(episodeList) {
 		same(episodeList, [this.episode], "Invoke callback");
+	}, this));
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("find - fail", 4, function() {
+	appController.db.failAt("SELECT EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence FROM Episode WHERE EpisodeID = " + this.id);
+	Episode.find(this.id, function(episode) {
+		equals(episode, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Episode.find: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("find - success", 4, function() {
+	appController.db.addResultRows([{
+		EpisodeID: this.id,
+		Name: this.episodeName,
+		Status: this.status,
+		StatusDate: this.statusDate,
+		Unverified: String(this.unverified),
+		Unscheduled: String(this.unscheduled),
+		Sequence: this.sequence,
+		SeriesID: this.seriesId
+	}]);
+
+	this.episode.seriesName = undefined;
+	this.episode.programName = undefined;
+	this.episode.programId = undefined;
+
+	Episode.find(this.id, $.proxy(function(episode) {
+		same(episode, this.episode, "Invoke callback");
 	}, this));
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
@@ -489,9 +567,9 @@ test("totalCount - success", 4, function() {
 	appController.db.addResultRows([{
 		EpisodeCount: 1
 	}]);
-	Episode.totalCount($.proxy(function(count) {
+	Episode.totalCount(function(count) {
 		equals(count, 1, "Invoke callback");
-	}, this));
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
@@ -511,10 +589,44 @@ test("countByStatus - success", 4, function() {
 	appController.db.addResultRows([{
 		EpisodeCount: 1
 	}]);
-	Episode.countByStatus(this.status, $.proxy(function(count) {
+	Episode.countByStatus(this.status, function(count) {
 		equals(count, 1, "Invoke callback");
-	}, this));
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
+});
+
+test("removeAll - fail", 4, function() {
+	appController.db.failAt("DELETE FROM Episode");
+	Episode.removeAll(function(message) {
+		notEqual(message, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Episode.removeAll: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("removeAll - success", 4, function() {
+	Episode.removeAll(function(message) {
+		equals(message, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("fromJson", 1, function() {
+	var episode = Episode.fromJson({
+		id: this.id,
+		episodeName: this.episodeName,
+		seriesId: this.seriesId,
+		status: this.status,
+		statusDate: this.statusDate,
+		unverified: this.unverified,
+		unscheduled: this.unscheduled,
+		sequence: this.sequence
+	});
+	
+	same(episode, new Episode(this.id, this.episodeName, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence, this.seriesId), "Episode object");
 });

@@ -433,7 +433,7 @@ fieldset > .row:last-child {
 	background: url(../images/listArrow.png) no-repeat right;
 }
 
-#statusRow {
+#statusRow, #syncErrors {
 	display: none;
 }
 

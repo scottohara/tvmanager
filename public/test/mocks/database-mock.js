@@ -15,7 +15,7 @@ DatabaseMock.prototype.transaction = function(callback, errorCallback, successCa
 		}
 	} else {
 		if (errorCallback) {
-			errorCallback({
+			tx.db.errorMessage = errorCallback({
 				code: 0,
 				message: this.errorMessage
 			});
@@ -36,11 +36,11 @@ DatabaseMock.prototype.changeVersion = function(initialVersion, expectedVersion,
 };
 
 DatabaseMock.prototype.failAt = function(sql) {
-	this.failAtSql = sql;
+	this.failAtSql = new RegExp(sql.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&").replace(/%/, '(.*)'), 'g');
 };
 
 DatabaseMock.prototype.noRowsAffectedAt = function(sql) {
-	this.noRowsAffectedAtSql = sql;
+	this.noRowsAffectedAtSql = new RegExp(sql.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&").replace(/%/, '(.*)'), 'g');
 };
 
 DatabaseMock.prototype.addResultRows = function(rows) {
@@ -82,13 +82,13 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 				parsedSql: parsedSql
 			};
 
-			if (this.db.failAtSql === parsedSql) {
+			if (this.db.failAtSql && this.db.failAtSql.test(parsedSql)) {
 				this.executeError("Force failed");
 			} else {
 				if (successCallback) {
 					var rowsAffected = 1;
 					var rows = [];
-					if (this.db.noRowsAffectedAtSql === parsedSql) {
+					if (this.db.noRowsAffectedAtSql && this.db.noRowsAffectedAtSql.test(parsedSql)) {
 						rowsAffected = null;
 					} else {
 						rows = this.db.resultRows;
@@ -97,8 +97,7 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 					try {
 						successCallback(this, {
 							rowsAffected: rowsAffected,
-							rows: rows,
-							insertId: 999
+							rows: rows
 						});
 						commit = true;
 					} catch(successError) {

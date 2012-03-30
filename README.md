@@ -18,9 +18,9 @@ The data model is very simple:
 
 The main view is the **Schedule**, which lists all series that are currently airing (ie. have a frequency other than "Not Showing"), plus any other series that may not be currently airing but have one or more recorded or upcoming episodes expected.
 
-The other main view is **Unscheduled**, which lists any upcoming episodes that flagged as "unscheduled".  This is your TODO list for programming your DVR.
+The other main view is **Unscheduled**, which lists any upcoming episodes that flagged as "unscheduled". This is your TODO list for programming your DVR.
 
-The rest of the app consists of data management views (add/edit/delete programs, series & episodes), basic reports (eg. "All recorded", "All Expected", "All Missed" etc.), and some utility functions such as importing/exporting the database to/from a JSON file etc.
+The rest of the app consists of data management views (add/edit/delete programs, series & episodes), basic reports (eg. "All recorded", "All Expected", "All Missed" etc.), and some utility functions such as importing/exporting the database to/from Amazon S3 etc.
 
 Screenshots
 ===========
@@ -45,7 +45,7 @@ The code uses an MVC-style architecture, with a custom "view stack" for navigati
 
 Database schema changes are managed via an upgrade routine on startup (similar to Rails-style migrations).
 
-On the server side, it's a Ruby Sinatra app.  There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO Amazon S3 account).
+On the server side, it's a Ruby Sinatra app. There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO Amazon S3 account).
 
 [jQuery](http://jquery.com/) is used throughout, for DOM manipulation & AJAX calls.
 
@@ -87,7 +87,7 @@ The default database name doesn't need to be overriden if each environment is ho
 
 Offline Mode
 ============
-HTML5 application caching uses a manifest file to indicate which files are allowed to be cached.  If the manifest file changes (in any way), all cached resources are refreshed from the server.
+HTML5 application caching uses a manifest file to indicate which files are allowed to be cached. If the manifest file changes (in any way), all cached resources are refreshed from the server.
 
 To avoid having to manually keep the manifest file up to date with new/changed files, it is dynamically generated on the server using the [Manifesto gem](https://github.com/johntopley/manifesto).
 
@@ -95,11 +95,9 @@ You can test that the application cache is working by disconnecting from the net
 
 Import/Export
 =============
-The app includes a rudimentary backup/restore facility.  Backing up the database simply serializes all of the data to a JSON-respresentation, and saves it to an Amazon S3 account that you configure on the server.
+The app includes a backup/restore facility. As log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to an Amazon S3 account configured on the server.
 
-The S3 bucket is configured with versioning enabled, meaning that each exported version is retained in S3 (Note: this means it is up to you to purge any old versions that you no longer wish to keep, as the app itself does not expire or remove previous backups).
-
-Restoring the database does the reverse, pulling the latest JSON file (database.json) from S3 (via the server), clearing any existing data from the database and reloading it from the JSON.
+Restoring the database does the reverse, pulling all JSON objects from S3 (via the server), clearing any existing data from the database and reloading it from the JSON.
 
 An MD5 checksum veries that the data was imported/exported succesfully.
 
@@ -109,11 +107,6 @@ To enable the Import/Export functionality, you will need to declare the followin
 * AMAZON_SECRET_ACCESS_KEY={your AWS secret key}
 * S3_ENDPOINT={optional, the S3 region to use. Defaults to s3.amazonaws.com if none specified}
 * S3_BACKUP_BUCKET={the bucket to use for storing backup data. Will be created automatically if doesn't exist. See important note below.}
-* S3_BACKUP_OBJECT={the object key for the backup, eg. 'production/database.json'.  See note below.}
-
-**IMPORTANT NOTE REGARDING S3 BUCKET:** Versioning will be automatically enabled on the bucket specified above.  If you choose to backup to an existing bucket, please be aware that any other keys in this bucket will become version-enabled. Each version of an S3 object is counted when calculating your storage usage, so if you have a large bucket and/or it is written to frequently; then be aware that your storage could increase dramatically.  Recommend that you specify a bucket that will be used exclusively by TV Manager, to avoid any issues.
-
-For the object key, you may wish to include the deploy/environment name as part of the key. This enables you to have development, staging and production databases all sharing a single bucket (eg. 'development/database.json', 'staging/database.json', 'production/database.json').
 
 In development, the above environment variables can be saved to a file (eg. ~/.aws), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
 
@@ -123,8 +116,7 @@ In development, the above environment variables can be saved to a file (eg. ~/.a
 export AMAZON_ACCESS_KEY_ID='your AWS access credentials'
 export AMAZON_SECRET_ACCESS_KEY='your AWS secret key'
 export S3_ENDPOINT='s3-ap-southeast-1.amazonaws.com'
-export S3_BACKUP_BUCKET='tvmanager-yourdomain.com'
-export S3_BACKUP_OBJECT='development/database.json'
+export S3_BACKUP_BUCKET='devtvmanager.yourdomain.com'
 ```
 
 **~/.profile**
@@ -139,8 +131,8 @@ fi
 For staging/production, if you use Heroku you can specify these config vars using the heroku CLI gem, eg.
 
 ```
-heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=staging/database.json --remote staging
-heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_OBJECT=production/database.json --remote production
+heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_BUCKET=stagingtvmanager.yourdomain.com --remote staging
+heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_BUCKET=tvmanager.yourdomain.com --remote production
 ```
 
 (Assumes you have setup two Heroku remotes, one for staging and one for production)
@@ -157,7 +149,7 @@ Alternatively, you can start the server manually using the -E argument (eg. `rac
 
 To run the entire QUnit test suite, simply browse to [http://localhost:9393/test/index.html](http://localhost:9393/test/index.html)
 
-To run a single QUnit test module, append '?module-name'  (eg. [http://localhost:9393/test/index.html?application-controller](http://localhost:9393/test/index.html?application-controller))
+To run a single QUnit test module, append '?module-name' (eg. [http://localhost:9393/test/index.html?application-controller](http://localhost:9393/test/index.html?application-controller))
 
 Once the test suite is passing cleanly, to check the test suite coverage:
 

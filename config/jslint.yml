@@ -10,7 +10,7 @@ paths:
   - public/**/*.js
 
 exclude_paths:
-  - **/framework/**/*.js
+  - ./**/framework/**/*.js
 
 # ------------ jslint options ------------
 # see http://www.jslint.com/lint.html#options for more detailed explanations
@@ -46,7 +46,7 @@ sub:      false     # true if subscript notation may be used for expressions bet
 
 # other options
 
-maxlen:   2350      # Maximum line length
+maxlen:   2410      # Maximum line length
 indent:   2         # Number of spaces that should be used for indentation - used only if 'white' option is set
 maxerr:   50        # The maximum number of warnings reported (per file)
 passfail: false     # true if the scan should stop on first error (per file)
@@ -66,18 +66,21 @@ predef:             # Names of predefined global variables - comma-separated str
   - "module"
   - "expect"
   - "start"
+  - "notEqual"
 
   # Framework
   - "$"
   - "SpinningWheel"
   - "abc"
   - "hex_md5"
+  - "uuid"
 
   # Models
   - "Program"
   - "Series"
   - "Episode"
   - "Setting"
+  - "Sync"
 
   # Components
   - "List"
@@ -117,6 +120,7 @@ predef:             # Names of predefined global variables - comma-separated str
   - "ProgressBarMock"
   - "SeriesMock"
   - "SettingMock"
+  - "SyncMock"
   - "SpinningWheelMock"
   - "TestController"
   - "TransactionMock"

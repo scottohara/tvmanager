@@ -12,40 +12,42 @@ var Episode = function (id, episodeName, status, statusDate, unverified, unsched
 	this.programName = programName;
 };
 
-Episode.prototype.save = function() {
+Episode.prototype.save = function(callback) {
 	appController.db.transaction($.proxy(function(tx) {
-		var sql;
-		var params;
-
-		if (this.id) {
-			sql = "UPDATE Episode SET Name = ?, Status = ?, StatusDate = ?, Unverified = ?, Unscheduled = ?, Sequence = ? WHERE rowid = ?";
-			params = [this.episodeName, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence, this.id];
-		} else {
-			sql = "INSERT INTO Episode (Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (?, ?, ?, ?, ?, ?, ?)";
-			params = [this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence];
+		if (!this.id) {
+			this.id = uuid.v4();
 		}
 
-		tx.executeSql(sql, params,
-			$.proxy(function(tx, resultSet) {
-				if (!resultSet.rowsAffected) {
-					throw new Error("Episode.save: no rows affected");
-				}
-
-				if (!this.id) {
-					this.id = resultSet.insertId;
-				}
-			}, this),
-			function(tx, error) {
-				return "Episode.save: " + error.message;
+		tx.executeSql("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [this.id, this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence], $.proxy(function(tx, resultSet) {
+			if (!resultSet.rowsAffected) {
+				throw new Error("no rows affected");
 			}
-		);
-	}, this));
+
+			tx.executeSql("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Episode', ?, 'modified')", [this.id],
+				$.proxy(function() {
+					if (callback) {
+						callback(this.id);
+					}
+				}, this),
+				function(tx, error) {
+					throw error;
+				}
+			);
+		}, this));
+	}, this),
+	function(error) {
+		if (callback) {
+			callback();
+		}
+		return "Episode.save: " + error.message;
+	});
 };
 
 Episode.prototype.remove = function() {
 	if (this.id) {
 		appController.db.transaction($.proxy(function(tx) {
-			tx.executeSql("DELETE FROM Episode WHERE rowid = ?", [this.id]);
+			tx.executeSql("REPLACE INTO Sync (Type, ID, Action) VALUES ('Episode', ?, 'deleted')", [this.id]);
+			tx.executeSql("DELETE FROM Episode WHERE EpisodeID = ?", [this.id]);
 		}, this),
 		null,
 		$.proxy(function() {
@@ -58,7 +60,9 @@ Episode.prototype.remove = function() {
 
 Episode.prototype.toJson = function() {
 	return {
+		id: this.id,
 		episodeName: this.episodeName,
+		seriesId: this.seriesId,
 		status: this.status,
 		statusDate: this.statusDate,
 		unverified: this.unverified,
@@ -118,7 +122,7 @@ Episode.prototype.setUnverified = function(unverified) {
 };
 
 Episode.listBySeries = function(seriesId, callback) {
-	var filter = "WHERE e.SeriesID = ? ORDER BY e.Sequence, e.rowid";
+	var filter = "WHERE e.SeriesID = ? ORDER BY e.Sequence, e.EpisodeID";
 	var params = [seriesId];
 	Episode.list(filter, params, callback);
 };
@@ -133,17 +137,32 @@ Episode.list = function(filter, params, callback) {
 	var episodeList = [];
 
 	appController.db.readTransaction(function(tx) {
-		tx.executeSql("SELECT e.rowid, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.rowid JOIN Program p ON s.ProgramID = p.rowid " + filter, params,
+		tx.executeSql("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID " + filter, params,
 			function(tx, resultSet) {
 				for (var i = 0; i < resultSet.rows.length; i++) {
 					var ep = resultSet.rows.item(i);
-					episodeList.push(new Episode(ep.rowid, ep.Name, ep.Status, ep.StatusDate, ("true" === ep.Unverified), ("true" === ep.Unscheduled), ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
+					episodeList.push(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ("true" === ep.Unverified), ("true" === ep.Unscheduled), ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
 				}
 				callback(episodeList);
 			},
 			function(tx, error) {
 				callback(episodeList);
 				return "Episode.list: " + error.message;
+			}
+		);
+	});
+};
+
+Episode.find = function(id, callback) {
+	appController.db.readTransaction(function(tx) {
+		tx.executeSql("SELECT EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence FROM Episode WHERE EpisodeID = ?", [id],
+			function(tx, resultSet) {
+				var ep = resultSet.rows.item(0);
+				callback(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ("true" === ep.Unverified), ("true" === ep.Unscheduled), ep.Sequence, ep.SeriesID));
+			},
+			function(tx, error) {
+				callback(null);
+				return "Episode.find: " + error.message;
 			}
 		);
 	});
@@ -173,4 +192,23 @@ Episode.count = function(filter, params, callback) {
 			}
 		);
 	});
+};
+
+Episode.removeAll = function(callback) {
+	appController.db.transaction(function(tx) {
+		tx.executeSql("DELETE FROM Episode", [],
+			function(tx, resultSet) {
+				callback();
+			},
+			function(tx, error) {
+				var message = "Episode.removeAll: " + error.message;
+				callback(message);
+				return message;
+			}
+		);
+	});
+};
+
+Episode.fromJson = function(episode) {
+	return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.unverified, episode.unscheduled, episode.sequence, episode.seriesId);
 };

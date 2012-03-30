@@ -33,7 +33,7 @@ test("constructor", 9, function() {
 });
 
 test("save - update fail", 4, function() {
-	appController.db.failAt("UPDATE Program SET Name = " + this.programName + " WHERE rowid = " + this.id);
+	appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -43,7 +43,7 @@ test("save - update fail", 4, function() {
 });
 
 test("save - update no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("UPDATE Program SET Name = " + this.programName + " WHERE rowid = " + this.id);
+	appController.db.noRowsAffectedAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -52,11 +52,21 @@ test("save - update no rows affected", 4, function() {
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
+test("save - update Sync fail", 4, function() {
+	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Program', " + this.id + ", 'modified')");
+	this.program.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Program.save: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
 test("save - update success", 5, function() {
 	this.program.save($.proxy(function(id) {
 		equals(id, this.id, "Invoke callback");
 	}, this));
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	equals(this.program.id, this.id, "id property");
 	ok(appController.db.commit, "Commit transaction");
@@ -64,7 +74,7 @@ test("save - update success", 5, function() {
 
 test("save - insert fail", 4, function() {
 	this.program.id = null;
-	appController.db.failAt("INSERT INTO Program (Name) VALUES (" + this.programName + ")");
+	appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (%, " + this.programName + ")");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -75,7 +85,7 @@ test("save - insert fail", 4, function() {
 
 test("save - insert no rows affected", 4, function() {
 	this.program.id = null;
-	appController.db.noRowsAffectedAt("INSERT INTO Program (Name) VALUES (" + this.programName + ")");
+	appController.db.noRowsAffectedAt("REPLACE INTO Program (ProgramID, Name) VALUES (%, " + this.programName + ")");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -84,14 +94,24 @@ test("save - insert no rows affected", 4, function() {
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
+test("save - insert Sync fail", 4, function() {
+	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Program', %, 'modified')");
+	this.program.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Program.save: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
 test("save - insert success", 5, function() {
 	this.program.id = null;
 	this.program.save(function(id) {
-		equals(id, 999, "Invoke callback");
+		notEqual(id, null, "Invoke callback");
 	});
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
-	equals(this.program.id, 999, "id property");
+	notEqual(this.program.id, null, "id property");
 	ok(appController.db.commit, "Commit transaction");
 });
 
@@ -101,10 +121,28 @@ test("remove - no rows affected", 1, function() {
 	equals(appController.db.commands.length, 0, "Number of SQL commands");
 });
 
-test("remove - delete Episode fail", 4, function() {
-	appController.db.failAt("DELETE FROM Episode WHERE SeriesID IN (SELECT rowid FROM Series WHERE ProgramID = " + this.id + ")");
+test("remove - insert Episode Sync fail", 4, function() {
+	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = " + this.id);
 	this.program.remove();
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	ok(!appController.db.commit, "Rollback transaction");
+	equals(this.program.id, this.id, "id property");
+	equals(this.program.programName, this.programName, "programName property");
+});
+
+test("remove - delete Episode fail", 4, function() {
+	appController.db.failAt("DELETE FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = " + this.id + ")");
+	this.program.remove();
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	ok(!appController.db.commit, "Rollback transaction");
+	equals(this.program.id, this.id, "id property");
+	equals(this.program.programName, this.programName, "programName property");
+});
+
+test("remove - insert Series Sync fail", 4, function() {
+	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'deleted' FROM Series WHERE ProgramID = " + this.id);
+	this.program.remove();
+	equals(appController.db.commands.length, 3, "Number of SQL commands");
 	ok(!appController.db.commit, "Rollback transaction");
 	equals(this.program.id, this.id, "id property");
 	equals(this.program.programName, this.programName, "programName property");
@@ -113,16 +151,25 @@ test("remove - delete Episode fail", 4, function() {
 test("remove - delete Series fail", 4, function() {
 	appController.db.failAt("DELETE FROM Series WHERE ProgramID = " + this.id);
 	this.program.remove();
-	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.commands.length, 4, "Number of SQL commands");
+	ok(!appController.db.commit, "Rollback transaction");
+	equals(this.program.id, this.id, "id property");
+	equals(this.program.programName, this.programName, "programName property");
+});
+
+test("remove - insert Program Sync fail", 4, function() {
+	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) VALUES ('Program', " + this.id + ", 'deleted')");
+	this.program.remove();
+	equals(appController.db.commands.length, 5, "Number of SQL commands");
 	ok(!appController.db.commit, "Rollback transaction");
 	equals(this.program.id, this.id, "id property");
 	equals(this.program.programName, this.programName, "programName property");
 });
 
 test("remove - delete Program fail", 4, function() {
-	appController.db.failAt("DELETE FROM Program WHERE rowid = " + this.id);
+	appController.db.failAt("DELETE FROM Program WHERE ProgramID = " + this.id);
 	this.program.remove();
-	equals(appController.db.commands.length, 3, "Number of SQL commands");
+	equals(appController.db.commands.length, 6, "Number of SQL commands");
 	ok(!appController.db.commit, "Rollback transaction");
 	equals(this.program.id, this.id, "id property");
 	equals(this.program.programName, this.programName, "programName property");
@@ -130,40 +177,18 @@ test("remove - delete Program fail", 4, function() {
 
 test("remove - success", 5, function() {
 	this.program.remove();
-	equals(appController.db.commands.length, 3, "Number of SQL commands");
+	equals(appController.db.commands.length, 6, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
 	equals(this.program.id, null, "id property");
 	equals(this.program.programName, null, "programName property");
 });
 
-test("toJson", function() {
-	var testParams = [
-		{
-			description: "no series",
-			seriesJson: []
-		},
-		{
-			description: "with series",
-			seriesJson: [{}]
-		}
-	];
-
-	expect(testParams.length);
-
-	var i;
-
-	var programRetrieved = $.proxy(function(json) {
-		same(json, {
-			programName: this.programName,
-			seriesList: testParams[i].seriesJson
-		}, testParams[i].description + " - program JSON");
-	}, this);
-
-	for (i = 0; i < testParams.length; i++) {
-		Series.seriesJson = testParams[i].seriesJson;
-		this.program.toJson(programRetrieved);
-	}
+test("toJson", 1, function() {
+	same(this.program.toJson(), {
+		id: this.id,
+		programName: this.programName
+	}, "program JSON");
 });
 
 test("setProgramName", 2, function() {
@@ -305,7 +330,7 @@ test("setExpectedCount", function() {
 });
 
 test("list - fail", 4, function() {
-	appController.db.failAt("SELECT p.rowid, p.Name, COUNT(DISTINCT s.rowid) AS SeriesCount, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.rowid = s.ProgramID LEFT OUTER JOIN Episode e on s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY p.rowid ORDER BY p.Name");
+	appController.db.failAt("SELECT p.ProgramID, p.Name, COUNT(DISTINCT s.SeriesID) AS SeriesCount, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e on s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY p.ProgramID ORDER BY p.Name");
 	Program.list(function(programList) {
 		same(programList, [], "Invoke callback");
 	});
@@ -315,7 +340,7 @@ test("list - fail", 4, function() {
 });
 
 test("list - no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("SELECT p.rowid, p.Name, COUNT(DISTINCT s.rowid) AS SeriesCount, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.rowid = s.ProgramID LEFT OUTER JOIN Episode e on s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY p.rowid ORDER BY p.Name");
+	appController.db.noRowsAffectedAt("SELECT p.ProgramID, p.Name, COUNT(DISTINCT s.SeriesID) AS SeriesCount, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e on s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY p.ProgramID ORDER BY p.Name");
 	Program.list(function(programList) {
 		same(programList, [], "Invoke callback");
 	});
@@ -326,7 +351,7 @@ test("list - no rows affected", 4, function() {
 
 test("list - success", 4, function() {
 	appController.db.addResultRows([{
-		rowid: this.id,
+		ProgramID: this.id,
 		Name: this.programName,
 		SeriesCount: this.seriesCount,
 		EpisodeCount: this.episodeCount,
@@ -336,6 +361,36 @@ test("list - success", 4, function() {
 	}]);
 	Program.list($.proxy(function(programList) {
 		same(programList, [this.program], "Invoke callback");
+	}, this));
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("find - fail", 4, function() {
+	appController.db.failAt("SELECT ProgramID, Name FROM Program WHERE ProgramID = " + this.id);
+	Program.find(this.id, function(program) {
+		equals(program, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Program.find: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("find - success", 4, function() {
+	appController.db.addResultRows([{
+		ProgramID: this.id,
+		Name: this.programName
+	}]);
+
+	this.program.seriesCount = undefined;
+	this.program.setEpisodeCount(undefined);
+	this.program.setWatchedCount(undefined);
+	this.program.setRecordedCount(undefined);
+	this.program.setExpectedCount(undefined);
+
+	Program.find(this.id, $.proxy(function(program) {
+		same(program, this.program, "Invoke callback");
 	}, this));
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
@@ -356,10 +411,38 @@ test("count - success", 4, function() {
 	appController.db.addResultRows([{
 		ProgramCount: 1
 	}]);
-	Program.count($.proxy(function(count) {
+	Program.count(function(count) {
 		equals(count, 1, "Invoke callback");
-	}, this));
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
+});
+
+test("removeAll - fail", 4, function() {
+	appController.db.failAt("DELETE FROM Program");
+	Program.removeAll(function(message) {
+		notEqual(message, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Program.removeAll: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("removeAll - success", 4, function() {
+	Program.removeAll(function(message) {
+		equals(message, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("fromJson", 1, function() {
+	var program = Program.fromJson({
+		id: this.id,
+		programName: this.programName
+	});
+	
+	same(program, new Program(this.id, this.programName), "Program object");
 });

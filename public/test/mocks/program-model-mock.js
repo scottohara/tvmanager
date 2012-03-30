@@ -1,34 +1,25 @@
 ProgramMock = {
 	saved: true,
+	removed: true,
 	programJson: [],
 	programs: [],
 	save: function(callback) {
-		this.toJson(function(json) {
-			ProgramMock.programJson.push(json);
-		});
-		
-		if (ProgramMock.saved) {
-			callback(999);
-		} else {
-			callback();
-		}
+		callback();
 	},
 	list: function(callback) {
-		var that = this;
-		
-		var programToJson = function(index) {
-			var name = that.programs[index].name;
-			return function(jsonCallback) {
-				jsonCallback({ name: name });
-			};
-		};
-
-		for (var i = 0; i < this.programs.length; i++) {
-			this.programs[i].toJson = programToJson(i);
-		}
 		callback(this.programs);
+	},
+	find: function(id, callback) {
+		callback(new Program(id, "test-program"));
 	},
 	count: function(callback) {
 		callback(1);
+	},
+	removeAll: function(callback) {
+		if (ProgramMock.removed) {
+			callback();
+		} else {
+			callback("Force failed");
+		}
 	}
 };

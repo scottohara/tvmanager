@@ -6,7 +6,7 @@ var DatabaseController = function (databaseName, callback, errorCallback) {
 	this.errorCallback = errorCallback;
 	this.initialVersion = "";
 
-	this.expectedVersion = "1.7";
+	this.expectedVersion = "1.9";
 
 	this.upgrades = [
 		{
@@ -40,6 +40,14 @@ var DatabaseController = function (databaseName, callback, errorCallback) {
 		{
 			version: "1.6",
 			upgradeHandler: this.v1_7
+		},
+		{
+			version: "1.7",
+			upgradeHandler: this.v1_8
+		},
+		{
+			version: "1.8",
+			upgradeHandler: this.v1_9
 		}
 	];
 
@@ -141,4 +149,59 @@ DatabaseController.prototype.v1_7 = function(tx) {
 			}
 		}
 	);
+};
+
+DatabaseController.prototype.v1_8 = function(tx) {
+	tx.executeSql("ALTER TABLE Program ADD COLUMN ProgramID");
+	tx.executeSql("ALTER TABLE Series ADD COLUMN SeriesID");
+	tx.executeSql("ALTER TABLE Episode ADD COLUMN EpisodeID");
+	tx.executeSql("SELECT rowid FROM Program", [],
+		function(tx, resultSet) {
+			for (var i = 0; i < resultSet.rows.length; i++) {
+				var prog = resultSet.rows.item(i);
+				var programId = uuid.v4();
+				tx.executeSql("UPDATE Program SET ProgramID = ? WHERE rowid = ?", [programId, prog.rowid]);
+				tx.executeSql("UPDATE Series SET ProgramID = ? WHERE ProgramID = ?", [programId, prog.rowid]);
+			}
+			tx.executeSql("CREATE TABLE tmp_Program (ProgramID PRIMARY KEY NOT NULL, Name)");
+			tx.executeSql("INSERT INTO tmp_Program (ProgramID, Name) SELECT ProgramID, Name FROM Program");
+			tx.executeSql("DROP TABLE Program");
+			tx.executeSql("ALTER TABLE tmp_Program RENAME TO Program");
+		}
+	);
+	tx.executeSql("SELECT rowid FROM Series", [],
+		function(tx, resultSet) {
+			for (var i = 0; i < resultSet.rows.length; i++) {
+				var series = resultSet.rows.item(i);
+				var seriesId = uuid.v4();
+				tx.executeSql("UPDATE Series SET SeriesID = ? WHERE rowid = ?", [seriesId, series.rowid]);
+				tx.executeSql("UPDATE Episode SET SeriesID = ? WHERE SeriesID = ?", [seriesId, series.rowid]);
+			}
+			tx.executeSql("CREATE TABLE tmp_Series (SeriesID PRIMARY KEY NOT NULL, Name, ProgramID, NowShowing)");
+			tx.executeSql("INSERT INTO tmp_Series (SeriesID, Name, ProgramID, NowShowing) SELECT SeriesID, Name, ProgramID, NowShowing FROM Series");
+			tx.executeSql("DROP TABLE Series");
+			tx.executeSql("ALTER TABLE tmp_Series RENAME TO Series");
+		}
+	);
+	tx.executeSql("SELECT rowid FROM Episode", [],
+		function(tx, resultSet) {
+			for (var i = 0; i < resultSet.rows.length; i++) {
+				var episode = resultSet.rows.item(i);
+				var episodeId = uuid.v4();
+				tx.executeSql("UPDATE Episode SET EpisodeID = ? WHERE rowid = ?", [episodeId, episode.rowid]);
+			}
+			tx.executeSql("CREATE TABLE tmp_Episode (EpisodeID PRIMARY KEY NOT NULL, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence)");
+			tx.executeSql("INSERT INTO tmp_Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) SELECT EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence FROM Episode");
+			tx.executeSql("DROP TABLE Episode");
+			tx.executeSql("ALTER TABLE tmp_Episode RENAME TO Episode");
+		}
+	);
+};
+
+DatabaseController.prototype.v1_9 = function(tx) {
+	tx.executeSql("CREATE TABLE IF NOT EXISTS Sync (Type, ID, Action, PRIMARY KEY ( Type, ID ))");
+	tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Program', ProgramID, 'modified' FROM Program");
+	tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'modified' FROM Series");
+	tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'modified' FROM Episode");
+	tx.executeSql("DELETE FROM Setting WHERE Name = 'LastSyncHash'");
 };

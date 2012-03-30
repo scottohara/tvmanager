@@ -2,10 +2,7 @@ SettingMock = function(settingName, settingValue) {
 	this.settingValue = settingValue;
 };
 
-SettingMock.prototype.save = function(callback) {
-	if (callback) {
-		callback(true);
-	}
+SettingMock.prototype.save = function() {
 };
 
 SettingMock.setting = {};

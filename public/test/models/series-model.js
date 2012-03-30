@@ -41,7 +41,7 @@ test("constructor", 13, function() {
 });
 
 test("save - update fail", 4, function() {
-	appController.db.failAt("UPDATE Series SET Name = " + this.seriesName + ", NowShowing = " + this.nowShowing + ", ProgramID = " + this.programId + " WHERE rowid = " + this.id);
+	appController.db.failAt("REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID) VALUES (" + this.id + ", " + this.seriesName + ", " + this.nowShowing + ", " + this.programId + ")");
 	this.series.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -51,7 +51,7 @@ test("save - update fail", 4, function() {
 });
 
 test("save - update no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("UPDATE Series SET Name = " + this.seriesName + ", NowShowing = " + this.nowShowing + ", ProgramID = " + this.programId + " WHERE rowid = " + this.id);
+	appController.db.noRowsAffectedAt("REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID) VALUES (" + this.id + ", " + this.seriesName + ", " + this.nowShowing + ", " + this.programId + ")");
 	this.series.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -60,11 +60,21 @@ test("save - update no rows affected", 4, function() {
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
+test("save - update Sync fail", 4, function() {
+	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Series', " + this.id + ", 'modified')");
+	this.series.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Series.save: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
 test("save - update success", 5, function() {
 	this.series.save($.proxy(function(id) {
 		equals(id, this.id, "Invoke callback");
 	}, this));
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	equals(this.series.id, this.id, "id property");
 	ok(appController.db.commit, "Commit transaction");
@@ -72,7 +82,7 @@ test("save - update success", 5, function() {
 
 test("save - insert fail", 4, function() {
 	this.series.id = null;
-	appController.db.failAt("INSERT INTO Series (Name, NowShowing, ProgramID) VALUES (" + this.seriesName + ", " + this.nowShowing + ", " + this.programId + ")");
+	appController.db.failAt("REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID) VALUES (%, " + this.seriesName + ", " + this.nowShowing + ", " + this.programId + ")");
 	this.series.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -83,7 +93,7 @@ test("save - insert fail", 4, function() {
 
 test("save - insert no rows affected", 4, function() {
 	this.series.id = null;
-	appController.db.noRowsAffectedAt("INSERT INTO Series (Name, NowShowing, ProgramID) VALUES (" + this.seriesName + ", " + this.nowShowing + ", " + this.programId + ")");
+	appController.db.noRowsAffectedAt("REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID) VALUES (%, " + this.seriesName + ", " + this.nowShowing + ", " + this.programId + ")");
 	this.series.save(function(id) {
 		equals(id, null, "Invoke callback");
 	});
@@ -92,14 +102,24 @@ test("save - insert no rows affected", 4, function() {
 	ok(!appController.db.commit, "Rollback transaction");
 });
 
+test("save - insert Sync fail", 4, function() {
+	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Series', %, 'modified')");
+	this.series.save(function(id) {
+		equals(id, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Series.save: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
 test("save - insert success", 5, function() {
 	this.series.id = null;
 	this.series.save(function(id) {
-		equals(id, 999, "Invoke callback");
+		notEqual(id, null, "Invoke callback");
 	});
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
-	equals(this.series.id, 999, "id property");
+	notEqual(this.series.id, null, "id property");
 	ok(appController.db.commit, "Commit transaction");
 });
 
@@ -109,10 +129,20 @@ test("remove - no rows affected", 1, function() {
 	equals(appController.db.commands.length, 0, "Number of SQL commands");
 });
 
+test("remove - insert Episode Sync fail", 5, function() {
+	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID = " + this.id);
+	this.series.remove();
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	ok(!appController.db.commit, "Rollback transaction");
+	equals(this.series.id, this.id, "id property");
+	equals(this.series.seriesName, this.seriesName, "programName property");
+	equals(this.series.programId, this.programId, "programId property");
+});
+
 test("remove - delete Episode fail", 6, function() {
 	appController.db.failAt("DELETE FROM Episode WHERE SeriesID = " + this.id);
 	this.series.remove();
-	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	ok(!appController.db.commit, "Rollback transaction");
 	equals(this.series.id, this.id, "id property");
 	equals(this.series.seriesName, this.seriesName, "seriesName property");
@@ -120,10 +150,20 @@ test("remove - delete Episode fail", 6, function() {
 	equals(this.series.programId, this.programId, "programId property");
 });
 
-test("remove - delete Series fail", 6, function() {
-	appController.db.failAt("DELETE FROM Series WHERE rowid = " + this.id);
+test("remove - insert Series Sync fail", 5, function() {
+	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) VALUES ('Series', " + this.id + ", 'deleted')");
 	this.series.remove();
-	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.commands.length, 3, "Number of SQL commands");
+	ok(!appController.db.commit, "Rollback transaction");
+	equals(this.series.id, this.id, "id property");
+	equals(this.series.seriesName, this.seriesName, "programName property");
+	equals(this.series.programId, this.programId, "programId property");
+});
+
+test("remove - delete Series fail", 6, function() {
+	appController.db.failAt("DELETE FROM Series WHERE SeriesID = " + this.id);
+	this.series.remove();
+	equals(appController.db.commands.length, 4, "Number of SQL commands");
 	ok(!appController.db.commit, "Rollback transaction");
 	equals(this.series.id, this.id, "id property");
 	equals(this.series.seriesName, this.seriesName, "seriesName property");
@@ -133,7 +173,7 @@ test("remove - delete Series fail", 6, function() {
 
 test("remove - success", 7, function() {
 	this.series.remove();
-	equals(appController.db.commands.length, 2, "Number of SQL commands");
+	equals(appController.db.commands.length, 4, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
 	equals(this.series.id, null, "id property");
@@ -143,13 +183,12 @@ test("remove - success", 7, function() {
 });
 
 test("toJson", 1, function() {
-	this.series.toJson($.proxy(function(json) {
-		same(json, {
-			seriesName: this.seriesName,
-			nowShowing: this.nowShowing,
-			episodes: [{}]
-		}, "series JSON");
-	}, this));
+	same(this.series.toJson(), {
+		id: this.id,
+		seriesName: this.seriesName,
+		nowShowing: this.nowShowing,
+		programId: this.programId
+	}, "series JSON");
 });
 
 test("setNowShowing", function() {
@@ -370,7 +409,7 @@ test("setStatusWarning", function() {
 });
 
 test("listByProgram - fail", 4, function() {
-	appController.db.failAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' WHERE ProgramID = " + this.programId + " GROUP BY s.rowid ORDER BY s.Name");
+	appController.db.failAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' WHERE p.ProgramID = " + this.programId + " GROUP BY s.SeriesID ORDER BY s.Name");
 	Series.listByProgram(this.programId, function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	});
@@ -380,7 +419,7 @@ test("listByProgram - fail", 4, function() {
 });
 
 test("listByProgram - no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' WHERE ProgramID = " + this.programId + " GROUP BY s.rowid ORDER BY s.Name");
+	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' WHERE p.ProgramID = " + this.programId + " GROUP BY s.SeriesID ORDER BY s.Name");
 	Series.listByProgram(this.programId, function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	});
@@ -391,7 +430,7 @@ test("listByProgram - no rows affected", 4, function() {
 
 test("listByProgram - success", 4, function() {
 	appController.db.addResultRows([{
-		rowid: this.id,
+		SeriesID: this.id,
 		Name: this.seriesName,
 		NowShowing: this.nowShowing,
 		ProgramID: this.programId,
@@ -412,7 +451,7 @@ test("listByProgram - success", 4, function() {
 });
 
 test("listByNowShowing - fail", 4, function() {
-	appController.db.failAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount, SUM(CASE WHEN e4.StatusDate IS NULL THEN 0 WHEN STRFTIME('%m', 'now') < '04' THEN CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END ELSE CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END END) AS StatusWarningCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY s.rowid HAVING s.NowShowing IS NOT NULL OR COUNT(e3.rowid) > 0 OR COUNT(e4.rowid) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name");
+	appController.db.failAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount, SUM(CASE WHEN e4.StatusDate IS NULL THEN 0 WHEN STRFTIME('%m', 'now') < '04' THEN CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END ELSE CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END END) AS StatusWarningCount FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY s.SeriesID HAVING s.NowShowing IS NOT NULL OR COUNT(e3.EpisodeID) > 0 OR COUNT(e4.EpisodeID) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name");
 	Series.listByNowShowing(function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	});
@@ -422,7 +461,7 @@ test("listByNowShowing - fail", 4, function() {
 });
 
 test("listByNowShowing - no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount, SUM(CASE WHEN e4.StatusDate IS NULL THEN 0 WHEN STRFTIME('%m', 'now') < '04' THEN CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END ELSE CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END END) AS StatusWarningCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY s.rowid HAVING s.NowShowing IS NOT NULL OR COUNT(e3.rowid) > 0 OR COUNT(e4.rowid) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name");
+	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount, SUM(CASE WHEN e4.StatusDate IS NULL THEN 0 WHEN STRFTIME('%m', 'now') < '04' THEN CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END ELSE CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END END) AS StatusWarningCount FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY s.SeriesID HAVING s.NowShowing IS NOT NULL OR COUNT(e3.EpisodeID) > 0 OR COUNT(e4.EpisodeID) > 0 ORDER BY CASE WHEN s.NowShowing IS NULL THEN 1 ELSE 0 END, s.NowShowing, p.Name");
 	Series.listByNowShowing(function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	});
@@ -433,7 +472,7 @@ test("listByNowShowing - no rows affected", 4, function() {
 
 test("listByNowShowing - success", 4, function() {
 	appController.db.addResultRows([{
-		rowid: this.id,
+		SeriesID: this.id,
 		Name: this.seriesName,
 		NowShowing: this.nowShowing,
 		ProgramID: this.programId,
@@ -455,7 +494,7 @@ test("listByNowShowing - success", 4, function() {
 
 test("listByStatus - fail", 4, function() {
 	var status = "Watched";
-	appController.db.failAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e.rowid) AS " + status + "Count FROM Program p JOIN Series s ON p.rowid = s.ProgramID JOIN Episode e ON s.rowid = e.SeriesID WHERE e.Status = " + status + " GROUP BY s.rowid ORDER BY p.Name, s.Name");
+	appController.db.failAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e.EpisodeID) AS " + status + "Count FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID JOIN Episode e ON s.SeriesID = e.SeriesID WHERE e.Status = " + status + " GROUP BY s.SeriesID ORDER BY p.Name, s.Name");
 	Series.listByStatus(function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	}, status);
@@ -466,7 +505,7 @@ test("listByStatus - fail", 4, function() {
 
 test("listByStatus - no rows affected", 4, function() {
 	var status = "Watched";
-	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e.rowid) AS " + status + "Count FROM Program p JOIN Series s ON p.rowid = s.ProgramID JOIN Episode e ON s.rowid = e.SeriesID WHERE e.Status = " + status + " GROUP BY s.rowid ORDER BY p.Name, s.Name");
+	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e.EpisodeID) AS " + status + "Count FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID JOIN Episode e ON s.SeriesID = e.SeriesID WHERE e.Status = " + status + " GROUP BY s.SeriesID ORDER BY p.Name, s.Name");
 	Series.listByStatus(function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	}, status);
@@ -478,7 +517,7 @@ test("listByStatus - no rows affected", 4, function() {
 test("listByStatus - success", 4, function() {
 	var status = "Watched";
 	appController.db.addResultRows([{
-		rowid: this.id,
+		SeriesID: this.id,
 		Name: this.seriesName,
 		NowShowing: this.nowShowing,
 		ProgramID: this.programId,
@@ -499,7 +538,7 @@ test("listByStatus - success", 4, function() {
 });
 
 test("listByIncomplete - fail", 4, function() {
-	appController.db.failAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY s.rowid HAVING COUNT(e.rowid) > COUNT(e2.rowid) AND COUNT(e2.rowid) > 0 ORDER BY p.Name, s.Name");
+	appController.db.failAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY s.SeriesID HAVING COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND COUNT(e2.EpisodeID) > 0 ORDER BY p.Name, s.Name");
 	Series.listByIncomplete(function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	});
@@ -509,7 +548,7 @@ test("listByIncomplete - fail", 4, function() {
 });
 
 test("listByIncomplete - no rows affected", 4, function() {
-	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.rowid, s.Name, s.NowShowing, s.ProgramID, COUNT(e.rowid) AS EpisodeCount, COUNT(e2.rowid) AS WatchedCount, COUNT(e3.rowid) AS RecordedCount, COUNT(e4.rowid) AS ExpectedCount FROM Program p JOIN Series s ON p.rowid = s.ProgramID LEFT OUTER JOIN Episode e ON s.rowid = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.rowid = e2.rowid AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.rowid = e3.rowid AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.rowid = e4.rowid AND e4.Status = 'Expected' GROUP BY s.rowid HAVING COUNT(e.rowid) > COUNT(e2.rowid) AND COUNT(e2.rowid) > 0 ORDER BY p.Name, s.Name");
+	appController.db.noRowsAffectedAt("SELECT p.Name AS ProgramName, s.SeriesID, s.Name, s.NowShowing, s.ProgramID, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY s.SeriesID HAVING COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND COUNT(e2.EpisodeID) > 0 ORDER BY p.Name, s.Name");
 	Series.listByIncomplete(function(seriesList) {
 		same(seriesList, [], "Invoke callback");
 	});
@@ -520,7 +559,7 @@ test("listByIncomplete - no rows affected", 4, function() {
 
 test("listByIncomplete - success", 4, function() {
 	appController.db.addResultRows([{
-		rowid: this.id,
+		SeriesID: this.id,
 		Name: this.seriesName,
 		NowShowing: this.nowShowing,
 		ProgramID: this.programId,
@@ -534,6 +573,40 @@ test("listByIncomplete - success", 4, function() {
 	}]);
 	Series.listByIncomplete($.proxy(function(seriesList) {
 		same(seriesList, [this.series], "Invoke callback");
+	}, this));
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("find - fail", 4, function() {
+	appController.db.failAt("SELECT SeriesID, Name, ProgramID, NowShowing FROM Series WHERE SeriesID = " + this.id);
+	Series.find(this.id, function(series) {
+		equals(series, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Series.find: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("find - success", 4, function() {
+	appController.db.addResultRows([{
+		SeriesID: this.id,
+		Name: this.seriesName,
+		NowShowing: this.nowShowing,
+		ProgramID: this.programId
+	}]);
+
+	this.series.programName = undefined;
+	this.series.setEpisodeCount(undefined);
+	this.series.setWatchedCount(undefined);
+	this.series.setRecordedCount(undefined);
+	this.series.setExpectedCount(undefined);
+	this.series.setMissedCount(undefined);
+	this.series.setStatusWarning(undefined);
+
+	Series.find(this.id, $.proxy(function(series) {
+		same(series, this.series, "Invoke callback");
 	}, this));
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
@@ -554,10 +627,40 @@ test("count - success", 4, function() {
 	appController.db.addResultRows([{
 		SeriesCount: 1
 	}]);
-	Series.count($.proxy(function(count) {
+	Series.count(function(count) {
 		equals(count, 1, "Invoke callback");
-	}, this));
+	});
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
 	ok(appController.db.commit, "Commit transaction");
+});
+
+test("removeAll - fail", 4, function() {
+	appController.db.failAt("DELETE FROM Series");
+	Series.removeAll(function(message) {
+		notEqual(message, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, "Series.removeAll: Force failed", "Error message");
+	ok(!appController.db.commit, "Rollback transaction");
+});
+
+test("removeAll - success", 4, function() {
+	Series.removeAll(function(message) {
+		equals(message, null, "Invoke callback");
+	});
+	equals(appController.db.commands.length, 1, "Number of SQL commands");
+	equals(appController.db.errorMessage, null, "Error message");
+	ok(appController.db.commit, "Commit transaction");
+});
+
+test("fromJson", 1, function() {
+	var series = Series.fromJson({
+		id: this.id,
+		seriesName: this.seriesName,
+		nowShowing: this.nowShowing,
+		programId: this.programId
+	});
+	
+	same(series, new Series(this.id, this.seriesName, this.nowShowing, this.programId), "Series object");
 });

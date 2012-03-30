@@ -1,8 +1,8 @@
 module("database-controller", {
 	setup: function() {
 		this.databaseName = "test-db";
-		this.expectedVersion = "1.7";
-		this.numUpgradeCommands = 12;
+		this.expectedVersion = "1.9";
+		this.numUpgradeCommands = 40;
 		this.initialVersion = this.expectedVersion;
 		
 		this.successCallback = $.proxy(function(versions) {

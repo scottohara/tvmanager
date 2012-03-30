@@ -1,19 +1,11 @@
 EpisodeMock = {
 	episodeJson: [],
 	episodes: [],
-	save: function() {
-		EpisodeMock.episodeJson.push(this.toJson());
+	save: function(callback) {
+		callback(999);
 	},
 	listBySeries: function(seriesId, callback) {
-		if (this.episodes.length > 0) {
-			callback(this.episodes);
-		} else {
-			callback([{
-				toJson: function() {
-					return {};
-				}
-			}]);
-		}
+		callback(this.episodes);
 	},
 	listByUnscheduled: function(callback) {
 		callback([{}]);
@@ -23,6 +15,9 @@ EpisodeMock = {
 	},
 	countByStatus: function(status, callback) {
 		callback(1);
+	},
+	removeAll: function(callback) {
+		callback();
 	}
 };
 

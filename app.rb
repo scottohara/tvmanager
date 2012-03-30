@@ -52,9 +52,9 @@ get '/manifest' do
 
 	# Need to explicitly list any routes called via Ajax as network resources
 	manifest << "\nNETWORK:\n"
-	manifest << "export\n"
-	manifest << "import\n"
-	manifest << "test\n"
+	manifest << "/programs\n"
+	manifest << "/series\n"
+	manifest << "/episodes\n"
 
 	# In dev/test configuration, add everything in /public/test/* to the online whitelist
 	# (not necessary for production/staging, as /public/test is excluded via .slugignore)
@@ -73,17 +73,16 @@ head '/test' do
 	end
 end
 
-# Export route used for testing
-post '/export', :isTest => :environment do
+# Create/update route used for testing
+post '/:resource/:id', :isTest => :environment do
 	begin
-		# Echo back the data & MD5 hash that was passed
+		# Echo back the MD5 hash that was passed
 		etag request.env["HTTP_CONTENT_MD5"]
-		request.body.read
 	end
 end
 
-# Export route
-post '/export' do
+# Create/update S3 object route
+post '/:resource/:id' do
 	begin
 		# Get the Content-MD5 header from the request
 		md5_received = request.env["HTTP_CONTENT_MD5"]
@@ -93,7 +92,7 @@ post '/export' do
 		request.body.rewind
 
 		# Check that the MD5 received matches the MD5 generated
-		raise BadRequest, "Checksum mismatch on received backup" unless md5_received == md5_hex
+		raise BadRequest, "Checksum mismatch on received change (#{md5_hex} != #{md5_received})" unless md5_received == md5_hex
 
 		# Initialise the storage controller
 		backup_bucket = StorageController.new
@@ -102,12 +101,12 @@ post '/export' do
 		md5_base64 = Digest::MD5.base64digest request.body.read
 		request.body.rewind
 
-		# Post request body to the object name configured for the environment
-		backup_object = AWS::S3::S3Object.new backup_bucket, ENV[:S3_BACKUP_OBJECT.to_s]
-		backup_objectversion = backup_object.write :data => request.body.read, :content_length => request.content_length.to_i, :content_type => 'application/json', :content_md5 => md5_base64
+		# Post request body to the object name matching the current URI (with the leading slash removed)
+		backup_object = AWS::S3::S3Object.new backup_bucket, request.path_info[1..-1]
+		backup_object.write :data => request.body.read, :content_length => request.content_length.to_i, :content_type => 'application/json', :content_md5 => md5_base64
 
 		# Double check that the etag returned still matches the MD5 digest
-		raise InternalServerError, "Checksum mismatch on stored backup (#{backup_objectversion.etag.gsub(/\"/, '')} != #{md5_hex})" unless backup_objectversion.etag.gsub(/\"/, '') == md5_hex
+		raise InternalServerError, "Checksum mismatch on stored change (#{backup_object.etag.gsub(/\"/, '')} != #{md5_hex})" unless backup_object.etag.gsub(/\"/, '') == md5_hex
 
 		# Return the MD5 digest as the response etag
 		etag md5_hex
@@ -122,27 +121,60 @@ post '/export' do
 	end
 end
 
-# Import route used for testing
-get '/import', :isTest => :environment do
+# Delete route used for testing
+delete '/:resource/:id', :isTest => :environment do
 	begin
-		etag "test-hash"
-		File.read(File.join('public', 'test', 'database.json'))
 	end
 end
 
-# Import route
-get '/import' do
+# Delete S3 object route
+delete '/:resource/:id' do
 	begin
 		# Initialise the storage controller
 		backup_bucket = StorageController.new
 
-		# Get the backup object
-		backup_object = backup_bucket.objects[ENV[:S3_BACKUP_OBJECT.to_s]]
-		raise NotFound, "Unable to located stored backup" if backup_object.nil?
+		# Delete the object name matching the current URI (with the leading slash removed)
+		backup_bucket.objects[request.path_info[1..-1]].delete
 
-		# Return the object's etag and data
-		etag backup_object.etag.gsub(/\"/, '')
-		backup_object.read
+	rescue HttpError => e
+		status e.class.status
+		e.message
+
+	rescue StandardError => e
+		status 500
+		e.message
+	end
+end
+
+# Import route used for testing
+get '/:resource', :isTest => :environment do
+	begin
+		etag "test-hash"
+		File.read(File.join("public", "test", "#{params[:resource]}.json"))
+	end
+end
+
+# Import route
+get '/:resource' do
+	begin
+		# Initialise the storage controller
+		backup_bucket = StorageController.new
+
+		# Get the backup objects of the requested type
+		backup_objects = backup_bucket.objects.with_prefix params[:resource]
+		raise NotFound, "Unable to located stored #{params[:resource]}" if backup_objects.nil?
+
+		# Map each object's data to the collection, checking the etag matches the MD5 digest as we go
+		backup_object_data = backup_objects.map do |object|
+			object_data = object.read
+			md5_hex = Digest::MD5.hexdigest object_data
+			raise InternalServerError, "Checksum mismatch on received object (#{object.etag.gsub(/\"/, '')} != #{md5_hex})" unless object.etag.gsub(/\"/, '') == md5_hex
+			object_data
+		end
+
+		# Return the collection's etag and data
+		etag Digest::MD5.hexdigest backup_object_data.to_json
+		backup_object_data.to_json
 
 	rescue HttpError => e
 		status e.class.status
@@ -179,7 +211,7 @@ end
 class StorageController
 	def self.new
 		# Check that we have all of the required environment variables
-		[:AMAZON_ACCESS_KEY_ID, :AMAZON_SECRET_ACCESS_KEY, :S3_BACKUP_BUCKET, :S3_BACKUP_OBJECT].each do |key|
+		[:AMAZON_ACCESS_KEY_ID, :AMAZON_SECRET_ACCESS_KEY, :S3_BACKUP_BUCKET].each do |key|
 			raise InternalServerError, key.to_s + " environment variable is not configured" unless ENV.key? key.to_s
 		end
 
@@ -194,9 +226,6 @@ class StorageController
 		# Get a reference to the backup bucket (create if not exists)
 		backup_bucket = s3.buckets[ENV[:S3_BACKUP_BUCKET.to_s]]
 		backup_bucket = s3.buckets.create ENV[:S3_BACKUP_BUCKET.to_s] unless backup_bucket.exists?
-
-		# Make sure that versioning is enabled on the backup bucket
-		backup_bucket.enable_versioning unless backup_bucket.versioned?
 
 		# Return the backup bucket
 		backup_bucket
