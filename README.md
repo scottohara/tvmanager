@@ -20,7 +20,7 @@ The main view is the **Schedule**, which lists all series that are currently air
 
 The other main view is **Unscheduled**, which lists any upcoming episodes that flagged as "unscheduled". This is your TODO list for programming your DVR.
 
-The rest of the app consists of data management views (add/edit/delete programs, series & episodes), basic reports (eg. "All recorded", "All Expected", "All Missed" etc.), and some utility functions such as importing/exporting the database to/from Amazon S3 etc.
+The rest of the app consists of data management views (add/edit/delete programs, series & episodes), basic reports (eg. "All recorded", "All Expected", "All Missed" etc.), and some utility functions such as importing/exporting the database to/from a backend NoSQL database (CouchDB) etc.
 
 Screenshots
 ===========
@@ -45,7 +45,7 @@ The code uses an MVC-style architecture, with a custom "view stack" for navigati
 
 Database schema changes are managed via an upgrade routine on startup (similar to Rails-style migrations).
 
-On the server side, it's a Ruby Sinatra app. There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO Amazon S3 account).
+On the server side, it's a Ruby Sinatra app. There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO CouchDB database).
 
 [jQuery](http://jquery.com/) is used throughout, for DOM manipulation & AJAX calls.
 
@@ -95,51 +95,45 @@ You can test that the application cache is working by disconnecting from the net
 
 Import/Export
 =============
-The app includes a backup/restore facility. As log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to an Amazon S3 account configured on the server.
+The app includes a backup/restore facility. As log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
 
-Restoring the database does the reverse, pulling all JSON objects from S3 (via the server), clearing any existing data from the database and reloading it from the JSON.
+Restoring the database does the reverse, pulling all JSON objects from CouchDB (via the server), clearing any existing data from the database and reloading it from the JSON.
 
 An MD5 checksum veries that the data was imported/exported succesfully.
 
-To enable the Import/Export functionality, you will need to declare the following environment variables:
+To enable the Import/Export functionality, you will need to declare the following environment variable:
 
-* AMAZON_ACCESS_KEY_ID={your AWS access credentials}
-* AMAZON_SECRET_ACCESS_KEY={your AWS secret key}
-* S3_ENDPOINT={optional, the S3 region to use. Defaults to s3.amazonaws.com if none specified}
-* S3_BACKUP_BUCKET={the bucket to use for storing backup data. Will be created automatically if doesn't exist. See important note below.}
+* TVMANAGER_COUCHDB_URL=http://{username}:{password}@{host}:{port}/{databasename}
 
-In development, the above environment variables can be saved to a file (eg. ~/.aws), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
+In development, the above environment variables can be saved to a file (eg. ~/.tvmanager), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
 
-**~/.aws**
+**~/.tvmanager**
 
 ```
-export AMAZON_ACCESS_KEY_ID='your AWS access credentials'
-export AMAZON_SECRET_ACCESS_KEY='your AWS secret key'
-export S3_ENDPOINT='s3-ap-southeast-1.amazonaws.com'
-export S3_BACKUP_BUCKET='devtvmanager.yourdomain.com'
+export TVMANAGER_COUCHDB_URL='http://user:pass@host:port/database'
 ```
 
 **~/.profile**
 
 ```
-AWS=~/.aws
-if [ -f $AWS ]; then
-	. $AWS
+TVMANAGER=~/.tvmanager
+if [ -f $TVMANAGER ]; then
+	. $TVMANAGER
 fi
 ```
 
 For staging/production, if you use Heroku you can specify these config vars using the heroku CLI gem, eg.
 
 ```
-heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_BUCKET=stagingtvmanager.yourdomain.com --remote staging
-heroku config:add AMAZON_ACCESS_KEY_ID=your_AWS_access_credentials AMAZON_SECRET_ACCESS_KEY=your_AWS_secret_key (etc..) S3_BACKUP_BUCKET=tvmanager.yourdomain.com --remote production
+heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager_staging --remote staging
+heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager --remote production
 ```
 
 (Assumes you have setup two Heroku remotes, one for staging and one for production)
 
 Test Suite
 ==========
-Before running the tests, ensure that the server is configured for testing (this prevents, for example, the unit tests for exporting/importing inadvertently overwriting your actual backups on S3 with test data, as test mode doesn't touch S3 at all).
+Before running the tests, ensure that the server is configured for testing (this prevents, for example, the unit tests for exporting/importing inadvertently overwriting your actual backups in CouchDB with test data, as test mode doesn't touch CouchDB at all).
 
 To run the server in test mode:
 

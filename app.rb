@@ -1,6 +1,6 @@
 require 'sinatra'
 require 'manifesto'
-require 'aws-sdk'
+require 'couchrest'
 require 'digest/md5'
 require 'json'
 
@@ -52,9 +52,8 @@ get '/manifest' do
 
 	# Need to explicitly list any routes called via Ajax as network resources
 	manifest << "\nNETWORK:\n"
-	manifest << "/programs\n"
-	manifest << "/series\n"
-	manifest << "/episodes\n"
+	manifest << "/export\n"
+	manifest << "/import\n"
 
 	# In dev/test configuration, add everything in /public/test/* to the online whitelist
 	# (not necessary for production/staging, as /public/test is excluded via .slugignore)
@@ -74,15 +73,15 @@ head '/test' do
 end
 
 # Create/update route used for testing
-post '/:resource/:id', :isTest => :environment do
+post '/export', :isTest => :environment do
 	begin
 		# Echo back the MD5 hash that was passed
 		etag request.env["HTTP_CONTENT_MD5"]
 	end
 end
 
-# Create/update S3 object route
-post '/:resource/:id' do
+# Create/update object route
+post '/export' do
 	begin
 		# Get the Content-MD5 header from the request
 		md5_received = request.env["HTTP_CONTENT_MD5"]
@@ -94,19 +93,23 @@ post '/:resource/:id' do
 		# Check that the MD5 received matches the MD5 generated
 		raise BadRequest, "Checksum mismatch on received change (#{md5_hex} != #{md5_received})" unless md5_received == md5_hex
 
+		# Parse the JSON
+		doc = JSON.parse request.body.read
+
+		# Set the CouchDb _id to match the object's id
+		doc["_id"] = doc["id"]
+
 		# Initialise the storage controller
-		backup_bucket = StorageController.new
+		db = StorageController.new
 
-		# Create a base64 MD5 digest, to include with the request
-		md5_base64 = Digest::MD5.base64digest request.body.read
-		request.body.rewind
+		# Get the existing doc (if any) and copy the _rev property to the new doc
+		begin
+			doc["_rev"] = db.get(doc["id"])["_rev"]
+		rescue
+		end
 
-		# Post request body to the object name matching the current URI (with the leading slash removed)
-		backup_object = AWS::S3::S3Object.new backup_bucket, request.path_info[1..-1]
-		backup_object.write :data => request.body.read, :content_length => request.content_length.to_i, :content_type => 'application/json', :content_md5 => md5_base64
-
-		# Double check that the etag returned still matches the MD5 digest
-		raise InternalServerError, "Checksum mismatch on stored change (#{backup_object.etag.gsub(/\"/, '')} != #{md5_hex})" unless backup_object.etag.gsub(/\"/, '') == md5_hex
+		# Save the document
+		db.save_doc doc
 
 		# Return the MD5 digest as the response etag
 		etag md5_hex
@@ -122,19 +125,19 @@ post '/:resource/:id' do
 end
 
 # Delete route used for testing
-delete '/:resource/:id', :isTest => :environment do
+delete '/export/:id', :isTest => :environment do
 	begin
 	end
 end
 
-# Delete S3 object route
-delete '/:resource/:id' do
-	begin
+# Delete object route
+delete '/export/:id' do
+	begin 
 		# Initialise the storage controller
-		backup_bucket = StorageController.new
+		db = StorageController.new
 
-		# Delete the object name matching the current URI (with the leading slash removed)
-		backup_bucket.objects[request.path_info[1..-1]].delete
+		# Delete the existing doc
+		db.get(params[:id]).destroy
 
 	rescue HttpError => e
 		status e.class.status
@@ -147,34 +150,26 @@ delete '/:resource/:id' do
 end
 
 # Import route used for testing
-get '/:resource', :isTest => :environment do
+get '/import', :isTest => :environment do
 	begin
 		etag "test-hash"
-		File.read(File.join("public", "test", "#{params[:resource]}.json"))
+		File.read(File.join("public", "test", "database.json"))
 	end
 end
 
 # Import route
-get '/:resource' do
+get '/import' do
 	begin
 		# Initialise the storage controller
-		backup_bucket = StorageController.new
+		db = StorageController.new
 
-		# Get the backup objects of the requested type
-		backup_objects = backup_bucket.objects.with_prefix params[:resource]
-		raise NotFound, "Unable to located stored #{params[:resource]}" if backup_objects.nil?
+		# Get all documents
+		docs = db.all_docs "include_docs" => true
+		raise NotFound, "No data" if docs.nil?
 
-		# Map each object's data to the collection, checking the etag matches the MD5 digest as we go
-		backup_object_data = backup_objects.map do |object|
-			object_data = object.read
-			md5_hex = Digest::MD5.hexdigest object_data
-			raise InternalServerError, "Checksum mismatch on received object (#{object.etag.gsub(/\"/, '')} != #{md5_hex})" unless object.etag.gsub(/\"/, '') == md5_hex
-			object_data
-		end
-
-		# Return the collection's etag and data
-		etag Digest::MD5.hexdigest backup_object_data.to_json
-		backup_object_data.to_json
+		# Return a hash of the documents as the etag, and the documents themselves as the response body
+		etag Digest::MD5.hexdigest docs["rows"].to_json
+		docs["rows"].to_json
 
 	rescue HttpError => e
 		status e.class.status
@@ -211,23 +206,14 @@ end
 class StorageController
 	def self.new
 		# Check that we have all of the required environment variables
-		[:AMAZON_ACCESS_KEY_ID, :AMAZON_SECRET_ACCESS_KEY, :S3_BACKUP_BUCKET].each do |key|
+		[:TVMANAGER_COUCHDB_URL].each do |key|
 			raise InternalServerError, key.to_s + " environment variable is not configured" unless ENV.key? key.to_s
 		end
 
-		# Connect to S3 using the credentials (and optional endpoint) configured for the environment
-		s3_config = {
-			:access_key_id			=> ENV[:AMAZON_ACCESS_KEY_ID.to_s],
-			:secret_access_key	=> ENV[:AMAZON_SECRET_ACCESS_KEY.to_s],
-		}
-		s3_config[:s3_endpoint] = ENV[:S3_ENDPOINT.to_s] if ENV.key? :S3_ENDPOINT.to_s
-		s3 = AWS::S3.new s3_config
+		# Connect to couch using the URL configured for the environment
+		db = CouchRest.database! ENV[:TVMANAGER_COUCHDB_URL.to_s]
 
-		# Get a reference to the backup bucket (create if not exists)
-		backup_bucket = s3.buckets[ENV[:S3_BACKUP_BUCKET.to_s]]
-		backup_bucket = s3.buckets.create ENV[:S3_BACKUP_BUCKET.to_s] unless backup_bucket.exists?
-
-		# Return the backup bucket
-		backup_bucket
+		# Return the db connection
+		db
 	end
 end

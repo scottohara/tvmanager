@@ -4,7 +4,11 @@ ProgramMock = {
 	programJson: [],
 	programs: [],
 	save: function(callback) {
-		callback();
+		if (ProgramMock.saved) {
+			callback(999);
+		} else {
+			callback();
+		}
 	},
 	list: function(callback) {
 		callback(this.programs);

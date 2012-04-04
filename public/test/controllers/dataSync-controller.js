@@ -48,10 +48,20 @@ module("dataSync-controller", {
 		];
 
 		this.ajaxMock = $.proxy(function(options) {
-			options.error.apply(options.context, [{
-				status: "404",
-				statusText: "Not found"
-			}, "Force failed"]);
+			if (this.importData) {
+				options.success.apply(options.context, [
+					this.importData,
+					200,
+					{
+						getResponseHeader: function() { return "test-hash"; } 
+					}
+				]);
+			} else {
+				options.error.apply(options.context, [{
+					status: "404",
+					statusText: "Not found"
+				}, "Force failed"]);
+			}
 				
 			if (options.complete) {
 				options.complete();
@@ -319,27 +329,6 @@ test("listRetrieved", 6, function() {
 	same(this.dataSyncController.syncErrors, [], "syncErrors property");
 });
 
-test("getResourceName", function() {
-	var testParams = [
-		{
-			description: "program",
-			type: "Program",
-			resource: "programs"
-		},
-		{
-			description: "series",
-			type: "Series",
-			resource: "series"
-		}
-	];
-
-	expect(testParams.length);
-
-	for (var i = 0; i < testParams.length; i++) {
-		equals(this.dataSyncController.getResourceName(testParams[i].type), testParams[i].resource, testParams[i].description + " - resource");
-	}
-});
-
 asyncTest("sendChange - checksum mismatch", 2, function() {
 	var originalMD5 = hex_md5;
 	hex_md5 = function(data) {
@@ -420,22 +409,18 @@ test("changeSent - not finished", 1, function() {
 	equals(this.status.val(), "Exported 1 of " + this.syncList.length + " changes", "Status");
 });
 
-test("changeSent - finished with errors", 4, function() {
+test("changeSent - finished with errors", 1, function() {
 	this.dataSyncController.syncProcessed = 0;
 	this.dataSyncController.syncErrors = [];
 	this.dataSyncController.syncList = this.syncList;
 	this.dataSyncController.syncProcessed = this.syncList.length - 1;
-	DataSyncController.prototype.syncError = this.originalSyncError;
 
-	this.dataSyncController.callback = function(success) {
-		ok(!success, "Invoke callback with false");
+	this.dataSyncController.showErrors = function() {
+		ok(true, "Show errors");
 	};
 
 	this.dataSyncController.syncError("Force failed");
 	this.dataSyncController.changeSent();
-	equals(this.status.val(), "Exported " + this.syncList.length + " of " + this.syncList.length + " changes", "Status");
-	ok(!$("#errorList").is(":empty"), "Display error list");
-	ok(!$("#syncErrors").is(":hidden"), "Show sync errors");
 });
 
 test("changeSent - finished without errors", 4, function() {
@@ -466,243 +451,227 @@ test("setLastSyncTime", 1, function() {
 	Date = originalDate;
 });
 
-test("doImport - delete Sync fail", 5, function() {
-	SyncMock.removed = false;
+asyncTest("doImport - delete fail", function() {
+	var testParams = ["Program", "Series", "Episode"];
+	ProgramMock.removed = false;
+	SeriesMock.removed = false;
+	EpisodeMock.removed = false;
 	this.dataSyncController.syncErrors = [];
-	DataSyncController.prototype.syncError = this.originalSyncError;
 
-	this.dataSyncController.callback = function(success) {
-		ok(!success, "Invoke callback with false");
-	};
+	expect(testParams.length * 3);
 
-	this.dataSyncController.doImport();
-	equals(this.dataSyncController.syncErrors.length, 1, "Number of errors");
-	same(this.dataSyncController.syncErrors[0].html(), "Delete error<br>Type: Sync<br>Force failed", "syncErrors property");
-	ok(!$("#errorList").is(":empty"), "Display error list");
-	ok(!$("#syncErrors").is(":hidden"), "Show sync errors");
-});
-
-test("doImport - success", 5, function() {
-	var objectsReceived = [];
-	SyncMock.removed = true;
+	this.dataSyncController.importDone = $.proxy(function() {
+		if (this.programsReady && this.seriesReady && this.episodesReady) {
+			for (var i = 0; i < testParams.length; i++) {
+				equals(this.syncErrors[i].error, "Delete error", "Sync error");
+				equals(this.syncErrors[i].type, testParams[i], "Error type");
+				equals(this.syncErrors[i].message, "Force failed", "Error message");
+			}
+			start();
+		}
+	}, this.dataSyncController);
 	
-	this.dataSyncController.receiveObjects = function(type) {
-		objectsReceived.push(type);
-	};
-
 	this.dataSyncController.doImport();
-	same(this.dataSyncController.objectsToImport, {Program: 0, Series: 0, Episode: 0}, "objectsToImport property");
-	same(this.dataSyncController.objectsImported, {Program: -1, Series: -1, Episode: -1}, "objectsImported property");
-	equals(this.dataSyncController.syncProcessed, 0, "syncProcessed property");
-	same(this.dataSyncController.syncErrors, [], "syncErrors property");
-	same(objectsReceived, ["Program", "Series", "Episode"], "syncErrors property");
 });
 
-asyncTest("receiveObjects - no data", 3, function() {
-	var resource = "Resource";
+asyncTest("doImport - success", 1, function() {
+	var objectsReceived = [];
+	ProgramMock.removed = true;
+	SeriesMock.removed = true;
+	EpisodeMock.removed = true;
 	this.dataSyncController.syncErrors = [];
+	
+	this.dataSyncController.importData = $.proxy(function() {
+		if (this.programsReady && this.seriesReady && this.episodesReady) {
+			same(this.syncErrors, [], "syncErrors property");
+			start();
+		}
+	}, this.dataSyncController);
+
+	this.dataSyncController.doImport();
+});
+
+test("importData - not finished", 2, function() {
+	this.dataSyncController.importDone();
+	equals(this.dataSyncController.objectsToImport, undefined, "objectsToImport property");
+	equals(this.dataSyncController.objectsImported, undefined, "objectsImported property");
+});
+
+asyncTest("importData - no data", 2, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
+	this.dataSyncController.syncErrors = [];
+	this.importData = [];
+
+	var originalAjax = $.ajax;
+	$.ajax = this.ajaxMock;
 
 	var originalMD5 = hex_md5;
 	hex_md5 = function(data) {
 		return "test-hash";
 	};
 
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
+	this.dataSyncController.importDone = $.proxy(function() {
 		hex_md5 = originalMD5;
 		equals(this.dataSyncController.syncErrors[0].error, "Receive error", "Sync error");
-		equals(this.dataSyncController.syncErrors[0].message, "No resources found", "Error message");
-		equals(type, resource, "Object received");
+		equals(this.dataSyncController.syncErrors[0].message, "No data found", "Error message");
 		start();
 	}, this);
 
-	this.dataSyncController.receiveObjects(resource);
+	this.dataSyncController.importData();
+	$.ajax = originalAjax;
 });
 
-asyncTest("receiveObjects - checksum mismatch", 2, function() {
+asyncTest("importData - checksum mismatch", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
 	this.dataSyncController.syncErrors = [];
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
+	this.dataSyncController.importDone = $.proxy(function() {
 		equals(this.dataSyncController.syncErrors[0].error, "Checksum mismatch", "Sync error");
-		equals(type, this.syncList[0].type, "Object received");
 		start();
 	}, this);
 
-	this.dataSyncController.receiveObjects(this.syncList[0].type);
+	this.dataSyncController.importData();
 });
 
-asyncTest("receiveObjects - ajax fail", 2, function() {
+asyncTest("importData - ajax fail", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
 
 	this.dataSyncController.syncErrors = [];
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
+	this.dataSyncController.importDone = $.proxy(function() {
 		equals(this.dataSyncController.syncErrors[0].error, "Receive error", "Sync error");
-		equals(type, this.syncList[0].type, "Object received");
 		start();
 	}, this);
 
-	this.dataSyncController.receiveObjects(this.syncList[0].type);
+	this.dataSyncController.importData();
 	$.ajax = originalAjax;
 });
 
-asyncTest("receiveObjects - delete fail", 2, function() {
+asyncTest("importData - save fail", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
 	this.dataSyncController.syncErrors = [];
-	this.dataSyncController.objectsToImport = { Program: 0 };
-	this.dataSyncController.objectsImported = { Program: -1 };
+	this.dataSyncController.objectsToImport = 0;
+	this.dataSyncController.objectsImported = 0;
+
+	ProgramMock.saved = false;
 
 	var originalMD5 = hex_md5;
 	hex_md5 = function(data) {
 		return "test-hash";
 	};
 
-	ProgramMock.removed = false;
-
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
-		this.dataSyncController.objectsImported[type]++;
-		if (this.dataSyncController.objectsImported[type] === this.dataSyncController.objectsToImport[type]) {
-			hex_md5 = originalMD5;
-			equals(this.dataSyncController.syncErrors[0].error, "Delete error", "Sync error");
-			equals(type, this.syncList[0].type, "Object received");
-			start();
-		}
+	this.dataSyncController.importDone = $.proxy(function() {
+		hex_md5 = originalMD5;
+		equals(this.dataSyncController.syncErrors[0].error, "Save error", "Sync error");
+		start();
 	}, this);
 
-	this.dataSyncController.receiveObjects(this.syncList[0].type);
+	this.dataSyncController.importData();
 });
 
-asyncTest("receiveObjects - save fail", 2, function() {
+asyncTest("importData - 304 Not Modified", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
 	this.dataSyncController.syncErrors = [];
-	this.dataSyncController.objectsToImport = { Program: 0 };
-	this.dataSyncController.objectsImported = { Program: -1 };
-
-	var originalMD5 = hex_md5;
-	hex_md5 = function(data) {
-		return "test-hash";
-	};
-
-	ProgramMock.removed = true;
-
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
-		this.dataSyncController.objectsImported[type]++;
-		if (this.dataSyncController.objectsImported[type] === this.dataSyncController.objectsToImport[type]) {
-			hex_md5 = originalMD5;
-			equals(this.dataSyncController.syncErrors[0].error, "Save error", "Sync error");
-			equals(type, this.syncList[0].type, "Object received");
-			start();
-		}
-	}, this);
-
-	this.dataSyncController.receiveObjects(this.syncList[0].type);
-});
-
-asyncTest("receiveObjects - 304 Not Modified", 2, function() {
-	this.dataSyncController.syncErrors = [];
-	this.dataSyncController.objectsToImport = { Series: 0 };
-	this.dataSyncController.objectsImported = { Series: -1 };
+	this.dataSyncController.objectsToImport = 0;
+	this.dataSyncController.objectsImported = 0;
 	$.ajax = jQueryMock.ajax;
 
-	var originalMD5 = hex_md5;
-	hex_md5 = function(data) {
-		return "test-hash";
-	};
-
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
-		this.dataSyncController.objectsImported[type]++;
-		if (this.dataSyncController.objectsImported[type] === this.dataSyncController.objectsToImport[type]) {
-			hex_md5 = originalMD5;
-			equals(this.dataSyncController.syncErrors.length, 0, "Number of errors");
-			equals(type, this.syncList[1].type, "Object received");
-			start();
-		}
-	}, this);
-
-	this.dataSyncController.receiveObjects(this.syncList[1].type);
-});
-
-asyncTest("receiveObjects - success", 2, function() {
-	this.dataSyncController.syncErrors = [];
-	this.dataSyncController.objectsToImport = { Episode: 0 };
-	this.dataSyncController.objectsImported = { Episode: -1 };
+	ProgramMock.saved = true;
 
 	var originalMD5 = hex_md5;
 	hex_md5 = function(data) {
 		return "test-hash";
 	};
 
-	this.dataSyncController.objectReceived = $.proxy(function(type) {
-		this.dataSyncController.objectsImported[type]++;
-		if (this.dataSyncController.objectsImported[type] === this.dataSyncController.objectsToImport[type]) {
-			hex_md5 = originalMD5;
-			equals(this.dataSyncController.syncErrors.length, 0, "Number of errors");
-			equals(type, this.syncList[2].type, "Object received");
-			start();
-		}
+	this.dataSyncController.importDone = $.proxy(function() {
+		hex_md5 = originalMD5;
+		equals(this.dataSyncController.syncErrors.length, 0, "Number of errors");
+		start();
 	}, this);
 
-	this.dataSyncController.receiveObjects(this.syncList[2].type);
+	this.dataSyncController.importData();
 });
 
-test("objectReceived - not finished", 1, function() {
-	this.dataSyncController.objectsToImport = {
-		Program: 1,
-		Series: 1,
-		Episode: 1
-	};
-
-	this.dataSyncController.objectsImported = {
-		Program: -1,
-		Series: 1,
-		Episode: 1
-	};
-	this.dataSyncController.objectReceived(this.syncList[0].type);
-	equals(this.status.val(), "Imported 0 of " + this.dataSyncController.objectsToImport[this.syncList[0].type] + " " + this.syncList[0].type, "Status");
-});
-
-test("objectReceived - finished with errors", 4, function() {
-	this.dataSyncController.objectsToImport = {
-		Program: 1,
-		Series: 1,
-		Episode: 1
-	};
-
-	this.dataSyncController.objectsImported = {
-		Program: 0,
-		Series: 1,
-		Episode: 1
-	};
+asyncTest("importData - success", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
 	this.dataSyncController.syncErrors = [];
-	DataSyncController.prototype.syncError = this.originalSyncError;
+	this.dataSyncController.objectsToImport = 0;
+	this.dataSyncController.objectsImported = 0;
 
-	this.dataSyncController.callback = function(success) {
-		ok(!success, "Invoke callback with false");
+	var originalMD5 = hex_md5;
+	hex_md5 = function(data) {
+		return "test-hash";
 	};
 
-	this.dataSyncController.syncError("Force failed");
-	this.dataSyncController.objectReceived(this.syncList[0].type);
-	equals(this.status.val(), "Imported " + this.dataSyncController.objectsToImport[this.syncList[0].type] + " of " + this.dataSyncController.objectsToImport[this.syncList[0].type] + " " + this.syncList[0].type, "Status");
-	ok(!$("#errorList").is(":empty"), "Display error list");
+	this.dataSyncController.importDone = $.proxy(function() {
+		hex_md5 = originalMD5;
+		equals(this.dataSyncController.syncErrors.length, 0, "Number of errors");
+		start();
+	}, this);
+
+	this.dataSyncController.importData();
+});
+
+test("importDone - not finished", 1, function() {
+	this.dataSyncController.importDone();
 	ok(!$("#syncErrors").is(":hidden"), "Show sync errors");
 });
 
-test("objectReceived - finished without errors", 4, function() {
-	this.dataSyncController.objectsToImport = {
-		Program: 1,
-		Series: 1,
-		Episode: 1
+test("importDone - finished with errors", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
+	this.dataSyncController.syncErrors = [];
+	DataSyncController.prototype.syncError = this.originalSyncError;
+
+	this.dataSyncController.showErrors = function() {
+		ok(true, "Show errors");
 	};
 
-	this.dataSyncController.objectsImported = {
-		Program: 0,
-		Series: 1,
-		Episode: 1
-	};
+	this.dataSyncController.syncError("Force failed");
+	this.dataSyncController.importDone();
+});
+
+test("importDone - delete fail", 1, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
 	this.dataSyncController.syncErrors = [];
+
+	SyncMock.removed = false;
+
+	this.dataSyncController.showErrors = function() {
+		ok(true, "Show errors");
+	};
+
+	this.dataSyncController.importDone();
+});
+
+test("importDone - finished without errors", 3, function() {
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
+	this.dataSyncController.syncErrors = [];
+
+	SyncMock.removed = true;
 
 	this.dataSyncController.callback = function(success) {
 		ok(success, "Invoke callback with true");
 	};
 
-	this.dataSyncController.objectReceived(this.syncList[0].type);
-	equals(this.status.val(), "Imported " + this.dataSyncController.objectsToImport[this.syncList[0].type] + " of " + this.dataSyncController.objectsToImport[this.syncList[0].type] + " " + this.syncList[0].type, "Status");
+	this.dataSyncController.importDone();
 	ok($("#errorList").is(":empty"), "Empty error list");
 	ok($("#syncErrors").is(":hidden"), "Hide sync errors");
 });
@@ -719,4 +688,18 @@ test("syncError - without id", 1, function() {
 	DataSyncController.prototype.syncError = this.originalSyncError;
 	this.dataSyncController.syncError("Test error", "test", "Test message");
 	same(this.dataSyncController.syncErrors, [$("<li>").html("Test error<br/>Type: test<br/>Test message")], "syncErrors property");
+});
+
+test("showErrors", 3, function() {
+	this.dataSyncController.syncErrors = [];
+	DataSyncController.prototype.syncError = this.originalSyncError;
+
+	this.dataSyncController.callback = function(success) {
+		ok(!success, "Invoke callback with false");
+	};
+
+	this.dataSyncController.syncError("Test error", "test", "Test message");
+	this.dataSyncController.showErrors();
+	ok(!$("#errorList").is(":empty"), "Display error list");
+	ok(!$("#syncErrors").is(":hidden"), "Show sync errors");
 });

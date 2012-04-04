@@ -437,6 +437,12 @@ fieldset > .row:last-child {
 	display: none;
 }
 
+#syncErrors ul li {
+	text-align: left;
+	font-weight: normal;
+	font-size: 16px;
+}
+
 /*************************** Notices ******************************/
 
 #notices {

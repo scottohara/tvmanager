@@ -1,4 +1,5 @@
 SeriesMock = {
+	removed: true,
 	seriesJson: [],
 	series: [],
 	save: function(callback) {
@@ -14,6 +15,10 @@ SeriesMock = {
 		callback(1);
 	},
 	removeAll: function(callback) {
-		callback();
+		if (SeriesMock.removed) {
+			callback();
+		} else {
+			callback("Force failed");
+		}
 	}
 };

@@ -1,4 +1,5 @@
 EpisodeMock = {
+	removed: true,
 	episodeJson: [],
 	episodes: [],
 	save: function(callback) {
@@ -17,7 +18,11 @@ EpisodeMock = {
 		callback(1);
 	},
 	removeAll: function(callback) {
-		callback();
+		if (EpisodeMock.removed) {
+			callback();
+		} else {
+			callback("Force failed");
+		}
 	}
 };
 
