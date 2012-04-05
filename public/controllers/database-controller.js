@@ -67,12 +67,12 @@ var DatabaseController = function (databaseName, callback, errorCallback) {
 					break;
 				}
 			}
+			this.upgradesToApply = this.upgrades.slice(startIndex, endIndex);
 
 			this.db.changeVersion(this.initialVersion, this.expectedVersion,
 				$.proxy(function(tx) {
-					for (var i = startIndex; i < endIndex; i++) {
-						this.upgrades[i].upgradeHandler(tx);
-					}
+					this.tx = tx;
+					this.nextUpgrade();
 				}, this),
 				this.errorCallback,
 				$.proxy(this.versionOK, this)
@@ -102,40 +102,53 @@ DatabaseController.prototype.versionOK = function() {
 	this.successCallback({initial: this.initialVersion, current: this.expectedVersion});
 };
 
-DatabaseController.prototype.v1_0 = function(tx) {
-	tx.executeSql("CREATE TABLE IF NOT EXISTS Program (Name)");
-	tx.executeSql("CREATE TABLE IF NOT EXISTS Series (Name, ProgramID)");
-	tx.executeSql("CREATE TABLE IF NOT EXISTS Episode (Name, SeriesID)");
+DatabaseController.prototype.nextUpgrade = function() {
+	if (this.upgradesToApply.length) {
+		$.proxy(this.upgradesToApply.shift().upgradeHandler, this)();
+	}
 };
 
-DatabaseController.prototype.v1_1 = function(tx) {
-	tx.executeSql("ALTER TABLE Episode ADD COLUMN Status");
+DatabaseController.prototype.v1_0 = function() {
+	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Program (Name)");
+	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Series (Name, ProgramID)");
+	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Episode (Name, SeriesID)");
+	this.nextUpgrade();
 };
 
-DatabaseController.prototype.v1_2 = function(tx) {
-	tx.executeSql("ALTER TABLE Episode ADD COLUMN StatusDate");
+DatabaseController.prototype.v1_1 = function() {
+	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Status");
+	this.nextUpgrade();
 };
 
-DatabaseController.prototype.v1_3 = function(tx) {
-	tx.executeSql("ALTER TABLE Series ADD COLUMN NowShowing");
+DatabaseController.prototype.v1_2 = function() {
+	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN StatusDate");
+	this.nextUpgrade();
 };
 
-DatabaseController.prototype.v1_4 = function(tx) {
-	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unverified");
+DatabaseController.prototype.v1_3 = function() {
+	this.tx.executeSql("ALTER TABLE Series ADD COLUMN NowShowing");
+	this.nextUpgrade();
 };
 
-DatabaseController.prototype.v1_5 = function(tx) {
-	tx.executeSql("CREATE TABLE IF NOT EXISTS Setting (Name, Value)");
+DatabaseController.prototype.v1_4 = function() {
+	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Unverified");
+	this.nextUpgrade();
 };
 
-DatabaseController.prototype.v1_6 = function(tx) {
-	tx.executeSql("ALTER TABLE Episode ADD COLUMN Unscheduled");
+DatabaseController.prototype.v1_5 = function() {
+	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Setting (Name, Value)");
+	this.nextUpgrade();
 };
 
-DatabaseController.prototype.v1_7 = function(tx) {
-	tx.executeSql("ALTER TABLE Episode ADD COLUMN Sequence");
-	tx.executeSql("SELECT rowid, SeriesID FROM Episode ORDER BY SeriesID", [],
-		function(tx, resultSet) {
+DatabaseController.prototype.v1_6 = function() {
+	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Unscheduled");
+	this.nextUpgrade();
+};
+
+DatabaseController.prototype.v1_7 = function() {
+	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Sequence");
+	this.tx.executeSql("SELECT rowid, SeriesID FROM Episode ORDER BY SeriesID", [],
+		$.proxy(function(tx, resultSet) {
 			var seriesId;
 			var sequence = 0;
 			for (var i = 0; i < resultSet.rows.length; i++) {
@@ -147,16 +160,24 @@ DatabaseController.prototype.v1_7 = function(tx) {
 				tx.executeSql("UPDATE Episode SET Sequence = ? WHERE rowid = ?", [sequence, ep.rowid]);
 				sequence++;
 			}
-		}
+			this.nextUpgrade();
+		}, this)
 	);
 };
 
-DatabaseController.prototype.v1_8 = function(tx) {
-	tx.executeSql("ALTER TABLE Program ADD COLUMN ProgramID");
-	tx.executeSql("ALTER TABLE Series ADD COLUMN SeriesID");
-	tx.executeSql("ALTER TABLE Episode ADD COLUMN EpisodeID");
-	tx.executeSql("SELECT rowid FROM Program", [],
-		function(tx, resultSet) {
+DatabaseController.prototype.v1_8 = function() {
+	var numSteps = 3;
+	var upgradeDone = $.proxy(function() {
+		if (0 === --numSteps) {
+			this.nextUpgrade();
+		}
+	}, this);
+
+	this.tx.executeSql("ALTER TABLE Program ADD COLUMN ProgramID");
+	this.tx.executeSql("ALTER TABLE Series ADD COLUMN SeriesID");
+	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN EpisodeID");
+	this.tx.executeSql("SELECT rowid FROM Program", [],
+		$.proxy(function(tx, resultSet) {
 			for (var i = 0; i < resultSet.rows.length; i++) {
 				var prog = resultSet.rows.item(i);
 				var programId = uuid.v4();
@@ -167,10 +188,11 @@ DatabaseController.prototype.v1_8 = function(tx) {
 			tx.executeSql("INSERT INTO tmp_Program (ProgramID, Name) SELECT ProgramID, Name FROM Program");
 			tx.executeSql("DROP TABLE Program");
 			tx.executeSql("ALTER TABLE tmp_Program RENAME TO Program");
-		}
+			upgradeDone();
+		}, this)
 	);
-	tx.executeSql("SELECT rowid FROM Series", [],
-		function(tx, resultSet) {
+	this.tx.executeSql("SELECT rowid FROM Series", [],
+		$.proxy(function(tx, resultSet) {
 			for (var i = 0; i < resultSet.rows.length; i++) {
 				var series = resultSet.rows.item(i);
 				var seriesId = uuid.v4();
@@ -181,10 +203,11 @@ DatabaseController.prototype.v1_8 = function(tx) {
 			tx.executeSql("INSERT INTO tmp_Series (SeriesID, Name, ProgramID, NowShowing) SELECT SeriesID, Name, ProgramID, NowShowing FROM Series");
 			tx.executeSql("DROP TABLE Series");
 			tx.executeSql("ALTER TABLE tmp_Series RENAME TO Series");
-		}
+			upgradeDone();
+		}, this)
 	);
-	tx.executeSql("SELECT rowid FROM Episode", [],
-		function(tx, resultSet) {
+	this.tx.executeSql("SELECT rowid FROM Episode", [],
+		$.proxy(function(tx, resultSet) {
 			for (var i = 0; i < resultSet.rows.length; i++) {
 				var episode = resultSet.rows.item(i);
 				var episodeId = uuid.v4();
@@ -194,14 +217,16 @@ DatabaseController.prototype.v1_8 = function(tx) {
 			tx.executeSql("INSERT INTO tmp_Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) SELECT EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence FROM Episode");
 			tx.executeSql("DROP TABLE Episode");
 			tx.executeSql("ALTER TABLE tmp_Episode RENAME TO Episode");
-		}
+			upgradeDone();
+		}, this)
 	);
 };
 
-DatabaseController.prototype.v1_9 = function(tx) {
-	tx.executeSql("CREATE TABLE IF NOT EXISTS Sync (Type, ID, Action, PRIMARY KEY ( Type, ID ))");
-	tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Program', ProgramID, 'modified' FROM Program");
-	tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'modified' FROM Series");
-	tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'modified' FROM Episode");
-	tx.executeSql("DELETE FROM Setting WHERE Name = 'LastSyncHash'");
+DatabaseController.prototype.v1_9 = function() {
+	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Sync (Type, ID, Action, PRIMARY KEY ( Type, ID ))");
+	this.tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Program', ProgramID, 'modified' FROM Program");
+	this.tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'modified' FROM Series");
+	this.tx.executeSql("INSERT INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'modified' FROM Episode");
+	this.tx.executeSql("DELETE FROM Setting WHERE Name = 'LastSyncHash'");
+	this.nextUpgrade();
 };

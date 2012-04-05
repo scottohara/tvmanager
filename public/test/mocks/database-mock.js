@@ -64,9 +64,9 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 		try {
 			var tokens = sql.match(/\?/g);
 			if (tokens && tokens.length !== params.length) {
-				this.db.commands[this.db.commands.length] = {
+				this.db.commands.push({
 					originalSql: sql
-				};
+				});
 				this.executeError("Number of ?s doesn't match number of parameters");
 			}
 
@@ -77,10 +77,10 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 				}
 			}
 
-			this.db.commands[this.db.commands.length] = {
+			this.db.commands.push({
 				originalSql: sql,
 				parsedSql: parsedSql
-			};
+			});
 
 			if (this.db.failAtSql && this.db.failAtSql.test(parsedSql)) {
 				this.executeError("Force failed");
