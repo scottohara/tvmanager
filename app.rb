@@ -139,6 +139,10 @@ delete '/export/:id' do
 		# Delete the existing doc
 		db.get(params[:id]).destroy
 
+	# Ignore any errors where the doc we're deleting was not found
+	rescue RestClient::ResourceNotFound => e
+		status 200
+
 	rescue HttpError => e
 		status e.class.status
 		e.message
