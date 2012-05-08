@@ -676,18 +676,22 @@ test("importDone - finished without errors", 3, function() {
 	ok($("#syncErrors").is(":hidden"), "Hide sync errors");
 });
 
-test("syncError - with id", 1, function() {
+test("syncError - with id", 3, function() {
 	this.dataSyncController.syncErrors = [];
 	DataSyncController.prototype.syncError = this.originalSyncError;
 	this.dataSyncController.syncError("Test error", "test", "Test message", 1);
-	same(this.dataSyncController.syncErrors, [$("<li>").html("Test error<br/>Type: test 1<br/>Test message")], "syncErrors property");
+	equals(this.dataSyncController.syncErrors.length, 1, "Number of errors");
+	ok(this.dataSyncController.syncErrors[0].is("li"), "syncErrors property type");
+	same(this.dataSyncController.syncErrors[0].html(), "Test error<br>Type: test 1<br>Test message", "syncErrors property content");
 });
 
-test("syncError - without id", 1, function() {
+test("syncError - without id", 3, function() {
 	this.dataSyncController.syncErrors = [];
 	DataSyncController.prototype.syncError = this.originalSyncError;
 	this.dataSyncController.syncError("Test error", "test", "Test message");
-	same(this.dataSyncController.syncErrors, [$("<li>").html("Test error<br/>Type: test<br/>Test message")], "syncErrors property");
+	equals(this.dataSyncController.syncErrors.length, 1, "Number of errors");
+	ok(this.dataSyncController.syncErrors[0].is("li"), "syncErrors property type");
+	same(this.dataSyncController.syncErrors[0].html(), "Test error<br>Type: test<br>Test message", "syncErrors property content");
 });
 
 test("showErrors", 3, function() {

@@ -55,6 +55,8 @@ On the server side, it's a Ruby Sinatra app. There's not much happening on the s
 
 [jslint_on_rails](https://github.com/psionides/jslint_on_rails) is used to run JSLint over the entire code base.
 
+[phantom.js](http://phantomjs.org) is used to run the unit test suite and code coverage headlessly.
+
 Requirements
 ============
 * WebKit-based browser, with HTML5 database support
@@ -163,3 +165,9 @@ To run lint:
 * `rake jslint`
 
 JSlint configuration options are set in config/jslint.yml
+
+For headless testing from the command line:
+
+* `rake test:headless:client` runs the Qunit test suite and writes any failed tests to stdout
+* `rake test:headless:coverage` runs the JSCoverage statistics and displays any files that have less that total coverage to stdout
+* `rake test:headless` runs JSLint, then the Qunit test suite, then the JSCoverage statistics

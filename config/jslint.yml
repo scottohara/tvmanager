@@ -68,6 +68,14 @@ predef:             # Names of predefined global variables - comma-separated str
   - "start"
   - "notEqual"
 
+  # Phantom.js
+  - "main"
+  - "page"
+  - "phantom"
+  - "require"
+  - "waitFor"
+  - "WebPage"
+
   # Framework
   - "$"
   - "SpinningWheel"

@@ -12,6 +12,7 @@ GEM
     manifesto (0.6.0)
     mime-types (1.18)
     multi_json (1.0.4)
+    open4 (1.3.0)
     rack (1.3.5)
     rack-protection (1.1.4)
       rack
@@ -35,5 +36,6 @@ DEPENDENCIES
   jslint_on_rails
   json
   manifesto
+  open4
   sinatra
   thin
