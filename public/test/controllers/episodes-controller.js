@@ -275,17 +275,17 @@ test("requenceItems", function() {
 
 	var items = [
 		{
-			id: 1,
+			id: "1",
 			sequence: 1,
 			save: save
 		},
 		{
-			id: 2,
+			id: "2",
 			sequence: 2,
 			save: save
 		},
 		{
-			id: 3,
+			id: "3",
 			sequence: 3,
 			save: save
 		}
