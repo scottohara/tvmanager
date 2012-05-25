@@ -21,7 +21,7 @@ DataSyncController.prototype.activate = function() {
 		$("#localChanges").val("Checking...");
 
 		Setting.get("LastSyncTime", this.gotLastSyncTime);
-		Setting.get("Device", this.gotDevice);
+		Setting.get("Device", $.proxy(this.gotDevice, this));
 		Sync.count($.proxy(this.checkForLocalChanges, this));
 };
 
