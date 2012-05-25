@@ -1,8 +1,9 @@
 require 'sinatra'
 require 'manifesto'
-require 'couchrest'
 require 'digest/md5'
 require 'json'
+require_relative 'error'
+require_relative 'storagecontroller'
 
 # Routing condition (true if :test configuration)
 set(:isTest) do |env|
@@ -11,9 +12,34 @@ set(:isTest) do |env|
 	end
 end
 
+# Returns a storage controller instance
+def db
+	StorageController.new
+end
+
 # Returns the client database name (if specified)
-def databaseName
+def database_name
 	ENV[:DATABASE_NAME.to_s] || "TVManager"
+end
+
+# Returns the client device ID
+def device_id
+	device_id = request.env["HTTP_X_DEVICE_ID"]
+	raise BadRequest, "Client device identifer was not supplied" if device_id.nil?
+	device_id
+end
+
+# Returns true if the specified device is authorised to make server changes
+def is_read_only
+	begin
+		# Get the matching device document
+		doc = db.get(device_id)
+
+		# Return the readonly property
+		doc["readOnly"]
+	rescue RestClient::ResourceNotFound => e
+		raise BadRequest, "Client device #{device_id} is not registered"
+	end
 end
 
 # Default route, redirects to /public/index.html
@@ -24,7 +50,7 @@ end
 # Route for database configuration settings
 get '/dbConfig' do
 	content_type :json
-	{ :databaseName => databaseName }.to_json
+	{ :databaseName => database_name }.to_json
 end
 
 # Route for HTML5 cache manifest
@@ -48,10 +74,11 @@ get '/manifest' do
 
 	# Add a cache entry for dbConfig
 	manifest << "/dbConfig\n"
-	manifest << "# databaseName: #{databaseName}\n"
+	manifest << "# databaseName: #{database_name}\n"
 
 	# Need to explicitly list any routes called via Ajax as network resources
 	manifest << "\nNETWORK:\n"
+	manifest << "/devices\n"
 	manifest << "/export\n"
 	manifest << "/import\n"
 
@@ -69,6 +96,7 @@ head '/test' do
 		status 200
 	rescue HttpError => e
 		status e.class.status
+		e.message
 	end
 end
 
@@ -83,6 +111,8 @@ end
 # Create/update object route
 post '/export' do
 	begin
+		raise Forbidden, "Client device #{device_id} is not authorised to export" if is_read_only
+
 		# Get the Content-MD5 header from the request
 		md5_received = request.env["HTTP_CONTENT_MD5"]
 
@@ -98,9 +128,6 @@ post '/export' do
 
 		# Set the CouchDb _id to match the object's id
 		doc["_id"] = doc["id"]
-
-		# Initialise the storage controller
-		db = StorageController.new
 
 		# Get the existing doc (if any) and copy the _rev property to the new doc
 		begin
@@ -133,8 +160,7 @@ end
 # Delete object route
 delete '/export/:id' do
 	begin 
-		# Initialise the storage controller
-		db = StorageController.new
+		raise Forbidden, "Client device #{device_id} is not authorised to export" if is_read_only
 
 		# Delete the existing doc
 		db.get(params[:id]).destroy
@@ -164,11 +190,8 @@ end
 # Import route
 get '/import' do
 	begin
-		# Initialise the storage controller
-		db = StorageController.new
-
 		# Get all documents
-		docs = db.all_docs "include_docs" => true
+		docs = db.view "data/all", "include_docs" => true
 		raise NotFound, "No data" if docs.nil?
 
 		# Return a hash of the documents as the etag, and the documents themselves as the response body
@@ -185,39 +208,77 @@ get '/import' do
 	end
 end
 
-class HttpError < RuntimeError
-	class << self
-		attr_reader :status
+# Device registration route used for testing
+put '/devices/:name', :isTest => :environment do
+	begin
+		# Echo back the name that was passed
+		headers "Location" => params[:name]
 	end
-end	
-
-class BadRequest < HttpError
-	@status = 400
 end
 
-class Forbidden < HttpError
-	@status = 403
-end
+# Device registration route
+put '/devices/:name' do
+	begin
+		# Check if a client device identifier was provided
+		device_id = request.env["HTTP_X_DEVICE_ID"]
 
-class NotFound < HttpError
-	@status = 404
-end
-
-class InternalServerError < HttpError
-	@status = 500
-end
-
-class StorageController
-	def self.new
-		# Check that we have all of the required environment variables
-		[:TVMANAGER_COUCHDB_URL].each do |key|
-			raise InternalServerError, key.to_s + " environment variable is not configured" unless ENV.key? key.to_s
+		device = unless (device_id.nil? || device_id.empty?)
+			# Get the existing device document
+			db.get(device_id)
+		else
+			# Create a new device document
+			{
+				:type => "device",
+				:readOnly => true
+			}
 		end
+		
+		# Set the device name
+		device[:name] = params[:name]
 
-		# Connect to couch using the URL configured for the environment
-		db = CouchRest.database! ENV[:TVMANAGER_COUCHDB_URL.to_s]
+		# Save the document
+		db.save_doc device
 
-		# Return the db connection
-		db
+		# Return the _id in the response location header
+		headers "Location" => device["_id"]
+		return
+	
+	rescue RestClient::ResourceNotFound => e
+		raise NotFound, "Client device #{params[:name]} is not registered"
+
+	rescue HttpError => e
+		status e.class.status
+		e.message
+
+	rescue StandardError => e
+		status 500
+		e.message
 	end
 end
+
+# Deregistration route used for testing
+delete '/devices/:id', :isTest => :environment do
+	begin
+	end
+end
+
+# Deregistration route
+delete '/devices/:id' do
+	begin 
+		# Delete the existing doc
+		db.get(params[:id]).destroy
+
+	# Ignore any errors where the doc we're deleting was not found
+	rescue RestClient::ResourceNotFound => e
+		status 200
+
+	rescue HttpError => e
+		status e.class.status
+		e.message
+
+	rescue StandardError => e
+		status 500
+		e.message
+	end
+end
+

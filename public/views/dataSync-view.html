@@ -1,29 +1,44 @@
 <div id="panel">
+	<h2>Registration</h2>
 	<fieldset>
-		<div class="row">
-			<label>Last Sync</label>
-			<input type="text" id="lastSyncTime" readonly="true" value=""/>
-		</div>
-		<div class="row">
-			<label>Changes</label>
-			<input type="text" id="localChanges" readonly="true" value=""/>
-		</div>
-		<div class="row">
-			<label>Sync</label>
-			<div id="import"></div>
-			<div id="export"></div>
-		</div>
-		<div class="row" id="statusRow">
-			<label>Status</label>
-			<input type="text" id="status" readonly="true" value=""/>
+		<div class="row toView" id="registrationRow">
+			<label>Device</label>
+			<input type="text" id="deviceName" readonly="true" value=""/>
 		</div>
 	</fieldset>
-	<div id="syncErrors">
-		<h2>Errors</h2>
+	<div id="registrationMessage">
+		<p>Before you can backup/restore data to the cloud, you must first register your device.</p>
+		<p>Once registered, you will be able to import data from the cloud to this device immediately.</p>
+		<p>Later, when your registration has been approved, you will be able to export changes you make on this device to the cloud.</p>
+	</div>
+	<div id="syncControls">
+		<h2>Sync</h2>
 		<fieldset>
 			<div class="row">
-				<ul id="errorList"/>
+				<label>Last Sync</label>
+				<input type="text" id="lastSyncTime" readonly="true" value=""/>
+			</div>
+			<div class="row">
+				<label>Changes</label>
+				<input type="text" id="localChanges" readonly="true" value=""/>
+			</div>
+			<div class="row">
+				<label>Sync</label>
+				<div id="import"></div>
+				<div id="export"></div>
+			</div>
+			<div class="row" id="statusRow">
+				<label>Status</label>
+				<input type="text" id="status" readonly="true" value=""/>
 			</div>
 		</fieldset>
+		<div id="syncErrors">
+			<h2>Errors</h2>
+			<fieldset>
+				<div class="row">
+					<ul id="errorList"/>
+				</div>
+			</fieldset>
+		</div>
 	</div>
 </div>

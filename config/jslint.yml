@@ -106,6 +106,7 @@ predef:             # Names of predefined global variables - comma-separated str
   - "EpisodesController"
   - "ProgramController"
   - "ProgramsController"
+  - "RegistrationController"
   - "ReportController"
   - "ScheduleController"
   - "SeriesController"

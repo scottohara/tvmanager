@@ -79,7 +79,7 @@ h2 {
 	font-size: inherit;
 	font-weight: bold;
 	color: #4d4d70;
-	text-shadow: rgba(255, 255, 255, 0.75) 2px 2px 0;
+	text-shadow: rgba(255, 255, 255, 0.75) 1px 1px 0;
 }
 
 footer {
@@ -320,6 +320,13 @@ div.progressBar div.expected {
 	font-size: 16px;
 }
 
+#panel p {
+	text-align: center;
+	font-size: inherit;
+	color: #4d4d70;
+	text-shadow: rgba(255, 255, 255, 0.75) 1px 1px 0;
+}
+
 .row  {
 	position: relative;
 	min-height: 42px;
@@ -337,6 +344,7 @@ fieldset > .row:last-child {
 	margin: 0 0 0 14px;
 	line-height: 42px;
 	font-weight: bold;
+	left: 0;
 }
 
 .row > input:not([type="radio"]) {
@@ -433,7 +441,7 @@ fieldset > .row:last-child {
 	background: url(../images/listArrow.png) no-repeat right;
 }
 
-#statusRow, #syncErrors {
+#registrationMessage, #syncControls, #statusRow, #syncErrors {
 	display: none;
 }
 

@@ -1,5 +1,9 @@
 require 'jslint/tasks'
 require 'open4'
+require 'json'
+require_relative 'error'
+require_relative 'storagecontroller'
+
 JSLint.config_path = "config/jslint.yml"
 
 def start_test_server(&block)
@@ -71,5 +75,30 @@ namespace :db do
 	desc "Start the development database"
 	task :start do
 		sh "couchdb"
+	end
+
+	desc "Run database migrations (for CouchDB, this means updating the _design docs)"
+	task :migrate do
+		# Initialise the storage controller
+		db = StorageController.new
+
+		# Update each of the design documents in /db/design/*.json
+		Dir.glob(File.join(File.dirname(__FILE__), 'db', 'design', '*.json')).each do |filename|
+			print "Updating #{File.basename(filename)}..."
+
+			# Read the file and parse the JSON
+			doc = JSON.parse File.read(filename)
+
+			# Get the existing doc (if any) and copy the _rev property to the new doc
+			begin
+				doc["_rev"] = db.get(doc["_id"])["_rev"]
+			rescue
+			end
+
+			# Save the document
+			db.save_doc doc
+
+			puts "done"
+		end
 	end
 end

@@ -1,5 +1,20 @@
 module("dataSync-controller", {
 	setup: function() {
+		this.deviceName = $("<input>")
+			.attr("id", "deviceName")
+			.hide()
+			.appendTo(document.body);
+
+		this.registrationMessage = $("<div>")
+			.attr("id", "registrationMessage")
+			.hide()
+			.appendTo(document.body);
+
+		this.syncControls = $("<div>")
+			.attr("id", "syncControls")
+			.hide()
+			.appendTo(document.body);
+
 		this.lastSyncTime = $("<input>")
 			.attr("id", "lastSyncTime")
 			.hide()
@@ -111,8 +126,15 @@ module("dataSync-controller", {
 		appController.db = new DatabaseMock();
 
 		this.dataSyncController = new DataSyncController();
+		this.dataSyncController.device = {
+			id: 1,
+			name: "test-device"
+		};
 	},
 	teardown: function() {
+		this.deviceName.remove();
+		this.registrationMessage.remove();
+		this.syncControls.remove();
 		this.lastSyncTime.remove();
 		this.localChanges.remove();
 		this.statusRow.remove();
@@ -140,7 +162,12 @@ test("constructor", 1, function() {
 	ok(this.dataSyncController, "Instantiate DataSyncController object");
 });
 
-test("setup", 6, function() {
+test("setup", 7, function() {
+	var registrationRow = $("<div>")
+		.attr("id", "registrationRow")
+		.hide()
+		.appendTo(document.body);
+
 	var importButton = $("<div>")
 		.attr("id", "import")
 		.hide()
@@ -168,10 +195,12 @@ test("setup", 6, function() {
 	equals(this.lastSyncTime.val(), "1-Jan-1900 12:00:00", "Last Sync Time");
 	ok(!this.dataSyncController.localChanges, "Detect no changes");
 	equals(this.localChanges.val(), "No changes to be synced", "Changes");
+	registrationRow.trigger("click");
 	importButton.trigger("click");
 	exportButton.trigger("click");
 	this.dataSyncController.header.leftButton.eventHandler();
 
+	registrationRow.remove();
 	importButton.remove();
 	exportButton.remove();
 });
@@ -184,6 +213,25 @@ test("gotLastSyncTime", 1, function() {
 	this.dataSyncController.gotLastSyncTime({ settingValue: null });
 	equals(this.lastSyncTime.val(), "Unknown", "Last Sync Time");
 });
+
+test("gotDevice - unregistered", 3, function() {
+	this.dataSyncController.gotDevice({}); 
+	equals(this.deviceName.val(), "< Unregistered >", "Device");
+	ok(!$("#registrationMessage").is(":hidden"), "Show registration message");
+	ok($("#syncControls").is(":hidden"), "Hide sync controls");
+});
+
+test("gotDevice - registered", 3, function() {
+	var device = {
+		settingValue: JSON.stringify(this.dataSyncController.device)
+	};
+
+	this.dataSyncController.gotDevice(device);
+	equals(this.deviceName.val(), this.dataSyncController.device.name, "Device");
+	ok(!$("#syncControls").is(":hidden"), "Show sync controls");
+	ok($("#registrationMessage").is(":hidden"), "Hide registration message");
+});
+
 
 test("checkForLocalChanges - single change", 2, function() {
 	var count = 1;

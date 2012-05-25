@@ -15,16 +15,22 @@ DataSyncController.prototype.setup = function() {
 };
 
 DataSyncController.prototype.activate = function() {
+		$("#registrationRow").bind('click', this.viewRegistration);
 		$("#import").bind('click', $.proxy(this.dataImport, this));
 		$("#export").bind('click', $.proxy(this.dataExport, this));
 		$("#localChanges").val("Checking...");
 
 		Setting.get("LastSyncTime", this.gotLastSyncTime);
+		Setting.get("Device", this.gotDevice);
 		Sync.count($.proxy(this.checkForLocalChanges, this));
 };
 
 DataSyncController.prototype.goBack = function() {
     appController.popView();
+};
+
+DataSyncController.prototype.viewRegistration = function() {
+	appController.pushView("registration");
 };
 
 DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
@@ -38,6 +44,17 @@ DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
 		$("#lastSyncTime").val(lastSyncDisplay);
 	} else {
 		$("#lastSyncTime").val("Unknown");
+	}
+};
+
+DataSyncController.prototype.gotDevice = function(device) {
+	if (device.settingValue) {
+		this.device = $.parseJSON(device.settingValue);
+		$("#deviceName").val(this.device.name);
+		$("#syncControls").show();
+	} else {
+		$("#deviceName").val("< Unregistered >");
+		$("#registrationMessage").show();
 	}
 };
 
@@ -154,7 +171,10 @@ DataSyncController.prototype.sendChange = function(sync) {
 			url: "/export",
 			context: this,
 			type: "POST",
-			headers: { "Content-MD5": hash },
+			headers: {
+				"Content-MD5": hash,
+				"X-DEVICE-ID": this.device.id
+			},
 			data: json,
 			success: function(exportResponse, status, jqXHR) {
 				var returnedHash = jqXHR.getResponseHeader("Etag").replace(/\"/g, "");
@@ -177,6 +197,9 @@ DataSyncController.prototype.sendDelete = function(sync){
 		url: "/export/" + sync.id,
 		context: this,
 		type: "DELETE",
+		headers: {
+			"X-DEVICE-ID": this.device.id
+		},
 		success: function(exportResponse, status, jqXHR) {
 			sync.remove();
 		},

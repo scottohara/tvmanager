@@ -87,6 +87,8 @@ For staging/production, if you use Heroku:
 
 The default database name doesn't need to be overriden if each environment is hosted under a separate domain (eg. tvmanager.mydomain.com and tvmanagerstaging.mydomain.com)
 
+After deployment, if you are using the import/export functionality to backup/restore a CouchDB database, you should run `rake db:migrate` (see Import/Export below)
+
 Offline Mode
 ============
 HTML5 application caching uses a manifest file to indicate which files are allowed to be cached. If the manifest file changes (in any way), all cached resources are refreshed from the server.
@@ -132,6 +134,8 @@ heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager --r
 ```
 
 (Assumes you have setup two Heroku remotes, one for staging and one for production)
+
+After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. You should run this rake task after each deployment, to ensure the latest design documents are being used.
 
 Test Suite
 ==========
