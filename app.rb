@@ -56,37 +56,24 @@ end
 # Route for HTML5 cache manifest
 get '/manifest' do
 	headers 'Content-Type' => 'text/cache-manifest'
-	manifest = Manifesto.cache :directory => settings.root + "/public"
 
-	# In dev/test configuration, remove all references to /public/test/*
-	# (this would be a good enhancment to the Manifesto gem, to support an :exclusions option....maybe someday)
-	if development? || test?
-		test = Manifesto.cache :directory => settings.root + "/public/test"
+	# Cache all files in the /public directory, except unit tests
+	# Include any routes called via Ajax as network resources
+	manifest_options = {
+		:timestamp => false,
+		:directory => settings.root + "/public",
+		:excludes => [ settings.root + "/public/test" ],
+		:network_includes => [ '/devices', '/export', '/import' ]
+	}
 
-		# Drop the first three lines, and prefix the rest with '/test'
-		test = test.to_a.drop(3).map do |line|
-			"/test" + line
-		end
+	# In dev/test configuration, make unit tests network resources as well
+	manifest_options[:network_includes] << '/test/*' if development? || test?
 
-		# Subtract any entries in test from manifest
-		manifest = (manifest.to_a - test.to_a).join
-	end
+	# Generate the manifest
+	manifest = Manifesto.cache manifest_options
 
 	# Add a cache entry for dbConfig
-	manifest << "/dbConfig\n"
-	manifest << "# databaseName: #{database_name}\n"
-
-	# Need to explicitly list any routes called via Ajax as network resources
-	manifest << "\nNETWORK:\n"
-	manifest << "/devices\n"
-	manifest << "/export\n"
-	manifest << "/import\n"
-
-	# In dev/test configuration, add everything in /public/test/* to the online whitelist
-	# (not necessary for production/staging, as /public/test is excluded via .slugignore)
-	manifest << "test/*\n" if development? || test?
-
-	manifest
+	manifest.gsub! "\nNETWORK:", "/dbConfig\n# databaseName: #{database_name}\n\nNETWORK:"
 end
 
 # Route for checking whether the server is in :test configuration
