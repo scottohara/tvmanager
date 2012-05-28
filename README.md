@@ -67,7 +67,7 @@ Installation (Development)
 ==========================
 1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
 2. Install the dependencies (`cd tvmanager && bundle install`)
-3. Start the server (`rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes)
+3. Start the server (`rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes). Better yet, using [foreman](https://github.com/ddollar/foreman) and a Procfile, you can start the server and the CouchDB database in a single command (`foreman start -f Procfile.dev`)
 2. Point your browser at /index.html
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
 
