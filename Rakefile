@@ -1,10 +1,12 @@
-require 'jslint/tasks'
-require 'open4'
 require 'json'
 require_relative 'error'
 require_relative 'storagecontroller'
 
-JSLint.config_path = "config/jslint.yml"
+unless ENV[:RACK_ENV.to_s].eql?("production")
+	require 'jslint/tasks'
+	require 'open4'
+	JSLint.config_path = "config/jslint.yml"
+end
 
 def start_test_server(&block)
 	Open4::popen4 "shotgun -E test -O -u /test/index.html", &block
