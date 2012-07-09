@@ -2,3 +2,4 @@ LICENCE
 README.md
 config
 public/test
+Procfile.dev
