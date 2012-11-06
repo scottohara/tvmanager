@@ -441,7 +441,7 @@ fieldset > .row:last-child {
 	background: url(../images/listArrow.png) no-repeat right;
 }
 
-#registrationMessage, #syncControls, #statusRow, #syncErrors {
+#registrationMessage, #syncControls, #statusRow, #syncErrors, #importChangesOnlyRow {
 	display: none;
 }
 

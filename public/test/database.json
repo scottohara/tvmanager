@@ -3,14 +3,21 @@
 		"doc": {
 			"id": "1",
 			"programName": "test-program-1",
-			"type": "Program"
+			"type": "Program",
+			"isDeleted": true,
+			"pending": [
+				"1"
+			]
 		}
 	},
 	{
 		"doc": {
 			"id": "2",
 			"programName": "test-program-2",
-			"type": "Program"
+			"type": "Program",
+			"pending": [
+				"1"
+			]
 		}
 	},
 	{
@@ -19,7 +26,10 @@
 			"seriesName": "test-series-1",
 			"nowShowing": null,
 			"programId": "1",
-			"type": "Series"
+			"type": "Series",
+			"pending": [
+				"2"
+			]
 		}
 	},
 	{

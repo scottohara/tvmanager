@@ -38,7 +38,7 @@ test("render", function() {
 					label: 1
 				}
 			],
-			result: '<div class="progressBar"><div class="test" style="width: 50%; ">1</div><div class="total">1</div></div>'
+			result: '<div class="progressBar"><div class="test" style="width: 50%;">1</div><div class="total">1</div></div>'
 		}
 	];
 

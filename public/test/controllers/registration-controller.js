@@ -2,7 +2,8 @@ module("registration-controller", {
 	setup: function() {
 		this.device = {
 			id: 1,
-			name: "test-device"
+			name: "test-device",
+			imported: true
 		};
 
 		this.deviceName = $("<input>")
@@ -49,7 +50,8 @@ test("setup", 3, function() {
 test("gotDevice - unregistered", 2, function() {
 	var device = {
 		id: "",
-		name: ""
+		name: "",
+		imported: false
 	};
 
 	appController.clearFooter = function() {

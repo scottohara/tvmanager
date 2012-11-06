@@ -1,6 +1,7 @@
 SyncMock = {
 	syncList: [],
 	removed: true,
+	removedCount: 0,
 	list: function(callback) {
 		callback(SyncMock.syncList);
 	},

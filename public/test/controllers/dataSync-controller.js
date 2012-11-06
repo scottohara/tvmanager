@@ -25,6 +25,16 @@ module("dataSync-controller", {
 			.hide()
 			.appendTo(document.body);
 
+		this.importChangesOnlyRow = $("<div>")
+			.attr("id", "importChangesOnlyRow")
+			.hide()
+			.appendTo(document.body);
+
+		this.importChangesOnly = $("<input type='checkbox'>")
+			.attr("id", "importChangesOnly")
+			.hide()
+			.appendTo(this.importChangesOnlyRow);
+		
 		this.statusRow = $("<div>")
 			.attr("id", "statusRow")
 			.css("visibility", "hidden")
@@ -86,8 +96,14 @@ module("dataSync-controller", {
 		this.originalSetting = Setting;
 		Setting = SettingMock;
 
-		this.originalSync = Sync;
-		Sync = SyncMock;
+		this.originalSyncList = Sync.list;
+		Sync.list = SyncMock.list;
+
+		this.originalSyncCount = Sync.count;
+		Sync.count = SyncMock.count;
+
+		this.originalSyncRemoveAll = Sync.removeAll;
+		Sync.removeAll = SyncMock.removeAll;
 
 		this.originalProgramSave = Program.prototype.save;
 		Program.prototype.save = ProgramMock.save;
@@ -127,8 +143,9 @@ module("dataSync-controller", {
 
 		this.dataSyncController = new DataSyncController();
 		this.dataSyncController.device = {
-			id: 1,
-			name: "test-device"
+			id: "1",
+			name: "test-device",
+			imported: false
 		};
 	},
 	teardown: function() {
@@ -137,12 +154,16 @@ module("dataSync-controller", {
 		this.syncControls.remove();
 		this.lastSyncTime.remove();
 		this.localChanges.remove();
+		this.importChangesOnlyRow.remove();
+		this.importChangesOnly.remove();
 		this.statusRow.remove();
 		this.status.remove();
 		this.syncErrors.remove();
 		this.errorList.remove();
 		Setting = this.originalSetting;
-		Sync = this.originalSync;
+		Sync.list = this.originalSyncList;
+		Sync.count = this.originalSyncCount;
+		Sync.removeAll = this.originalSyncRemoveAll;
 		Program.prototype.save = this.originalProgramSave;
 		Program.find = this.originalProgramFind;
 		Program.removeAll = this.originalProgramRemoveAll;
@@ -221,7 +242,7 @@ test("gotDevice - unregistered", 3, function() {
 	ok($("#syncControls").is(":hidden"), "Hide sync controls");
 });
 
-test("gotDevice - registered", 3, function() {
+test("gotDevice - registered, not imported", 5, function() {
 	var device = {
 		settingValue: JSON.stringify(this.dataSyncController.device)
 	};
@@ -230,8 +251,20 @@ test("gotDevice - registered", 3, function() {
 	equals(this.deviceName.val(), this.dataSyncController.device.name, "Device");
 	ok(!$("#syncControls").is(":hidden"), "Show sync controls");
 	ok($("#registrationMessage").is(":hidden"), "Hide registration message");
+	ok($("#importChangesOnlyRow").is(":hidden"), "Hide import changes only row");
+	ok(!$("#importChangesOnly").is(":checked"), "Import changes only");
 });
 
+test("gotDevice - registered, imported", 2, function() {
+	this.dataSyncController.device.imported = true;
+	var device = {
+		settingValue: JSON.stringify(this.dataSyncController.device)
+	};
+
+	this.dataSyncController.gotDevice(device);
+	ok(!$("#importChangesOnlyRow").is(":hidden"), "Show import changes only row");
+	ok($("#importChangesOnly").is(":checked"), "Import changes only");
+});
 
 test("checkForLocalChanges - single change", 2, function() {
 	var count = 1;
@@ -499,17 +532,33 @@ test("setLastSyncTime", 1, function() {
 	Date = originalDate;
 });
 
+test("doImport - changes only", 4, function() {
+	this.importChangesOnly.attr("checked", true);
+	var changesOnly = this.importChangesOnly.attr("checked");
+	
+	this.dataSyncController.importData = $.proxy(function() {
+		equals(this.importChangesOnly, changesOnly, "Import changes only property");
+		ok(this.programsReady, "Programs ready");
+		ok(this.seriesReady, "Series ready");
+		ok(this.episodesReady, "Episodes ready");
+	}, this.dataSyncController);
+
+	this.dataSyncController.doImport();
+});
+
 asyncTest("doImport - delete fail", function() {
 	var testParams = ["Program", "Series", "Episode"];
 	ProgramMock.removed = false;
 	SeriesMock.removed = false;
 	EpisodeMock.removed = false;
 	this.dataSyncController.syncErrors = [];
+	var changesOnly = this.importChangesOnly.attr("checked");
 
-	expect(testParams.length * 3);
+	expect(testParams.length * 3 + 1);
 
 	this.dataSyncController.importDone = $.proxy(function() {
 		if (this.programsReady && this.seriesReady && this.episodesReady) {
+			equals(this.importChangesOnly, changesOnly, "Import changes only property");
 			for (var i = 0; i < testParams.length; i++) {
 				equals(this.syncErrors[i].error, "Delete error", "Sync error");
 				equals(this.syncErrors[i].type, testParams[i], "Error type");
@@ -522,15 +571,17 @@ asyncTest("doImport - delete fail", function() {
 	this.dataSyncController.doImport();
 });
 
-asyncTest("doImport - success", 1, function() {
+asyncTest("doImport - success", 2, function() {
 	var objectsReceived = [];
 	ProgramMock.removed = true;
 	SeriesMock.removed = true;
 	EpisodeMock.removed = true;
 	this.dataSyncController.syncErrors = [];
+	var changesOnly = this.importChangesOnly.attr("checked");
 	
 	this.dataSyncController.importData = $.proxy(function() {
 		if (this.programsReady && this.seriesReady && this.episodesReady) {
+			equals(this.importChangesOnly, false, "Import changes only property");
 			same(this.syncErrors, [], "syncErrors property");
 			start();
 		}
@@ -545,7 +596,8 @@ test("importData - not finished", 2, function() {
 	equals(this.dataSyncController.objectsImported, undefined, "objectsImported property");
 });
 
-asyncTest("importData - no data", 2, function() {
+asyncTest("importData - full import, no data", 2, function() {
+	this.dataSyncController.importChangesOnly = false;
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -564,6 +616,32 @@ asyncTest("importData - no data", 2, function() {
 		hex_md5 = originalMD5;
 		equals(this.dataSyncController.syncErrors[0].error, "Receive error", "Sync error");
 		equals(this.dataSyncController.syncErrors[0].message, "No data found", "Error message");
+		start();
+	}, this);
+
+	this.dataSyncController.importData();
+	$.ajax = originalAjax;
+});
+
+asyncTest("importData - changes only, no data", 1, function() {
+	this.dataSyncController.importChangesOnly = true;
+	this.dataSyncController.programsReady = true;
+	this.dataSyncController.seriesReady = true;
+	this.dataSyncController.episodesReady = true;
+	this.dataSyncController.syncErrors = [];
+	this.importData = [];
+
+	var originalAjax = $.ajax;
+	$.ajax = this.ajaxMock;
+
+	var originalMD5 = hex_md5;
+	hex_md5 = function(data) {
+		return "test-hash";
+	};
+
+	this.dataSyncController.importDone = $.proxy(function() {
+		hex_md5 = originalMD5;
+		equals(this.dataSyncController.syncErrors.length, 0, "Number of errors");
 		start();
 	}, this);
 
@@ -650,26 +728,75 @@ asyncTest("importData - 304 Not Modified", 1, function() {
 	this.dataSyncController.importData();
 });
 
-asyncTest("importData - success", 1, function() {
+asyncTest("importData - success", 3, function() {
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
 	this.dataSyncController.syncErrors = [];
 	this.dataSyncController.objectsToImport = 0;
 	this.dataSyncController.objectsImported = 0;
+	this.dataSyncController.importChangesOnly = true;
 
 	var originalMD5 = hex_md5;
 	hex_md5 = function(data) {
 		return "test-hash";
 	};
 
+	var originalProgramRemove = Program.prototype.remove;
+	Program.prototype.remove = function() {
+		ok(true, "Program removed");
+	};
+
+	SyncMock.removedCount = 0;
+	var originalSyncRemove = Sync.prototype.remove;
+	Sync.prototype.remove = function() {
+		SyncMock.removedCount++;
+	};
+
 	this.dataSyncController.importDone = $.proxy(function() {
 		hex_md5 = originalMD5;
+		Program.prototype.remove = originalProgramRemove;
+		Sync.prototype.remove = originalSyncRemove;
+		equals(this.dataSyncController.objectsImported, SyncMock.removedCount, "Number of Syncs removed");
 		equals(this.dataSyncController.syncErrors.length, 0, "Number of errors");
 		start();
 	}, this);
 
 	this.dataSyncController.importData();
+});
+
+asyncTest("removePending - ajax fail", 2, function() {
+	var originalAjax = $.ajax;
+	$.ajax = this.ajaxMock;
+
+	this.dataSyncController.syncError = $.proxy(function(error, type, message) {
+		equals(error, "Save error", "Sync error");
+		equals(type, this.syncList[0].type, "Type");
+		start();
+	}, this);
+	
+	this.dataSyncController.removePending(this.syncList[0].id, this.syncList[0].type);
+	$.ajax = originalAjax;
+});
+
+asyncTest("removePending - success", 1, function() {
+	this.dataSyncController.dataImported = function() {
+		ok(true, "Data imported");
+		start();
+	};
+	this.dataSyncController.removePending(this.syncList[0].id, this.syncList[0].type);
+});
+
+test("dataImported", 2, function() {
+	this.dataSyncController.objectsToImport = 1;
+	this.dataSyncController.objectsImported = 0;
+	
+	this.dataSyncController.importDone = function() {
+		ok(true, "Import done");
+	};
+
+	this.dataSyncController.dataImported();
+	equals(this.status.val(), "Imported 1 of 1", "Status");
 });
 
 test("importDone - not finished", 1, function() {
@@ -707,7 +834,22 @@ test("importDone - delete fail", 1, function() {
 	this.dataSyncController.importDone();
 });
 
-test("importDone - finished without errors", 3, function() {
+test("importDone - finished without errors", function() {
+	var testParams = [
+		{
+			description: "full import",
+			changesOnly: false,
+			imported: true
+		},
+		{
+			description: "import changes only",
+			changesOnly: true,
+			imported: false
+		}
+	];
+
+	expect(testParams.length * 2);
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -715,11 +857,26 @@ test("importDone - finished without errors", 3, function() {
 
 	SyncMock.removed = true;
 
+	var i;
+
+	this.dataSyncController.importSuccessful = function() {
+		ok(true, testParams[i].description + " - Import successful");
+		equals(this.device.imported, testParams[i].imported, testParams[i].description + " - Device imported property");
+	};
+
+	for (i = 0; i < testParams.length; i++) {
+		this.dataSyncController.device.imported = false;
+		this.dataSyncController.importChangesOnly = testParams[i].changesOnly;
+		this.dataSyncController.importDone();
+	}
+});
+
+test("importSuccessful", 3, function() {
 	this.dataSyncController.callback = function(success) {
 		ok(success, "Invoke callback with true");
 	};
 
-	this.dataSyncController.importDone();
+	this.dataSyncController.importSuccessful();
 	ok($("#errorList").is(":empty"), "Empty error list");
 	ok($("#syncErrors").is(":hidden"), "Hide sync errors");
 });

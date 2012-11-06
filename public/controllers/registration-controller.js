@@ -37,7 +37,8 @@ RegistrationController.prototype.gotDevice = function(device) {
 	} else {
 		this.device = {
 			id: "",
-			name: ""
+			name: "",
+			imported: false
 		};
 		appController.clearFooter();
 	}

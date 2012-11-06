@@ -99,9 +99,15 @@ You can test that the application cache is working by disconnecting from the net
 
 Import/Export
 =============
-The app includes a backup/restore facility. As log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
+The app includes a backup/restore facility. A log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
 
-Restoring the database does the reverse, pulling all JSON objects from CouchDB (via the server), clearing any existing data from the database and reloading it from the JSON.
+Restoring the database does the reverse, pulling JSON objects from CouchDB (via the server) and loading them into the local database.
+
+Each client must first register itself with the server for the import/export feature to become available. Once registered, the first import is always a full import, clearing any existing data from the local database and reloading it with the JSON objects from CouchDB. After that, any subsequent imports will pull down only changes from the server (although a full import can be requested at any time, by turning off the "Fast Import" option).
+
+Before a client is allowed to export changes to the server, the CouchDB admin must first permit the client. This is done by updating the client's "device" document in CouchDB, setting its "readOnly" attribute to false. Once this is done, the client can export any local changes or deletions to the server.
+
+In the event of a conflict (i.e. an object modified/deleted both locally and on the server), the conflict is resolved in the direction that data is flowing. In other words: for exporting, local changes overwrite changes on the server; and for importing, changes on the server overwrite local changes.
 
 An MD5 checksum veries that the data was imported/exported succesfully.
 

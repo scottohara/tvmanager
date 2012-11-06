@@ -4,6 +4,9 @@
 	"views": {
 		"all": {
 			"map": "function(doc) { if ('device' !== doc.type) { emit(doc._id, null); } }"
+		},
+		"pending": {
+			"map": "function(doc) { if ('device' != doc.type && doc.pending && 0 < doc.pending.length) { for (device in doc.pending) { emit(doc.pending[device], null); } } }"
 		}
 	}
 }

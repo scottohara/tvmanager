@@ -42,6 +42,40 @@ def is_read_only
 	end
 end
 
+# Returns all devices, except the specified device
+def other_devices
+	# Get all devices excluding the specified device
+	devices = db.view("devices/all")["rows"].reject do |item|
+		item["id"].eql? device_id
+	end 
+
+	# Return an array of device ids
+	devices.map do |item|
+		item["id"]
+	end
+end
+
+# Removes the device from the pending list of a document
+def remove_pending(doc, pending_device_id=nil)
+	# If an explicit pending device was not specified, get it from the HTTP headers
+	pending_device_id = device_id if pending_device_id.nil?
+
+	# Remove the device from the pending array
+	doc["pending"].reject! do |item|
+		item.eql? pending_device_id
+	end
+
+	# Remove the pending array if empty
+	doc.delete "pending" if doc["pending"].empty?
+
+	# If the document is marked as deleted and has no pending array, delete the document; otherwise save the document
+	if doc["isDeleted"] && !doc.has_key?("pending")
+		db.get(doc['id']).destroy
+	else
+		db.save_doc doc
+	end
+end
+
 # Default route, redirects to /public/index.html
 get '/' do
 	redirect 'index.html'
@@ -116,6 +150,9 @@ post '/export' do
 		# Set the CouchDb _id to match the object's id
 		doc["_id"] = doc["id"]
 
+		# Set the other devices to notify of this change
+		doc["pending"] = other_devices
+
 		# Get the existing doc (if any) and copy the _rev property to the new doc
 		begin
 			doc["_rev"] = db.get(doc["id"])["_rev"]
@@ -149,9 +186,23 @@ delete '/export/:id' do
 	begin 
 		raise Forbidden, "Client device #{device_id} is not authorised to export" if is_read_only
 
-		# Delete the existing doc
-		db.get(params[:id]).destroy
+		# Get the existing doc
+		doc = db.get(params[:id])
 
+		# If the document is already marked for deletion, remove the device from the pending array
+		if doc["isDeleted"]
+			remove_pending doc
+		else
+			# Mark it as deleted
+			doc["isDeleted"] = true
+
+			# Set the other devices to notify of this change
+			doc["pending"] = other_devices
+
+			# Save the document
+			db.save_doc doc
+		end
+		
 	# Ignore any errors where the doc we're deleting was not found
 	rescue RestClient::ResourceNotFound => e
 		status 200
@@ -166,24 +217,56 @@ delete '/export/:id' do
 	end
 end
 
-# Import route used for testing
-get '/import', :isTest => :environment do
-	begin
-		etag "test-hash"
-		File.read(File.join("public", "test", "database.json"))
+['/import', '/import/:all'].each do |path|
+	# Import route used for testing
+	get path, :isTest => :environment do
+		begin
+			etag "test-hash"
+			File.read(File.join("public", "test", "database.json"))
+		end
+	end
+
+	# Import route
+	get path do
+		begin
+			if params[:all]
+				# Get all documents
+				docs = db.view "data/all", "include_docs" => true
+				raise NotFound, "No data" if docs.nil?
+			else
+				# Get all documents pending for this device
+				docs = db.view "data/pending", "key" => device_id, "include_docs" => true
+			end
+
+			# Return a hash of the documents as the etag, and the documents themselves as the response body
+			etag Digest::MD5.hexdigest docs["rows"].to_json
+			docs["rows"].to_json
+
+		rescue HttpError => e
+			status e.class.status
+			e.message
+
+		rescue StandardError => e
+			status 500
+			e.message
+		end
 	end
 end
 
-# Import route
-get '/import' do
+# Delete pending route used for testing
+delete '/import/:id', :isTest => :environment do
 	begin
-		# Get all documents
-		docs = db.view "data/all", "include_docs" => true
-		raise NotFound, "No data" if docs.nil?
+	end
+end
 
-		# Return a hash of the documents as the etag, and the documents themselves as the response body
-		etag Digest::MD5.hexdigest docs["rows"].to_json
-		docs["rows"].to_json
+# Delete pending route
+delete '/import/:id' do
+	begin
+		# Get the existing doc
+		doc = db.get(params[:id])
+
+		# Remove the device from the pending array
+		remove_pending doc
 
 	rescue HttpError => e
 		status e.class.status
@@ -252,7 +335,13 @@ end
 # Deregistration route
 delete '/devices/:id' do
 	begin 
-		# Delete the existing doc
+		# Get all documents pending for this device
+		docs = db.view("data/pending", "key" => params[:id], "include_docs" => true)["rows"].each do |row|
+			# Remove the device from the pending array
+			remove_pending row['doc'], params[:id]
+		end
+
+		# Delete the device
 		db.get(params[:id]).destroy
 
 	# Ignore any errors where the doc we're deleting was not found

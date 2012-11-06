@@ -52,6 +52,11 @@ DataSyncController.prototype.gotDevice = function(device) {
 		this.device = $.parseJSON(device.settingValue);
 		$("#deviceName").val(this.device.name);
 		$("#syncControls").show();
+
+		if (this.device.imported) {
+			$("#importChangesOnly").attr('checked', true);
+			$("#importChangesOnlyRow").show();
+		}
 	} else {
 		$("#deviceName").val("< Unregistered >");
 		$("#registrationMessage").show();
@@ -234,36 +239,44 @@ DataSyncController.prototype.setLastSyncTime = function() {
 
 DataSyncController.prototype.doImport = function() {
 	this.syncErrors = [];
+	this.importChangesOnly = $("#importChangesOnly").attr('checked');
 
-	Program.removeAll($.proxy(function(errorMessage) {
+	if (!this.importChangesOnly) {
+		Program.removeAll($.proxy(function(errorMessage) {
+			this.programsReady = true;
+			if (errorMessage) {
+				this.syncError("Delete error", "Program", errorMessage);
+				this.importDone();
+			} else {
+				this.importData();
+			}
+		}, this));
+		
+		Series.removeAll($.proxy(function(errorMessage) {
+			this.seriesReady = true;
+			if (errorMessage) {
+				this.syncError("Delete error", "Series", errorMessage);
+				this.importDone();
+			} else {
+				this.importData();
+			}
+		}, this));
+
+		Episode.removeAll($.proxy(function(errorMessage) {
+			this.episodesReady = true;
+			if (errorMessage) {
+				this.syncError("Delete error", "Episode", errorMessage);
+				this.importDone();
+			} else {
+				this.importData();
+			}
+		}, this));
+	} else {
 		this.programsReady = true;
-		if (errorMessage) {
-			this.syncError("Delete error", "Program", errorMessage);
-			this.importDone();
-		} else {
-			this.importData();
-		}
-	}, this));
-	
-	Series.removeAll($.proxy(function(errorMessage) {
 		this.seriesReady = true;
-		if (errorMessage) {
-			this.syncError("Delete error", "Series", errorMessage);
-			this.importDone();
-		} else {
-			this.importData();
-		}
-	}, this));
-
-	Episode.removeAll($.proxy(function(errorMessage) {
 		this.episodesReady = true;
-		if (errorMessage) {
-			this.syncError("Delete error", "Episode", errorMessage);
-			this.importDone();
-		} else {
-			this.importData();
-		}
-	}, this));
+		this.importData();
+	}
 };
 
 DataSyncController.prototype.importData = function() {
@@ -272,9 +285,12 @@ DataSyncController.prototype.importData = function() {
 		this.objectsImported = 0;
 
 		$.ajax({
-			url: "/import",
+			url: "/import" + (this.importChangesOnly ? "" : "/all"),
 			context: this,
 			dataType: "json",
+			headers: {
+				"X-DEVICE-ID": this.device.id
+			},
 			success: function(importObj, status, jqXHR) {
 				if (importObj === undefined) {
 					importObj = $.parseJSON(jqXHR.responseText);
@@ -285,28 +301,55 @@ DataSyncController.prototype.importData = function() {
 				if (hash === returnedHash) {
 					if (importObj.length > 0) {
 						this.objectsToImport = importObj.length;
-						$("#status").val("Imported " + this.objectsImported + " of " + this.objectsToImport + " ");
-						var obj;
+						$("#status").val("Imported " + this.objectsImported + " of " + this.objectsToImport);
+						var	obj,
+								pending,
+								isPending;
 
-						var saveCallback = $.proxy(function(type) {
+						var saveCallback = $.proxy(function(type, isPending) {
 							return $.proxy(function(id) {
 								if (!id) {
 									this.syncError("Save error", type, "Error saving " + type.toLowerCase());
 								}
-								this.objectsImported++;
-								$("#status").val("Imported " + this.objectsImported + " of " + this.objectsToImport + " ");
-								if (this.objectsImported === this.objectsToImport) {
-									this.importDone();
+
+								if (this.importChangesOnly) {
+									var sync = new Sync(type, id);
+									sync.remove();
+								}
+
+								if (isPending) {
+									this.removePending(id, type);
+								} else {
+									this.dataImported();
 								}
 							}, this);
 						}, this);
 
 						for (var i = 0; i < importObj.length; i++) {
 							obj = window[importObj[i].doc.type].fromJson(importObj[i].doc);
-							obj.save(saveCallback(importObj[i].doc.type));
+							pending = importObj[i].doc.pending;
+							isPending = false;
+
+							if (pending) {
+								for (var j = 0; j < pending.length; j++) {
+									if (this.device.id === pending[j]) {
+										isPending = true;
+										break;
+									}
+								}
+							}
+
+							if (importObj[i].doc.isDeleted) {
+								obj.remove();
+								saveCallback(importObj[i].doc.type, isPending)(importObj[i].doc.id);
+							} else {
+								obj.save(saveCallback(importObj[i].doc.type, isPending));
+							}
 						}
 					} else {
-						this.syncError("Receive error", "Sync", "No data found");
+						if (!this.importChangesOnly) {
+							this.syncError("Receive error", "Sync", "No data found");
+						}
 						this.importDone();
 					}
 				} else {
@@ -322,24 +365,63 @@ DataSyncController.prototype.importData = function() {
 	}
 };
 
+DataSyncController.prototype.removePending = function(id, type) {
+	$.ajax({
+		url: "/import/" + id,
+		context: this,
+		type: "DELETE",
+		headers: {
+			"X-DEVICE-ID": this.device.id
+		},
+		error: $.proxy(function(request, statusText) {
+			this.syncError("Save error", type, "Error saving " + type.toLowerCase());
+		}, this),
+		complete: $.proxy(function() {
+			this.dataImported();
+		}, this)
+	});
+};
+
+DataSyncController.prototype.dataImported = function() {
+	this.objectsImported++;
+	$("#status").val("Imported " + this.objectsImported + " of " + this.objectsToImport);
+	if (this.objectsImported === this.objectsToImport) {
+		this.importDone();
+	}
+};
+
 DataSyncController.prototype.importDone = function() {
 	if (this.programsReady && this.seriesReady && this.episodesReady) {
 		if (0 === this.syncErrors.length) {
-			Sync.removeAll($.proxy(function(errorMessage) {
-				if (errorMessage) {
-					this.syncError("Delete error", "Sync", errorMessage);
-					this.showErrors();
-				} else {
-					this.setLastSyncTime();
-					Sync.count($.proxy(this.checkForLocalChanges, this));
-					$("#syncErrors").hide();
-					this.callback(true);
+			if (!this.importChangesOnly) {
+				if (!this.device.imported) {
+					this.device.imported = true;
+					var device = new Setting("Device", JSON.stringify(this.device));
+					device.save();
 				}
-			}, this));
+
+				Sync.removeAll($.proxy(function(errorMessage) {
+					if (errorMessage) {
+						this.syncError("Delete error", "Sync", errorMessage);
+						this.showErrors();
+					} else {
+						this.importSuccessful();
+					}
+				}, this));
+			} else {
+				this.importSuccessful();
+			}
 		} else {
 			this.showErrors();
 		}
 	}
+};
+
+DataSyncController.prototype.importSuccessful = function() {
+	this.setLastSyncTime();
+	Sync.count($.proxy(this.checkForLocalChanges, this));
+	$("#syncErrors").hide();
+	this.callback(true);
 };
 
 DataSyncController.prototype.syncError = function(error, type, message, id) {
