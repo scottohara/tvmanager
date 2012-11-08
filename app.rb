@@ -231,16 +231,20 @@ end
 		begin
 			if params[:all]
 				# Get all documents
-				docs = db.view "data/all", "include_docs" => true
+				docs = []
+				db.view "data/all", "include_docs" => true do |doc|
+					docs << doc
+				end
 				raise NotFound, "No data" if docs.nil?
 			else
 				# Get all documents pending for this device
 				docs = db.view "data/pending", "key" => device_id, "include_docs" => true
+				docs = docs["rows"]
 			end
 
 			# Return a hash of the documents as the etag, and the documents themselves as the response body
-			etag Digest::MD5.hexdigest docs["rows"].to_json
-			docs["rows"].to_json
+			etag Digest::MD5.hexdigest docs.to_json
+			docs.to_json
 
 		rescue HttpError => e
 			status e.class.status
