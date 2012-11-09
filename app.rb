@@ -230,21 +230,38 @@ end
 	get path do
 		begin
 			if params[:all]
-				# Get all documents
 				docs = []
-				db.view "data/all", "include_docs" => true do |doc|
-					docs << doc
+
+				# Return a hash of the documents as the etag, and the documents themselves as the response body
+				etag Digest::MD5.hexdigest docs.to_json
+
+				stream do |out|
+					# Get all documents
+					out << "["
+
+					first = true
+
+					db.view "data/all", "include_docs" => true do |doc|
+						out << "," unless first
+						first = false
+						out << doc.to_json
+						docs << doc
+					end
+					out << "]"
+
+					raise NotFound, "No data" if docs.nil?
 				end
-				raise NotFound, "No data" if docs.nil?
 			else
 				# Get all documents pending for this device
 				docs = db.view "data/pending", "key" => device_id, "include_docs" => true
 				docs = docs["rows"]
+
+				# Return a hash of the documents as the etag, and the documents themselves as the response body
+				etag Digest::MD5.hexdigest docs.to_json
+
+				docs.to_json
 			end
 
-			# Return a hash of the documents as the etag, and the documents themselves as the response body
-			etag Digest::MD5.hexdigest docs.to_json
-			docs.to_json
 
 		rescue HttpError => e
 			status e.class.status
