@@ -105,11 +105,11 @@ Restoring the database does the reverse, pulling JSON objects from CouchDB (via 
 
 Each client must first register itself with the server for the import/export feature to become available. Once registered, the first import is always a full import, clearing any existing data from the local database and reloading it with the JSON objects from CouchDB. After that, any subsequent imports will pull down only changes from the server (although a full import can be requested at any time, by turning off the "Fast Import" option).
 
-Before a client is allowed to export changes to the server, the CouchDB admin must first permit the client. This is done by updating the client's "device" document in CouchDB, setting its "readOnly" attribute to false. Once this is done, the client can export any local changes or deletions to the server.
+Before a client is allowed to export changes to the server (to prevent unauthorised access to your data), the CouchDB admin must first permit the client. This is done by updating the client's "device" document in CouchDB, setting its "readOnly" attribute to false. Once this is done, the client can export any local changes or deletions to the server.
 
 In the event of a conflict (i.e. an object modified/deleted both locally and on the server), the conflict is resolved in the direction that data is flowing. In other words: for exporting, local changes overwrite changes on the server; and for importing, changes on the server overwrite local changes.
 
-An MD5 checksum veries that the data was imported/exported succesfully.
+An MD5 checksum verifies that the data was imported/exported succesfully.
 
 To enable the Import/Export functionality, you will need to declare the following environment variable:
 
