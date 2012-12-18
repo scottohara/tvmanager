@@ -166,7 +166,7 @@ EpisodesController.prototype.editItems = function() {
 EpisodesController.prototype.viewItems = function() {
 	this.episodeList.setAction("view");
 	appController.clearFooter();
-	$("#list")
+	$("#list.ui-sortable")
 		.removeClass()
 		.sortable("destroy")
 		.removeTouch();

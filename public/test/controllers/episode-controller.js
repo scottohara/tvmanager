@@ -149,8 +149,8 @@ test("save", 6, function() {
 	var unverified = true;
 	var unscheduled = true;
 	this.episodeName.val(episodeName);
-	this.unverified.attr("checked", unverified);
-	this.unscheduled.attr("checked", unscheduled);
+	this.unverified.prop("checked", unverified);
+	this.unscheduled.prop("checked", unscheduled);
 	appController.viewStack = [
 		{ scrollPos: 0 },
 		{ scrollPos: 0 }
@@ -323,7 +323,7 @@ test("toggleStatusDateRow", function() {
 
 	expect(testParams.length + 1);
 	for (i = 0; i < testParams.length; i++) {
-		this.unscheduled.attr("checked", testParams[i].unscheduled);
+		this.unscheduled.prop("checked", testParams[i].unscheduled);
 		this.episodeController.listItem.episode.status = testParams[i].status;
 		if ("undefined" !== testParams[i].statusDate) {
 			this.episodeController.listItem.episode.statusDate = testParams[i].statusDate;

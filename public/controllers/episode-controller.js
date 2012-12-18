@@ -24,8 +24,8 @@ EpisodeController.prototype.setup = function() {
 	};
     
 	$("#episodeName").val(this.listItem.episode.episodeName);
-	$("#unverified").attr('checked', this.listItem.episode.unverified);
-	$("#unscheduled").attr('checked', this.listItem.episode.unscheduled);
+	$("#unverified").prop('checked', this.listItem.episode.unverified);
+	$("#unscheduled").prop('checked', this.listItem.episode.unscheduled);
 
 	$("#watched").bind('click', $.proxy(function() { this.setStatus("Watched"); }, this));
 	$("#recorded").bind('click', $.proxy(function() { this.setStatus("Recorded"); }, this));
@@ -43,8 +43,8 @@ EpisodeController.prototype.setup = function() {
 
 EpisodeController.prototype.save = function() {
 	this.listItem.episode.episodeName = $("#episodeName").val();
-	this.listItem.episode.setUnverified($("#unverified").attr('checked'));
-	this.listItem.episode.unscheduled = $("#unscheduled").attr('checked');
+	this.listItem.episode.setUnverified($("#unverified").is(':checked'));
+	this.listItem.episode.unscheduled = $("#unscheduled").is(':checked');
 	this.listItem.episode.save();
 	if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
 		appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
@@ -128,7 +128,7 @@ EpisodeController.prototype.setStatusDate = function() {
 EpisodeController.prototype.toggleStatusDateRow = function() {
 	$("#statusDateRow").hide();
 
-	if ($("#unscheduled").attr('checked') || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
+	if ($("#unscheduled").is(':checked') || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
 		$("#statusDateRow").show();
 		if ("" === this.listItem.episode.statusDate) {
 			this.getStatusDate();

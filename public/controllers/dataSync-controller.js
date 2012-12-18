@@ -54,7 +54,7 @@ DataSyncController.prototype.gotDevice = function(device) {
 		$("#syncControls").show();
 
 		if (this.device.imported) {
-			$("#importChangesOnly").attr('checked', true);
+			$("#importChangesOnly").prop('checked', true);
 			$("#importChangesOnlyRow").show();
 		}
 	} else {
@@ -239,7 +239,7 @@ DataSyncController.prototype.setLastSyncTime = function() {
 
 DataSyncController.prototype.doImport = function() {
 	this.syncErrors = [];
-	this.importChangesOnly = $("#importChangesOnly").attr('checked');
+	this.importChangesOnly = $("#importChangesOnly").is(':checked');
 
 	if (!this.importChangesOnly) {
 		Program.removeAll($.proxy(function(errorMessage) {

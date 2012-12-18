@@ -533,8 +533,8 @@ test("setLastSyncTime", 1, function() {
 });
 
 test("doImport - changes only", 4, function() {
-	this.importChangesOnly.attr("checked", true);
-	var changesOnly = this.importChangesOnly.attr("checked");
+	this.importChangesOnly.prop("checked", true);
+	var changesOnly = this.importChangesOnly.is(":checked");
 	
 	this.dataSyncController.importData = $.proxy(function() {
 		equals(this.importChangesOnly, changesOnly, "Import changes only property");
@@ -552,7 +552,7 @@ asyncTest("doImport - delete fail", function() {
 	SeriesMock.removed = false;
 	EpisodeMock.removed = false;
 	this.dataSyncController.syncErrors = [];
-	var changesOnly = this.importChangesOnly.attr("checked");
+	var changesOnly = this.importChangesOnly.is(":checked");
 
 	expect(testParams.length * 3 + 1);
 
@@ -577,7 +577,7 @@ asyncTest("doImport - success", 2, function() {
 	SeriesMock.removed = true;
 	EpisodeMock.removed = true;
 	this.dataSyncController.syncErrors = [];
-	var changesOnly = this.importChangesOnly.attr("checked");
+	var changesOnly = this.importChangesOnly.is(":checked");
 	
 	this.dataSyncController.importData = $.proxy(function() {
 		if (this.programsReady && this.seriesReady && this.episodesReady) {
@@ -649,6 +649,8 @@ asyncTest("importData - changes only, no data", 1, function() {
 	$.ajax = originalAjax;
 });
 
+// Test quarantined until Heroku timeout issue resolved
+/*
 asyncTest("importData - checksum mismatch", 1, function() {
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
@@ -661,6 +663,7 @@ asyncTest("importData - checksum mismatch", 1, function() {
 
 	this.dataSyncController.importData();
 });
+*/
 
 asyncTest("importData - ajax fail", 1, function() {
 	this.dataSyncController.programsReady = true;
