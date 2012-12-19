@@ -238,7 +238,7 @@ ApplicationController.prototype.clearFooter = function() {
 };
 
 ApplicationController.prototype.setContentHeight = function() {
-	$("#content").children(":first").height(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
+	$("#content").children(":first").outerHeight(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
 };
 
 ApplicationController.prototype.showNotice = function(notice) {
