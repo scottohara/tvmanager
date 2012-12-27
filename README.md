@@ -191,5 +191,5 @@ The JavaScript source is fully annotated with JSDoc3 tags, allowing HTML documen
 To generate documentation:
 
 * install [JSDoc3](http://usejsdoc.org)
-* run the docs:generate rake task (eg. `rake docs:generate`). This generates the documentation in the `/docs` project's root directory.
+* run the docs:generate rake task (eg. `rake docs:generate`). This generates the documentation in the `/docs` directory of the project's root.
 * browse to file://path_to_project/docs/index.html
