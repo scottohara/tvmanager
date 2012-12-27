@@ -104,3 +104,20 @@ namespace :db do
 		end
 	end
 end
+
+namespace :docs do
+	desc "Generates JSDoc3 documentation"
+	task :generate do
+		root_dir = File.dirname(__FILE__)
+		source_dir = File.join(root_dir, 'public')
+		config_path = File.join(root_dir, 'config', 'jsdoc3.json')
+		dest_dir = File.join(root_dir, 'docs')
+
+		# When JSDoc3 installed via Homebrew, the symlink doesn't work (see https://github.com/jsdoc3/jsdoc/issues/205)
+		# So we need to fully qualify the path to the executable
+		# Hoping to remove this once the above issue is resolved
+		jsdoc_path = '/usr/local/Cellar/jsdoc3/3.0.1/libexec/'
+	
+		result = sh "#{jsdoc_path}jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
+	end
+end

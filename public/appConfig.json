@@ -1,3 +1,10 @@
+/**
+ * @class ApplicationConfig
+ * @classdesc Anonymous object containing the application configuration settings
+ * @private
+ * @property {String} appVersion - the application version number
+ */
+
 {
 	"appVersion": "4.05"
 }

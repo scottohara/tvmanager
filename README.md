@@ -57,6 +57,8 @@ On the server side, it's a Ruby Sinatra app. There's not much happening on the s
 
 [phantom.js](http://phantomjs.org) is used to run the unit test suite and code coverage headlessly.
 
+[JSDoc3](http://usejsdoc.org) is used to generate API documentation.
+
 Requirements
 ============
 * WebKit-based browser, with HTML5 database support
@@ -160,7 +162,7 @@ To run a single QUnit test module, append '?module-name' (eg. [http://localhost:
 Once the test suite is passing cleanly, to check the test suite coverage:
 
 * install [JSCoverage](http://siliconforks.com/jscoverage/)
-* run the test:coverage rake task (eg. `rake test:coverage`). This generates generates an instrumented copy of the code for tracking coverage.
+* run the test:coverage rake task (eg. `rake test:coverage`). This generates an instrumented copy of the code for tracking coverage.
 * browse to [http://localhost:9292/jscoverage.html?test/index.html&missing=true](http://localhost:9292/jscoverage.html?test/index.html&missing=true) (Note: unlike the test:client task, which uses shotgun to start the server on a default port of 9393; the test:coverage task uses rackup on port 9292. For some reason, jscoverage wouldn't run properly using shotgun)
 * on the Summary tab, check that we have >=99% total coverage
 
@@ -181,3 +183,13 @@ For headless testing from the command line:
 * `rake test:headless:client` runs the Qunit test suite and writes any failed tests to stdout
 * `rake test:headless:coverage` runs the JSCoverage statistics and displays any files that have less that total coverage to stdout
 * `rake test:headless` runs JSLint, then the Qunit test suite, then the JSCoverage statistics
+
+API Documentation
+=================
+The JavaScript source is fully annotated with JSDoc3 tags, allowing HTML documentation of the API to be automatically generated.
+
+To generate documentation:
+
+* install [JSDoc3](http://usejsdoc.org)
+* run the docs:generate rake task (eg. `rake docs:generate`). This generates the documentation in the `/docs` project's root directory.
+* browse to file://path_to_project/docs/index.html
