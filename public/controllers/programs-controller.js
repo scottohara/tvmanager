@@ -15,7 +15,7 @@
  * @constructor
  */
 var ProgramsController = function () {
-
+	"use strict";
 };
 
 /**
@@ -26,6 +26,8 @@ var ProgramsController = function () {
  * @desc Initialises the controller
  */
 ProgramsController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Programs",
@@ -57,6 +59,8 @@ ProgramsController.prototype.setup = function() {
  * @param {ProgramListItem} [listItem] - a list item that was just added/edited in the Program view
  */
 ProgramsController.prototype.activate = function(listItem) {
+	"use strict";
+
 	// When returning from the Program view, we need to update the list with the new values
 	if (listItem) {
 		// If an existing program was edited, update the program details
@@ -84,6 +88,8 @@ ProgramsController.prototype.activate = function(listItem) {
  * @param {Array<Program>} programList - array of program objects
  */
 ProgramsController.prototype.listRetrieved = function(programList) {
+	"use strict";
+
 	// Set the list items
 	this.programList.items = programList;
 
@@ -99,6 +105,8 @@ ProgramsController.prototype.listRetrieved = function(programList) {
  * @desc Pops the view off the stack
  */
 ProgramsController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView();
 };
 
@@ -111,6 +119,8 @@ ProgramsController.prototype.goBack = function() {
  * @param {Number} itemIndex - the list index of the program to view
  */
 ProgramsController.prototype.viewItem = function(itemIndex) {
+	"use strict";
+
 	appController.pushView("seriesList", { listIndex: itemIndex, program: this.programList.items[itemIndex] });
 };
 
@@ -122,6 +132,8 @@ ProgramsController.prototype.viewItem = function(itemIndex) {
  * @desc Displays the Program view for adding a program
  */
 ProgramsController.prototype.addItem = function() {
+	"use strict";
+
 	appController.pushView("program");
 };
 
@@ -134,6 +146,8 @@ ProgramsController.prototype.addItem = function() {
  * @param {Number} itemIndex - the list index of the program to edit
  */
 ProgramsController.prototype.editItem = function(itemIndex) {
+	"use strict";
+
 	appController.pushView("program", { listIndex: itemIndex, program: this.programList.items[itemIndex] });
 };
 
@@ -146,6 +160,8 @@ ProgramsController.prototype.editItem = function(itemIndex) {
  * @param {Number} itemIndex - the list index of the program to delete
  */
 ProgramsController.prototype.deleteItem = function(itemIndex) {
+	"use strict";
+
 	// Remove the item from the database
 	this.programList.items[itemIndex].remove();
 
@@ -164,6 +180,8 @@ ProgramsController.prototype.deleteItem = function(itemIndex) {
  * @desc Sets the list to delete mode
  */
 ProgramsController.prototype.deleteItems = function() {
+	"use strict";
+
 	// Set the list to delete mode
 	this.programList.setAction("delete");
 
@@ -198,6 +216,8 @@ ProgramsController.prototype.deleteItems = function() {
  * @desc Sets the list to edit mode
  */
 ProgramsController.prototype.editItems = function() {
+	"use strict";
+
 	// Set the list to edit mode
 	this.programList.setAction("edit");
 
@@ -232,6 +252,8 @@ ProgramsController.prototype.editItems = function() {
  * @desc Sets the list to view mode
  */
 ProgramsController.prototype.viewItems = function() {
+	"use strict";
+
 	// Set the list to view mode
 	this.programList.setAction("view");
 

@@ -26,6 +26,8 @@
  * @param {Report} report - the report to display
  */
 var ReportController = function (report) {
+	"use strict";
+
 	this.report = report;
 };
 
@@ -37,6 +39,8 @@ var ReportController = function (report) {
  * @desc Initialises the controller
  */
 ReportController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: this.report.reportName,
@@ -62,6 +66,8 @@ ReportController.prototype.setup = function() {
  * @desc Activates the controller
  */
 ReportController.prototype.activate = function() {
+	"use strict";
+
 	// Get the data for the report
 	this.report.dataSource($.proxy(this.listRetrieved, this), this.report.args);
 };
@@ -75,6 +81,8 @@ ReportController.prototype.activate = function() {
  * @param {Array<Series>} reportList - array of series objects
  */
 ReportController.prototype.listRetrieved = function(reportList) {
+	"use strict";
+
 	// Set the list items
 	this.reportList.items = reportList;
 
@@ -93,6 +101,8 @@ ReportController.prototype.listRetrieved = function(reportList) {
  * @desc Pops the view off the stack
  */
 ReportController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView();
 };
 
@@ -105,6 +115,8 @@ ReportController.prototype.goBack = function() {
  * @param {Number} itemIndex - the list index of the series to view
  */
 ReportController.prototype.viewItem = function(itemIndex) {
+	"use strict";
+
 	appController.pushView("episodes", { source: "Report", listIndex: itemIndex, series: this.reportList.items[itemIndex] });
 };
 
@@ -116,6 +128,8 @@ ReportController.prototype.viewItem = function(itemIndex) {
  * @desc Sets the list to view mode
  */
 ReportController.prototype.viewItems = function() {
+	"use strict";
+
 	// Set the list to view mode
 	this.reportList.setAction("view");
 

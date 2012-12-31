@@ -1,5 +1,7 @@
 module("toucheventproxy", {
 	setup: function() {
+		"use strict";
+
 		this.element = $("<div>");
 		this.target = $("<a>");
 
@@ -34,17 +36,23 @@ module("toucheventproxy", {
 		this.toucheventproxy = new TouchEventProxy(this.element.get(0));
 	},
 	teardown: function() {
+		"use strict";
+
 		this.element.remove();
 		this.target.remove();
 	}
 });
 
 test("constructor", 2, function() {
+	"use strict";
+
 	ok(this.toucheventproxy, "Instantiate TouchEventProxy object");
 	same(this.toucheventproxy.element, this.element.get(0), "element property");
 });
 
 test("constructor - without TouchEvent", 2, function() {
+	"use strict";
+
 	var originalCreateEvent = document.createEvent;
 	document.createEvent = function() {
 		throw new Error();
@@ -62,6 +70,8 @@ test("constructor - without TouchEvent", 2, function() {
 });
 
 test("constructor - with TouchEvent", 0, function() {
+	"use strict";
+
 	var originalCreateEvent = document.createEvent;
 	document.createEvent = function() {
 		return;
@@ -80,6 +90,8 @@ test("constructor - with TouchEvent", 0, function() {
 });
 
 test("handleEvent - mousedown disabled", 1, function() {
+	"use strict";
+
 	this.toucheventproxy.enabled = false;
 	this.event.type = "mousedown";
 	var mapsTo = "touchstart";
@@ -97,6 +109,8 @@ test("handleEvent - mousedown disabled", 1, function() {
 });
 
 test("handleEvent - mousedown enabled", 10, function() {
+	"use strict";
+
 	this.event.type = "mousedown";
 	var mapsTo = "touchstart";
 	this.event.mapsTo = mapsTo;
@@ -113,6 +127,8 @@ test("handleEvent - mousedown enabled", 10, function() {
 });
 
 test("handleEvent - mousemove", 7, function() {
+	"use strict";
+
 	this.event.type = "mousemove";
 	var mapsTo = "touchmove";
 	this.event.mapsTo = mapsTo;
@@ -121,6 +137,8 @@ test("handleEvent - mousemove", 7, function() {
 });
 
 test("handleEvent - mouseup", 7, function() {
+	"use strict";
+
 	this.event.type = "mouseup";
 	var mapsTo = "touchend";
 	this.event.mapsTo = mapsTo;
@@ -137,6 +155,8 @@ test("handleEvent - mouseup", 7, function() {
 });
 
 test("handleEvent - click", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "enabled",

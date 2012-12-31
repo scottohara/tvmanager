@@ -23,6 +23,8 @@
  * @param {ProgramListItem} listItem - a list item from the Programs view
  */
 var ProgramController = function (listItem) {
+	"use strict";
+
 	// If a list item was passed, we're editing an existing program
 	if (listItem) {
 		this.listItem = listItem;
@@ -40,6 +42,8 @@ var ProgramController = function (listItem) {
  * @desc Initialises the controller
  */
 ProgramController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Add/Edit Program",
@@ -67,6 +71,8 @@ ProgramController.prototype.setup = function() {
  * @desc Saves the program details to the database and returns to the previous view
  */
 ProgramController.prototype.save = function() {
+	"use strict";
+
 	// Get the program details
 	this.listItem.program.setProgramName($("#programName").val());
 
@@ -90,5 +96,7 @@ ProgramController.prototype.save = function() {
  * @desc Pops the view off the stack
  */
 ProgramController.prototype.cancel = function() {
+	"use strict";
+
 	appController.popView();
 };

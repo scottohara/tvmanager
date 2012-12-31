@@ -31,7 +31,9 @@
  * @param {SeriesListItem} listItem - a list item from the Series, Schedule or Report view
  */
 var EpisodesController = function (listItem) {
-  this.listItem = listItem;
+	"use strict";
+
+	this.listItem = listItem;
 	this.scrollToFirstUnwatched = true;
 };
 
@@ -43,6 +45,8 @@ var EpisodesController = function (listItem) {
  * @desc Initialises the controller
  */
 EpisodesController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: this.listItem.series.programName + " : " + this.listItem.series.seriesName,
@@ -74,6 +78,8 @@ EpisodesController.prototype.setup = function() {
  * @param {EpisodeListItem} [listItem] - a list item that was just added/edited in the Episode view
  */
 EpisodesController.prototype.activate = function(listItem) {
+	"use strict";
+
 	// When returning from the Episode view, we need to update the list with the new values
 	if (listItem) {
 		// Get the details of the added/edited episode
@@ -116,6 +122,8 @@ EpisodesController.prototype.activate = function(listItem) {
  * @param {Episode} episode - the episode added to the list
  */
 EpisodesController.prototype.onPopulateListItem = function(episode) {
+	"use strict";
+
 	// Only proceed if we need to scroll to the first unwatched episode
 	if (this.scrollToFirstUnwatched) {
 		// If the status of the episode is Watched, update the scroll position to the top of this episode
@@ -137,6 +145,8 @@ EpisodesController.prototype.onPopulateListItem = function(episode) {
  * @param {Array<Episode>} episodeList - array of episode objects
  */
 EpisodesController.prototype.listRetrieved = function(episodeList) {
+	"use strict";
+
 	// Set the list items
 	this.episodeList.items = episodeList;
 
@@ -152,6 +162,8 @@ EpisodesController.prototype.listRetrieved = function(episodeList) {
  * @desc Pops the view off the stack
  */
 EpisodesController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView(this.listItem);
 };
 
@@ -164,6 +176,8 @@ EpisodesController.prototype.goBack = function() {
  * @param {Number} itemIndex - the list index of the episode to edit
  */
 EpisodesController.prototype.viewItem = function(itemIndex) {
+	"use strict";
+
 	// Save the current episode details
 	this.origWatchedCount = ("Watched" === this.episodeList.items[itemIndex].status ? 1 : 0);
 	this.origRecordedCount = ("Recorded" === this.episodeList.items[itemIndex].status ? 1 : 0);
@@ -182,6 +196,8 @@ EpisodesController.prototype.viewItem = function(itemIndex) {
  * @desc Displays the Episode view for adding an episode
  */
 EpisodesController.prototype.addItem = function() {
+	"use strict";
+
 	appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
 };
 
@@ -194,6 +210,8 @@ EpisodesController.prototype.addItem = function() {
  * @param {Number} itemIndex - the list index of the episode to delete
  */
 EpisodesController.prototype.deleteItem = function(itemIndex) {
+	"use strict";
+
 	// Get the details of the deleted episode
 	var newWatchedCount = ("Watched" === this.episodeList.items[itemIndex].status ? 1 : 0);
 	var newRecordedCount = ("Recorded" === this.episodeList.items[itemIndex].status ? 1 : 0);
@@ -228,6 +246,8 @@ EpisodesController.prototype.deleteItem = function(itemIndex) {
  * @desc Sets the list to delete mode
  */
 EpisodesController.prototype.deleteItems = function() {
+	"use strict";
+
 	// Set the list to delete mode
 	this.episodeList.setAction("delete");
 
@@ -261,6 +281,8 @@ EpisodesController.prototype.deleteItems = function() {
  * @desc Updates the sequence number of list items based on their current position in the list
  */
 EpisodesController.prototype.resequenceItems = function() {
+	"use strict";
+
 	var that = this;
 
 	// Iterate over the HTML DOM elements in the list
@@ -300,6 +322,8 @@ EpisodesController.prototype.resequenceItems = function() {
  * @desc Sets the list to edit mode
  */
 EpisodesController.prototype.editItems = function() {
+	"use strict";
+
 	// Set the list to edit mode
 	this.episodeList.setAction("edit");
 
@@ -343,6 +367,8 @@ EpisodesController.prototype.editItems = function() {
  * @desc Sets the list to view mode
  */
 EpisodesController.prototype.viewItems = function() {
+	"use strict";
+
 	// Set the list to view mode
 	this.episodeList.setAction("view");
 

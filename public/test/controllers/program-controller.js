@@ -1,5 +1,7 @@
 module("program-controller", {
 	setup: function() {
+		"use strict";
+
 		this.listItem = {
 			program: {
 				programName: "test-program",
@@ -20,16 +22,22 @@ module("program-controller", {
 		this.programController = new ProgramController(this.listItem);
 	},
 	teardown: function() {
+		"use strict";
+
 		this.programName.remove();
 	}
 });
 
 test("constructor - update", 2, function() {
+	"use strict";
+
 	ok(this.programController, "Instantiate ProgramController object");
 	same(this.programController.listItem, this.listItem, "listItem property");
 });
 
 test("constructor - add", 2, function() {
+	"use strict";
+
 	var listItem = {
 		program: new Program(null, "", 0, 0, 0, 0, 0)
 	};
@@ -40,6 +48,8 @@ test("constructor - add", 2, function() {
 });
 
 test("setup", 3, function() {
+	"use strict";
+
 	this.programController.cancel = function() {
 		ok(true, "Bind back button event handler");
 	};
@@ -54,6 +64,8 @@ test("setup", 3, function() {
 });
 
 test("save", 4, function() {
+	"use strict";
+
 	var programName = "test-program-2";
 	this.programName.val(programName);
 	appController.viewStack = [
@@ -66,5 +78,7 @@ test("save", 4, function() {
 });
 
 test("cancel", 1, function() {
+	"use strict";
+
 	this.programController.cancel();
 });

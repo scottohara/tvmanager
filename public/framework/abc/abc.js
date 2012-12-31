@@ -70,3 +70,6 @@ abc.prototype = {
 		return false;
 	}
 }
+
+// SOH: Create an alias that satisfies JSLint: ie. A constructor name should start with an uppercase letter
+var Abc = abc;

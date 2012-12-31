@@ -1,4 +1,6 @@
 TestController = function(args) {
+	"use strict";
+
 	this.args = args;
 	this.header = {
 		label: "test-header",
@@ -29,15 +31,21 @@ TestController = function(args) {
 };
 
 TestController.prototype.buttonClicked = function(e, button) {
+	"use strict";
+
 	ok(true, "Bind " + button + " button " + e.type + " event listener");
 };
 
 TestController.prototype.setup = function() {
+	"use strict";
+
 	equals($("#content").html(), "<div></div>", "content");
 	start();
 };
 
 TestController.prototype.activate = function(args) {
+	"use strict";
+
 	equals(args, "Activated", "Activate arguments");
 	equals($("#content").html(), "<div></div>", "content");
 	start();

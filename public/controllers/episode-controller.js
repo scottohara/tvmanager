@@ -29,6 +29,8 @@
  * @param {EpisodeListItem} listItem - a list item from the Episodes or Unscheduled view
  */
 var EpisodeController = function (listItem) {
+	"use strict";
+
 	// If the passed item has an index, we're editing an existing episode
 	if (listItem.listIndex >= 0) {
 		this.listItem = listItem;
@@ -48,6 +50,8 @@ var EpisodeController = function (listItem) {
  * @desc Initialises the controller
  */
 EpisodeController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Add/Edit Episode",
@@ -93,6 +97,8 @@ EpisodeController.prototype.setup = function() {
  * @desc Saves the episode details to the database and returns to the previous view
  */
 EpisodeController.prototype.save = function() {
+	"use strict";
+
 	// Get the episode details
 	this.listItem.episode.episodeName = $("#episodeName").val();
 	this.listItem.episode.setUnverified($("#unverified").is(':checked'));
@@ -118,6 +124,8 @@ EpisodeController.prototype.save = function() {
  * @desc Reverts any changes and returns to the previous view
  */
 EpisodeController.prototype.cancel = function() {
+	"use strict";
+
 	// Revert to the original episode details
 	this.listItem.episode.status = this.originalStatus;
 	this.listItem.episode.statusDate = this.originalStatusDate;
@@ -135,6 +143,8 @@ EpisodeController.prototype.cancel = function() {
  * @param {String} status - the episode status
  */
 EpisodeController.prototype.setStatus = function(status) {
+	"use strict";
+
 	// Only proceed if the status is not already being set
 	if (!this.settingStatus) {
 		// Set the setting flag
@@ -191,6 +201,8 @@ EpisodeController.prototype.setStatus = function(status) {
  * @desc Displays a SpinningWheel control for capturing the episode status date
  */
 EpisodeController.prototype.getStatusDate = function() {
+	"use strict";
+
 	// Setup a dictionary of months
 	var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" };
 
@@ -227,6 +239,8 @@ EpisodeController.prototype.getStatusDate = function() {
  * @desc Gets the selected value from the SpinningWheel and updates the model and view
  */
 EpisodeController.prototype.setStatusDate = function() {
+	"use strict";
+
 	// Update the model with the selected values in the SpinningWheel
 	this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join('-'));
 
@@ -245,6 +259,8 @@ EpisodeController.prototype.setStatusDate = function() {
  * @desc Shows/hides the status date based on the current episode details
  */
 EpisodeController.prototype.toggleStatusDateRow = function() {
+	"use strict";
+
 	// Hide the status date
 	$("#statusDateRow").hide();
 

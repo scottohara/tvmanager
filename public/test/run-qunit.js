@@ -5,6 +5,8 @@ if (!phantom.injectJs('phantom-common.js')) {
 
 // Main processing
 var main = function() {
+	"use strict";
+
 	waitFor(function(){
 		// When the word "completed" is found in the test results; return true
 		return page.evaluate(function(){
@@ -25,13 +27,21 @@ var main = function() {
 			// Get any tests that failed
 			var failedTests = $("li.fail:has('.module-name')");
 			var failedAssertNum = 0;
+
+			// Utility function to string repetition (for section headers)
+			var sectionHeader = function(character, length) {
+				var a = [];
+				a.length = parseInt(length, 10) + 1;
+				return a.join(character);
+			};
+
 			for (var i = 0; i < failedTests.length; i++) {
 				var failedTest = $(failedTests[i]);
 				// Output the name of the module and the name of the test that failed
 				var failedTestName = $(failedTest.find('.module-name')[0]).text() + ": " + $(failedTest.find('.test-name')[0]).text();
-				console.log(Array(failedTestName.length + 1).join("="));
+				console.log(sectionHeader("=", failedTestName.length));
 				console.log(failedTestName);
-				console.log(Array(failedTestName.length + 1).join("-"));
+				console.log(sectionHeader("-", failedTestName.length));
 
 				// Get the assertions that failed
 				var assertFailures = failedTest.find("li.fail");

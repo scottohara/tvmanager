@@ -1,5 +1,7 @@
 module("cache-controller", {
 	setup: function() {
+		"use strict";
+
 		this.originalAppCache = window.applicationCache;
 		window.applicationCache = {
 			eventHandler: [],
@@ -21,11 +23,15 @@ module("cache-controller", {
 		this.cacheController = new CacheController();
 	},
 	teardown: function() {
+		"use strict";
+
 		window.applicationCache = this.originalAppCache;
 	}
 });
 
 test("constructor", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			eventType: "downloading",
@@ -91,12 +97,16 @@ test("constructor", function() {
 });
 
 test("update - with application cache", 2, function() {
+	"use strict";
+
 	var callback = {};
 	this.cacheController.update(callback);
 	same(this.cacheController.callback, callback, "Callback");
 });
 
 test("update - without application cache", 2, function() {
+	"use strict";
+
 	window.applicationCache = null;
 	this.cacheController.update(function(updated, message) {
 		equals(updated, false, "Updated");

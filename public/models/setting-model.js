@@ -16,8 +16,10 @@
  * @param {String} settingValue - the value of the setting
  */
 var Setting = function (settingName, settingValue) {
-		this.settingName = settingName;
-		this.settingValue = settingValue;
+	"use strict";
+
+	this.settingName = settingName;
+	this.settingValue = settingValue;
 };
 
 /**
@@ -29,6 +31,8 @@ var Setting = function (settingName, settingValue) {
  * @param {Function} callback - a function to call after the database is updated
  */
 Setting.prototype.save = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction($.proxy(function(tx) {
 		// Execute the SQL to delete the existing setting (if exists)
@@ -70,6 +74,8 @@ Setting.prototype.save = function(callback) {
  * @desc Deletes a setting from the database
  */
 Setting.prototype.remove = function() {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction($.proxy(function(tx) {
 		// Execute the SQL to delete the setting
@@ -90,6 +96,8 @@ Setting.prototype.remove = function() {
  * @param {Function} callback - a function to call passing the setting retrieved
  */
 Setting.get = function(settingName, callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the setting

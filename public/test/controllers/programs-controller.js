@@ -1,5 +1,7 @@
 module("programs-controller", {
 	setup: function() {
+		"use strict";
+
 		this.items = [{
 			programName: "test-program",
 			remove: function() {
@@ -12,15 +14,21 @@ module("programs-controller", {
 		this.programsController = new ProgramsController();
 	},
 	teardown: function() {
+		"use strict";
+
 		Program = this.originalProgram;
 	}
 });
 
 test("constructor", 1, function() {
+	"use strict";
+
 	ok(this.programsController, "Instantiate ProgramsController object");
 });
 
 test("setup", 10, function() {
+	"use strict";
+
 	var originalList = List;
 	List = ListMock;
 
@@ -64,10 +72,14 @@ test("setup", 10, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.programsController.goBack();
 });
 
 test("activate", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "update",
@@ -96,6 +108,8 @@ test("activate", function() {
 });
 
 test("viewItem", 2, function() {
+	"use strict";
+
 	var index = 0;
 	this.programsController.programList = { items: this.items };
 	this.programsController.viewItem(index);
@@ -103,10 +117,14 @@ test("viewItem", 2, function() {
 });
 
 test("addItem", 1, function() {
+	"use strict";
+
 	this.programsController.addItem();
 });
 
 test("editItem", 2, function() {
+	"use strict";
+
 	var index = 0;
 	this.programsController.programList = { items: this.items };
 	this.programsController.editItem(index);
@@ -114,6 +132,8 @@ test("editItem", 2, function() {
 });
 
 test("deleteItem", 2, function() {
+	"use strict";
+
 	var index = 0;
 	this.programsController.programList = new ListMock(null, null, null, this.items);
 	this.programsController.deleteItem(index);
@@ -121,6 +141,8 @@ test("deleteItem", 2, function() {
 });
 
 test("deleteItems", 4, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()
@@ -141,6 +163,8 @@ test("deleteItems", 4, function() {
 });
 
 test("editItems", 4, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()

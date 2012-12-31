@@ -1,5 +1,7 @@
 module("schedule-controller", {
 	setup: function() {
+		"use strict";
+
 		this.items = [
 			{
 				programName: "test-program-2",
@@ -28,10 +30,14 @@ module("schedule-controller", {
 });
 
 test("constructor", 1, function() {
+	"use strict";
+
 	ok(this.scheduleController, "Instantiate ScheduleController object");
 });
 
 test("setup", 8, function() {
+	"use strict";
+
 	var originalList = List;
 	List = ListMock;
 
@@ -70,6 +76,8 @@ test("setup", 8, function() {
 });
 
 test("activate - item not in schedule", 1, function() {
+	"use strict";
+
 	var listItem = {
 		listIndex: 0,
 		series: {
@@ -85,6 +93,8 @@ test("activate - item not in schedule", 1, function() {
 });
 
 test("activate - item in schedule", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "series name change",
@@ -128,6 +138,8 @@ test("activate - item in schedule", function() {
 });
 
 test("viewItem", 2, function() {
+	"use strict";
+
 	var index = 0;
 	this.scheduleController.scheduleList = { items: this.items };
 	this.scheduleController.viewItem(index);
@@ -135,18 +147,26 @@ test("viewItem", 2, function() {
 });
 
 test("viewUnscheduled", 1, function() {
+	"use strict";
+
 	this.scheduleController.viewUnscheduled();
 });
 
 test("viewPrograms", 1, function() {
+	"use strict";
+
 	this.scheduleController.viewPrograms();
 });
 
 test("viewSettings", 1, function() {
+	"use strict";
+
 	this.scheduleController.viewSettings();
 });
 
 test("editItem", 4, function() {
+	"use strict";
+
 	var index = 0;
 	this.scheduleController.scheduleList = { items: this.items };
 	this.scheduleController.editItem(index);
@@ -156,6 +176,8 @@ test("editItem", 4, function() {
 });
 
 test("editItems", 3, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()

@@ -18,9 +18,11 @@
  * @param {String} action - the type of local change ("modified" or "deleted")
  */
 var Sync = function (type, id, action) {
-		this.type = type;
-		this.id = id;
-		this.action = action;
+	"use strict";
+
+	this.type = type;
+	this.id = id;
+	this.action = action;
 };
 
 /**
@@ -31,6 +33,8 @@ var Sync = function (type, id, action) {
  * @desc Deletes a local change from the database
  */
 Sync.prototype.remove = function() {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction($.proxy(function(tx) {
 		// Execute the SQL to delete the local change
@@ -51,6 +55,8 @@ Sync.prototype.remove = function() {
  * @param {Function} callback - a function to call passing the list of local changes retrieved
  */
 Sync.list = function(callback) {
+	"use strict";
+
 	var syncList = [];
 
 	// Start a new readonly database transaction
@@ -85,6 +91,8 @@ Sync.list = function(callback) {
  * @param {Function} callback - a function to call passing the local changes count
  */
 Sync.count = function(callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the count of local changes
@@ -109,6 +117,8 @@ Sync.count = function(callback) {
  * @param {Function} callback - a function to call after removing the local changes
  */
 Sync.removeAll = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction(function(tx) {
 		// Execute the SQL to delete the local changes

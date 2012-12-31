@@ -14,8 +14,9 @@
  * @constructor
  * @param {Object} element - HTML DOM Element to remap events for
  */
-var TouchEventProxy = function (el)
-{
+var TouchEventProxy = function (el) {
+	"use strict";
+
 	this.element = el;
 	this.enabled = true;
 
@@ -40,6 +41,8 @@ TouchEventProxy.prototype = {
 	 * @param {Object} e - a browser event object
 	 */
 	handleEvent: function(e) {
+		"use strict";
+
 		// Depending on the type of event, call the appropriate function
 		switch(e.type) {
 			case "mousedown": this.onTouchStart(e); break;
@@ -60,6 +63,8 @@ TouchEventProxy.prototype = {
 	 * @param {String} type - the type of event to dispatch
 	 */
 	dispatchTouchEvent: function(e, type) {
+		"use strict";
+
 		// Create a new generic event
 		var touchEvent = document.createEvent("Event");
 		
@@ -94,6 +99,8 @@ TouchEventProxy.prototype = {
 	 * @returns {Boolean} false
 	 */
 	onTouchStart: function(e) {
+		"use strict";
+
 		// Only proceed if the object is enabled
 		if (this.enabled ) {
 			// Prevent default event handlers
@@ -121,6 +128,8 @@ TouchEventProxy.prototype = {
 	 * @returns {Boolean} false
 	 */
 	onTouchMove: function(e) {
+		"use strict";
+
 		// Dispatch a touchmove event
 		this.dispatchTouchEvent(e, "touchmove");
 		return false;
@@ -137,6 +146,8 @@ TouchEventProxy.prototype = {
 	 * @returns {Boolean} false
 	 */
 	onTouchEnd: function(e) {
+		"use strict";
+
 		// Remove the listeners added by the touch start
 		this.element.removeEventListener("mousemove", this, false);
 		this.element.removeEventListener("mouseup", this, false);
@@ -156,6 +167,8 @@ TouchEventProxy.prototype = {
 	 * @returns {Boolean} false
 	 */
 	captureBrowserEvent: function(e) {
+		"use strict";
+
 		// Only capture if the object is enabled and the event can be cancelled
 		if (this.enabled && e.cancelable) {
 			// Stop the event from propagating further

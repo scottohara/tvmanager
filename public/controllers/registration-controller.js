@@ -15,6 +15,7 @@
  * @constructor
  */
 var RegistrationController = function () {
+	"use strict";
 };
 
 /**
@@ -25,6 +26,8 @@ var RegistrationController = function () {
  * @desc Initialises the controller
  */
 RegistrationController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Register",
@@ -53,6 +56,8 @@ RegistrationController.prototype.setup = function() {
  * @param {Setting} device - a Setting object containing the registered device
  */
 RegistrationController.prototype.gotDevice = function(device) {
+	"use strict";
+
 	// Check if we have a registered device
 	if (device.settingValue) {
 		// Parse the JSON
@@ -94,6 +99,8 @@ RegistrationController.prototype.gotDevice = function(device) {
  * @desc Unregisters the current device
  */
 RegistrationController.prototype.unregister = function() {
+	"use strict";
+
 	// Send a DELETE request to the server
 	$.ajax({
 		url: "/devices/" + this.device.id,
@@ -128,6 +135,8 @@ RegistrationController.prototype.unregister = function() {
  * @desc Registers or updates the current device
  */
 RegistrationController.prototype.save = function() {
+	"use strict";
+
 	// Get the device details
 	this.device.name = $("#deviceName").val();
 	
@@ -171,5 +180,7 @@ RegistrationController.prototype.save = function() {
  * @desc Pops the view off the stack
  */
 RegistrationController.prototype.cancel = function() {
+	"use strict";
+
 	appController.popView();
 };

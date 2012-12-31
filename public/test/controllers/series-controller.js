@@ -1,5 +1,7 @@
 module("series-controller", {
 	setup: function() {
+		"use strict";
+
 		this.listItem = {
 			listIndex: 0,
 			series: {
@@ -43,6 +45,8 @@ module("series-controller", {
 		this.seriesController = new SeriesController(this.listItem);
 	},
 	teardown: function() {
+		"use strict";
+
 		this.seriesName.remove();
 		this.nowShowing.remove();
 		this.moveTo.remove();
@@ -53,6 +57,8 @@ module("series-controller", {
 });
 
 test("constructor - update", 4, function() {
+	"use strict";
+
 	ok(this.seriesController, "Instantiate SeriesController object");
 	same(this.seriesController.listItem, this.listItem, "listItem property");
 	equals(this.seriesController.originalNowShowing, this.listItem.series.nowShowing, "originalNowShowing property");
@@ -60,6 +66,8 @@ test("constructor - update", 4, function() {
 });
 
 test("constructor - add", 2, function() {
+	"use strict";
+
 	var program = {
 		id: 1,
 		programName: "test-program"
@@ -75,6 +83,8 @@ test("constructor - add", 2, function() {
 });
 
 test("setup", 6, function() {
+	"use strict";
+
 	this.seriesController.cancel = function() {
 		ok(true, "Bind back button event handler");
 	};
@@ -98,6 +108,8 @@ test("setup", 6, function() {
 });
 
 test("save", 4, function() {
+	"use strict";
+
 	var seriesName = "test-series-2";
 	this.seriesName.val(seriesName);
 	appController.viewStack = [
@@ -111,6 +123,8 @@ test("save", 4, function() {
 });
 
 test("cancel", 3, function() {
+	"use strict";
+
 	this.seriesController.listItem.series.nowShowing = 2;
 	this.seriesController.listItem.series.programId = 2;
 	this.seriesController.cancel();
@@ -119,12 +133,16 @@ test("cancel", 3, function() {
 });
 
 test("getNowShowing - getting", 1, function() {
+	"use strict";
+
 	this.seriesController.gettingNowShowing = true;
 	this.seriesController.getNowShowing();
 	ok(this.seriesController.gettingNowShowing, "Blocked by semaphore");
 });
 
 test("getNowShowing - not getting", 3, function() {
+	"use strict";
+
 	this.seriesController.setNowShowing = function() {
 		ok(true, "Set done action callback");
 	};
@@ -135,6 +153,8 @@ test("getNowShowing - not getting", 3, function() {
 });
 
 test("setNowShowing", 2, function() {
+	"use strict";
+
 	var nowShowing = 1;
 	var nowShowingDisplay = "Mondays";
 	SpinningWheel.selectedValues.keys = [nowShowing];
@@ -145,12 +165,16 @@ test("setNowShowing", 2, function() {
 });
 
 test("getProgramId - getting", 1, function() {
+	"use strict";
+
 	this.seriesController.gettingProgramId = true;
 	this.seriesController.getProgramId();
 	ok(this.seriesController.gettingProgramId, "Blocked by semaphore");
 });
 
 test("getProgramId - not getting", 3, function() {
+	"use strict";
+
 	this.seriesController.setProgramId = function() {
 		ok(true, "Set done action callback");
 	};
@@ -169,6 +193,8 @@ test("getProgramId - not getting", 3, function() {
 });
 
 test("setProgramId", 2, function() {
+	"use strict";
+
 	var programId = 2;
 	var programName = "test-program-2";
 	SpinningWheel.selectedValues.keys = [programId];

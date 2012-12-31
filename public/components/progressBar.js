@@ -25,6 +25,8 @@
  * @param {Array} sections - array of section objects
  */
 var ProgressBar = function (total, sections) {
+	"use strict";
+
 	this.sections = sections;
 	this.setTotal(total);
 };
@@ -38,6 +40,8 @@ var ProgressBar = function (total, sections) {
  * @returns {String} the HTML of the progress bar
  */
 ProgressBar.prototype.render = function() {
+	"use strict";
+
 	// Only generate the HTML if a total is set
 	if (this.total > 0) {
 		// Create the progress bar div
@@ -91,6 +95,8 @@ ProgressBar.prototype.render = function() {
  * @returns {String} the HTML of the progress bar
  */
 ProgressBar.prototype.setTotal = function(total) {
+	"use strict";
+
 	this.total = total;
 	return this.render();
 };
@@ -106,6 +112,8 @@ ProgressBar.prototype.setTotal = function(total) {
  * @returns {String} the HTML of the progress bar
  */
 ProgressBar.prototype.setSection = function(index, section) {
+	"use strict";
+
 	this.sections[index] = section;
 	return this.render();
 };

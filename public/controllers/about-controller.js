@@ -15,7 +15,7 @@
  * @constructor
  */
 var AboutController = function () {
-
+	"use strict";
 };
 
 /**
@@ -26,6 +26,8 @@ var AboutController = function () {
  * @desc Initialises the controller
  */
 AboutController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "About",
@@ -64,6 +66,8 @@ AboutController.prototype.setup = function() {
  * @desc Pop the view off the stack
  */
 AboutController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView();
 };
 
@@ -76,6 +80,8 @@ AboutController.prototype.goBack = function() {
  * @param {Number} count - the total number of programs
  */
 AboutController.prototype.programCount = function(count) {
+	"use strict";
+
 	$("#totalPrograms").val(count);
 };
 
@@ -88,6 +94,8 @@ AboutController.prototype.programCount = function(count) {
  * @param {Number} count - the total number of series
  */
 AboutController.prototype.seriesCount = function(count) {
+	"use strict";
+
 	$("#totalSeries").val(count);
 };
 
@@ -100,6 +108,8 @@ AboutController.prototype.seriesCount = function(count) {
  * @param {Number} count - the total number of episodes
  */
 AboutController.prototype.episodeCount = function(count) {
+	"use strict";
+
 	// Save the total for later
 	this.episodeTotalCount = count;
 
@@ -116,6 +126,8 @@ AboutController.prototype.episodeCount = function(count) {
  * @param {Number} count - the total number of watched episodes
  */
 AboutController.prototype.watchedCount = function(count) {
+	"use strict";
+
 	// Calculate the percentage of watched episodes
 	var watchedPercent = this.episodeTotalCount > 0 ? Math.round(count / this.episodeTotalCount * 100, 2) : 0;
 
@@ -131,6 +143,8 @@ AboutController.prototype.watchedCount = function(count) {
  * @desc Updates the application cache
  */
 AboutController.prototype.checkForUpdate = function() {
+	"use strict";
+
 	// Check that an update is not currently in progress
 	if (!this.updating) {
 		// Set the updating flag
@@ -154,6 +168,8 @@ AboutController.prototype.checkForUpdate = function() {
  * @param {String} message - a success/failure message from the cache controller
  */
 AboutController.prototype.updateChecked = function(updated, message) {
+	"use strict";
+
 	// Show the notice
 	appController.showNotice({
 		label: message,

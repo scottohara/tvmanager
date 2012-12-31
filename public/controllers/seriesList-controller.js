@@ -21,6 +21,8 @@
  * @param {ProgramListItem} listItem - a list item from the Programs view
  */
 var SeriesListController = function (listItem) {
+	"use strict";
+
 	this.listItem = listItem;
 };
 
@@ -32,6 +34,8 @@ var SeriesListController = function (listItem) {
  * @desc Initialises the controller
  */
 SeriesListController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: this.listItem.program.programName,
@@ -63,6 +67,8 @@ SeriesListController.prototype.setup = function() {
  * @param {SeriesListItem} [listItem] - a list item that was just view in the Episodes view, or added/edited in the Series view
  */
 SeriesListController.prototype.activate = function(listItem) {
+	"use strict";
+
 	// When returning from the Episodes or Series view, we need to update the list with the new values
 	if (listItem) {
 		// If an existing series was viewed/edited, check if the series was moved or increment/decrement the status counts for the series
@@ -101,6 +107,8 @@ SeriesListController.prototype.activate = function(listItem) {
  * @param {Array<Series>} seriesList - array of series objects
  */
 SeriesListController.prototype.listRetrieved = function(seriesList) {
+	"use strict";
+
 	// Set the list items
 	this.seriesList.items = seriesList;
 
@@ -116,6 +124,8 @@ SeriesListController.prototype.listRetrieved = function(seriesList) {
  * @desc Pops the view off the stack
  */
 SeriesListController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView(this.listItem);
 };
 
@@ -128,6 +138,8 @@ SeriesListController.prototype.goBack = function() {
  * @param {Number} itemIndex - the list index of the series to view
  */
 SeriesListController.prototype.viewItem = function(itemIndex) {
+	"use strict";
+
 	// Save the current series details
 	this.origEpisodeCount = this.seriesList.items[itemIndex].episodeCount;
 	this.origWatchedCount = this.seriesList.items[itemIndex].watchedCount;
@@ -146,6 +158,8 @@ SeriesListController.prototype.viewItem = function(itemIndex) {
  * @desc Displays the Series view for adding a series
  */
 SeriesListController.prototype.addItem = function() {
+	"use strict";
+
 	appController.pushView("series", { program: this.listItem.program });
 };
 
@@ -158,6 +172,8 @@ SeriesListController.prototype.addItem = function() {
  * @param {Number} itemIndex - the list index of the series to edit
  */
 SeriesListController.prototype.editItem = function(itemIndex) {
+	"use strict";
+
 	// Save the current series details
 	this.origEpisodeCount = this.seriesList.items[itemIndex].episodeCount;
 	this.origWatchedCount = this.seriesList.items[itemIndex].watchedCount;
@@ -178,6 +194,8 @@ SeriesListController.prototype.editItem = function(itemIndex) {
  * @param {Boolean} [dontRemove] - if true, remove the item from the list, but not from the database (eg. when moving a series to a different program)
  */
 SeriesListController.prototype.deleteItem = function(itemIndex, dontRemove) {
+	"use strict";
+
 	// Decrement the status counts for the program
 	this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount - this.seriesList.items[itemIndex].episodeCount);
 	this.listItem.program.setWatchedCount(this.listItem.program.watchedCount - this.seriesList.items[itemIndex].watchedCount);
@@ -205,6 +223,8 @@ SeriesListController.prototype.deleteItem = function(itemIndex, dontRemove) {
  * @desc Sets the list to delete mode
  */
 SeriesListController.prototype.deleteItems = function() {
+	"use strict";
+
 	// Set the list to delete mode
 	this.seriesList.setAction("delete");
 
@@ -238,6 +258,8 @@ SeriesListController.prototype.deleteItems = function() {
  * @desc Sets the list to edit mode
  */
 SeriesListController.prototype.editItems = function() {
+	"use strict";
+
 	// Set the list to edit mode
 	this.seriesList.setAction("edit");
 
@@ -271,6 +293,8 @@ SeriesListController.prototype.editItems = function() {
  * @desc Sets the list to view mode
  */
 SeriesListController.prototype.viewItems = function() {
+	"use strict";
+
 	// Set the list to view mode
 	this.seriesList.setAction("view");
 

@@ -29,6 +29,8 @@
  * @param {Number} expectedCount - the number of expected episodes for the program
  */
 var Program = function (id, programName, seriesCount, episodeCount, watchedCount, recordedCount, expectedCount) {
+	"use strict";
+
 	this.id = id;
 	this.setProgramName(programName);
 	this.seriesCount = seriesCount;
@@ -48,6 +50,8 @@ var Program = function (id, programName, seriesCount, episodeCount, watchedCount
  * @param {Function} callback - a function to call after the database is updated
  */
 Program.prototype.save = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction($.proxy(function(tx) {
 		// If an id has not been set (ie. is a new program to be added), generate a new UUID
@@ -94,6 +98,8 @@ Program.prototype.save = function(callback) {
  * @desc Deletes the program from the database
  */
 Program.prototype.remove = function() {
+	"use strict";
+
 	// Only proceed if there is an ID to delete
 	if (this.id) {
 		// Start a new database transaction
@@ -134,6 +140,8 @@ Program.prototype.remove = function() {
  * @returns {Object} the JSON representation of the program
  */
 Program.prototype.toJson = function() {
+	"use strict";
+
 	return {
 		id: this.id,
 		programName: this.programName
@@ -149,6 +157,8 @@ Program.prototype.toJson = function() {
  * @param {String} programName - name of the program
  */
 Program.prototype.setProgramName = function(programName) {
+	"use strict";
+
 	this.programName = programName;
 
 	// Recalculate the program group based on the first letter of the program name
@@ -164,6 +174,8 @@ Program.prototype.setProgramName = function(programName) {
  * @param {Number} count - the number of episodes for the program
  */
 Program.prototype.setEpisodeCount = function(count) {
+	"use strict";
+
 	this.episodeCount = count;
 
 	// Update the progress bar with the new total
@@ -182,6 +194,8 @@ Program.prototype.setEpisodeCount = function(count) {
  * @param {Number} count - the number of watched episodes for the program
  */
 Program.prototype.setWatchedCount = function(count) {
+	"use strict";
+
 	this.watchedCount = count;
 
 	// Regenerate the progress bar HTML
@@ -196,6 +210,8 @@ Program.prototype.setWatchedCount = function(count) {
  * @desc Regenerates the progress bar HTML after setting the episode or watched count
  */
 Program.prototype.setWatchedProgress = function() {
+	"use strict";
+
 	var watchedPercent = 0;
 	
 	// Calculate the percentage of episodes that are watched
@@ -220,6 +236,8 @@ Program.prototype.setWatchedProgress = function() {
  * @param {Number} count - the number of recorded episodes for the program
  */
 Program.prototype.setRecordedCount = function(count) {
+	"use strict";
+
 	this.recordedCount = count;
 	var recordedPercent = 0;
 
@@ -245,6 +263,8 @@ Program.prototype.setRecordedCount = function(count) {
  * @param {Number} count - the number of expected episodes for the program
  */
 Program.prototype.setExpectedCount = function(count) {
+	"use strict";
+
 	this.expectedCount = count;
 	var expectedPercent = 0;
 
@@ -268,6 +288,8 @@ Program.prototype.setExpectedCount = function(count) {
  * @param {Function} callback - a function to call passing the list of programs retrieved
  */
 Program.list = function(callback) {
+	"use strict";
+
 	var programList = [];
 
 	// Start a new readonly database transaction
@@ -303,6 +325,8 @@ Program.list = function(callback) {
  * @param {Function} callback - a function to call passing the program retrieved
  */
 Program.find = function(id, callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the program
@@ -329,6 +353,8 @@ Program.find = function(id, callback) {
  * @param {Function} callback - a function to call passing the program count
  */
 Program.count = function(callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the count of programs
@@ -353,6 +379,8 @@ Program.count = function(callback) {
  * @param {Function} callback - a function to call after removing the programs
  */
 Program.removeAll = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction(function(tx) {
 		// Execute the SQL to delete the programs
@@ -379,5 +407,7 @@ Program.removeAll = function(callback) {
  * @returns {Program} the Program object
  */
 Program.fromJson = function(program) {
+	"use strict";
+
 	return new Program(program.id, program.programName);
 };

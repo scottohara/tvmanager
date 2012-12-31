@@ -1,5 +1,7 @@
 module("database-controller", {
 	setup: function() {
+		"use strict";
+
 		this.databaseName = "test-db";
 		this.expectedVersion = "1.9";
 		this.numUpgradeCommands = 40;
@@ -34,11 +36,15 @@ module("database-controller", {
 		}, this);
 	},
 	teardown: function() {
+		"use strict";
+
 		openDatabase = this.originalOpenDatabase;
 	}
 });
 
 test("constructor - error", 5, function() {
+	"use strict";
+
 	this.db = null;
 	this.error.message = "Unable to open database " + this.databaseName;
 	var databaseController = new DatabaseController(this.databaseName, this.successCallback, this.errorCallback);
@@ -49,11 +55,15 @@ test("constructor - error", 5, function() {
 });
 
 test("constructor - without upgrade", 2, function() {
+	"use strict";
+
 	var databaseController = new DatabaseController(this.databaseName, this.successCallback, this.errorCallback);
 	equals(databaseController.version, this.expectedVersion, "Database version");
 });
 
 test("constructor - with upgrade fail", 5, function() {
+	"use strict";
+
 	this.initialVersion = "";
 	this.db.failAt("CREATE TABLE IF NOT EXISTS Program (Name)");
 	this.error.message = "Force failed";
@@ -64,6 +74,8 @@ test("constructor - with upgrade fail", 5, function() {
 });
 /*
 test("constructor - with partial upgrade", 6, function() {
+	"use strict";
+
 	this.initialVersion = "";
 	this.expectedVersion = "1.0";
 	this.db.version = this.expectedVersion;
@@ -74,6 +86,8 @@ test("constructor - with partial upgrade", 6, function() {
 });
 */
 test("constructor - with full upgrade", 6, function() {
+	"use strict";
+
 	this.initialVersion = "";
 	this.db.addResultRows([{
 		rowid: 1,

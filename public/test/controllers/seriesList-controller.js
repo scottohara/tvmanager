@@ -1,5 +1,7 @@
 module("seriesList-controller", {
 	setup: function() {
+		"use strict";
+
 		this.listItem = {
 			program: {
 				id: 1,
@@ -40,16 +42,22 @@ module("seriesList-controller", {
 		this.seriesListController = new SeriesListController(this.listItem);
 	},
 	teardown: function() {
+		"use strict";
+
 		Series = this.originalSeries;
 	}
 });
 
 test("constructor", 2, function() {
+	"use strict";
+
 	ok(this.seriesListController, "Instantiate SeriesListController object");
 	same(this.seriesListController.listItem, this.listItem, "listItem property");
 });
 
 test("setup", 10, function() {
+	"use strict";
+
 	var originalList = List;
 	List = ListMock;
 
@@ -93,10 +101,14 @@ test("setup", 10, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.seriesListController.goBack();
 });
 
 test("activate - move", 2, function() {
+	"use strict";
+
 	var listItem = {
 		listIndex: 0,
 		series: {
@@ -114,6 +126,8 @@ test("activate - move", 2, function() {
 });
 
 test("activate - update", 5, function() {
+	"use strict";
+
 	var listItem = {
 		listIndex: 0,
 		series: {
@@ -151,6 +165,8 @@ test("activate - update", 5, function() {
 });
 
 test("activate - add", 2, function() {
+	"use strict";
+
 	var listItem = {
 		listIndex: -1,
 		series: {
@@ -168,6 +184,8 @@ test("activate - add", 2, function() {
 });
 
 test("viewItem", 6, function() {
+	"use strict";
+
 	var index = 0;
 	this.seriesListController.seriesList = { items: this.items };
 	this.seriesListController.viewItem(index);
@@ -179,11 +197,15 @@ test("viewItem", 6, function() {
 });
 
 test("addItem", 2, function() {
+	"use strict";
+
 	this.seriesListController.addItem(this.listItem.program);
 	same(appController.viewArgs, { program: this.listItem.program }, "View arguments");
 });
 
 test("editItem", 6, function() {
+	"use strict";
+
 	var index = 0;
 	this.seriesListController.seriesList = { items: this.items };
 	this.seriesListController.editItem(index);
@@ -195,6 +217,8 @@ test("editItem", 6, function() {
 });
 
 test("deleteItem", 7, function() {
+	"use strict";
+
 	var index = 0;
 	this.seriesListController.seriesList = new ListMock(null, null, null, this.items);
 
@@ -214,6 +238,8 @@ test("deleteItem", 7, function() {
 });
 
 test("deleteItems", 3, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()
@@ -233,6 +259,8 @@ test("deleteItems", 3, function() {
 });
 
 test("editItems", 3, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()

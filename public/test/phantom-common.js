@@ -11,6 +11,8 @@
  * @param timeOutMillis the max amount of time to wait. If not specified, 3 sec is used.
  */
 var waitFor = function (testFx, onReady, timeOutMillis) {
+	"use strict";
+
 	var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3001, //< Default Max Timout is 3s
 	start = new Date().getTime(),
 	condition = false,
@@ -42,6 +44,8 @@ if (system.args.length !== 2) {
 var page = new WebPage();
 // Retrieve the requested URL
 page.open(system.args[1], function(status){
+	"use strict";
+
 	if (status !== "success") {
 		// If we couldn't get the page, abort
 		console.log("Unable to access network");

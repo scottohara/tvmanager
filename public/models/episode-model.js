@@ -37,6 +37,8 @@
  * @param {String} programName - name of the program that the episode belongs to
  */
 var Episode = function (id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId, seriesName, programId, programName) {
+	"use strict";
+
 	this.id = id;
 	this.episodeName = episodeName;
 	this.statusDate = statusDate;
@@ -59,6 +61,8 @@ var Episode = function (id, episodeName, status, statusDate, unverified, unsched
  * @param {Function} callback - a function to call after the database is updated
  */
 Episode.prototype.save = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction($.proxy(function(tx) {
 		// If an id has not been set (ie. is a new episode to be added), generate a new UUID
@@ -105,6 +109,8 @@ Episode.prototype.save = function(callback) {
  * @desc Deletes the episode from the database
  */
 Episode.prototype.remove = function() {
+	"use strict";
+
 	// Only proceed if there is an ID to delete
 	if (this.id) {
 		// Start a new database transaction
@@ -134,6 +140,8 @@ Episode.prototype.remove = function() {
  * @returns {Object} the JSON representation of the episode
  */
 Episode.prototype.toJson = function() {
+	"use strict";
+
 	return {
 		id: this.id,
 		episodeName: this.episodeName,
@@ -155,6 +163,8 @@ Episode.prototype.toJson = function() {
  * @param {String} status - the episode status
  */
 Episode.prototype.setStatus = function(status) {
+	"use strict";
+
 	this.status = status;
 	
 	// Refresh the status date display and status warning based on the current status
@@ -170,6 +180,8 @@ Episode.prototype.setStatus = function(status) {
  * @param {String} statusDate - the date of the episode status
  */
 Episode.prototype.setStatusDate = function(statusDate) {
+	"use strict";
+
 	this.statusDate = statusDate;
 
 	// Refresh the status date display based on the current status and date
@@ -227,6 +239,8 @@ Episode.prototype.setStatusDate = function(statusDate) {
  * @param {Boolean} unverified - indicates whether the episode is verified or not
  */
 Episode.prototype.setUnverified = function(unverified) {
+	"use strict";
+
 	this.unverified = unverified;
 
 	// Refresh the unverified display based on the current unverified flag
@@ -245,6 +259,8 @@ Episode.prototype.setUnverified = function(unverified) {
  * @param {Function} callback - a function to call passing the list of episodes retrieved
  */
 Episode.listBySeries = function(seriesId, callback) {
+	"use strict";
+
 	// Set the WHERE clause to filter by the specified series, and the ORDER BY clause to sort by episode sequence
 	var filter = "WHERE e.SeriesID = ? ORDER BY e.Sequence, e.EpisodeID";
 
@@ -262,6 +278,8 @@ Episode.listBySeries = function(seriesId, callback) {
  * @param {Function} callback - a function to call passing the list of episodes retrieved
  */
 Episode.listByUnscheduled = function(callback) {
+	"use strict";
+
 	// Set the WHERE clause to filter by unscheduled episodes, and the ORDER BY clause to sort by status date
 	var filter = "WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)";
 	var params = [];
@@ -279,6 +297,8 @@ Episode.listByUnscheduled = function(callback) {
  * @param {Function} callback - a function to call passing the list of episodes retrieved
  */
 Episode.list = function(filter, params, callback) {
+	"use strict";
+
 	var episodeList = [];
 
 	// Start a new readonly database transaction
@@ -314,6 +334,8 @@ Episode.list = function(filter, params, callback) {
  * @param {Function} callback - a function to call passing the episode retrieved
  */
 Episode.find = function(id, callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the episode
@@ -340,6 +362,8 @@ Episode.find = function(id, callback) {
  * @param {Function} callback - a function to call passing the episode count
  */
 Episode.totalCount = function(callback) {
+	"use strict";
+
 	var filter = "";
 	var params = [];
 
@@ -355,6 +379,8 @@ Episode.totalCount = function(callback) {
  * @param {Function} callback - a function to call passing the episode count
  */
 Episode.countByStatus = function(status, callback) {
+	"use strict";
+
 	// Set the WHERE clause to filter by the specified status
 	var filter = "WHERE Status = ?";
 
@@ -374,6 +400,8 @@ Episode.countByStatus = function(status, callback) {
  * @param {Function} callback - a function to call passing the episode count
  */
 Episode.count = function(filter, params, callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the count of episodes
@@ -398,6 +426,8 @@ Episode.count = function(filter, params, callback) {
  * @param {Function} callback - a function to call after removing the episodes
  */
 Episode.removeAll = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction(function(tx) {
 		// Execute the SQL to delete the episodes
@@ -424,5 +454,7 @@ Episode.removeAll = function(callback) {
  * @returns {Episode} the Episode object
  */
 Episode.fromJson = function(episode) {
+	"use strict";
+
 	return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.unverified, episode.unscheduled, episode.sequence, episode.seriesId);
 };

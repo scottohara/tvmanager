@@ -20,6 +20,8 @@
  * @param {SeriesListItem} listItem - a list item from the SeriesList or Schedule view
  */
 var SeriesController = function (listItem) {
+	"use strict";
+
 	// If the passed item has an index, we're editing an existing series
 	if (listItem.listIndex >= 0) {
 		this.listItem = listItem;
@@ -39,6 +41,8 @@ var SeriesController = function (listItem) {
  * @desc Initialises the controller
  */
 SeriesController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Add/Edit Series",
@@ -71,6 +75,8 @@ SeriesController.prototype.setup = function() {
  * @desc Saves the series details to the database and returns to the previous view
  */
 SeriesController.prototype.save = function() {
+	"use strict";
+
 	// Get the series details
 	this.listItem.series.seriesName = $("#seriesName").val();
 
@@ -94,6 +100,8 @@ SeriesController.prototype.save = function() {
  * @desc Reverts any changes and returns to the previous view
  */
 SeriesController.prototype.cancel = function() {
+	"use strict";
+
 	// Revert to the original series details
 	this.listItem.series.setNowShowing(this.originalNowShowing);
 	this.listItem.series.programId = (this.originalProgramId);
@@ -110,6 +118,8 @@ SeriesController.prototype.cancel = function() {
  * @desc Displays a SpinningWheel control for capturing the now showing status
  */
 SeriesController.prototype.getNowShowing = function() {
+	"use strict";
+
 	// Only proceed if the now showing status is not already being set
 	if (!this.gettingNowShowing) {
 		// Set the getting flag
@@ -142,6 +152,8 @@ SeriesController.prototype.getNowShowing = function() {
  * @desc Gets the selected value from the SpinningWheel and updates the model and view
  */
 SeriesController.prototype.setNowShowing = function() {
+	"use strict";
+
 	// Update the model with the selected values in the SpinningWheel
 	this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues().keys[0]);
 
@@ -160,6 +172,8 @@ SeriesController.prototype.setNowShowing = function() {
  * @desc Gets the list of programs that the user can move the series to
  */
 SeriesController.prototype.getProgramId = function() {
+	"use strict";
+
 	// Only proceed if the programs list is not already being retrieved
 	if (!this.gettingProgramId) {
 		// Set the getting flag
@@ -179,6 +193,8 @@ SeriesController.prototype.getProgramId = function() {
  * @param {Array<Program>} programList - array of program objects
  */
 SeriesController.prototype.listRetrieved = function(programList) {
+	"use strict";
+
 	var programs = {};
 
 	// Iterate of the list of programs and setup the data for the SpinningWheel
@@ -206,6 +222,8 @@ SeriesController.prototype.listRetrieved = function(programList) {
  * @desc Gets the selected value from the SpinningWheel and updates the model and view
  */
 SeriesController.prototype.setProgramId = function() {
+	"use strict";
+
 	// Update the model with the selected values in the SpinningWheel
 	this.listItem.series.programId = SpinningWheel.getSelectedValues().keys[0];
 

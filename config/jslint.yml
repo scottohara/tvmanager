@@ -19,7 +19,7 @@ exclude_paths:
 
 adsafe:   false     # true if ADsafe rules should be enforced. See http://www.ADsafe.org/
 bitwise:  true      # true if bitwise operators should not be allowed
-newcap:   false     # true if Initial Caps must be used with constructor functions
+newcap:   true     # true if Initial Caps must be used with constructor functions
 eqeqeq:   true      # true if === should be required (for ALL equality comparisons)
 immed:    true      # true if immediate function invocations must be wrapped in parens
 nomen:    true      # true if initial or trailing underscore in identifiers should be forbidden
@@ -27,7 +27,7 @@ onevar:   false     # true if only one var statement per function should be allo
 plusplus: false     # true if ++ and -- should not be allowed
 regexp:   true      # true if . and [^...] should not be allowed in RegExp literals
 safe:     false     # true if the safe subset rules are enforced (used by ADsafe)
-strict:   false     # true if the ES5 "use strict"; pragma is required
+strict:   true      # true if the ES5 "use strict"; pragma is required
 undef:    true      # true if variables must be declared before used
 white:    false     # true if strict whitespace rules apply (see also 'indent' option)
 
@@ -80,6 +80,7 @@ predef:             # Names of predefined global variables - comma-separated str
   - "$"
   - "SpinningWheel"
   - "abc"
+  - "Abc"
   - "hex_md5"
   - "uuid"
 

@@ -33,6 +33,8 @@
  * @returns {Database} a HTML5 Web SQL database
  */
 var DatabaseController = function (databaseName, callback, errorCallback) {
+	"use strict";
+
 	this.name = databaseName;
 	this.displayName = "TV Manager";
 	this.estimatedSize = "10000";
@@ -152,6 +154,8 @@ var DatabaseController = function (databaseName, callback, errorCallback) {
  * @desc Opens the specified HTML5 Web SQL database
  */
 DatabaseController.prototype.openDb = function() {
+	"use strict";
+
 	this.db = openDatabase(this.name, "", this.displayName, this.estimatedSize);
 };
 
@@ -163,6 +167,8 @@ DatabaseController.prototype.openDb = function() {
  * @desc Calls the success handler to signal that the database is ready
  */
 DatabaseController.prototype.versionOK = function() {
+	"use strict";
+
 	// If we're not yet at the expected version (ie. we just upgraded), reopen the database
 	if (this.initialVersion !== this.expectedVersion) {
 		this.openDb();
@@ -180,6 +186,8 @@ DatabaseController.prototype.versionOK = function() {
  * @desc Pops the next upgrade routine off the front of the array and executes the upgrade handler
  */
 DatabaseController.prototype.nextUpgrade = function() {
+	"use strict";
+
 	// Only proceed if we have upgrades left
 	if (this.upgradesToApply.length) {
 		// Pop the first one off the front of the array and execute the upgrade handler
@@ -195,6 +203,8 @@ DatabaseController.prototype.nextUpgrade = function() {
  * @desc Initialises the database to schema version 1.0
  */
 DatabaseController.prototype.v1_0 = function() {
+	"use strict";
+
 	// Create the Program, Series and Episode tables
 	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Program (Name)");
 	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Series (Name, ProgramID)");
@@ -212,6 +222,8 @@ DatabaseController.prototype.v1_0 = function() {
  * @desc Upgrades the database to schema version 1.1
  */
 DatabaseController.prototype.v1_1 = function() {
+	"use strict";
+
 	// Add Episode.Status
 	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Status");
 
@@ -227,6 +239,8 @@ DatabaseController.prototype.v1_1 = function() {
  * @desc Upgrades the database to schema version 1.2
  */
 DatabaseController.prototype.v1_2 = function() {
+	"use strict";
+
 	// Add Episode.StatusDate
 	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN StatusDate");
 	
@@ -242,6 +256,8 @@ DatabaseController.prototype.v1_2 = function() {
  * @desc Upgrades the database to schema version 1.3
  */
 DatabaseController.prototype.v1_3 = function() {
+	"use strict";
+
 	// Add Series.NowShowing
 	this.tx.executeSql("ALTER TABLE Series ADD COLUMN NowShowing");
 
@@ -257,6 +273,8 @@ DatabaseController.prototype.v1_3 = function() {
  * @desc Upgrades the database to schema version 1.4
  */
 DatabaseController.prototype.v1_4 = function() {
+	"use strict";
+
 	// Add Episode.Unverified
 	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Unverified");
 
@@ -272,6 +290,8 @@ DatabaseController.prototype.v1_4 = function() {
  * @desc Upgrades the database to schema version 1.5
  */
 DatabaseController.prototype.v1_5 = function() {
+	"use strict";
+
 	// Create the Setting table
 	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Setting (Name, Value)");
 
@@ -287,6 +307,8 @@ DatabaseController.prototype.v1_5 = function() {
  * @desc Upgrades the database to schema version 1.6
  */
 DatabaseController.prototype.v1_6 = function() {
+	"use strict";
+
 	// Add Episode.Unscheduled
 	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Unscheduled");
 
@@ -302,6 +324,8 @@ DatabaseController.prototype.v1_6 = function() {
  * @desc Upgrades the database to schema version 1.7
  */
 DatabaseController.prototype.v1_7 = function() {
+	"use strict";
+
 	// Add Episode.Sequence
 	this.tx.executeSql("ALTER TABLE Episode ADD COLUMN Sequence");
 
@@ -341,6 +365,8 @@ DatabaseController.prototype.v1_7 = function() {
  * @desc Upgrades the database to schema version 1.8
  */
 DatabaseController.prototype.v1_8 = function() {
+	"use strict";
+
 	// Declare the number of parallel jobs to complete
 	var numSteps = 3;
 
@@ -443,6 +469,8 @@ DatabaseController.prototype.v1_8 = function() {
  * @desc Upgrades the database to schema version 1.9
  */
 DatabaseController.prototype.v1_9 = function() {
+	"use strict";
+
 	// Create the Sync table
 	this.tx.executeSql("CREATE TABLE IF NOT EXISTS Sync (Type, ID, Action, PRIMARY KEY ( Type, ID ))");
 

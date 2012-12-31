@@ -38,18 +38,20 @@
  * @param {Number} statusWarningCount - the number of expected episodes past their status date for the series
  */
 var Series = function (id, seriesName, nowShowing, programId, programName, episodeCount, watchedCount, recordedCount, expectedCount, missedCount, statusWarningCount) {
-		this.id = id;
-		this.seriesName = seriesName;
-		this.setNowShowing(nowShowing);
-		this.programId = programId;
-		this.programName = programName;
-		this.progressBar = new ProgressBar(episodeCount, []);
-		this.setEpisodeCount(episodeCount);
-		this.setWatchedCount(watchedCount);
-		this.setRecordedCount(recordedCount);
-		this.setExpectedCount(expectedCount);
-		this.setMissedCount(missedCount);
-		this.setStatusWarning(statusWarningCount);
+	"use strict";
+
+	this.id = id;
+	this.seriesName = seriesName;
+	this.setNowShowing(nowShowing);
+	this.programId = programId;
+	this.programName = programName;
+	this.progressBar = new ProgressBar(episodeCount, []);
+	this.setEpisodeCount(episodeCount);
+	this.setWatchedCount(watchedCount);
+	this.setRecordedCount(recordedCount);
+	this.setExpectedCount(expectedCount);
+	this.setMissedCount(missedCount);
+	this.setStatusWarning(statusWarningCount);
 };
 
 /**
@@ -61,6 +63,8 @@ var Series = function (id, seriesName, nowShowing, programId, programName, episo
  * @param {Function} callback - a function to call after the database is updated
  */
 Series.prototype.save = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction($.proxy(function(tx) {
 		// If an id has not been set (ie. is a new series to be added), generate a new UUID
@@ -107,6 +111,8 @@ Series.prototype.save = function(callback) {
  * @desc Deletes the series from the database
  */
 Series.prototype.remove = function() {
+	"use strict";
+
 	// Only proceed if there is an ID to delete
 	if (this.id) {
 		// Start a new database transaction
@@ -143,6 +149,8 @@ Series.prototype.remove = function() {
  * @returns {Object} the JSON representation of the series
  */
 Series.prototype.toJson = function() {
+	"use strict";
+
 	return {
 		id: this.id,
 		seriesName: this.seriesName,
@@ -160,6 +168,8 @@ Series.prototype.toJson = function() {
  * @param {Number} nowShowing - the now showing status of the series
  */
 Series.prototype.setNowShowing = function(nowShowing) {
+	"use strict";
+
 	// If a value was not provided, default to "Not Showing"
 	if (!nowShowing) {
 		nowShowing = 0;
@@ -186,6 +196,8 @@ Series.prototype.setNowShowing = function(nowShowing) {
  * @param {Number} count - the number of episodes for the series
  */
 Series.prototype.setEpisodeCount = function(count) {
+	"use strict";
+
 	this.episodeCount = count;
 
 	// Update the progress bar with the new total
@@ -204,6 +216,8 @@ Series.prototype.setEpisodeCount = function(count) {
  * @param {Number} count - the number of watched episodes for the series
  */
 Series.prototype.setWatchedCount = function(count) {
+	"use strict";
+
 	this.watchedCount = count;
 
 	// Regenerate the progress bar HTML
@@ -218,6 +232,8 @@ Series.prototype.setWatchedCount = function(count) {
  * @desc Regenerates the progress bar HTML after setting the episode or watched count
  */
 Series.prototype.setWatchedProgress = function() {
+	"use strict";
+
 	var watchedPercent = 0;
 
 	// Calculate the percentage of episodes that are watched
@@ -242,6 +258,8 @@ Series.prototype.setWatchedProgress = function() {
  * @param {Number} count - the number of recorded episodes for the series
  */
 Series.prototype.setRecordedCount = function(count) {
+	"use strict";
+
 	this.recordedCount = count;
 	var recordedPercent = 0;
 
@@ -267,6 +285,8 @@ Series.prototype.setRecordedCount = function(count) {
  * @param {Number} count - the number of expected episodes for the series
  */
 Series.prototype.setExpectedCount = function(count) {
+	"use strict";
+
 	this.expectedCount = count;
 	var expectedPercent = 0;
 
@@ -292,6 +312,8 @@ Series.prototype.setExpectedCount = function(count) {
  * @param {Number} count - the number of missed episodes for the series
  */
 Series.prototype.setMissedCount = function(count) {
+	"use strict";
+
 	this.missedCount = count;
 	var missedPercent = 0;
 
@@ -317,6 +339,8 @@ Series.prototype.setMissedCount = function(count) {
  * @param {Number} count - the number of expected episodes past their status date for the series
  */
 Series.prototype.setStatusWarning = function(count) {
+	"use strict";
+
 	this.statusWarningCount = count;
 
 	// If there are one or more episodes with a warning, highlight the series with a warning also
@@ -346,6 +370,8 @@ Series.standardQuery = {
  * @param {Function} callback - a function to call passing the list of series retrieved
  */
 Series.listByProgram = function(programId, callback) {
+	"use strict";
+
 	// Set the SELECT and FROM clauses to use the standard
 	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + " " + Series.standardQuery.entityList;
 
@@ -366,6 +392,8 @@ Series.listByProgram = function(programId, callback) {
  * @param {Function} callback - a function to call passing the list of series retrieved
  */
 Series.listByNowShowing = function(callback) {
+	"use strict";
+
 	// Set the SELECT and FROM clauses to use the standard, plus a calculation of the number of episodes with a warning
 	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + ", SUM(CASE WHEN e4.StatusDate IS NULL THEN 0 WHEN STRFTIME('%m', 'now') < '04' THEN CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END ELSE CASE WHEN STRFTIME('%m%d', 'now') < (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (CASE SUBSTR(e4.StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0 ELSE 1 END END) AS StatusWarningCount " + Series.standardQuery.entityList;
 
@@ -385,6 +413,8 @@ Series.listByNowShowing = function(callback) {
  * @param {String} status - the episode status
  */
 Series.listByStatus = function(callback, status) {
+	"use strict";
+
 	// Set the SELECT clause to the standard, plus a calculation of the number of episodes in the specified status
 	var query = Series.standardQuery.baseData + ", COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e.EpisodeID) AS " + status + "Count FROM Program p JOIN Series s ON p.ProgramID = s.ProgramID JOIN Episode e ON s.SeriesID = e.SeriesID";
 
@@ -405,6 +435,8 @@ Series.listByStatus = function(callback, status) {
  * @param {Function} callback - a function to call passing the list of series retrieved
  */
 Series.listByIncomplete = function(callback) {
+	"use strict";
+
 	// Set the SELECT and FROM clauses to use the standard
 	var query = Series.standardQuery.baseData + ", " + Series.standardQuery.summaryData + " " + Series.standardQuery.entityList;
 
@@ -426,6 +458,8 @@ Series.listByIncomplete = function(callback) {
  * @param {Function} callback - a function to call passing the list of series retrieved
  */
 Series.list = function(query, filter, params, callback) {
+	"use strict";
+
 	var seriesList = [];
 
 	// Start a new readonly database transaction
@@ -461,6 +495,8 @@ Series.list = function(query, filter, params, callback) {
  * @param {Function} callback - a function to call passing the series retrieved
  */
 Series.find = function(id, callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the series
@@ -487,6 +523,8 @@ Series.find = function(id, callback) {
  * @param {Function} callback - a function to call passing the series count
  */
 Series.count = function(callback) {
+	"use strict";
+
 	// Start a new readonly database transaction
 	appController.db.readTransaction(function(tx) {
 		// Execute the SQL to retrieve the count of series
@@ -511,6 +549,8 @@ Series.count = function(callback) {
  * @param {Function} callback - a function to call after removing the series
  */
 Series.removeAll = function(callback) {
+	"use strict";
+
 	// Start a new database transaction
 	appController.db.transaction(function(tx) {
 		// Execute the SQL to delete the series
@@ -537,6 +577,8 @@ Series.removeAll = function(callback) {
  * @returns {Series} the Series object
  */
 Series.fromJson = function(series) {
+	"use strict";
+
 	return new Series(series.id, series.seriesName, series.nowShowing, series.programId);
 };
 

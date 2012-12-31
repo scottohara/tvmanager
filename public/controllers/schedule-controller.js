@@ -17,7 +17,7 @@
  * @constructor
  */
 var ScheduleController = function () {
-
+	"use strict";
 };
 
 /**
@@ -28,6 +28,8 @@ var ScheduleController = function () {
  * @desc Initialises the controller
  */
 ScheduleController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Schedule",
@@ -59,6 +61,8 @@ ScheduleController.prototype.setup = function() {
  * @param {SeriesListItem} [listItem] - a list item that was just view/added/edited
  */
 ScheduleController.prototype.activate = function(listItem) {
+	"use strict";
+
 	// When returning from the Episodes view, we need to update the list with the new values
 	if (listItem) {
 		// If the series is now not showing or has no recorded/expected episodes, remove the item from the list
@@ -98,6 +102,8 @@ ScheduleController.prototype.activate = function(listItem) {
  * @param {Array<Series>} scheduleList - array of series objects
  */
 ScheduleController.prototype.listRetrieved = function(scheduleList) {
+	"use strict";
+
 	// Set the list items
 	this.scheduleList.items = scheduleList;
 
@@ -117,6 +123,8 @@ ScheduleController.prototype.listRetrieved = function(scheduleList) {
  * @param {Number} itemIndex - the list index of the series to view
  */
 ScheduleController.prototype.viewItem = function(itemIndex) {
+	"use strict";
+
 	appController.pushView("episodes", { source: "Schedule", listIndex: itemIndex, series: this.scheduleList.items[itemIndex] });
 };
 
@@ -128,6 +136,8 @@ ScheduleController.prototype.viewItem = function(itemIndex) {
  * @desc Displays the Unscheduled view
  */
 ScheduleController.prototype.viewUnscheduled = function() {
+	"use strict";
+
 	appController.pushView("unscheduled");
 };
 
@@ -139,6 +149,8 @@ ScheduleController.prototype.viewUnscheduled = function() {
  * @desc Displays the Programs view
  */
 ScheduleController.prototype.viewPrograms = function() {
+	"use strict";
+
 	appController.pushView("programs");
 };
 
@@ -150,6 +162,8 @@ ScheduleController.prototype.viewPrograms = function() {
  * @desc Displays the Settings view
  */
 ScheduleController.prototype.viewSettings = function() {
+	"use strict";
+
 	appController.pushView("settings");
 };
 
@@ -162,6 +176,8 @@ ScheduleController.prototype.viewSettings = function() {
  * @param {Number} itemIndex - the list index of the series to edit
  */
 ScheduleController.prototype.editItem = function(itemIndex) {
+	"use strict";
+
 	// Save the current series details
 	this.origSeriesName = this.scheduleList.items[itemIndex].seriesName;
 	this.origNowShowing = this.scheduleList.items[itemIndex].nowShowing;
@@ -178,6 +194,8 @@ ScheduleController.prototype.editItem = function(itemIndex) {
  * @desc Sets the list to edit mode
  */
 ScheduleController.prototype.editItems = function() {
+	"use strict";
+
 	// Set the list to edit mode
 	this.scheduleList.setAction("edit");
 
@@ -211,6 +229,8 @@ ScheduleController.prototype.editItems = function() {
  * @desc Sets the list to view mode
  */
 ScheduleController.prototype.viewItems = function() {
+	"use strict";
+
 	// Set the list to view mode
 	this.scheduleList.setAction("view");
 

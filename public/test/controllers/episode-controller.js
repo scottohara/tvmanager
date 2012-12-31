@@ -1,5 +1,7 @@
 module("episode-controller", {
 	setup: function() {
+		"use strict";
+
 		this.listItem = {
 			listIndex: 0,
 			episode: {
@@ -74,6 +76,8 @@ module("episode-controller", {
 		this.episodeController = new EpisodeController(this.listItem);
 	},
 	teardown: function() {
+		"use strict";
+
 		this.episodeName.remove();
 		this.watched.remove();
 		this.recorded.remove();
@@ -89,6 +93,8 @@ module("episode-controller", {
 });
 
 test("constructor - update", 4, function() {
+	"use strict";
+
 	ok(this.episodeController, "Instantiate EpisodeController object");
 	same(this.episodeController.listItem, this.listItem, "listItem property");
 	equals(this.episodeController.originalStatus, this.listItem.episode.status, "originalStatus property");
@@ -96,6 +102,8 @@ test("constructor - update", 4, function() {
 });
 
 test("constructor - add", 2, function() {
+	"use strict";
+
 	var series = { id: 1 };
 	var sequence = 1;
 
@@ -113,6 +121,8 @@ test("constructor - add", 2, function() {
 });
 
 test("setup", 13, function() {
+	"use strict";
+
 	this.episodeController.cancel = function() {
 		ok(true, "Bind back button event handler");
 	};
@@ -145,6 +155,8 @@ test("setup", 13, function() {
 });
 
 test("save", 6, function() {
+	"use strict";
+
 	var episodeName = "test-episode-2";
 	var unverified = true;
 	var unscheduled = true;
@@ -164,6 +176,8 @@ test("save", 6, function() {
 });
 
 test("cancel", 3, function() {
+	"use strict";
+
 	this.episodeController.listItem.episode.status = "Recorded";
 	this.episodeController.listItem.episode.statusDate = "02-Jan";
 	this.episodeController.cancel();
@@ -172,12 +186,16 @@ test("cancel", 3, function() {
 });
 
 test("setStatus - setting", 1, function() {
+	"use strict";
+
 	this.episodeController.settingStatus = true;
 	this.episodeController.setStatus();
 	ok(this.episodeController.settingStatus, "Blocked by semaphore");
 });
 
 test("setStatus", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "unset",
@@ -239,6 +257,8 @@ test("setStatus", function() {
 });
 
 test("getStatusDate - without date", 3, function() {
+	"use strict";
+
 	var originalDate = Date;
 	var fakeDate = new Date(1900, 1, 2, 12, 0, 0);
 	Date = function() {
@@ -257,6 +277,8 @@ test("getStatusDate - without date", 3, function() {
 });
 
 test("getStatusDate - with date", 3, function() {
+	"use strict";
+
 	this.episodeController.setStatusDate = function() {
 		ok(true, "Set done action callback");
 	};
@@ -267,6 +289,8 @@ test("getStatusDate - with date", 3, function() {
 });
 
 test("setStatusDate", 2, function() {
+	"use strict";
+
 	var statusDateDay = "02";
 	var statusDateMonth = "Feb";
 	SpinningWheel.selectedValues.values = [statusDateDay, statusDateMonth];
@@ -276,6 +300,8 @@ test("setStatusDate", 2, function() {
 });
 
 test("toggleStatusDateRow", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "hidden",

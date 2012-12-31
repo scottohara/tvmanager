@@ -15,7 +15,7 @@
  * @constructor
  */
 var UnscheduledController = function () {
-
+	"use strict";
 };
 
 /**
@@ -26,6 +26,8 @@ var UnscheduledController = function () {
  * @desc Initialises the controller
  */
 UnscheduledController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Unscheduled",
@@ -51,6 +53,8 @@ UnscheduledController.prototype.setup = function() {
  * @desc Activates the controller
  */
 UnscheduledController.prototype.activate = function() {
+	"use strict";
+
 	// Get the list of unscheduled episodes
 	Episode.listByUnscheduled($.proxy(this.listRetrieved, this));
 };
@@ -64,6 +68,8 @@ UnscheduledController.prototype.activate = function() {
  * @param {Array<Episode>} unscheduledList - array of episode objects
  */
 UnscheduledController.prototype.listRetrieved = function(unscheduledList) {
+	"use strict";
+
 	// Set the list items
 	this.unscheduledList.items = unscheduledList;
 
@@ -82,6 +88,8 @@ UnscheduledController.prototype.listRetrieved = function(unscheduledList) {
  * @desc Pop the view off the stack
  */
 UnscheduledController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView();
 };
 
@@ -94,6 +102,8 @@ UnscheduledController.prototype.goBack = function() {
  * @param {Number} itemIndex - the list index of the episode to edit
  */
 UnscheduledController.prototype.viewItem = function(itemIndex) {
+	"use strict";
+
 	appController.pushView("episode", { listIndex: itemIndex, episode: this.unscheduledList.items[itemIndex] });
 };
 
@@ -105,6 +115,8 @@ UnscheduledController.prototype.viewItem = function(itemIndex) {
  * @desc Sets the list to view mode
  */
 UnscheduledController.prototype.viewItems = function() {
+	"use strict";
+
 	// Set the list to view mode
 	this.unscheduledList.setAction("view");
 

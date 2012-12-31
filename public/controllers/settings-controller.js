@@ -13,7 +13,7 @@
  * @constructor
  */
 var SettingsController = function () {
-
+	"use strict";
 };
 
 /**
@@ -24,6 +24,8 @@ var SettingsController = function () {
  * @desc Initialises the controller
  */
 SettingsController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Settings",
@@ -46,6 +48,8 @@ SettingsController.prototype.setup = function() {
  * @desc Activates the controller
  */
 SettingsController.prototype.activate = function() {
+	"use strict";
+
 	// Bind events for all of the buttons/controls
 	$("#dataSyncRow").bind('click', this.viewDataSync);
 	$("#aboutRow").bind('click', this.viewAbout);
@@ -63,6 +67,8 @@ SettingsController.prototype.activate = function() {
  * @desc Pop the view off the stack
  */
 SettingsController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView();
 };
 
@@ -74,6 +80,8 @@ SettingsController.prototype.goBack = function() {
  * @desc Display the dataSync view
  */
 SettingsController.prototype.viewDataSync = function() {
+	"use strict";
+
 	appController.pushView("dataSync");
 };
 
@@ -85,6 +93,8 @@ SettingsController.prototype.viewDataSync = function() {
  * @desc Display the about view
  */
 SettingsController.prototype.viewAbout = function() {
+	"use strict";
+
 	appController.pushView("about");
 };
 
@@ -96,6 +106,8 @@ SettingsController.prototype.viewAbout = function() {
  * @desc Display the All Recorded report view
  */
 SettingsController.prototype.viewRecordedReport = function() {
+	"use strict";
+
 	appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus, args: 'Recorded' });
 };
 
@@ -107,6 +119,8 @@ SettingsController.prototype.viewRecordedReport = function() {
  * @desc Display the All Expected report view
  */
 SettingsController.prototype.viewExpectedReport = function() {
+	"use strict";
+
 	appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus, args: 'Expected' });
 };
 
@@ -118,6 +132,8 @@ SettingsController.prototype.viewExpectedReport = function() {
  * @desc Display the All Missed report view
  */
 SettingsController.prototype.viewMissedReport = function() {
+	"use strict";
+
 	appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus, args: 'Missed' });
 };
 
@@ -129,5 +145,7 @@ SettingsController.prototype.viewMissedReport = function() {
  * @desc Display the All Incomplete report view
  */
 SettingsController.prototype.viewIncompleteReport = function() {
+	"use strict";
+
 	appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete, args: null });
 };

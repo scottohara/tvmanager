@@ -1,5 +1,7 @@
 module("application-controller", {
 	setup: function() {
+		"use strict";
+
 		this.contentWrapper = $("<div>")
 			.attr("id", "contentWrapper")
 			.hide()
@@ -94,6 +96,8 @@ module("application-controller", {
 		this.appController.viewStack.push(this.testView);
 	},
 	teardown: function() {
+		"use strict";
+
 		this.contentWrapper.remove();
 		this.abc.remove();
 		this.notices.remove();
@@ -113,6 +117,8 @@ module("application-controller", {
 });
 
 test("constructor", 8, function() {
+	"use strict";
+
 	ok(this.appController, "Instantiate ApplicationController object");
 	same(this.appController.viewStack, [this.testView], "viewStack property");
 	same(this.appController.noticeStack, {
@@ -129,6 +135,8 @@ test("constructor", 8, function() {
 });
 
 test("constructor - cache update", 1, function() {
+	"use strict";
+
 	CacheControllerMock.prototype.updated = true;
 	this.appController = new ApplicationController();
 	same(this.notice.pop(), {
@@ -143,6 +151,8 @@ test("constructor - cache update", 1, function() {
 });
 
 test("constructor - cache update progress", 1, function() {
+	"use strict";
+
 	CacheControllerMock.prototype.updated = true;
 	$("#" + this.appCacheUpdateNoticeId).remove();
 	var notice = $("<p>")
@@ -156,12 +166,16 @@ test("constructor - cache update progress", 1, function() {
 });
 
 asyncTest("start - dbConfig 304 Not Modified", 1, function() {
+	"use strict";
+
 	$.get = jQueryMock.get;
 	DatabaseController = DatabaseControllerMockNotModified;
 	this.appController.start();
 });
 
 asyncTest("start - fail", 1, function() {
+	"use strict";
+
 	DatabaseController = DatabaseControllerMockFail;
 	this.expectedNotice = {
 		label: "Error",
@@ -175,6 +189,8 @@ asyncTest("start - fail", 1, function() {
 });
 
 asyncTest("start - database upgrade", 1, function() {
+	"use strict";
+
 	DatabaseController = DatabaseControllerMockUpgrade;
 	this.expectedNotice = {
 		label: "Database has been successfully upgraded from version 1.0 to version 1.1. Please restart the application.",
@@ -189,6 +205,8 @@ asyncTest("start - database upgrade", 1, function() {
 });
 
 asyncTest("start - sync warning", 2, function() {
+	"use strict";
+
 	this.expectedNotice = {
 		label: "The last data sync was over 7 days ago",
 		leftButton: {
@@ -202,12 +220,16 @@ asyncTest("start - sync warning", 2, function() {
 });
 
 test("gotAppConfig - 304 Not Modified", 1, function() {
+	"use strict";
+
 	var appVersion = "1.0";
 	this.appController.gotAppConfig(undefined, "notmodified", { responseText: JSON.stringify({ "appVersion": appVersion }) });
 	equals(this.appController.appVersion, appVersion, "appVersion property");
 });
 
 asyncTest("pushView", 3, function() {
+	"use strict";
+
 	$("#content").children(":first").scrollTop(1);
 	this.appController.pushView = this.originalPushView;
 	this.appController.contentShown = this.originalContentShown;
@@ -218,6 +240,8 @@ asyncTest("pushView", 3, function() {
 });
 
 asyncTest("pushView - 304 Not Modified", 1, function() {
+	"use strict";
+
 	$.fn.load = jQueryMock.load;
 	this.appController.pushView = this.originalPushView;
 	this.appController.contentShown = this.originalContentShown;
@@ -225,6 +249,8 @@ asyncTest("pushView - 304 Not Modified", 1, function() {
 });
 
 asyncTest("popView", 3, function() {
+	"use strict";
+
 	this.appController.viewStack.push(this.testView);
 	this.appController.contentShown = this.originalContentShown;
 	this.appController.popView("Activated");
@@ -232,6 +258,8 @@ asyncTest("popView", 3, function() {
 });
 
 test("setScrollPosition", function() {
+	"use strict";
+
 	$.fn.scrollTop = jQueryMock.scrollTop;
 	$.fn.position = jQueryMock.position;
 
@@ -259,6 +287,8 @@ test("setScrollPosition", function() {
 });
 
 test("contentShown - loading", 3, function() {
+	"use strict";
+
 	$("#contentWrapper").addClass("loading");
 	this.appController.contentShown = this.originalContentShown;
 	this.appController.contentShown();
@@ -268,6 +298,8 @@ test("contentShown - loading", 3, function() {
 });
 
 test("contentShown - loaded", 1, function() {
+	"use strict";
+
 	$("#contentWrapper").addClass("loaded");
 	this.appController.contentShown = this.originalContentShown;
 	this.appController.contentShown();
@@ -275,6 +307,8 @@ test("contentShown - loaded", 1, function() {
 });
 
 test("setHeader", 10, function() {
+	"use strict";
+
 	this.appController.setHeader();
 	$("#headerLeftButton").trigger("click", "left");
 	ok($("#headerLeftButton").hasClass(this.testView.controller.header.leftButton.style), "Set left button style");
@@ -289,6 +323,8 @@ test("setHeader", 10, function() {
 });
 
 test("clearHeader", 3, function() {
+	"use strict";
+
 	this.appController.clearHeader();
 	$("#headerLeftButton").trigger("click", "left");
 	$("#headerRightButton").trigger("click", "right");
@@ -298,6 +334,8 @@ test("clearHeader", 3, function() {
 });
 
 test("setFooter", 10, function() {
+	"use strict";
+
 	this.appController.setFooter();
 	$("#footerLeftButton").trigger("click", "left");
 	ok($("#footerLeftButton").hasClass(this.testView.controller.footer.leftButton.style), "Set left button style");
@@ -312,6 +350,8 @@ test("setFooter", 10, function() {
 });
 
 test("clearFooter", 4, function() {
+	"use strict";
+
 	this.appController.clearFooter();
 	$("#footerLeftButton").trigger("click", "left");
 	$("#footerRightButton").trigger("click", "right");
@@ -322,6 +362,8 @@ test("clearFooter", 4, function() {
 });
 
 test("setContentHeight", 1, function() {
+	"use strict";
+
 	var list = $("<ul>").appendTo(this.content);
 	$("#header").outerHeight(1);
 	$("#footer").outerHeight(1);
@@ -332,6 +374,8 @@ test("setContentHeight", 1, function() {
 });
 
 asyncTest("showNotice", 14, function() {
+	"use strict";
+
 	var buttonClicked = function(e, button) {
 		ok(true, "Bind " + button + " button " + e.type + " event listener");
 	};
@@ -389,6 +433,8 @@ asyncTest("showNotice", 14, function() {
 });
 
 asyncTest("hideNotice", 5, function() {
+	"use strict";
+
 	var notice = {
 		height: function() {
 			return 1;
@@ -413,6 +459,8 @@ asyncTest("hideNotice", 5, function() {
 });
 
 asyncTest("noticeHidden", 2, function() {
+	"use strict";
+
 	var originalAnimate = $.fn.animate;
 	$.fn.animate = $.proxy(function(args, callback) {
 		$.fn.animate = originalAnimate;
@@ -424,6 +472,8 @@ asyncTest("noticeHidden", 2, function() {
 });
 
 test("noticesMoved", 4, function() {
+	"use strict";
+
 	var notice1 = $("<div>")
 		.attr("id", "test-notice-1")
 		.hide()
@@ -449,11 +499,15 @@ test("noticesMoved", 4, function() {
 });
 
 test("showScrollHelper", 1, function() {
+	"use strict";
+
 	this.appController.showScrollHelper();
 	ok(!$("#abc").is(":hidden"), "Show scroll helper");
 });
 
 test("hideScrollHelper", 1, function() {
+	"use strict";
+
 	this.appController.hideScrollHelper();
 	ok($("#abc").is(":hidden"), "Hide scroll helper");
 });

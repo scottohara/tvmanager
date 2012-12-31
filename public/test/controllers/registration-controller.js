@@ -1,5 +1,7 @@
 module("registration-controller", {
 	setup: function() {
+		"use strict";
+
 		this.device = {
 			id: 1,
 			name: "test-device",
@@ -24,12 +26,16 @@ module("registration-controller", {
 		this.registrationController = new RegistrationController();
 	},
 	teardown: function() {
+		"use strict";
+
 		this.deviceName.remove();
 		Setting = this.originalSetting;
 	}
 });
 
 test("setup", 3, function() {
+	"use strict";
+
 	this.registrationController.cancel = function() {
 		ok(true, "Bind back button event handler");
 	};
@@ -48,6 +54,8 @@ test("setup", 3, function() {
 });
 
 test("gotDevice - unregistered", 2, function() {
+	"use strict";
+
 	var device = {
 		id: "",
 		name: "",
@@ -63,6 +71,8 @@ test("gotDevice - unregistered", 2, function() {
 });
 
 test("gotDevice - registered", 2, function() {
+	"use strict";
+
 	var device = {
 		settingValue: JSON.stringify(this.device)
 	};
@@ -77,6 +87,8 @@ test("gotDevice - registered", 2, function() {
 });
 
 test("unregister - ajax fail", 1, function() {
+	"use strict";
+
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
 
@@ -94,6 +106,8 @@ test("unregister - ajax fail", 1, function() {
 });
 
 asyncTest("unregister - success", 2, function() {
+	"use strict";
+
 	Setting.prototype.remove = function() {
 		ok(true, "Setting removed");
 	};
@@ -109,6 +123,8 @@ asyncTest("unregister - success", 2, function() {
 });
 
 test("save - ajax fail", 1, function() {
+	"use strict";
+
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
 
@@ -126,6 +142,8 @@ test("save - ajax fail", 1, function() {
 });
 
 asyncTest("save - success", 3, function() {
+	"use strict";
+
 	var that = this;
 	Setting.prototype.save = function() {
 		same($.parseJSON(this.settingValue), that.device, "settingValue property");
@@ -144,5 +162,7 @@ asyncTest("save - success", 3, function() {
 });
 
 test("cancel", 1, function() {
+	"use strict";
+
 	this.registrationController.cancel();
 });

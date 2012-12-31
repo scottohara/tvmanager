@@ -1,5 +1,7 @@
 module("dataSync-controller", {
 	setup: function() {
+		"use strict";
+
 		this.deviceName = $("<input>")
 			.attr("id", "deviceName")
 			.hide()
@@ -149,6 +151,8 @@ module("dataSync-controller", {
 		};
 	},
 	teardown: function() {
+		"use strict";
+
 		this.deviceName.remove();
 		this.registrationMessage.remove();
 		this.syncControls.remove();
@@ -180,10 +184,14 @@ module("dataSync-controller", {
 });
 
 test("constructor", 1, function() {
+	"use strict";
+
 	ok(this.dataSyncController, "Instantiate DataSyncController object");
 });
 
 test("setup", 7, function() {
+	"use strict";
+
 	var registrationRow = $("<div>")
 		.attr("id", "registrationRow")
 		.hide()
@@ -227,15 +235,21 @@ test("setup", 7, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.dataSyncController.goBack();
 });
 
 test("gotLastSyncTime", 1, function() {
+	"use strict";
+
 	this.dataSyncController.gotLastSyncTime({ settingValue: null });
 	equals(this.lastSyncTime.val(), "Unknown", "Last Sync Time");
 });
 
 test("gotDevice - unregistered", 3, function() {
+	"use strict";
+
 	this.dataSyncController.gotDevice({}); 
 	equals(this.deviceName.val(), "< Unregistered >", "Device");
 	ok(!$("#registrationMessage").is(":hidden"), "Show registration message");
@@ -243,6 +257,8 @@ test("gotDevice - unregistered", 3, function() {
 });
 
 test("gotDevice - registered, not imported", 5, function() {
+	"use strict";
+
 	var device = {
 		settingValue: JSON.stringify(this.dataSyncController.device)
 	};
@@ -256,6 +272,8 @@ test("gotDevice - registered, not imported", 5, function() {
 });
 
 test("gotDevice - registered, imported", 2, function() {
+	"use strict";
+
 	this.dataSyncController.device.imported = true;
 	var device = {
 		settingValue: JSON.stringify(this.dataSyncController.device)
@@ -267,6 +285,8 @@ test("gotDevice - registered, imported", 2, function() {
 });
 
 test("checkForLocalChanges - single change", 2, function() {
+	"use strict";
+
 	var count = 1;
 	this.dataSyncController.checkForLocalChanges(count);
 	ok(this.dataSyncController.localChanges, "Detect changes");
@@ -274,6 +294,8 @@ test("checkForLocalChanges - single change", 2, function() {
 });
 
 test("checkForLocalChanges - multiple change", 2, function() {
+	"use strict";
+
 	var count = 2;
 	this.dataSyncController.checkForLocalChanges(count);
 	ok(this.dataSyncController.localChanges, "Detect changes");
@@ -281,6 +303,8 @@ test("checkForLocalChanges - multiple change", 2, function() {
 });
 
 test("dataExport - exporting", 2, function() {
+	"use strict";
+
 	this.dataSyncController.exporting = true;
 	this.dataSyncController.dataExport();
 	ok(this.dataSyncController.exporting, "Export blocked by semaphore");
@@ -288,6 +312,8 @@ test("dataExport - exporting", 2, function() {
 });
 
 test("dataExport - not exporting", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "abort",
@@ -339,6 +365,8 @@ test("dataExport - not exporting", function() {
 });
 
 test("dataImport - importing", 2, function() {
+	"use strict";
+
 	this.dataSyncController.importing = true;
 	this.dataSyncController.dataImport();
 	ok(this.dataSyncController.importing, "Import blocked by semaphore");
@@ -346,6 +374,8 @@ test("dataImport - importing", 2, function() {
 });
 
 test("dataImport - not importing", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "abort",
@@ -395,6 +425,8 @@ test("dataImport - not importing", function() {
 });
 
 test("listRetrieved", 6, function() {
+	"use strict";
+
 	this.dataSyncController.sendChange = $.proxy(function(sync) {
 		equals(sync, this.syncList[0], "Sync - modified");
 		ok(true, "Send change");
@@ -411,6 +443,8 @@ test("listRetrieved", 6, function() {
 });
 
 asyncTest("sendChange - checksum mismatch", 2, function() {
+	"use strict";
+
 	var originalMD5 = hex_md5;
 	hex_md5 = function(data) {
 		return "\"";
@@ -428,6 +462,8 @@ asyncTest("sendChange - checksum mismatch", 2, function() {
 });
 
 asyncTest("sendChange - ajax fail", 2, function() {
+	"use strict";
+
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
 
@@ -443,6 +479,8 @@ asyncTest("sendChange - ajax fail", 2, function() {
 });
 
 asyncTest("sendChange - success", 2, function() {
+	"use strict";
+
 	this.syncList[0].remove = function() {
 		ok(true, "Sync removed");
 	};
@@ -456,6 +494,8 @@ asyncTest("sendChange - success", 2, function() {
 });
 
 asyncTest("sendDelete - ajax fail", 2, function() {
+	"use strict";
+
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
 
@@ -471,6 +511,8 @@ asyncTest("sendDelete - ajax fail", 2, function() {
 });
 
 asyncTest("sendDelete - success", 2, function() {
+	"use strict";
+
 	this.syncList[0].remove = function() {
 		ok(true, "Sync removed");
 	};
@@ -484,6 +526,8 @@ asyncTest("sendDelete - success", 2, function() {
 });
 
 test("changeSent - not finished", 1, function() {
+	"use strict";
+
 	this.dataSyncController.syncProcessed = 0;
 	this.dataSyncController.syncList = this.syncList;
 	this.dataSyncController.changeSent();
@@ -491,6 +535,8 @@ test("changeSent - not finished", 1, function() {
 });
 
 test("changeSent - finished with errors", 1, function() {
+	"use strict";
+
 	this.dataSyncController.syncProcessed = 0;
 	this.dataSyncController.syncErrors = [];
 	this.dataSyncController.syncList = this.syncList;
@@ -505,6 +551,8 @@ test("changeSent - finished with errors", 1, function() {
 });
 
 test("changeSent - finished without errors", 4, function() {
+	"use strict";
+
 	this.dataSyncController.syncProcessed = 0;
 	this.dataSyncController.syncErrors = [];
 	this.dataSyncController.syncList = this.syncList;
@@ -521,6 +569,8 @@ test("changeSent - finished without errors", 4, function() {
 });
 
 test("setLastSyncTime", 1, function() {
+	"use strict";
+
 	var originalDate = Date;
 	var fakeDate = new Date(1900, 0, 1, 12, 0, 0);
 	Date = function() {
@@ -533,6 +583,8 @@ test("setLastSyncTime", 1, function() {
 });
 
 test("doImport - changes only", 4, function() {
+	"use strict";
+
 	this.importChangesOnly.prop("checked", true);
 	var changesOnly = this.importChangesOnly.is(":checked");
 	
@@ -547,6 +599,8 @@ test("doImport - changes only", 4, function() {
 });
 
 asyncTest("doImport - delete fail", function() {
+	"use strict";
+
 	var testParams = ["Program", "Series", "Episode"];
 	ProgramMock.removed = false;
 	SeriesMock.removed = false;
@@ -572,6 +626,8 @@ asyncTest("doImport - delete fail", function() {
 });
 
 asyncTest("doImport - success", 2, function() {
+	"use strict";
+
 	var objectsReceived = [];
 	ProgramMock.removed = true;
 	SeriesMock.removed = true;
@@ -591,12 +647,16 @@ asyncTest("doImport - success", 2, function() {
 });
 
 test("importData - not finished", 2, function() {
+	"use strict";
+
 	this.dataSyncController.importDone();
 	equals(this.dataSyncController.objectsToImport, undefined, "objectsToImport property");
 	equals(this.dataSyncController.objectsImported, undefined, "objectsImported property");
 });
 
 asyncTest("importData - full import, no data", 2, function() {
+	"use strict";
+
 	this.dataSyncController.importChangesOnly = false;
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
@@ -624,6 +684,8 @@ asyncTest("importData - full import, no data", 2, function() {
 });
 
 asyncTest("importData - changes only, no data", 1, function() {
+	"use strict";
+
 	this.dataSyncController.importChangesOnly = true;
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
@@ -652,6 +714,8 @@ asyncTest("importData - changes only, no data", 1, function() {
 // Test quarantined until Heroku timeout issue resolved
 /*
 asyncTest("importData - checksum mismatch", 1, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -666,6 +730,8 @@ asyncTest("importData - checksum mismatch", 1, function() {
 */
 
 asyncTest("importData - ajax fail", 1, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -683,6 +749,8 @@ asyncTest("importData - ajax fail", 1, function() {
 });
 
 asyncTest("importData - save fail", 1, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -707,6 +775,8 @@ asyncTest("importData - save fail", 1, function() {
 });
 
 asyncTest("importData - 304 Not Modified", 1, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -732,6 +802,8 @@ asyncTest("importData - 304 Not Modified", 1, function() {
 });
 
 asyncTest("importData - success", 3, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -769,6 +841,8 @@ asyncTest("importData - success", 3, function() {
 });
 
 asyncTest("removePending - ajax fail", 2, function() {
+	"use strict";
+
 	var originalAjax = $.ajax;
 	$.ajax = this.ajaxMock;
 
@@ -783,6 +857,8 @@ asyncTest("removePending - ajax fail", 2, function() {
 });
 
 asyncTest("removePending - success", 1, function() {
+	"use strict";
+
 	this.dataSyncController.dataImported = function() {
 		ok(true, "Data imported");
 		start();
@@ -791,6 +867,8 @@ asyncTest("removePending - success", 1, function() {
 });
 
 test("dataImported", 2, function() {
+	"use strict";
+
 	this.dataSyncController.objectsToImport = 1;
 	this.dataSyncController.objectsImported = 0;
 	
@@ -803,11 +881,15 @@ test("dataImported", 2, function() {
 });
 
 test("importDone - not finished", 1, function() {
+	"use strict";
+
 	this.dataSyncController.importDone();
 	ok(!$("#syncErrors").is(":hidden"), "Show sync errors");
 });
 
 test("importDone - finished with errors", 1, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -823,6 +905,8 @@ test("importDone - finished with errors", 1, function() {
 });
 
 test("importDone - delete fail", 1, function() {
+	"use strict";
+
 	this.dataSyncController.programsReady = true;
 	this.dataSyncController.seriesReady = true;
 	this.dataSyncController.episodesReady = true;
@@ -838,6 +922,8 @@ test("importDone - delete fail", 1, function() {
 });
 
 test("importDone - finished without errors", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "full import",
@@ -875,6 +961,8 @@ test("importDone - finished without errors", function() {
 });
 
 test("importSuccessful", 3, function() {
+	"use strict";
+
 	this.dataSyncController.callback = function(success) {
 		ok(success, "Invoke callback with true");
 	};
@@ -885,6 +973,8 @@ test("importSuccessful", 3, function() {
 });
 
 test("syncError - with id", 3, function() {
+	"use strict";
+
 	this.dataSyncController.syncErrors = [];
 	DataSyncController.prototype.syncError = this.originalSyncError;
 	this.dataSyncController.syncError("Test error", "test", "Test message", 1);
@@ -894,6 +984,8 @@ test("syncError - with id", 3, function() {
 });
 
 test("syncError - without id", 3, function() {
+	"use strict";
+
 	this.dataSyncController.syncErrors = [];
 	DataSyncController.prototype.syncError = this.originalSyncError;
 	this.dataSyncController.syncError("Test error", "test", "Test message");
@@ -903,6 +995,8 @@ test("syncError - without id", 3, function() {
 });
 
 test("showErrors", 3, function() {
+	"use strict";
+
 	this.dataSyncController.syncErrors = [];
 	DataSyncController.prototype.syncError = this.originalSyncError;
 

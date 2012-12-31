@@ -1,5 +1,7 @@
 module("sync-model", {
 	setup: function() {
+		"use strict";
+
 		this.type = "test-sync";
 		this.id = "1";
 		this.action = "modified";
@@ -9,6 +11,8 @@ module("sync-model", {
 });
 
 test("constructor", 4, function() {
+	"use strict";
+
 	ok(this.sync, "Instantiate Sync object");
 	equals(this.sync.type, this.type, "type property");
 	equals(this.sync.id, this.id, "id property");
@@ -17,6 +21,8 @@ test("constructor", 4, function() {
 
 
 test("remove - fail", 2, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Sync WHERE Type = " + this.type + " AND ID = " + this.id);
 	this.sync.remove();
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
@@ -24,6 +30,8 @@ test("remove - fail", 2, function() {
 });
 
 test("remove - success", 5, function() {
+	"use strict";
+
 	this.sync.remove();
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
@@ -33,6 +41,8 @@ test("remove - success", 5, function() {
 });
 
 test("list - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT Type, ID, Action FROM Sync");
 	Sync.list(function(syncList) {
 		same(syncList, [], "Invoke callback");
@@ -43,6 +53,8 @@ test("list - fail", 4, function() {
 });
 
 test("list - no rows affected", 4, function() {
+	"use strict";
+
 	appController.db.noRowsAffectedAt("SELECT Type, ID, Action FROM Sync");
 	Sync.list(function(syncList) {
 		same(syncList, [], "Invoke callback");
@@ -53,6 +65,8 @@ test("list - no rows affected", 4, function() {
 });
 
 test("list - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		Type: this.type,
 		ID: this.id,
@@ -67,6 +81,8 @@ test("list - success", 4, function() {
 });
 
 test("count - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT COUNT(*) AS SyncCount FROM Sync");
 	Sync.count(function(count) {
 		equals(count, 0, "Invoke callback");
@@ -77,6 +93,8 @@ test("count - fail", 4, function() {
 });
 
 test("count - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		SyncCount: 1
 	}]);
@@ -89,6 +107,8 @@ test("count - success", 4, function() {
 });
 
 test("removeAll - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Sync");
 	Sync.removeAll(function(message) {
 		notEqual(message, null, "Invoke callback");
@@ -99,6 +119,8 @@ test("removeAll - fail", 4, function() {
 });
 
 test("removeAll - success", 4, function() {
+	"use strict";
+
 	Sync.removeAll(function(message) {
 		equals(message, null, "Invoke callback");
 	});

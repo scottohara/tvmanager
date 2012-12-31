@@ -1,5 +1,7 @@
 module("report-controller", {
 	setup: function() {
+		"use strict";
+
 		this.args = "test-args";
 
 		this.items = [
@@ -21,11 +23,15 @@ module("report-controller", {
 });
 
 test("constructor", 2, function() {
+	"use strict";
+
 	ok(this.reportController, "Instantiate ReportController object");
 	same(this.reportController.report, this.report, "report property");
 });
 
 test("setup", 6, function() {
+	"use strict";
+
 	var originalList = List;
 	List = ListMock;
 
@@ -45,10 +51,14 @@ test("setup", 6, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.reportController.goBack();
 });
 
 test("viewItem", 2, function() {
+	"use strict";
+
 	var index = 1;
 	this.reportController.reportList = { items: this.items };
 	this.reportController.viewItem(index);

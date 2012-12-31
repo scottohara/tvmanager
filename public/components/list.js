@@ -29,6 +29,8 @@
  * @param {Function} [populateItemEventHandler] - function called after creating each list item
  */
 var List = function (container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
+	"use strict";
+
 	this.container = container;
 	this.itemTemplate = itemTemplate;
 	this.groupBy = groupBy;
@@ -48,6 +50,8 @@ var List = function (container, itemTemplate, groupBy, items, viewEventHandler, 
  * @desc (Re)Populates and renders the HTML list
  */
 List.prototype.refresh = function () {
+	"use strict";
+
 	// Load the HTML template to use for the list items
 	$.get(this.itemTemplate, $.proxy(function (template, status, jqXHR) {
 		// A 302 Not Modified returns undefined, so we need to get the template from the jqXHR object instead
@@ -120,6 +124,8 @@ List.prototype.refresh = function () {
  * @param {String} action - "view", "edit" or "delete"
  */
 List.prototype.setAction = function (action) {
+	"use strict";
+
 	var	bValidAction = false,
 			bSavePosition = false;
 
@@ -160,6 +166,8 @@ List.prototype.setAction = function (action) {
  * @param {Number} itemIndex - index of the item that was tapped
  */
 List.prototype.tap = function (itemIndex) {
+	"use strict";
+
 	// Call the appropriate function depending on the current list mode, and whether or not a handler for that mode was specified
 	switch (this.action) {
 		case "view":

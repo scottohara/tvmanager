@@ -36,6 +36,7 @@
  * @constructor
  */
 var DataSyncController = function () {
+	"use strict";
 };
 
 /**
@@ -46,6 +47,8 @@ var DataSyncController = function () {
  * @desc Initialises the controller
  */
 DataSyncController.prototype.setup = function() {
+	"use strict";
+
 	// Setup the header
 	this.header = {
 		label: "Import/Export",
@@ -68,6 +71,8 @@ DataSyncController.prototype.setup = function() {
  * @desc Activates the controller
  */
 DataSyncController.prototype.activate = function() {
+	"use strict";
+
 	// Bind an event handler to access the registration view
 	$("#registrationRow").bind('click', this.viewRegistration);
 
@@ -96,6 +101,8 @@ DataSyncController.prototype.activate = function() {
  * @desc Pop the view off the stack
  */
 DataSyncController.prototype.goBack = function() {
+	"use strict";
+
 	appController.popView();
 };
 
@@ -107,6 +114,8 @@ DataSyncController.prototype.goBack = function() {
  * @desc Display the registration view
  */
 DataSyncController.prototype.viewRegistration = function() {
+	"use strict";
+
 	appController.pushView("registration");
 };
 
@@ -119,6 +128,8 @@ DataSyncController.prototype.viewRegistration = function() {
  * @param {Setting} lastSyncTime - a Setting object containing the last time an import/export was run
  */
 DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
+	"use strict";
+
 	// Only proceed if we have a last sync time
 	if (lastSyncTime.settingValue) {
 		// Format the value as dd-mon-yyyy hh:mm:ss
@@ -146,6 +157,8 @@ DataSyncController.prototype.gotLastSyncTime = function(lastSyncTime) {
  * @param {Setting} device - a Setting object containing the registered device
  */
 DataSyncController.prototype.gotDevice = function(device) {
+	"use strict";
+
 	// Only proceed if we have a device
 	if (device.settingValue) {
 		// Parse the JSON
@@ -178,6 +191,8 @@ DataSyncController.prototype.gotDevice = function(device) {
  * @param {Number} count - the number of local changes to be synced
  */
 DataSyncController.prototype.checkForLocalChanges = function(count) {
+	"use strict";
+
 	// If there are any local changes, set the indicator
 	this.localChanges = (count > 0);
 
@@ -198,6 +213,8 @@ DataSyncController.prototype.checkForLocalChanges = function(count) {
  * @desc Initiates a data export
  */
 DataSyncController.prototype.dataExport = function() {
+	"use strict";
+
 	// Make sure an export is not already running
 	if (!this.exporting) {
 		// Set the exporting flag
@@ -254,6 +271,8 @@ DataSyncController.prototype.dataExport = function() {
  * @desc Initiates a data import
  */
 DataSyncController.prototype.dataImport = function() {
+	"use strict";
+
 	// Make sure an import is not already running
 	if (!this.importing) {
 		// Set the importing flag
@@ -317,6 +336,8 @@ DataSyncController.prototype.dataImport = function() {
  * @param {Array<Sync>} syncList - array of Sync objects
  */
 DataSyncController.prototype.listRetrieved = function(syncList) {
+	"use strict";
+
 	this.syncProcessed = 0;
 	this.syncErrors = [];
 	this.syncList = syncList;
@@ -342,6 +363,8 @@ DataSyncController.prototype.listRetrieved = function(syncList) {
  * @param {Sync} sync - Sync object containing the id/type of the record that was added/changed
  */
 DataSyncController.prototype.sendChange = function(sync) {
+	"use strict";
+
 	// Call the find method of the appropriate model object to get the item to export
 	window[sync.type].find(sync.id, $.proxy(function(instance) {
 		// Get the JSON respresentation of the object
@@ -397,6 +420,8 @@ DataSyncController.prototype.sendChange = function(sync) {
  * @param {Sync} sync - Sync object containing the id/type of the record that was deleted
  */
 DataSyncController.prototype.sendDelete = function(sync){
+	"use strict";
+
 	// Send a DELETE request to the server, including the device ID in the request headers
 	$.ajax({
 		url: "/export/" + sync.id,
@@ -425,6 +450,8 @@ DataSyncController.prototype.sendDelete = function(sync){
  * @desc Updates the export progress message, and finalises the export if all records have been processed
  */
 DataSyncController.prototype.changeSent = function() {
+	"use strict";
+
 	// Increment the number of records processed
 	this.syncProcessed++;
 
@@ -459,6 +486,8 @@ DataSyncController.prototype.changeSent = function() {
  * @desc Updates the last sync time
  */
 DataSyncController.prototype.setLastSyncTime = function() {
+	"use strict";
+
 	// Get the current date/time
 	var now = new Date();
 
@@ -480,6 +509,8 @@ DataSyncController.prototype.setLastSyncTime = function() {
  * @desc For full imports, deletes all local data before starting the import; otherwise just starts the import immediately
  */
 DataSyncController.prototype.doImport = function() {
+	"use strict";
+
 	this.syncErrors = [];
 
 	// Check if Fast Import is selected
@@ -545,6 +576,8 @@ DataSyncController.prototype.doImport = function() {
  * @desc Retrieves data to be imported and loads it into the local database
  */
 DataSyncController.prototype.importData = function() {
+	"use strict";
+
 	// Only proceed if all models are ready
 	if (this.programsReady && this.seriesReady && this.episodesReady) {
 		this.objectsToImport = 0;
@@ -678,6 +711,8 @@ DataSyncController.prototype.importData = function() {
  * @param {String} type - The type of pending object
  */
 DataSyncController.prototype.removePending = function(id, type) {
+	"use strict";
+
 	// Send a DELETE request to the server, including the device ID in the request headers
 	$.ajax({
 		url: "/import/" + id,
@@ -705,6 +740,8 @@ DataSyncController.prototype.removePending = function(id, type) {
  * @desc Updates the import progress message and checks if all objects have been imported
  */
 DataSyncController.prototype.dataImported = function() {
+	"use strict";
+
 	// Increment the running total number of objects imported
 	this.objectsImported++;
 
@@ -726,6 +763,8 @@ DataSyncController.prototype.dataImported = function() {
  * @desc Finalises the data import
  */
 DataSyncController.prototype.importDone = function() {
+	"use strict";
+
 	// Only proceed if all models are ready
 	if (this.programsReady && this.seriesReady && this.episodesReady) {
 		// Check for any sync errors
@@ -769,6 +808,8 @@ DataSyncController.prototype.importDone = function() {
  * @desc Updates the last sync time and the number of local changes to be synced, and calls the success handler
  */
 DataSyncController.prototype.importSuccessful = function() {
+	"use strict";
+
 	// Update the last sync time
 	this.setLastSyncTime();
 	
@@ -794,6 +835,8 @@ DataSyncController.prototype.importSuccessful = function() {
  * @param {String} message - the error message
  */
 DataSyncController.prototype.syncError = function(error, type, message, id) {
+	"use strict";
+
 	// Append the error to the list
 	this.syncErrors.push($("<li>").html(error + "<br/>Type: " + type + (id ? " " + id : "")	+ "<br/>" + message));
 };
@@ -806,6 +849,8 @@ DataSyncController.prototype.syncError = function(error, type, message, id) {
  * @desc Displays the errors container
  */
 DataSyncController.prototype.showErrors = function() {
+	"use strict";
+
 	// Clear any existing errors and replace with the current errors list
 	$("#errorList")
 		.empty()

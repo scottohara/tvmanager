@@ -1,5 +1,7 @@
 module("list", {
 	setup: function() {
+		"use strict";
+
 		this.container = "list";
 		this.itemTemplate = "views/listTemplate.html";
 		this.groupBy = "name";
@@ -47,12 +49,16 @@ module("list", {
 		this.list = new List(this.container, this.itemTemplate, this.groupBy, this.items, this.eventHandler, this.eventHandler, this.eventHandler, this.populateItemEventHandler);
 	},
 	teardown: function() {
+		"use strict";
+
 		$("#" + this.container).remove();
 		appController.setScrollPosition = this.originalSetScrollPosition;
 	}
 });
 
 test("constructor", 10, function() {
+	"use strict";
+
 	ok(this.list, "Instantiate List object");
 	equals(this.list.container, this.container, "container property");
 	equals(this.list.itemTemplate, this.itemTemplate, "itemTemplate property");
@@ -66,6 +72,8 @@ test("constructor", 10, function() {
 });
 
 asyncTest("refresh - 304 not modified", 7, function() {
+	"use strict";
+
 	$.get = jQueryMock.get;
 	this.list.groupBy = null;
 	this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
@@ -73,17 +81,23 @@ asyncTest("refresh - 304 not modified", 7, function() {
 });
 
 asyncTest("refresh - without grouping", 7, function() {
+	"use strict";
+
 	this.list.groupBy = null;
 	this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
 	this.list.refresh();
 });
 
 asyncTest("refresh - with grouping", 7, function() {
+	"use strict";
+
 	this.renderHtml = '<li id="group-one" class="group">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id="group-two" class="group">group-two</li><li><a>group-two:item-three</a></li>';
 	this.list.refresh();
 });
 
 test("setAction - valid", function() {
+	"use strict";
+
 	expect(this.validActions.length);
 	for (var i = 0; i < this.validActions.length; i++) {
 		this.list.action = "";
@@ -93,6 +107,8 @@ test("setAction - valid", function() {
 });
 
 test("setAction - invalid", 2, function() {
+	"use strict";
+
 	var originalAlert = window.alert;
 	window.alert = function(message) {
 		equals(message, "invalid is not a valid action", "alert");
@@ -104,6 +120,8 @@ test("setAction - invalid", 2, function() {
 });
 
 test("tap - without event handlers", 0, function() {
+	"use strict";
+
 	this.list.viewEventHandler = null;
 	this.list.editEventHandler = null;
 	this.list.deleteEventHandler = null;
@@ -114,6 +132,8 @@ test("tap - without event handlers", 0, function() {
 });
 
 test("tap - with event handlers", function() {
+	"use strict";
+
 	expect(this.validActions.length + 1);
 
 	var originalConfirm = window.confirm;

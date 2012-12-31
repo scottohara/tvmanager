@@ -1,5 +1,7 @@
 module("episodes-controller", {
 	setup: function() {
+		"use strict";
+
 		this.listItem = {
 			source: "test-source",
 			series: {
@@ -43,17 +45,23 @@ module("episodes-controller", {
 		this.episodesController = new EpisodesController(this.listItem);
 	},
 	teardown: function() {
+		"use strict";
+
 		Episode = this.originalEpisode;
 	}
 });
 
 test("constructor", 3, function() {
+	"use strict";
+
 	ok(this.episodesController, "Instantiate EpisodesController object");
 	same(this.episodesController.listItem, this.listItem, "listItem property");
 	ok(this.episodesController.scrollToFirstUnwatched, "scrollToFirstUnwatched property");
 });
 
 test("setup", 11, function() {
+	"use strict";
+
 	var originalList = List;
 	List = ListMock;
 
@@ -98,10 +106,14 @@ test("setup", 11, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.episodesController.goBack();
 });
 
 test("activate", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "update",
@@ -161,6 +173,8 @@ test("activate", function() {
 });
 
 test("onPopulateListItem", 1, function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "watched",
@@ -200,6 +214,8 @@ test("onPopulateListItem", 1, function() {
 });
 
 test("viewItem", 6, function() {
+	"use strict";
+
 	var index = 0;
 	this.episodesController.episodeList = { items: this.items };
 	this.episodesController.viewItem(index);
@@ -211,12 +227,16 @@ test("viewItem", 6, function() {
 });
 
 test("addItem", 2, function() {
+	"use strict";
+
 	this.episodesController.episodeList = { items: this.items };
 	this.episodesController.addItem();
 	same(appController.viewArgs, { series: this.listItem.series, sequence: this.items.length }, "View arguments");
 });
 
 test("deleteItem", 8, function() {
+	"use strict";
+
 	var index = 0;
 
 	var list = $("<ul>")
@@ -250,6 +270,8 @@ test("deleteItem", 8, function() {
 });
 
 test("deleteItems", 3, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()
@@ -269,6 +291,8 @@ test("deleteItems", 3, function() {
 });
 
 test("requenceItems", function() {
+	"use strict";
+
 	var save = function() {
 		ok(true, "Save episode " + this.sequence);
 	};
@@ -319,6 +343,8 @@ test("requenceItems", function() {
 });
 
 test("editItems", 3, function() {
+	"use strict";
+
 	var list = $("<ul>")
 		.attr("id", "list")
 		.hide()

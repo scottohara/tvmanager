@@ -8,6 +8,8 @@ var processed = false;
 
 // Main processing
 var main = function() {
+	"use strict";
+
 	waitFor(function(){
 		// When the word "completed" is found in the test results; return true
 		return page.evaluate(function(){

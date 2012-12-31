@@ -63,6 +63,8 @@
  * @constructor
  */
 var ApplicationController = function () {
+	"use strict";
+
 	this.viewStack = [];
 	this.noticeStack = {
 		height: 0,
@@ -76,7 +78,7 @@ var ApplicationController = function () {
 	SpinningWheel.cellHeight = 45;
 
 	// Create a scroll helper and associate it with the content
-	this.abc = new abc($("#abc").get(0), $("#content"));
+	this.abc = new Abc($("#abc").get(0), $("#content"));
 
 	// Scroll helper only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
 	this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
@@ -114,6 +116,8 @@ var ApplicationController = function () {
  * @desc Start the application
  */
 ApplicationController.prototype.start = function() {
+	"use strict";
+
 	// Load the database configuration settings
 	$.get("/dbConfig", $.proxy(function(config, status, jqXHR) {
 		// A 302 Not Modified returns undefined, so we need to get the config from the jqXHR object instead
@@ -172,6 +176,8 @@ ApplicationController.prototype.start = function() {
  * @param {Object} jqXHR - the jQuery jqXHR object
  */
 ApplicationController.prototype.gotAppConfig = function(config, status, jqXHR) {
+	"use strict";
+
 	// A 302 Not Modified returns undefined, so we need to get the config from the jqXHR object instead
 	if (config === undefined) {
 		config = $.parseJSON(jqXHR.responseText);
@@ -191,6 +197,8 @@ ApplicationController.prototype.gotAppConfig = function(config, status, jqXHR) {
  * @param {Object} [args] - arguments to pass to the view controller
  */
 ApplicationController.prototype.pushView = function(view, args) {
+	"use strict";
+
 	// If a current view is displayed, save the current scroll position and clear the existing header/footer
 	if (this.viewStack.length > 0) {
 		this.getScrollPosition();
@@ -217,6 +225,8 @@ ApplicationController.prototype.pushView = function(view, args) {
  * @desc Sets up the view controller for the view just pushed, and sets the header
  */
 ApplicationController.prototype.viewPushed = function() {
+	"use strict";
+
 	// Call the view controller's setup method
 	this.viewStack[this.viewStack.length - 1].controller.setup();
 
@@ -236,6 +246,8 @@ ApplicationController.prototype.viewPushed = function() {
  * @param {Object} [args] - arguments to pass to the previous view controller
  */
 ApplicationController.prototype.popView = function(args) {
+	"use strict";
+
 	// Clear the header/footer
 	this.clearFooter();
 	this.clearHeader();
@@ -256,6 +268,8 @@ ApplicationController.prototype.popView = function(args) {
  * @param {Object} [args] - arguments to pass to the revealed view controller
  */
 ApplicationController.prototype.viewPopped = function(args) {
+	"use strict";
+
 	// Call the view controller's activate method
 	this.viewStack[this.viewStack.length - 1].controller.activate(args);
 	
@@ -276,6 +290,8 @@ ApplicationController.prototype.viewPopped = function(args) {
  * @param {Object} [args] - arguments to pass to the view controller
  */
 ApplicationController.prototype.show = function(onSuccess, args) {
+	"use strict";
+
 	// Hide the scroll helper
 	this.hideScrollHelper();
 
@@ -305,6 +321,8 @@ ApplicationController.prototype.show = function(onSuccess, args) {
  * @desc Saves the current scroll position of the active view
  */
 ApplicationController.prototype.getScrollPosition = function() {
+	"use strict";
+
 	this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").scrollTop();
 };
 
@@ -316,6 +334,8 @@ ApplicationController.prototype.getScrollPosition = function() {
  * @desc Restores the saved scroll position of the active view
  */
 ApplicationController.prototype.setScrollPosition = function() {
+	"use strict";
+
 	// If the scroll position is -1, set it to the bottom element
 	if (-1 === this.viewStack[this.viewStack.length - 1].scrollPos) {
 		this.viewStack[this.viewStack.length - 1].scrollPos = $("#content").children(":first").children(":last").position().top;
@@ -333,6 +353,8 @@ ApplicationController.prototype.setScrollPosition = function() {
  * @desc Toggles the now loading indicator
  */
 ApplicationController.prototype.contentShown = function() {
+	"use strict";
+
 	if ($("#contentWrapper").hasClass("loading")) {
 		$("#contentWrapper").removeClass("loading");
 		$("#contentWrapper").addClass("loaded");
@@ -350,6 +372,8 @@ ApplicationController.prototype.contentShown = function() {
  * @desc Displays the view header (contents of the header are set by the view controller)
  */
 ApplicationController.prototype.setHeader = function() {
+	"use strict";
+
 	// If the view controller specified a left-hand button, set it up
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
 		// Bind the event handler for the button
@@ -405,6 +429,8 @@ ApplicationController.prototype.setHeader = function() {
  * @desc Clears and hides the view header
  */
 ApplicationController.prototype.clearHeader = function() {
+	"use strict";
+
 	// If the view controller specified a left-hand button, unbind the event handler
 	if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
 		$("#headerLeftButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
@@ -432,6 +458,8 @@ ApplicationController.prototype.clearHeader = function() {
  * @desc Displays the view footer (contents of the footer are set by the view controller)
  */
 ApplicationController.prototype.setFooter = function() {
+	"use strict";
+
 	// Only proceed if the view controller specified a footer
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 		// If the view controller specified a left-hand button, set it up
@@ -489,6 +517,8 @@ ApplicationController.prototype.setFooter = function() {
  * @desc Clears and hides the view footer
  */
 ApplicationController.prototype.clearFooter = function() {
+	"use strict";
+
 	// Only proceed if the view controller specified a footer
 	if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 		// If the view controller specified a left-hand button, unbind the event handler
@@ -520,6 +550,8 @@ ApplicationController.prototype.clearFooter = function() {
  * @desc Sets the height of the content area to the available height less any space required by the header/footer
  */
 ApplicationController.prototype.setContentHeight = function() {
+	"use strict";
+
 	$("#content").children(":first").outerHeight(window.innerHeight - $("#header").outerHeight() - $("#footer").outerHeight());
 };
 
@@ -532,6 +564,8 @@ ApplicationController.prototype.setContentHeight = function() {
  * @param {Notice} notice - the notice to display
  */
 ApplicationController.prototype.showNotice = function(notice) {
+	"use strict";
+
 	// Create a div for the new notice
 	var noticeContainer = $("<div>")
 		.addClass("notice")
@@ -615,6 +649,8 @@ ApplicationController.prototype.showNotice = function(notice) {
  * @param {Object} notice - HTML DOM element of the notice
  */
 ApplicationController.prototype.hideNotice = function(notice) {
+	"use strict";
+
 	// Update the height of the notices stack to reclaim the space for the notice
 	this.noticeStack.height += notice.height();
 
@@ -634,6 +670,8 @@ ApplicationController.prototype.hideNotice = function(notice) {
  * @param {Object} [event] - a browser event object
  */
 ApplicationController.prototype.noticeHidden = function(event) {
+	"use strict";
+
 	// Slide down the notices container to the height of the notices stack
 	$("#notices").animate({top: "-=" + this.noticeStack.height}, $.proxy(this.noticesMoved, this));
 };
@@ -647,6 +685,8 @@ ApplicationController.prototype.noticeHidden = function(event) {
  * @param {Object} [event] - a browser event object
  */
 ApplicationController.prototype.noticesMoved = function(event) {
+	"use strict";
+
 	// Iterate in reverse order over the notices in the stack
 	for (var i = this.noticeStack.notice.length - 1; i >= 0; i--) {
 		// Check if the notice has been acknowledged
@@ -673,6 +713,8 @@ ApplicationController.prototype.noticesMoved = function(event) {
  * @desc Displays the scroll helper
  */
 ApplicationController.prototype.showScrollHelper = function() {
+	"use strict";
+
 	$("#abc").show();
 };
 
@@ -684,6 +726,8 @@ ApplicationController.prototype.showScrollHelper = function() {
  * @desc Hides the scroll helper
  */
 ApplicationController.prototype.hideScrollHelper = function() {
+	"use strict";
+
 	$("#abc").hide();
 };
 
@@ -696,6 +740,8 @@ ApplicationController.prototype.hideScrollHelper = function() {
  * @param {Setting} lastSyncTime - a Setting object containing the last time an import/export was run
  */
 ApplicationController.prototype.gotLastSyncTime = function(lastSyncTime) {
+	"use strict";
+
 	// Only proceed if we have a last sync time
 	if (lastSyncTime.settingValue) {
 		// Constants for the notification threshold

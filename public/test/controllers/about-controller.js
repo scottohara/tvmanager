@@ -1,14 +1,20 @@
 module("about-controller", {
 	setup: function() {
+		"use strict";
+
 		this.aboutController = new AboutController();
 	}
 });
 
 test("constructor", 1, function() {
+	"use strict";
+
 	ok(this.aboutController, "Instantiate AboutController object");
 });
 
 test("setup", 8, function() {
+	"use strict";
+
 	var originalProgram = Program;
 	var originalSeries = Series;
 	var originalEpisode = Episode;
@@ -76,16 +82,22 @@ test("setup", 8, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.aboutController.goBack();
 });
 
 test("checkForUpdate - updating", 1, function() {
+	"use strict";
+
 	this.aboutController.updating = true;
 	this.aboutController.checkForUpdate();
 	ok(this.aboutController.updating, "Update blocked by semaphore");
 });
 
 test("checkForUpdate - not updating", 2, function() {
+	"use strict";
+
 	this.aboutController.checkForUpdate();
 	same(appController.notice.pop(), {
 		label: "Updated",

@@ -14,6 +14,8 @@
  * @constructor
  */
 var CacheController = function () {
+	"use strict";
+
 	// Define the list of status' for the application cache
 	this.cacheStatusValues = [
 		'uncached',
@@ -83,6 +85,8 @@ var CacheController = function () {
  * @param {Function} callback - a function to call during/after the cache has been updated
  */
 CacheController.prototype.update = function(callback) {
+	"use strict";
+
 	// Check that the browser supports the HTML5 application cache
 	if (window.applicationCache) {
 		this.callback = callback;

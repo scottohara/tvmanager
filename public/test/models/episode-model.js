@@ -1,5 +1,7 @@
 module("episode-model", {
 	setup: function() {
+		"use strict";
+
 		this.id = 1;
 		this.episodeName = "test-episode";
 		this.status = "Expected";
@@ -17,6 +19,8 @@ module("episode-model", {
 });
 
 test("constructor", 12, function() {
+	"use strict";
+
 	ok(this.episode, "Instantiate Episode object");
 	equals(this.episode.id, this.id, "id property");
 	equals(this.episode.episodeName, this.episodeName, "episodeName property");
@@ -32,6 +36,8 @@ test("constructor", 12, function() {
 });
 
 test("save - update fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.id + ", " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
 	this.episode.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -42,6 +48,8 @@ test("save - update fail", 4, function() {
 });
 
 test("save - update no rows affected", 4, function() {
+	"use strict";
+
 	appController.db.noRowsAffectedAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.id + ", " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
 	this.episode.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -52,6 +60,8 @@ test("save - update no rows affected", 4, function() {
 });
 
 test("save - update Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Episode', " + this.id + ", 'modified')");
 	this.episode.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -62,6 +72,8 @@ test("save - update Sync fail", 4, function() {
 });
 
 test("save - update success", 5, function() {
+	"use strict";
+
 	this.episode.save($.proxy(function(id) {
 		equals(id, this.id, "Invoke callback");
 	}, this));
@@ -72,6 +84,8 @@ test("save - update success", 5, function() {
 });
 
 test("save - insert fail", 4, function() {
+	"use strict";
+
 	this.episode.id = null;
 	appController.db.failAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (%, " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
 	this.episode.save(function(id) {
@@ -83,6 +97,8 @@ test("save - insert fail", 4, function() {
 });
 
 test("save - insert no rows affected", 4, function() {
+	"use strict";
+
 	this.episode.id = null;
 	appController.db.noRowsAffectedAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (%, " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
 	this.episode.save(function(id) {
@@ -94,6 +110,8 @@ test("save - insert no rows affected", 4, function() {
 });
 
 test("save - insert Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Episode', %, 'modified')");
 	this.episode.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -104,6 +122,8 @@ test("save - insert Sync fail", 4, function() {
 });
 
 test("save - insert success", 5, function() {
+	"use strict";
+
 	this.episode.id = null;
 	this.episode.save($.proxy(function(id) {
 		notEqual(id, null, "Invoke callback");
@@ -115,12 +135,16 @@ test("save - insert success", 5, function() {
 });
 
 test("remove - no rows affected", 1, function() {
+	"use strict";
+
 	this.episode.id = null;
 	this.episode.remove();
 	equals(appController.db.commands.length, 0, "Number of SQL commands");
 });
 
 test("remove - insert Sync fail", 5, function() {
+	"use strict";
+
 	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) VALUES ('Episode', " + this.id + ", 'deleted')");
 	this.episode.remove();
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
@@ -131,6 +155,8 @@ test("remove - insert Sync fail", 5, function() {
 });
 
 test("remove - fail", 5, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Episode WHERE EpisodeID = " + this.id);
 	this.episode.remove();
 	equals(appController.db.commands.length, 2, "Number of SQL commands");
@@ -141,6 +167,8 @@ test("remove - fail", 5, function() {
 });
 
 test("remove - success", 6, function() {
+	"use strict";
+
 	this.episode.remove();
 	equals(appController.db.commands.length, 2, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
@@ -151,6 +179,8 @@ test("remove - success", 6, function() {
 });
 
 test("toJson", 1, function() {
+	"use strict";
+
 	same(this.episode.toJson(), {
 		id: this.id,
 		episodeName: this.episodeName,
@@ -164,12 +194,16 @@ test("toJson", 1, function() {
 });
 
 test("setStatus", 1, function() {
+	"use strict";
+
 	this.status = "Watched";
 	this.episode.setStatus(this.status);
 	equals(this.episode.status, this.status, "status property");
 });
 
 test("setStatusDate", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "Recorded without date",
@@ -399,6 +433,8 @@ test("setStatusDate", function() {
 });
 
 test("setUnverified", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "Watched & Unverified",
@@ -436,6 +472,8 @@ test("setUnverified", function() {
 });
 
 test("listBySeries - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE e.SeriesID = " + this.seriesId + " ORDER BY e.Sequence, e.EpisodeID");
 	Episode.listBySeries(this.seriesId, function(episodeList) {
 		same(episodeList, [], "Invoke callback");
@@ -446,6 +484,8 @@ test("listBySeries - fail", 4, function() {
 });
 
 test("listBySeries - no rows affected", 4, function() {
+	"use strict";
+
 	appController.db.noRowsAffectedAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE e.SeriesID = " + this.seriesId + " ORDER BY e.Sequence, e.EpisodeID");
 	Episode.listBySeries(this.seriesId, function(episodeList) {
 		same(episodeList, [], "Invoke callback");
@@ -456,6 +496,8 @@ test("listBySeries - no rows affected", 4, function() {
 });
 
 test("listBySeries - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		EpisodeID: this.id,
 		Name: this.episodeName,
@@ -478,6 +520,8 @@ test("listBySeries - success", 4, function() {
 });
 
 test("listByUnscheduled - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)");
 	Episode.listByUnscheduled(function(episodeList) {
 		same(episodeList, [], "Invoke callback");
@@ -488,6 +532,8 @@ test("listByUnscheduled - fail", 4, function() {
 });
 
 test("listByUnscheduled - no rows affected", 4, function() {
+	"use strict";
+
 	appController.db.noRowsAffectedAt("SELECT e.EpisodeID, e.Name, e.Status, e.StatusDate, e.Unverified, e.Unscheduled, e.Sequence, e.SeriesID, s.Name AS SeriesName, s.ProgramID, p.Name AS ProgramName FROM Episode e JOIN Series s ON e.SeriesID = s.SeriesID JOIN Program p ON s.ProgramID = p.ProgramID WHERE	e.Unscheduled = 'true' ORDER BY	CASE WHEN STRFTIME('%m%d', 'now') <= (CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END || SUBSTR(StatusDate, 1, 2)) THEN 0 ELSE 1 END, CASE SUBSTR(StatusDate, 4, 3) WHEN 'Jan' THEN '01' WHEN 'Feb' THEN '02' WHEN 'Mar' THEN '03' WHEN 'Apr' THEN '04' WHEN 'May' THEN '05' WHEN 'Jun' THEN '06' WHEN 'Jul' THEN '07' WHEN 'Aug' THEN '08' WHEN 'Sep' THEN '09' WHEN 'Oct' THEN '10' WHEN 'Nov' THEN '11' WHEN 'Dec' THEN '12' END, SUBSTR(StatusDate, 1, 2)");
 	Episode.listByUnscheduled(function(episodeList) {
 		same(episodeList, [], "Invoke callback");
@@ -498,6 +544,8 @@ test("listByUnscheduled - no rows affected", 4, function() {
 });
 
 test("listByUnscheduled - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		EpisodeID: this.id,
 		Name: this.episodeName,
@@ -520,6 +568,8 @@ test("listByUnscheduled - success", 4, function() {
 });
 
 test("find - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence FROM Episode WHERE EpisodeID = " + this.id);
 	Episode.find(this.id, function(episode) {
 		equals(episode, null, "Invoke callback");
@@ -530,6 +580,8 @@ test("find - fail", 4, function() {
 });
 
 test("find - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		EpisodeID: this.id,
 		Name: this.episodeName,
@@ -554,6 +606,8 @@ test("find - success", 4, function() {
 });
 
 test("totalCount - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT COUNT(*) AS EpisodeCount FROM Episode ");
 	Episode.totalCount(function(count) {
 		equals(count, 0, "Invoke callback");
@@ -564,6 +618,8 @@ test("totalCount - fail", 4, function() {
 });
 
 test("totalCount - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		EpisodeCount: 1
 	}]);
@@ -576,6 +632,8 @@ test("totalCount - success", 4, function() {
 });
 
 test("countByStatus - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT COUNT(*) AS EpisodeCount FROM Episode WHERE Status = " + this.status);
 	Episode.countByStatus(this.status, function(count) {
 		equals(count, 0, "Invoke callback");
@@ -586,6 +644,8 @@ test("countByStatus - fail", 4, function() {
 });
 
 test("countByStatus - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		EpisodeCount: 1
 	}]);
@@ -598,6 +658,8 @@ test("countByStatus - success", 4, function() {
 });
 
 test("removeAll - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Episode");
 	Episode.removeAll(function(message) {
 		notEqual(message, null, "Invoke callback");
@@ -608,6 +670,8 @@ test("removeAll - fail", 4, function() {
 });
 
 test("removeAll - success", 4, function() {
+	"use strict";
+
 	Episode.removeAll(function(message) {
 		equals(message, null, "Invoke callback");
 	});
@@ -617,6 +681,8 @@ test("removeAll - success", 4, function() {
 });
 
 test("fromJson", 1, function() {
+	"use strict";
+
 	var episode = Episode.fromJson({
 		id: this.id,
 		episodeName: this.episodeName,

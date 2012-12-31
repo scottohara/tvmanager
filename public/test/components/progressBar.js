@@ -1,5 +1,7 @@
 module("progressBar", {
 	setup: function() {
+		"use strict";
+
 		this.total = 1;
 		this.sections = [];
 		this.progressBar = new ProgressBar(this.total, this.sections);
@@ -7,12 +9,16 @@ module("progressBar", {
 });
 
 test("constructor", 3, function() {
+	"use strict";
+
 	ok(this.progressBar, "Instantiate ProgressBar object");
 	equals(this.progressBar.total, this.total, "total property");
 	equals(this.progressBar.sections, this.sections, "sections property");
 });
 
 test("render", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "zero total",
@@ -51,12 +57,16 @@ test("render", function() {
 });
 
 test("setTotal", 1, function() {
+	"use strict";
+
 	this.total = 2;
 	this.progressBar.setTotal(this.total);
 	equals(this.progressBar.total, this.total, "total property");
 });
 
 test("setSection", 1, function() {
+	"use strict";
+
 	this.sections.push("section-one");
 	this.sections.push("section-two");
 	for (var i = 0; i < this.sections.length; i++) {

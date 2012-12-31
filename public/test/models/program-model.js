@@ -1,5 +1,7 @@
 module("program-model", {
 	setup: function() {
+		"use strict";
+
 		this.id = 1;
 		this.programName = "test-program";
 		this.seriesCount = 1;
@@ -15,12 +17,16 @@ module("program-model", {
 		appController.db = new DatabaseMock();
 	},
 	teardown: function() {
+		"use strict";
+
 		ProgressBar = this.originalProgressBar;
 		Series = this.originalSeries;
 	}
 });
 
 test("constructor", 9, function() {
+	"use strict";
+
 	ok(this.program, "Instantiate Program object");
 	equals(this.program.id, this.id, "id property");
 	equals(this.program.programName, this.programName, "programName property");
@@ -33,6 +39,8 @@ test("constructor", 9, function() {
 });
 
 test("save - update fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -43,6 +51,8 @@ test("save - update fail", 4, function() {
 });
 
 test("save - update no rows affected", 4, function() {
+	"use strict";
+
 	appController.db.noRowsAffectedAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -53,6 +63,8 @@ test("save - update no rows affected", 4, function() {
 });
 
 test("save - update Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Program', " + this.id + ", 'modified')");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -63,6 +75,8 @@ test("save - update Sync fail", 4, function() {
 });
 
 test("save - update success", 5, function() {
+	"use strict";
+
 	this.program.save($.proxy(function(id) {
 		equals(id, this.id, "Invoke callback");
 	}, this));
@@ -73,6 +87,8 @@ test("save - update success", 5, function() {
 });
 
 test("save - insert fail", 4, function() {
+	"use strict";
+
 	this.program.id = null;
 	appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (%, " + this.programName + ")");
 	this.program.save(function(id) {
@@ -84,6 +100,8 @@ test("save - insert fail", 4, function() {
 });
 
 test("save - insert no rows affected", 4, function() {
+	"use strict";
+
 	this.program.id = null;
 	appController.db.noRowsAffectedAt("REPLACE INTO Program (ProgramID, Name) VALUES (%, " + this.programName + ")");
 	this.program.save(function(id) {
@@ -95,6 +113,8 @@ test("save - insert no rows affected", 4, function() {
 });
 
 test("save - insert Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Program', %, 'modified')");
 	this.program.save(function(id) {
 		equals(id, null, "Invoke callback");
@@ -105,6 +125,8 @@ test("save - insert Sync fail", 4, function() {
 });
 
 test("save - insert success", 5, function() {
+	"use strict";
+
 	this.program.id = null;
 	this.program.save(function(id) {
 		notEqual(id, null, "Invoke callback");
@@ -116,12 +138,16 @@ test("save - insert success", 5, function() {
 });
 
 test("remove - no rows affected", 1, function() {
+	"use strict";
+
 	this.program.id = null;
 	this.program.remove();
 	equals(appController.db.commands.length, 0, "Number of SQL commands");
 });
 
 test("remove - insert Episode Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = " + this.id);
 	this.program.remove();
 	equals(appController.db.commands.length, 1, "Number of SQL commands");
@@ -131,6 +157,8 @@ test("remove - insert Episode Sync fail", 4, function() {
 });
 
 test("remove - delete Episode fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = " + this.id + ")");
 	this.program.remove();
 	equals(appController.db.commands.length, 2, "Number of SQL commands");
@@ -140,6 +168,8 @@ test("remove - delete Episode fail", 4, function() {
 });
 
 test("remove - insert Series Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'deleted' FROM Series WHERE ProgramID = " + this.id);
 	this.program.remove();
 	equals(appController.db.commands.length, 3, "Number of SQL commands");
@@ -149,6 +179,8 @@ test("remove - insert Series Sync fail", 4, function() {
 });
 
 test("remove - delete Series fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Series WHERE ProgramID = " + this.id);
 	this.program.remove();
 	equals(appController.db.commands.length, 4, "Number of SQL commands");
@@ -158,6 +190,8 @@ test("remove - delete Series fail", 4, function() {
 });
 
 test("remove - insert Program Sync fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) VALUES ('Program', " + this.id + ", 'deleted')");
 	this.program.remove();
 	equals(appController.db.commands.length, 5, "Number of SQL commands");
@@ -167,6 +201,8 @@ test("remove - insert Program Sync fail", 4, function() {
 });
 
 test("remove - delete Program fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Program WHERE ProgramID = " + this.id);
 	this.program.remove();
 	equals(appController.db.commands.length, 6, "Number of SQL commands");
@@ -176,6 +212,8 @@ test("remove - delete Program fail", 4, function() {
 });
 
 test("remove - success", 5, function() {
+	"use strict";
+
 	this.program.remove();
 	equals(appController.db.commands.length, 6, "Number of SQL commands");
 	equals(appController.db.errorMessage, null, "Error message");
@@ -185,6 +223,8 @@ test("remove - success", 5, function() {
 });
 
 test("toJson", 1, function() {
+	"use strict";
+
 	same(this.program.toJson(), {
 		id: this.id,
 		programName: this.programName
@@ -192,6 +232,8 @@ test("toJson", 1, function() {
 });
 
 test("setProgramName", 2, function() {
+	"use strict";
+
 	this.programName = "another-test-program";
 	this.programGroup = "A";
 	this.program.setProgramName(this.programName);
@@ -200,6 +242,8 @@ test("setProgramName", 2, function() {
 });
 
 test("setEpisodeCount", 2, function() {
+	"use strict";
+
 	this.episodeCount = 2;
 	this.program.setEpisodeCount(this.episodeCount);
 	equals(this.program.episodeCount, this.episodeCount, "episodeCount property");
@@ -207,12 +251,16 @@ test("setEpisodeCount", 2, function() {
 });
 
 test("setWatchedCount", 1, function() {
+	"use strict";
+
 	this.watchedCount = 2;
 	this.program.setWatchedCount(this.watchedCount);
 	equals(this.program.watchedCount, this.watchedCount, "watchedCount property");
 });
 
 test("setWatchedProgress", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "null watched count",
@@ -252,6 +300,8 @@ test("setWatchedProgress", function() {
 });
 
 test("setRecordedCount", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "null recorded count",
@@ -291,6 +341,8 @@ test("setRecordedCount", function() {
 });
 
 test("setExpectedCount", function() {
+	"use strict";
+
 	var testParams = [
 		{
 			description: "null expected count",
@@ -330,6 +382,8 @@ test("setExpectedCount", function() {
 });
 
 test("list - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT p.ProgramID, p.Name, COUNT(DISTINCT s.SeriesID) AS SeriesCount, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e on s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY p.ProgramID ORDER BY p.Name");
 	Program.list(function(programList) {
 		same(programList, [], "Invoke callback");
@@ -340,6 +394,8 @@ test("list - fail", 4, function() {
 });
 
 test("list - no rows affected", 4, function() {
+	"use strict";
+
 	appController.db.noRowsAffectedAt("SELECT p.ProgramID, p.Name, COUNT(DISTINCT s.SeriesID) AS SeriesCount, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e on s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY p.ProgramID ORDER BY p.Name");
 	Program.list(function(programList) {
 		same(programList, [], "Invoke callback");
@@ -350,6 +406,8 @@ test("list - no rows affected", 4, function() {
 });
 
 test("list - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		ProgramID: this.id,
 		Name: this.programName,
@@ -368,6 +426,8 @@ test("list - success", 4, function() {
 });
 
 test("find - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT ProgramID, Name FROM Program WHERE ProgramID = " + this.id);
 	Program.find(this.id, function(program) {
 		equals(program, null, "Invoke callback");
@@ -378,6 +438,8 @@ test("find - fail", 4, function() {
 });
 
 test("find - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		ProgramID: this.id,
 		Name: this.programName
@@ -398,6 +460,8 @@ test("find - success", 4, function() {
 });
 
 test("count - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("SELECT COUNT(*) AS ProgramCount FROM Program");
 	Program.count(function(count) {
 		equals(count, 0, "Invoke callback");
@@ -408,6 +472,8 @@ test("count - fail", 4, function() {
 });
 
 test("count - success", 4, function() {
+	"use strict";
+
 	appController.db.addResultRows([{
 		ProgramCount: 1
 	}]);
@@ -420,6 +486,8 @@ test("count - success", 4, function() {
 });
 
 test("removeAll - fail", 4, function() {
+	"use strict";
+
 	appController.db.failAt("DELETE FROM Program");
 	Program.removeAll(function(message) {
 		notEqual(message, null, "Invoke callback");
@@ -430,6 +498,8 @@ test("removeAll - fail", 4, function() {
 });
 
 test("removeAll - success", 4, function() {
+	"use strict";
+
 	Program.removeAll(function(message) {
 		equals(message, null, "Invoke callback");
 	});
@@ -439,6 +509,8 @@ test("removeAll - success", 4, function() {
 });
 
 test("fromJson", 1, function() {
+	"use strict";
+
 	var program = Program.fromJson({
 		id: this.id,
 		programName: this.programName

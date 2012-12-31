@@ -1,4 +1,6 @@
 DatabaseMock = function() {
+	"use strict";
+
 	this.commit = true;
 	this.errorMessage = null;
 	this.commands = [];
@@ -7,6 +9,8 @@ DatabaseMock = function() {
 };
 
 DatabaseMock.prototype.transaction = function(callback, errorCallback, successCallback) {
+	"use strict";
+
 	var tx = new TransactionMock(this);
 	callback(tx);
 	if (this.commit) {
@@ -24,10 +28,14 @@ DatabaseMock.prototype.transaction = function(callback, errorCallback, successCa
 };
 
 DatabaseMock.prototype.readTransaction = function(callback, errorCallback, successCallback) {
+	"use strict";
+
 	this.transaction(callback, errorCallback, successCallback);
 };
 
 DatabaseMock.prototype.changeVersion = function(initialVersion, expectedVersion, callback, errorCallback, successCallback) {
+	"use strict";
+
 	equals(initialVersion, this.version, "Initial version");
 	this.transaction(callback, errorCallback, successCallback);
 	if (this.commit) {
@@ -36,14 +44,20 @@ DatabaseMock.prototype.changeVersion = function(initialVersion, expectedVersion,
 };
 
 DatabaseMock.prototype.failAt = function(sql) {
+	"use strict";
+
 	this.failAtSql = new RegExp(sql.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&").replace(/%/, '(.*)'), 'g');
 };
 
 DatabaseMock.prototype.noRowsAffectedAt = function(sql) {
+	"use strict";
+
 	this.noRowsAffectedAtSql = new RegExp(sql.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&").replace(/%/, '(.*)'), 'g');
 };
 
 DatabaseMock.prototype.addResultRows = function(rows) {
+	"use strict";
+
 	this.resultRows = {
 		data: rows,
 		length: rows.length,
@@ -54,10 +68,14 @@ DatabaseMock.prototype.addResultRows = function(rows) {
 };
 
 TransactionMock = function(db) {
+	"use strict";
+
 	this.db = db;
 };
 
 TransactionMock.prototype.executeSql = function(sql, params, successCallback, errorCallback) {
+	"use strict";
+
 	if (this.db.commit) {
 		var commit = false;
 
@@ -127,6 +145,8 @@ TransactionMock.prototype.executeSql = function(sql, params, successCallback, er
 };
 
 TransactionMock.prototype.executeError = function(message) {
+	"use strict";
+
 	var e = new Error(message);
 	e.name = "ExecuteError";
 	throw e;

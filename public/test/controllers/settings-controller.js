@@ -1,14 +1,20 @@
 module("settings-controller", {
 	setup: function() {
+		"use strict";
+
 		this.settingsController = new SettingsController();
 	}
 });
 
 test("constructor", 1, function() {
+	"use strict";
+
 	ok(this.settingsController, "Instantiate SettingsController object");
 });
 
 test("setup", 11, function() {
+	"use strict";
+
 	var dataSyncRow = $("<div>")
 		.attr("id", "dataSyncRow")
 		.hide()
@@ -65,5 +71,7 @@ test("setup", 11, function() {
 });
 
 test("goBack", 1, function() {
+	"use strict";
+
 	this.settingsController.goBack();
 });
