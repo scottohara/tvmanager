@@ -57,17 +57,6 @@ predef:             # Names of predefined global variables - comma-separated str
   - "openDatabase"
   - "Date"
 
-  # Qunit
-  - "equals"
-  - "ok"
-  - "same"
-  - "test"
-  - "asyncTest"
-  - "module"
-  - "expect"
-  - "start"
-  - "notEqual"
-
   # Phantom.js
   - "main"
   - "page"
@@ -76,64 +65,12 @@ predef:             # Names of predefined global variables - comma-separated str
   - "waitFor"
   - "WebPage"
 
+  # Require.js
+  - "define"
+  - "require"
+
   # Framework
-  - "$"
-  - "SpinningWheel"
-  - "abc"
-  - "Abc"
-  - "hex_md5"
-  - "uuid"
-
-  # Models
-  - "Program"
-  - "Series"
-  - "Episode"
-  - "Setting"
-  - "Sync"
-
-  # Components
-  - "List"
-  - "ProgressBar"
-  - "TouchEventProxy"
-
-  # Controllers
-  - "AboutController"
-  - "ApplicationController"
-  - "appController"
-  - "CacheController"
-  - "DatabaseController"
-  - "DataSyncController"
-  - "EpisodeController"
-  - "EpisodesController"
-  - "ProgramController"
-  - "ProgramsController"
-  - "RegistrationController"
-  - "ReportController"
-  - "ScheduleController"
-  - "SeriesController"
-  - "SeriesListController"
-  - "SettingsController"
-  - "UnscheduledController"
-
-  # Mocks
-  - "ApplicationControllerMock"
-  - "CacheControllerMock"
-  - "DatabaseControllerMock"
-  - "DatabaseControllerMockFail"
-  - "DatabaseControllerMockNotModified"
-  - "DatabaseControllerMockUpgrade"
-  - "DatabaseMock"
-  - "EpisodeMock"
-  - "jQueryMock"
-  - "ListMock"
-  - "ProgramMock"
-  - "ProgressBarMock"
-  - "SeriesMock"
-  - "SettingMock"
-  - "SyncMock"
-  - "SpinningWheelMock"
-  - "TestController"
-  - "TransactionMock"
+  - "$"             # only needed for run-qunit.js, which does not use AMD/require.js
 
 browser:  true      # true if the standard browser globals should be predefined
 rhino:    false     # true if the Rhino environment globals should be predefined

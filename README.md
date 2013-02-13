@@ -49,6 +49,8 @@ On the server side, it's a Ruby Sinatra app. There's not much happening on the s
 
 [jQuery](http://jquery.com/) is used throughout, for DOM manipulation & AJAX calls.
 
+[require.js](http://requirejs.org) is used for asynchronous module loading.
+
 [QUnit](http://docs.jquery.com/Qunit) is used for unit testing.
 
 [JSCoverage](http://siliconforks.com/jscoverage/) is used to measure unit test code coverage.
@@ -157,20 +159,14 @@ Alternatively, you can start the server manually using the -E argument (eg. `rac
 
 To run the entire QUnit test suite, simply browse to [http://localhost:9393/test/index.html](http://localhost:9393/test/index.html)
 
-To run a single QUnit test module, append '?module-name' (eg. [http://localhost:9393/test/index.html?application-controller](http://localhost:9393/test/index.html?application-controller))
+To run a single QUnit test module, append '?module=module-name' (eg. [http://localhost:9393/test/index.html?module=application-controller](http://localhost:9393/test/index.html?module=application-controller))
 
 Once the test suite is passing cleanly, to check the test suite coverage:
 
 * install [JSCoverage](http://siliconforks.com/jscoverage/)
 * run the test:coverage rake task (eg. `rake test:coverage`). This generates an instrumented copy of the code for tracking coverage.
 * browse to [http://localhost:9292/jscoverage.html?test/index.html&missing=true](http://localhost:9292/jscoverage.html?test/index.html&missing=true) (Note: unlike the test:client task, which uses shotgun to start the server on a default port of 9393; the test:coverage task uses rackup on port 9292. For some reason, jscoverage wouldn't run properly using shotgun)
-* on the Summary tab, check that we have >=99% total coverage
-
-Coverage Exceptions:
-
-* database-controller.js (96%): 2 lines that handle upgrading to an earlier version are not tested
-* episodes-controller.js (98%): 1 line that sets the jQueryUI sortable helper offset is not tested
-* database-mock.js (97%): 2 lines that handle malformed SQL commands (mismatched parameters & tokens) are not tested
+* on the Summary tab, check that we have 100% total coverage
 
 To run lint:
 

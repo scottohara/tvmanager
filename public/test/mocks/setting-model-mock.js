@@ -1,21 +1,22 @@
-SettingMock = function(settingName, settingValue) {
-	"use strict";
+define(
+	function() {
+		"use strict";
 
-	this.settingValue = settingValue;
-};
+		var SettingMock = function(settingName, settingValue) {
+			this.settingValue = settingValue;
+		};
 
-SettingMock.prototype.save = function() {
-	"use strict";
-};
+		SettingMock.prototype.save = function() {
+		};
 
-SettingMock.setting = {};
+		SettingMock.setting = {};
 
-SettingMock.get = function(settingName, callback) {
-	"use strict";
+		SettingMock.get = function(settingName, callback) {
+			callback({
+				settingValue: this.setting[settingName]
+			});
+		};
 
-	callback({
-		settingValue: this.setting[settingName]
-	});
-};
-
-
+		return SettingMock;
+	}
+);

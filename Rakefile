@@ -17,7 +17,7 @@ def start_testcoverage_server(root_dir, source_dir, &block)
 
 	dest_dir = File.join(root_dir, 'testCoverage')
 
-	result = sh "jscoverage --no-instrument=framework --no-instrument=test/framework #{source_dir} #{dest_dir}"
+	result = sh "jscoverage --no-instrument=framework --no-instrument=test/framework --no-instrument=test/index.js #{source_dir} #{dest_dir}"
 	abort result unless 0.eql? $?.to_i  
 
 	puts "done!"

@@ -1,39 +1,60 @@
-ProgramMock = {
-	saved: true,
-	removed: true,
-	programJson: [],
-	programs: [],
-	save: function(callback) {
+define(
+	function() {
 		"use strict";
 
-		if (ProgramMock.saved) {
-			callback(999);
-		} else {
-			callback();
-		}
-	},
-	list: function(callback) {
-		"use strict";
+		var ProgramMock = function(id, programName, seriesCount, episodeCount, watchedCount, recordedCount, expectedCount) {
+			this.id = id;
+			this.programName = programName;
+			this.seriesCount = seriesCount;
+			this.episodeCount = episodeCount;
+			this.watchedCount = watchedCount;
+			this.recordedCount = recordedCount;
+			this.expectedCount = expectedCount;
+		};
 
-		callback(this.programs);
-	},
-	find: function(id, callback) {
-		"use strict";
+		ProgramMock.prototype.save = function(callback) {
+			if (ProgramMock.saved) {
+				callback(999);
+			} else {
+				callback();
+			}
+		};
 
-		callback(new Program(id, "test-program"));
-	},
-	count: function(callback) {
-		"use strict";
+		ProgramMock.prototype.remove = function() {
+		};
 
-		callback(1);
-	},
-	removeAll: function(callback) {
-		"use strict";
+		ProgramMock.prototype.toJson = function() {
+			return {};
+		};
 
-		if (ProgramMock.removed) {
-			callback();
-		} else {
-			callback("Force failed");
-		}
+		ProgramMock.saved = true;
+		ProgramMock.removed = true;
+		ProgramMock.programs = [];
+
+		ProgramMock.list = function(callback) {
+			callback(ProgramMock.programs);
+		};
+
+		ProgramMock.find = function(id, callback) {
+			callback(new ProgramMock(id, "test-program"));
+		};
+
+		ProgramMock.count = function(callback) {
+			callback(1);
+		};
+
+		ProgramMock.removeAll = function(callback) {
+			if (ProgramMock.removed) {
+				callback();
+			} else {
+				callback("Force failed");
+			}
+		};
+
+		ProgramMock.fromJson = function(program) {
+			return new ProgramMock();
+		};
+
+		return ProgramMock;
 	}
-};
+);

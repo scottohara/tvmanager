@@ -1,73 +1,79 @@
-ApplicationControllerMock = function() {
-	"use strict";
+define(
+	[
+		'test/mocks/database-mock',
+		'test/mocks/cache-controller-mock',
+		'models/setting-model',
+		'test/framework/qunit'
+	],
 
-	this.db = new DatabaseMock();
-	this.cache = new CacheControllerMock();
-	this.notice = [];
-	this.appVersion = "1.0";
-};
+	function(DatabaseMock, CacheControllerMock, Setting, QUnit) {
+		"use strict";
 
-ApplicationControllerMock.prototype.getScrollPosition = function() {
-	"use strict";
-};
+		var ApplicationControllerMock = function() {
+			// App controller is a singleton, so if an instance already exists, return it
+			if (ApplicationControllerMock.prototype.singletonInstance) {
+				return ApplicationControllerMock.prototype.singletonInstance;
+			}
 
-ApplicationControllerMock.prototype.setScrollPosition = function() {
-	"use strict";
+			// No existing instance, so make this instance the singleton
+			ApplicationControllerMock.prototype.singletonInstance = this;
 
-	ok(true, "Set scroll position");
-};
+			this.db = new DatabaseMock();
+			this.cache = new CacheControllerMock();
+			this.notice = [];
+			this.appVersion = "1.0";
+		};
 
-ApplicationControllerMock.prototype.pushView = function(view, args) {
-	"use strict";
+		ApplicationControllerMock.prototype.loadDependencies = function(dependencies, callback) {
+			callback(Setting);
+		};
 
-	this.viewArgs = args;
-	ok(true, "Push " + view + " view");
-};
+		ApplicationControllerMock.prototype.getScrollPosition = function() {
+		};
 
-ApplicationControllerMock.prototype.popView = function() {
-	"use strict";
+		ApplicationControllerMock.prototype.setScrollPosition = function() {
+			QUnit.ok(true, "Set scroll position");
+		};
 
-	ok(true, "Pop view");
-};
+		ApplicationControllerMock.prototype.pushView = function(view, args) {
+			this.viewArgs = args;
+			QUnit.ok(true, "Push " + view + " view");
+		};
 
-ApplicationControllerMock.prototype.showNotice = function(notice) {
-	"use strict";
+		ApplicationControllerMock.prototype.popView = function() {
+			QUnit.ok(true, "Pop view");
+		};
 
-	this.notice.push(notice);
-};
+		ApplicationControllerMock.prototype.showNotice = function(notice) {
+			this.notice.push(notice);
+		};
 
-ApplicationControllerMock.prototype.checkNotice = function(notice) {
-	"use strict";
+		ApplicationControllerMock.prototype.checkNotice = function(notice) {
+			QUnit.deepEqual(notice, this.expectedNotice, "Notice");
+			QUnit.start();
+		};
 
-	same(notice, this.expectedNotice, "Notice");
-	start();
-};
+		ApplicationControllerMock.prototype.contentShown = function(e) {
+			QUnit.ok(true, "Bind " + e.type + " event listener");
+		};
 
-ApplicationControllerMock.prototype.contentShown = function(e) {
-	"use strict";
+		ApplicationControllerMock.prototype.noticesMoved = function(e) {
+			QUnit.ok(true, "Slide notices");
+			QUnit.start();
+		};
 
-	ok(true, "Bind " + e.type + " event listener");
-};
+		ApplicationControllerMock.prototype.clearFooter = function() {
+		};
 
-ApplicationControllerMock.prototype.noticesMoved = function(e) {
-	"use strict";
+		ApplicationControllerMock.prototype.setFooter = function() {
+		};
 
-	ok(true, "Slide notices");
-	start();
-};
+		ApplicationControllerMock.prototype.showScrollHelper = function() {
+		};
 
-ApplicationControllerMock.prototype.clearFooter = function() {
-	"use strict";
-};
+		ApplicationControllerMock.prototype.hideScrollHelper = function() {
+		};
 
-ApplicationControllerMock.prototype.setFooter = function() {
-	"use strict";
-};
-
-ApplicationControllerMock.prototype.showScrollHelper = function() {
-	"use strict";
-};
-
-ApplicationControllerMock.prototype.hideScrollHelper = function() {
-	"use strict";
-};
+		return ApplicationControllerMock;
+	}
+);

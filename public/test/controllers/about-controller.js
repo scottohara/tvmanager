@@ -1,110 +1,94 @@
-module("about-controller", {
-	setup: function() {
+define(
+	[
+		'controllers/about-controller',
+		'controllers/application-controller',
+		'framework/jquery',
+		'test/framework/qunit',
+		'test/mocks/jQuery-mock'
+	],
+
+	function(AboutController, ApplicationController, $, QUnit, jQueryMock) {
 		"use strict";
 
-		this.aboutController = new AboutController();
+		// Get a reference to the application controller singleton
+		var appController = new ApplicationController();
+
+		QUnit.module("about-controller", {
+			setup: function() {
+				this.aboutController = new AboutController();
+			}
+		});
+
+		QUnit.test("constructor", 1, function() {
+			QUnit.ok(this.aboutController, "Instantiate AboutController object");
+		});
+
+		QUnit.test("setup", 8, function() {
+			var sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
+			var totalPrograms = $("<input>")
+				.attr("id", "totalPrograms")
+				.appendTo(sandbox);
+
+			var totalSeries = $("<input>")
+				.attr("id", "totalSeries")
+				.appendTo(sandbox);
+
+			var totalEpisodes = $("<input>")
+				.attr("id", "totalEpisodes")
+				.appendTo(sandbox);
+
+			var databaseVersion = $("<input>")
+				.attr("id", "databaseVersion")
+				.appendTo(sandbox);
+
+			var appVersion = $("<input>")
+				.attr("id", "appVersion")
+				.appendTo(sandbox);
+
+			var update = $("<div>")
+				.attr("id", "update")
+				.appendTo(sandbox);
+
+			this.aboutController.checkForUpdate = function() {
+				QUnit.ok(true, "Bind click event listener");
+			};
+			this.aboutController.goBack = function() {
+				QUnit.ok(true, "Bind back button event listener");
+			};
+
+			jQueryMock.setDefaultContext(sandbox);
+			this.aboutController.setup();
+			QUnit.equal(totalPrograms.val(), "1", "Total Programs");
+			QUnit.equal(totalSeries.val(), "1", "Total Series");
+			QUnit.equal(totalEpisodes.val(), "1 (100% watched)", "Total Episodes");
+			QUnit.equal(databaseVersion.val(), "v1.0", "Database Version");
+			QUnit.equal(appVersion.val(), "v1.0", "App Version");
+			update.trigger("click");
+			this.aboutController.header.leftButton.eventHandler();
+			jQueryMock.clearDefaultContext();
+			sandbox.remove();
+		});
+
+		QUnit.test("goBack", 1, function() {
+			this.aboutController.goBack();
+		});
+
+		QUnit.test("checkForUpdate - updating", 1, function() {
+			this.aboutController.updating = true;
+			this.aboutController.checkForUpdate();
+			QUnit.ok(this.aboutController.updating, "Update blocked by semaphore");
+		});
+
+		QUnit.test("checkForUpdate - not updating", 2, function() {
+			this.aboutController.checkForUpdate();
+			QUnit.deepEqual(appController.notice.pop(), {
+				label: "Updated",
+				leftButton: {
+					style: "redButton",
+					label: "OK"
+				}
+			}, "Update notice");
+			QUnit.ok(!this.aboutController.updating, "Reset semaphore");
+		});
 	}
-});
-
-test("constructor", 1, function() {
-	"use strict";
-
-	ok(this.aboutController, "Instantiate AboutController object");
-});
-
-test("setup", 8, function() {
-	"use strict";
-
-	var originalProgram = Program;
-	var originalSeries = Series;
-	var originalEpisode = Episode;
-
-	Program = ProgramMock;
-	Series = SeriesMock;
-	Episode = EpisodeMock;
-
-	var totalPrograms = $("<input>")
-		.attr("id", "totalPrograms")
-		.hide()
-		.appendTo(document.body);
-
-	var totalSeries = $("<input>")
-		.attr("id", "totalSeries")
-		.hide()
-		.appendTo(document.body);
-
-	var totalEpisodes = $("<input>")
-		.attr("id", "totalEpisodes")
-		.hide()
-		.appendTo(document.body);
-
-	var databaseVersion = $("<input>")
-		.attr("id", "databaseVersion")
-		.hide()
-		.appendTo(document.body);
-
-	var appVersion = $("<input>")
-		.attr("id", "appVersion")
-		.hide()
-		.appendTo(document.body);
-
-	var update = $("<div>")
-		.attr("id", "update")
-		.hide()
-		.appendTo(document.body);
-
-	this.aboutController.checkForUpdate = function() {
-		ok(true, "Bind click event listener");
-	};
-	this.aboutController.goBack = function() {
-		ok(true, "Bind back button event listener");
-	};
-
-	this.aboutController.setup();
-	equals(totalPrograms.val(), "1", "Total Programs");
-	equals(totalSeries.val(), "1", "Total Series");
-	equals(totalEpisodes.val(), "1 (100% watched)", "Total Episodes");
-	equals(databaseVersion.val(), "v1.0", "Database Version");
-	equals(appVersion.val(), "v1.0", "App Version");
-	update.trigger("click");
-	this.aboutController.header.leftButton.eventHandler();
-
-	totalPrograms.remove();
-	totalSeries.remove();
-	totalEpisodes.remove();
-	databaseVersion.remove();
-	appVersion.remove();
-	update.remove();
-
-	Program = originalProgram;
-	Series = originalSeries;
-	Episode = originalEpisode;
-});
-
-test("goBack", 1, function() {
-	"use strict";
-
-	this.aboutController.goBack();
-});
-
-test("checkForUpdate - updating", 1, function() {
-	"use strict";
-
-	this.aboutController.updating = true;
-	this.aboutController.checkForUpdate();
-	ok(this.aboutController.updating, "Update blocked by semaphore");
-});
-
-test("checkForUpdate - not updating", 2, function() {
-	"use strict";
-
-	this.aboutController.checkForUpdate();
-	same(appController.notice.pop(), {
-		label: "Updated",
-		leftButton: {
-			style: "redButton",
-			label: "OK"
-		}
-	}, "Update notice");
-	ok(!this.aboutController.updating, "Reset semaphore");
-});
+);

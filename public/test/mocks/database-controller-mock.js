@@ -1,28 +1,40 @@
-DatabaseControllerMock = function(databaseName, callback, errorCallback) {
-	"use strict";
+define(
+	[
+		'test/mocks/jQuery-mock',
+		'framework/jquery',
+		'test/framework/qunit'
+	],
 
-	callback({initial: "1.1", current: "1.1"});
-	return { version: "1.1" };
-};
+	function(jQueryMock, $, QUnit) {
+		"use strict";
 
-DatabaseControllerMockNotModified = function(databaseName, callback, errorCallback) {
-	"use strict";
+		var DatabaseControllerMock = function(databaseName, callback, errorCallback) {
+			var mode = DatabaseControllerMock.mode;
+			DatabaseControllerMock.mode = null;
 
-	$.get = jQueryMock.originalGet;
-	equals(databaseName, "TVManager", "databaseName property");
-	start();
-};
+			switch (mode) {
+				case "NotModified":
+					$.get = jQueryMock.originalGet;
+					QUnit.equal(databaseName, "TVManager", "databaseName property");
+					QUnit.start();
+					break;
 
-DatabaseControllerMockFail = function(databaseName, callback, errorCallback) {
-	"use strict";
+				case "Fail":
+					errorCallback({message: "Error"});
+					return {};
 
-	errorCallback({message: "Error"});
-	return {};
-};
+				case "Upgrade":
+					callback({initial: "1.0", current: "1.1"});
+					return { version: "1.1" };
 
-DatabaseControllerMockUpgrade = function(databaseName, callback, errorCallback) {
-	"use strict";
+				default:
+					callback({initial: "1.1", current: "1.1"});
+					return { version: "1.1" };
+			}
+		};
 
-	callback({initial: "1.0", current: "1.1"});
-	return { version: "1.1" };
-};
+		DatabaseControllerMock.mode = null;
+
+		return DatabaseControllerMock;
+	}
+);

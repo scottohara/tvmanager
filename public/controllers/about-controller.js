@@ -5,177 +5,182 @@
  * @license MIT
  */
 
-/**
- * @class AboutController
- * @classdesc Controller for the about view
- * @property {HeaderFooter} header - the view header bar
- * @property {Number} episodeTotalCount - the total number of episodes
- * @property {Boolean} updating - indicates whether an application cache update is currently running
- * @this AboutController
- * @constructor
- */
-var AboutController = function () {
-	"use strict";
-};
+define(
+	[
+		'models/program-model',
+		'models/series-model',
+		'models/episode-model',
+		'controllers/application-controller',
+		'framework/jquery'
+	],
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method setup
- * @desc Initialises the controller
- */
-AboutController.prototype.setup = function() {
-	"use strict";
+	/**
+	 * @exports controllers/about-controller
+	 */
+	function(Program, Series, Episode, ApplicationController, $) {
+		"use strict";
 
-	// Setup the header
-	this.header = {
-		label: "About",
-		leftButton: {
-			eventHandler: this.goBack,
-			style: "backButton",
-			label: "Settings"
-		}
-	};
+		// Get a reference to the application controller singleton
+		var appController = new ApplicationController();
 
-	// Get the total number of programs
-	Program.count(this.programCount);
+		/**
+		 * @class AboutController
+		 * @classdesc Controller for the about view
+		 * @property {HeaderFooter} header - the view header bar
+		 * @property {Number} episodeTotalCount - the total number of episodes
+		 * @property {Boolean} updating - indicates whether an application cache update is currently running
+		 * @this AboutController
+		 * @constructor AboutController
+		 */
+		var AboutController = function () {
+		};
 
-	// Get the total number of series
-	Series.count(this.seriesCount);
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method setup
+		 * @desc Initialises the controller
+		 */
+		AboutController.prototype.setup = function() {
+			// Setup the header
+			this.header = {
+				label: "About",
+				leftButton: {
+					eventHandler: this.goBack,
+					style: "backButton",
+					label: "Settings"
+				}
+			};
 
-	// Get the total number of episodes
-	Episode.totalCount($.proxy(this.episodeCount, this));
+			// Get the total number of programs
+			Program.count(this.programCount);
 
-	// Set the version information
-	$("#databaseVersion").val("v" + appController.db.version);
-	$("#appVersion").val("v" + appController.appVersion);
+			// Get the total number of series
+			Series.count(this.seriesCount);
 
-	// Bind an event to the check for updates button
-	$("#update").bind('click', $.proxy(this.checkForUpdate, this));
+			// Get the total number of episodes
+			Episode.totalCount($.proxy(this.episodeCount, this));
 
-	// Set the scroll position
-	appController.setScrollPosition();
-};
+			// Set the version information
+			$("#databaseVersion").val("v" + appController.db.version);
+			$("#appVersion").val("v" + appController.appVersion);
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method goBack
- * @desc Pop the view off the stack
- */
-AboutController.prototype.goBack = function() {
-	"use strict";
+			// Bind an event to the check for updates button
+			$("#update").bind('click', $.proxy(this.checkForUpdate, this));
 
-	appController.popView();
-};
+			// Set the scroll position
+			appController.setScrollPosition();
+		};
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method programCount
- * @desc Displays the total number of programs
- * @param {Number} count - the total number of programs
- */
-AboutController.prototype.programCount = function(count) {
-	"use strict";
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method goBack
+		 * @desc Pop the view off the stack
+		 */
+		AboutController.prototype.goBack = function() {
+			appController.popView();
+		};
 
-	$("#totalPrograms").val(count);
-};
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method programCount
+		 * @desc Displays the total number of programs
+		 * @param {Number} count - the total number of programs
+		 */
+		AboutController.prototype.programCount = function(count) {
+			$("#totalPrograms").val(count);
+		};
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method seriesCount
- * @desc Displays the total number of series
- * @param {Number} count - the total number of series
- */
-AboutController.prototype.seriesCount = function(count) {
-	"use strict";
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method seriesCount
+		 * @desc Displays the total number of series
+		 * @param {Number} count - the total number of series
+		 */
+		AboutController.prototype.seriesCount = function(count) {
+			$("#totalSeries").val(count);
+		};
 
-	$("#totalSeries").val(count);
-};
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method episodeCount
+		 * @desc Sets the total number episodes, and gets the total number of watched episdes
+		 * @param {Number} count - the total number of episodes
+		 */
+		AboutController.prototype.episodeCount = function(count) {
+			// Save the total for later
+			this.episodeTotalCount = count;
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method episodeCount
- * @desc Sets the total number episodes, and gets the total number of watched episdes
- * @param {Number} count - the total number of episodes
- */
-AboutController.prototype.episodeCount = function(count) {
-	"use strict";
+			// Get the total number of watched episodes
+			Episode.countByStatus("Watched", $.proxy(this.watchedCount, this));
+		};
 
-	// Save the total for later
-	this.episodeTotalCount = count;
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method watchedCount
+		 * @desc Calculates the percentage of watched episodes, and displays the total number of episodes and percent watched
+		 * @param {Number} count - the total number of watched episodes
+		 */
+		AboutController.prototype.watchedCount = function(count) {
+			// Calculate the percentage of watched episodes
+			var watchedPercent = this.episodeTotalCount > 0 ? Math.round(count / this.episodeTotalCount * 100, 2) : 0;
 
-	// Get the total number of watched episodes
-	Episode.countByStatus("Watched", $.proxy(this.watchedCount, this));
-};
+			// Display the total number of episodes and percent watched
+			$("#totalEpisodes").val(this.episodeTotalCount + " (" + watchedPercent + "% watched)");
+		};
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method watchedCount
- * @desc Calculates the percentage of watched episodes, and displays the total number of episodes and percent watched
- * @param {Number} count - the total number of watched episodes
- */
-AboutController.prototype.watchedCount = function(count) {
-	"use strict";
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method checkForUpdate
+		 * @desc Updates the application cache
+		 */
+		AboutController.prototype.checkForUpdate = function() {
+			// Check that an update is not currently in progress
+			if (!this.updating) {
+				// Set the updating flag
+				this.updating = true;
 
-	// Calculate the percentage of watched episodes
-	var watchedPercent = this.episodeTotalCount > 0 ? Math.round(count / this.episodeTotalCount * 100, 2) : 0;
+				// Update the application cache
+				appController.cache.update(this.updateChecked);
 
-	// Display the total number of episodes and percent watched
-	$("#totalEpisodes").val(this.episodeTotalCount + " (" + watchedPercent + "% watched)");
-};
+				// Clear the updating flag
+				this.updating = false;
+			}
+		};
 
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method checkForUpdate
- * @desc Updates the application cache
- */
-AboutController.prototype.checkForUpdate = function() {
-	"use strict";
+		/**
+		 * @memberof AboutController
+		 * @this AboutController
+		 * @instance
+		 * @method updateChecked
+		 * @desc Displays a notice from the application cache update
+		 * @param {Boolean} updated - whether or not the cache was updated
+		 * @param {String} message - a success/failure message from the cache controller
+		 */
+		AboutController.prototype.updateChecked = function(updated, message) {
+			// Show the notice
+			appController.showNotice({
+				label: message,
+				leftButton: {
+					style: "redButton",
+					label: "OK"
+				}
+			});
+		};
 
-	// Check that an update is not currently in progress
-	if (!this.updating) {
-		// Set the updating flag
-		this.updating = true;
-
-		// Update the application cache
-		appController.cache.update(this.updateChecked);
-
-		// Clear the updating flag
-		this.updating = false;
+		return AboutController;
 	}
-};
-
-/**
- * @memberof AboutController
- * @this AboutController
- * @instance
- * @method updateChecked
- * @desc Displays a notice from the application cache update
- * @param {Boolean} updated - whether or not the cache was updated
- * @param {String} message - a success/failure message from the cache controller
- */
-AboutController.prototype.updateChecked = function(updated, message) {
-	"use strict";
-
-	// Show the notice
-	appController.showNotice({
-		label: message,
-		leftButton: {
-			style: "redButton",
-			label: "OK"
-		}
-	});
-};
+);

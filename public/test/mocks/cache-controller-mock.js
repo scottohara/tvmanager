@@ -1,13 +1,17 @@
-CacheControllerMock = function() {
-	"use strict";
+define(
+	function() {
+		"use strict";
 
-	this.noticeId = "appCacheUpdateNotice";
-};
+		var CacheControllerMock = function() {
+			this.noticeId = "appCacheUpdateNotice";
+		};
 
-CacheControllerMock.prototype.update = function(callback) {
-	"use strict";
+		CacheControllerMock.prototype.update = function(callback) {
+			callback(this.updated, "Updated", this.noticeId);
+		};
 
-	callback(this.updated, "Updated", this.noticeId);
-};
+		CacheControllerMock.prototype.updated = false;
 
-CacheControllerMock.prototype.updated = false;
+		return CacheControllerMock;
+	}
+);

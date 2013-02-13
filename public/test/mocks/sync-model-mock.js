@@ -1,25 +1,33 @@
-SyncMock = {
-	syncList: [],
-	removed: true,
-	removedCount: 0,
-	list: function(callback) {
+define(
+	function() {
 		"use strict";
 
-		callback(SyncMock.syncList);
-	},
-	count: function(callback) {
-		"use strict";
+		var SyncMock = function() {
+		};
 
-		callback(SyncMock.syncList.length);
-	},
-	removeAll: function(callback) {
-		"use strict";
+		SyncMock.prototype.remove = function() {
+		};
 
-		if (SyncMock.removed) {
-			callback();
-		} else {
-			callback("Force failed");
-		}
+		SyncMock.syncList = [];
+		SyncMock.removed = true;
+		SyncMock.removedCount = 0;
+
+		SyncMock.list = function(callback) {
+			callback(SyncMock.syncList);
+		};
+
+		SyncMock.count = function(callback) {
+			callback(SyncMock.syncList.length);
+		};
+
+		SyncMock.removeAll = function(callback) {
+			if (SyncMock.removed) {
+				callback();
+			} else {
+				callback("Force failed");
+			}
+		};
+
+		return SyncMock;
 	}
-};
-
+);

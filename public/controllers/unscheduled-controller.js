@@ -5,132 +5,140 @@
  * @license MIT
  */
 
-/**
- * @class UnscheduledController
- * @classdesc Controller for the unscheduled view
- * @property {HeaderFooter} header - the view header bar
- * @property {List} unscheduledList - the list of episodes to display
- * @property {HeaderFooter} footer - the view footer bar
- * @this ScheduleController
- * @constructor
- */
-var UnscheduledController = function () {
-	"use strict";
-};
+define(
+	[
+		'components/list',
+		'models/episode-model',
+		'controllers/application-controller',
+		'framework/jquery'
+	],
 
-/**
- * @memberof UnscheduledController
- * @this UnscheduledController
- * @instance
- * @method setup
- * @desc Initialises the controller
- */
-UnscheduledController.prototype.setup = function() {
-	"use strict";
+	/**
+	 * @exports controllers/unscheduled-controller
+	 */
+	function(List, Episode, ApplicationController, $) {
+		"use strict";
 
-	// Setup the header
-	this.header = {
-		label: "Unscheduled",
-		leftButton: {
-			eventHandler: this.goBack,
-			style: "backButton",
-			label: "Schedule"
-		}
-	};
+		// Get a reference to the application controller singleton
+		var appController = new ApplicationController();
 
-	// Instantiate a List object
-	this.unscheduledList = new List("list", "views/unscheduledListTemplate.html", null, [], $.proxy(this.viewItem, this), null);
+		/**
+		 * @class UnscheduledController
+		 * @classdesc Controller for the unscheduled view
+		 * @property {HeaderFooter} header - the view header bar
+		 * @property {List} unscheduledList - the list of episodes to display
+		 * @property {HeaderFooter} footer - the view footer bar
+		 * @this UnscheduleController
+		 * @constructor UnscheduledController
+		 */
+		var UnscheduledController = function () {
+		};
 
-	// Activate the controller
-	this.activate();
-};
+		/**
+		 * @memberof UnscheduledController
+		 * @this UnscheduledController
+		 * @instance
+		 * @method setup
+		 * @desc Initialises the controller
+		 */
+		UnscheduledController.prototype.setup = function() {
+			// Setup the header
+			this.header = {
+				label: "Unscheduled",
+				leftButton: {
+					eventHandler: this.goBack,
+					style: "backButton",
+					label: "Schedule"
+				}
+			};
 
-/**
- * @memberof UnscheduledController
- * @this UnscheduledController
- * @instance
- * @method activate
- * @desc Activates the controller
- */
-UnscheduledController.prototype.activate = function() {
-	"use strict";
+			// Instantiate a List object
+			this.unscheduledList = new List("list", "views/unscheduledListTemplate.html", null, [], $.proxy(this.viewItem, this), null);
 
-	// Get the list of unscheduled episodes
-	Episode.listByUnscheduled($.proxy(this.listRetrieved, this));
-};
+			// Activate the controller
+			this.activate();
+		};
 
-/**
- * @memberof UnscheduledController
- * @this UnscheduledController
- * @instance
- * @method listRetrieved
- * @desc Callback function after the list of episodes is retrieved
- * @param {Array<Episode>} unscheduledList - array of episode objects
- */
-UnscheduledController.prototype.listRetrieved = function(unscheduledList) {
-	"use strict";
+		/**
+		 * @memberof UnscheduledController
+		 * @this UnscheduledController
+		 * @instance
+		 * @method activate
+		 * @desc Activates the controller
+		 */
+		UnscheduledController.prototype.activate = function() {
+			// Get the list of unscheduled episodes
+			Episode.listByUnscheduled($.proxy(this.listRetrieved, this));
+		};
 
-	// Set the list items
-	this.unscheduledList.items = unscheduledList;
+		/**
+		 * @memberof UnscheduledController
+		 * @this UnscheduledController
+		 * @instance
+		 * @method listRetrieved
+		 * @desc Callback function after the list of episodes is retrieved
+		 * @param {Array<Episode>} unscheduledList - array of episode objects
+		 */
+		UnscheduledController.prototype.listRetrieved = function(unscheduledList) {
+			// Set the list items
+			this.unscheduledList.items = unscheduledList;
 
-	// Refresh the list
-	this.unscheduledList.refresh();
+			// Refresh the list
+			this.unscheduledList.refresh();
 
-	// Set to view mode
-  this.viewItems();
-};
+			// Set to view mode
+			this.viewItems();
+		};
 
-/**
- * @memberof UnscheduledController
- * @this UnscheduledController
- * @instance
- * @method goBack
- * @desc Pop the view off the stack
- */
-UnscheduledController.prototype.goBack = function() {
-	"use strict";
+		/**
+		 * @memberof UnscheduledController
+		 * @this UnscheduledController
+		 * @instance
+		 * @method goBack
+		 * @desc Pop the view off the stack
+		 */
+		UnscheduledController.prototype.goBack = function() {
+			appController.popView();
+		};
 
-	appController.popView();
-};
+		/**
+		 * @memberof UnscheduledController
+		 * @this UnscheduledController
+		 * @instance
+		 * @method viewItem
+		 * @desc Displays the Episode view for editing an episode
+		 * @param {Number} itemIndex - the list index of the episode to edit
+		 */
+		UnscheduledController.prototype.viewItem = function(itemIndex) {
+			appController.pushView("episode", { listIndex: itemIndex, episode: this.unscheduledList.items[itemIndex] });
+		};
 
-/**
- * @memberof UnscheduledController
- * @this UnscheduledController
- * @instance
- * @method viewItem
- * @desc Displays the Episode view for editing an episode
- * @param {Number} itemIndex - the list index of the episode to edit
- */
-UnscheduledController.prototype.viewItem = function(itemIndex) {
-	"use strict";
+		/**
+		 * @memberof UnscheduledController
+		 * @this UnscheduledController
+		 * @instance
+		 * @method viewItems
+		 * @desc Sets the list to view mode
+		 */
+		UnscheduledController.prototype.viewItems = function() {
+			// Set the list to view mode
+			this.unscheduledList.setAction("view");
 
-	appController.pushView("episode", { listIndex: itemIndex, episode: this.unscheduledList.items[itemIndex] });
-};
+			// Clear the view footer
+			appController.clearFooter();
 
-/**
- * @memberof UnscheduledController
- * @this UnscheduledController
- * @instance
- * @method viewItems
- * @desc Sets the list to view mode
- */
-UnscheduledController.prototype.viewItems = function() {
-	"use strict";
+			// Show the view icons next to each list item
+			$("#list").removeClass();
 
-	// Set the list to view mode
-	this.unscheduledList.setAction("view");
+			// Setup the footer
+			this.footer = {
+				label: "v" + appController.db.version
+			};
 
-	// Clear the view footer
-	appController.clearFooter();
+			// Set the view footer
+			appController.setFooter();
+		};
 
-	// Show the view icons next to each list item
-	$("#list").removeClass();
-
-	// Setup the footer
-	this.footer = {
-		label: "v" + appController.db.version
-	};
-
-	// Set the view footer
-	appController.setFooter();
-};
+		return UnscheduledController;
+	}
+);

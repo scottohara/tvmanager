@@ -1,52 +1,63 @@
-TestController = function(args) {
-	"use strict";
+define(
+	[
+		'framework/jquery',
+		'test/mocks/jQuery-mock',
+		'test/framework/qunit'
+	],
 
-	this.args = args;
-	this.header = {
-		label: "test-header",
-		leftButton: {
-			eventHandler: this.buttonClicked,
-			style: "left-button-style",
-			label: "left-button"
-		},
-		rightButton: {
-			eventHandler: this.buttonClicked,
-			style: "right-button-style",
-			label: "right-button"
-		}
-	};
-	this.footer = {
-		label: "test-footer",
-		leftButton: {
-			eventHandler: this.buttonClicked,
-			style: "left-button-style",
-			label: "left-button"
-		},
-		rightButton: {
-			eventHandler: this.buttonClicked,
-			style: "right-button-style",
-			label: "right-button"
-		}
-	};
-};
+	function($, jQueryMock, QUnit) {
+		"use strict";
 
-TestController.prototype.buttonClicked = function(e, button) {
-	"use strict";
+		var TestController = function(args) {
+			this.args = args;
+			this.header = {
+				label: "test-header",
+				leftButton: {
+					eventHandler: this.buttonClicked,
+					style: "left-button-style",
+					label: "left-button"
+				},
+				rightButton: {
+					eventHandler: this.buttonClicked,
+					style: "right-button-style",
+					label: "right-button"
+				}
+			};
+			this.footer = {
+				label: "test-footer",
+				leftButton: {
+					eventHandler: this.buttonClicked,
+					style: "left-button-style",
+					label: "left-button"
+				},
+				rightButton: {
+					eventHandler: this.buttonClicked,
+					style: "right-button-style",
+					label: "right-button"
+				}
+			};
+		};
 
-	ok(true, "Bind " + button + " button " + e.type + " event listener");
-};
+		TestController.prototype.buttonClicked = function(e, button) {
+			QUnit.ok(true, "Bind " + button + " button " + e.type + " event listener");
+		};
 
-TestController.prototype.setup = function() {
-	"use strict";
+		TestController.prototype.setup = function() {
+			jQueryMock.setDefaultContext(TestController.sandbox);
+			QUnit.equal($("#content").html(), "<div></div>", "content");
+			QUnit.start();
+		};
 
-	equals($("#content").html(), "<div></div>", "content");
-	start();
-};
+		TestController.prototype.activate = function(args) {
+			jQueryMock.setDefaultContext(TestController.sandbox);
+			QUnit.equal(args, "Activated", "Activate arguments");
+			QUnit.equal($("#content").html(), "<div></div>", "content");
+			QUnit.start();
+		};
 
-TestController.prototype.activate = function(args) {
-	"use strict";
+		TestController.sandbox = null;
 
-	equals(args, "Activated", "Activate arguments");
-	equals($("#content").html(), "<div></div>", "content");
-	start();
-};
+		return TestController;
+	}
+);
+

@@ -1,25 +1,26 @@
-SpinningWheelMock = {
-	slots: [],
-	selectedValues: {
-		keys: [],
-		values: []
-	},
-	addSlot: function(data, align, value) {
+define(
+	function() {
 		"use strict";
 
-		this.slots.push(value);
-	},
-	setDoneAction: function(callback) {
-		"use strict";
+		var SpinningWheelMock = {
+			slots: [],
+			selectedValues: {
+				keys: [],
+				values: []
+			},
+			addSlot: function(data, align, value) {
+				this.slots.push(value);
+			},
+			setDoneAction: function(callback) {
+				callback();
+			},
+			open: function() {
+			},
+			getSelectedValues: function() {
+				return this.selectedValues;
+			}
+		};
 
-		callback();
-	},
-	open: function() {
-		"use strict";
-	},
-	getSelectedValues: function() {
-		"use strict";
-
-		return this.selectedValues;
+		return SpinningWheelMock;
 	}
-};
+);
