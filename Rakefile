@@ -26,6 +26,16 @@ def start_testcoverage_server(root_dir, source_dir, &block)
 	Open4::popen4 "rackup -E testCoverage", &block
 end
 
+def start_simulator(url, &block)
+	simulator = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator"
+	sdk_version = :'6.1'   # :5.0 or :6.1
+	sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk"
+	device = :'iPhone (Retina 3.5-inch)'	# :iPad, :'iPad (Retina)', :iPhone, :'iPhone (Retina 3.5-inch)', :'iPhone (Retina 4-inch)'
+	application = "/Applications/MobileSafari.app/MobileSafari"
+
+	Open4::popen4 "'#{simulator}' -currentSDKRoot '#{sdk}' -SimulateDevice '#{device}' -SimulateApplication '#{sdk}#{application}' -u #{url}", &block
+end
+
 namespace :test do
 	root_dir = File.dirname(__FILE__)
 	source_dir = File.join(root_dir, 'public')
@@ -43,6 +53,18 @@ namespace :test do
 		start_testcoverage_server(root_dir, source_dir) do |pid, stdin, stdout|
 			puts "Server started on port 9292. Browse to http://localhost:9292/jscoverage.html?test/index.html&missing=true to run JSCoverage statistics. Ctrl-C to quit."
 			puts stdout.read
+		end
+	end
+
+	desc "Start the server in :test mode, and run the Qunit test suite (simulator)"
+	task :simulator do
+		start_test_server do |server_pid|
+			url = "http://localhost:9393/test/index.html"
+			start_simulator(url) do |pid, stdin, stdout|
+				puts "Simulator started. Server started on port 9393. Browse to http://localhost:9393/test/index.html to run QUnit test suite."
+				puts stdout.read
+			end
+			Process.kill "SIGTERM", server_pid
 		end
 	end
 
@@ -119,5 +141,14 @@ namespace :docs do
 		jsdoc_path = '/usr/local/Cellar/jsdoc3/3.0.1/libexec/'
 	
 		result = sh "#{jsdoc_path}jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
+	end
+end
+
+desc "Launch the simulator"
+task :simulator do
+	url = "http://localhost:9393/index.html"
+	start_simulator(url) do |pid, stdin, stdout|
+		puts "Simulator started. Browse to http://localhost:9393/index.html to run the application."
+		puts stdout.read
 	end
 end
