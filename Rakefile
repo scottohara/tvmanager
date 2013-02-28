@@ -37,7 +37,7 @@ def start_simulator(url, &block)
 end
 
 namespace :test do
-	root_dir = File.dirname(__FILE__)
+	root_dir = __dir__
 	source_dir = File.join(root_dir, 'public')
 
 	desc "Start the server in :test mode for manually running the Qunit test suite"
@@ -107,7 +107,7 @@ namespace :db do
 		db = StorageController.new
 
 		# Update each of the design documents in /db/design/*.json
-		Dir.glob(File.join(File.dirname(__FILE__), 'db', 'design', '*.json')).each do |filename|
+		Dir.glob(File.join(__dir__, 'db', 'design', '*.json')).each do |filename|
 			print "Updating #{File.basename(filename)}..."
 
 			# Read the file and parse the JSON
@@ -130,7 +130,7 @@ end
 namespace :docs do
 	desc "Generates JSDoc3 documentation"
 	task :generate do
-		root_dir = File.dirname(__FILE__)
+		root_dir = __dir__
 		source_dir = File.join(root_dir, 'public')
 		config_path = File.join(root_dir, 'config', 'jsdoc3.json')
 		dest_dir = File.join(root_dir, 'docs')
