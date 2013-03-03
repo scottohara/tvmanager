@@ -64,7 +64,7 @@ define(
 
 			// Set the version information
 			$("#databaseVersion").val("v" + appController.db.version);
-			$("#appVersion").val("v" + appController.appVersion);
+			$("#appVersion").val(appController.appVersion);
 
 			// Bind an event to the check for updates button
 			$("#update").bind('click', $.proxy(this.checkForUpdate, this));

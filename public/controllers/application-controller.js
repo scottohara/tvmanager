@@ -225,7 +225,7 @@ define(
 			}, this), "json");
 
 			// Load the application configuration settings
-			$.get("appConfig.json", $.proxy(this.gotAppConfig, this), "json");
+			$.get("/appConfig", $.proxy(this.gotAppConfig, this), "json");
 		};
 
 		/**

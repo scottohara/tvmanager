@@ -6,6 +6,8 @@ group :development do
 	gem 'jslint_on_rails'
 	gem 'open4'
 	gem 'rake'
+	gem 'heroku-api'
+	gem 'git'
 end
 
 gem 'thin'

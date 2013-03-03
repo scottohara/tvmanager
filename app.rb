@@ -22,6 +22,11 @@ def database_name
 	ENV[:DATABASE_NAME.to_s] || "TVManager"
 end
 
+# Returns the current app version (if specified)
+def app_version
+	ENV[:APP_VERSION.to_s] || `git describe`.chomp
+end
+
 # Returns the client device ID
 def device_id
 	device_id = request.env["HTTP_X_DEVICE_ID"]
@@ -87,6 +92,12 @@ get '/dbConfig' do
 	{ :databaseName => database_name }.to_json
 end
 
+# Route for database configuration settings
+get '/appConfig' do
+	content_type :json
+	{ :appVersion => app_version }.to_json
+end
+
 # Route for HTML5 cache manifest
 get '/manifest' do
 	headers 'Content-Type' => 'text/cache-manifest'
@@ -106,8 +117,14 @@ get '/manifest' do
 	# Generate the manifest
 	manifest = Manifesto.cache manifest_options
 
-	# Add a cache entry for dbConfig
-	manifest.gsub! "\nNETWORK:", "/dbConfig\n# databaseName: #{database_name}\n\nNETWORK:"
+	# Add cache entries for dbConfig & appConfig
+	config_entries = <<-END.gsub(/^\s*/, '')
+		/dbConfig
+		/appConfig
+		# databaseName: #{database_name}
+		# appVersion: #{app_version}
+	END
+	manifest.gsub! "\nNETWORK:", "#{config_entries}\n\nNETWORK:"
 end
 
 # Route for checking whether the server is in :test configuration

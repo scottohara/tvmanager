@@ -7,8 +7,12 @@ GEM
       rest-client (~> 1.6.1)
     daemons (1.1.8)
     eventmachine (0.12.10)
+    excon (0.16.10)
     foreman (0.46.0)
       thor (>= 0.13.6)
+    git (1.2.5)
+    heroku-api (0.3.8)
+      excon (~> 0.16.10)
     jslint_on_rails (1.1.1)
     json (1.7.3)
     manifesto (0.7.0)
@@ -40,6 +44,8 @@ PLATFORMS
 DEPENDENCIES
   couchrest
   foreman
+  git
+  heroku-api
   jslint_on_rails
   json
   manifesto

@@ -21,7 +21,7 @@ define(
 			this.db = new DatabaseMock();
 			this.cache = new CacheControllerMock();
 			this.notice = [];
-			this.appVersion = "1.0";
+			this.appVersion = "v1.0";
 		};
 
 		ApplicationControllerMock.prototype.loadDependencies = function(dependencies, callback) {
