@@ -72,16 +72,27 @@ namespace :test do
 	end
 
 	desc "Run JSLint, the Qunit test suite and the JSCoverage statistics (headless)"
-	task :headless => [:jslint, "headless:client", "headless:coverage"]
+	task :headless do
+		errors = []
+		[:jslint, "test:headless:client", "test:headless:coverage"].each do |task|
+			begin
+				Rake::Task[task].invoke
+			rescue Exception => e
+				errors << e.message
+			end
+		end
+		fail errors.join "\n" unless errors.empty?
+	end
 
 	namespace :headless do
 		desc "Start the server in :test mode, and run the Qunit test suite (headless)"
 		task :client do
 			start_test_server do |server_pid|
-				Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-qunit.js http://localhost:9393/test/index.html" do |pid, stdin, stdout, stderr|
+				result = Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-qunit.js http://localhost:9393/test/index.html" do |pid, stdin, stdout, stderr|
 					puts stdout.read
 				end
 				Process.kill "SIGTERM", server_pid
+				fail "Test suite did not pass" unless result.exitstatus.eql? 0
 			end
 		end
 
@@ -89,10 +100,11 @@ namespace :test do
 		task :coverage do
 			start_testcoverage_server(root_dir, source_dir) do |server_pid|
 				sleep 1
-				Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-jscoverage.js http://localhost:9292/jscoverage.html?test/index.html" do |pid, stdin, stdout, stderr|
+				result = Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-jscoverage.js http://localhost:9292/jscoverage.html?test/index.html" do |pid, stdin, stdout, stderr|
 					puts stdout.read
 				end
 				Process.kill "SIGTERM", server_pid
+				fail "Test coverage is not 100%" unless result.exitstatus.eql? 0
 			end
 		end
 	end

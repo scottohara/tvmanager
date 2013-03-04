@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/scottohara/tvmanager.png)](https://travis-ci.org/scottohara/tvmanager)
+
 What is TV Manager?
 =======================
 TV Manager is a HTML5 webapp that keeps track of which episodes of your favourite TV shows you:
