@@ -1,4 +1,11 @@
 language: ruby
+
 rvm:
   - 2.0.0
-script: rake test:headless
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq jscoverage
+
+script:
+  - rake test:headless
