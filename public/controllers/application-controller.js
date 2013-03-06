@@ -77,6 +77,7 @@ define(
 		 * @property {CacheController} cache - the application cache controller
 		 * @property {DatabaseController} db - the database controller
 		 * @property {String} appVersion - the application version number
+		 * @property {Number} maxDataAgeDays - the number of days since the last import/export before a warning notice is displayed
 		 * @property {Object} viewControllers - a hash of all view controller objects that can be pushed
 		 * @this ApplicationController
 		 * @constructor ApplicationController
@@ -215,17 +216,11 @@ define(
 					}, this)
 				);
 
-				// If no errors occurred, get the last sync time
+				// If no errors occurred, get the application configuration settings
 				if (this.db.version) {
-					// Load the setting model if it's not already loaded
-					this.loadDependencies(['models/setting-model'], $.proxy(function(Setting) {
-						Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
-					}, this));
+					$.get("/appConfig", $.proxy(this.gotAppConfig, this), "json");
 				}
 			}, this), "json");
-
-			// Load the application configuration settings
-			$.get("/appConfig", $.proxy(this.gotAppConfig, this), "json");
 		};
 
 		/**
@@ -259,6 +254,15 @@ define(
 
 			// Set the application version
 			this.appVersion = config.appVersion;
+
+			// Set the max data age days
+			this.maxDataAgeDays = config.maxDataAgeDays;
+
+			// Load the setting model if it's not already loaded
+			this.loadDependencies(['models/setting-model'], $.proxy(function(Setting) {
+				// Get the last sync time
+				Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
+			}, this));
 		};
 
 		/**
@@ -779,7 +783,6 @@ define(
 			// Only proceed if we have a last sync time
 			if (lastSyncTime.settingValue) {
 				// Constants for the notification threshold
-				var MAX_DATA_AGE_DAYS = 7;
 				var MILLISECONDS_IN_ONE_DAY = 1000 * 60 * 60 * 24;
 
 				// Get the current date and the last sync date
@@ -787,10 +790,10 @@ define(
 				var lastSync = new Date(lastSyncTime.settingValue);
 
 				// Check if the last sync was more that the specified threshold
-				if (Math.round(Math.abs(now.getTime() - lastSync.getTime()) / MILLISECONDS_IN_ONE_DAY) > MAX_DATA_AGE_DAYS) {
+				if (Math.round(Math.abs(now.getTime() - lastSync.getTime()) / MILLISECONDS_IN_ONE_DAY) > this.maxDataAgeDays) {
 					// Show a notice to the user
 					this.showNotice({
-						label: "The last data sync was over " + MAX_DATA_AGE_DAYS + " days ago",
+						label: "The last data sync was over " + this.maxDataAgeDays + " days ago",
 						leftButton: {
 							style: "redButton",
 							label: "OK"

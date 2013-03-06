@@ -12,6 +12,13 @@ set(:isTest) do |env|
 	end
 end
 
+# Routing condition (true if the app cache is disabled)
+set(:noAppCache) do |env|
+	condition do
+		!!ENV[:TVMANAGER_NO_APPCACHE.to_s]
+	end
+end
+
 # Returns a storage controller instance
 def db
 	StorageController.new
@@ -25,6 +32,11 @@ end
 # Returns the current app version (if specified)
 def app_version
 	ENV[:APP_VERSION.to_s] || `git describe`.chomp
+end
+
+# Returns the number of days since the last import/export before a warning notice is shown
+def max_data_age_days
+	ENV[:TVMANAGER_MAX_DATA_AGE_DAYS.to_s].to_i || 7
 end
 
 # Returns the client device ID
@@ -95,10 +107,18 @@ end
 # Route for database configuration settings
 get '/appConfig' do
 	content_type :json
-	{ :appVersion => app_version }.to_json
+	{ :appVersion => app_version, :maxDataAgeDays => max_data_age_days }.to_json
 end
 
-# Route for HTML5 cache manifest
+# Route for HTML5 cache manifest when app cache is disabled
+get '/manifest', :noAppCache => :environment do
+	headers 'Content-Type' => 'text/cache-manifest'
+
+	# Cache nothing, using an open online whitelist wildcard flag
+	"CACHE MANIFEST\nNETWORK:\n*"
+end
+
+# Route for HTML5 cache manifest when app cache is enabled
 get '/manifest' do
 	headers 'Content-Type' => 'text/cache-manifest'
 
@@ -124,7 +144,7 @@ get '/manifest' do
 		# databaseName: #{database_name}
 		# appVersion: #{app_version}
 	END
-	manifest.gsub! "\nNETWORK:", "#{config_entries}\n\nNETWORK:"
+	manifest.gsub! "\nNETWORK:", "#{config_entries}\nNETWORK:"
 end
 
 # Route for checking whether the server is in :test configuration

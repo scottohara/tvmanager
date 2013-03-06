@@ -28,6 +28,11 @@ define(
 			callback(Setting);
 		};
 
+		ApplicationControllerMock.prototype.gotAppConfig = function() {
+			QUnit.ok(true, "Got application configuration");
+			QUnit.start();
+		};
+
 		ApplicationControllerMock.prototype.getScrollPosition = function() {
 		};
 
@@ -50,7 +55,6 @@ define(
 
 		ApplicationControllerMock.prototype.checkNotice = function(notice) {
 			QUnit.deepEqual(notice, this.expectedNotice, "Notice");
-			QUnit.start();
 		};
 
 		ApplicationControllerMock.prototype.contentShown = function(e) {

@@ -11,6 +11,10 @@ unless ENV[:RACK_ENV.to_s].eql?("production")
 	JSLint.config_path = "config/jslint.yml"
 end
 
+def start_server(&block)
+	Open4::popen4 "shotgun -O -u /index.html", &block
+end
+	
 def start_test_server(&block)
 	Open4::popen4 "shotgun -E test -O -u /test/index.html", &block
 end
@@ -212,9 +216,32 @@ end
 
 desc "Launch the simulator"
 task :simulator do
-	url = "http://localhost:9393/index.html"
-	start_simulator(url) do |pid, stdin, stdout|
-		puts "Simulator started. Browse to http://localhost:9393/index.html to run the application."
-		puts stdout.read
+	start_server do |server_pid|
+		url = "http://localhost:9393/index.html"
+		start_simulator(url) do |pid, stdin, stdout|
+			puts "Simulator started. Browse to http://localhost:9393/index.html to run the application."
+			puts stdout.read
+		end
+		Process.kill "SIGTERM", server_pid
+	end
+end
+
+namespace :appcache do
+	desc "Starts the server with the HTML5 application cache enabled"
+	task :enable do
+		ENV.delete :TVMANAGER_NO_APPCACHE.to_s
+		start_server do |pid, stdin, stdout|
+			puts "Server started on port 9393. Browse to http://localhost:9393/index.html to run Qunit test suite. Ctrl-C to quit."
+			puts stdout.read
+		end
+	end
+
+	desc "Starts the server with the HTML5 application cache disabled"
+	task :disable do
+		ENV[:TVMANAGER_NO_APPCACHE.to_s] = "true"
+		start_server do |pid, stdin, stdout|
+			puts "Server started on port 9393. Browse to http://localhost:9393/index.html to run Qunit test suite. Ctrl-C to quit."
+			puts stdout.read
+		end
 	end
 end

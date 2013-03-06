@@ -103,6 +103,12 @@ To avoid having to manually keep the manifest file up to date with new/changed f
 
 You can test that the application cache is working by disconnecting from the network (or turning your mobile device to flight mode); and if everything goes well you should be able to continue using the app even though you're disconnected.
 
+Note: In development, where files are constantly being modified, application caching can sometimes be a hindrance. You can disable application caching using the following environment variable:
+
+`export TVMANAGER_NO_APPCACHE='true'`
+
+For convenience, rake tasks are available that start the server with application caching enabled (`rake appcache:enable`) or disabled (`rake appcache:disable`), for quickly toggling between the two.
+
 Import/Export
 =============
 The app includes a backup/restore facility. A log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
@@ -148,6 +154,12 @@ heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager --r
 (Assumes you have setup two Heroku remotes, one for staging and one for production)
 
 After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. You should run this rake task after each deployment, to ensure the latest design documents are being used.
+
+To remind users to backup regularly, a warning prompt appears at startup if the last backup was more than 7 days ago.  You can override the number of days that this warning appears using the following environment variable:
+
+`export TVMANAGER_MAX_DATA_AGE_DAYS=3`
+
+The above setting would prompt the user to backup after three days instead of the default seven days. In development, it is useful to set this to a very high number (eg. 9999) so that you are not constantly prompted to backup.
 
 Test Suite
 ==========

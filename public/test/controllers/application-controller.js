@@ -84,6 +84,7 @@ define(
 				};
 
 				this.originalLoadDependencies = ApplicationController.prototype.loadDependencies;
+				this.originalGotAppConfig = ApplicationController.prototype.gotAppConfig;
 				this.originalShowNotice = ApplicationController.prototype.showNotice;
 				this.originalContentShown = ApplicationController.prototype.contentShown;
 				this.originalPushView = ApplicationController.prototype.pushView;
@@ -96,6 +97,7 @@ define(
 				this.appController = new ApplicationController();
 				jQueryMock.clearDefaultContext();
 				this.appController.loadDependencies = ApplicationControllerMock.prototype.loadDependencies;
+				this.appController.gotAppConfig = ApplicationControllerMock.prototype.gotAppConfig;
 				this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.showNotice, this);
 				this.appController.pushView = ApplicationControllerMock.prototype.pushView;
 				this.appController.noticesMoved = ApplicationControllerMock.prototype.noticesMoved;
@@ -202,11 +204,14 @@ define(
 					label: "OK"
 				}
 			};
-			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
+			this.appController.showNotice = $.proxy(function(notice) {
+				$.proxy(ApplicationControllerMock.prototype.checkNotice, this)(notice);
+				QUnit.start();
+			}, this);
 			this.appController.start();
 		});
 
-		QUnit.asyncTest("start - database upgrade", 1, function() {
+		QUnit.asyncTest("start - database upgrade", 2, function() {
 			DatabaseController.mode = "Upgrade";
 			this.expectedNotice = {
 				label: "Database has been successfully upgraded from version 1.0 to version 1.1. Please restart the application.",
@@ -216,20 +221,10 @@ define(
 				}
 			};
 			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
-			Setting.setting.LastSyncTime = new Date();
 			this.appController.start();
 		});
 
-		QUnit.asyncTest("start - sync warning", 2, function() {
-			this.expectedNotice = {
-				label: "The last data sync was over 7 days ago",
-				leftButton: {
-					style: "redButton",
-					label: "OK"
-				}
-			};
-			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
-			Setting.setting.LastSyncTime = new Date(1900, 0, 1);
+		QUnit.asyncTest("start - success", 2, function() {
 			this.appController.start();
 		});
 
@@ -242,10 +237,29 @@ define(
 			this.appController.loadDependencies([], callback);
 		});
 
-		QUnit.test("gotAppConfig - 304 Not Modified", 1, function() {
+		QUnit.test("gotAppConfig - 304 Not Modified", 2, function() {
+			this.appController.gotAppConfig = this.originalGotAppConfig;
 			var appVersion = "1.0";
-			this.appController.gotAppConfig(undefined, "notmodified", { responseText: JSON.stringify({ "appVersion": appVersion }) });
+			var maxDataAgeDays = 1;
+			Setting.setting.LastSyncTime = new Date();
+			this.appController.gotAppConfig(undefined, "notmodified", { responseText: JSON.stringify({ "appVersion": appVersion, "maxDataAgeDays": maxDataAgeDays }) });
 			QUnit.equal(this.appController.appVersion, appVersion, "appVersion property");
+			QUnit.equal(this.appController.maxDataAgeDays, maxDataAgeDays, "maxDataAgeDays property");
+		});
+
+		QUnit.test("gotAppConfig - sync warning", 1, function() {
+			this.appController.gotAppConfig = this.originalGotAppConfig;
+			var maxDataAgeDays = 1;
+			this.expectedNotice = {
+				label: "The last data sync was over " + maxDataAgeDays + " days ago",
+				leftButton: {
+					style: "redButton",
+					label: "OK"
+				}
+			};
+			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
+			Setting.setting.LastSyncTime = new Date(1900, 0, 1);
+			this.appController.gotAppConfig({ "maxDataAgeDays": maxDataAgeDays });
 		});
 
 		QUnit.asyncTest("pushView", 3, function() {
