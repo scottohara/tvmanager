@@ -7,13 +7,14 @@
 
 define(
 	[
-		'framework/jquery'
+		'framework/jquery',
+		'components/window'
 	],
 
 	/**
 	 * @exports controllers/cache-controller
 	 */
-	function($) {
+	function($, window) {
 		"use strict";
 	
 		/**
@@ -67,7 +68,7 @@ define(
 				// Bind an event listener for the error event
 				window.applicationCache.addEventListener('error', $.proxy(function() {
 					// It's only an error if we're online
-					if (navigator.onLine) {
+					if (window.navigator.onLine) {
 						// Display a notice indicating the error
 						var error = "Error reading application cache manifest (status: " + this.cacheStatusValues[window.applicationCache.status] + ")";
 						console.log(error);

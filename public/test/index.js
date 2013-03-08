@@ -55,6 +55,7 @@ require.config({
 		"*": {
 			'components/list': 'test/mocks/list-mock',
 			'components/progressBar': 'test/mocks/progressBar-mock',
+			'components/window': 'test/mocks/window-mock',
 			'controllers/application-controller': 'test/mocks/application-controller-mock',
 			'controllers/cache-controller': 'test/mocks/cache-controller-mock',
 			'controllers/database-controller': 'test/mocks/database-controller-mock',

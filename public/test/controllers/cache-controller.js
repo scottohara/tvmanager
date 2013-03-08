@@ -1,36 +1,17 @@
 define(
 	[
 		'controllers/cache-controller',
-		'test/framework/qunit'
+		'test/framework/qunit',
+		'test/mocks/window-mock'
 	],
 
-	function(CacheController, QUnit) {
+	function(CacheController, QUnit, window) {
 		"use strict";
 	
 		QUnit.module("cache-controller", {
 			setup: function() {
-				this.originalAppCache = window.applicationCache;
-				window.applicationCache = {
-					eventHandler: [],
-					assertions: false,
-					status: 0,
-					swapCache: function() {
-						QUnit.ok(true, "Swap cache");
-					},
-					addEventListener: function(eventType, handler) {
-						this.eventHandler[eventType] = handler;
-						if (this.assertions) {
-							QUnit.ok(true, "Add " + eventType + " event listener");
-						}
-					},
-					update: function() {
-						QUnit.ok(true, "Update cache");
-					}
-				};
+				window.applicationCache.assertions = false;
 				this.cacheController = new CacheController();
-			},
-			teardown: function() {
-				window.applicationCache = this.originalAppCache;
 			}
 		});
 
@@ -106,11 +87,13 @@ define(
 		});
 
 		QUnit.test("update - without application cache", 2, function() {
+			var originalApplicationCache = window.applicationCache;
 			window.applicationCache = null;
 			this.cacheController.update(function(updated, message) {
 				QUnit.equal(updated, false, "Updated");
 				QUnit.equal(message, "This browser does not support application caching.", "Message");
 			});
+			window.applicationCache = originalApplicationCache;
 		});
 	}
 );
