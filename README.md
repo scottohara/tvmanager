@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/scottohara/tvmanager.png)](https://travis-ci.org/scottohara/tvmanager)
+[![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)
 
 What is TV Manager?
 =======================
