@@ -580,7 +580,10 @@ define(
 			this.dataSyncController.seriesReady = true;
 			this.dataSyncController.episodesReady = true;
 			this.dataSyncController.syncErrors = [];
-			this.importData = [];
+			this.importData = {
+				data: [],
+				checksum: "test-hash"
+			};
 
 			var originalAjax = $.ajax;
 			$.ajax = this.ajaxMock;
@@ -615,21 +618,21 @@ define(
 			$.ajax = originalAjax;
 		});
 
-		// Test quarantined until Heroku timeout issue resolved
-		/*
 		QUnit.asyncTest("importData - checksum mismatch", 1, function() {
+			var originalHash = hex_md5();
+			hex_md5.setHash("\"");
 			this.dataSyncController.programsReady = true;
 			this.dataSyncController.seriesReady = true;
 			this.dataSyncController.episodesReady = true;
 			this.dataSyncController.syncErrors = [];
 			this.dataSyncController.importDone = $.proxy(function() {
 				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Checksum mismatch", "Sync error");
+				hex_md5.setHash(originalHash);
 				QUnit.start();
 			}, this);
 
 			this.dataSyncController.importData();
 		});
-		*/
 
 		QUnit.asyncTest("importData - ajax fail", 1, function() {
 			this.dataSyncController.programsReady = true;

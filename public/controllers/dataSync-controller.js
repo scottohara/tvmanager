@@ -592,14 +592,23 @@ define(
 							importObj = $.parseJSON(jqXHR.responseText);
 						}
 
+						// Get the Etag value returned by the server
+						// For a fast import, look in the Etag header; for a full import there will be a checksum
+						// property in the body content.
+						// (This is because to avoid the full import from timing, the response is streamed back
+						// as it is generated; so we're unable to calculate a checksum for the response header.
+						// Ideally, we would be able to use a HTTP Trailer header to provide this information
+						// after the body content; but no browsers support HTTP Trailer headers)
+						var returnedHash;
+						if (this.importChangesOnly) {
+							returnedHash = jqXHR.getResponseHeader("Etag").replace(/\"/g, "");
+						} else {
+							returnedHash = importObj.checksum;
+							importObj = importObj.data;
+						}
+
 						// Calculate an MD5 sum of the JSON returned
 						var hash = hex_md5(JSON.stringify(importObj));
-
-						// Get the Etag value returned by the server
-						var returnedHash = jqXHR.getResponseHeader("Etag").replace(/\"/g, "");
-
-						//TODO: Hack for dealing with heroku timeouts...this will be fixed/removed later
-						returnedHash = hash;
 
 						// Compare the Etag with the MD5 sum we calculated
 						if (hash === returnedHash) {

@@ -258,8 +258,17 @@ end
 	# Import route used for testing
 	get path, :isTest => :environment do
 		begin
-			etag "test-hash"
-			File.read(File.join("public", "test", "database.json"))
+			# Get the test JSON data
+			docs = File.read(File.join("public", "test", "database.json"))
+
+			if params[:all]
+				# Send the checksum as part of the JSON payload
+				{ :data => JSON.parse(docs), :checksum => "test-hash" }.to_json
+			else
+				# Send the checksum as the etag
+				etag "test-hash"
+				docs
+			end
 		end
 	end
 
@@ -269,24 +278,25 @@ end
 			if params[:all]
 				docs = []
 
-				# Return a hash of the documents as the etag, and the documents themselves as the response body
-				etag Digest::MD5.hexdigest docs.to_json
-
+				# Start a streamed response
 				stream do |out|
-					# Get all documents
-					out << "["
+					# Send the first part of the JSON
+					out << "{\"data\":["
 
 					first = true
 
+					# Get all documents, and stream each one to the response
 					db.view "data/all", "include_docs" => true do |doc|
 						out << "," unless first
 						first = false
 						out << doc.to_json
 						docs << doc
 					end
-					out << "]"
 
-					raise NotFound, "No data" if docs.nil?
+					# Finalise the JSON with the MD5 checksum 
+					out << "], \"checksum\": \"#{Digest::MD5.hexdigest docs.to_json}\"}"
+
+					raise NotFound, "No data" if docs.empty?
 				end
 			else
 				# Get all documents pending for this device
