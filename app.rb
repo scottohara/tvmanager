@@ -8,7 +8,7 @@ require_relative 'storagecontroller'
 # Routing condition (true if :test configuration)
 set(:isTest) do |env|
 	condition do
-		test?
+		settings.test?
 	end
 end
 
@@ -132,7 +132,7 @@ get '/manifest' do
 	}
 
 	# In dev/test configuration, make unit tests network resources as well
-	manifest_options[:network_includes] << '/test/*' if development? || test?
+	manifest_options[:network_includes] << '/test/*' if settings.development? || settings.test?
 
 	# Generate the manifest
 	manifest = Manifesto.cache manifest_options
@@ -150,7 +150,7 @@ end
 # Route for checking whether the server is in :test configuration
 head '/test' do
 	begin
-		raise Forbidden, "Server is not running in the test configuration" unless test?
+		raise Forbidden, "Server is not running in the test configuration" unless settings.test?
 		status 200
 	rescue HttpError => e
 		status e.class.status
