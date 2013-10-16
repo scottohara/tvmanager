@@ -204,7 +204,7 @@ namespace :deploy do
 			logger.level = Logger::DEBUG
 
 			# Deploy the latest version to the specified remote
-			git.push remote, latest_version
+			git.push remote, "#{latest_version}^{}:master"
 			
 			# Update the APP_VERSION config var
 			heroku.put_config_vars app_name, "APP_VERSION" => latest_version
