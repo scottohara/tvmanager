@@ -36,7 +36,7 @@ end
 
 # Returns the number of days since the last import/export before a warning notice is shown
 def max_data_age_days
-	ENV[:TVMANAGER_MAX_DATA_AGE_DAYS.to_s].to_i || 7
+	ENV[:TVMANAGER_MAX_DATA_AGE_DAYS.to_s] || 7
 end
 
 # Returns the client device ID
@@ -107,7 +107,7 @@ end
 # Route for database configuration settings
 get '/appConfig' do
 	content_type :json
-	{ :appVersion => app_version, :maxDataAgeDays => max_data_age_days }.to_json
+	{ :appVersion => app_version, :maxDataAgeDays => max_data_age_days.to_i }.to_json
 end
 
 # Route for HTML5 cache manifest when app cache is disabled
