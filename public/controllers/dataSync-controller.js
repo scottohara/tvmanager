@@ -260,9 +260,7 @@ define(
 				}, this);
 
 				// Ask the user to confirm their action
-				//if (window.confirm("Are you sure you want to export?")) {
-				// Temporarily skip confirmation due to iOS7 bug
-				if (true) {
+				if (window.confirm("Are you sure you want to export?")) {
 					// Get the list of local changes to sync
 					Sync.list($.proxy(this.listRetrieved, this));
 				} else {
@@ -324,9 +322,7 @@ define(
 				}
 
 				// Ask the user to confirm their action
-				//if (window.confirm(prompt + "Are you sure you want to import?")) {
-				// Temporarily skip confirmation due to iOS7 bug
-				if (true) {
+				if (window.confirm(prompt + "Are you sure you want to import?")) {
 					// Do the import
 					this.doImport();
 				} else {
