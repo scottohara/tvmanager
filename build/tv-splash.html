@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<style>
+			@import url(http://fonts.googleapis.com/css?family=Chau+Philomene+One:400italic);
+			body {
+				font-family: 'Chau Philomene One';	
+				font-size: 24px;
+				font-style: italic;
+				color: white;
+				margin: 0;
+			}
+
+			#container {
+				width: 320px;
+				height: 460px;
+				position: absolute;
+				text-align: center;
+				background: black 20% 45% no-repeat url('tv-icon.svg');
+			}
+
+			#container.retina {
+				width: 640px;
+				height: 920px;
+				background: black 37% 46% no-repeat url('tv-icon.svg');
+			}
+
+			#content {
+				position: absolute;
+				bottom: 53%;
+				padding-left: 16px;
+				width: 100%;
+				-webkit-box-reflect: below -1px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.1, transparent), to(white));
+				text-shadow: 0 0 3px rgba(255,255,255,0.5);
+			}
+
+			.highlight {
+				color: orange;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container" class="retina">
+			<div id="content"><span class="highlight">TV</span>manager</div>
+		</div>
+	</body>
+</html>
+

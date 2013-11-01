@@ -2,7 +2,7 @@
 [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)
 
 What is TV Manager?
-=======================
+===================
 TV Manager is a HTML5 webapp that keeps track of which episodes of your favourite TV shows you:
 
 * have seen,
