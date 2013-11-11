@@ -10,20 +10,78 @@
 				margin: 0;
 			}
 
+			/* Main container */
 			#container {
-				width: 320px;
-				height: 460px;
 				position: absolute;
 				text-align: center;
 				background: black 20% 45% no-repeat url('tv-icon.svg');
 			}
 
-			#container.retina {
-				width: 640px;
-				height: 920px;
-				background: black 37% 46% no-repeat url('tv-icon.svg');
+			/* Settings */
+			#settings {
+				color: black;
+				position: absolute;
+				font-size: 14px;
+				font-style: italic;
+				right: 0;
+				opacity: 0;
 			}
 
+			#settings:hover {
+				opacity: 1;
+			}
+
+			#settings label {
+				padding-right: 50px;
+			}
+
+			/* iPhone (3.5", non-retina) */
+			#container.iphone {
+				width: 320px;
+				height: 460px;
+			}
+
+			/* iPhone (retina) */
+			#container.iphone.retina {
+				width: 640px;
+				height: 920px;
+				background-position: 37% 46%;
+			}
+
+			/* iPhone (4") */
+			#container.iphone.retina.fourinch {
+				height: 1096px;
+			}
+
+			/* iPad (non-retina, portrait) */
+			#container.ipad {
+				width: 768px;
+				height: 1004px;
+				background-position: 39% 46%;
+			}
+
+			/* iPad (retina, portrait) */
+			#container.ipad.retina {
+				width: 1536px;
+				height: 2008px;
+				background-position: 45% 46%;
+			}
+
+			/* iPad (non-retina, landscape) */
+			#container.ipad.landscape {
+				width: 1024px;
+				height: 748px;
+				background-position: 42% 46%;
+			}
+
+			/* iPad (retina, landscape) */
+			#container.ipad.retina.landscape {
+				width: 2048px;
+				height: 1496px;
+				background-position: 46% 46%;
+			}
+
+			/* Logo & text content */
 			#content {
 				position: absolute;
 				bottom: 53%;
@@ -36,12 +94,74 @@
 			.highlight {
 				color: orange;
 			}
+
+			/* Guidelines */
+			#container > .guide {
+				display: none;
+				background-color: #F00;
+				position: absolute;
+			}
+
+			#guideX {
+				width: 100%;
+				height: 1px;
+				top: 50%;
+			}
+
+			#guideY {
+				width: 1px;
+				height: 100%;
+				left: 50%;
+			}
+
+			#container.guides > .guide {
+				display: block;
+			}
+
 		</style>
+		<script src="../public/framework/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				$("#showguides").click(function(){
+					$("#container").toggleClass("guides", this.checked);
+				});
+
+				$("#device").change(function(){
+					// Remove all device classes, and add back the current selection
+					$("#container")
+						.removeClass("iphone ipad retina fourinch landscape")
+						.addClass(this.value);
+				});
+			})
+		</script>
 	</head>
 	<body>
-		<div id="container" class="retina">
+		<div id="container" class="iphone">
+			<div id="guideX" class="guide"></div>
+			<div id="guideY" class="guide"></div>
 			<div id="content"><span class="highlight">TV</span>manager</div>
+		</div>
+		<div id="settings">
+			<div>
+				<span>
+					<label for="showguides">Show Guides</label>
+				</span>
+				<input id="showguides" type="checkbox"></input>
+			</div>
+			<div>
+				<span>
+					<label for"device">Device</label>
+				</span>
+				<select id="device" value="iphone">
+					<option value="iphone">iPhone (3.5", non-retina)</option>
+					<option value="iphone retina">iPhone (3.5", retina)</option>
+					<option value="iphone retina fourinch">iPhone (4")</option>
+					<option value="ipad">iPad (non-retina, portrait)</option>
+					<option value="ipad retina">iPad (retina, portrait)</option>
+					<option value="ipad landscape">iPad (non-retina, landscape)</option>
+					<option value="ipad retina landscape">iPad (retina, landscape)</option>
+				</select>
+			</div>
 		</div>
 	</body>
 </html>
-
