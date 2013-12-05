@@ -363,8 +363,8 @@ define(
 			// Hide the scroll helper
 			this.hideScrollHelper();
 
-			//TODO: Fixed conflict with webkit-transform and webkit-overflow-scrolling
-			//$("#nowLoading").addClass("loading");
+			// Show the now loading indicator
+			$("#nowLoading").addClass("loading");
 			
 			// Load the view template 
 			$("#content").load("views/" + this.viewStack[this.viewStack.length - 1].name + "-view.html", function(responseText, status, jqXHR) {
@@ -373,8 +373,8 @@ define(
 					$(this).html(jqXHR.responseText);
 				}
 
-				//TODO: Fixed conflict with webkit-transform and webkit-overflow-scrolling
-				//$("#contentWrapper").addClass("loading");
+				// Slide in the new view from the right
+				$("#contentWrapper").addClass("loading");
 
 				// Call the success function, passing through the arguments
 				onSuccess(args);

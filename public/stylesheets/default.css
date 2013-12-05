@@ -43,20 +43,20 @@ footer {
 /* Main content wrapper (for animating view transitions) */
 #contentWrapper {
 	position: relative;
-	-webkit-transition-duration: 300ms;
-	/*-webkit-transition-property: -webkit-transform;*/
+	transition-duration: 300ms;
+	transition-property: -webkit-transform;
 }
 
 /* Hide the content wrapper while content is being loaded */
 #contentWrapper.loading {
 	visibility: hidden;
-	/*-webkit-transform: translateX(100%);*/
+	-webkit-transform: translateX(100%);
 }
 
 /* Show the content wrapper once the content has finished loading */
 #contentWrapper.loaded {
 	visibility: visible;
-	/*-webkit-transform: translateX(0%);*/
+	-webkit-transform: translateX(0%);
 }
 
 /* Now loading indicator */
