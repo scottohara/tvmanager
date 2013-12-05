@@ -32,14 +32,17 @@ define(
 					QUnit.equal(e.originalEvent.type, this.event.mapsTo, "event type");
 					QUnit.equal(e.originalEvent.targetTouches[0].clientX, this.event.clientX, "targetTouches clientX property");
 					QUnit.equal(e.originalEvent.targetTouches[0].clientY, this.event.clientY, "targetTouches clientY property");
+					QUnit.equal(e.originalEvent.targetTouches[0].identifier, -1, "targetTouches clientY property");
 					QUnit.equal(e.originalEvent.changedTouches[0].target, this.event.target, "changedTouches target property");
 					QUnit.deepEqual(e.originalEvent.target, this.event.target, "target property");
 					QUnit.equal(Date(e.originalEvent.timeStamp).toString(), this.event.timeStamp.toString(), "timeStamp property");
 				}, this);
 
-				this.emptyEventHandler = function(e) {
-					QUnit.ok(true, "Add " + e.type + " event listener");
-				};
+				this.emptyEventHandler = $.proxy(function(e) {
+					if (this.toucheventproxy.enabled){
+						QUnit.ok(true, "Add " + e.type + " event listener");
+					}
+				}, this);
 
 				this.toucheventproxy = new TouchEventProxy(this.element.get(0));
 			},
@@ -52,41 +55,6 @@ define(
 		QUnit.test("constructor", 2, function() {
 			QUnit.ok(this.toucheventproxy, "Instantiate TouchEventProxy object");
 			QUnit.deepEqual(this.toucheventproxy.element, this.element.get(0), "element property");
-		});
-
-		QUnit.test("constructor - without TouchEvent", 2, function() {
-			var originalCreateEvent = document.createEvent;
-			document.createEvent = function() {
-				throw new Error();
-			};
-			this.toucheventproxy = new TouchEventProxy(this.element.get(0));
-			document.createEvent = originalCreateEvent;
-			this.toucheventproxy.onTouchStart = this.emptyEventHandler;
-			this.toucheventproxy.captureBrowserEvent = this.emptyEventHandler;
-			var event = document.createEvent("Event");
-			event.initEvent("mousedown", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-			event = document.createEvent("Event");
-			event.initEvent("click", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-		});
-
-		QUnit.test("constructor - with TouchEvent", 0, function() {
-			var originalCreateEvent = document.createEvent;
-			document.createEvent = function() {
-				return;
-			};
-
-			this.toucheventproxy = new TouchEventProxy(this.element.get(0));
-			document.createEvent = originalCreateEvent;
-			this.toucheventproxy.onTouchStart = this.emptyEventHandler;
-			this.toucheventproxy.captureBrowserEvent = this.emptyEventHandler;
-			var event = document.createEvent("Event");
-			event.initEvent("mousedown", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-			event = document.createEvent("Event");
-			event.initEvent("click", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
 		});
 
 		QUnit.test("handleEvent - mousedown disabled", 1, function() {
@@ -107,7 +75,7 @@ define(
 			this.toucheventproxy.element.dispatchEvent(event);
 		});
 
-		QUnit.test("handleEvent - mousedown enabled", 10, function() {
+		QUnit.test("handleEvent - mousedown enabled", 11, function() {
 			this.event.type = "mousedown";
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchstart";
@@ -124,7 +92,7 @@ define(
 			this.toucheventproxy.element.dispatchEvent(event);
 		});
 
-		QUnit.test("handleEvent - mousemove", 7, function() {
+		QUnit.test("handleEvent - mousemove", 8, function() {
 			this.event.type = "mousemove";
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchmove";
@@ -133,7 +101,7 @@ define(
 			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
 		});
 
-		QUnit.test("handleEvent - mouseup", 7, function() {
+		QUnit.test("handleEvent - mouseup", 8, function() {
 			this.event.type = "mouseup";
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchend";
@@ -178,5 +146,32 @@ define(
 				QUnit.ok(!this.toucheventproxy.handleEvent(this.event), testParams[i].description + " - return false");
 			}
 		});
+
+		QUnit.test("handleEvent - touch event from proxy", 1, function() {
+			var originalIsTouchDevice = $.proxy(this.toucheventproxy.isTouchDevice, this.toucheventproxy);
+			this.toucheventproxy.isTouchDevice = $.proxy(function(e) {
+				originalIsTouchDevice(e);
+				QUnit.ok(this.enabled, "Proxy enabled");
+				this.isToucDevice = originalIsTouchDevice;
+			}, this.toucheventproxy);
+			var event = document.createEvent("Event");
+			event.initEvent("touchstart", true, true);
+			event.targetTouches = [{identifier: -1}];
+			this.toucheventproxy.element.dispatchEvent(event);
+		});
+
+		QUnit.test("handleEvent - touch event from brower", 1, function() {
+			var originalIsTouchDevice = $.proxy(this.toucheventproxy.isTouchDevice, this.toucheventproxy);
+			this.toucheventproxy.isTouchDevice = $.proxy(function(e) {
+				originalIsTouchDevice(e);
+				QUnit.ok(!this.enabled, "Proxy disabled");
+				this.isToucDevice = originalIsTouchDevice;
+			}, this.toucheventproxy);
+			var event = document.createEvent("Event");
+			event.initEvent("touchstart", true, true);
+			this.toucheventproxy.element.dispatchEvent(event);
+			this.toucheventproxy.element.dispatchEvent(event);
+		});
+
 	}
 );
