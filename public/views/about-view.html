@@ -1,6 +1,6 @@
-<div id="panel">
-	<h2>Statistics</h2>
-	<fieldset>
+<div id="dialog">
+	<section>
+		<h2>Statistics</h2>
 		<div class="row">
 			<label>Programs</label>
 			<input type="text" id="totalPrograms" readonly="true" value=""/>
@@ -13,9 +13,9 @@
 			<label>Episodes</label>
 			<input type="text" id="totalEpisodes" readonly="true" value=""/>
 		</div>
-	</fieldset>
-	<h2>Version</h2>
-	<fieldset>
+	</section>
+	<section>
+		<h2>Version</h2>
 		<div class="row">
 			<label>Database</label>
 			<input type="text" id="databaseVersion" readonly="true" value=""/>
@@ -25,8 +25,7 @@
 			<input type="text" id="appVersion" readonly="true" value=""/>
 		</div>
 		<div class="row">
-			<label>Update</label>
-			<div id="update"></div>
+			<a class="button left" id="update">Check for updates</div>
 		</div>
-	</fieldset>
+	</section>
 </div>

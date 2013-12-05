@@ -52,7 +52,6 @@ define(
 				},
 				rightButton: {
 					eventHandler: this.addItem,
-					style: "toolButton",
 					label: "+"
 				}
 			};
@@ -197,7 +196,7 @@ define(
 				label: "v" + appController.db.version,
 				rightButton: {
 					eventHandler: $.proxy(this.viewItems, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Done"
 				}
 			};
@@ -231,7 +230,7 @@ define(
 				label: "v" + appController.db.version,
 				leftButton: {
 					eventHandler: $.proxy(this.viewItems, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Done"
 				}
 			};
@@ -265,12 +264,11 @@ define(
 				label: "v" + appController.db.version,
 				leftButton: {
 					eventHandler: $.proxy(this.editItems, this),
-					style: "toolButton",
 					label: "Edit"
 				},
 				rightButton: {
 					eventHandler: $.proxy(this.deleteItems, this),
-					style: "redButton",
+					style: "cautionButton",
 					label: "Delete"
 				}
 			};

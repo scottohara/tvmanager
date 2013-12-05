@@ -11,7 +11,7 @@ define(
 		'controllers/application-controller',
 		'components/toucheventproxy',
 		'models/program-model',
-		'framework/sw/spinningwheel-min',
+		'framework/sw/spinningwheel',
 		'framework/jquery'
 	],
 
@@ -63,12 +63,11 @@ define(
 				label: "Add/Edit Series",
 				leftButton: {
 					eventHandler: $.proxy(this.cancel, this),
-					style: "toolButton",
 					label: "Cancel"
 				},
 				rightButton: {
 					eventHandler: $.proxy(this.save, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Save"
 				}
 			};

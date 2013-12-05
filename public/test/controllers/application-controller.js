@@ -7,7 +7,7 @@ define(
 		'controllers/application-controller',
 		'test/mocks/application-controller-mock',
 		'test/mocks/jQuery-mock',
-		'framework/sw/spinningwheel-min',
+		'framework/sw/spinningwheel',
 		'framework/jquery',
 		'test/framework/qunit'
 	],
@@ -126,7 +126,7 @@ define(
 			}, "noticeStack property");
 
 			jQueryMock.setDefaultContext(this.sandbox);
-			$("#contentWrapper").trigger("webkitTransitionEnd");
+			$("#contentWrapper").trigger("transitionend");
 			QUnit.equal(SpinningWheel.cellHeight, 45, "SpinningWheel.cellHeight property");
 			QUnit.deepEqual(this.appController.abc.element, $("#abc").get(0), "abc.element property");
 			QUnit.deepEqual(this.appController.abc.scrollElement, $("#content"), "abc.scrollElement property");
@@ -146,7 +146,7 @@ define(
 				id: this.appCacheUpdateNoticeId,
 				label: "Updated",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			}, "Notice");
@@ -200,7 +200,7 @@ define(
 			this.expectedNotice = {
 				label: "Error",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			};
@@ -216,7 +216,7 @@ define(
 			this.expectedNotice = {
 				label: "Database has been successfully upgraded from version 1.0 to version 1.1. Please restart the application.",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			};
@@ -253,7 +253,7 @@ define(
 			this.expectedNotice = {
 				label: "The last data sync was over " + maxDataAgeDays + " days ago",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			};

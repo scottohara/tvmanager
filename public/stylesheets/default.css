@@ -1,7 +1,10 @@
+/* Default application styles */
 body {
-	background-color: #fff;
+	background-color: rgb(240, 240, 240);
 	color: #000;
-	font-family: Helvetica;
+	font-family: Helvetica Neue;
+	font-size: 17px;
+	font-weight: 300;
 	overflow: hidden;
 	margin: 0;
 	padding: 0;
@@ -9,25 +12,54 @@ body {
 	-webkit-text-size-adjust: none;
 }
 
-/************************** Content *******************************/
+/* Hide the header & footer content by default */
+#header *, #footer * {
+	display: none;
+}
 
+/* Header title */
+h1 {
+	margin: 0;
+	background-color: rgb(248, 248, 248);
+	border-bottom: 1px solid rgb(200, 199, 204);
+	display: block;
+	font-size: inherit;
+	font-weight: 500;
+	padding: 11px 100px;
+	text-align: center;
+}
+
+/* Footer title */
+footer {
+	height:23px;
+	background-color: rgb(248, 248, 248);
+	border-top: 1px solid rgb(200, 199, 204);
+	display: block;
+	font-weight: 500;
+	padding: 10px 0;
+	text-align: center;
+}
+
+/* Main content wrapper (for animating view transitions) */
 #contentWrapper {
 	position: relative;
-	z-index: 1;
 	-webkit-transition-duration: 300ms;
 	/*-webkit-transition-property: -webkit-transform;*/
 }
 
+/* Hide the content wrapper while content is being loaded */
 #contentWrapper.loading {
 	visibility: hidden;
 	/*-webkit-transform: translateX(100%);*/
 }
 
+/* Show the content wrapper once the content has finished loading */
 #contentWrapper.loaded {
 	visibility: visible;
 	/*-webkit-transform: translateX(0%);*/
 }
 
+/* Now loading indicator */
 #nowLoading {
 	margin: 20px auto;
 	background: url(../images/loading.gif) no-repeat;
@@ -36,447 +68,487 @@ body {
 	width: 200px;
 	position: relative;
 	display: none;
-	font-size: 20px;
-	font-weight: bold;
+	font-weight: 500;
 }
 
+/* Show the now loading indicator while content is being loaded */
 #nowLoading.loading {
 	display: block;
 }
 
-/*********************** Header/footer ****************************/
-
-#header, #footer {
-  background: url(../images/toolbar.png) #6d84a2 repeat-x;
-	width: 100%;
-	position: relative;
-	z-index: 21;
-}
-
-#footer {
-	width: 100%;
-	position: absolute;
-}
-
-#header *, #footer * {
-	display: none;
-}
-
-h1 {
-	margin: 0;
-	border-bottom: 1px solid #666;
-	color: #fff;
-	display: block;
-	font-size: 20px;
-	font-weight: bold;
-	padding: 10px 100px;
-	text-align: center;
-	text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
-}
-
-h2 {
-	margin: 0 0 8px 14px;
-	font-size: inherit;
-	font-weight: bold;
-	color: #4d4d70;
-	text-shadow: rgba(255, 255, 255, 0.75) 1px 1px 0;
-}
-
-footer {
-	height:23px;
-	margin: 0;
-	border-top: 1px solid #666;
-	color: #fff;
-	display: block;
-	font-size: 20px;
-	font-weight: bold;
-	padding: 10px 0;
-	text-align: center;
-	text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
-}
-
+/* Default buttons */
 a.button {
 	position: absolute;
 	overflow: hidden;
-	margin: 0;
 	padding: 0 3px;
-	width: auto;
-	height: 30px;
 	line-height: 30px;
-	font-family: inherit;
-	font-size: 12px;
-	font-weight: bold;
-	color: white;
-	text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+	color: rgb(0, 122, 255);
 	text-overflow: ellipsis;
 	text-decoration: none;
 	white-space: nowrap;
-	background: none;
+	font-weight: 400;
 }
 
+/* Position of buttons in header */
 a.header {
 	top: 7px;
 }
 
+/* Position of buttons in footer */
 a.footer {
 	bottom: 7px;
 }
 
+/* Position of left buttons */
 a.left {
 	left: 6px;
 	right: auto;
 }
 
+/* Position of right buttons */
 a.right {
 	right: 6px;
 }
 
+/* Padding for back navigation buttons */
 a.backButton {
-	border-width: 0 8px 0 14px;
-	-webkit-border-image: url(../images/backButton.png) 0 8 0 14;
+	padding-left: 20px;
 }
 
-a.blueButton {
-	border-width: 0 5px;
-	-webkit-border-image: url(../images/blueButton.png) 0 5 0 5;
+/* Chevron glyph for back navigation buttons */
+a.backButton:before {
+	content: "";
+	position:absolute;
+	width: 10px;
+	height: 10px;
+	top: 8px;
+	left: 5px;
+	border-style: solid;
+	border-color: rgb(0, 122, 255);
+	border-width: 0 0 3px 3px;
+	-webkit-transform: rotate(45deg);
 }
 
-a.redButton {
-	border-width: 0 5px;
-	-webkit-border-image: url(../images/redButton.png) 0 5 0 5;
+/* Confirm action buttons */
+a.confirmButton {
+	font-weight: 500;
 }
 
-a.whiteButton {
-	border-width: 0 5px;
-	-webkit-border-image: url(../images/whiteButton.png) 0 5 0 5;
+/* Caution action buttons */
+a.cautionButton {
+	color: rgb(255, 59, 48);
 }
 
-a.toolButton {
-	border-width: 0 5px;
-	-webkit-border-image: url(../images/toolButton.png) 0 5 0 5;
-}
-
-a.toggle {
-	position: relative;
-}
-
-/*************************** Lists ********************************/
-
-ul {
-	padding:0;
-	margin: 0;
+/* Scrolling lists & dialogs */
+ul, #dialog {
 	overflow-y: scroll;
 	-webkit-overflow-scrolling: touch;
 }
 
-ul li {
+/* Default scrolling lists */
+ul {
+	background-color: #FFF;
+	padding:0;
 	margin: 0;
-	border-bottom: 1px solid #E0E0E0;
-	padding: 8px 0 8px 10px;
-	font-size: 20px;
-	font-weight: bold;
+}
+
+/* List items */
+ul li {
+	margin: 0 0 0 15px;
+	border-top: 1px solid #E0E0E0;
+	padding: 2px 0;
 	list-style: none;
 }
 
+/* List group headers */
 ul li.group {
-	top: -1px;
-	border-top: 1px solid #7d7d7d;
-	border-bottom: 1px solid #999999;
-	padding: 1px 10px;
-	background: url(../images/listGroup.png) repeat-x;
-	font-size: 17px;
-	text-shadow: rgba(0, 0, 0, 0.4) 0 1px 0;
-	color: #FFFFFF;
+	padding: 1px 15px;
+	font-weight: 500;
+	background-color: rgb(240, 240, 240);
+	border: 0;
+	margin-left: 0;
 }
 
-ul li.group:first-child {
-	top: 0;
-	border-top: none;
+/* No top border for the first item in a list or list group */
+ul li.group + li, ul li:first-child:not(.group) {
+	border-top: 0;
 }
 
+/* List item content */
 ul li a {
 	min-height: 40px;
 	display: block;
-	margin: -8px 0px -8px -10px;
-	padding: 8px 32px 8px 10px;
-	text-decoration: none;
-	color: inherit;
-	background: url(../images/listArrow.png) no-repeat right center;
+	margin: -2px 0px -2px -15px;
+	padding: 2px 32px 2px 15px;
+	-webkit-transform: rotate(0);
 }
 
+/* Chevron glyph for list items and navigating to a subview */
+ul li a:before, .toView:before {
+	content: "";
+	position:absolute;
+	width: 7px;
+	height: 7px;
+	right: 0;
+	border-style: solid;
+	border-color: rgb(200, 199, 204);
+	border-width: 3px 3px 0 0;
+	-webkit-transform-origin: 100% 100%;
+	-webkit-transform: rotate(45deg) translate(0%, 240%);
+}
+
+/* Highlighted list items */
 ul li a.warning {
-	background-color: #FFFFCA;
+	background-color: rgb(255, 255, 222);
 }
 
+/* Hide the chevron images for lists that use a helper */
+ul.withHelper li a:before {
+	display: none;
+}
+
+/* Prevent list items from running under helper */
+ul.withHelper li {
+	margin-right: 27px;
+}
+
+/* No right padding for lists that use a helper */
 ul.withHelper li a {
-	background-image: none;
+	padding-right: 5px;
 }
 
-ul.edit li a {
-	background-image: url(../images/listArrowSel.png);
+/* Chevron image for list items in edit mode */
+ul.edit li a:before {
+	content: "i";
+	position:absolute;
+	width: 20px;
+	height: 20px;
+	top: 12px;
+	right: 5px;
+	border-radius: 14px;
+	border: 1px solid rgb(200, 199, 204);
+	text-align: center;
+	font-family: serif;
+	color: rgb(200, 199, 204);
+	line-height: 20px;
+	-webkit-transform-origin: 100% 100%;
+	-webkit-transform: rotate(0);
 }
 
-ul.delete li a {
-	background-image: url(../images/cancel.png);
+/* Delete image for list items in delete mode */
+ul.delete li a:before {
+	content: "\2013";
+	position:absolute;
+	width: 20px;
+	height: 20px;
+	top: 12px;
+	right: 6px;
+	background-color: rgb(255, 45, 85);
+	border-radius: 14px;
+	border: 0;
+	text-align: center;
+	color: #FFF;
+	line-height: 16px;
+	-webkit-transform-origin: 100% 100%;
+	-webkit-transform: rotate(0);
 }
 
-ul li a div.status {
-	margin: 4px;
-	width: 32px;
-	height: 32px;
-	float: left;
-	clear: none;
-	background-repeat: no-repeat;
-	background-position: center;
+/* Episode status indicators for episode list */
+ul li a.status {
+	margin-left: -10px;
+	border-left: 5px solid transparent;
 }
 
-ul li a div.Watched {
-	background-image: url(../images/watched.png);
+/* Use double status indicators for unverified episodes */
+ul li a.status.Unverified {
+	border-left-style: double;
 }
 
-ul li a div.Recorded {
-	background-image: url(../images/recorded.png);
+/* Watched status indicators for episode list */
+ul li a.Watched {
+	border-left-color: rgb(76, 217, 100);
 }
 
-ul li a div.RecordedUnverified {
-	background-image: url(../images/recorded_unverified.png);
+/* Recorded status indicators for episode list */
+ul li a.Recorded {
+	border-left-color: rgb(255, 45, 85);
 }
 
-ul li a div.Expected {
-	background-image: url(../images/expected.png);
+/* Expected status indicators for episode list */
+ul li a.Expected {
+	border-left-color: rgb(255, 204, 0);
 }
 
-ul li a div.ExpectedUnverified {
-	background-image: url(../images/expected_unverified.png);
+/* Missed status indicators for episode list */
+ul li a.Missed {
+	border-left-color: rgb(142, 142, 147);
 }
 
-ul li a div.Missed {
-	background-image: url(../images/missed.png);
-}
-
-ul li a div.MissedUnverified {
-	background-image: url(../images/missed_unverified.png);
-}
-
+/* List item content subtext */
 ul li a div.subText {
 	font-size: 12px;
+	color: rgb(111, 111, 116);
 }
 
+/* Progress bars */
 div.progressBar {
-  border-width: 1px 2px;
-  -webkit-border-image: url(../images/percentImage.png) 1 2;
-	width: 100%;
+	background-color: rgb(142, 142, 147);
 	height: 14px;
 	font-size: 12px;
-	white-space: nowrap;
 	overflow: hidden;
 }
 
+/* Progress bar sections */
 div.progressBar div {
-  border-width: 1px 0;
 	float: left;
-	clear: none;
-	height: 12px;
+	height: inherit;
 	text-align: center;
 }
 
+/* Totals in progress bars */
 div.progressBar div.total {
 	float: right !important;
+	padding-right: 2px;
 	color: #FFF;
 }
 
+/* Watched section in progress bars */
 div.progressBar div.watched {
-  -webkit-border-image: url(../images/percentImage_back1.png) 1 2 1 2;
+	background-color: rgb(76, 217, 100);
 }
 
+/* Recorded section in progress bars */
 div.progressBar div.recorded {
-  -webkit-border-image: url(../images/percentImage_back4.png) 1 2 1 2;
+	background-color: rgb(255, 45, 85);
 	color: #FFF;
 }
 
+/* Expected section in progress bars */
 div.progressBar div.expected {
-  -webkit-border-image: url(../images/percentImage_back2.png) 1 2 1 2;
+	background-color: rgb(255, 204, 0);
 }
 
-/*************************** Panels *******************************/
-
-#panel {
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	padding: 10px;
-	background: #c8c8c8 url(../images/pinstripes.png);
+/* Dialog sections */
+section {
+	padding-top: 20px
 }
 
-#panel fieldset {
-	position: relative;
-	margin: 0 0 20px 0;
-	padding: 0;
-	background: #FFFFFF;
-	-webkit-border-radius: 10px;
-	-moz-border-radius: 10px;
-	border: 1px solid #999999;
-	text-align: right;
-	font-size: 16px;
+/* Dialog titles */
+h2 {
+	margin: 10px 0 6px 15px;
+	font-size: 14px;
+	font-weight: 300;
+	color: rgb(111, 111, 116);
+	text-transform: uppercase;
 }
 
-#panel p {
-	text-align: center;
-	font-size: inherit;
-	color: #4d4d70;
-	text-shadow: rgba(255, 255, 255, 0.75) 1px 1px 0;
-}
-
+/* Dialog rows */
 .row  {
-	position: relative;
+	background: #FFF;
 	min-height: 42px;
-	border-bottom: 1px solid #999999;
-	-webkit-border-radius: 0;
-	text-align: right;
+	padding-left: 15px;
+	border-bottom: 1px solid #E0E0E0;
+	white-space: nowrap;
+	overflow: hidden;
+	-webkit-transform: rotate(0);
 }
 
-fieldset > .row:last-child {
-	border-bottom: none !important;
+/* Top border for first row in a dialog or dialog section */
+h2 + .row, .row:first-child {
+	border-top: 1px solid #E0E0E0;
 }
 
-.row > label {
+/* First row in a dialog with no preceding header */
+.row:first-child {
+	margin-top: 33px;
+}
+
+/* Overlay to make offset separators between dialog rows */
+.row + .row:after {
+	content: "";
 	position: absolute;
-	margin: 0 0 0 14px;
-	line-height: 42px;
-	font-weight: bold;
-	left: 0;
-}
-
-.row > input:not([type="radio"]) {
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	margin: 0;
-	border: none;
-	padding: 0 10px 0 110px;
-	height: 42px;
-	background: none;
-	width: 100%;
-	font-size: 16px;
-	font-weight: normal;
-}
-
-.row div {
-	float: left;
-	clear: none;
-	height: 32px;
-	width: 32px;
-	border: 1px solid #000;
-	-webkit-border-radius: 5px;
-	margin: 3px;
-	background-repeat: no-repeat;
-	background-position: center;
-}
-
-.row div.status {
-	background-color: #6d84a2;
-}
-
-.row #watched {
-	margin-left: 110px;
-	background-image: url(../images/watched.png);
-}
-
-.row #recorded {
-	background-image: url(../images/recorded.png);
-}
-
-.row #expected {
-	background-image: url(../images/expected.png);
-}
-
-.row #missed {
-	background-image: url(../images/missed.png);
-}
-
-.row #import {
-	margin-left: 110px;
-	background-image: url(../images/import.png);
-}
-
-.row #export {
-	background-image: url(../images/export.png);
-}
-
-.row #update {
-	margin-left: 110px;
-	background-image: url(../images/update.png);
-}
-
-.row div.toggle {
-	width: 94px;
-	height: 27px;
-	overflow: hidden;
-	margin: 8px 0 0 110px;
-	border: 0;
-}
-
-.row div.toggle input[type="checkbox"]:checked {
+	width: 15px;
+	height: 1px;
 	left: 0px;
+	background-color: inherit;
+	-webkit-transform: translateY(-1px);
+}
+/* Dialog labels */
+label {
+	line-height: 40px;
+	display: inline-block;
+	min-width: 105px;
 }
 
-.row div.toggle input[type="checkbox"] {
-	-webkit-tap-highlight-color: rgba(0,0,0,0);
-	margin: 0;
-	-webkit-border-radius: 5px;
-	background: #fff url(../images/on_off.png) 0 0 no-repeat;
-	height: 27px;
-	overflow: hidden;
-	width: 149px;
-	border: 0;
-	-webkit-appearance: textarea;
-	background-color: transparent;
-	-webkit-transition: left .15s;
+/* Dialog text content */
+p {
+	margin: 8px 15px;
+	color: rgb(111, 111, 116);
+}
+
+/* Dialog fields */
+input:not([type="radio"]) {
+	border: none;
+	height: 40px;
+	width: 100%;
+	font-family: inherit;
+	font-weight: inherit;
+	font-size: inherit;
+	background: transparent;
+	outline: none;
+}
+
+/* Episode status toggles */
+.row #watched, .row #recorded, .row #expected, .row #missed {
+	height: 25px;
+	width: 25px;
+	border-width: 2px;
+	border-style: solid;
+	border-radius: 14px;
+	display: inline-block;
+	margin-right: 10px;
 	position: relative;
-	top: 0;
-	left: -55px;
+	top: 7px;
+	transition: background-color .25s ease-in-out;
 }
 
-.toView {
-	background: url(../images/listArrow.png) no-repeat right;
+/* Watched episode status toggle (unselected) */
+.row #watched {
+	border-color: rgb(76, 217, 100);
 }
 
+/* Watched episode status toggle (selected) */
+.row #watched.status {
+	background-color: rgb(76, 217, 100);
+}
+
+/* Recorded episode status toggle (unselected) */
+.row #recorded {
+	border-color: rgb(255, 45, 85);
+}
+
+/* Recorded episode status toggle (selected) */
+.row #recorded.status {
+	background-color: rgb(255, 45, 85);
+}
+
+/* Expected episode status toggle (unselected) */
+.row #expected {
+	border-color: rgb(255, 204, 0);
+}
+
+/* Expected episode status toggle (selected) */
+.row #expected.status {
+	background-color: rgb(255, 204, 0);
+}
+
+/* Missed episode status toggle (unselected) */
+.row #missed {
+	border-color: rgb(111, 111, 116);
+}
+
+/* Missed episode status toggle (selected) */
+.row #missed.status {
+	background-color: rgb(111, 111, 116);
+}
+
+/* Buttons in dialog rows */
+.row a.button {
+	line-height: 40px;
+}
+
+/* Hide browser default checkbox style */
+input[type="checkbox"] {
+	max-height: 0;
+	max-width: 0;
+	opacity: 0;
+	margin: 0;
+}
+
+/* Background for checkbox sliders */
+input[type="checkbox"] + label {
+	display: inline-block;
+	position: relative;
+	box-shadow: inset 0 0 0px 1px #d5d5d5;
+	height: 30px;
+	width: 50px;
+	border-radius: 15px;
+	top: 6px;
+	min-width: 0;
+	margin-bottom: -1px;
+}
+
+/* Left side of checkbox slider (unchecked) */
+input[type="checkbox"] + label:before {
+	content: "";
+	position: absolute;
+	display: block;
+	height: 30px;
+	width: 30px;
+	left: 0;
+	border-radius: 15px;
+	transition: .25s ease-in-out;
+}
+
+/* Right side of checkbox slider (unchecked) */
+input[type="checkbox"] + label:after {
+	content: "";
+	position: absolute;
+	display: block;
+	height: 30px;
+	width: 30px;
+	left: 0px;
+	border-radius: 15px;
+	background: white;
+	box-shadow: inset 0 0 0 1px rgba(0,0,0,.2), 0 2px 4px rgba(0,0,0,.2);
+	transition: .25s ease-in-out;
+}
+
+/* Left side of checkbox slider (checked) */
+input[type="checkbox"]:checked + label:before {
+	width: 50px;
+	background: rgba(19,191,17,1);
+}
+
+/* Right side of checkbox slider (checked) */
+input[type="checkbox"]:checked + label:after {
+	left: 20px;
+	box-shadow: inset 0 0 0 1px rgba(19,191,17,1), 0 2px 4px rgba(0,0,0,.2);
+}
+
+/* Hide registration message, sync controls, status row, sync error & import changes only rows by default */
 #registrationMessage, #syncControls, #statusRow, #syncErrors, #importChangesOnlyRow {
 	display: none;
 }
 
+/* Sync errors */
 #syncErrors ul li {
 	text-align: left;
-	font-weight: normal;
-	font-size: 16px;
 }
 
-/*************************** Notices ******************************/
-
+/* Notices stack */
 #notices {
 	position: absolute;
 	visibility: hidden;
-	margin: auto;
-	width: 100%;
 	z-index: 1000;
-	padding: 0;
-}
-
-div.notice {
-	position: relative;
-	margin: auto;
 	width: 100%;
-	min-height: 40px;
-	border: 1px solid #999999;
-	z-index: 1000;
 	background: rgba(0, 0, 0, 0.7);
-	padding: 0;
-	text-align: center;
-	color: #FFF;
-	text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
 }
 
+/* Notices */
+div.notice {
+	min-height: 46px;
+	border-top: 1px solid rgb(240, 240, 240);
+}
+
+/* Notice buttons */
+div.notice a.button {
+	padding-top: 7px;
+}
+
+/* Notice content */
 div.notice p {
-	padding: 5px 5px 5px 35px;
+	padding: 10px 5px 10px 50px;
 	margin: 0;
+	color: rgb(248, 248, 248);
 }

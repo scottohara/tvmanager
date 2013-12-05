@@ -32,7 +32,7 @@ require.config({
 		'framework/jshash/md5-min': {
 			exports: 'hex_md5'
 		},
-		'framework/sw/spinningwheel-min': {
+		'framework/sw/spinningwheel': {
 			exports: 'SpinningWheel'
 		},
 		'framework/abc/abc': {
@@ -64,7 +64,7 @@ require.config({
 			'models/series-model': 'test/mocks/series-model-mock',
 			'models/setting-model': 'test/mocks/setting-model-mock',
 			'models/sync-model': 'test/mocks/sync-model-mock',
-			'framework/sw/spinningwheel-min': 'test/mocks/sw-mock',
+			'framework/sw/spinningwheel': 'test/mocks/sw-mock',
 			'framework/jshash/md5-min': 'test/mocks/md5-mock'
 		},
 

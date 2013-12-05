@@ -175,7 +175,7 @@ define(
 			appController.showNotice({
 				label: message,
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			});

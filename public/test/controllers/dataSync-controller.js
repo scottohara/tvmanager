@@ -292,7 +292,7 @@ define(
 				QUnit.deepEqual(appController.notice.pop(), {
 					label: testParams[i].notice,
 					leftButton: {
-						style: "redButton",
+						style: "cautionButton",
 						label: "OK"
 					}
 				}, "Update notice");
@@ -351,7 +351,7 @@ define(
 				QUnit.deepEqual(appController.notice.pop(), {
 					label: testParams[i].notice,
 					leftButton: {
-						style: "redButton",
+						style: "cautionButton",
 						label: "OK"
 					}
 				}, "Update notice");

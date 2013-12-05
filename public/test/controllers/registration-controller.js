@@ -101,7 +101,7 @@ define(
 			QUnit.deepEqual(appController.notice.pop(), {
 				label: "Unregister failed: Force failed, 404 (Not found)",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			}, "Failure notice");
@@ -136,7 +136,7 @@ define(
 			QUnit.deepEqual(appController.notice.pop(), {
 				label: "Registration failed: Force failed, 404 (Not found)",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			}, "Failure notice");

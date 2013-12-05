@@ -46,12 +46,11 @@ define(
 				label: "Register",
 				leftButton: {
 					eventHandler: this.cancel,
-					style: "toolButton",
 					label: "Cancel"
 				},
 				rightButton: {
 					eventHandler: $.proxy(this.save, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Save"
 				}
 			};
@@ -82,7 +81,7 @@ define(
 					label: "v" + appController.db.version,
 					leftButton: {
 						eventHandler: $.proxy(this.unregister, this),
-						style: "redButton",
+						style: "cautionButton",
 						label: "Unregister"
 					}
 				};
@@ -128,7 +127,7 @@ define(
 					appController.showNotice({
 						label: "Unregister failed: " + statusText + ", " + request.status + " (" + request.statusText + ")",
 						leftButton: {
-							style: "redButton",
+							style: "cautionButton",
 							label: "OK"
 						}
 					});
@@ -171,7 +170,7 @@ define(
 					appController.showNotice({
 						label: "Registration failed: " + statusText + ", " + request.status + " (" + request.statusText + ")",
 						leftButton: {
-							style: "redButton",
+							style: "cautionButton",
 							label: "OK"
 						}
 					});

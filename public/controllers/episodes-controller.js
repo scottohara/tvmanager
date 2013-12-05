@@ -71,7 +71,6 @@ define(
 				},
 				rightButton: {
 					eventHandler: $.proxy(this.addItem, this),
-					style: "toolButton",
 					label: "+"
 				}
 			};
@@ -262,7 +261,7 @@ define(
 				label: "v" + appController.db.version,
 				rightButton: {
 					eventHandler: $.proxy(this.viewItems, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Done"
 				}
 			};
@@ -342,7 +341,7 @@ define(
 						this.resequenceItems();
 						this.viewItems();
 					}, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Done"
 				}
 			};
@@ -382,17 +381,19 @@ define(
 				.sortable("destroy")
 				.removeTouch();
 
+			// Show the view icons next to each list item
+			$("#list").removeClass();
+
 			// Setup the footer
 			this.footer = {
 				label: "v" + appController.db.version,
 				leftButton: {
 					eventHandler: $.proxy(this.editItems, this),
-					style: "toolButton",
 					label: "Sort"
 				},
 				rightButton: {
 					eventHandler: $.proxy(this.deleteItems, this),
-					style: "redButton",
+					style: "cautionButton",
 					label: "Delete"
 				}
 			};

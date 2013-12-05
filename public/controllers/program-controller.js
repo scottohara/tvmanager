@@ -61,12 +61,11 @@ define(
 				label: "Add/Edit Program",
 				leftButton: {
 					eventHandler: this.cancel,
-					style: "toolButton",
 					label: "Cancel"
 				},
 				rightButton: {
 					eventHandler: $.proxy(this.save, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Save"
 				}
 			};

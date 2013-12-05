@@ -1,27 +1,29 @@
-<div id="panel">
-    <fieldset>
-        <div class="row">
-            <label>Name</label>
-            <input type="text" id="episodeName"/>
-        </div>
-        <div class="row">
-            <label>Status</label>
-            <div id="watched"></div>
-            <div id="recorded"></div>
-            <div id="expected"></div>
-						<div id="missed"></div>
-        </div>
-        <div class="row" id="statusDateRow">
-            <label>When</label>
-            <input type="text" id="statusDate" readonly="true"/>
-        </div>
-        <div class="row" id="unverifiedRow">
-						<label>Unverified</label>
-						<div class="toggle"><input type="checkbox" id="unverified"/></div>
-        </div>
-        <div class="row" id="unscheduledRow">
-						<label>Unsched.</label>
-						<div class="toggle"><input type="checkbox" id="unscheduled"/></div>
-        </div>
-    </fieldset>
+<div id="dialog">
+	<section>
+		<div class="row">
+			<label>Name</label>
+			<input type="text" id="episodeName"/>
+		</div>
+		<div class="row">
+			<label>Status</label>
+			<div id="watched"></div>
+			<div id="recorded"></div>
+			<div id="expected"></div>
+			<div id="missed"></div>
+		</div>
+		<div class="row" id="statusDateRow">
+			<label>When</label>
+			<input type="text" id="statusDate" readonly="true"/>
+		</div>
+		<div class="row" id="unverifiedRow">
+			<label>Unverified</label>
+			<input type="checkbox" id="unverified"/>
+			<label for="unverified"></label>
+		</div>
+		<div class="row" id="unscheduledRow">
+			<label>Unscheduled</label>
+			<input type="checkbox" id="unscheduled"/>
+			<label for="unscheduled"></label>
+		</div>
+	</section>
 </div>

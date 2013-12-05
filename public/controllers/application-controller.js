@@ -11,7 +11,7 @@ define(
 		'components/toucheventproxy',
 		'controllers/cache-controller',
 		'controllers/database-controller',
-		'framework/sw/spinningwheel-min',
+		'framework/sw/spinningwheel',
 		'framework/abc/abc',
 		'framework/jquery',
 		'framework/jquery.iphoneui'
@@ -98,7 +98,7 @@ define(
 			};
 
 			// Bind a handler for transition end events
-			$("#contentWrapper").bind('webkitTransitionEnd', this.contentShown);
+			$("#contentWrapper").bind('transitionend', this.contentShown);
 
 			// Increase the default cell height of the SpinningWheel (44px default is incorrect)
 			SpinningWheel.cellHeight = 45;
@@ -125,7 +125,7 @@ define(
 							id: noticeId,
 							label: message,
 							leftButton: {
-								style: "redButton",
+								style: "cautionButton",
 								label: "OK"
 							}
 						});
@@ -158,7 +158,7 @@ define(
 							this.showNotice({
 								label: "Database has been successfully upgraded from version " + version.initial + " to version " + version.current + ". Please restart the application.",
 								leftButton: {
-									style: "redButton",
+									style: "cautionButton",
 									label: "OK"
 								}
 							});
@@ -209,7 +209,7 @@ define(
 						this.showNotice({
 							label: error.message,
 							leftButton: {
-								style: "redButton",
+								style: "cautionButton",
 								label: "OK"
 							}
 						});
@@ -635,7 +635,7 @@ define(
 				// Style the button
 				noticeLeftButton
 					.removeClass()
-					.addClass("button footer left " + notice.leftButton.style);
+					.addClass("button left " + notice.leftButton.style);
 
 				// Set the button label
 				noticeLeftButton.text(notice.leftButton.label);
@@ -665,7 +665,7 @@ define(
 				// Style the button
 				noticeRightButton
 					.removeClass()
-					.addClass("button footer right " + notice.rightButton.style);
+					.addClass("button right " + notice.rightButton.style);
 
 				// Set the button label
 				noticeRightButton.text(notice.rightButton.label);
@@ -795,7 +795,7 @@ define(
 					this.showNotice({
 						label: "The last data sync was over " + this.maxDataAgeDays + " days ago",
 						leftButton: {
-							style: "redButton",
+							style: "cautionButton",
 							label: "OK"
 						}
 					});

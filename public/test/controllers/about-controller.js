@@ -84,7 +84,7 @@ define(
 			QUnit.deepEqual(appController.notice.pop(), {
 				label: "Updated",
 				leftButton: {
-					style: "redButton",
+					style: "cautionButton",
 					label: "OK"
 				}
 			}, "Update notice");

@@ -49,12 +49,10 @@ define(
 				label: "Schedule",
 				leftButton: {
 					eventHandler: this.viewUnscheduled,
-					style: "toolButton",
 					label: "Unscheduled"
 				},
 				rightButton: {
 					eventHandler: this.viewPrograms,
-					style: "toolButton",
 					label: "Programs"
 				}
 			};
@@ -210,7 +208,7 @@ define(
 				label: "v" + appController.db.version,
 				leftButton: {
 					eventHandler: $.proxy(this.viewItems, this),
-					style: "blueButton",
+					style: "confirmButton",
 					label: "Done"
 				}
 			};
@@ -241,12 +239,10 @@ define(
 				label: "v" + appController.db.version,
 				leftButton: {
 					eventHandler: $.proxy(this.editItems, this),
-					style: "toolButton",
 					label: "Edit"
 				},
 				rightButton: {
 					eventHandler: this.viewSettings,
-					style: "toolButton",
 					label: "Settings"
 				}
 			};

@@ -1,6 +1,6 @@
 define(
 	[
-		'framework/sw/spinningwheel-min',
+		'framework/sw/spinningwheel',
 		'controllers/episode-controller',
 		'models/episode-model',
 		'controllers/application-controller',

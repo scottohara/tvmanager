@@ -250,7 +250,7 @@ define(
 					appController.showNotice({
 						label: label,
 						leftButton: {
-							style: "redButton",
+							style: "cautionButton",
 							label: "OK"
 						}
 					});
@@ -306,7 +306,7 @@ define(
 					appController.showNotice({
 						label: label,
 						leftButton: {
-							style: "redButton",
+							style: "cautionButton",
 							label: "OK"
 						}
 					});

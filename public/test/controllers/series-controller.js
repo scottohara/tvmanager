@@ -1,7 +1,7 @@
 define(
 	[
 		'models/series-model',
-		'framework/sw/spinningwheel-min',
+		'framework/sw/spinningwheel',
 		'controllers/series-controller',
 		'controllers/application-controller',
 		'models/program-model',

@@ -3,28 +3,20 @@
 	position:absolute;
 	z-index:1000;
 	top:48px;
-	right:4px;
-	width:28px;
-	height:364px;
-	-webkit-border-radius:14px;
-	text-align:center;
+	right:0px;
 	font-size:11px;
-	color:#6a737d;
+	color: rgb(0, 122, 255);
+	background-color: transparent;
+	padding: 8px;
 }
 
 #abc li {
 	padding:2px 0 0 0;
-	font-weight:bold;
-	font-size:inherit;
-	font-family:arial;
+	font-weight: 500;
 	border:0;
 	height:11px;
 }
 
 #abc li:first-child {
 	padding-top:6px;
-}
-
-#abc.hover {
-	background:rgba(106,115,125,0.5);
 }

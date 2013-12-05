@@ -37,7 +37,7 @@ require.config({
 		'framework/jshash/md5-min': {
 			exports: 'hex_md5'
 		},
-		'framework/sw/spinningwheel-min': {
+		'framework/sw/spinningwheel': {
 			exports: 'SpinningWheel'
 		},
 		'framework/abc/abc': {
