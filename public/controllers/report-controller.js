@@ -7,9 +7,9 @@
 
 define(
 	[
-		'components/list',
-		'controllers/application-controller',
-		'framework/jquery'
+		"components/list",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**

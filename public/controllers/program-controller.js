@@ -7,9 +7,9 @@
 
 define(
 	[
-		'models/program-model',
-		'controllers/application-controller',
-		'framework/jquery'
+		"models/program-model",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**

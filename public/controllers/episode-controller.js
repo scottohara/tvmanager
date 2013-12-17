@@ -7,11 +7,11 @@
 
 define(
 	[
-		'models/episode-model',
-		'controllers/application-controller',
-		'components/toucheventproxy',
-		'framework/sw/spinningwheel',
-		'framework/jquery'
+		"models/episode-model",
+		"controllers/application-controller",
+		"components/toucheventproxy",
+		"framework/sw/spinningwheel",
+		"framework/jquery"
 	],
 
 	/**
@@ -82,16 +82,16 @@ define(
 				
 			// Set the episode details
 			$("#episodeName").val(this.listItem.episode.episodeName);
-			$("#unverified").prop('checked', this.listItem.episode.unverified);
-			$("#unscheduled").prop('checked', this.listItem.episode.unscheduled);
+			$("#unverified").prop("checked", this.listItem.episode.unverified);
+			$("#unscheduled").prop("checked", this.listItem.episode.unscheduled);
 
 			// Bind events for all of the buttons/controls
-			$("#watched").bind('click', $.proxy(function() { this.setStatus("Watched"); }, this));
-			$("#recorded").bind('click', $.proxy(function() { this.setStatus("Recorded"); }, this));
-			$("#expected").bind('click', $.proxy(function() { this.setStatus("Expected"); }, this));
-			$("#missed").bind('click', $.proxy(function() { this.setStatus("Missed"); }, this));
-			$("#statusDate").bind('click', $.proxy(this.getStatusDate, this));
-			$("#unscheduled").bind('click', $.proxy(this.toggleStatusDateRow, this));
+			$("#watched").bind("click", $.proxy(function() { this.setStatus("Watched"); }, this));
+			$("#recorded").bind("click", $.proxy(function() { this.setStatus("Recorded"); }, this));
+			$("#expected").bind("click", $.proxy(function() { this.setStatus("Expected"); }, this));
+			$("#missed").bind("click", $.proxy(function() { this.setStatus("Missed"); }, this));
+			$("#statusDate").bind("click", $.proxy(this.getStatusDate, this));
+			$("#unscheduled").bind("click", $.proxy(this.toggleStatusDateRow, this));
 
 			// Toggle the current status
 			var status = this.listItem.episode.status;
@@ -112,8 +112,8 @@ define(
 		EpisodeController.prototype.save = function() {
 			// Get the episode details
 			this.listItem.episode.episodeName = $("#episodeName").val();
-			this.listItem.episode.setUnverified($("#unverified").is(':checked'));
-			this.listItem.episode.unscheduled = $("#unscheduled").is(':checked');
+			this.listItem.episode.setUnverified($("#unverified").is(":checked"));
+			this.listItem.episode.unscheduled = $("#unscheduled").is(":checked");
 
 			// Update the database
 			this.listItem.episode.save();
@@ -212,7 +212,7 @@ define(
 			var months = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun", 6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" };
 
 			// Split the current status date on the dashe into date and month parts
-			var parts = this.listItem.episode.statusDate.split('-');
+			var parts = this.listItem.episode.statusDate.split("-");
 
 			// If we don't have enough parts (ie. no date set), default to today's date
 			if (parts.length < 2) {
@@ -245,7 +245,7 @@ define(
 		 */
 		EpisodeController.prototype.setStatusDate = function() {
 			// Update the model with the selected values in the SpinningWheel
-			this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join('-'));
+			this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues().values.join("-"));
 
 			// Update the view
 			$("#statusDate").val(this.listItem.episode.statusDate);
@@ -266,7 +266,7 @@ define(
 			$("#statusDateRow").hide();
 
 			// Show the status date if certain criteria is met
-			if ($("#unscheduled").is(':checked') || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
+			if ($("#unscheduled").is(":checked") || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
 				$("#statusDateRow").show();
 
 				// If no date has been specified, prompt the user for a date

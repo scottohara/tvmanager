@@ -6,6 +6,7 @@ group :development do
 	gem 'foreman'
 	gem 'shotgun'
 	gem 'jslint_on_rails'
+	gem 'jshint_on_rails'
 	gem 'open4'
 	gem 'rake'
 	gem 'heroku-api'

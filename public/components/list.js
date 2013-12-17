@@ -7,8 +7,8 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'framework/jquery'
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**
@@ -113,7 +113,7 @@ define(
 					$("<li>")
 						.html(itemHTML)
 						.appendTo($("#" + this.container))
-						.bind('click', itemClicked(i));
+						.bind("click", itemClicked(i));
 
 					// If a populate item event handler was specified, trigger it
 					if (this.populateItemEventHandler) {
@@ -152,7 +152,7 @@ define(
 					bValidAction = true;
 					break;
 				default:
-					alert(action + " is not a valid action");
+					window.alert(action + " is not a valid action");
 			}
 
 			// For edit/delete modes, we want the application controller to remember the current scroll position

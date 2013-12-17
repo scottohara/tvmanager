@@ -7,7 +7,7 @@
 
 define(
 	[
-		'framework/jquery'
+		"framework/jquery"
 	],
 
 	/**

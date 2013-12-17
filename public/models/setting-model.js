@@ -7,8 +7,8 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'framework/jquery'
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**

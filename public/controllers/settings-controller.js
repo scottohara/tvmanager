@@ -7,9 +7,9 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'models/series-model',
-		'framework/jquery'
+		"controllers/application-controller",
+		"models/series-model",
+		"framework/jquery"
 	],
 
 	/**
@@ -62,12 +62,12 @@ define(
 		 */
 		SettingsController.prototype.activate = function() {
 			// Bind events for all of the buttons/controls
-			$("#dataSyncRow").bind('click', this.viewDataSync);
-			$("#aboutRow").bind('click', this.viewAbout);
-			$("#recordedReportRow").bind('click', this.viewRecordedReport);
-			$("#expectedReportRow").bind('click', this.viewExpectedReport);
-			$("#missedReportRow").bind('click', this.viewMissedReport);
-			$("#incompleteReportRow").bind('click', this.viewIncompleteReport);
+			$("#dataSyncRow").bind("click", this.viewDataSync);
+			$("#aboutRow").bind("click", this.viewAbout);
+			$("#recordedReportRow").bind("click", this.viewRecordedReport);
+			$("#expectedReportRow").bind("click", this.viewExpectedReport);
+			$("#missedReportRow").bind("click", this.viewMissedReport);
+			$("#incompleteReportRow").bind("click", this.viewIncompleteReport);
 		};
 
 		/**
@@ -111,7 +111,7 @@ define(
 		 * @desc Display the All Recorded report view
 		 */
 		SettingsController.prototype.viewRecordedReport = function() {
-			appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus, args: 'Recorded' });
+			appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus, args: "Recorded" });
 		};
 
 		/**
@@ -122,7 +122,7 @@ define(
 		 * @desc Display the All Expected report view
 		 */
 		SettingsController.prototype.viewExpectedReport = function() {
-			appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus, args: 'Expected' });
+			appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus, args: "Expected" });
 		};
 
 		/**
@@ -133,7 +133,7 @@ define(
 		 * @desc Display the All Missed report view
 		 */
 		SettingsController.prototype.viewMissedReport = function() {
-			appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus, args: 'Missed' });
+			appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus, args: "Missed" });
 		};
 
 		/**

@@ -7,8 +7,8 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'framework/jquery'
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**
@@ -128,7 +128,7 @@ define(
 			appController.db.transaction(function(tx) {
 				// Execute the SQL to delete the local changes
 				tx.executeSql("DELETE FROM Sync", [],
-					function(tx, resultSet) {
+					function() {
 						// Invoke the callback function
 						callback();
 					},

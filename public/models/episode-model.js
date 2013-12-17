@@ -7,9 +7,9 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'framework/uuid',
-		'framework/jquery'
+		"controllers/application-controller",
+		"framework/uuid",
+		"framework/jquery"
 	],
 
 	/**
@@ -198,7 +198,7 @@ define(
 			// Recalculate the status warning based on the current status and date
 			// The warning is used to highlight any expected episodes that are on or past their expected date
 			// Note: As the status date only captures day & month (no year), a date more than 3 months in the past is considered to be a future date
-			this.statusWarning = '';
+			this.statusWarning = "";
 			if ("Expected" === this.status && "" !== this.statusDate) {
 				// Get the current date and set as the start of the warning range
 				var today = new Date();
@@ -226,10 +226,10 @@ define(
 
 				// In Jan, Feb or Mar, it's an OR operation (less than start OR greater than end)
 				if (today.getMonth() < 3) {
-					this.statusWarning = (tempStatusDate <= start || tempStatusDate >= end ? 'warning' : '');
+					this.statusWarning = (tempStatusDate <= start || tempStatusDate >= end ? "warning" : "");
 				} else {
 					// Otherwise it's an AND operation (less that start AND greater than end)
-					this.statusWarning = (tempStatusDate <= start && tempStatusDate >= end ? 'warning' : '');
+					this.statusWarning = (tempStatusDate <= start && tempStatusDate >= end ? "warning" : "");
 				}
 			}
 		};
@@ -418,7 +418,7 @@ define(
 			appController.db.transaction(function(tx) {
 				// Execute the SQL to delete the episodes
 				tx.executeSql("DELETE FROM Episode", [],
-					function(tx, resultSet) {
+					function() {
 						// Invoke the callback function
 						callback();
 					},

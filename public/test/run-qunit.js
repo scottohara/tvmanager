@@ -1,4 +1,6 @@
-if (!phantom.injectJs('phantom-common.js')) {
+/*jshint unused:false */
+
+if (!phantom.injectJs("phantom-common.js")) {
 	console.log("Initialization failed: couldn't inject phantom-common.js");
 	phantom.exit();
 }
@@ -10,8 +12,8 @@ var main = function() {
 	waitFor(function(){
 		// When the word "completed" is found in the test results; return true
 		return page.evaluate(function(){
-			var el = document.getElementById('qunit-testresult');
-			if (el && el.innerText.match('completed')) {
+			var el = document.getElementById("qunit-testresult");
+			if (el && el.innerText.match("completed")) {
 				return true;
 			}
 			return false;
@@ -38,7 +40,7 @@ var main = function() {
 			for (var i = 0; i < failedTests.length; i++) {
 				var failedTest = $(failedTests[i]);
 				// Output the name of the module and the name of the test that failed
-				var failedTestName = $(failedTest.find('.module-name')[0]).text() + ": " + $(failedTest.find('.test-name')[0]).text();
+				var failedTestName = $(failedTest.find(".module-name")[0]).text() + ": " + $(failedTest.find(".test-name")[0]).text();
 				console.log(sectionHeader("=", failedTestName.length));
 				console.log(failedTestName);
 				console.log(sectionHeader("-", failedTestName.length));
@@ -59,10 +61,10 @@ var main = function() {
 
 		// Get the result totals
 		var failedNum = page.evaluate(function(){
-			var el = document.getElementById('qunit-testresult');
+			var el = document.getElementById("qunit-testresult");
 			console.log(el.innerText);
 			try {
-				return el.getElementsByClassName('failed')[0].innerHTML;
+				return el.getElementsByClassName("failed")[0].innerHTML;
 			} catch (e) { }
 			return 10000;
 		});

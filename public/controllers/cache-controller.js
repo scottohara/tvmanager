@@ -7,8 +7,8 @@
 
 define(
 	[
-		'framework/jquery',
-		'components/window'
+		"framework/jquery",
+		"components/window"
 	],
 
 	/**
@@ -28,12 +28,12 @@ define(
 		var CacheController = function () {
 			// Define the list of status' for the application cache
 			this.cacheStatusValues = [
-				'uncached',
-				'idle',
-				'checking',
-				'downloading',
-				'updateready',
-				'obsolete'
+				"uncached",
+				"idle",
+				"checking",
+				"downloading",
+				"updateready",
+				"obsolete"
 			];
 
 			// Only proceed if the browser supports the HTML5 application cache
@@ -42,19 +42,19 @@ define(
 				var NOTICE_ID = "appCacheUpdateNotice";
 
 				// Bind an event handler for the downloading event
-				window.applicationCache.addEventListener('downloading', $.proxy(function() {
+				window.applicationCache.addEventListener("downloading", $.proxy(function() {
 					// Display a notice indicating that the cache is being updated
 					this.callback(true, "Updating application to the latest version...<br/>Please Wait.", NOTICE_ID);
 				}, this), false);
 
 				// Bind an event handler for the progress event
-				window.applicationCache.addEventListener('progress', $.proxy(function(event) {
+				window.applicationCache.addEventListener("progress", $.proxy(function(event) {
 					// Display a notice indicating how many files have been downloaded, and how many in total
 					this.callback(true, "Updating application to the latest version...<br/>Downloaded " + event.loaded + "/" + event.total, NOTICE_ID);
 				}, this), false);
 
 				// Bind an event handler for the updateready event
-				window.applicationCache.addEventListener('updateready', $.proxy(function() {
+				window.applicationCache.addEventListener("updateready", $.proxy(function() {
 					// Only proceed if the status is not idle
 					if ("idle" !== this.cacheStatusValues[window.applicationCache.status]) {
 						// Swap to the updated cache
@@ -66,7 +66,7 @@ define(
 				}, this), false);
 
 				// Bind an event listener for the error event
-				window.applicationCache.addEventListener('error', $.proxy(function() {
+				window.applicationCache.addEventListener("error", $.proxy(function() {
 					// It's only an error if we're online
 					if (window.navigator.onLine) {
 						// Display a notice indicating the error
@@ -77,7 +77,7 @@ define(
 				}, this));
 
 				// Bind an event listener for the noupdate event
-				window.applicationCache.addEventListener('noupdate', $.proxy(function() {
+				window.applicationCache.addEventListener("noupdate", $.proxy(function() {
 					// If a callback function was provided, display a notice indicating that no update was available
 					if (this.callback) {
 						this.callback(false, "You are currently running the latest version. No updates are available at this time.");

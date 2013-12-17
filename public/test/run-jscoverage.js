@@ -1,4 +1,6 @@
-if (!phantom.injectJs('phantom-common.js')) {
+/*jshint unused:false */
+
+if (!phantom.injectJs("phantom-common.js")) {
 	console.log("Initialization failed: couldn't inject phantom-common.js");
 	phantom.exit();
 }
@@ -13,8 +15,8 @@ var main = function() {
 	waitFor(function(){
 		// When the word "completed" is found in the test results; return true
 		return page.evaluate(function(){
-			var el = document.getElementById('browserIframe').contentDocument.getElementById('qunit-testresult');
-			if (el && el.innerText.match('completed')) {
+			var el = document.getElementById("browserIframe").contentDocument.getElementById("qunit-testresult");
+			if (el && el.innerText.match("completed")) {
 				return true;
 			}
 			return false;
@@ -32,19 +34,19 @@ var main = function() {
 
 			// Tests have finished running, so now click the summary tab.
 			el = page.evaluate(function() {
-				el = document.getElementById('summaryTab');
+				el = document.getElementById("summaryTab");
 				return {
 					"left": el.offsetLeft + el.offsetParent.offsetLeft,
 					"top": el.offsetTop + el.offsetParent.offsetTop
 				};
 			});
-			page.sendEvent('click', el.left, el.top);
+			page.sendEvent("click", el.left, el.top);
 
 			waitFor(function() {
 				// When the summary total covered has a style attribute; return true
 				return page.evaluate(function(){
-					el = document.getElementById('summaryTotals').getElementsByClassName('covered')[0];
-					if (el && el.getAttribute('style')) {
+					el = document.getElementById("summaryTotals").getElementsByClassName("covered")[0];
+					if (el && el.getAttribute("style")) {
 						return true;
 					}
 					return false;
@@ -71,9 +73,9 @@ var main = function() {
 				// Get the result totals
 				coverage = page.evaluate(function(){
 					try {
-						el = document.getElementById('summaryTotals');
-						el = el.getElementsByClassName('coverage')[0];
-						el = el.getElementsByClassName('pct')[0];
+						el = document.getElementById("summaryTotals");
+						el = el.getElementsByClassName("coverage")[0];
+						el = el.getElementsByClassName("pct")[0];
 						console.log("Total Coverage: " + el.innerText);
 						return el.innerText;
 					} catch (e) { }

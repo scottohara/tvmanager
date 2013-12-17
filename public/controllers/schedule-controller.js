@@ -7,10 +7,10 @@
 
 define(
 	[
-		'components/list',
-		'models/series-model',
-		'controllers/application-controller',
-		'framework/jquery'
+		"components/list",
+		"models/series-model",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**

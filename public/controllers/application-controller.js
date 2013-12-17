@@ -7,14 +7,14 @@
 
 define(
 	[
-		'require',
-		'components/toucheventproxy',
-		'controllers/cache-controller',
-		'controllers/database-controller',
-		'framework/sw/spinningwheel',
-		'framework/abc/abc',
-		'framework/jquery',
-		'framework/jquery.iphoneui'
+		"require",
+		"components/toucheventproxy",
+		"controllers/cache-controller",
+		"controllers/database-controller",
+		"framework/sw/spinningwheel",
+		"framework/abc/abc",
+		"framework/jquery",
+		"framework/jquery.iphoneui"
 	],
 
 	/**
@@ -98,7 +98,7 @@ define(
 			};
 
 			// Bind a handler for transition end events
-			$("#contentWrapper").bind('transitionend', this.contentShown);
+			$("#contentWrapper").bind("transitionend", this.contentShown);
 
 			// Increase the default cell height of the SpinningWheel (44px default is incorrect)
 			SpinningWheel.cellHeight = 45;
@@ -166,19 +166,19 @@ define(
 							// Load all of the view controllers, and populate a hash so that they can be referenced later dynamically by name
 							this.loadDependencies(
 								[
-									'controllers/about-controller',
-									'controllers/dataSync-controller',
-									'controllers/episode-controller',
-									'controllers/episodes-controller',
-									'controllers/program-controller',
-									'controllers/programs-controller',
-									'controllers/registration-controller',
-									'controllers/report-controller',
-									'controllers/schedule-controller',
-									'controllers/series-controller',
-									'controllers/seriesList-controller',
-									'controllers/settings-controller',
-									'controllers/unscheduled-controller'
+									"controllers/about-controller",
+									"controllers/dataSync-controller",
+									"controllers/episode-controller",
+									"controllers/episodes-controller",
+									"controllers/program-controller",
+									"controllers/programs-controller",
+									"controllers/registration-controller",
+									"controllers/report-controller",
+									"controllers/schedule-controller",
+									"controllers/series-controller",
+									"controllers/seriesList-controller",
+									"controllers/settings-controller",
+									"controllers/unscheduled-controller"
 								],
 								
 								$.proxy(function(AboutController, DataSyncController, EpisodeController, EpisodesController, ProgramController, ProgramsController, RegistrationController, ReportController, ScheduleController, SeriesController, SeriesListController, SettingsController, UnscheduledController) {
@@ -259,7 +259,7 @@ define(
 			this.maxDataAgeDays = config.maxDataAgeDays;
 
 			// Load the setting model if it's not already loaded
-			this.loadDependencies(['models/setting-model'], $.proxy(function(Setting) {
+			this.loadDependencies(["models/setting-model"], $.proxy(function(Setting) {
 				// Get the last sync time
 				Setting.get("LastSyncTime", $.proxy(this.gotLastSyncTime, this));
 			}, this));
@@ -437,7 +437,7 @@ define(
 			// If the view controller specified a left-hand button, set it up
 			if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
 				// Bind the event handler for the button
-				$("#headerLeftButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
+				$("#headerLeftButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
 
 				// Style the button
 				$("#headerLeftButton")
@@ -463,7 +463,7 @@ define(
 			// If the view controller specified a right-hand button, set it up
 			if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
 				// Bind the event handler for the button
-				$("#headerRightButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
+				$("#headerRightButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
 				
 				// Style the button
 				$("#headerRightButton")
@@ -491,12 +491,12 @@ define(
 		ApplicationController.prototype.clearHeader = function() {
 			// If the view controller specified a left-hand button, unbind the event handler
 			if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
-				$("#headerLeftButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
+				$("#headerLeftButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
 			}
 
 			// If the view controller specified a right-hand button, unbind the event handler
 			if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
-				$("#headerRightButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
+				$("#headerRightButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
 			}
 
 			// Hide the buttons and header label
@@ -521,7 +521,7 @@ define(
 				// If the view controller specified a left-hand button, set it up
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
 					// Bind the event handler for the button
-					$("#footerLeftButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
+					$("#footerLeftButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
 					
 					// Style the button
 					$("#footerLeftButton")
@@ -546,7 +546,7 @@ define(
 				// If the view controller specified a right-hand button, set it up
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
 					// Bind the event handler for the button
-					$("#footerRightButton").bind('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
+					$("#footerRightButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
 
 					// Style the button
 					$("#footerRightButton")
@@ -577,12 +577,12 @@ define(
 			if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 				// If the view controller specified a left-hand button, unbind the event handler
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
-					$("#footerLeftButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
+					$("#footerLeftButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
 				}
 
 				// If the view controller specified a right-hand button, unbind the event handler
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
-					$("#footerRightButton").unbind('click', this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
+					$("#footerRightButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
 				}
 			}
 
@@ -626,11 +626,11 @@ define(
 			if (notice.leftButton) {
 				// Bind the event handler for the button
 				if (notice.leftButton.eventHandler) {
-					noticeLeftButton.bind('click', notice.leftButton.eventHandler);
+					noticeLeftButton.bind("click", notice.leftButton.eventHandler);
 				}
 
 				// Also bind a function to hide the notice when the button is clicked
-				noticeLeftButton.bind('click', $.proxy(function(notice) { return $.proxy(function() { this.hideNotice(notice); }, this);}, this)(noticeContainer));
+				noticeLeftButton.bind("click", $.proxy(function(notice) { return $.proxy(function() { this.hideNotice(notice); }, this);}, this)(noticeContainer));
 
 				// Style the button
 				noticeLeftButton
@@ -659,7 +659,7 @@ define(
 			if (notice.rightButton) {
 				// Bind the event handler for the button
 				if (notice.rightButton.eventHandler) {
-					noticeRightButton.bind('click', notice.rightButton.eventHandler);
+					noticeRightButton.bind("click", notice.rightButton.eventHandler);
 				}
 				
 				// Style the button
@@ -676,7 +676,7 @@ define(
 
 			// If there are currently no notices displayed, position the notices container just off screen (at the bottom) and make it visible
 			if (0 === this.noticeStack.notice.length) {
-				$("#notices").css('top', window.innerHeight + window.pageYOffset + 'px');
+				$("#notices").css("top", window.innerHeight + window.pageYOffset + "px");
 				$("#notices").css("visibility", "visible");
 			}
 
@@ -715,9 +715,8 @@ define(
 		 * @instance
 		 * @method noticeHidden
 		 * @desc Repositions the notices container after a notice is hidden
-		 * @param {Object} [event] - a browser event object
 		 */
-		ApplicationController.prototype.noticeHidden = function(event) {
+		ApplicationController.prototype.noticeHidden = function() {
 			// Slide down the notices container to the height of the notices stack
 			$("#notices").animate({top: "-=" + this.noticeStack.height}, $.proxy(this.noticesMoved, this));
 		};
@@ -728,9 +727,8 @@ define(
 		 * @instance
 		 * @method noticesMoved
 		 * @desc Removes any acknowledged notices from the stack, and hides the notices container after the last notice is removed
-		 * @param {Object} [event] - a browser event object
 		 */
-		ApplicationController.prototype.noticesMoved = function(event) {
+		ApplicationController.prototype.noticesMoved = function() {
 			// Iterate in reverse order over the notices in the stack
 			for (var i = this.noticeStack.notice.length - 1; i >= 0; i--) {
 				// Check if the notice has been acknowledged

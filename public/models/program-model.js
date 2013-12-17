@@ -7,10 +7,10 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'components/progressBar',
-		'framework/uuid',
-		'framework/jquery'
+		"controllers/application-controller",
+		"components/progressBar",
+		"framework/uuid",
+		"framework/jquery"
 	],
 
 	/**
@@ -374,7 +374,7 @@ define(
 			appController.db.transaction(function(tx) {
 				// Execute the SQL to delete the programs
 				tx.executeSql("DELETE FROM Program", [],
-					function(tx, resultSet) {
+					function() {
 						// Invoke the callback function
 						callback();
 					},

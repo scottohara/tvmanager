@@ -7,9 +7,9 @@
 
 define(
 	[
-		'models/setting-model',
-		'controllers/application-controller',
-		'framework/jquery'
+		"models/setting-model",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
 	/**
@@ -114,7 +114,7 @@ define(
 				url: "/devices/" + this.device.id,
 				context: this,
 				type: "DELETE",
-				success: function(unregisterResponse, status, jqXHR) {
+				success: function() {
 					// Remove the device from the database
 					var device = new Setting("Device", null);
 					device.remove();

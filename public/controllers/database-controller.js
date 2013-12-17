@@ -7,8 +7,8 @@
 
 define(
 	[
-		'framework/uuid',
-		'framework/jquery'
+		"framework/uuid",
+		"framework/jquery"
 	],
 
 	/**

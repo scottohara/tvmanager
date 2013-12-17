@@ -7,14 +7,14 @@
 
 define(
 	[
-		'models/setting-model',
-		'models/sync-model',
-		'controllers/application-controller',
-		'models/episode-model',
-		'models/program-model',
-		'models/series-model',
-		'framework/jshash/md5-min',
-		'framework/jquery'
+		"models/setting-model",
+		"models/sync-model",
+		"controllers/application-controller",
+		"models/episode-model",
+		"models/program-model",
+		"models/series-model",
+		"framework/jshash/md5-min",
+		"framework/jquery"
 	],
 
 	/**
@@ -97,11 +97,11 @@ define(
 		 */
 		DataSyncController.prototype.activate = function() {
 			// Bind an event handler to access the registration view
-			$("#registrationRow").bind('click', this.viewRegistration);
+			$("#registrationRow").bind("click", this.viewRegistration);
 
 			// Bind event handlers for the import/export buttons
-			$("#import").bind('click', $.proxy(this.dataImport, this));
-			$("#export").bind('click', $.proxy(this.dataExport, this));
+			$("#import").bind("click", $.proxy(this.dataImport, this));
+			$("#export").bind("click", $.proxy(this.dataExport, this));
 
 			// Set the initial status message
 			$("#localChanges").val("Checking...");
@@ -187,7 +187,7 @@ define(
 
 				// If the device has previously performed a full import, allow the Fast Import option
 				if (this.device.imported) {
-					$("#importChangesOnly").prop('checked', true);
+					$("#importChangesOnly").prop("checked", true);
 					$("#importChangesOnlyRow").show();
 				}
 			} else {
@@ -433,7 +433,7 @@ define(
 				headers: {
 					"X-DEVICE-ID": this.device.id
 				},
-				success: function(exportResponse, status, jqXHR) {
+				success: function() {
 					// Delete was successful, so remove the Sync record
 					sync.remove();
 				},
@@ -511,7 +511,7 @@ define(
 			this.syncErrors = [];
 
 			// Check if Fast Import is selected
-			this.importChangesOnly = $("#importChangesOnly").is(':checked');
+			this.importChangesOnly = $("#importChangesOnly").is(":checked");
 
 			// For full imports, delete all local data first
 			if (!this.importChangesOnly) {
@@ -694,7 +694,7 @@ define(
 							this.importDone();
 						}
 					},
-					error: function(request, statusText, errorThrown) {
+					error: function(request, statusText) {
 						// An error occurred getting the objects to import
 						this.syncError("Receive error", "Sync", statusText + ", " + request.status + " (" + request.statusText + ")");
 
@@ -723,7 +723,7 @@ define(
 				headers: {
 					"X-DEVICE-ID": this.device.id
 				},
-				error: $.proxy(function(request, statusText) {
+				error: $.proxy(function() {
 					// An error occurred with the delete
 					this.syncError("Save error", type, "Error saving " + type.toLowerCase());
 				}, this),

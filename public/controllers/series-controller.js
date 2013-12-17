@@ -7,12 +7,12 @@
 
 define(
 	[
-		'models/series-model',
-		'controllers/application-controller',
-		'components/toucheventproxy',
-		'models/program-model',
-		'framework/sw/spinningwheel',
-		'framework/jquery'
+		"models/series-model",
+		"controllers/application-controller",
+		"components/toucheventproxy",
+		"models/program-model",
+		"framework/sw/spinningwheel",
+		"framework/jquery"
 	],
 
 	/**
@@ -77,8 +77,8 @@ define(
 			$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
 
 			// Bind events for all of the buttons/controls
-			$("#nowShowing").bind('click', $.proxy(this.getNowShowing, this));
-			$("#moveTo").bind('click', $.proxy(this.getProgramId, this));
+			$("#nowShowing").bind("click", $.proxy(this.getNowShowing, this));
+			$("#moveTo").bind("click", $.proxy(this.getProgramId, this));
 		};
 
 		/**

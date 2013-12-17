@@ -10,6 +10,9 @@
  * as a callback function.
  * @param timeOutMillis the max amount of time to wait. If not specified, 3 sec is used.
  */
+
+/*jshint unused:false */
+
 var waitFor = function (testFx, onReady, timeOutMillis) {
 	"use strict";
 
@@ -35,9 +38,9 @@ var waitFor = function (testFx, onReady, timeOutMillis) {
 };
 
 // Check arguments and print usage statement
-var system = require('system');
+var system = require("system");
 if (system.args.length !== 2) {
-	console.log('Usage: ' + system.args[0] + ' URL');
+	console.log("Usage: " + system.args[0] + " URL");
 	phantom.exit();
 }
 

@@ -4,11 +4,13 @@ require_relative 'storagecontroller'
 
 unless ENV[:RACK_ENV.to_s].eql?("production")
 	require 'jslint/tasks'
+	require 'jshint/tasks'
 	require 'open4'
 	require 'heroku-api'
 	require 'git'
 	require 'logger'
 	JSLint.config_path = "config/jslint.yml"
+	JSHint.config_path = "config/jshint.yml"
 end
 
 def start_server(&block)
@@ -153,13 +155,7 @@ namespace :docs do
 		source_dir = File.join(root_dir, 'public')
 		config_path = File.join(root_dir, 'config', 'jsdoc3.json')
 		dest_dir = File.join(root_dir, 'docs')
-
-		# When JSDoc3 installed via Homebrew, the symlink doesn't work (see https://github.com/jsdoc3/jsdoc/issues/205)
-		# So we need to fully qualify the path to the executable
-		# Hoping to remove this once the above issue is resolved
-		jsdoc_path = '/usr/local/Cellar/jsdoc3/3.0.1/libexec/'
-	
-		result = sh "#{jsdoc_path}jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
+		result = sh "jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
 	end
 end
 

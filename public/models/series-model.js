@@ -7,10 +7,10 @@
 
 define(
 	[
-		'controllers/application-controller',
-		'components/progressBar',
-		'framework/uuid',
-		'framework/jquery'
+		"controllers/application-controller",
+		"components/progressBar",
+		"framework/uuid",
+		"framework/jquery"
 	],
 
 	/**
@@ -338,9 +338,9 @@ define(
 
 			// If there are one or more episodes with a warning, highlight the series with a warning also
 			if (this.statusWarningCount > 0) {
-				this.statusWarning = 'warning';
+				this.statusWarning = "warning";
 			}	else {
-				this.statusWarning = '';
+				this.statusWarning = "";
 			}
 		};
 
@@ -532,7 +532,7 @@ define(
 			appController.db.transaction(function(tx) {
 				// Execute the SQL to delete the series
 				tx.executeSql("DELETE FROM Series", [],
-					function(tx, resultSet) {
+					function() {
 						// Invoke the callback function
 						callback();
 					},

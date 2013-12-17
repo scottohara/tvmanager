@@ -7,11 +7,11 @@
 
 define(
 	[
-		'components/list',
-		'models/episode-model',
-		'controllers/application-controller',
-		'framework/jquery',
-		'framework/jquery-ui'
+		"components/list",
+		"models/episode-model",
+		"controllers/application-controller",
+		"framework/jquery",
+		"framework/jquery-ui"
 	],
 
 	/**
