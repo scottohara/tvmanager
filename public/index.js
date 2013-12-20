@@ -12,38 +12,38 @@ require.config({
 	// so that any dependency references don't have the version numbers in them.
 	// When updating to a later library version, we only need to update one place.
 	paths: {
-		'framework/jquery': 'framework/jquery-1.8.3.min',
-		'framework/jquery-ui': 'framework/jquery-ui-1.9.2.custom.min',
-		'framework/jshash': 'framework/jshash-2.2'
+		"framework/jquery": "framework/jquery-2.0.3.min",
+		"framework/jquery-ui": "framework/jquery-ui-1.10.3.custom.min",
+		"framework/jshash": "framework/jshash-2.2"
 	},
 
 	// Setup shims for all of our 3rd-party framework libraries
 	shim: {
-		'framework/jquery': {
-			exports: '$'
+		"framework/jquery": {
+			exports: "$"
 		},
-		'framework/jquery-ui': {
+		"framework/jquery-ui": {
 			deps: [
-				'framework/jquery'
+				"framework/jquery"
 			],
-			exports: '$.ui'
+			exports: "$.ui"
 		},
-		'framework/jquery.iphoneui': {
+		"framework/jquery.iphoneui": {
 			deps: [
-				'framework/jquery'
+				"framework/jquery"
 			],
-			exports: '$.iPhone'
+			exports: "$.iPhone"
 		},
-		'framework/jshash/md5-min': {
-			exports: 'hex_md5'
+		"framework/jshash/md5-min": {
+			exports: "hex_md5"
 		},
-		'framework/sw/spinningwheel': {
-			exports: 'SpinningWheel'
+		"framework/sw/spinningwheel": {
+			exports: "SpinningWheel"
 		},
-		'framework/abc/abc': {
-			exports: 'Abc'
+		"framework/abc/abc": {
+			exports: "Abc"
 		},
-		'framework/uuid': {
+		"framework/uuid": {
 			init: function() {
 				"use strict";
 
