@@ -1,6 +1,14 @@
+.gitignore
+.jshintignore
+.jshintrc
+.travis.yml
 LICENCE
 README.md
 build
 config
 public/test
 Procfile.dev
+
+# ignore uncompressed jquery and source maps
+public/framework/jquery-*[^min].js
+public/framework/*.map
