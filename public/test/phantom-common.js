@@ -51,7 +51,7 @@ page.open(system.args[1], function(status){
 
 	if (status !== "success") {
 		// If we couldn't get the page, abort
-		console.log("Unable to access network");
+		console.log("Unable to open page " + system.args[1] + ", status:", status);
 		phantom.exit();
 	} else {
 		main();

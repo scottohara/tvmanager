@@ -101,10 +101,6 @@ define(
 				// Apply the original event target as the touch target
 				touchEvent.changedTouches = [{}];
 				touchEvent.changedTouches[0].target = e.target;
-				touchEvent.target = e.target;
-
-				// Preserve the original event timestamp
-				touchEvent.timeStamp = e.timeStamp;
 			
 				// Dispatch the new event
 				e.target.dispatchEvent(touchEvent);

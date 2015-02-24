@@ -94,6 +94,7 @@ namespace :test do
 		desc "Start the server in :test mode, and run the Qunit test suite (headless)"
 		task :client do
 			start_test_server do |server_pid|
+				sleep 1
 				result = Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-qunit.js http://localhost:9393/test/index.html" do |pid, stdin, stdout, stderr|
 					puts stdout.read
 				end
