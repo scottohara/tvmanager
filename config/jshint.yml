@@ -56,6 +56,7 @@ predef:             # Names of predefined global variables - comma-separated str
   - "window"
   - "openDatabase"
   - "Date"
+  - "Event"
 
   # Phantom.js
   - "main"

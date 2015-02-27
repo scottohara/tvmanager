@@ -85,11 +85,11 @@ define(
 			 */
 			dispatchTouchEvent: function(e, type) {
 				// Create a new generic event
-				var touchEvent = document.createEvent("Event");
+				var touchEvent = new Event(type, {
+					bubbles: true,
+					cancelable: true
+				});
 				
-				// Initalise to the specified type, and allow it to bubble and be cancelled
-				touchEvent.initEvent(type, true, true);
-
 				// Apply the original event coordinates as touch coordinates
 				touchEvent.targetTouches = [{}];
 				touchEvent.targetTouches[0].clientX = e.clientX;
