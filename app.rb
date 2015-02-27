@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'bundler/setup'
 require 'sinatra'
 require 'manifesto'
 require 'digest/md5'
@@ -54,7 +56,7 @@ def is_read_only
 
 		# Return the readonly property
 		doc["readOnly"]
-	rescue RestClient::ResourceNotFound => e
+	rescue RestClient::ResourceNotFound
 		raise BadRequest, "Client device #{device_id} is not registered"
 	end
 end

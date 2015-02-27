@@ -1,2 +1,2 @@
-web: shotgun
-db: rake db:start
+web: bundle exec shotgun
+db: bundle exec rake db:start

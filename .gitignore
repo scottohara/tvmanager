@@ -1,4 +1,6 @@
+.bundle
 docs
 testCoverage
+vendor/bundle
 *~
 *.swp

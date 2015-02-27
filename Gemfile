@@ -1,6 +1,6 @@
 ruby "2.1.0"
 
-source :rubygems
+source 'https://rubygems.org'
 
 group :development do
 	gem 'foreman'
