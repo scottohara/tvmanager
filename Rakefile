@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'bundler/setup'
 require 'json'
 require_relative 'error'
 require_relative 'storagecontroller'
