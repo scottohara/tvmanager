@@ -24,4 +24,4 @@ script:
   - npm test -- --browsers PhantomJS
 
 # Pipe the JS coverage data to Code Climate
-after_script: cat ./coverage/phantomjs/lcov.info | codeclimate
+after_script: cat ./coverage/phantomjs/lcov.info | codeclimate-test-reporter

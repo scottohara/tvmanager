@@ -147,7 +147,7 @@ if [ -f $TVMANAGER ]; then
 fi
 ```
 
-For staging/production, if you use Heroku you can specify these config vars using the heroku CLI gem, eg.
+For staging/production, if you use Heroku you can specify these config vars using the heroku toolbelt CLI, eg.
 
 ```
 heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager_staging --remote staging
@@ -172,13 +172,15 @@ To run the QUnit test suite:
 
 Test results will be displayed in the terminal, along with code coverage statistics.
 
-Additionally, a HTML coverage report is generated which can be viewed at [file://<path_to_local_repository>/coverage/<browser>/index.html](file://<path_to_local_repository>/coverage/<browser>/index.html).
+Additionally, a HTML coverage report is generated which can be viewed at [file://path_to_local_repository/coverage/browser_name/index.html](file://path_to_local_repository/coverage/browser_name/index.html).
 
 To run lint:
 
-* `rake jslint`
+* `rake jslint`, or
+* `rake jshint`
 
 JSlint configuration options are set in config/jslint.yml
+JSHint configuration options are set in config/jshint.yml
 
 API Documentation
 =================
