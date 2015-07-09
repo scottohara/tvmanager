@@ -2,12 +2,14 @@
 .jshintignore
 .jshintrc
 .travis.yml
+karma.conf.js
 LICENCE
+package.json
+Procfile.dev
 README.md
 build
 config
 public/test
-Procfile.dev
 
 # ignore uncompressed jquery and source maps
 public/framework/jquery-*[^min].js

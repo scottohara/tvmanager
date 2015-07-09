@@ -9,11 +9,10 @@ define(
 		'controllers/application-controller',
 		'test/mocks/jQuery-mock',
 		'framework/jshash/md5-min',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(Setting, Sync, Program, Series, Episode, DataSyncController, ApplicationController, jQueryMock, hex_md5, $, QUnit) {
+	function(Setting, Sync, Program, Series, Episode, DataSyncController, ApplicationController, jQueryMock, hex_md5, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -95,7 +94,7 @@ define(
 							this.importData,
 							200,
 							{
-								getResponseHeader: function() { return "test-hash"; } 
+								getResponseHeader: function() { return "test-hash"; }
 							}
 						]);
 					} else {
@@ -104,10 +103,35 @@ define(
 							statusText: "Not found"
 						}, "Force failed"]);
 					}
-						
+
 					if (options.complete) {
 						options.complete();
 					}
+				}, this);
+
+				QUnit.stop();
+				$.get("/base/test/database.json", $.proxy(function(docs) {
+					this.docs = docs;
+					QUnit.start();
+				}, this));
+
+				this.startFakeServer = $.proxy(function() {
+					this.fakeServer = sinon.fakeServer.create();
+					this.fakeServer.autoRespond = true;
+					this.fakeServer.respondWith("POST", "/export", function(request) {
+						request.respond(200, {"Etag": request.requestHeaders["Content-MD5"]});
+					});
+					this.fakeServer.respondWith("DELETE", /\/export\/\d+/, "");
+					this.fakeServer.respondWith("GET", "/import/all", [200, {}, JSON.stringify({
+						data: this.docs,
+						checksum: "test-hash"
+					})]);
+					this.fakeServer.respondWith("GET", "/import", [200, {"Etag": "test-hash"}, JSON.stringify(this.docs)]);
+					this.fakeServer.respondWith("DELETE", /\/import\/\d+/, "");
+				}, this);
+
+				this.stopFakeServer = $.proxy(function() {
+					this.fakeServer.restore();
 				}, this);
 
 				this.originalSyncError = DataSyncController.prototype.syncError;
@@ -133,7 +157,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 1, function() {
+		QUnit.test("object constructor", 1, function() {
 			QUnit.ok(this.dataSyncController, "Instantiate DataSyncController object");
 		});
 
@@ -384,12 +408,14 @@ define(
 
 			this.dataSyncController.syncErrors = [];
 			this.dataSyncController.changeSent = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Checksum mismatch", "Sync error");
 				QUnit.ok(true, "Change sent");
 				hex_md5.setHash(originalHash);
 				QUnit.start();
 			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.sendChange(this.syncList[0]);
 		});
 
@@ -413,11 +439,13 @@ define(
 				QUnit.ok(true, "Sync removed");
 			};
 
-			this.dataSyncController.changeSent = function() {
+			this.dataSyncController.changeSent = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.ok(true, "Change sent");
 				QUnit.start();
-			};
+			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.sendChange(this.syncList[0]);
 		});
 
@@ -441,11 +469,13 @@ define(
 				QUnit.ok(true, "Sync removed");
 			};
 
-			this.dataSyncController.changeSent = function() {
+			this.dataSyncController.changeSent = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.ok(true, "Change sent");
 				QUnit.start();
-			};
+			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.sendDelete(this.syncList[0]);
 		});
 
@@ -621,16 +651,19 @@ define(
 		QUnit.asyncTest("importData - checksum mismatch", 1, function() {
 			var originalHash = hex_md5();
 			hex_md5.setHash("\"");
+
 			this.dataSyncController.programsReady = true;
 			this.dataSyncController.seriesReady = true;
 			this.dataSyncController.episodesReady = true;
 			this.dataSyncController.syncErrors = [];
 			this.dataSyncController.importDone = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Checksum mismatch", "Sync error");
 				hex_md5.setHash(originalHash);
 				QUnit.start();
 			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.importData();
 		});
 
@@ -661,10 +694,12 @@ define(
 			Program.saved = false;
 
 			this.dataSyncController.importDone = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Save error", "Sync error");
 				QUnit.start();
 			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.importData();
 		});
 
@@ -679,10 +714,12 @@ define(
 			Program.saved = true;
 
 			this.dataSyncController.importDone = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.equal(this.dataSyncController.syncErrors.length, 0, "Number of errors");
 				QUnit.start();
 			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.importData();
 		});
 
@@ -707,6 +744,7 @@ define(
 			};
 
 			this.dataSyncController.importDone = $.proxy(function() {
+				this.stopFakeServer();
 				Program.prototype.remove = originalProgramRemove;
 				Sync.prototype.remove = originalSyncRemove;
 				QUnit.equal(this.dataSyncController.objectsImported, Sync.removedCount, "Number of Syncs removed");
@@ -714,6 +752,7 @@ define(
 				QUnit.start();
 			}, this);
 
+			this.startFakeServer();
 			this.dataSyncController.importData();
 		});
 
@@ -732,10 +771,13 @@ define(
 		});
 
 		QUnit.asyncTest("removePending - success", 1, function() {
-			this.dataSyncController.dataImported = function() {
+			this.dataSyncController.dataImported = $.proxy(function() {
+				this.stopFakeServer();
 				QUnit.ok(true, "Data imported");
 				QUnit.start();
-			};
+			}, this);
+
+			this.startFakeServer();
 			this.dataSyncController.removePending(this.syncList[0].id, this.syncList[0].type);
 		});
 

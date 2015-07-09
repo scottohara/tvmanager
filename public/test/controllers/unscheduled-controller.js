@@ -1,11 +1,10 @@
 define(
 	[
 		'controllers/unscheduled-controller',
-		'controllers/application-controller',
-		'test/framework/qunit'
+		'controllers/application-controller'
 	],
 
-	function(UnscheduledController, ApplicationController, QUnit) {
+	function(UnscheduledController, ApplicationController) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -18,7 +17,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 1, function() {
+		QUnit.test("object constructor", 1, function() {
 			QUnit.ok(this.unscheduledController, "Instantiate UnscheduledController object");
 		});
 

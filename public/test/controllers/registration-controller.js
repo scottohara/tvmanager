@@ -4,11 +4,10 @@ define(
 		'controllers/registration-controller',
 		'controllers/application-controller',
 		'framework/jquery',
-		'test/framework/qunit',
 		'test/mocks/jQuery-mock'
 	],
 
-	function(Setting, RegistrationController, ApplicationController, $, QUnit, jQueryMock) {
+	function(Setting, RegistrationController, ApplicationController, $, jQueryMock) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -32,6 +31,19 @@ define(
 						status: "404",
 						statusText: "Not found"
 					}, "Force failed"]);
+				}, this);
+
+				this.startFakeServer = $.proxy(function() {
+					this.fakeServer = sinon.fakeServer.create();
+					this.fakeServer.autoRespond = true;
+					this.fakeServer.respondWith("PUT", /\/devices\/(\w+)/, function(request, name) {
+						request.respond(200, {"Location": name});
+					});
+					this.fakeServer.respondWith("DELETE", /\/devices\/\w+/, "");
+				}, this);
+
+				this.stopFakeServer = $.proxy(function() {
+					this.fakeServer.restore();
 				}, this);
 
 				this.registrationController = new RegistrationController();
@@ -117,13 +129,15 @@ define(
 			};
 
 			var originalPopView = appController.popView;
-			appController.popView = function() {
+			appController.popView = $.proxy(function() {
+				this.stopFakeServer();
 				appController.popView = originalPopView;
 				originalPopView();
 				QUnit.start();
-			};
+			}, this);
 
 			this.registrationController.device = this.device;
+			this.startFakeServer();
 			this.registrationController.unregister();
 		});
 
@@ -155,16 +169,18 @@ define(
 			};
 
 			var originalPopView = appController.popView;
-			appController.popView = function() {
+			appController.popView = $.proxy(function() {
+				this.stopFakeServer();
 				jQueryMock.clearDefaultContext();
 				appController.popView = originalPopView;
 				originalPopView();
 				QUnit.start();
-			};
+			}, this);
 
 			jQueryMock.setDefaultContext(this.sandbox);
 			$("#deviceName").val(this.device.name);
 			this.registrationController.device = this.device;
+			this.startFakeServer();
 			this.registrationController.save();
 		});
 

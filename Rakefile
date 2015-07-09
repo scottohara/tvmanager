@@ -19,24 +19,6 @@ def start_server(&block)
 	Open4::popen4 "shotgun -O -u /index.html", &block
 end
 	
-def start_test_server(&block)
-	Open4::popen4 "shotgun -E test -O -u /test/index.html", &block
-end
-	
-def start_testcoverage_server(root_dir, source_dir, &block)
-	puts "Regenerating instrumented code..."
-
-	dest_dir = File.join(root_dir, 'testCoverage')
-
-	result = sh "jscoverage --no-instrument=framework --no-instrument=test/framework --no-instrument=test/index.js #{source_dir} #{dest_dir}"
-	abort result unless 0.eql? $?.to_i  
-
-	puts "done!"
-
-	#Open4::popen4 "shotgun -E testCoverage -O -u /jscoverage.html?test/index.html&missing=true"
-	Open4::popen4 "rackup -E testCoverage", &block
-end
-
 def start_simulator(url, &block)
 	simulator = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator"
 	sdk_version = :'6.1'   # :5.0 or :6.1
@@ -45,78 +27,6 @@ def start_simulator(url, &block)
 	application = "/Applications/MobileSafari.app/MobileSafari"
 
 	Open4::popen4 "'#{simulator}' -currentSDKRoot '#{sdk}' -SimulateDevice '#{device}' -SimulateApplication '#{sdk}#{application}' -u #{url}", &block
-end
-
-namespace :test do
-	root_dir = __dir__
-	source_dir = File.join(root_dir, 'public')
-
-	desc "Start the server in :test mode for manually running the Qunit test suite"
-	task :client do
-		start_test_server do |pid, stdin, stdout|
-			puts "Server started on port 9393. Browse to http://localhost:9393/test/index.html to run Qunit test suite. Ctrl-C to quit."
-			puts stdout.read
-		end
-	end
-
-	desc "Start the server in :testCoverage mode for manually running the JSCoverage statistics"
-	task :coverage do
-		start_testcoverage_server(root_dir, source_dir) do |pid, stdin, stdout|
-			puts "Server started on port 9292. Browse to http://localhost:9292/jscoverage.html?test/index.html&missing=true to run JSCoverage statistics. Ctrl-C to quit."
-			puts stdout.read
-		end
-	end
-
-	desc "Start the server in :test mode, and run the Qunit test suite (simulator)"
-	task :simulator do
-		start_test_server do |server_pid|
-			url = "http://localhost:9393/test/index.html"
-			start_simulator(url) do |pid, stdin, stdout|
-				puts "Simulator started. Server started on port 9393. Browse to http://localhost:9393/test/index.html to run QUnit test suite."
-				puts stdout.read
-			end
-			Process.kill "SIGTERM", server_pid
-		end
-	end
-
-	desc "Run JSLint, the Qunit test suite and the JSCoverage statistics (headless)"
-	task :headless do
-		errors = []
-		[:jslint, "test:headless:client", "test:headless:coverage"].each do |task|
-			begin
-				Rake::Task[task].invoke
-			rescue Exception => e
-				errors << e.message
-			end
-		end
-		fail errors.join "\n" unless errors.empty?
-	end
-
-	namespace :headless do
-		desc "Start the server in :test mode, and run the Qunit test suite (headless)"
-		task :client do
-			start_test_server do |server_pid|
-				sleep 1
-				result = Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-qunit.js http://localhost:9393/test/index.html" do |pid, stdin, stdout, stderr|
-					puts stdout.read
-				end
-				Process.kill "SIGTERM", server_pid
-				fail "Test suite did not pass" unless result.exitstatus.eql? 0
-			end
-		end
-
-		desc "Start the server in :testCoverage mode, and run the JSCoverage statistics (headless)"
-		task :coverage do
-			start_testcoverage_server(root_dir, source_dir) do |server_pid|
-				sleep 1
-				result = Open4::popen4 "http_proxy= && phantomjs #{source_dir}/test/run-jscoverage.js http://localhost:9292/jscoverage.html?test/index.html" do |pid, stdin, stdout, stderr|
-					puts stdout.read
-				end
-				Process.kill "SIGTERM", server_pid
-				fail "Test coverage is not 100%" unless result.exitstatus.eql? 0
-			end
-		end
-	end
 end
 
 namespace :db do
@@ -230,7 +140,7 @@ namespace :appcache do
 	task :enable do
 		ENV.delete :TVMANAGER_NO_APPCACHE.to_s
 		start_server do |pid, stdin, stdout|
-			puts "Server started on port 9393. Browse to http://localhost:9393/index.html to run Qunit test suite. Ctrl-C to quit."
+			puts "Server started on port 9393. Browse to http://localhost:9393/index.html to run the application. Ctrl-C to quit."
 			puts stdout.read
 		end
 	end
@@ -239,7 +149,7 @@ namespace :appcache do
 	task :disable do
 		ENV[:TVMANAGER_NO_APPCACHE.to_s] = "true"
 		start_server do |pid, stdin, stdout|
-			puts "Server started on port 9393. Browse to http://localhost:9393/index.html to run Qunit test suite. Ctrl-C to quit."
+			puts "Server started on port 9393. Browse to http://localhost:9393/index.html to run the application. Ctrl-C to quit."
 			puts stdout.read
 		end
 	end

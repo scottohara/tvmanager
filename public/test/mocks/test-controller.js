@@ -1,11 +1,10 @@
 define(
 	[
 		'framework/jquery',
-		'test/mocks/jQuery-mock',
-		'test/framework/qunit'
+		'test/mocks/jQuery-mock'
 	],
 
-	function($, jQueryMock, QUnit) {
+	function($, jQueryMock) {
 		"use strict";
 
 		var TestController = function(args) {

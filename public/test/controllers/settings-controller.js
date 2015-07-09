@@ -4,11 +4,10 @@ define(
 		'controllers/application-controller',
 		'models/series-model',
 		'framework/jquery',
-		'test/framework/qunit',
 		'test/mocks/jQuery-mock'
 	],
 
-	function(SettingsController, ApplicationController, Series, $, QUnit, jQueryMock) {
+	function(SettingsController, ApplicationController, Series, $, jQueryMock) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -20,7 +19,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 1, function() {
+		QUnit.test("object constructor", 1, function() {
 			QUnit.ok(this.settingsController, "Instantiate SettingsController object");
 		});
 

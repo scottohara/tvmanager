@@ -1,10 +1,9 @@
 define(
 	[
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function($, QUnit) {
+	function($) {
 		"use strict";
 
 		var jQueryMock = {

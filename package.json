@@ -1,0 +1,41 @@
+{
+  "name": "tvmanager",
+  "version": "1.0.0",
+  "description": "iPhone web app for managing recorded TV",
+  "keywords": [
+    "tv",
+    "recording",
+    "iphone"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/scottohara/tvmanager.git"
+  },
+  "author": "Scott O'Hara",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scottohara/tvmanager/issues"
+  },
+  "homepage": "https://github.com/scottohara/tvmanager",
+  "devDependencies": {
+    "karma": "^0.12.37",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-coverage": "^0.4.2",
+    "karma-mocha-reporter": "^1.0.2",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "karma-qunit": "^0.1.4",
+    "karma-requirejs": "^0.2.2",
+    "karma-sinon": "^1.0.4",
+    "phantomjs": "^1.9.17",
+    "qunitjs": "^1.18.0",
+    "requirejs": "^2.1.18",
+    "sinon": "^1.15.4"
+  },
+  "scripts": {
+    "test": "./node_modules/karma/bin/karma start"
+  },
+  "engines": {
+    "node": "^0.12.5",
+    "npm": "^2.11.3"
+  }
+}

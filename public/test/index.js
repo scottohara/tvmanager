@@ -1,5 +1,8 @@
+/*jshint nomen: false */
+/*jslint nomen: false */
+
 require.config({
-	baseUrl: "../",
+	baseUrl: "/base",
 	enforceDefine: true,
 
 	// Setup paths for any shims that have version numbers in their script names,
@@ -8,8 +11,7 @@ require.config({
 	paths: {
 		"framework/jquery": "framework/jquery-2.0.3.min",
 		"framework/jquery-ui": "framework/jquery-ui-1.10.3.custom.min",
-		"framework/jshash": "framework/jshash-2.2",
-		"test/framework/qunit": "test/framework/qunit-1.12.0"
+		"framework/jshash": "framework/jshash-2.2"
 	},
 
 	// Setup shims for all of our 3rd-party framework libraries
@@ -39,14 +41,7 @@ require.config({
 			exports: "Abc"
 		},
 		"framework/uuid": {
-			init: function() {
-				"use strict";
-
-				return this.uuid.noConflict();
-			}
-		},
-		"test/framework/qunit": {
-			exports: "QUnit"
+			exports: "uuid"
 		}
 	},
 
@@ -99,71 +94,34 @@ require.config({
 		"test/models/sync-model": {
 			"models/sync-model": "models/sync-model"
 		}
-	}
-});
+	},
 
-define(
-	[
-		"test/framework/qunit"
+	deps: [
+		"test/components/list",
+		"test/components/progressBar",
+		"test/components/toucheventproxy",
+		"test/models/program-model",
+		"test/models/series-model",
+		"test/models/episode-model",
+		"test/models/setting-model",
+		"test/models/sync-model",
+		"test/controllers/application-controller",
+		"test/controllers/cache-controller",
+		"test/controllers/database-controller",
+		"test/controllers/dataSync-controller",
+		"test/controllers/schedule-controller",
+		"test/controllers/unscheduled-controller",
+		"test/controllers/programs-controller",
+		"test/controllers/program-controller",
+		"test/controllers/seriesList-controller",
+		"test/controllers/series-controller",
+		"test/controllers/episodes-controller",
+		"test/controllers/episode-controller",
+		"test/controllers/settings-controller",
+		"test/controllers/about-controller",
+		"test/controllers/report-controller",
+		"test/controllers/registration-controller"
 	],
-	
-	function(QUnit) {
-		"use strict";
 
-		QUnit.config.autostart = false;
-
-		require(
-			[
-				"framework/jquery",
-				"test/components/list",
-				"test/components/progressBar",
-				"test/components/toucheventproxy",
-				"test/models/program-model",
-				"test/models/series-model",
-				"test/models/episode-model",
-				"test/models/setting-model",
-				"test/models/sync-model",
-				"test/controllers/application-controller",
-				"test/controllers/cache-controller",
-				"test/controllers/database-controller",
-				"test/controllers/dataSync-controller",
-				"test/controllers/schedule-controller",
-				"test/controllers/unscheduled-controller",
-				"test/controllers/programs-controller",
-				"test/controllers/program-controller",
-				"test/controllers/seriesList-controller",
-				"test/controllers/series-controller",
-				"test/controllers/episodes-controller",
-				"test/controllers/episode-controller",
-				"test/controllers/settings-controller",
-				"test/controllers/about-controller",
-				"test/controllers/report-controller",
-				"test/controllers/registration-controller"
-			],
-			
-			function($) {
-				$.ajax({
-					url: "../test",
-					type: "HEAD",
-					success: function() {
-						QUnit.load();
-						QUnit.start();
-					},
-					statusCode: {
-						403: function() {
-							if (window.confirm("WARNING: Server is not configured in test mode. Running the test suite now will export TEST data to the server storage. Are you sure you want to do this?")) {
-								QUnit.load();
-								QUnit.start();
-							} else {
-								$("<li>")
-									.html("Testing aborted at users request")
-									.appendTo("#qunit-tests");
-							}
-						}
-					}
-				});
-			}
-		);
-	}
-);
-
+	callback: window.__karma__.start
+});

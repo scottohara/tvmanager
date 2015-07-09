@@ -2,11 +2,10 @@ define(
 	[
 		'models/sync-model',
 		'controllers/application-controller',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(Sync, ApplicationController, $, QUnit) {
+	function(Sync, ApplicationController, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -24,7 +23,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 4, function() {
+		QUnit.test("object constructor", 4, function() {
 			QUnit.ok(this.sync, "Instantiate Sync object");
 			QUnit.equal(this.sync.type, this.type, "type property");
 			QUnit.equal(this.sync.id, this.id, "id property");

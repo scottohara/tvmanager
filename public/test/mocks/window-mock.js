@@ -1,9 +1,5 @@
 define(
-	[
-		'test/framework/qunit'
-	],
-
-	function(QUnit) {
+	function() {
 		"use strict";
 
 		var WindowMock = function() {

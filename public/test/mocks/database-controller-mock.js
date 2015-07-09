@@ -1,19 +1,22 @@
 define(
 	[
 		'test/mocks/jQuery-mock',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(jQueryMock, $, QUnit) {
+	function(jQueryMock, $) {
 		"use strict";
 
 		var DatabaseControllerMock = function(databaseName, callback, errorCallback) {
-			var mode = DatabaseControllerMock.mode;
+			var mode = DatabaseControllerMock.mode,
+					stopFakeServer = DatabaseControllerMock.stopFakeServer;
+
 			DatabaseControllerMock.mode = null;
+			DatabaseControllerMock.stopFakeServer = null;
 
 			switch (mode) {
 				case "NotModified":
+					stopFakeServer();
 					$.get = jQueryMock.originalGet;
 					QUnit.equal(databaseName, "TVManager", "databaseName property");
 					QUnit.start();
@@ -34,6 +37,7 @@ define(
 		};
 
 		DatabaseControllerMock.mode = null;
+		DatabaseControllerMock.stopFakeServer = null;
 
 		return DatabaseControllerMock;
 	}

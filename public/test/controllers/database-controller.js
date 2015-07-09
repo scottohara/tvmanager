@@ -2,11 +2,10 @@ define(
 	[
 		'controllers/database-controller',
 		'test/mocks/database-mock',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(DatabaseController, DatabaseMock, $, QUnit) {
+	function(DatabaseController, DatabaseMock, $) {
 		"use strict";
 	
 		QUnit.module("database-controller", {

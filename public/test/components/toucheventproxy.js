@@ -1,11 +1,10 @@
 define(
 	[
 		'components/toucheventproxy',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 	
-	function(TouchEventProxy, $, QUnit) {
+	function(TouchEventProxy, $) {
 		"use strict";
 
 		QUnit.module("toucheventproxy", {
@@ -52,7 +51,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 2, function() {
+		QUnit.test("object constructor", 2, function() {
 			QUnit.ok(this.toucheventproxy, "Instantiate TouchEventProxy object");
 			QUnit.deepEqual(this.toucheventproxy.element, this.element.get(0), "element property");
 		});

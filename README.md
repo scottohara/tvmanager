@@ -56,7 +56,9 @@ On the server side, it's a Ruby Sinatra app. There's not much happening on the s
 
 [QUnit](http://docs.jquery.com/Qunit) is used for unit testing.
 
-[JSCoverage](http://siliconforks.com/jscoverage/) is used to measure unit test code coverage.
+[Karma](http://karma-runner.github.io/0.12/index.html) is used to run the test suite.
+
+[Istanbul](https://github.com/gotwarlost/istanbul) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) is used for unit test coverage.
 
 [jslint_on_rails](https://github.com/psionides/jslint_on_rails) is used to run JSLint over the entire code base.
 
@@ -164,36 +166,19 @@ The above setting would prompt the user to backup after three days instead of th
 
 Test Suite
 ==========
-Before running the tests, ensure that the server is configured for testing (this prevents, for example, the unit tests for exporting/importing inadvertently overwriting your actual backups in CouchDB with test data, as test mode doesn't touch CouchDB at all).
+To run the QUnit test suite:
+* install the dependencies (`npm install`)
+* start the test runner (`karma start`)
 
-To run the server in test mode:
+Test results will be displayed in the terminal, along with code coverage statistics.
 
-* `rake test:client`
-
-Alternatively, you can start the server manually using the -E argument (eg. `rackup -E test` or `shotgun -E test`). If you try running the unit tests when the server is not in test mode, you will be warned and prompted by your browser whether or not to continue.
-
-To run the entire QUnit test suite, simply browse to [http://localhost:9393/test/index.html](http://localhost:9393/test/index.html)
-
-To run a single QUnit test module, append '?module=module-name' (eg. [http://localhost:9393/test/index.html?module=application-controller](http://localhost:9393/test/index.html?module=application-controller))
-
-Once the test suite is passing cleanly, to check the test suite coverage:
-
-* install [JSCoverage](http://siliconforks.com/jscoverage/)
-* run the test:coverage rake task (eg. `rake test:coverage`). This generates an instrumented copy of the code for tracking coverage.
-* browse to [http://localhost:9292/jscoverage.html?test/index.html&missing=true](http://localhost:9292/jscoverage.html?test/index.html&missing=true) (Note: unlike the test:client task, which uses shotgun to start the server on a default port of 9393; the test:coverage task uses rackup on port 9292. For some reason, jscoverage wouldn't run properly using shotgun)
-* on the Summary tab, check that we have 100% total coverage
+Additionally, a HTML coverage report is generated which can be viewed at [file://<path_to_local_repository>/coverage/<browser>/index.html](file://<path_to_local_repository>/coverage/<browser>/index.html).
 
 To run lint:
 
 * `rake jslint`
 
 JSlint configuration options are set in config/jslint.yml
-
-For headless testing from the command line:
-
-* `rake test:headless:client` runs the Qunit test suite and writes any failed tests to stdout
-* `rake test:headless:coverage` runs the JSCoverage statistics and displays any files that have less that total coverage to stdout
-* `rake test:headless` runs JSLint, then the Qunit test suite, then the JSCoverage statistics
 
 API Documentation
 =================

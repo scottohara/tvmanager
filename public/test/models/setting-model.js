@@ -2,11 +2,10 @@ define(
 	[
 		'models/setting-model',
 		'controllers/application-controller',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(Setting, ApplicationController, $, QUnit) {
+	function(Setting, ApplicationController, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -23,7 +22,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 3, function() {
+		QUnit.test("object constructor", 3, function() {
 			QUnit.ok(this.setting, "Instantiate Setting object");
 			QUnit.equal(this.setting.settingName, this.settingName, "settingName property");
 			QUnit.equal(this.setting.settingValue, this.settingValue, "settingValue property");

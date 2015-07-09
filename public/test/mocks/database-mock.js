@@ -1,11 +1,10 @@
 define(
 	[
 		'test/mocks/transaction-mock',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(TransactionMock, $, QUnit) {
+	function(TransactionMock, $) {
 		"use strict";
 
 		var DatabaseMock = function() {

@@ -2,11 +2,10 @@ define(
 	[
 		'test/mocks/database-mock',
 		'test/mocks/cache-controller-mock',
-		'models/setting-model',
-		'test/framework/qunit'
+		'models/setting-model'
 	],
 
-	function(DatabaseMock, CacheControllerMock, Setting, QUnit) {
+	function(DatabaseMock, CacheControllerMock, Setting) {
 		"use strict";
 
 		var ApplicationControllerMock = function() {
@@ -29,6 +28,7 @@ define(
 		};
 
 		ApplicationControllerMock.prototype.gotAppConfig = function() {
+			this.stopFakeServer();
 			QUnit.ok(true, "Got application configuration");
 			QUnit.start();
 		};

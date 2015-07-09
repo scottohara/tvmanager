@@ -3,11 +3,10 @@ define(
 		'controllers/about-controller',
 		'controllers/application-controller',
 		'framework/jquery',
-		'test/framework/qunit',
 		'test/mocks/jQuery-mock'
 	],
 
-	function(AboutController, ApplicationController, $, QUnit, jQueryMock) {
+	function(AboutController, ApplicationController, $, jQueryMock) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -19,7 +18,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 1, function() {
+		QUnit.test("object constructor", 1, function() {
 			QUnit.ok(this.aboutController, "Instantiate AboutController object");
 		});
 

@@ -7,13 +7,6 @@ require 'json'
 require_relative 'error'
 require_relative 'storagecontroller'
 
-# Routing condition (true if :test configuration)
-set(:isTest) do |env|
-	condition do
-		settings.test?
-	end
-end
-
 # Routing condition (true if the app cache is disabled)
 set(:noAppCache) do |env|
 	condition do
@@ -149,25 +142,6 @@ get '/manifest' do
 	manifest.gsub! "\nNETWORK:", "#{config_entries}\nNETWORK:"
 end
 
-# Route for checking whether the server is in :test configuration
-head '/test' do
-	begin
-		raise Forbidden, "Server is not running in the test configuration" unless settings.test?
-		status 200
-	rescue HttpError => e
-		status e.class.status
-		e.message
-	end
-end
-
-# Create/update route used for testing
-post '/export', :isTest => :environment do
-	begin
-		# Echo back the MD5 hash that was passed
-		etag request.env["HTTP_CONTENT_MD5"]
-	end
-end
-
 # Create/update object route
 post '/export' do
 	begin
@@ -214,12 +188,6 @@ post '/export' do
 	end
 end
 
-# Delete route used for testing
-delete '/export/:id', :isTest => :environment do
-	begin
-	end
-end
-
 # Delete object route
 delete '/export/:id' do
 	begin 
@@ -257,23 +225,6 @@ delete '/export/:id' do
 end
 
 ['/import', '/import/:all'].each do |path|
-	# Import route used for testing
-	get path, :isTest => :environment do
-		begin
-			# Get the test JSON data
-			docs = File.read(File.join("public", "test", "database.json"))
-
-			if params[:all]
-				# Send the checksum as part of the JSON payload
-				{ :data => JSON.parse(docs), :checksum => "test-hash" }.to_json
-			else
-				# Send the checksum as the etag
-				etag "test-hash"
-				docs
-			end
-		end
-	end
-
 	# Import route
 	get path do
 		begin
@@ -323,12 +274,6 @@ end
 	end
 end
 
-# Delete pending route used for testing
-delete '/import/:id', :isTest => :environment do
-	begin
-	end
-end
-
 # Delete pending route
 delete '/import/:id' do
 	begin
@@ -345,14 +290,6 @@ delete '/import/:id' do
 	rescue StandardError => e
 		status 500
 		e.message
-	end
-end
-
-# Device registration route used for testing
-put '/devices/:name', :isTest => :environment do
-	begin
-		# Echo back the name that was passed
-		headers "Location" => params[:name]
 	end
 end
 
@@ -393,12 +330,6 @@ put '/devices/:name' do
 	rescue StandardError => e
 		status 500
 		e.message
-	end
-end
-
-# Deregistration route used for testing
-delete '/devices/:id', :isTest => :environment do
-	begin
 	end
 end
 

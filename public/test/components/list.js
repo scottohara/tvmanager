@@ -3,11 +3,10 @@ define(
 		'controllers/application-controller',
 		'components/list',
 		'test/mocks/jQuery-mock',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(ApplicationController, List, jQueryMock, $, QUnit) {
+	function(ApplicationController, List, jQueryMock, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -15,8 +14,8 @@ define(
 
 		QUnit.module("list", {
 			setup: function() {
-				this.container = QUnit.config.current.module + "-" + QUnit.config.current.testName.replace(/\s/g, "") + "-list";
-				this.itemTemplate = "views/listTemplate.html";
+				this.container = QUnit.config.current.module.name + "-" + QUnit.config.current.testName.replace(/\s/g, "") + "-list";
+				this.itemTemplate = "base/test/views/listTemplate.html";
 				this.groupBy = "name";
 				this.items = [
 					{
@@ -69,7 +68,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 10, function() {
+		QUnit.test("object constructor", 10, function() {
 			QUnit.ok(this.list, "Instantiate List object");
 			QUnit.equal(this.list.container, this.container, "container property");
 			QUnit.equal(this.list.itemTemplate, this.itemTemplate, "itemTemplate property");

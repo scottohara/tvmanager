@@ -44,11 +44,7 @@ require.config({
 			exports: "Abc"
 		},
 		"framework/uuid": {
-			init: function() {
-				"use strict";
-
-				return this.uuid.noConflict();
-			}
+			exports: "uuid"
 		}
 	}
 });

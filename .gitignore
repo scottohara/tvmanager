@@ -1,6 +1,14 @@
-.bundle
-docs
-testCoverage
-vendor/bundle
-*~
-*.swp
+# Ignore bundler config
+/.bundle
+
+# Ignore coverage results
+/coverage
+
+# Ignore generated docs
+/docs
+
+# Ignore node_modules
+/node_modules
+
+# Ignore vendored gems
+/vendor/bundle

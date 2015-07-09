@@ -5,12 +5,11 @@ define(
 		'components/list',
 		'controllers/application-controller',
 		'framework/jquery',
-		'test/framework/qunit',
 		'test/mocks/jQuery-mock',
 		'framework/jquery.iphoneui'
 	],
 
-	function(Episode, EpisodesController, List, ApplicationController, $, QUnit, jQueryMock) {
+	function(Episode, EpisodesController, List, ApplicationController, $, jQueryMock) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -68,7 +67,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 3, function() {
+		QUnit.test("object constructor", 3, function() {
 			QUnit.ok(this.episodesController, "Instantiate EpisodesController object");
 			QUnit.deepEqual(this.episodesController.listItem, this.listItem, "listItem property");
 			QUnit.ok(this.episodesController.scrollToFirstUnwatched, "scrollToFirstUnwatched property");

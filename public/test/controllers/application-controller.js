@@ -8,11 +8,10 @@ define(
 		'test/mocks/application-controller-mock',
 		'test/mocks/jQuery-mock',
 		'framework/sw/spinningwheel',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(TestController, CacheController, DatabaseController, Setting, ApplicationController, ApplicationControllerMock, jQueryMock, SpinningWheel, $, QUnit) {
+	function(TestController, CacheController, DatabaseController, Setting, ApplicationController, ApplicationControllerMock, jQueryMock, SpinningWheel, $) {
 		"use strict";
 
 		QUnit.module("application-controller", {
@@ -83,6 +82,17 @@ define(
 					scrollPos: 1
 				};
 
+				this.startFakeServer = $.proxy(function() {
+					this.fakeServer = sinon.fakeServer.create();
+					this.fakeServer.autoRespond = true;
+					this.fakeServer.respondWith("GET", "/dbConfig", [200, {}, JSON.stringify({databaseName: "TVManager"})]);
+					this.fakeServer.respondWith("GET", "/appConfig", [200, {}, JSON.stringify({appVersion: "", maxDataAgeDays: 1})]);
+				}, this);
+
+				this.stopFakeServer = $.proxy(function() {
+					this.fakeServer.restore();
+				}, this);
+
 				this.originalLoadDependencies = ApplicationController.prototype.loadDependencies;
 				this.originalGotAppConfig = ApplicationController.prototype.gotAppConfig;
 				this.originalShowNotice = ApplicationController.prototype.showNotice;
@@ -97,7 +107,7 @@ define(
 				this.appController = new ApplicationController();
 				jQueryMock.clearDefaultContext();
 				this.appController.loadDependencies = ApplicationControllerMock.prototype.loadDependencies;
-				this.appController.gotAppConfig = ApplicationControllerMock.prototype.gotAppConfig;
+				this.appController.gotAppConfig = $.proxy(ApplicationControllerMock.prototype.gotAppConfig, this);
 				this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.showNotice, this);
 				this.appController.pushView = ApplicationControllerMock.prototype.pushView;
 				this.appController.noticesMoved = ApplicationControllerMock.prototype.noticesMoved;
@@ -117,7 +127,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 8, function() {
+		QUnit.test("object constructor", 8, function() {
 			QUnit.ok(this.appController, "Instantiate ApplicationController object");
 			QUnit.deepEqual(this.appController.viewStack, [this.testView], "viewStack property");
 			QUnit.deepEqual(this.appController.noticeStack, {
@@ -192,6 +202,8 @@ define(
 		QUnit.asyncTest("start - dbConfig 304 Not Modified", 1, function() {
 			$.get = jQueryMock.get;
 			DatabaseController.mode = "NotModified";
+			DatabaseController.stopFakeServer = this.stopFakeServer;
+			this.startFakeServer();
 			this.appController.start();
 		});
 
@@ -205,9 +217,12 @@ define(
 				}
 			};
 			this.appController.showNotice = $.proxy(function(notice) {
+				this.stopFakeServer();
 				$.proxy(ApplicationControllerMock.prototype.checkNotice, this)(notice);
 				QUnit.start();
 			}, this);
+
+			this.startFakeServer();
 			this.appController.start();
 		});
 
@@ -221,10 +236,14 @@ define(
 				}
 			};
 			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
+
+			this.startFakeServer();
 			this.appController.start();
 		});
 
 		QUnit.asyncTest("start - success", 2, function() {
+			DatabaseController.stopFakeServer = this.stopFakeServer;
+			this.startFakeServer();
 			this.appController.start();
 		});
 

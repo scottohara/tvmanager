@@ -1,11 +1,10 @@
 define(
 	[
 		'controllers/cache-controller',
-		'test/framework/qunit',
 		'test/mocks/window-mock'
 	],
 
-	function(CacheController, QUnit, window) {
+	function(CacheController, window) {
 		"use strict";
 	
 		QUnit.module("cache-controller", {
@@ -15,7 +14,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", function() {
+		QUnit.test("object constructor", function() {
 			var testParams = [
 				{
 					eventType: "downloading",

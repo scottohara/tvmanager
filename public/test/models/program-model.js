@@ -2,11 +2,10 @@ define(
 	[
 		'models/program-model',
 		'controllers/application-controller',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(Program, ApplicationController, $, QUnit) {
+	function(Program, ApplicationController, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -28,7 +27,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 9, function() {
+		QUnit.test("object constructor", 9, function() {
 			QUnit.ok(this.program, "Instantiate Program object");
 			QUnit.equal(this.program.id, this.id, "id property");
 			QUnit.equal(this.program.programName, this.programName, "programName property");

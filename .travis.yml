@@ -1,11 +1,27 @@
 language: ruby
 
-rvm:
-  - 2.2.0
+# Cache gems
+cache: bundler
+
+# Required to use new Travis container-based infrastructure
+sudo: false
+
+# Code Climate token for coverage reporting
+addons:
+  code_climate:
+    repo_token: 1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq jscoverage
+  - npm install -g npm@latest           # Default npm version on Travis is (currently) 1.4.x; we need 2.x (for passing args to npm test)
 
+install:
+  - bundle install --without production --path=${BUNDLE_PATH:-vendor/bundle}  # Install ruby gems, excluding production only gems such as unicorn (already present by default in Travis)
+  - npm install                         # Install npm dependencies
+  - npm install codeclimate-test-reporter
+
+# Run the test suite
 script:
-  - rake test:headless
+  - npm test -- --browsers PhantomJS
+
+# Pipe the JS coverage data to Code Climate
+after_script: cat ./coverage/phantomjs/lcov.info | codeclimate

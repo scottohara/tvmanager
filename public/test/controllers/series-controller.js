@@ -6,11 +6,10 @@ define(
 		'controllers/application-controller',
 		'models/program-model',
 		'framework/jquery',
-		'test/framework/qunit',
 		'test/mocks/jQuery-mock'
 	],
 
-	function(Series, SpinningWheel, SeriesController, ApplicationController, Program, $, QUnit, jQueryMock) {
+	function(Series, SpinningWheel, SeriesController, ApplicationController, Program, $, jQueryMock) {
 		"use strict";
 
 		// Get a reference to the application controller singleton

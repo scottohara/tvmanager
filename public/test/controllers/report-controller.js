@@ -2,11 +2,10 @@ define(
 	[
 		'controllers/report-controller',
 		'controllers/application-controller',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(ReportController, ApplicationController, $, QUnit) {
+	function(ReportController, ApplicationController, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -34,7 +33,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 2, function() {
+		QUnit.test("object constructor", 2, function() {
 			QUnit.ok(this.reportController, "Instantiate ReportController object");
 			QUnit.deepEqual(this.reportController.report, this.report, "report property");
 		});

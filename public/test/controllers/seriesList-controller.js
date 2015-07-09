@@ -5,11 +5,10 @@ define(
 		'components/list',
 		'controllers/application-controller',
 		'framework/jquery',
-		'test/framework/qunit',
 		'test/mocks/jQuery-mock'
 	],
 
-	function(Series, SeriesListController, List, ApplicationController, $, QUnit, jQueryMock) {
+	function(Series, SeriesListController, List, ApplicationController, $, jQueryMock) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -64,7 +63,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 2, function() {
+		QUnit.test("object constructor", 2, function() {
 			QUnit.ok(this.seriesListController, "Instantiate SeriesListController object");
 			QUnit.deepEqual(this.seriesListController.listItem, this.listItem, "listItem property");
 		});

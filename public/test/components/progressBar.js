@@ -1,10 +1,9 @@
 define(
 	[
-		'components/progressBar',
-		'test/framework/qunit'
+		'components/progressBar'
 	],
 
-	function(ProgressBar, QUnit) {
+	function(ProgressBar) {
 		"use strict";
 
 		QUnit.module("progressBar", {
@@ -15,7 +14,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 3, function() {
+		QUnit.test("object constructor", 3, function() {
 			QUnit.ok(this.progressBar, "Instantiate ProgressBar object");
 			QUnit.equal(this.progressBar.total, this.total, "total property");
 			QUnit.equal(this.progressBar.sections, this.sections, "sections property");

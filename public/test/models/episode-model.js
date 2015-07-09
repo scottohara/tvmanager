@@ -2,11 +2,10 @@ define(
 	[
 		'models/episode-model',
 		'controllers/application-controller',
-		'framework/jquery',
-		'test/framework/qunit'
+		'framework/jquery'
 	],
 
-	function(Episode, ApplicationController, $, QUnit) {
+	function(Episode, ApplicationController, $) {
 		"use strict";
 
 		// Get a reference to the application controller singleton
@@ -32,7 +31,7 @@ define(
 			}
 		});
 
-		QUnit.test("constructor", 12, function() {
+		QUnit.test("object constructor", 12, function() {
 			QUnit.ok(this.episode, "Instantiate Episode object");
 			QUnit.equal(this.episode.id, this.id, "id property");
 			QUnit.equal(this.episode.episodeName, this.episodeName, "episodeName property");
