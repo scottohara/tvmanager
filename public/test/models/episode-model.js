@@ -46,7 +46,15 @@ define(
 			QUnit.equal(this.episode.programName, this.programName, "programName property");
 		});
 
-		QUnit.test("save - update fail", 4, function() {
+		QUnit.test("save - update fail without callback", 3, function() {
+			appController.db.failAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.id + ", " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
+			this.episode.save();
+			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
+			QUnit.equal(appController.db.errorMessage, "Episode.save: Force failed", "Error message");
+			QUnit.ok(!appController.db.commit, "Rollback transaction");
+		});
+
+		QUnit.test("save - update fail with callback", 4, function() {
 			appController.db.failAt("REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence) VALUES (" + this.id + ", " + this.episodeName + ", " + this.seriesId + ", " + this.status + ", " + this.statusDate + ", " + this.unverified + ", " + this.unscheduled + ", " + this.sequence + ")");
 			this.episode.save(function(id) {
 				QUnit.equal(id, null, "Invoke callback");
@@ -76,7 +84,15 @@ define(
 			QUnit.ok(!appController.db.commit, "Rollback transaction");
 		});
 
-		QUnit.test("save - update success", 5, function() {
+		QUnit.test("save - update success without callback", 4, function() {
+			this.episode.save();
+			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
+			QUnit.equal(appController.db.errorMessage, null, "Error message");
+			QUnit.equal(this.episode.id, this.id, "id property");
+			QUnit.ok(appController.db.commit, "Commit transaction");
+		});
+
+		QUnit.test("save - update success with callback", 5, function() {
 			this.episode.save($.proxy(function(id) {
 				QUnit.equal(id, this.id, "Invoke callback");
 			}, this));

@@ -72,6 +72,21 @@ define(
 			this.aboutController.goBack();
 		});
 
+		QUnit.test("watchedCount - no episodes", 1, function() {
+			var sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
+
+			var totalEpisodes = $("<input>")
+				.attr("id", "totalEpisodes")
+				.appendTo(sandbox);
+
+			jQueryMock.setDefaultContext(sandbox);
+			this.aboutController.episodeTotalCount = 0;
+			this.aboutController.watchedCount();
+			QUnit.equal(totalEpisodes.val(), "0 (0% watched)", "Total Episodes");
+			jQueryMock.clearDefaultContext();
+			sandbox.remove();
+		});
+
 		QUnit.test("checkForUpdate - updating", 1, function() {
 			this.aboutController.updating = true;
 			this.aboutController.checkForUpdate();

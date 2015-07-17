@@ -5,9 +5,6 @@ define(
 		var SyncMock = function() {
 		};
 
-		SyncMock.prototype.remove = function() {
-		};
-
 		SyncMock.syncList = [];
 		SyncMock.removed = true;
 		SyncMock.removedCount = 0;

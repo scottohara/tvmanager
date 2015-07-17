@@ -12,7 +12,7 @@ define(
 			setup: function() {
 				this.databaseName = "test-db";
 				this.expectedVersion = "1.9";
-				this.numUpgradeCommands = 40;
+				this.numUpgradeCommands = 46;
 				this.initialVersion = this.expectedVersion;
 				
 				this.successCallback = $.proxy(function(versions) {
@@ -90,10 +90,16 @@ define(
 		
 		QUnit.test("constructor - with full upgrade", 6, function() {
 			this.initialVersion = "";
-			this.db.addResultRows([{
-				rowid: 1,
-				SeriesID: 1
-			}]);
+			this.db.addResultRows([
+				{
+					rowid: 1,
+					SeriesID: 1
+				},
+				{
+					rowid: 2,
+					SeriesID: 1
+				}
+			]);
 			var databaseController = new DatabaseController(this.databaseName, this.successCallback, this.errorCallback);
 			QUnit.equal(databaseController.commands.length, this.numUpgradeCommands, "Number of SQL commands");
 			QUnit.ok(databaseController.commit, "Commit transaction");

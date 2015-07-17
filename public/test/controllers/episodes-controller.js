@@ -73,7 +73,19 @@ define(
 			QUnit.ok(this.episodesController.scrollToFirstUnwatched, "scrollToFirstUnwatched property");
 		});
 
-		QUnit.test("setup", 11, function() {
+		QUnit.test("setup", function() {
+			var testParams = [
+				{
+					description: "with source",
+					expected: this.listItem.source
+				},
+				{
+					description: "without source",
+					noSource: true,
+					expected: "Series"
+				}
+			];
+
 			this.episodesController.viewItem = function() {
 				QUnit.ok(true, "Bind list view event handler");
 			};
@@ -98,17 +110,24 @@ define(
 
 			Episode.episodes = this.items;
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.episodesController.setup();
-			QUnit.equal(this.episodesController.header.label, this.listItem.series.programName + " : " + this.listItem.series.seriesName, "Header label");
-			QUnit.equal(this.episodesController.header.leftButton.label, this.listItem.source, "Back button label");
-			this.episodesController.header.leftButton.eventHandler();
-			this.episodesController.header.rightButton.eventHandler();
-			QUnit.deepEqual(this.episodesController.episodeList.items, this.items, "List items");
-			QUnit.equal(this.episodesController.episodeList.action, "view", "List action");
-			this.episodesController.footer.leftButton.eventHandler();
-			this.episodesController.footer.rightButton.eventHandler();
-			jQueryMock.clearDefaultContext();
+			QUnit.expect(testParams.length * 11);
+
+			for (var i = 0; i < testParams.length; i++) {
+				jQueryMock.setDefaultContext(this.sandbox);
+				if (testParams[i].noSource) {
+					this.listItem.source = null;
+				}
+				this.episodesController.setup();
+				QUnit.equal(this.episodesController.header.label, this.listItem.series.programName + " : " + this.listItem.series.seriesName, testParams[i].description + " - Header label");
+				QUnit.equal(this.episodesController.header.leftButton.label, testParams[i].expected, testParams[i].description + " - Back button label");
+				this.episodesController.header.leftButton.eventHandler();
+				this.episodesController.header.rightButton.eventHandler();
+				QUnit.deepEqual(this.episodesController.episodeList.items, this.items, testParams[i].description + " - List items");
+				QUnit.equal(this.episodesController.episodeList.action, "view", testParams[i].description + " - List action");
+				this.episodesController.footer.leftButton.eventHandler();
+				this.episodesController.footer.rightButton.eventHandler();
+				jQueryMock.clearDefaultContext();
+			}
 		});
 
 		QUnit.test("goBack", 1, function() {
@@ -117,6 +136,21 @@ define(
 
 		QUnit.test("activate", function() {
 			var testParams = [
+				{
+					description: "update",
+					addEpisodes: 0,
+					addWatched: 0,
+					addRecorded: 0,
+					addExpected: 0,
+					addStatusWarning: 0,
+					listItem: {
+						listIndex: 0,
+						episode: {
+							episodeName: "test-episode-2",
+							status: "Watched"
+						}
+					}
+				},
 				{
 					description: "update",
 					addEpisodes: 0,
@@ -174,7 +208,7 @@ define(
 			}
 		});
 
-		QUnit.test("onPopulateListItem", 1, function() {
+		QUnit.test("onPopulateListItem", function() {
 			var testParams = [
 				{
 					description: "watched",
@@ -184,6 +218,12 @@ define(
 				},
 				{
 					description: "not watched",
+					status: "",
+					scrollPos: 0,
+					scrollToFirstUnwatched: false
+				},
+				{
+					description: "another not watched",
 					status: "",
 					scrollPos: 0,
 					scrollToFirstUnwatched: false
@@ -214,15 +254,49 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("viewItem", 6, function() {
+		QUnit.test("viewItem", function() {
+			var testParams = [
+				{
+					description: "Watched",
+					statusWarning: "warning",
+					expectedWatchedCount: 1,
+					expectedRecordedCount: 0,
+					expectedExpectedCount: 0,
+					expectedStatusWarningCount: 1
+				},
+				{
+					description: "Recorded",
+					statusWarning: null,
+					expectedWatchedCount: 0,
+					expectedRecordedCount: 1,
+					expectedExpectedCount: 0,
+					expectedStatusWarningCount: 0
+				},
+				{
+					description: "Expected",
+					statusWarning: null,
+					expectedWatchedCount: 0,
+					expectedRecordedCount: 0,
+					expectedExpectedCount: 1,
+					expectedStatusWarningCount: 0
+				}
+			];
+
 			var index = 0;
-			this.episodesController.episodeList = { items: this.items };
-			this.episodesController.viewItem(index);
-			QUnit.equal(this.episodesController.origWatchedCount, 1, "watchedCount property");
-			QUnit.equal(this.episodesController.origRecordedCount, 0, "recordedCount property");
-			QUnit.equal(this.episodesController.origExpectedCount, 0, "expectedCount property");
-			QUnit.equal(this.episodesController.origStatusWarningCount, 1, "statusWarningCount property");
-			QUnit.deepEqual(appController.viewArgs, { listIndex: index, episode: this.items[index] }, "View arguments");
+
+			QUnit.expect(testParams.length * 6);
+
+			for (var i = 0; i < testParams.length; i++) {
+				this.items[index].status = testParams[i].description;
+				this.items[index].statusWarning = testParams[i].statusWarning;
+				this.episodesController.episodeList = { items: this.items };
+				this.episodesController.viewItem(index);
+				QUnit.equal(this.episodesController.origWatchedCount, testParams[i].expectedWatchedCount, testParams[i].description + " - watchedCount property");
+				QUnit.equal(this.episodesController.origRecordedCount, testParams[i].expectedRecordedCount, testParams[i].description + " - recordedCount property");
+				QUnit.equal(this.episodesController.origExpectedCount, testParams[i].expectedExpectedCount, testParams[i].description + " - expectedCount property");
+				QUnit.equal(this.episodesController.origStatusWarningCount, testParams[i].expectedStatusWarningCount, testParams[i].description + " - statusWarningCount property");
+				QUnit.deepEqual(appController.viewArgs, { listIndex: index, episode: this.items[index] }, testParams[i].description + " - View arguments");
+			}
 		});
 
 		QUnit.test("addItem", 2, function() {
@@ -231,36 +305,69 @@ define(
 			QUnit.deepEqual(appController.viewArgs, { series: this.listItem.series, sequence: this.items.length }, "View arguments");
 		});
 
-		QUnit.test("deleteItem", 8, function() {
+		QUnit.test("deleteItem", function() {
+			var testParams = [
+				{
+					description: "Watched",
+					statusWarning: "warning",
+					expectedWatchedCount: 1,
+					expectedRecordedCount: 0,
+					expectedExpectedCount: 0,
+					expectedStatusWarningCount: 1
+				},
+				{
+					description: "Recorded",
+					statusWarning: null,
+					expectedWatchedCount: 0,
+					expectedRecordedCount: 1,
+					expectedExpectedCount: 0,
+					expectedStatusWarningCount: 0
+				},
+				{
+					description: "Expected",
+					statusWarning: null,
+					expectedWatchedCount: 0,
+					expectedRecordedCount: 0,
+					expectedExpectedCount: 1,
+					expectedStatusWarningCount: 0
+				}
+			];
+
 			var index = 0;
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			var list = $("#list");
+			QUnit.expect(testParams.length * 8);
 
-			$("<a>")
-				.attr("id", this.items[index].id)
-				.hide()
-				.appendTo($("<li>")
+			for (var i = 0; i < testParams.length; i++) {
+				this.items[index].status = testParams[i].description;
+				this.items[index].statusWarning = testParams[i].statusWarning;
+				jQueryMock.setDefaultContext(this.sandbox);
+				var list = $("#list");
+
+				$("<a>")
+					.attr("id", this.items[index].id)
 					.hide()
-					.appendTo(list));
+					.appendTo($("<li>")
+						.hide()
+						.appendTo(list));
 
-			this.episodesController.episodeList = new List(null, null, null, this.items);
+				this.episodesController.episodeList = new List(null, null, null, this.items.slice(0));
 
-			var origEpisodeCount = this.listItem.series.episodeCount;
-			var origWatchedCount = this.listItem.series.watchedCount;
-			var origRecordedCount = this.listItem.series.recordedCount;
-			var origExpectedCount = this.listItem.series.expectedCount;
-			var origStatusWarningCount = this.listItem.series.statusWarningCount;
+				var origEpisodeCount = this.listItem.series.episodeCount;
+				var origWatchedCount = this.listItem.series.watchedCount;
+				var origRecordedCount = this.listItem.series.recordedCount;
+				var origExpectedCount = this.listItem.series.expectedCount;
+				var origStatusWarningCount = this.listItem.series.statusWarningCount;
 
-			this.episodesController.deleteItem(index);
-			QUnit.equal(this.episodesController.listItem.series.episodeCount, origEpisodeCount - 1, "listItem.series.episodeCount property");
-			QUnit.equal(this.episodesController.listItem.series.watchedCount, origWatchedCount - 1, "listItem.series.watchedCount property");
-			QUnit.equal(this.episodesController.listItem.series.recordedCount, origRecordedCount, "listItem.series.recordedCount property");
-			QUnit.equal(this.episodesController.listItem.series.expectedCount, origExpectedCount, "listItem.series.expectedCount property");
-			QUnit.equal(this.episodesController.listItem.series.statusWarningCount, origStatusWarningCount - 1, "listItem.series.statusWarningCount property");
-			QUnit.deepEqual(this.episodesController.episodeList.items, this.items.slice(1), "List items");
-			QUnit.equal($("#list li a").length, 0, "Remove list item from DOM");
-			jQueryMock.clearDefaultContext();
+				this.episodesController.deleteItem(index);
+				QUnit.equal(this.episodesController.listItem.series.episodeCount, origEpisodeCount - 1, testParams[i].description + " - listItem.series.episodeCount property");
+				QUnit.equal(this.episodesController.listItem.series.watchedCount, origWatchedCount - testParams[i].expectedWatchedCount, testParams[i].description + " - listItem.series.watchedCount property");
+				QUnit.equal(this.episodesController.listItem.series.recordedCount, origRecordedCount - testParams[i].expectedRecordedCount, testParams[i].description + " - listItem.series.recordedCount property");
+				QUnit.equal(this.episodesController.listItem.series.expectedCount, origExpectedCount - testParams[i].expectedExpectedCount, testParams[i].description + " - listItem.series.expectedCount property");
+				QUnit.equal(this.episodesController.listItem.series.statusWarningCount, origStatusWarningCount - testParams[i].expectedStatusWarningCount, testParams[i].description + " - listItem.series.statusWarningCount property");
+				QUnit.deepEqual(this.episodesController.episodeList.items, this.items.slice(1), testParams[i].description + " - List items");
+				QUnit.equal($("#list li a").length, 0, testParams[i].description + " - Remove list item from DOM");
+				jQueryMock.clearDefaultContext();
+			}
 		});
 
 		QUnit.test("deleteItems", 3, function() {
@@ -298,13 +405,19 @@ define(
 					id: "3",
 					sequence: 3,
 					save: save
+				},
+				{
+					id: "4",
+					sequence: 3,
+					save: save
 				}
 			];
 
 			var sortedItems = [
 				items[1],
 				items[0],
-				items[2]
+				items[2],
+				items[3]
 			];
 
 			jQueryMock.setDefaultContext(this.sandbox);
@@ -320,7 +433,7 @@ define(
 			}
 
 			this.episodesController.episodeList = new List(null, null, null, items);
-			QUnit.expect(items.length);
+			QUnit.expect(items.length - 1);
 			this.episodesController.resequenceItems();
 			QUnit.deepEqual(this.episodesController.episodeList.items, sortedItems, "List items");
 			jQueryMock.clearDefaultContext();

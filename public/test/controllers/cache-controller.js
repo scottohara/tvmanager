@@ -14,6 +14,14 @@ define(
 			}
 		});
 
+		QUnit.test("object constructor - without application cache", 1, function() {
+			var originalApplicationCache = window.applicationCache;
+			window.applicationCache = null;
+			this.cacheController = new CacheController();
+			QUnit.ok(this.cacheController, "Instantiate CacheController object");
+			window.applicationCache = originalApplicationCache;
+		});
+
 		QUnit.test("object constructor", function() {
 			var testParams = [
 				{
@@ -45,13 +53,22 @@ define(
 					noticeId: null
 				},
 				{
+					eventType: "error",
+					updated: false,
+					offline: true
+				},
+				{
 					eventType: "noupdate",
 					updated: false,
 					message: "You are currently running the latest version. No updates are available at this time.",
 					noticeId: null
+				},
+				{
+					eventType: "noupdate",
+					noCallback: true
 				}
 			];
-			QUnit.expect((testParams.length - 1) * 4 + 2);
+			QUnit.expect((testParams.length - 3) * 4 + 2);
 			window.applicationCache.assertions = true;
 			this.cacheController = new CacheController();
 			QUnit.ok(this.cacheController, "Instantiate CacheController object");
@@ -68,6 +85,11 @@ define(
 				var originalStatus = window.applicationCache.status;
 				if (testParams[i].status) {
 					window.applicationCache.status = testParams[i].status;
+				}
+
+				window.navigator.onLine = testParams[i].offline ? false : true;
+				if (testParams[i].noCallback) {
+					this.cacheController.callback = null;
 				}
 
 				window.applicationCache.eventHandler[testParams[i].eventType]({

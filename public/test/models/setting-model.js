@@ -35,7 +35,15 @@ define(
 			QUnit.ok(!appController.db.commit, "Rollback transaction");
 		});
 
-		QUnit.test("save - insert fail", 4, function() {
+		QUnit.test("save - insert fail without callback", 3, function() {
+			appController.db.failAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
+			this.setting.save();
+			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands OK");
+			QUnit.equal(appController.db.errorMessage, "Setting.save: Force failed", "Error message");
+			QUnit.ok(!appController.db.commit, "Rollback transaction");
+		});
+
+		QUnit.test("save - insert fail with callback", 4, function() {
 			appController.db.failAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
 
 			this.setting.save(function(success) {
@@ -47,7 +55,15 @@ define(
 			QUnit.ok(!appController.db.commit, "Rollback transaction");
 		});
 
-		QUnit.test("save - no rows affected", 4, function() {
+		QUnit.test("save - no rows affected without callback", 3, function() {
+			appController.db.noRowsAffectedAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
+			this.setting.save();
+			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
+			QUnit.equal(appController.db.errorMessage, "Setting.save: no rows affected", "Error message");
+			QUnit.ok(!appController.db.commit, "Rollback transaction");
+		});
+
+		QUnit.test("save - no rows affected with callback", 4, function() {
 			appController.db.noRowsAffectedAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
 			this.setting.save(function(success) {
 				QUnit.ok(!success, "Invoke callback with false");
@@ -57,7 +73,14 @@ define(
 			QUnit.ok(!appController.db.commit, "Rollback transaction");
 		});
 
-		QUnit.test("save - success", 4, function() {
+		QUnit.test("save - success without callback", 3, function() {
+			this.setting.save();
+			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
+			QUnit.equal(appController.db.errorMessage, null, "Error message");
+			QUnit.ok(appController.db.commit, "Commit transaction");
+		});
+
+		QUnit.test("save - success with callback", 4, function() {
 			this.setting.save(function(success) {
 				QUnit.ok(success, "Invoke callback with true");
 			});

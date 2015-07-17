@@ -83,7 +83,15 @@ define(
 
 		// For full code coverage, we need to execute some code that is otherwise not covered in unit testing
 		try {
-			var tx = new TransactionMock({commit: true, commands: []}).executeSql("?", []);
+			var tx = new TransactionMock({commit: true, commands: []});
+
+			// Override executeError so that it doesn't throw an "ExecuteError", to ensure 100% branch coverage of catch block
+			tx.executeError = function() {
+				throw new Error();
+			};
+
+			// Attempt to execute a SQL statement with an incorrect number of param tokens
+			tx.executeSql("?", []);
 		} catch (e) {
 		}
 

@@ -19,14 +19,42 @@ def start_server(&block)
 	Open4::popen4 "shotgun -O -u /index.html", &block
 end
 	
-def start_simulator(url, &block)
-	simulator = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator"
-	sdk_version = :'6.1'   # :5.0 or :6.1
-	sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk"
-	device = :'iPhone (Retina 3.5-inch)'	# :iPad, :'iPad (Retina)', :iPhone, :'iPhone (Retina 3.5-inch)', :'iPhone (Retina 4-inch)'
-	application = "/Applications/MobileSafari.app/MobileSafari"
+def start_test_runner(&block)
+	Open4::popen4 "karma start --browsers", &block
+end
 
-	Open4::popen4 "'#{simulator}' -currentSDKRoot '#{sdk}' -SimulateDevice '#{device}' -SimulateApplication '#{sdk}#{application}' -u #{url}", &block
+def start_simulator(description, url)
+	# Get the list of available simulator devices into an array
+	devices = `xcrun instruments -s devices | grep Simulator`.split "\n"
+
+	# Present the list of options to the user
+	devices.each_with_index {|device, index| puts "#{index + 1}) #{device}"}
+	puts
+	puts "Enter the number of the simulator to launch: "
+
+	# Get the selected simulator to launch
+	device = devices[STDIN.gets.chomp.to_i - 1]
+	raise "Invalid choice" if device.nil?
+
+	# Launch the simulator, then pause for an arbitrary amount of time to allow the boot process to complete
+	`xcrun instruments -w '#{device}'`
+	sleep 3
+
+	# Load the passed URL into Mobile Safari
+	sh "xcrun simctl openurl booted #{url}"
+	puts "#{description} in simulator"
+
+	# Find the pid of the running simulator process (if more than one, assume last one)
+	pid = `pgrep "iOS Simulator"`.split("\n").last.to_i
+
+	# Monitor the pid by sending kill 0 to it every second; until it no longer exists.
+	begin
+		while Process.kill 0, pid do
+			sleep 1
+		end
+	rescue
+		puts "Simulator closed"
+	end
 end
 
 namespace :db do
@@ -68,7 +96,7 @@ namespace :docs do
 		source_dir = File.join(root_dir, 'public')
 		config_path = File.join(root_dir, 'config', 'jsdoc3.json')
 		dest_dir = File.join(root_dir, 'docs')
-		result = sh "jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
+		sh "jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
 	end
 end
 
@@ -123,15 +151,24 @@ namespace :deploy do
 	end
 end
 
-desc "Launch the simulator"
-task :simulator do
-	start_server do |server_pid|
-		url = "http://localhost:9393/index.html"
-		start_simulator(url) do |pid, stdin, stdout|
-			puts "Simulator started. Browse to http://localhost:9393/index.html to run the application."
-			puts stdout.read
+namespace :simulator do
+	desc "Run the application in an iOS simulator"
+	task :run do
+		start_server do |server_pid|
+			start_simulator "Application launched", "http://localhost:9393/index.html"
+			puts "Stopping server."
+			Process.kill "SIGTERM", server_pid
 		end
-		Process.kill "SIGTERM", server_pid
+	end
+
+	desc "Run the test suite in an iOS simulator"
+	task :test do
+		start_test_runner do |server_pid, stdin, stdout|
+			start_simulator "Test suite started", "http://localhost:9876"
+			puts "Stopping test runner."
+			puts stdout.read
+			Process.kill "SIGTERM", server_pid
+		end
 	end
 end
 

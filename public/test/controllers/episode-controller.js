@@ -143,25 +143,42 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("save", 6, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			var episodeName = "test-episode-2";
-			var unverified = true;
-			var unscheduled = true;
-			$("#episodeName").val(episodeName);
-			$("#unverified").prop("checked", unverified);
-			$("#unscheduled").prop("checked", unscheduled);
-			appController.viewStack = [
-				{ scrollPos: 0 },
-				{ scrollPos: 0 }
+		QUnit.test("save", function() {
+			var testParams = [
+				{
+					description: "update",
+					listIndex: 0,
+					scrollPos: 0
+				},
+				{
+					description: "insert",
+					listIndex: -1,
+					scrollPos: -1
+				}
 			];
-			this.episodeController.listItem.listIndex = -1;
-			this.episodeController.save();
-			QUnit.equal(this.episodeController.listItem.episode.episodeName, episodeName, "listItem.episode.episodeName property");
-			QUnit.equal(this.episodeController.listItem.episode.unverified, unverified, "listItem.episode.unverified property");
-			QUnit.equal(this.episodeController.listItem.episode.unscheduled, unscheduled, "listItem.episode.unscheduled property");
-			QUnit.equal(appController.viewStack[0].scrollPos, -1, "Scroll position");
-			jQueryMock.clearDefaultContext();
+
+			QUnit.expect(testParams.length * 6);
+
+			for (var i = 0; i < testParams.length; i++) {
+				jQueryMock.setDefaultContext(this.sandbox);
+				var episodeName = "test-episode-2";
+				var unverified = true;
+				var unscheduled = true;
+				$("#episodeName").val(episodeName);
+				$("#unverified").prop("checked", unverified);
+				$("#unscheduled").prop("checked", unscheduled);
+				appController.viewStack = [
+					{ scrollPos: 0 },
+					{ scrollPos: 0 }
+				];
+				this.episodeController.listItem.listIndex = testParams[i].listIndex;
+				this.episodeController.save();
+				QUnit.equal(this.episodeController.listItem.episode.episodeName, episodeName, testParams[i].description + " - listItem.episode.episodeName property");
+				QUnit.equal(this.episodeController.listItem.episode.unverified, unverified, testParams[i].description + " - listItem.episode.unverified property");
+				QUnit.equal(this.episodeController.listItem.episode.unscheduled, unscheduled, testParams[i].description + " - listItem.episode.unscheduled property");
+				QUnit.equal(appController.viewStack[0].scrollPos, testParams[i].scrollPos, testParams[i].description + " - Scroll position");
+				jQueryMock.clearDefaultContext();
+			}
 		});
 
 		QUnit.test("cancel", 3, function() {
@@ -330,9 +347,7 @@ define(
 			for (i = 0; i < testParams.length; i++) {
 				$("#unscheduled").prop("checked", testParams[i].unscheduled);
 				this.episodeController.listItem.episode.status = testParams[i].status;
-				if ("undefined" !== testParams[i].statusDate) {
-					this.episodeController.listItem.episode.statusDate = testParams[i].statusDate;
-				}
+				this.episodeController.listItem.episode.statusDate = testParams[i].statusDate;
 				this.episodeController.toggleStatusDateRow();
 				QUnit.notEqual(statusDateRow.css("display") === "none", testParams[i].visible, testParams[i].description + " - Status date row visible");
 			}

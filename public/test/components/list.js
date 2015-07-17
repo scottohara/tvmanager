@@ -18,10 +18,11 @@ define(
 				this.itemTemplate = "base/test/views/listTemplate.html";
 				this.groupBy = "name";
 				this.items = [
-					{
-						name: "group-one",
-						value: "item-one"
-					},
+					// Object create is used to set a prototype, so we can test that the template correctly ignores inherited properties
+					Object.create({inheritedProperty: "ignore me"}, {
+						name: {enumerable: true, value: "group-one"},
+						value: {enumerable: true, value: "item-one"}
+					}),
 					{
 						name: "group-one",
 						value: "item-two"
@@ -89,6 +90,13 @@ define(
 			this.list.refresh();
 		});
 
+		QUnit.asyncTest("refresh - without event handler", 4, function() {
+			this.list = new List(this.container, this.itemTemplate, null, this.items, this.eventHandler, this.eventHandler, this.eventHandler, null);
+			this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
+			appController.setScrollPosition = this.mockSetScrollPosition;
+			this.list.refresh();
+		});
+
 		QUnit.asyncTest("refresh - without grouping", 7, function() {
 			this.list.groupBy = null;
 			this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
@@ -143,6 +151,18 @@ define(
 				this.list.action = this.validActions[i];
 				this.list.tap(0);
 			}
+
+			delete window.confirm;
+		});
+
+		QUnit.test("tap - delete abort", 1, function() {
+			window.confirm = function(message) {
+				QUnit.equal(message, "Delete this item?", "confirm");
+				return false;
+			};
+
+			this.list.action = "delete";
+			this.list.tap(0);
 
 			delete window.confirm;
 		});

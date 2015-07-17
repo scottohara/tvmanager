@@ -76,8 +76,11 @@ Installation (Development)
 ==========================
 1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
 2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle`) (--path ensures that gems are installed locally in the project)
-3. Start the server (`rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes). Better yet, using [foreman](https://github.com/ddollar/foreman) and a Procfile, you can start the server and the CouchDB database in a single command (`foreman start -f Procfile.dev`)
+3. Start the server (`bundle exec rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes). Better yet, using [foreman](https://github.com/ddollar/foreman) and a Procfile, you can start the server and the CouchDB database in a single command (`bundle exec foreman start -f Procfile.dev`)
 2. Point your browser at /index.html
+
+For running in the iOS Simulator, use `rake simulator:run`. This rake task will start a server process, prompt for the device & iOS version to launch the simulator for, and open the application in Mobile Safari. Quitting the simulator will automatically shutdown the server process it started.
+
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
 
 The first time it runs it will create the database (you should receive a message saying that the database has been upgraded, and to restart the app).
@@ -170,17 +173,25 @@ To run the QUnit test suite:
 * install the dependencies (`npm install`)
 * start the test runner (`karma start`)
 
+By default, the tests will run in both Chrome and PhantomJS.
+
+To run the tests in the iOS Simulator, use `rake simulator:test`. This rake task will start the test runner, prompt for the device & iOS version to launch the simulator for, and open the the test URL (ie. `http://localhost:9876`) in Mobile Safari. Quitting the simulator will automatically shutdown the test runner.
+
+To run the tests in Mobile Safari on a physical device:
+* start the test runner *without* launching the default browsers (`karma start --browsers`)
+* the Karma server will pause waiting for a browser connection
+* manually launch Mobile Safari and browse to the URL shown in the terminal window (eg. `http://localhost:9876`)
+
 Test results will be displayed in the terminal, along with code coverage statistics.
 
 Additionally, a HTML coverage report is generated which can be viewed at [file://path_to_local_repository/coverage/browser_name/index.html](file://path_to_local_repository/coverage/browser_name/index.html).
 
+(Note: The name of the subdirectory for Mobile Safari coverage reports is 'mobile', ie. `coverage/mobile/index.html`)
+
 To run lint:
 
-* `rake jslint`, or
-* `rake jshint`
-
-JSlint configuration options are set in config/jslint.yml
-JSHint configuration options are set in config/jshint.yml
+* `rake jslint` (configuration options are set in `config/jslint.yml`), or
+* `rake jshint` (configuration options are set in `config/jshint.yml`)
 
 API Documentation
 =================

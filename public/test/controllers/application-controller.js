@@ -281,7 +281,20 @@ define(
 			this.appController.gotAppConfig({ "maxDataAgeDays": maxDataAgeDays });
 		});
 
-		QUnit.asyncTest("pushView", 3, function() {
+		QUnit.asyncTest("pushView - initial view", 2, function() {
+			this.appController.viewStack = [];
+			jQueryMock.setDefaultContext(this.sandbox);
+			TestController.sandbox = this.sandbox;
+			$("#content").children(":first").scrollTop(1);
+			this.appController.pushView = this.originalPushView;
+			this.appController.contentShown = this.originalContentShown;
+			this.appController.pushView("test", {});
+			this.testView.scrollPos = 0;
+			QUnit.deepEqual(this.appController.viewStack[0], this.testView, "viewStack property");
+			jQueryMock.clearDefaultContext();
+		});
+
+		QUnit.asyncTest("pushView - subsequent view", 3, function() {
 			jQueryMock.setDefaultContext(this.sandbox);
 			TestController.sandbox = this.sandbox;
 			$("#content").children(":first").scrollTop(1);
@@ -363,7 +376,15 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("setHeader", 10, function() {
+		QUnit.test("contentShown - unknown state", 1, function() {
+			jQueryMock.setDefaultContext(this.sandbox);
+			this.appController.contentShown = this.originalContentShown;
+			this.appController.contentShown();
+			QUnit.ok(!$("#contentWrapper").hasClass("loaded"), "contentWrapper not marked as loaded");
+			jQueryMock.clearDefaultContext();
+		});
+
+		QUnit.test("setHeader - with header content", 10, function() {
 			jQueryMock.setDefaultContext(this.sandbox);
 			this.appController.setHeader();
 			$("#headerLeftButton").trigger("click", "left");
@@ -379,18 +400,52 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("clearHeader", 3, function() {
+		QUnit.test("setHeader - without header content", 8, function() {
+			var originalHeader = Object.create(this.testView.controller.header);
 			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.clearHeader();
+			this.appController.viewStack[this.appController.viewStack.length - 1].controller.header = {};
+			this.appController.setHeader();
 			$("#headerLeftButton").trigger("click", "left");
+			QUnit.ok(!$("#headerLeftButton").hasClass(originalHeader.leftButton.style), "Set left button style");
+			QUnit.notEqual($("#headerLeftButton").text(), originalHeader.leftButton.label, "Left button label");
+			QUnit.equal($("#headerLeftButton").css("display"), "none", "Show left button");
+			QUnit.notEqual($("#headerLabel").text(), originalHeader.label, "Header label");
+			QUnit.equal($("#headerLabel").css("display"), "none", "Show header label");
 			$("#headerRightButton").trigger("click", "right");
-			QUnit.equal($("#headerLeftButton").css("display"), "none", "Hide left button");
-			QUnit.equal($("#headerLabel").css("display"), "none", "Hide header label");
-			QUnit.equal($("#headerRightButton").css("display"), "none", "Hide right button");
+			QUnit.ok(!$("#headerRightButton").hasClass(originalHeader.rightButton.style), "Set right button style");
+			QUnit.notEqual($("#headerRightButton").text(), originalHeader.rightButton.label, "Right button label");
+			QUnit.equal($("#headerRightButton").css("display"), "none", "Show right button");
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("setFooter", 10, function() {
+		QUnit.test("clearHeader", function() {
+			var testParams = [
+				{
+					description: "with buttons",
+					header: this.testView.controller.header
+				},
+				{
+					description: "without buttons",
+					header: {}
+				}
+			];
+
+			QUnit.expect(testParams.length * 3);
+
+			for (var i = 0; i < testParams.length; i++) {
+				jQueryMock.setDefaultContext(this.sandbox);
+				this.appController.viewStack[this.appController.viewStack.length - 1].controller.header = testParams[i].header;
+				this.appController.clearHeader();
+				$("#headerLeftButton").trigger("click", "left");
+				$("#headerRightButton").trigger("click", "right");
+				QUnit.equal($("#headerLeftButton").css("display"), "none", testParams[i].description + " - Hide left button");
+				QUnit.equal($("#headerLabel").css("display"), "none", testParams[i].description + " - Hide header label");
+				QUnit.equal($("#headerRightButton").css("display"), "none", testParams[i].description + " - Hide right button");
+				jQueryMock.clearDefaultContext();
+			}
+		});
+
+		QUnit.test("setFooter - with footer content", 10, function() {
 			jQueryMock.setDefaultContext(this.sandbox);
 			this.appController.setFooter();
 			$("#footerLeftButton").trigger("click", "left");
@@ -406,16 +461,66 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("clearFooter", 4, function() {
+		QUnit.test("setFooter - without footer content", 8, function() {
+			var originalFooter = Object.create(this.testView.controller.footer);
 			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.clearFooter();
+			this.appController.viewStack[this.appController.viewStack.length - 1].controller.footer = {};
+			this.appController.setFooter();
 			$("#footerLeftButton").trigger("click", "left");
+			QUnit.ok(!$("#footerLeftButton").hasClass(originalFooter.leftButton.style), "Set left button style");
+			QUnit.notEqual($("#footerLeftButton").text(), originalFooter.leftButton.label, "Left button label");
+			QUnit.equal($("#footerLeftButton").css("display"), "none", "Show left button");
+			QUnit.notEqual($("#footerLabel").text(), originalFooter.label, "Footer label");
+			QUnit.notEqual($("#footerLabel").css("display"), "none", "Show footer label");
 			$("#footerRightButton").trigger("click", "right");
-			QUnit.equal($("#footerLeftButton").css("display"), "none", "Hide left button");
-			QUnit.equal($("#footerLabel").val(), "", "Footer label");
-			QUnit.equal($("#footerLabel").css("display"), "none", "Hide footer label");
-			QUnit.equal($("#footerRightButton").css("display"), "none", "Hide right button");
+			QUnit.ok(!$("#footerRightButton").hasClass(originalFooter.rightButton.style), "Set right button style");
+			QUnit.notEqual($("#footerRightButton").text(), originalFooter.rightButton.label, "Right button label");
+			QUnit.equal($("#footerRightButton").css("display"), "none", "Show right button");
 			jQueryMock.clearDefaultContext();
+		});
+
+		QUnit.test("setFooter - without footer", 3, function() {
+			jQueryMock.setDefaultContext(this.sandbox);
+			this.appController.viewStack[this.appController.viewStack.length - 1].controller.footer = null;
+			this.appController.setFooter();
+			$("#footerLeftButton").trigger("click", "left");
+			QUnit.equal($("#footerLeftButton").css("display"), "none", "Show left button");
+			QUnit.equal($("#footerLabel").css("display"), "none", "Show footer label");
+			$("#footerRightButton").trigger("click", "right");
+			QUnit.equal($("#footerRightButton").css("display"), "none", "Show right button");
+			jQueryMock.clearDefaultContext();
+		});
+
+		QUnit.test("clearFooter", function() {
+			var testParams = [
+				{
+					description: "with buttons",
+					footer: this.testView.controller.footer
+				},
+				{
+					description: "without buttons",
+					footer: {}
+				},
+				{
+					description: "without footer",
+					footer: null
+				}
+			];
+
+			QUnit.expect(testParams.length * 4);
+
+			for (var i = 0; i < testParams.length; i++) {
+				jQueryMock.setDefaultContext(this.sandbox);
+				this.appController.viewStack[this.appController.viewStack.length - 1].controller.footer = testParams[i].footer;
+				this.appController.clearFooter();
+				$("#footerLeftButton").trigger("click", "left");
+				$("#footerRightButton").trigger("click", "right");
+				QUnit.equal($("#footerLeftButton").css("display"), "none", testParams[i].description + " - Hide left button");
+				QUnit.equal($("#footerLabel").val(), "", testParams[i].description + " - Footer label");
+				QUnit.equal($("#footerLabel").css("display"), "none", testParams[i].description + " - Hide footer label");
+				QUnit.equal($("#footerRightButton").css("display"), "none", testParams[i].description + " - Hide right button");
+				jQueryMock.clearDefaultContext();
+			}
 		});
 
 		QUnit.test("setContentHeight", 1, function() {
@@ -485,6 +590,91 @@ define(
 			}, this);
 
 			jQueryMock.setDefaultContext(this.sandbox);
+			this.appController.showNotice(notice);
+		});
+
+		QUnit.asyncTest("showNotice - without button events", 12, function() {
+			var notice = {
+				id: "test-notice",
+				label: "<b>test-notice</b>",
+				leftButton: {
+					style: "left-button-style",
+					label: "left-button"
+				},
+				rightButton: {
+					style: "right-button-style",
+					label: "right-button"
+				}
+			};
+
+			this.appController.showNotice = this.originalShowNotice;
+			this.appController.hideNotice = function(noticeContainer) {
+				QUnit.ok(noticeContainer.hasClass("notice"), "Bind hideNotice event listener");
+			};
+			window.innerHeight = 1;
+
+			var originalAnimate = $.fn.animate;
+			$.fn.animate = $.proxy(function(args, callback) {
+				$.fn.animate = originalAnimate;
+
+				var leftButton = $("#notices div a." + notice.leftButton.style);
+				QUnit.ok(leftButton.hasClass(notice.leftButton.style), "Set left button style");
+				QUnit.equal(leftButton.text(), notice.leftButton.label, "Left button label");
+
+				QUnit.equal($("#test-notice").html(), notice.label, "Notice label");
+
+				var rightButton = $("#notices div a." + notice.rightButton.style);
+				QUnit.ok(rightButton.hasClass(notice.rightButton.style), "Set right button style");
+				QUnit.equal(rightButton.text(), notice.rightButton.label, "Right button label");
+
+				QUnit.equal($("#notices").css("visibility"), "visible", "Notices visibility");
+				QUnit.equal($("#notices").css("top"), 1 + window.pageYOffset + "px", "Notices position");
+
+				var noticeContainer = $("#notices div");
+				QUnit.equal(this.appController.noticeStack.height, -noticeContainer.height(), "noticeStack height");
+				QUnit.equal(this.appController.noticeStack.notice[0].html(), noticeContainer.html(), "Notice");
+
+				$("#notices div a." + notice.rightButton.style).trigger("click", "right");
+				$("#notices div a." + notice.leftButton.style).trigger("click", "left");
+				
+				QUnit.deepEqual(args, { top: $(window).height() + this.appController.noticeStack.height }, "Animate arguments");
+				callback();
+				jQueryMock.clearDefaultContext();
+			}, this);
+
+			jQueryMock.setDefaultContext(this.sandbox);
+			this.appController.showNotice(notice);
+		});
+
+		QUnit.asyncTest("showNotice - without buttons or id", 7, function() {
+			var notice = {
+				label: "<b>test-notice</b>"
+			};
+
+			this.appController.showNotice = this.originalShowNotice;
+			window.innerHeight = 1;
+
+			var originalAnimate = $.fn.animate;
+			$.fn.animate = $.proxy(function(args, callback) {
+				$.fn.animate = originalAnimate;
+
+				var noticeContainer = $("#notices div");
+
+				QUnit.equal(noticeContainer.children("p").first().html(), notice.label, "Notice label");
+
+				QUnit.equal($("#notices").css("visibility"), "visible", "Notices visibility");
+				QUnit.equal($("#notices").css("top"), "auto", "Notices position");
+
+				QUnit.equal(this.appController.noticeStack.height, -noticeContainer.height(), "noticeStack height");
+				QUnit.equal(this.appController.noticeStack.notice[1].html(), noticeContainer.html(), "Notice");
+
+				QUnit.deepEqual(args, { top: $(window).height() + this.appController.noticeStack.height }, "Animate arguments");
+				callback();
+				jQueryMock.clearDefaultContext();
+			}, this);
+
+			jQueryMock.setDefaultContext(this.sandbox);
+			this.appController.noticeStack.notice.push($("<span>"));
 			this.appController.showNotice(notice);
 		});
 
@@ -560,6 +750,12 @@ define(
 			this.appController.hideScrollHelper();
 			QUnit.equal($("#abc").css("display"), "none", "Hide scroll helper");
 			jQueryMock.clearDefaultContext();
+		});
+
+		QUnit.test("gotLastTyncTime - no value", 1, function() {
+			this.appController.maxDataAgeDays = 1;
+			this.appController.gotLastSyncTime({});
+			QUnit.equal(this.notice.length, 0, "notice length");
 		});
 	}
 );

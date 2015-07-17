@@ -107,19 +107,36 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("save", 4, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			var seriesName = "test-series-2";
-			$("#seriesName").val(seriesName);
-			appController.viewStack = [
-				{ scrollPos: 0 },
-				{ scrollPos: 0 }
+		QUnit.test("save", function() {
+			var testParams = [
+				{
+					description: "update",
+					listIndex: 0,
+					scrollPos: 0
+				},
+				{
+					description: "insert",
+					listIndex: -1,
+					scrollPos: -1
+				}
 			];
-			this.seriesController.listItem.listIndex = -1;
-			this.seriesController.save();
-			QUnit.equal(this.seriesController.listItem.series.seriesName, seriesName, "listItem.series.seriesName property");
-			QUnit.equal(appController.viewStack[0].scrollPos, -1, "Scroll position");
-			jQueryMock.clearDefaultContext();
+
+			QUnit.expect(testParams.length * 4);
+
+			for (var i = 0; i < testParams.length; i++) {
+				jQueryMock.setDefaultContext(this.sandbox);
+				var seriesName = "test-series-2";
+				$("#seriesName").val(seriesName);
+				appController.viewStack = [
+					{ scrollPos: 0 },
+					{ scrollPos: 0 }
+				];
+				this.seriesController.listItem.listIndex = testParams[i].listIndex;
+				this.seriesController.save();
+				QUnit.equal(this.seriesController.listItem.series.seriesName, seriesName, testParams[i].description + " - listItem.series.seriesName property");
+				QUnit.equal(appController.viewStack[0].scrollPos, testParams[i].scrollPos, testParams[i].description + " - Scroll position");
+				jQueryMock.clearDefaultContext();
+			}
 		});
 
 		QUnit.test("cancel", 3, function() {
@@ -136,14 +153,32 @@ define(
 			QUnit.ok(this.seriesController.gettingNowShowing, "Blocked by semaphore");
 		});
 
-		QUnit.test("getNowShowing - not getting", 3, function() {
+		QUnit.test("getNowShowing - not getting", function() {
+			var testParams = [
+				{
+					description: "showing",
+					nowShowing: 1,
+					expected: 1
+				},
+				{
+					description: "not showing",
+					nowShowing: null,
+					expected: 0
+				}
+			];
+
 			this.seriesController.setNowShowing = function() {
 				QUnit.ok(true, "Set done action callback");
 			};
 
-			this.seriesController.getNowShowing();
-			QUnit.equal(SpinningWheel.slots[0], 0, "Selected value");
-			QUnit.ok(!this.seriesController.gettingNowShowing, "Reset semaphore");
+			QUnit.expect(testParams.length * 3);
+
+			for (var i = 0; i < testParams.length; i++) {
+				this.seriesController.listItem.series.nowShowing = testParams[i].nowShowing;
+				this.seriesController.getNowShowing();
+				QUnit.equal(SpinningWheel.slots[i], testParams[i].expected, testParams[i].description + " - Selected value");
+				QUnit.ok(!this.seriesController.gettingNowShowing, testParams[i].description + " - Reset semaphore");
+			}
 		});
 
 		QUnit.test("setNowShowing", 2, function() {

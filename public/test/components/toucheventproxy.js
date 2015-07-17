@@ -38,9 +38,7 @@ define(
 				}, this);
 
 				this.emptyEventHandler = $.proxy(function(e) {
-					if (this.toucheventproxy.enabled){
-						QUnit.ok(true, "Add " + e.type + " event listener");
-					}
+					QUnit.ok(true, "Add " + e.type + " event listener");
 				}, this);
 
 				this.toucheventproxy = new TouchEventProxy(this.element.get(0));

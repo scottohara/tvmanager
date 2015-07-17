@@ -207,23 +207,37 @@ define(
 			QUnit.deepEqual(appController.viewArgs, { listIndex: index, series: this.items[index] }, "View arguments");
 		});
 
-		QUnit.test("deleteItem", 7, function() {
-			var index = 0;
-			this.seriesListController.seriesList = new List(null, null, null, this.items);
+		QUnit.test("deleteItem", function() {
+			var testParams = [
+				{
+					description: "remove",
+					dontRemove: false
+				},
+				{
+					description: "don't remove",
+					dontRemove: true
+				}
+			];
 
-			var origEpisodeCount = this.listItem.program.episodeCount;
-			var origWatchedCount = this.listItem.program.watchedCount;
-			var origRecordedCount = this.listItem.program.recordedCount;
-			var origExpectedCount = this.listItem.program.expectedCount;
-			var origSeriesCount = this.listItem.program.seriesCount;
+			QUnit.expect(testParams.length * 7 - 1);
 
-			this.seriesListController.deleteItem(index, false);
-			QUnit.equal(this.seriesListController.listItem.program.episodeCount, origEpisodeCount - 3, "listItem.program.episodeCount property");
-			QUnit.equal(this.seriesListController.listItem.program.watchedCount, origWatchedCount - 1, "listItem.program.watchedCount property");
-			QUnit.equal(this.seriesListController.listItem.program.recordedCount, origRecordedCount - 1, "listItem.program.recordedCount property");
-			QUnit.equal(this.seriesListController.listItem.program.expectedCount, origExpectedCount - 1, "listItem.program.expectedCount property");
-			QUnit.equal(this.seriesListController.listItem.program.seriesCount, origSeriesCount - 1, "listItem.program.seriesCount property");
-			QUnit.deepEqual(this.seriesListController.seriesList.items, this.items.slice(1), "List items");
+			for (var i = 0; i < testParams.length; i++) {
+				var origEpisodeCount = this.listItem.program.episodeCount;
+				var origWatchedCount = this.listItem.program.watchedCount;
+				var origRecordedCount = this.listItem.program.recordedCount;
+				var origExpectedCount = this.listItem.program.expectedCount;
+				var origSeriesCount = this.listItem.program.seriesCount;
+
+				this.seriesListController.seriesList = new List(null, null, null, this.items.slice(0));
+				this.seriesListController.deleteItem(0, testParams[i].dontRemove);
+
+				QUnit.equal(this.seriesListController.listItem.program.episodeCount, origEpisodeCount - 3, testParams[i].description + " - listItem.program.episodeCount property");
+				QUnit.equal(this.seriesListController.listItem.program.watchedCount, origWatchedCount - 1, testParams[i].description + " - listItem.program.watchedCount property");
+				QUnit.equal(this.seriesListController.listItem.program.recordedCount, origRecordedCount - 1, testParams[i].description + " - listItem.program.recordedCount property");
+				QUnit.equal(this.seriesListController.listItem.program.expectedCount, origExpectedCount - 1, testParams[i].description + " - listItem.program.expectedCount property");
+				QUnit.equal(this.seriesListController.listItem.program.seriesCount, origSeriesCount - 1, testParams[i].description + " - listItem.program.seriesCount property");
+				QUnit.deepEqual(this.seriesListController.seriesList.items, this.items.slice(1), testParams[i].description + " - List items");
+			}
 		});
 
 		QUnit.test("deleteItems", 3, function() {

@@ -70,18 +70,36 @@ define(
 			jQueryMock.clearDefaultContext();
 		});
 
-		QUnit.test("save", 4, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			var programName = "test-program-2";
-			$("#programName").val(programName);
-			appController.viewStack = [
-				{ scrollPos: 0 },
-				{ scrollPos: 0 }
+		QUnit.test("save", function() {
+			var testParams = [
+				{
+					description: "update",
+					listIndex: 0,
+					scrollPos: 0
+				},
+				{
+					description: "insert",
+					listIndex: -1,
+					scrollPos: -1
+				}
 			];
-			this.programController.save();
-			QUnit.equal(this.programController.listItem.program.programName, programName, "listItem.program.programName property");
-			QUnit.equal(appController.viewStack[0].scrollPos, -1, "Scroll position");
-			jQueryMock.clearDefaultContext();
+
+			QUnit.expect(testParams.length * 4);
+
+			for (var i = 0; i < testParams.length; i++) {
+				jQueryMock.setDefaultContext(this.sandbox);
+				var programName = "test-program-2";
+				$("#programName").val(programName);
+				appController.viewStack = [
+					{ scrollPos: 0 },
+					{ scrollPos: 0 }
+				];
+				this.programController.listItem.listIndex = testParams[i].listIndex;
+				this.programController.save();
+				QUnit.equal(this.programController.listItem.program.programName, programName, testParams[i].description + " - listItem.program.programName property");
+				QUnit.equal(appController.viewStack[0].scrollPos, testParams[i].scrollPos, testParams[i].description + " - Scroll position");
+				jQueryMock.clearDefaultContext();
+			}
 		});
 
 		QUnit.test("cancel", 1, function() {

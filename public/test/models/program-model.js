@@ -39,7 +39,15 @@ define(
 			QUnit.equal(this.program.expectedCount, this.expectedCount, "expectedCount property");
 		});
 
-		QUnit.test("save - update fail", 4, function() {
+		QUnit.test("save - update fail without callback", 3, function() {
+			appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
+			this.program.save();
+			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
+			QUnit.equal(appController.db.errorMessage, "Program.save: Force failed", "Error message");
+			QUnit.ok(!appController.db.commit, "Rollback transaction");
+		});
+
+		QUnit.test("save - update fail with callback", 4, function() {
 			appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
 			this.program.save(function(id) {
 				QUnit.equal(id, null, "Invoke callback");
@@ -69,7 +77,15 @@ define(
 			QUnit.ok(!appController.db.commit, "Rollback transaction");
 		});
 
-		QUnit.test("save - update success", 5, function() {
+		QUnit.test("save - update success without callback", 4, function() {
+			this.program.save();
+			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
+			QUnit.equal(appController.db.errorMessage, null, "Error message");
+			QUnit.equal(this.program.id, this.id, "id property");
+			QUnit.ok(appController.db.commit, "Commit transaction");
+		});
+
+		QUnit.test("save - update success with callback", 5, function() {
 			this.program.save($.proxy(function(id) {
 				QUnit.equal(id, this.id, "Invoke callback");
 			}, this));

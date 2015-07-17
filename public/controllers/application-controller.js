@@ -452,7 +452,7 @@ define(
 			}
 
 			// If the view controller specified a header, set up the header label 
-			if (this.viewStack[this.viewStack.length - 1].controller.header) {
+			if (this.viewStack[this.viewStack.length - 1].controller.header.label) {
 				// Set the header label
 				$("#headerLabel").text(this.viewStack[this.viewStack.length - 1].controller.header.label);
 

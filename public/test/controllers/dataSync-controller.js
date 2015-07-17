@@ -84,7 +84,7 @@ define(
 					{
 						type: "Episode",
 						id: "3",
-						action: "modified"
+						action: "unknown"
 					}
 				];
 
@@ -340,28 +340,39 @@ define(
 			var testParams = [
 				{
 					description: "abort",
+					localChanges: true,
+					prompt: "Warning: Local changes have been made. ",
 					proceed: false,
 					status: "Import aborted",
 					notice: "Import failed."
 				},
 				{
 					description: "import",
+					localChanges: true,
+					prompt: "Warning: Local changes have been made. ",
+					proceed: true,
+					status: "Starting import",
+					notice: "Database has been successfully imported."
+				},
+				{
+					description: "no local changes",
+					localChanges: false,
+					prompt: "",
 					proceed: true,
 					status: "Starting import",
 					notice: "Database has been successfully imported."
 				}
 			];
 
-			QUnit.expect(testParams.length * 5 + 1);
+			QUnit.expect(testParams.length * 5 + 2);
 
 			var i;
 
 			window.confirm = function(message) {
-				QUnit.equal(message, "Warning: Local changes have been made. Are you sure you want to import?", "confirm");
+				QUnit.equal(message, testParams[i].prompt + "Are you sure you want to import?", "confirm");
 				return testParams[i].proceed;
 			};
 
-			this.dataSyncController.localChanges = true;
 			this.dataSyncController.doImport = function() {
 				QUnit.ok(true, "Do import");
 				this.callback(true);
@@ -369,6 +380,7 @@ define(
 
 			jQueryMock.setDefaultContext(this.sandbox);
 			for (i = 0; i < testParams.length; i++) {
+				this.dataSyncController.localChanges = testParams[i].localChanges;
 				this.dataSyncController.dataImport();
 				QUnit.equal($("#status").val(), testParams[i].status, testParams[i].description + " - Status");
 				QUnit.equal($("#statusRow").css("display") === "none", testParams[i].proceed, testParams[i].description + " - Hide status row");
@@ -397,7 +409,7 @@ define(
 				QUnit.ok(true, "Send delete");
 			}, this);
 
-			this.dataSyncController.listRetrieved(this.syncList.slice(0,2));
+			this.dataSyncController.listRetrieved(this.syncList.slice(0));
 			QUnit.equal(this.dataSyncController.syncProcessed, 0, "syncProcessed property");
 			QUnit.deepEqual(this.dataSyncController.syncErrors, [], "syncErrors property");
 		});
@@ -599,7 +611,7 @@ define(
 		});
 
 		QUnit.test("importData - not finished", 2, function() {
-			this.dataSyncController.importDone();
+			this.dataSyncController.importData();
 			QUnit.equal(this.dataSyncController.objectsToImport, undefined, "objectsToImport property");
 			QUnit.equal(this.dataSyncController.objectsImported, undefined, "objectsImported property");
 		});
@@ -833,14 +845,22 @@ define(
 		QUnit.test("importDone - finished without errors", function() {
 			var testParams = [
 				{
-					description: "full import",
+					description: "first full import",
 					changesOnly: false,
-					imported: true
+					imported: false,
+					expectedImported: true
+				},
+				{
+					description: "subsequent full import",
+					changesOnly: false,
+					imported: true,
+					expectedImported: true
 				},
 				{
 					description: "import changes only",
 					changesOnly: true,
-					imported: false
+					imported: false,
+					expectedImported: false
 				}
 			];
 
@@ -857,11 +877,11 @@ define(
 
 			this.dataSyncController.importSuccessful = function() {
 				QUnit.ok(true, testParams[i].description + " - Import successful");
-				QUnit.equal(this.device.imported, testParams[i].imported, testParams[i].description + " - Device imported property");
+				QUnit.equal(this.device.imported, testParams[i].expectedImported, testParams[i].description + " - Device imported property");
 			};
 
 			for (i = 0; i < testParams.length; i++) {
-				this.dataSyncController.device.imported = false;
+				this.dataSyncController.device.imported = testParams[i].imported;
 				this.dataSyncController.importChangesOnly = testParams[i].changesOnly;
 				this.dataSyncController.importDone();
 			}

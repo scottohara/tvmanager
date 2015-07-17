@@ -37,6 +37,13 @@ define(
 						nowShowing: null,
 						recordedCount: 0,
 						expectedCount: 0
+					},
+					{
+						programName: "test-program-1",
+						seriesName: "test-series",
+						nowShowing: null,
+						recordedCount: 0,
+						expectedCount: 0
 					}
 				];
 				this.scheduleController = new ScheduleController();
@@ -116,6 +123,19 @@ define(
 							programName: "test-program-2",
 							seriesName: "test-series",
 							nowShowing: 2,
+							recordedCount: 0,
+							expectedCount: 0
+						}
+					}
+				},
+				{
+					description: "no change",
+					listItem: {
+						listIndex: 0,
+						series: {
+							programName: "test-program-3",
+							seriesName: "test-series",
+							nowShowing: 1,
 							recordedCount: 0,
 							expectedCount: 0
 						}
