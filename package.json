@@ -21,7 +21,7 @@
     "karma": "0.13.21",
     "karma-chrome-launcher": "0.2.2",
     "karma-coverage": "0.5.3",
-    "karma-mocha-reporter": "1.1.5",
+    "karma-mocha-reporter": "1.1.6",
     "karma-phantomjs-launcher": "1.0.0",
     "karma-qunit": "0.1.9",
     "karma-requirejs": "0.2.5",
