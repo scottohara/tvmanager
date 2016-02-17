@@ -25,7 +25,7 @@ end
 
 def start_simulator(description, url)
 	# Get the list of available simulator devices into an array
-	devices = `xcrun instruments -s devices | grep Simulator`.split "\n"
+	devices = `xcrun instruments -s devices`.split "\n"
 
 	# Present the list of options to the user
 	devices.each_with_index {|device, index| puts "#{index + 1}) #{device}"}
