@@ -211,10 +211,10 @@ define(
 
 			// If there are any local changes, display the number of changes to be synced
 			if (this.localChanges) {
-				$("#localChanges").val(count + " change" + (count > 1 ? "s" : "") + " to be synced");
+				$("#localChanges").val(count + " change" + (count > 1 ? "s" : "") + " pending");
 			} else {
 				// No local changes
-				$("#localChanges").val("No changes to be synced");
+				$("#localChanges").val("None pending");
 			}
 		};
 
@@ -232,8 +232,10 @@ define(
 				this.exporting = true;
 
 				// Show the status row
-				$("#statusRow").show();
+				$("#progress").hide()
 				$("#status").val("Starting export");
+				$("#status").show();
+				$("#statusRow").show();
 
 				// Define a callback function for when the export is finished
 				this.callback =	$.proxy(function(successful) {
@@ -288,8 +290,10 @@ define(
 				this.importing = true;
 
 				// Show the status row
-				$("#statusRow").show();
+				$("#progress").hide();
 				$("#status").val("Starting import");
+				$("#status").show();
+				$("#statusRow").show();
 
 				// Define a callback function for when the import is finished
 				this.callback = $.proxy(function(successful) {
@@ -348,6 +352,12 @@ define(
 			this.syncProcessed = 0;
 			this.syncErrors = [];
 			this.syncList = syncList;
+
+			// Show the export progress
+			$("#status").hide();
+			$("#progress").val(this.syncProcessed);
+			$("#progress").attr("max", this.syncList.length);
+			$("#progress").show()
 
 			// Iterate over the list
 			for (var i = 0; i < this.syncList.length; i++) {
@@ -456,8 +466,8 @@ define(
 			// Increment the number of records processed
 			this.syncProcessed++;
 
-			// Update the export progress message
-			$("#status").val("Exported " + this.syncProcessed + " of " + this.syncList.length + " changes");
+			// Update the export progress
+			$("#progress").val(this.syncProcessed);
 
 			// Check if we're done
 			if (this.syncProcessed === this.syncList.length) {
@@ -615,10 +625,12 @@ define(
 							// Only proceed if there are objects to import
 							if (importObj.length > 0) {
 								this.objectsToImport = importObj.length;
+								// Show the import progress
+								$("#status").hide();
+								$("#progress").val(this.objectsImported);
+								$("#progress").attr("max", this.objectsToImport);
+								$("#progress").show()
 								
-								// Update the import progress message
-								$("#status").val("Imported " + this.objectsImported + " of " + this.objectsToImport);
-
 								var	obj,
 										pending,
 										isPending;
@@ -745,8 +757,8 @@ define(
 			// Increment the running total number of objects imported
 			this.objectsImported++;
 
-			// Update the import progress message
-			$("#status").val("Imported " + this.objectsImported + " of " + this.objectsToImport);
+			// Update the import progress
+			$("#progress").val(this.objectsImported);
 
 			// Check if all objects have been imported
 			if (this.objectsImported === this.objectsToImport) {

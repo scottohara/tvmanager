@@ -57,6 +57,10 @@ define(
 					.attr("id", "statusRow")
 					.appendTo(this.sandbox);
 
+				$("<progress>")
+					.attr("id", "progress")
+					.appendTo(statusRow);
+
 				$("<input>")
 					.attr("id", "status")
 					.appendTo(statusRow);
@@ -191,7 +195,7 @@ define(
 			this.dataSyncController.setup();
 			QUnit.equal($("#lastSyncTime").val(), "1-Jan-1900 12:00:00", "Last Sync Time");
 			QUnit.ok(!this.dataSyncController.localChanges, "Detect no changes");
-			QUnit.equal($("#localChanges").val(), "No changes to be synced", "Changes");
+			QUnit.equal($("#localChanges").val(), "None pending", "Changes");
 			registrationRow.trigger("click");
 			importButton.trigger("click");
 			exportButton.trigger("click");
@@ -252,7 +256,7 @@ define(
 			jQueryMock.setDefaultContext(this.sandbox);
 			this.dataSyncController.checkForLocalChanges(count);
 			QUnit.ok(this.dataSyncController.localChanges, "Detect changes");
-			QUnit.equal($("#localChanges").val(), count + " change to be synced", "Changes");
+			QUnit.equal($("#localChanges").val(), count + " change pending", "Changes");
 			jQueryMock.clearDefaultContext();
 		});
 
@@ -261,7 +265,7 @@ define(
 			jQueryMock.setDefaultContext(this.sandbox);
 			this.dataSyncController.checkForLocalChanges(count);
 			QUnit.ok(this.dataSyncController.localChanges, "Detect changes");
-			QUnit.equal($("#localChanges").val(), count + " changes to be synced", "Changes");
+			QUnit.equal($("#localChanges").val(), count + " changes pending", "Changes");
 			jQueryMock.clearDefaultContext();
 		});
 
@@ -290,7 +294,7 @@ define(
 				}
 			];
 
-			QUnit.expect(testParams.length * 5 + 2);
+			QUnit.expect(testParams.length * 7 + 2);
 
 			var i;
 
@@ -311,7 +315,9 @@ define(
 			jQueryMock.setDefaultContext(this.sandbox);
 			for (i = 0; i < testParams.length; i++) {
 				this.dataSyncController.dataExport();
+				QUnit.equal($("#progress").css("display"), "none", testParams[i].description + " - Hide progress");
 				QUnit.equal($("#status").val(), testParams[i].status, testParams[i].description + " - Status");
+				QUnit.notEqual($("#status").css("display"), "none", testParams[i].description + " - Show status");
 				QUnit.equal($("#statusRow").css("display") === "none", testParams[i].proceed, testParams[i].description + " - Hide status row");
 				QUnit.deepEqual(appController.notice.pop(), {
 					label: testParams[i].notice,
@@ -364,7 +370,7 @@ define(
 				}
 			];
 
-			QUnit.expect(testParams.length * 5 + 2);
+			QUnit.expect(testParams.length * 7 + 2);
 
 			var i;
 
@@ -382,7 +388,9 @@ define(
 			for (i = 0; i < testParams.length; i++) {
 				this.dataSyncController.localChanges = testParams[i].localChanges;
 				this.dataSyncController.dataImport();
+				QUnit.equal($("#progress").css("display"), "none", testParams[i].description + " - Hide progress");
 				QUnit.equal($("#status").val(), testParams[i].status, testParams[i].description + " - Status");
+				QUnit.notEqual($("#status").css("display"), "none", testParams[i].description + " - Show status");
 				QUnit.equal($("#statusRow").css("display") === "none", testParams[i].proceed, testParams[i].description + " - Hide status row");
 				QUnit.deepEqual(appController.notice.pop(), {
 					label: testParams[i].notice,
@@ -398,7 +406,7 @@ define(
 			delete window.confirm;
 		});
 
-		QUnit.test("listRetrieved", 6, function() {
+		QUnit.test("listRetrieved", 10, function() {
 			this.dataSyncController.sendChange = $.proxy(function(sync) {
 				QUnit.equal(sync, this.syncList[0], "Sync - modified");
 				QUnit.ok(true, "Send change");
@@ -412,6 +420,10 @@ define(
 			this.dataSyncController.listRetrieved(this.syncList.slice(0));
 			QUnit.equal(this.dataSyncController.syncProcessed, 0, "syncProcessed property");
 			QUnit.deepEqual(this.dataSyncController.syncErrors, [], "syncErrors property");
+			QUnit.equal($("#status").css("display"), "none", "Hide status");
+			QUnit.equal($("#progress").attr("value"), 0, "Progress value");
+			QUnit.equal($("#progress").attr("max"), this.syncList.length, "Progress max");
+			QUnit.notEqual($("#progress").css("display"), "none", "Show progress");
 		});
 
 		QUnit.asyncTest("sendChange - checksum mismatch", 2, function() {
@@ -496,7 +508,7 @@ define(
 			this.dataSyncController.syncProcessed = 0;
 			this.dataSyncController.syncList = this.syncList;
 			this.dataSyncController.changeSent();
-			QUnit.equal($("#status").val(), "Exported 1 of " + this.syncList.length + " changes", "Status");
+			QUnit.equal($("#progress").attr("value"), 1, "Progress value");
 			jQueryMock.clearDefaultContext();
 		});
 
@@ -526,7 +538,7 @@ define(
 
 			jQueryMock.setDefaultContext(this.sandbox);
 			this.dataSyncController.changeSent();
-			QUnit.equal($("#status").val(), "Exported " + this.syncList.length + " of " + this.syncList.length + " changes", "Status");
+			QUnit.equal($("#progress").attr("value"), this.dataSyncController.syncProcessed, "Progress value");
 			QUnit.ok($("#errorList").is(":empty"), "Empty error list");
 			QUnit.equal($("#syncErrors").css("display"), "none", "Hide sync errors");
 			jQueryMock.clearDefaultContext();
@@ -735,7 +747,7 @@ define(
 			this.dataSyncController.importData();
 		});
 
-		QUnit.asyncTest("importData - success", 3, function() {
+		QUnit.asyncTest("importData - success", 7, function() {
 			this.dataSyncController.programsReady = true;
 			this.dataSyncController.seriesReady = true;
 			this.dataSyncController.episodesReady = true;
@@ -761,6 +773,10 @@ define(
 				Sync.prototype.remove = originalSyncRemove;
 				QUnit.equal(this.dataSyncController.objectsImported, Sync.removedCount, "Number of Syncs removed");
 				QUnit.equal(this.dataSyncController.syncErrors.length, 0, "Number of errors");
+				QUnit.equal($("#status").css("display"), "none", "Hide status");
+				QUnit.equal($("#progress").attr("value"), this.dataSyncController.objectsImported, "Progress value");
+				QUnit.equal($("#progress").attr("max"), this.dataSyncController.objectsImported, "Progress max");
+				QUnit.notEqual($("#progress").css("display"), "none", "Show progress");
 				QUnit.start();
 			}, this);
 
@@ -768,16 +784,20 @@ define(
 			this.dataSyncController.importData();
 		});
 
-		QUnit.asyncTest("removePending - ajax fail", 2, function() {
+		QUnit.asyncTest("removePending - ajax fail", 3, function() {
 			var originalAjax = $.ajax;
 			$.ajax = this.ajaxMock;
 
 			this.dataSyncController.syncError = $.proxy(function(error, type, message) {
 				QUnit.equal(error, "Save error", "Sync error");
 				QUnit.equal(type, this.syncList[0].type, "Type");
-				QUnit.start();
 			}, this);
 			
+			this.dataSyncController.dataImported = $.proxy(function() {
+				QUnit.ok(true, "Data imported");
+				QUnit.start();
+			}, this);
+
 			this.dataSyncController.removePending(this.syncList[0].id, this.syncList[0].type);
 			$.ajax = originalAjax;
 		});
@@ -802,7 +822,7 @@ define(
 			};
 
 			this.dataSyncController.dataImported();
-			QUnit.equal($("#status").val(), "Imported 1 of 1", "Status");
+			QUnit.equal($("#progress").attr("value"), 1, "Progress value");
 		});
 
 		QUnit.test("importDone - not finished", 1, function() {

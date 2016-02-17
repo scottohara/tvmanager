@@ -516,8 +516,8 @@ input[type="checkbox"]:checked + label:after {
 	box-shadow: inset 0 0 0 1px rgba(19,191,17,1), 0 2px 4px rgba(0,0,0,.2);
 }
 
-/* Hide registration message, sync controls, status row, sync error & import changes only rows by default */
-#registrationMessage, #syncControls, #statusRow, #syncErrors, #importChangesOnlyRow {
+/* Hide registration message, sync controls, progress bar, status row, sync error & import changes only rows by default */
+#registrationMessage, #syncControls, #progress, #statusRow, #syncErrors, #importChangesOnlyRow {
 	display: none;
 }
 
