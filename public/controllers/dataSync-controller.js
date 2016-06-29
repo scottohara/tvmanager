@@ -232,7 +232,7 @@ define(
 				this.exporting = true;
 
 				// Show the status row
-				$("#progress").hide()
+				$("#progress").hide();
 				$("#status").val("Starting export");
 				$("#status").show();
 				$("#statusRow").show();
@@ -357,7 +357,7 @@ define(
 			$("#status").hide();
 			$("#progress").val(this.syncProcessed);
 			$("#progress").attr("max", this.syncList.length);
-			$("#progress").show()
+			$("#progress").show();
 
 			// Iterate over the list
 			for (var i = 0; i < this.syncList.length; i++) {
@@ -629,7 +629,7 @@ define(
 								$("#status").hide();
 								$("#progress").val(this.objectsImported);
 								$("#progress").attr("max", this.objectsToImport);
-								$("#progress").show()
+								$("#progress").show();
 								
 								var	obj,
 										pending,
