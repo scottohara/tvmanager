@@ -18,24 +18,24 @@
   },
   "homepage": "https://github.com/scottohara/tvmanager",
   "devDependencies": {
-    "karma": "0.13.21",
-    "karma-chrome-launcher": "0.2.2",
-    "karma-coverage": "0.5.3",
-    "karma-mocha-reporter": "1.1.6",
-    "karma-phantomjs-launcher": "1.0.0",
-    "karma-qunit": "0.1.9",
-    "karma-requirejs": "0.2.5",
-    "karma-sinon": "1.0.4",
-    "phantomjs-prebuilt": "2.1.4",
+    "karma": "1.1.0",
+    "karma-chrome-launcher": "1.0.1",
+    "karma-coverage": "1.0.0",
+    "karma-mocha-reporter": "2.0.4",
+    "karma-phantomjs-launcher": "1.0.1",
+    "karma-qunit": "1.1.0",
+    "karma-requirejs": "1.0.0",
+    "karma-sinon": "1.0.5",
+    "phantomjs-prebuilt": "2.1.7",
     "qunitjs": "1.21.0",
-    "requirejs": "2.1.22",
+    "requirejs": "2.2.0",
     "sinon": "1.17.3"
   },
   "scripts": {
     "test": "./node_modules/karma/bin/karma start"
   },
   "engines": {
-    "node": "5.6.0",
-    "npm": "3.6.0"
+    "node": "6.2.2",
+    "npm": "3.10.3"
   }
 }
