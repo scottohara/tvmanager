@@ -13,8 +13,7 @@ define(
 		"controllers/database-controller",
 		"framework/sw/spinningwheel",
 		"framework/abc/abc",
-		"framework/jquery",
-		"framework/jquery.iphoneui"
+		"framework/jquery"
 	],
 
 	/**

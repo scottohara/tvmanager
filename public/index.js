@@ -14,6 +14,7 @@ require.config({
 	paths: {
 		"framework/jquery": "framework/jquery-3.1.0.min",
 		"framework/jquery-ui": "framework/jquery-ui.min",
+		"framework/jquery.ui.touch-punch": "framework/jquery.ui.touch-punch.min",
 		"framework/jshash": "framework/jshash-2.2"
 	},
 
@@ -28,11 +29,11 @@ require.config({
 			],
 			exports: "$.ui"
 		},
-		"framework/jquery.iphoneui": {
+		"framework/jquery.ui.touch-punch": {
 			deps: [
-				"framework/jquery"
+				"framework/jquery-ui"
 			],
-			exports: "$.iPhone"
+			exports: "$.support"
 		},
 		"framework/jshash/md5-min": {
 			exports: "hex_md5"

@@ -6,7 +6,7 @@ define(
 		'controllers/application-controller',
 		'framework/jquery',
 		'test/mocks/jQuery-mock',
-		'framework/jquery.iphoneui'
+		'framework/jquery.ui.touch-punch'
 	],
 
 	function(Episode, EpisodesController, List, ApplicationController, $, jQueryMock) {

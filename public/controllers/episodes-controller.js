@@ -11,7 +11,7 @@ define(
 		"models/episode-model",
 		"controllers/application-controller",
 		"framework/jquery",
-		"framework/jquery-ui"
+		"framework/jquery.ui.touch-punch"
 	],
 
 	/**
@@ -330,8 +330,7 @@ define(
 				.sortable({
 					axis: "y",
 					sort: this.sortItems
-				})
-				.addTouch();
+				});
 
 			// Setup the footer
 			this.footer = {
@@ -378,8 +377,7 @@ define(
 			// Make the list unsortable
 			$("#list.ui-sortable")
 				.removeClass()
-				.sortable("destroy")
-				.removeTouch();
+				.sortable("destroy");
 
 			// Show the view icons next to each list item
 			$("#list").removeClass();
