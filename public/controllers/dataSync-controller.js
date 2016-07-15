@@ -97,11 +97,11 @@ define(
 		 */
 		DataSyncController.prototype.activate = function() {
 			// Bind an event handler to access the registration view
-			$("#registrationRow").bind("click", this.viewRegistration);
+			$("#registrationRow").on("click", this.viewRegistration);
 
 			// Bind event handlers for the import/export buttons
-			$("#import").bind("click", $.proxy(this.dataImport, this));
-			$("#export").bind("click", $.proxy(this.dataExport, this));
+			$("#import").on("click", $.proxy(this.dataImport, this));
+			$("#export").on("click", $.proxy(this.dataExport, this));
 
 			// Set the initial status message
 			$("#localChanges").val("Checking...");
@@ -177,7 +177,7 @@ define(
 			// Only proceed if we have a device
 			if (device.settingValue) {
 				// Parse the JSON
-				this.device = $.parseJSON(device.settingValue);
+				this.device = JSON.parse(device.settingValue);
 
 				// Display the device name
 				$("#deviceName").val(this.device.name);
@@ -599,7 +599,7 @@ define(
 					success: function(importObj, status, jqXHR) {
 						// A 302 Not Modified returns undefined, so we need to get the JSON from the jqXHR object instead
 						if (importObj === undefined) {
-							importObj = $.parseJSON(jqXHR.responseText);
+							importObj = JSON.parse(jqXHR.responseText);
 						}
 
 						// Get the Etag value returned by the server

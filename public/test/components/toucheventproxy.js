@@ -60,7 +60,7 @@ define(
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchstart";
 			this.event.mapsTo = mapsTo;
-			this.target.bind(mapsTo, this.eventHandler);
+			this.target.on(mapsTo, this.eventHandler);
 			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
 			this.toucheventproxy.onTouchMove = this.emptyEventHandler;
 			this.toucheventproxy.onTouchEnd = this.emptyEventHandler;
@@ -77,7 +77,7 @@ define(
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchstart";
 			this.event.mapsTo = mapsTo;
-			this.target.bind(mapsTo, this.eventHandler);
+			this.target.on(mapsTo, this.eventHandler);
 			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
 			this.toucheventproxy.onTouchMove = this.emptyEventHandler;
 			this.toucheventproxy.onTouchEnd = this.emptyEventHandler;
@@ -94,7 +94,7 @@ define(
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchmove";
 			this.event.mapsTo = mapsTo;
-			this.target.bind(mapsTo, this.eventHandler);
+			this.target.on(mapsTo, this.eventHandler);
 			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
 		});
 
@@ -103,7 +103,7 @@ define(
 			this.event.timeStamp = new Date();
 			var mapsTo = "touchend";
 			this.event.mapsTo = mapsTo;
-			this.target.bind(mapsTo, this.eventHandler);
+			this.target.on(mapsTo, this.eventHandler);
 			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
 			this.toucheventproxy.onTouchMove = this.emptyEventHandler;
 			this.toucheventproxy.onTouchEnd = this.emptyEventHandler;

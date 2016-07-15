@@ -9,8 +9,8 @@ require.config({
 	// so that any dependency references don't have the version numbers in them.
 	// When updating to a later library version, we only need to update one place.
 	paths: {
-		"framework/jquery": "framework/jquery-2.0.3.min",
-		"framework/jquery-ui": "framework/jquery-ui-1.10.3.custom.min",
+		"framework/jquery": "framework/jquery-3.1.0.min",
+		"framework/jquery-ui": "framework/jquery-ui.min",
 		"framework/jshash": "framework/jshash-2.2"
 	},
 

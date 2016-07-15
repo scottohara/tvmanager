@@ -98,7 +98,7 @@ define(
 			};
 
 			// Bind a handler for transition end events
-			$("#contentWrapper").bind("transitionend", this.contentShown);
+			$("#contentWrapper").on("transitionend", this.contentShown);
 
 			// Increase the default cell height of the SpinningWheel (44px default is incorrect)
 			SpinningWheel.cellHeight = 45;
@@ -146,7 +146,7 @@ define(
 			$.get("/dbConfig", $.proxy(function(config, status, jqXHR) {
 				// A 302 Not Modified returns undefined, so we need to get the config from the jqXHR object instead
 				if (config === undefined) {
-					config = $.parseJSON(jqXHR.responseText);
+					config = JSON.parse(jqXHR.responseText);
 				}
 
 				// Create the database controller
@@ -249,7 +249,7 @@ define(
 		ApplicationController.prototype.gotAppConfig = function(config, status, jqXHR) {
 			// A 302 Not Modified returns undefined, so we need to get the config from the jqXHR object instead
 			if (config === undefined) {
-				config = $.parseJSON(jqXHR.responseText);
+				config = JSON.parse(jqXHR.responseText);
 			}
 
 			// Set the application version
@@ -437,7 +437,7 @@ define(
 			// If the view controller specified a left-hand button, set it up
 			if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
 				// Bind the event handler for the button
-				$("#headerLeftButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
+				$("#headerLeftButton").on("click", this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
 
 				// Style the button
 				$("#headerLeftButton")
@@ -463,7 +463,7 @@ define(
 			// If the view controller specified a right-hand button, set it up
 			if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
 				// Bind the event handler for the button
-				$("#headerRightButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
+				$("#headerRightButton").on("click", this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
 				
 				// Style the button
 				$("#headerRightButton")
@@ -491,12 +491,12 @@ define(
 		ApplicationController.prototype.clearHeader = function() {
 			// If the view controller specified a left-hand button, unbind the event handler
 			if (this.viewStack[this.viewStack.length - 1].controller.header.leftButton) {
-				$("#headerLeftButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
+				$("#headerLeftButton").off("click", this.viewStack[this.viewStack.length - 1].controller.header.leftButton.eventHandler);
 			}
 
 			// If the view controller specified a right-hand button, unbind the event handler
 			if (this.viewStack[this.viewStack.length - 1].controller.header.rightButton) {
-				$("#headerRightButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
+				$("#headerRightButton").off("click", this.viewStack[this.viewStack.length - 1].controller.header.rightButton.eventHandler);
 			}
 
 			// Hide the buttons and header label
@@ -521,7 +521,7 @@ define(
 				// If the view controller specified a left-hand button, set it up
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
 					// Bind the event handler for the button
-					$("#footerLeftButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
+					$("#footerLeftButton").on("click", this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
 					
 					// Style the button
 					$("#footerLeftButton")
@@ -546,7 +546,7 @@ define(
 				// If the view controller specified a right-hand button, set it up
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
 					// Bind the event handler for the button
-					$("#footerRightButton").bind("click", this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
+					$("#footerRightButton").on("click", this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
 
 					// Style the button
 					$("#footerRightButton")
@@ -577,12 +577,12 @@ define(
 			if (this.viewStack[this.viewStack.length - 1].controller.footer) {
 				// If the view controller specified a left-hand button, unbind the event handler
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.leftButton) {
-					$("#footerLeftButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
+					$("#footerLeftButton").off("click", this.viewStack[this.viewStack.length - 1].controller.footer.leftButton.eventHandler);
 				}
 
 				// If the view controller specified a right-hand button, unbind the event handler
 				if (this.viewStack[this.viewStack.length - 1].controller.footer.rightButton) {
-					$("#footerRightButton").unbind("click", this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
+					$("#footerRightButton").off("click", this.viewStack[this.viewStack.length - 1].controller.footer.rightButton.eventHandler);
 				}
 			}
 
@@ -626,11 +626,11 @@ define(
 			if (notice.leftButton) {
 				// Bind the event handler for the button
 				if (notice.leftButton.eventHandler) {
-					noticeLeftButton.bind("click", notice.leftButton.eventHandler);
+					noticeLeftButton.on("click", notice.leftButton.eventHandler);
 				}
 
 				// Also bind a function to hide the notice when the button is clicked
-				noticeLeftButton.bind("click", $.proxy(function(notice) { return $.proxy(function() { this.hideNotice(notice); }, this);}, this)(noticeContainer));
+				noticeLeftButton.on("click", $.proxy(function(notice) { return $.proxy(function() { this.hideNotice(notice); }, this);}, this)(noticeContainer));
 
 				// Style the button
 				noticeLeftButton
@@ -659,7 +659,7 @@ define(
 			if (notice.rightButton) {
 				// Bind the event handler for the button
 				if (notice.rightButton.eventHandler) {
-					noticeRightButton.bind("click", notice.rightButton.eventHandler);
+					noticeRightButton.on("click", notice.rightButton.eventHandler);
 				}
 				
 				// Style the button

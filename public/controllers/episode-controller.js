@@ -86,12 +86,12 @@ define(
 			$("#unscheduled").prop("checked", this.listItem.episode.unscheduled);
 
 			// Bind events for all of the buttons/controls
-			$("#watched").bind("click", $.proxy(function() { this.setStatus("Watched"); }, this));
-			$("#recorded").bind("click", $.proxy(function() { this.setStatus("Recorded"); }, this));
-			$("#expected").bind("click", $.proxy(function() { this.setStatus("Expected"); }, this));
-			$("#missed").bind("click", $.proxy(function() { this.setStatus("Missed"); }, this));
-			$("#statusDate").bind("click", $.proxy(this.getStatusDate, this));
-			$("#unscheduled").bind("click", $.proxy(this.toggleStatusDateRow, this));
+			$("#watched").on("click", $.proxy(function() { this.setStatus("Watched"); }, this));
+			$("#recorded").on("click", $.proxy(function() { this.setStatus("Recorded"); }, this));
+			$("#expected").on("click", $.proxy(function() { this.setStatus("Expected"); }, this));
+			$("#missed").on("click", $.proxy(function() { this.setStatus("Missed"); }, this));
+			$("#statusDate").on("click", $.proxy(this.getStatusDate, this));
+			$("#unscheduled").on("click", $.proxy(this.toggleStatusDateRow, this));
 
 			// Toggle the current status
 			var status = this.listItem.episode.status;

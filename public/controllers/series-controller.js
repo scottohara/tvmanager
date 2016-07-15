@@ -77,8 +77,8 @@ define(
 			$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
 
 			// Bind events for all of the buttons/controls
-			$("#nowShowing").bind("click", $.proxy(this.getNowShowing, this));
-			$("#moveTo").bind("click", $.proxy(this.getProgramId, this));
+			$("#nowShowing").on("click", $.proxy(this.getNowShowing, this));
+			$("#moveTo").on("click", $.proxy(this.getProgramId, this));
 		};
 
 		/**

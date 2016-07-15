@@ -61,7 +61,7 @@ define(
 				QUnit.ok(true, "Bind save button event handler");
 			};
 			this.registrationController.gotDevice = $.proxy(function(device) {
-				QUnit.deepEqual($.parseJSON(device.settingValue), this.device, "Device");
+				QUnit.deepEqual(JSON.parse(device.settingValue), this.device, "Device");
 			}, this);
 
 			Setting.setting.Device = JSON.stringify(this.device);
@@ -164,7 +164,7 @@ define(
 			var originalSettingSave = Setting.prototype.save;
 			Setting.prototype.save = function() {
 				Setting.prototype.save = originalSettingSave;
-				QUnit.deepEqual($.parseJSON(this.settingValue), that.device, "settingValue property");
+				QUnit.deepEqual(JSON.parse(this.settingValue), that.device, "settingValue property");
 				QUnit.ok(true, "Setting saved");
 			};
 

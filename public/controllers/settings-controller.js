@@ -62,12 +62,12 @@ define(
 		 */
 		SettingsController.prototype.activate = function() {
 			// Bind events for all of the buttons/controls
-			$("#dataSyncRow").bind("click", this.viewDataSync);
-			$("#aboutRow").bind("click", this.viewAbout);
-			$("#recordedReportRow").bind("click", this.viewRecordedReport);
-			$("#expectedReportRow").bind("click", this.viewExpectedReport);
-			$("#missedReportRow").bind("click", this.viewMissedReport);
-			$("#incompleteReportRow").bind("click", this.viewIncompleteReport);
+			$("#dataSyncRow").on("click", this.viewDataSync);
+			$("#aboutRow").on("click", this.viewAbout);
+			$("#recordedReportRow").on("click", this.viewRecordedReport);
+			$("#expectedReportRow").on("click", this.viewExpectedReport);
+			$("#missedReportRow").on("click", this.viewMissedReport);
+			$("#incompleteReportRow").on("click", this.viewIncompleteReport);
 		};
 
 		/**

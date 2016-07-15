@@ -71,7 +71,7 @@ define(
 			// Check if we have a registered device
 			if (device.settingValue) {
 				// Parse the JSON
-				this.device = $.parseJSON(device.settingValue);
+				this.device = JSON.parse(device.settingValue);
 
 				// Display the device name
 				$("#deviceName").val(this.device.name);

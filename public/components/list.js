@@ -113,7 +113,7 @@ define(
 					$("<li>")
 						.html(itemHTML)
 						.appendTo($("#" + this.container))
-						.bind("click", itemClicked(i));
+						.on("click", itemClicked(i));
 
 					// If a populate item event handler was specified, trigger it
 					if (this.populateItemEventHandler) {

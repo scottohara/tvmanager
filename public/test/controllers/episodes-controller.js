@@ -461,8 +461,9 @@ define(
 			};
 
 			var ui = {
-				helper: $("<div>").offset({top: 0})
+				helper: $("<div>")
 					.appendTo(document.body)
+					.offset({top: 0})
 			};
 
 			this.episodesController.sortItems(e, ui);
