@@ -45,11 +45,11 @@ end
 def is_read_only
 	begin
 		# Get the matching device document
-		doc = db.get(device_id)
+		doc = db.get!(device_id)
 
 		# Return the readonly property
 		doc["readOnly"]
-	rescue RestClient::ResourceNotFound
+	rescue CouchRest::NotFound
 		raise BadRequest, "Client device #{device_id} is not registered"
 	end
 end
@@ -82,7 +82,7 @@ def remove_pending(doc, pending_device_id=nil)
 
 	# If the document is marked as deleted and has no pending array, delete the document; otherwise save the document
 	if doc["isDeleted"] && !doc.has_key?("pending")
-		db.get(doc['id']).destroy
+		db.get!(doc['id']).destroy
 	else
 		db.save_doc doc
 	end
@@ -168,7 +168,7 @@ post '/export' do
 
 		# Get the existing doc (if any) and copy the _rev property to the new doc
 		begin
-			doc["_rev"] = db.get(doc["id"])["_rev"]
+			doc["_rev"] = db.get!(doc["id"])["_rev"]
 		rescue
 		end
 
@@ -194,7 +194,7 @@ delete '/export/:id' do
 		raise Forbidden, "Client device #{device_id} is not authorised to export" if is_read_only
 
 		# Get the existing doc
-		doc = db.get(params[:id])
+		doc = db.get!(params[:id])
 
 		# If the document is already marked for deletion, remove the device from the pending array
 		if doc["isDeleted"]
@@ -211,7 +211,7 @@ delete '/export/:id' do
 		end
 		
 	# Ignore any errors where the doc we're deleting was not found
-	rescue RestClient::ResourceNotFound => e
+	rescue CouchRest::NotFound => e
 		status 200
 
 	rescue HttpError => e
@@ -278,7 +278,7 @@ end
 delete '/import/:id' do
 	begin
 		# Get the existing doc
-		doc = db.get(params[:id])
+		doc = db.get!(params[:id])
 
 		# Remove the device from the pending array
 		remove_pending doc
@@ -301,7 +301,7 @@ put '/devices/:name' do
 
 		device = unless (device_id.nil? || device_id.empty?)
 			# Get the existing device document
-			db.get(device_id)
+			db.get!(device_id)
 		else
 			# Create a new device document
 			{
@@ -320,7 +320,7 @@ put '/devices/:name' do
 		headers "Location" => device["_id"]
 		return
 	
-	rescue RestClient::ResourceNotFound => e
+	rescue CouchRest::NotFound => e
 		raise NotFound, "Client device #{params[:name]} is not registered"
 
 	rescue HttpError => e
@@ -337,16 +337,16 @@ end
 delete '/devices/:id' do
 	begin 
 		# Get all documents pending for this device
-		docs = db.view("data/pending", "key" => params[:id], "include_docs" => true)["rows"].each do |row|
+		db.view("data/pending", "key" => params[:id], "include_docs" => true)["rows"].each do |row|
 			# Remove the device from the pending array
 			remove_pending row['doc'], params[:id]
 		end
 
 		# Delete the device
-		db.get(params[:id]).destroy
+		db.get!(params[:id]).destroy
 
 	# Ignore any errors where the doc we're deleting was not found
-	rescue RestClient::ResourceNotFound => e
+	rescue CouchRest::NotFound => e
 		status 200
 
 	rescue HttpError => e
