@@ -1,0 +1,70 @@
+require 'manifesto'
+require_relative 'base_controller'
+require_relative '../helpers/environment'
+
+module TVManager
+	class ManifestController < BaseController
+		helpers TVManager::Helpers::Environment
+
+		# ==========
+		# CONDITIONS
+		# ==========
+
+		# Routing condition (true if the app cache is disabled)
+		set :noAppCache do |_|
+			condition do
+				!!ENV[:TVMANAGER_NO_APPCACHE.to_s]
+			end
+		end
+
+		# =============
+		# CONFIGURATION
+		# =============
+
+		# Register cache manifest mime type
+		configure do
+			mime_type :cache_manifest, "text/cache-manifest"
+		end
+
+		# ======
+		# ROUTES
+		# ======
+
+		# Route for HTML5 cache manifest when app cache is disabled
+		get '/', noAppCache: true do
+			content_type :cache_manifest
+
+			# Cache nothing, using an open online whitelist wildcard flag
+			"CACHE MANIFEST\nNETWORK:\n*"
+		end
+
+		# Route for HTML5 cache manifest when app cache is enabled
+		get '/' do
+			content_type :cache_manifest
+
+			# Cache all files in the /public directory, except unit tests
+			# Include any routes called via Ajax as network resources
+			manifest_options = {
+				timestamp: false,
+				directory: settings.public_folder,
+				excludes: [ settings.public_folder + "/test" ],
+				network_includes: %w(/devices /export /import)
+			}
+
+			# In dev/test configuration, make unit tests network resources as well
+			manifest_options[:network_includes] << '/test/*' if settings.development? || settings.test?
+
+			# Generate the manifest
+			manifest = Manifesto.cache manifest_options
+
+			# Add cache entries for dbConfig & appConfig
+			config_entries = <<~END
+				/dbConfig
+				/appConfig
+				# databaseName: #{database_name}
+				# appVersion: #{app_version}
+			END
+			manifest.gsub! "\nNETWORK:", "#{config_entries}\nNETWORK:"
+		end
+	end
+end

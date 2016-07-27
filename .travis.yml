@@ -6,22 +6,30 @@ cache: bundler
 # Required to use new Travis container-based infrastructure
 sudo: false
 
+# Enable couchdb
+services: couchdb
+
 # Code Climate token for coverage reporting
 addons:
   code_climate:
     repo_token: 1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
 
 before_install:
-  - npm install -g npm@latest           # Default npm version on Travis is (currently) 1.4.x; we need 2.x (for passing args to npm test)
+  - nvm install                         # Install node version from .nvmrc
+  - export TVMANAGER_COUCHDB_URL=http://localhost:5984/tvm                    # Database URL
 
 install:
   - bundle install --without production --path=${BUNDLE_PATH:-vendor/bundle}  # Install ruby gems, excluding production only gems such as unicorn (already present by default in Travis)
   - npm install                         # Install npm dependencies
   - npm install codeclimate-test-reporter
 
+# Setup the database
+before_script: bundle exec rake db:migrate
+
 # Run the test suite
 script:
-  - npm test -- --browsers PhantomJS
+  - bundle exec rake                    # Backend specs
+  - npm test -- --browsers PhantomJS    # Frontend specs
 
 # Pipe the JS coverage data to Code Climate
 after_script: cat ./coverage/phantomjs/lcov.info | codeclimate-test-reporter

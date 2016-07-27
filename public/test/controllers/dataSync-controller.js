@@ -122,16 +122,16 @@ define(
 				this.startFakeServer = $.proxy(function() {
 					this.fakeServer = sinon.fakeServer.create();
 					this.fakeServer.autoRespond = true;
-					this.fakeServer.respondWith("POST", "/export", function(request) {
+					this.fakeServer.respondWith("POST", "/documents", function(request) {
 						request.respond(200, {"Etag": request.requestHeaders["Content-MD5"]});
 					});
-					this.fakeServer.respondWith("DELETE", /\/export\/\d+/, "");
-					this.fakeServer.respondWith("GET", "/import/all", [200, {}, JSON.stringify({
+					this.fakeServer.respondWith("DELETE", /\/documents\/\d+/, "");
+					this.fakeServer.respondWith("GET", "/documents/all", [200, {}, JSON.stringify({
 						data: this.docs,
 						checksum: "test-hash"
 					})]);
-					this.fakeServer.respondWith("GET", "/import", [200, {"Etag": "test-hash"}, JSON.stringify(this.docs)]);
-					this.fakeServer.respondWith("DELETE", /\/import\/\d+/, "");
+					this.fakeServer.respondWith("GET", "/documents/pending", [200, {"Etag": "test-hash"}, JSON.stringify(this.docs)]);
+					this.fakeServer.respondWith("DELETE", /\/documents\/\d+\/pending/, "");
 				}, this);
 
 				this.stopFakeServer = $.proxy(function() {

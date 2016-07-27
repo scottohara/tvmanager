@@ -396,7 +396,7 @@ define(
 
 				// Post to the export route, including the MD5 sum and device ID in the request headers
 				$.ajax({
-					url: "/export",
+					url: "/documents",
 					context: this,
 					type: "POST",
 					headers: {
@@ -437,7 +437,7 @@ define(
 		DataSyncController.prototype.sendDelete = function(sync){
 			// Send a DELETE request to the server, including the device ID in the request headers
 			$.ajax({
-				url: "/export/" + sync.id,
+				url: "/documents/" + sync.id,
 				context: this,
 				type: "DELETE",
 				headers: {
@@ -590,7 +590,7 @@ define(
 
 				// Get the list of objects to import from the server, including the device ID in the request headers
 				$.ajax({
-					url: "/import" + (this.importChangesOnly ? "" : "/all"),
+					url: "/documents/" + (this.importChangesOnly ? "pending" : "all"),
 					context: this,
 					dataType: "json",
 					headers: {
@@ -729,7 +729,7 @@ define(
 		DataSyncController.prototype.removePending = function(id, type) {
 			// Send a DELETE request to the server, including the device ID in the request headers
 			$.ajax({
-				url: "/import/" + id,
+				url: "/documents/" + id + "/pending",
 				context: this,
 				type: "DELETE",
 				headers: {

@@ -195,6 +195,9 @@ To run lint:
 * `rake jslint` (configuration options are set in `config/jslint.yml`), or
 * `rake jshint` (configuration options are set in `config/jshint.yml`)
 
+To run the backend test suite:
+* `rake spec`
+
 API Documentation
 =================
 The JavaScript source is fully annotated with JSDoc3 tags, allowing HTML documentation of the API to be automatically generated.

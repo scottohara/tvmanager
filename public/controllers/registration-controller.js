@@ -114,6 +114,9 @@ define(
 				url: "/devices/" + this.device.id,
 				context: this,
 				type: "DELETE",
+				headers: {
+					"X-DEVICE-ID": this.device.id
+				},
 				success: function() {
 					// Remove the device from the database
 					var device = new Setting("Device", null);

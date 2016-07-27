@@ -11,6 +11,7 @@ group :development do
 	gem 'rake'
 	gem 'heroku-api'
 	gem 'git'
+	gem 'rubocop', require: false
 end
 
 gem 'thin'
@@ -18,3 +19,10 @@ gem 'sinatra'
 gem 'manifesto'
 gem 'couchrest'
 gem 'json'
+
+group :development, :test do
+	gem 'rspec'
+	gem 'rack-test'
+	gem 'simplecov'
+end
+

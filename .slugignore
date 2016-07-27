@@ -10,6 +10,7 @@ README.md
 build
 config
 public/test
+spec
 
 # ignore uncompressed jquery and source maps
 public/framework/jquery-*[^min].js
