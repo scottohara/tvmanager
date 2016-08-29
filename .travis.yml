@@ -28,7 +28,7 @@ before_script: bundle exec rake db:migrate
 
 # Run the test suite
 script:
-  - bundle exec rake                    # Backend specs
+  - bundle exec rake spec               # Backend specs
   - npm test -- --browsers PhantomJS    # Frontend specs
 
 # Pipe the JS coverage data to Code Climate
