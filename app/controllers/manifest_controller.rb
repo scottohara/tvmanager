@@ -1,8 +1,11 @@
+# Copyright (c) 2016 Scott O'Hara, oharagroup.net
+# frozen_string_literal: true
 require 'manifesto'
 require_relative 'base_controller'
 require_relative '../helpers/environment'
 
 module TVManager
+	# Provides the appcache manifest for offline support
 	class ManifestController < BaseController
 		helpers TVManager::Helpers::Environment
 
@@ -13,7 +16,7 @@ module TVManager
 		# Routing condition (true if the app cache is disabled)
 		set :noAppCache do |_|
 			condition do
-				!!ENV[:TVMANAGER_NO_APPCACHE.to_s]
+				ENV[:TVMANAGER_NO_APPCACHE.to_s].eql? 'true'
 			end
 		end
 
@@ -23,7 +26,7 @@ module TVManager
 
 		# Register cache manifest mime type
 		configure do
-			mime_type :cache_manifest, "text/cache-manifest"
+			mime_type :cache_manifest, 'text/cache-manifest'
 		end
 
 		# ======
@@ -47,7 +50,7 @@ module TVManager
 			manifest_options = {
 				timestamp: false,
 				directory: settings.public_folder,
-				excludes: [ settings.public_folder + "/test" ],
+				excludes: ["#{settings.public_folder}/test"],
 				network_includes: %w(/devices /export /import)
 			}
 

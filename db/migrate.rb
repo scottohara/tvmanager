@@ -1,7 +1,10 @@
+# Copyright (c) 2016 Scott O'Hara, oharagroup.net
+# frozen_string_literal: true
 require 'json'
 require_relative '../app/helpers/database'
 
 module TVManager
+	# Provides database management operations
 	class Database
 		class << self
 			include TVManager::Helpers::Database
@@ -15,15 +18,13 @@ module TVManager
 					doc = JSON.parse File.read(filename)
 
 					# Get the existing doc (if any) and copy the _rev property to the new doc
-					begin
-						doc["_rev"] = db.get!(doc["_id"])["_rev"]
-					rescue
-					end
+					existing_doc = db.get doc['_id']
+					doc['_rev'] = existing_doc['_rev'] unless existing_doc.nil?
 
 					# Save the document
 					db.save_doc doc
 
-					puts "done"
+					puts 'done'
 				end
 			end
 		end

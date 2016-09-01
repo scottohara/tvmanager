@@ -1,4 +1,7 @@
-ruby "2.3.1"
+# Copyright (c) 2016 Scott O'Hara, oharagroup.net
+# frozen_string_literal: true
+
+ruby '2.3.1'
 
 source 'https://rubygems.org'
 
@@ -25,4 +28,3 @@ group :development, :test do
 	gem 'rack-test'
 	gem 'simplecov'
 end
-

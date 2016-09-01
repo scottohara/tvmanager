@@ -1,0 +1,80 @@
+# Cops that are disabled by default
+Style/AutoResourceCleanup:
+  Enabled: true
+
+Style/CollectionMethods:
+  Enabled: true
+
+Style/Copyright:
+  Enabled: true
+  Notice: 'Copyright \(c\) 2016 Scott O.Hara, oharagroup.net'
+
+Style/FirstArrayElementLineBreak:
+  Enabled: true
+
+Style/FirstHashElementLineBreak:
+  Enabled: true
+
+Style/FirstMethodArgumentLineBreak:
+  Enabled: true
+
+Style/FirstMethodParameterLineBreak:
+  Enabled: true
+
+Style/ImplicitRuntimeError:
+  Enabled: true
+
+Style/MethodCalledOnDoEndBlock:
+  Enabled: true
+
+Style/MultilineAssignmentLayout:
+  Enabled: true
+
+Style/OptionHash:
+  Enabled: true
+
+Style/Send:
+  Enabled: true
+
+Style/StringMethods:
+  Enabled: true
+
+Style/SymbolArray:
+  Enabled: true
+
+# Block comment in spec_helper
+Style/BlockComments:
+  Enabled: false
+
+# Needed for @@db
+Style/ClassVars:
+  Enabled: false
+
+# Changed from 2 (spaces) to 1 (tab)
+Style/IndentationWidth:
+  Width: 1
+
+# Waiting for https://github.com/bbatsov/rubocop/pull/3461
+Style/LeadingCommentSpace:
+  Enabled: false
+
+# Only require parens where absolutely necessary
+Style/NestedParenthesizedCalls:
+  Enabled: false
+
+Style/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+# Prefer tabs over spaces
+Style/Tab:
+  Enabled: false
+
+# Disable metrics
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false

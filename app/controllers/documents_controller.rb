@@ -1,9 +1,12 @@
+# Copyright (c) 2016 Scott O'Hara, oharagroup.net
+# frozen_string_literal: true
 require 'json'
 require_relative 'base_controller'
 require_relative '../models/device'
 require_relative '../models/document'
 
 module TVManager
+	# Routes for importing to/exporting from the client
 	class DocumentsController < BaseController
 		# =======
 		# FILTERS
@@ -16,9 +19,7 @@ module TVManager
 
 		# For any non-GET requests, check the device access
 		before do
-			unless request.get?
-				Device.new(@device_id).check_access
-			end
+			Device.new(@device_id).check_access unless request.get?
 		end
 
 		# ======
@@ -43,7 +44,7 @@ module TVManager
 		# Create/update document
 		post '/' do
 			# Get the Content-MD5 header from the request
-			md5_received = request.env["HTTP_CONTENT_MD5"]
+			md5_received = request.env['HTTP_CONTENT_MD5']
 
 			# Create an MD5 digest of the request body
 			doc = request.body.read
