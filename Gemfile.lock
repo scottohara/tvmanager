@@ -2,6 +2,8 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.3.0)
+    codeclimate-test-reporter (0.6.0)
+      simplecov (>= 0.7.1, < 1.0.0)
     couchrest (2.0.0)
       httpclient (~> 2.8)
       mime-types (>= 1.15)
@@ -80,6 +82,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  codeclimate-test-reporter
   couchrest
   foreman
   git

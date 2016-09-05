@@ -190,13 +190,14 @@ Additionally, a HTML coverage report is generated which can be viewed at [file:/
 
 (Note: The name of the subdirectory for Mobile Safari coverage reports is 'mobile', ie. `coverage/mobile/index.html`)
 
-To run lint:
+To run the backend test suite:
+* `rake spec`
+
+To run code checks:
 
 * `rake jslint` (configuration options are set in `config/jslint.yml`), or
 * `rake jshint` (configuration options are set in `config/jshint.yml`)
-
-To run the backend test suite:
-* `rake spec`
+* `bundle exec rubocop`
 
 API Documentation
 =================
