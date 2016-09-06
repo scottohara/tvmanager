@@ -51,7 +51,7 @@ module TVManager
 				timestamp: false,
 				directory: settings.public_folder,
 				excludes: ["#{settings.public_folder}/test"],
-				network_includes: %w(/devices /export /import)
+				network_includes: %w(/devices /documents)
 			}
 
 			# In dev/test configuration, make unit tests network resources as well

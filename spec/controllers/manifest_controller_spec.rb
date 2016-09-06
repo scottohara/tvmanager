@@ -45,8 +45,7 @@ describe TVManager::ManifestController do
 
 					NETWORK:
 					/test/*
-					/import
-					/export
+					/documents
 					/devices
 				END
 			end
