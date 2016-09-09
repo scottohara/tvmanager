@@ -84,6 +84,13 @@ describe TVManager::Device do
 
 			it_behaves_like 'a Device constructor'
 		end
+
+		context 'when a device id is blank' do
+			let(:device_id) { '' }
+			let(:device_doc) { {type: 'device', readOnly: true} }
+
+			it_behaves_like 'a Device constructor'
+		end
 	end
 
 	describe '#check_access' do

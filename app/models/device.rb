@@ -34,7 +34,7 @@ module TVManager
 			@id = device_id
 
 			# If a device id was not provided, initialise a new device document
-			@device = {type: 'device', readOnly: true} if device_id.nil?
+			@device = {type: 'device', readOnly: true} if device_id.nil? || device_id.empty?
 		end
 
 		def check_access
