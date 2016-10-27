@@ -1,6 +1,12 @@
 # Ignore bundler config
 /.bundle
 
+# Ignore vscode settings
+/.vscode
+
+# Ignore all logfiles and tempfiles
+npm-debug.log
+
 # Ignore coverage results
 /coverage
 
