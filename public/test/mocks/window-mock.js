@@ -1,30 +1,33 @@
 define(
-	function() {
+	() => {
 		"use strict";
 
-		var WindowMock = function() {
-			this.navigator = {
-				onLine: true
-			};
+		class WindowMock {
+			constructor() {
+				this.navigator = {onLine: true};
+				this.appCacheSupported = true;
+				this.appCache = {
+					eventHandler: [],
+					status: 0,
+					swapCache: sinon.stub(),
+					addEventListener(eventType, handler) {
+						this.eventHandler[eventType] = handler;
+					},
+					update: sinon.stub()
+				};
+				this.openDatabase = sinon.stub();
 
-			this.applicationCache = {
-				eventHandler: [],
-				assertions: false,
-				status: 0,
-				swapCache: function() {
-					QUnit.ok(true, "Swap cache");
-				},
-				addEventListener: function(eventType, handler) {
-					this.eventHandler[eventType] = handler;
-					if (this.assertions) {
-						QUnit.ok(true, "Add " + eventType + " event listener");
-					}
-				},
-				update: function() {
-					QUnit.ok(true, "Update cache");
+				sinon.spy(this.appCache, "addEventListener");
+			}
+
+			get applicationCache() {
+				if (this.appCacheSupported) {
+					return this.appCache;
 				}
-			};
-		};
+
+				return Reflect.undefined;
+			}
+		}
 
 		return new WindowMock();
 	}

@@ -1,29 +1,45 @@
 define(
-	function() {
+	() => {
 		"use strict";
 
-		var SyncMock = function() {
-		};
+		const removeStub = sinon.stub(),
+					listStub = sinon.stub(),
+					countStub = sinon.stub(),
+					removeAllStub = sinon.stub().yields();
 
-		SyncMock.syncList = [];
-		SyncMock.removed = true;
-		SyncMock.removedCount = 0;
+		let syncList = [];
 
-		SyncMock.list = function(callback) {
-			callback(SyncMock.syncList);
-		};
-
-		SyncMock.count = function(callback) {
-			callback(SyncMock.syncList.length);
-		};
-
-		SyncMock.removeAll = function(callback) {
-			if (SyncMock.removed) {
-				callback();
-			} else {
-				callback("Force failed");
+		class SyncMock {
+			constructor(type, id) {
+				syncList = [{type, id}];
+				removeStub.reset();
 			}
-		};
+
+			get remove() {
+				return removeStub;
+			}
+
+			static get syncList() {
+				return syncList;
+			}
+
+			static reset() {
+				syncList = [];
+				removeStub.reset();
+			}
+
+			static get list() {
+				return listStub.yields(this.syncList);
+			}
+
+			static get count() {
+				return countStub.yields(this.syncList.length);
+			}
+
+			static get removeAll() {
+				return removeAllStub;
+			}
+		}
 
 		return SyncMock;
 	}

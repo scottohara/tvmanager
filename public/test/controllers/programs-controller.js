@@ -1,168 +1,307 @@
 define(
 	[
-		'models/program-model',
-		'controllers/programs-controller',
-		'components/list',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"models/program-model",
+		"controllers/programs-controller",
+		"components/list",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
-	function(Program, ProgramsController, List, ApplicationController, $, jQueryMock) {
+	(Program, ProgramsController, List, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("programs-controller", {
-			setup: function() {
-				this.items = [{
-					programName: "test-program",
-					remove: function() {
-						QUnit.ok(true, "Remove program");
-					}
-				}];
+		describe("ProgramsController", () => {
+			let items,
+					programList,
+					programsController;
 
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-				$("<ul>")
+			beforeEach(() => {
+				items = [{programName: "test-program"}];
+
+				programList = $("<ul>")
 					.attr("id", "list")
-					.appendTo(this.sandbox);
+					.appendTo(document.body);
 
-				this.programsController = new ProgramsController();
-			},
-			teardown: function() {
-				this.sandbox.remove();
-			}			
-		});
+				programsController = new ProgramsController();
+			});
 
-		QUnit.test("object constructor", 1, function() {
-			QUnit.ok(this.programsController, "Instantiate ProgramsController object");
-		});
+			describe("object constructor", () => {
+				it("should return a ProgramsController instance", () => programsController.should.be.an.instanceOf(ProgramsController));
+			});
 
-		QUnit.test("setup", 10, function() {
-			this.programsController.viewItem = function() {
-				QUnit.ok(true, "Bind list view event handler");
-			};
-			this.programsController.editItem = function() {
-				QUnit.ok(true, "Bind list edit event handler");
-			};
-			this.programsController.deleteItem = function() {
-				QUnit.ok(true, "Bind list delete event handler");
-			};
-			this.programsController.goBack = function() {
-				QUnit.ok(true, "Bind back button event handler");
-			};
-			this.programsController.addItem = function() {
-				QUnit.ok(true, "Bind add action event handler");
-			};
-			this.programsController.editItems = function() {
-				QUnit.ok(true, "Bind edit action event handler");
-			};
-			this.programsController.deleteItems = function() {
-				QUnit.ok(true, "Bind delete action event handler");
-			};
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(programsController, "viewItem");
+					sinon.stub(programsController, "editItem");
+					sinon.stub(programsController, "deleteItem");
+					sinon.stub(programsController, "goBack");
+					sinon.stub(programsController, "addItem");
+					sinon.stub(programsController, "listRetrieved");
+					Program.programs = items;
+					programsController.setup();
+				});
 
-			Program.programs = this.items;
+				it("should set the header label", () => programsController.header.label.should.equal("Programs"));
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.programsController.setup();
-			QUnit.deepEqual(this.programsController.programList.items, this.items, "List items");
-			QUnit.equal(this.programsController.programList.action, "view", "List action");
-			QUnit.ok($("#list").hasClass("withHelper"), "Set list helper style");
-			this.programsController.header.leftButton.eventHandler();
-			this.programsController.header.rightButton.eventHandler();
-			this.programsController.footer.leftButton.eventHandler();
-			this.programsController.footer.rightButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
+				it("should attach a header left button event handler", () => {
+					programsController.header.leftButton.eventHandler();
+					programsController.goBack.should.have.been.called;
+				});
 
-		QUnit.test("goBack", 1, function() {
-			this.programsController.goBack();
-		});
+				it("should set the header left button style", () => programsController.header.leftButton.style.should.equal("backButton"));
+				it("should set the header left button label", () => programsController.header.leftButton.label.should.equal("Schedule"));
 
-		QUnit.test("activate", function() {
-			var testParams = [
-				{
-					description: "update",
-					listItem: {
-						listIndex: 0,
-						program: { programName: "test-program-2" }
-					}
-				},
-				{
-					description: "add",
-					listItem: {
-						listIndex: -1,
-						program: { programName: "test-program-2" }
-					}
-				}
-			];
+				it("should attach a header right button event handler", () => {
+					programsController.header.rightButton.eventHandler();
+					programsController.addItem.should.have.been.called;
+				});
 
-			QUnit.expect(testParams.length);
-			for (var i = 0; i < testParams.length; i++) {
-				var itemsCopy = JSON.parse(JSON.stringify(this.items));
-				this.programsController.programList = new List(null, null, null, JSON.parse(JSON.stringify(this.items)));
-				this.programsController.activate(testParams[i].listItem);
-				itemsCopy[testParams[i].listItem.listIndex * -1] = testParams[i].listItem.program;
-				QUnit.deepEqual(this.programsController.programList.items, itemsCopy, testParams[i].description + " - List items");
-			}
-		});
+				it("should set the header right button label", () => programsController.header.rightButton.label.should.equal("+"));
 
-		QUnit.test("viewItem", 2, function() {
-			var index = 0;
-			this.programsController.programList = { items: this.items };
-			this.programsController.viewItem(index);
-			QUnit.deepEqual(appController.viewArgs, { listIndex: index, program: this.items[index] }, "View arguments");
-		});
+				it("should attach a view event handler to the programs list", () => {
+					programsController.programList.viewEventHandler();
+					programsController.viewItem.should.have.been.called;
+				});
 
-		QUnit.test("addItem", 1, function() {
-			this.programsController.addItem();
-		});
+				it("should attach an edit event handler to the programs list", () => {
+					programsController.programList.editEventHandler();
+					programsController.editItem.should.have.been.called;
+				});
 
-		QUnit.test("editItem", 2, function() {
-			var index = 0;
-			this.programsController.programList = { items: this.items };
-			this.programsController.editItem(index);
-			QUnit.deepEqual(appController.viewArgs, { listIndex: index, program: this.items[index] }, "View arguments");
-		});
+				it("should attach a delete event handler to the programs list", () => {
+					programsController.programList.deleteEventHandler();
+					programsController.deleteItem.should.have.been.called;
+				});
 
-		QUnit.test("deleteItem", 2, function() {
-			var index = 0;
-			this.programsController.programList = new List(null, null, null, this.items);
-			this.programsController.deleteItem(index);
-			QUnit.deepEqual(this.programsController.programList.items, this.items.slice(1), "List items");
-		});
+				it("should get the list of programs", () => {
+					Program.list.should.have.been.calledWith(sinon.match.func);
+					programsController.listRetrieved.should.have.been.calledWith(items);
+				});
+			});
 
-		QUnit.test("deleteItems", 4, function() {
-			this.programsController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+			describe("activate", () => {
+				beforeEach(() => {
+					sinon.stub(programsController, "viewItems");
+					programsController.programList = {
+						items: [Object.assign({}, items[0])],
+						refresh: sinon.stub()
+					};
+				});
 
-			this.programsController.programList = new List();
+				describe("from schedule", () => {
+					beforeEach(() => programsController.activate());
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.programsController.deleteItems();
-			QUnit.ok(!$("#list").hasClass("withHelper"), "Unset list helper style");
-			QUnit.equal(this.programsController.programList.action, "delete", "List action");
-			QUnit.ok($("#list").hasClass("delete"), "Set list delete style");
-			this.programsController.footer.rightButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
+					it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+					it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
+				});
 
-		QUnit.test("editItems", 4, function() {
-			this.programsController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+				describe("from program view", () => {
+					let listItem;
 
-			this.programsController.programList = new List();
+					beforeEach(() => {
+						listItem = {program: {programName: "viewed-program"}};
+					});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.programsController.editItems();
-			QUnit.ok(!$("#list").hasClass("withHelper"), "Unset list helper style");
-			QUnit.equal(this.programsController.programList.action, "edit", "List action");
-			QUnit.ok($("#list").hasClass("edit"), "Set list edit style");
-			this.programsController.footer.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
+					describe("edit", () => {
+						beforeEach(() => {
+							listItem.listIndex = 0;
+							items[0] = listItem.program;
+							programsController.activate(listItem);
+						});
+
+						it("should update the item in the program list", () => programsController.programList.items.should.deep.equal(items));
+						it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+						it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
+					});
+
+					describe("add", () => {
+						beforeEach(() => {
+							items.push(listItem.program);
+							programsController.activate(listItem);
+						});
+
+						it("should add the item to the program list", () => programsController.programList.items.should.deep.equal(items));
+						it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+						it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
+					});
+				});
+			});
+
+			describe("listRetrieved", () => {
+				beforeEach(() => {
+					sinon.stub(programsController, "activate");
+					programsController.programList = {};
+					programsController.listRetrieved(items);
+				});
+
+				it("should set the program list items", () => programsController.programList.items.should.deep.equal(items));
+				it("should activate the controller", () => programsController.activate.should.have.been.called);
+			});
+
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					programsController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
+
+			describe("viewItem", () => {
+				it("should push the series list view for the selected item", () => {
+					const index = 0;
+
+					programsController.programList = {items};
+					programsController.viewItem(index);
+					appController.pushView.should.have.been.calledWith("seriesList", {
+						listIndex: index,
+						program: items[index]
+					});
+				});
+			});
+
+			describe("addItem", () => {
+				it("should push the program view with no selected item", () => {
+					programsController.addItem();
+					appController.pushView.should.have.been.calledWithExactly("program");
+				});
+			});
+
+			describe("editItem", () => {
+				it("should push the program view for the selected item", () => {
+					const index = 0;
+
+					programsController.programList = {items};
+					programsController.editItem(index);
+					appController.pushView.should.have.been.calledWith("program", {
+						listIndex: index,
+						program: items[index]
+					});
+				});
+			});
+
+			describe("deleteItem", () => {
+				let index,
+						item;
+
+				beforeEach(() => {
+					index = 0;
+					item = {
+						programName: "test-program",
+						remove: sinon.stub()
+					};
+					programsController.programList = {
+						items: [item],
+						refresh: sinon.stub()
+					};
+					programsController.deleteItem(index);
+				});
+
+				it("should remove the item from the database", () => item.remove.should.have.been.called);
+				it("should remove the item from the program list", () => programsController.programList.items.should.deep.equal([]));
+				it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+			});
+
+			describe("deleteItems", () => {
+				beforeEach(() => {
+					sinon.stub(programsController, "listRetrieved");
+					sinon.stub(programsController, "viewItems");
+					programsController.setup();
+					programsController.deleteItems();
+				});
+
+				it("should set the list to delete mode", () => programsController.programList.action.should.equal("delete"));
+				it("should hide the scroll helper", () => appController.hideScrollHelper.should.have.been.called);
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					programList.hasClass("delete").should.be.true;
+					programList.hasClass("edit").should.be.false;
+					programList.hasClass("withHelper").should.be.false;
+				});
+
+				it("should set the footer label", () => programsController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer right button event handler", () => {
+					programsController.footer.rightButton.eventHandler();
+					programsController.viewItems.should.have.been.called;
+				});
+
+				it("should set the footer right button style", () => programsController.footer.rightButton.style.should.equal("confirmButton"));
+				it("should set the footer right button label", () => programsController.footer.rightButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			describe("editItems", () => {
+				beforeEach(() => {
+					sinon.stub(programsController, "listRetrieved");
+					sinon.stub(programsController, "viewItems");
+					programsController.setup();
+					programsController.editItems();
+				});
+
+				it("should set the list to edit mode", () => programsController.programList.action.should.equal("edit"));
+				it("should hide the scroll helper", () => appController.hideScrollHelper.should.have.been.called);
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					programList.hasClass("delete").should.be.false;
+					programList.hasClass("edit").should.be.true;
+					programList.hasClass("withHelper").should.be.false;
+				});
+
+				it("should set the footer label", () => programsController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					programsController.footer.leftButton.eventHandler();
+					programsController.viewItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => programsController.footer.leftButton.style.should.equal("confirmButton"));
+				it("should set the footer left button label", () => programsController.footer.leftButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			describe("viewItems", () => {
+				beforeEach(() => {
+					sinon.stub(programsController, "listRetrieved");
+					sinon.stub(programsController, "editItems");
+					sinon.stub(programsController, "deleteItems");
+					programsController.setup();
+					programsController.viewItems();
+				});
+
+				it("should set the list to view mode", () => programsController.programList.action.should.equal("view"));
+				it("should show the scroll helper", () => appController.showScrollHelper.should.have.been.called);
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					programList.hasClass("delete").should.be.false;
+					programList.hasClass("edit").should.be.false;
+					programList.hasClass("withHelper").should.be.true;
+				});
+
+				it("should set the footer label", () => programsController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					programsController.footer.leftButton.eventHandler();
+					programsController.editItems.should.have.been.called;
+				});
+
+				it("should set the footer left button label", () => programsController.footer.leftButton.label.should.equal("Edit"));
+
+				it("should attach a footer right button event handler", () => {
+					programsController.footer.rightButton.eventHandler();
+					programsController.deleteItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => programsController.footer.rightButton.style.should.equal("cautionButton"));
+				it("should set the footer right button label", () => programsController.footer.rightButton.label.should.equal("Delete"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			afterEach(() => programList.remove());
 		});
 	}
 );

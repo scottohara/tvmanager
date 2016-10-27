@@ -1,22 +1,26 @@
 define(
 	[
-		'models/series-model',
-		'controllers/seriesList-controller',
-		'components/list',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"models/series-model",
+		"controllers/seriesList-controller",
+		"components/list",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
-	function(Series, SeriesListController, List, ApplicationController, $, jQueryMock) {
+	(Series, SeriesListController, List, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("seriesList-controller", {
-			setup: function() {
-				this.listItem = {
+		describe("SeriesListController", () => {
+			let listItem,
+					items,
+					seriesList,
+					seriesListController;
+
+			beforeEach(() => {
+				listItem = {
 					program: {
 						id: 1,
 						programName: "test-program",
@@ -25,249 +29,365 @@ define(
 						watchedCount: 2,
 						recordedCount: 2,
 						expectedCount: 2,
-						setEpisodeCount: function(count) {
-							this.episodeCount = count;
-						},
-						setWatchedCount: function(count) {
-							this.watchedCount = count;
-						},
-						setRecordedCount: function(count) {
-							this.recordedCount = count;
-						},
-						setExpectedCount: function(count) {
-							this.expectedCount = count;
-						}
+						setEpisodeCount: sinon.stub(),
+						setWatchedCount: sinon.stub(),
+						setRecordedCount: sinon.stub(),
+						setExpectedCount: sinon.stub()
 					}
 				};
-				this.items = [{
+
+				items = [{
 					seriesName: "test-series",
 					programId: 1,
 					episodeCount: 3,
 					watchedCount: 1,
 					recordedCount: 1,
-					expectedCount: 1,
-					remove: function() {
-						QUnit.ok(true, "Remove series");
-					}
+					expectedCount: 1
 				}];
 
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-				$("<ul>")
+				seriesList = $("<ul>")
 					.attr("id", "list")
-					.appendTo(this.sandbox);
+					.appendTo(document.body);
 
-				this.seriesListController = new SeriesListController(this.listItem);
-			},
-			teardown: function() {
-				this.sandbox.remove();
-			}
-		});
+				seriesListController = new SeriesListController(listItem);
+			});
 
-		QUnit.test("object constructor", 2, function() {
-			QUnit.ok(this.seriesListController, "Instantiate SeriesListController object");
-			QUnit.deepEqual(this.seriesListController.listItem, this.listItem, "listItem property");
-		});
+			describe("object constructor", () => {
+				it("should return a SeriesListController instance", () => seriesListController.should.be.an.instanceOf(SeriesListController));
+				it("should set the list item", () => seriesListController.listItem.should.equal(listItem));
+			});
 
-		QUnit.test("setup", 10, function() {
-			this.seriesListController.viewItem = function() {
-				QUnit.ok(true, "Bind list view event handler");
-			};
-			this.seriesListController.editItem = function() {
-				QUnit.ok(true, "Bind list edit event handler");
-			};
-			this.seriesListController.deleteItem = function() {
-				QUnit.ok(true, "Bind list delete event handler");
-			};
-			this.seriesListController.goBack = function() {
-				QUnit.ok(true, "Bind back button event handler");
-			};
-			this.seriesListController.addItem = function() {
-				QUnit.ok(true, "Bind add action event handler");
-			};
-			this.seriesListController.editItems = function() {
-				QUnit.ok(true, "Bind edit action event handler");
-			};
-			this.seriesListController.deleteItems = function() {
-				QUnit.ok(true, "Bind delete action event handler");
-			};
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(seriesListController, "viewItem");
+					sinon.stub(seriesListController, "editItem");
+					sinon.stub(seriesListController, "deleteItem");
+					sinon.stub(seriesListController, "goBack");
+					sinon.stub(seriesListController, "addItem");
+					sinon.stub(seriesListController, "listRetrieved");
+					Series.series = items;
+					seriesListController.setup();
+				});
 
-			Series.series = this.items;
+				it("should set the header label", () => seriesListController.header.label.should.equal(listItem.program.programName));
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.seriesListController.setup();
-			QUnit.equal(this.seriesListController.header.label, this.listItem.program.programName, "Header label");
-			this.seriesListController.header.leftButton.eventHandler();
-			this.seriesListController.header.rightButton.eventHandler();
-			QUnit.deepEqual(this.seriesListController.seriesList.items, this.items, "List items");
-			QUnit.equal(this.seriesListController.seriesList.action, "view", "List action");
-			this.seriesListController.footer.leftButton.eventHandler();
-			this.seriesListController.footer.rightButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
+				it("should attach a header left button event handler", () => {
+					seriesListController.header.leftButton.eventHandler();
+					seriesListController.goBack.should.have.been.called;
+				});
 
-		QUnit.test("goBack", 1, function() {
-			this.seriesListController.goBack();
-		});
+				it("should set the header left button style", () => seriesListController.header.leftButton.style.should.equal("backButton"));
+				it("should set the header left button label", () => seriesListController.header.leftButton.label.should.equal("Programs"));
 
-		QUnit.test("activate - move", 2, function() {
-			var listItem = {
-				listIndex: 0,
-				series: {
-					programId: 2
-				}
-			};
+				it("should attach a header right button event handler", () => {
+					seriesListController.header.rightButton.eventHandler();
+					seriesListController.addItem.should.have.been.called;
+				});
 
-			this.seriesListController.deleteItem = function(index, dontRemove) {
-				QUnit.equal(index, listItem.listIndex, "List index to delete");
-				QUnit.ok(dontRemove, "Skip database delete");
-			};
+				it("should set the header right button label", () => seriesListController.header.rightButton.label.should.equal("+"));
 
-			this.seriesListController.seriesList = new List(null, null, null, this.items);
-			this.seriesListController.activate(listItem);
-		});
+				it("should attach a view event handler to the series list", () => {
+					seriesListController.seriesList.viewEventHandler();
+					seriesListController.viewItem.should.have.been.called;
+				});
 
-		QUnit.test("activate - update", 5, function() {
-			var listItem = {
-				listIndex: 0,
-				series: {
-					seriesName: "test-series-2",
-					programId: 1,
-					episodeCount: 4,
-					watchedCount: 2,
-					recordedCount: 0,
-					expectedCount: 2
-				}
-			};
+				it("should attach an edit event handler to the series list", () => {
+					seriesListController.seriesList.editEventHandler();
+					seriesListController.editItem.should.have.been.called;
+				});
 
-			var origEpisodeCount = this.listItem.program.episodeCount;
-			var origWatchedCount = this.listItem.program.watchedCount;
-			var origRecordedCount = this.listItem.program.recordedCount;
-			var origExpectedCount = this.listItem.program.expectedCount;
+				it("should attach a delete event handler to the series list", () => {
+					seriesListController.seriesList.deleteEventHandler();
+					seriesListController.deleteItem.should.have.been.called;
+				});
 
-			var itemsCopy = JSON.parse(JSON.stringify(this.items));
-			this.seriesListController.seriesList = new List(null, null, null, JSON.parse(JSON.stringify(this.items)));
-			this.seriesListController.origEpisodeCount = this.items[0].episodeCount;
-			this.seriesListController.origWatchedCount = this.items[0].watchedCount;
-			this.seriesListController.origRecordedCount = this.items[0].recordedCount;
-			this.seriesListController.origExpectedCount = this.items[0].expectedCount;
-			this.seriesListController.activate(listItem);
-			itemsCopy[0].seriesName = listItem.series.seriesName;
-			itemsCopy[0].episodeCount = listItem.series.episodeCount;
-			itemsCopy[0].watchedCount = listItem.series.watchedCount;
-			itemsCopy[0].recordedCount = listItem.series.recordedCount;
-			itemsCopy[0].expectedCount = listItem.series.expectedCount;
-			QUnit.deepEqual(this.seriesListController.seriesList.items, itemsCopy, "List items");
-			QUnit.equal(this.seriesListController.listItem.program.episodeCount, origEpisodeCount + 1, "listItem.program.episodeCount property");
-			QUnit.equal(this.seriesListController.listItem.program.watchedCount, origWatchedCount + 1, "listItem.program.watchedCount property");
-			QUnit.equal(this.seriesListController.listItem.program.recordedCount, origRecordedCount - 1, "listItem.program.recordedCount property");
-			QUnit.equal(this.seriesListController.listItem.program.expectedCount, origExpectedCount + 1, "listItem.program.expectedCount property");
-		});
+				it("should get the list of series for the program", () => {
+					Series.listByProgram.should.have.been.calledWith(listItem.program.id, sinon.match.func);
+					seriesListController.listRetrieved.should.have.been.calledWith(items);
+				});
+			});
 
-		QUnit.test("activate - add", 2, function() {
-			var listItem = {
-				listIndex: -1,
-				series: {
-					seriesName: "test-series-2"
-				}
-			};
+			describe("activate", () => {
+				beforeEach(() => {
+					sinon.stub(seriesListController, "viewItems");
+					seriesListController.seriesList = {
+						items: [Object.assign({}, items[0])],
+						refresh: sinon.stub()
+					};
+				});
 
-			var origSeriesCount = this.listItem.program.seriesCount;
-			var itemsCopy = JSON.parse(JSON.stringify(this.items));
-			this.seriesListController.seriesList = new List(null, null, null, JSON.parse(JSON.stringify(this.items)));
-			this.seriesListController.activate(listItem);
-			itemsCopy[1] = listItem.series;
-			QUnit.deepEqual(this.seriesListController.seriesList.items, itemsCopy, "List items");
-			QUnit.equal(this.seriesListController.listItem.program.seriesCount, origSeriesCount + 1, "listItem.program.seriesCount property");
-		});
+				describe("from programs view", () => {
+					beforeEach(() => seriesListController.activate());
 
-		QUnit.test("viewItem", 6, function() {
-			var index = 0;
-			this.seriesListController.seriesList = { items: this.items };
-			this.seriesListController.viewItem(index);
-			QUnit.equal(this.seriesListController.origEpisodeCount, this.items[index].episodeCount, "episodeCount property");
-			QUnit.equal(this.seriesListController.origWatchedCount, this.items[index].watchedCount, "watchedCount property");
-			QUnit.equal(this.seriesListController.origRecordedCount, this.items[index].recordedCount, "recordedCount property");
-			QUnit.equal(this.seriesListController.origExpectedCount, this.items[index].expectedCount, "expectedCount property");
-			QUnit.deepEqual(appController.viewArgs, { listIndex: index, series: this.items[index] }, "View arguments");
-		});
+					it("should refresh the list", () => seriesListController.seriesList.refresh.should.have.been.called);
+					it("should set the list to view mode", () => seriesListController.viewItems.should.have.been.called);
+				});
 
-		QUnit.test("addItem", 2, function() {
-			this.seriesListController.addItem(this.listItem.program);
-			QUnit.deepEqual(appController.viewArgs, { program: this.listItem.program }, "View arguments");
-		});
+				describe("from series or episodes view", () => {
+					describe("edit", () => {
+						beforeEach(() => {
+							sinon.stub(seriesListController, "deleteItem");
+							listItem.listIndex = 0;
+							listItem.series = Object.assign(items[0], {seriesName: "edited-series"});
+						});
 
-		QUnit.test("editItem", 6, function() {
-			var index = 0;
-			this.seriesListController.seriesList = { items: this.items };
-			this.seriesListController.editItem(index);
-			QUnit.equal(this.seriesListController.origEpisodeCount, this.items[index].episodeCount, "episodeCount property");
-			QUnit.equal(this.seriesListController.origWatchedCount, this.items[index].watchedCount, "watchedCount property");
-			QUnit.equal(this.seriesListController.origRecordedCount, this.items[index].recordedCount, "recordedCount property");
-			QUnit.equal(this.seriesListController.origExpectedCount, this.items[index].expectedCount, "expectedCount property");
-			QUnit.deepEqual(appController.viewArgs, { listIndex: index, series: this.items[index] }, "View arguments");
-		});
+						describe("program changed", () => {
+							beforeEach(() => {
+								listItem.series.programId = 2;
+								seriesListController.activate(listItem);
+							});
 
-		QUnit.test("deleteItem", function() {
-			var testParams = [
-				{
-					description: "remove",
-					dontRemove: false
-				},
-				{
-					description: "don't remove",
-					dontRemove: true
-				}
-			];
+							it("should not update the program episode count", () => listItem.program.setEpisodeCount.should.not.have.been.called);
+							it("should not update the program watched count", () => listItem.program.setWatchedCount.should.not.have.been.called);
+							it("should not update the program recorded count", () => listItem.program.setRecordedCount.should.not.have.been.called);
+							it("should not update the program expected count", () => listItem.program.setExpectedCount.should.not.have.been.called);
+							it("should remove the item from the list", () => seriesListController.deleteItem.should.have.been.calledWith(listItem.listIndex, true));
+							it("should refresh the list", () => seriesListController.seriesList.refresh.should.have.been.called);
+							it("should set the list to view mode", () => seriesListController.viewItems.should.have.been.called);
+						});
 
-			QUnit.expect(testParams.length * 7 - 1);
+						describe("program not changed", () => {
+							beforeEach(() => {
+								seriesListController.origEpisodeCount = 2;
+								seriesListController.origWatchedCount = 0;
+								seriesListController.origRecordedCount = 1;
+								seriesListController.origExpectedCount = 2;
+								items[0] = listItem.series;
+								seriesListController.activate(listItem);
+							});
 
-			for (var i = 0; i < testParams.length; i++) {
-				var origEpisodeCount = this.listItem.program.episodeCount;
-				var origWatchedCount = this.listItem.program.watchedCount;
-				var origRecordedCount = this.listItem.program.recordedCount;
-				var origExpectedCount = this.listItem.program.expectedCount;
-				var origSeriesCount = this.listItem.program.seriesCount;
+							it("should update the item in the series list", () => seriesListController.seriesList.items.should.deep.equal(items));
+							it("should update the program episode count", () => listItem.program.setEpisodeCount.should.have.been.calledWith(7));
+							it("should update the program watched count", () => listItem.program.setWatchedCount.should.have.been.calledWith(3));
+							it("should update the program recorded count", () => listItem.program.setRecordedCount.should.have.been.calledWith(2));
+							it("should update the program expected count", () => listItem.program.setExpectedCount.should.have.been.calledWith(1));
+							it("should not remove the item from the list", () => seriesListController.deleteItem.should.not.have.been.called);
+							it("should refresh the list", () => seriesListController.seriesList.refresh.should.have.been.called);
+							it("should set the list to view mode", () => seriesListController.viewItems.should.have.been.called);
+						});
+					});
 
-				this.seriesListController.seriesList = new List(null, null, null, this.items.slice(0));
-				this.seriesListController.deleteItem(0, testParams[i].dontRemove);
+					describe("add", () => {
+						beforeEach(() => {
+							listItem.series = {seriesName: "new-series"};
+							items.push(listItem.series);
+							seriesListController.activate(listItem);
+						});
 
-				QUnit.equal(this.seriesListController.listItem.program.episodeCount, origEpisodeCount - 3, testParams[i].description + " - listItem.program.episodeCount property");
-				QUnit.equal(this.seriesListController.listItem.program.watchedCount, origWatchedCount - 1, testParams[i].description + " - listItem.program.watchedCount property");
-				QUnit.equal(this.seriesListController.listItem.program.recordedCount, origRecordedCount - 1, testParams[i].description + " - listItem.program.recordedCount property");
-				QUnit.equal(this.seriesListController.listItem.program.expectedCount, origExpectedCount - 1, testParams[i].description + " - listItem.program.expectedCount property");
-				QUnit.equal(this.seriesListController.listItem.program.seriesCount, origSeriesCount - 1, testParams[i].description + " - listItem.program.seriesCount property");
-				QUnit.deepEqual(this.seriesListController.seriesList.items, this.items.slice(1), testParams[i].description + " - List items");
-			}
-		});
+						it("should add the item to the series list", () => seriesListController.seriesList.items.should.deep.equal(items));
+						it("should increment the program series count", () => listItem.program.seriesCount.should.equal(2));
+						it("should refresh the list", () => seriesListController.seriesList.refresh.should.have.been.called);
+						it("should set the list to view mode", () => seriesListController.viewItems.should.have.been.called);
+					});
+				});
+			});
 
-		QUnit.test("deleteItems", 3, function() {
-			this.seriesListController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+			describe("listRetrieved", () => {
+				beforeEach(() => {
+					sinon.stub(seriesListController, "activate");
+					seriesListController.seriesList = {};
+					seriesListController.listRetrieved(items);
+				});
 
-			this.seriesListController.seriesList = new List();
+				it("should set the series list items", () => seriesListController.seriesList.items.should.deep.equal(items));
+				it("should activate the controller", () => seriesListController.activate.should.have.been.called);
+			});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.seriesListController.deleteItems();
-			QUnit.equal(this.seriesListController.seriesList.action, "delete", "List action");
-			QUnit.ok($("#list").hasClass("delete"), "Set list delete style");
-			this.seriesListController.footer.rightButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					seriesListController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
 
-		QUnit.test("editItems", 3, function() {
-			this.seriesListController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+			describe("viewItem", () => {
+				let index;
 
-			this.seriesListController.seriesList = new List();
+				beforeEach(() => {
+					index = 0;
+					seriesListController.seriesList = {items};
+					seriesListController.viewItem(index);
+				});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.seriesListController.editItems();
-			QUnit.equal(this.seriesListController.seriesList.action, "edit", "List action");
-			QUnit.ok($("#list").hasClass("edit"), "Set list edit style");
-			this.seriesListController.footer.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
+				it("should save the current series details", () => {
+					seriesListController.origEpisodeCount.should.equal(3);
+					seriesListController.origWatchedCount.should.equal(1);
+					seriesListController.origRecordedCount.should.equal(1);
+					seriesListController.origExpectedCount.should.equal(1);
+				});
+
+				it("should push the episodes view for the selected item", () => appController.pushView.should.have.been.calledWith("episodes", {
+					listIndex: index,
+					series: items[index]
+				}));
+			});
+
+			describe("addItem", () => {
+				it("should push the series view with no selected item", () => {
+					seriesListController.addItem();
+					appController.pushView.should.have.been.calledWithExactly("series", {program: listItem.program});
+				});
+			});
+
+			describe("editItem", () => {
+				let index;
+
+				beforeEach(() => {
+					index = 0;
+					seriesListController.seriesList = {items};
+					seriesListController.editItem(index);
+				});
+
+				it("should save the current series details", () => {
+					seriesListController.origEpisodeCount.should.equal(3);
+					seriesListController.origWatchedCount.should.equal(1);
+					seriesListController.origRecordedCount.should.equal(1);
+					seriesListController.origExpectedCount.should.equal(1);
+				});
+
+				it("should push the program view for the selected item", () => appController.pushView.should.have.been.calledWith("series", {
+					listIndex: index,
+					series: items[index]
+				}));
+			});
+
+			describe("deleteItem", () => {
+				const testParams = [
+					{
+						description: "moving",
+						dontRemove: true
+					},
+					{
+						description: "deleting",
+						dontRemove: false
+					}
+				];
+
+				let index,
+						item;
+
+				beforeEach(() => {
+					index = 0;
+					item = Object.assign(items[0], {remove: sinon.stub()});
+					seriesListController.seriesList = {
+						items: [item],
+						refresh: sinon.stub()
+					};
+				});
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => seriesListController.deleteItem(index, params.dontRemove));
+
+						it("should decrement the program episode count", () => listItem.program.setEpisodeCount.should.have.been.calledWith(3));
+						it("should decrement the program watched count", () => listItem.program.setWatchedCount.should.have.been.calledWith(1));
+						it("should decrement the program recorded count", () => listItem.program.setRecordedCount.should.have.been.calledWith(1));
+						it("should decrement the program expected count", () => listItem.program.setExpectedCount.should.have.been.calledWith(1));
+						it("should decrement the program series count", () => listItem.program.seriesCount.should.equal(0));
+
+						if (!params.dontRemove) {
+							it("should remove the item from the database", () => item.remove.should.have.been.called);
+						}
+
+						it("should remove the item from the series list", () => seriesListController.seriesList.items.should.deep.equal([]));
+						it("should refresh the list", () => seriesListController.seriesList.refresh.should.have.been.called);
+					});
+				});
+			});
+
+			describe("deleteItems", () => {
+				beforeEach(() => {
+					sinon.stub(seriesListController, "listRetrieved");
+					sinon.stub(seriesListController, "viewItems");
+					seriesListController.setup();
+					seriesListController.deleteItems();
+				});
+
+				it("should set the list to delete mode", () => seriesListController.seriesList.action.should.equal("delete"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					seriesList.hasClass("delete").should.be.true;
+					seriesList.hasClass("edit").should.be.false;
+				});
+
+				it("should set the footer label", () => seriesListController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer right button event handler", () => {
+					seriesListController.footer.rightButton.eventHandler();
+					seriesListController.viewItems.should.have.been.called;
+				});
+
+				it("should set the footer right button style", () => seriesListController.footer.rightButton.style.should.equal("confirmButton"));
+				it("should set the footer right button label", () => seriesListController.footer.rightButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			describe("editItems", () => {
+				beforeEach(() => {
+					sinon.stub(seriesListController, "listRetrieved");
+					sinon.stub(seriesListController, "viewItems");
+					seriesListController.setup();
+					seriesListController.editItems();
+				});
+
+				it("should set the list to edit mode", () => seriesListController.seriesList.action.should.equal("edit"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					seriesList.hasClass("delete").should.be.false;
+					seriesList.hasClass("edit").should.be.true;
+				});
+
+				it("should set the footer label", () => seriesListController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					seriesListController.footer.leftButton.eventHandler();
+					seriesListController.viewItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => seriesListController.footer.leftButton.style.should.equal("confirmButton"));
+				it("should set the footer left button label", () => seriesListController.footer.leftButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			describe("viewItems", () => {
+				beforeEach(() => {
+					sinon.stub(seriesListController, "listRetrieved");
+					sinon.stub(seriesListController, "editItems");
+					sinon.stub(seriesListController, "deleteItems");
+					seriesListController.setup();
+					seriesListController.viewItems();
+				});
+
+				it("should set the list to view mode", () => seriesListController.seriesList.action.should.equal("view"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					seriesList.hasClass("delete").should.be.false;
+					seriesList.hasClass("edit").should.be.false;
+				});
+
+				it("should set the footer label", () => seriesListController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					seriesListController.footer.leftButton.eventHandler();
+					seriesListController.editItems.should.have.been.called;
+				});
+
+				it("should set the footer left button label", () => seriesListController.footer.leftButton.label.should.equal("Edit"));
+
+				it("should attach a footer right button event handler", () => {
+					seriesListController.footer.rightButton.eventHandler();
+					seriesListController.deleteItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => seriesListController.footer.rightButton.style.should.equal("cautionButton"));
+				it("should set the footer right button label", () => seriesListController.footer.rightButton.label.should.equal("Delete"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			afterEach(() => seriesList.remove());
 		});
 	}
 );

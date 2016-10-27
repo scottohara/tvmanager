@@ -1,6 +1,3 @@
-/*jshint nomen: false */
-/*jslint nomen: false */
-
 require.config({
 	baseUrl: "/base",
 	enforceDefine: true,
@@ -124,5 +121,6 @@ require.config({
 		"test/controllers/registration-controller"
 	],
 
+	/* eslint no-underscore-dangle: off */
 	callback: window.__karma__.start
 });

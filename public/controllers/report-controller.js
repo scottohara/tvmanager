@@ -15,11 +15,11 @@ define(
 	/**
 	 * @exports controllers/report-controller
 	 */
-	function(List, ApplicationController, $) {
+	(List, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
 		/**
 		 * @class Report
@@ -37,118 +37,122 @@ define(
 		 * @property {Report} report - the report to display
 		 * @property {List} reportList - the list of series to display
 		 * @property {HeaderFooter} footer - the view footer bar
-		 * @this ReportController
-		 * @constructor ReportController
-		 * @param {Report} report - the report to display
 		 */
-		var ReportController = function (report) {
-			this.report = report;
-		};
+		class ReportController {
+			/**
+			 * @constructor ReportController
+			 * @this ReportController
+			 * @param {Report} report - the report to display
+			 */
+			constructor(report) {
+				this.report = report;
+			}
 
-		/**
-		 * @memberof ReportController
-		 * @this ReportController
-		 * @instance
-		 * @method setup
-		 * @desc Initialises the controller
-		 */
-		ReportController.prototype.setup = function() {
-			// Setup the header
-			this.header = {
-				label: this.report.reportName,
-				leftButton: {
-					eventHandler: this.goBack,
-					style: "backButton",
-					label: "Settings"
-				}
-			};
+			/**
+			 * @memberof ReportController
+			 * @this ReportController
+			 * @instance
+			 * @method setup
+			 * @desc Initialises the controller
+			 */
+			setup() {
+				// Setup the header
+				this.header = {
+					label: this.report.reportName,
+					leftButton: {
+						eventHandler: this.goBack,
+						style: "backButton",
+						label: "Settings"
+					}
+				};
 
-			// Instantiate a List object
-			this.reportList = new List("list", "views/reportListTemplate.html", null, [], $.proxy(this.viewItem, this));
+				// Instantiate a List object
+				this.reportList = new List("list", "views/reportListTemplate.html", null, [], this.viewItem.bind(this));
 
-			// Activate the controller
-			this.activate();
-		};
+				// Activate the controller
+				this.activate();
+			}
 
-		/**
-		 * @memberof ReportController
-		 * @this ReportController
-		 * @instance
-		 * @method activate
-		 * @desc Activates the controller
-		 */
-		ReportController.prototype.activate = function() {
-			// Get the data for the report
-			this.report.dataSource($.proxy(this.listRetrieved, this), this.report.args);
-		};
+			/**
+			 * @memberof ReportController
+			 * @this ReportController
+			 * @instance
+			 * @method activate
+			 * @desc Activates the controller
+			 */
+			activate() {
+				// Get the data for the report
+				this.report.dataSource(this.listRetrieved.bind(this), this.report.args);
+			}
 
-		/**
-		 * @memberof ReportController
-		 * @this ReportController
-		 * @instance
-		 * @method listRetrieved
-		 * @desc Callback function after the list of report data is retrieved
-		 * @param {Array<Series>} reportList - array of series objects
-		 */
-		ReportController.prototype.listRetrieved = function(reportList) {
-			// Set the list items
-			this.reportList.items = reportList;
+			/**
+			 * @memberof ReportController
+			 * @this ReportController
+			 * @instance
+			 * @method listRetrieved
+			 * @desc Callback function after the list of report data is retrieved
+			 * @param {Array<Series>} reportList - array of series objects
+			 */
+			listRetrieved(reportList) {
+				// Set the list items
+				this.reportList.items = reportList;
 
-			// Refresh the list
-			this.reportList.refresh();
+				// Refresh the list
+				this.reportList.refresh();
 
-			// Set to view mode
-			this.viewItems();
-		};
+				// Set to view mode
+				this.viewItems();
+			}
 
-		/**
-		 * @memberof ReportController
-		 * @this ReportController
-		 * @instance
-		 * @method goBack
-		 * @desc Pops the view off the stack
-		 */
-		ReportController.prototype.goBack = function() {
-			appController.popView();
-		};
+			/**
+			 * @memberof ReportController
+			 * @this ReportController
+			 * @instance
+			 * @method goBack
+			 * @desc Pops the view off the stack
+			 */
+			goBack() {
+				appController.popView();
+			}
 
-		/**
-		 * @memberof ReportController
-		 * @this ReportController
-		 * @instance
-		 * @method viewItem
-		 * @desc Displays the Episodes view for a series
-		 * @param {Number} itemIndex - the list index of the series to view
-		 */
-		ReportController.prototype.viewItem = function(itemIndex) {
-			appController.pushView("episodes", { source: "Report", listIndex: itemIndex, series: this.reportList.items[itemIndex] });
-		};
+			/**
+			 * @memberof ReportController
+			 * @this ReportController
+			 * @instance
+			 * @method viewItem
+			 * @desc Displays the Episodes view for a series
+			 * @param {Number} itemIndex - the list index of the series to view
+			 */
+			viewItem(itemIndex) {
+				appController.pushView("episodes", {source: "Report", listIndex: itemIndex, series: this.reportList.items[itemIndex]});
+			}
 
-		/**
-		 * @memberof ReportController
-		 * @this ReportController
-		 * @instance
-		 * @method viewItems
-		 * @desc Sets the list to view mode
-		 */
-		ReportController.prototype.viewItems = function() {
-			// Set the list to view mode
-			this.reportList.setAction("view");
+			/**
+			 * @memberof ReportController
+			 * @this ReportController
+			 * @instance
+			 * @method viewItems
+			 * @desc Sets the list to view mode
+			 */
+			viewItems() {
+				// Set the list to view mode
+				this.reportList.setAction("view");
 
-			// Clear the view footer
-			appController.clearFooter();
+				// Clear the view footer
+				appController.clearFooter();
 
-			// Show the view icons next to each list item
-			$("#list").removeClass();
-			
-			// Setup the footer
-			this.footer = {
-				label: "v" + appController.db.version
-			};
+				// Show the view icons next to each list item
+				$("#list").removeClass();
 
-			// Set the view footer
-			appController.setFooter();
-		};
+				// Setup the footer
+				this.footer = {
+					label: `v${appController.db.version}`
+				};
+
+				// Set the view footer
+				appController.setFooter();
+			}
+		}
 
 		return ReportController;
 	}

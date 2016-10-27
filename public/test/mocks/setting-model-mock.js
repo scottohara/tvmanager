@@ -1,21 +1,36 @@
 define(
-	function() {
+	() => {
 		"use strict";
 
-		var SettingMock = function(settingName, settingValue) {
-			this.settingValue = settingValue;
-		};
+		const saveStub = sinon.stub(),
+					removeStub = sinon.stub(),
+					getStub = sinon.stub(),
+					setting = {};
 
-		SettingMock.prototype.save = function() {
-		};
+		class SettingMock {
+			constructor(settingName, settingValue) {
+				this.settingName = setting.name = settingName;
+				this.settingValue = setting.value = settingValue;
+				saveStub.reset();
+				removeStub.reset();
+			}
 
-		SettingMock.setting = {};
+			get save() {
+				return saveStub;
+			}
 
-		SettingMock.get = function(settingName, callback) {
-			callback({
-				settingValue: this.setting[settingName]
-			});
-		};
+			get remove() {
+				return removeStub;
+			}
+
+			static get setting() {
+				return setting;
+			}
+
+			static get "get"() {
+				return getStub;
+			}
+		}
 
 		return SettingMock;
 	}

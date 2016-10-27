@@ -15,7 +15,7 @@ define(
 	/**
 	 * @exports controllers/program-controller
 	 */
-	function(Program, ApplicationController, $) {
+	(Program, ApplicationController, $) => {
 		"use strict";
 
 		/**
@@ -27,86 +27,92 @@ define(
 		 */
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
 		/**
 		 * @class ProgramController
 		 * @classdesc Controller for the program view
 		 * @property {ProgramListItem} listItem - a list item from the Programs view
 		 * @property {HeaderFooter} header - the view header bar
-		 * @this ProgramController
-		 * @constructor ProgramController
-		 * @param {ProgramListItem} listItem - a list item from the Programs view
 		 */
-		var ProgramController = function (listItem) {
-			// If a list item was passed, we're editing an existing program
-			if (listItem) {
-				this.listItem = listItem;
-			} else {
-				// Otherwise we're adding a new program
-				this.listItem = { program: new Program(null, "", 0, 0, 0, 0, 0) };
-			}
-		};
-
-		/**
-		 * @memberof ProgramController
-		 * @this ProgramController
-		 * @instance
-		 * @method setup
-		 * @desc Initialises the controller
-		 */
-		ProgramController.prototype.setup = function() {
-			// Setup the header
-			this.header = {
-				label: "Add/Edit Program",
-				leftButton: {
-					eventHandler: this.cancel,
-					label: "Cancel"
-				},
-				rightButton: {
-					eventHandler: $.proxy(this.save, this),
-					style: "confirmButton",
-					label: "Save"
+		class ProgramController {
+			/**
+			 * @constructor ProgramController
+			 * @this ProgramController
+			 * @param {ProgramListItem} listItem - a list item from the Programs view
+			 */
+			constructor(listItem) {
+				// If a list item was passed, we're editing an existing program
+				if (listItem) {
+					this.listItem = listItem;
+				} else {
+					// Otherwise we're adding a new program
+					this.listItem = {program: new Program(null, "", 0, 0, 0, 0, 0)};
 				}
-			};
-
-			// Set the program details
-			$("#programName").val(this.listItem.program.programName);
-		};
-
-		/**
-		 * @memberof ProgramController
-		 * @this ProgramController
-		 * @instance
-		 * @method save
-		 * @desc Saves the program details to the database and returns to the previous view
-		 */
-		ProgramController.prototype.save = function() {
-			// Get the program details
-			this.listItem.program.setProgramName($("#programName").val());
-
-			// Update the database
-			this.listItem.program.save();
-
-			// If a new program was added, scroll the Programs view to the end of the list to reveal the new item
-			if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
-				appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 			}
 
-			// Pop the view off the stack
-			appController.popView(this.listItem);
-		};
+			/**
+			 * @memberof ProgramController
+			 * @this ProgramController
+			 * @instance
+			 * @method setup
+			 * @desc Initialises the controller
+			 */
+			setup() {
+				// Setup the header
+				this.header = {
+					label: "Add/Edit Program",
+					leftButton: {
+						eventHandler: this.cancel,
+						label: "Cancel"
+					},
+					rightButton: {
+						eventHandler: this.save.bind(this),
+						style: "confirmButton",
+						label: "Save"
+					}
+				};
 
-		/**
-		 * @memberof ProgramController
-		 * @this ProgramController
-		 * @instance
-		 * @method cancel
-		 * @desc Pops the view off the stack
-		 */
-		ProgramController.prototype.cancel = function() {
-			appController.popView();
-		};
+				// Set the program details
+				$("#programName").val(this.listItem.program.programName);
+			}
+
+			/**
+			 * @memberof ProgramController
+			 * @this ProgramController
+			 * @instance
+			 * @method save
+			 * @desc Saves the program details to the database and returns to the previous view
+			 */
+			save() {
+				const PREVIOUS_VIEW_OFFSET = 2;
+
+				// Get the program details
+				this.listItem.program.setProgramName($("#programName").val());
+
+				// Update the database
+				this.listItem.program.save();
+
+				// If a new program was added, scroll the Programs view to the end of the list to reveal the new item
+				if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
+					appController.viewStack[appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
+				}
+
+				// Pop the view off the stack
+				appController.popView(this.listItem);
+			}
+
+			/**
+			 * @memberof ProgramController
+			 * @this ProgramController
+			 * @instance
+			 * @method cancel
+			 * @desc Pops the view off the stack
+			 */
+			cancel() {
+				appController.popView();
+			}
+		}
 
 		return ProgramController;
 	}

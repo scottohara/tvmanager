@@ -1,24 +1,12 @@
 define(
-	function() {
+	() => {
 		"use strict";
 
-		var SpinningWheelMock = {
-			slots: [],
-			selectedValues: {
-				keys: [],
-				values: []
-			},
-			addSlot: function(data, align, value) {
-				this.slots.push(value);
-			},
-			setDoneAction: function(callback) {
-				callback();
-			},
-			open: function() {
-			},
-			getSelectedValues: function() {
-				return this.selectedValues;
-			}
+		const SpinningWheelMock = {
+			addSlot: sinon.stub(),
+			setDoneAction: sinon.stub().yields(),
+			open: sinon.stub(),
+			getSelectedValues: sinon.stub()
 		};
 
 		return SpinningWheelMock;

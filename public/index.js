@@ -54,12 +54,12 @@ define(
 	[
 		"controllers/application-controller"
 	],
-	
-	function(ApplicationController) {
+
+	ApplicationController => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
 		// Start the application
 		appController.start();

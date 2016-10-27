@@ -1,174 +1,248 @@
 define(
 	[
-		'components/toucheventproxy',
-		'framework/jquery'
+		"components/toucheventproxy",
+		"framework/jquery"
 	],
-	
-	function(TouchEventProxy, $) {
+
+	(TouchEventProxy, $) => {
 		"use strict";
 
-		QUnit.module("toucheventproxy", {
-			setup: function() {
-				this.element = $("<div>");
-				this.target = $("<a>");
+		describe("TouchEventProxy", () => {
+			let	element,
+					toucheventproxy;
 
-				this.event = {
-					clientX: 1,
-					clientY: 2,
-					timeStamp: new Date(),
-					cancelable: true,
-					target: this.target.get(0),
-					preventDefault: function() {
-						QUnit.ok(true, "Prevent default");
-					},
-					stopPropagation: function() {
-						QUnit.ok(true, "Stop propagation");
-					}
-				};
+			beforeEach(() => {
+				element = $("<div>");
+				toucheventproxy = new TouchEventProxy(element.get(0));
+			});
 
-				this.eventHandler = $.proxy(function(e) {
-					//For some reason need to use e.originalEvent here, not e
-					QUnit.equal(e.originalEvent.type, this.event.mapsTo, "event type");
-					QUnit.equal(e.originalEvent.targetTouches[0].clientX, this.event.clientX, "targetTouches clientX property");
-					QUnit.equal(e.originalEvent.targetTouches[0].clientY, this.event.clientY, "targetTouches clientY property");
-					QUnit.equal(e.originalEvent.targetTouches[0].identifier, -1, "targetTouches clientY property");
-					QUnit.equal(e.originalEvent.changedTouches[0].target, this.event.target, "changedTouches target property");
-					QUnit.deepEqual(e.originalEvent.target, this.event.target, "target property");
-					QUnit.equal(Date(e.originalEvent.timeStamp).toString(), this.event.timeStamp.toString(), "timeStamp property");
-				}, this);
+			describe("object constructor", () => {
+				it("should return a TouchEventProxy instance", () => toucheventproxy.should.be.an.instanceOf(TouchEventProxy));
+				it("should set the element", () => toucheventproxy.element.should.equal(element.get(0)));
+			});
 
-				this.emptyEventHandler = $.proxy(function(e) {
-					QUnit.ok(true, "Add " + e.type + " event listener");
-				}, this);
+			describe("handleEvent", () => {
+				let target,
+						event,
+						eventHandler;
 
-				this.toucheventproxy = new TouchEventProxy(this.element.get(0));
-			},
-			teardown: function() {
-				this.element.remove();
-				this.target.remove();
-			}
+				beforeEach(() => {
+					target = $("<a>");
+
+					event = {
+						clientX: 1,
+						clientY: 2,
+						timeStamp: new Date(),
+						cancelable: true,
+						target: target.get(0),
+						preventDefault: sinon.stub(),
+						stopPropagation: sinon.stub()
+					};
+
+					eventHandler = sinon.spy(e => {
+						// For some reason need to use e.originalEvent here, not e
+						e.originalEvent.type.should.equal(event.mapsTo);
+						e.originalEvent.targetTouches[0].clientX.should.equal(event.clientX);
+						e.originalEvent.targetTouches[0].clientY.should.equal(event.clientY);
+						e.originalEvent.targetTouches[0].identifier.should.equal(-1);
+						e.originalEvent.changedTouches[0].target.should.equal(event.target);
+						e.originalEvent.target.should.deep.equal(event.target);
+						Date(e.originalEvent.timeStamp).toString().should.equal(event.timeStamp.toString());
+					});
+				});
+
+				describe("mousedown", () => {
+					const mapsTo = "touchstart";
+
+					let mouseMoveEvent,
+							mouseUpEvent;
+
+					beforeEach(() => {
+						// Configure the event to handle
+						event.type = "mousedown";
+						event.mapsTo = mapsTo;
+						target.on(mapsTo, eventHandler);
+
+						sinon.stub(toucheventproxy, "onTouchMove");
+						mouseMoveEvent = document.createEvent("Event");
+						mouseMoveEvent.initEvent("mousemove", true, true);
+
+						sinon.stub(toucheventproxy, "onTouchEnd");
+						mouseUpEvent = document.createEvent("Event");
+						mouseUpEvent.initEvent("mouseup", true, true);
+					});
+
+					describe("disabled", () => {
+						beforeEach(() => {
+							toucheventproxy.enabled = false;
+							toucheventproxy.handleEvent(event);
+							toucheventproxy.element.dispatchEvent(mouseMoveEvent);
+							toucheventproxy.element.dispatchEvent(mouseUpEvent);
+						});
+
+						it("should not prevent default behaviour of the event", () => event.preventDefault.should.not.have.been.called);
+						it("should not dispatch a touchstart event", () => eventHandler.should.not.have.been.called);
+						it("should not attach a mousemove event listener", () => toucheventproxy.onTouchMove.should.not.have.been.called);
+						it("should not attach a mouseup event listener", () => toucheventproxy.onTouchEnd.should.not.have.been.called);
+					});
+
+					describe("enabled", () => {
+						beforeEach(() => {
+							toucheventproxy.handleEvent(event);
+							toucheventproxy.element.dispatchEvent(mouseMoveEvent);
+							toucheventproxy.element.dispatchEvent(mouseUpEvent);
+						});
+
+						it("should prevent default behaviour of the event", () => event.preventDefault.should.have.been.called);
+						it("should dispatch a touchstart event", () => eventHandler.should.have.been.called);
+						it("should attach a mousemove event listener", () => toucheventproxy.onTouchMove.should.have.been.called);
+						it("should attach a mouseup event listener", () => toucheventproxy.onTouchEnd.should.have.been.called);
+					});
+				});
+
+				describe("mousemove", () => {
+					it("should dispatch a touchmove event", () => {
+						const mapsTo = "touchmove";
+
+						event.type = "mousemove";
+						event.mapsTo = mapsTo;
+						target.on(mapsTo, eventHandler);
+						toucheventproxy.handleEvent(event);
+						eventHandler.should.have.been.called;
+					});
+				});
+
+				describe("mouseup", () => {
+					const mapsTo = "touchend";
+
+					beforeEach(() => {
+						const mouseMoveEvent = document.createEvent("Event"),
+									mouseUpEvent = document.createEvent("Event");
+
+						toucheventproxy.element.addEventListener("mousemove", toucheventproxy, false);
+						toucheventproxy.element.addEventListener("mouseup", toucheventproxy, false);
+
+						event.type = "mouseup";
+						event.mapsTo = mapsTo;
+						target.on(mapsTo, eventHandler);
+						toucheventproxy.handleEvent(event);
+
+						sinon.stub(toucheventproxy, "onTouchMove");
+						mouseMoveEvent.initEvent("mousemove", true, true);
+						toucheventproxy.element.dispatchEvent(mouseMoveEvent);
+
+						sinon.stub(toucheventproxy, "onTouchEnd");
+						mouseUpEvent.initEvent("mouseup", true, true);
+						toucheventproxy.element.dispatchEvent(mouseUpEvent);
+					});
+
+					it("should remove the mousemove event listener", () => toucheventproxy.onTouchMove.should.not.have.been.called);
+					it("should remove the mouseup event listener", () => toucheventproxy.onTouchEnd.should.not.have.been.called);
+					it("should dispatch a touchend event", () => eventHandler.should.have.been.called);
+				});
+
+				describe("click", () => {
+					const testParams = [
+						{
+							description: "disabled and not cancelable",
+							enabled: false,
+							cancelable: false,
+							stopPropagation: false
+						},
+						{
+							description: "enabled only",
+							enabled: true,
+							cancelable: false,
+							stopPropagation: false
+						},
+						{
+							description: "cancelable only",
+							enabled: false,
+							cancelable: true,
+							stopPropagation: false
+						},
+						{
+							description: "enabled and cancelable",
+							enabled: true,
+							cancelable: true,
+							stopPropagation: true
+						}
+					];
+
+					beforeEach(() => (event.type = "click"));
+
+					testParams.forEach(params => {
+						describe(params.description, () => {
+							beforeEach(() => {
+								toucheventproxy.enabled = params.enabled;
+								event.cancelable = params.cancelable;
+								toucheventproxy.handleEvent(event);
+							});
+
+							it(`should ${params.stopPropagation ? "" : "not "}stop the event from propagating further`, () => params.stopPropagation ? event.stopPropagation.should.have.been.called : event.stopPropagation.should.not.have.been.called);
+						});
+					});
+				});
+
+				describe("touchevent", () => {
+					let touchStartEvent,
+							touchEndEvent,
+							touchMoveEvent,
+							touchCancelEvent;
+
+					beforeEach(() => {
+						touchStartEvent = document.createEvent("Event");
+						touchStartEvent.initEvent("touchstart", true, true);
+
+						touchEndEvent = document.createEvent("Event");
+						touchEndEvent.initEvent("touchend", true, true);
+
+						touchMoveEvent = document.createEvent("Event");
+						touchMoveEvent.initEvent("touchmove", true, true);
+
+						touchCancelEvent = document.createEvent("Event");
+						touchCancelEvent.initEvent("touchcancel", true, true);
+
+						sinon.spy(toucheventproxy, "isTouchDevice");
+					});
+
+					describe("from proxy", () => {
+						beforeEach(() => {
+							touchStartEvent.targetTouches = [{identifier: -1}];
+							toucheventproxy.element.dispatchEvent(touchStartEvent);
+
+							touchEndEvent.targetTouches = [{identifier: -1}];
+							toucheventproxy.element.dispatchEvent(touchEndEvent);
+
+							touchMoveEvent.targetTouches = [{identifier: -1}];
+							toucheventproxy.element.dispatchEvent(touchMoveEvent);
+
+							touchCancelEvent.targetTouches = [{identifier: -1}];
+							toucheventproxy.element.dispatchEvent(touchCancelEvent);
+						});
+
+						it("should not disable the proxy", () => toucheventproxy.enabled.should.be.true);
+						it("should not remove the touch event listeners", () => toucheventproxy.isTouchDevice.callCount.should.equal(4));
+					});
+
+					describe("from browser", () => {
+						beforeEach(() => {
+							toucheventproxy.element.dispatchEvent(touchStartEvent);
+							toucheventproxy.element.dispatchEvent(touchStartEvent);
+							toucheventproxy.element.dispatchEvent(touchEndEvent);
+							toucheventproxy.element.dispatchEvent(touchMoveEvent);
+							toucheventproxy.element.dispatchEvent(touchCancelEvent);
+						});
+
+						it("should disable the proxy", () => toucheventproxy.enabled.should.be.false);
+						it("should remove the touch event listeners", () => toucheventproxy.isTouchDevice.should.have.been.calledOnce);
+					});
+				});
+
+				afterEach(() => target.remove());
+			});
+
+			afterEach(() => element.remove());
 		});
-
-		QUnit.test("object constructor", 2, function() {
-			QUnit.ok(this.toucheventproxy, "Instantiate TouchEventProxy object");
-			QUnit.deepEqual(this.toucheventproxy.element, this.element.get(0), "element property");
-		});
-
-		QUnit.test("handleEvent - mousedown disabled", 1, function() {
-			this.toucheventproxy.enabled = false;
-			this.event.type = "mousedown";
-			this.event.timeStamp = new Date();
-			var mapsTo = "touchstart";
-			this.event.mapsTo = mapsTo;
-			this.target.on(mapsTo, this.eventHandler);
-			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
-			this.toucheventproxy.onTouchMove = this.emptyEventHandler;
-			this.toucheventproxy.onTouchEnd = this.emptyEventHandler;
-			var event = document.createEvent("Event");
-			event.initEvent("mousemove", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-			event = document.createEvent("Event");
-			event.initEvent("mouseup", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-		});
-
-		QUnit.test("handleEvent - mousedown enabled", 11, function() {
-			this.event.type = "mousedown";
-			this.event.timeStamp = new Date();
-			var mapsTo = "touchstart";
-			this.event.mapsTo = mapsTo;
-			this.target.on(mapsTo, this.eventHandler);
-			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
-			this.toucheventproxy.onTouchMove = this.emptyEventHandler;
-			this.toucheventproxy.onTouchEnd = this.emptyEventHandler;
-			var event = document.createEvent("Event");
-			event.initEvent("mousemove", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-			event = document.createEvent("Event");
-			event.initEvent("mouseup", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-		});
-
-		QUnit.test("handleEvent - mousemove", 8, function() {
-			this.event.type = "mousemove";
-			this.event.timeStamp = new Date();
-			var mapsTo = "touchmove";
-			this.event.mapsTo = mapsTo;
-			this.target.on(mapsTo, this.eventHandler);
-			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
-		});
-
-		QUnit.test("handleEvent - mouseup", 8, function() {
-			this.event.type = "mouseup";
-			this.event.timeStamp = new Date();
-			var mapsTo = "touchend";
-			this.event.mapsTo = mapsTo;
-			this.target.on(mapsTo, this.eventHandler);
-			QUnit.ok(!this.toucheventproxy.handleEvent(this.event), "return false");
-			this.toucheventproxy.onTouchMove = this.emptyEventHandler;
-			this.toucheventproxy.onTouchEnd = this.emptyEventHandler;
-			var event = document.createEvent("Event");
-			event.initEvent("mousemove", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-			event = document.createEvent("Event");
-			event.initEvent("mouseup", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-		});
-
-		QUnit.test("handleEvent - click", function() {
-			var testParams = [
-				{
-					description: "enabled",
-					enabled: true,
-					cancelable: false
-				},
-				{
-					description: "cancelable",
-					enabled: false,
-					cancelable: true
-				},
-				{
-					description: "enabled & cancelable",
-					enabled: true,
-					cancelable: true
-				}
-			];
-
-			QUnit.expect(testParams.length + 1);
-			this.event.type = "click";
-
-			for (var i = 0; i < testParams.length; i++) {
-				this.toucheventproxy.enabled = testParams[i].enabled;
-				this.event.cancelable = testParams[i].cancelable;
-				QUnit.ok(!this.toucheventproxy.handleEvent(this.event), testParams[i].description + " - return false");
-			}
-		});
-
-		QUnit.test("handleEvent - touch event from proxy", 1, function() {
-			var originalIsTouchDevice = $.proxy(this.toucheventproxy.isTouchDevice, this.toucheventproxy);
-			this.toucheventproxy.isTouchDevice = $.proxy(function(e) {
-				originalIsTouchDevice(e);
-				QUnit.ok(this.enabled, "Proxy enabled");
-				this.isToucDevice = originalIsTouchDevice;
-			}, this.toucheventproxy);
-			var event = document.createEvent("Event");
-			event.initEvent("touchstart", true, true);
-			event.targetTouches = [{identifier: -1}];
-			this.toucheventproxy.element.dispatchEvent(event);
-		});
-
-		QUnit.test("handleEvent - touch event from brower", 1, function() {
-			var originalIsTouchDevice = $.proxy(this.toucheventproxy.isTouchDevice, this.toucheventproxy);
-			this.toucheventproxy.isTouchDevice = $.proxy(function(e) {
-				originalIsTouchDevice(e);
-				QUnit.ok(!this.enabled, "Proxy disabled");
-				this.isToucDevice = originalIsTouchDevice;
-			}, this.toucheventproxy);
-			var event = document.createEvent("Event");
-			event.initEvent("touchstart", true, true);
-			this.toucheventproxy.element.dispatchEvent(event);
-			this.toucheventproxy.element.dispatchEvent(event);
-		});
-
 	}
 );

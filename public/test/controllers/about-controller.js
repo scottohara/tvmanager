@@ -1,108 +1,198 @@
 define(
 	[
-		'controllers/about-controller',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"controllers/about-controller",
+		"controllers/application-controller",
+		"models/program-model",
+		"models/series-model",
+		"models/episode-model",
+		"framework/jquery"
 	],
 
-	function(AboutController, ApplicationController, $, jQueryMock) {
+	(AboutController, ApplicationController, Program, Series, Episode, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("about-controller", {
-			setup: function() {
-				this.aboutController = new AboutController();
-			}
-		});
+		describe("AboutController", () => {
+			let aboutController;
 
-		QUnit.test("object constructor", 1, function() {
-			QUnit.ok(this.aboutController, "Instantiate AboutController object");
-		});
+			beforeEach(() => (aboutController = new AboutController()));
 
-		QUnit.test("setup", 8, function() {
-			var sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-			var totalPrograms = $("<input>")
-				.attr("id", "totalPrograms")
-				.appendTo(sandbox);
+			describe("object constructor", () => {
+				it("should return an AboutController instance", () => aboutController.should.be.an.instanceOf(AboutController));
+			});
 
-			var totalSeries = $("<input>")
-				.attr("id", "totalSeries")
-				.appendTo(sandbox);
+			describe("setup", () => {
+				let databaseVersion,
+						appVersion,
+						update;
 
-			var totalEpisodes = $("<input>")
-				.attr("id", "totalEpisodes")
-				.appendTo(sandbox);
+				beforeEach(() => {
+					databaseVersion = $("<input>").attr("id", "databaseVersion");
+					appVersion = $("<input>").attr("id", "appVersion");
+					update = $("<div>").attr("id", "update");
 
-			var databaseVersion = $("<input>")
-				.attr("id", "databaseVersion")
-				.appendTo(sandbox);
+					sinon.stub(aboutController, "goBack");
+					sinon.stub(aboutController, "programCount");
+					sinon.stub(aboutController, "seriesCount");
+					sinon.stub(aboutController, "episodeCount");
+					sinon.stub(aboutController, "checkForUpdate");
 
-			var appVersion = $("<input>")
-				.attr("id", "appVersion")
-				.appendTo(sandbox);
+					$(document.body).append(databaseVersion, appVersion, update);
+					aboutController.setup();
+				});
 
-			var update = $("<div>")
-				.attr("id", "update")
-				.appendTo(sandbox);
+				it("should set the header label", () => aboutController.header.label.should.equal("About"));
 
-			this.aboutController.checkForUpdate = function() {
-				QUnit.ok(true, "Bind click event listener");
-			};
-			this.aboutController.goBack = function() {
-				QUnit.ok(true, "Bind back button event listener");
-			};
+				it("should attach a header left button event handler", () => {
+					aboutController.header.leftButton.eventHandler();
+					aboutController.goBack.should.have.been.called;
+				});
 
-			jQueryMock.setDefaultContext(sandbox);
-			this.aboutController.setup();
-			QUnit.equal(totalPrograms.val(), "1", "Total Programs");
-			QUnit.equal(totalSeries.val(), "1", "Total Series");
-			QUnit.equal(totalEpisodes.val(), "1 (100% watched)", "Total Episodes");
-			QUnit.equal(databaseVersion.val(), "v1.0", "Database Version");
-			QUnit.equal(appVersion.val(), "v1.0", "App Version");
-			update.trigger("click");
-			this.aboutController.header.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-			sandbox.remove();
-		});
+				it("should set the header left button style", () => aboutController.header.leftButton.style.should.equal("backButton"));
+				it("should set the header left button label", () => aboutController.header.leftButton.label.should.equal("Settings"));
 
-		QUnit.test("goBack", 1, function() {
-			this.aboutController.goBack();
-		});
+				it("should get the total number of programs", () => {
+					Program.count.should.have.been.calledWith(aboutController.programCount);
+					aboutController.programCount.should.have.been.calledWith(1);
+				});
 
-		QUnit.test("watchedCount - no episodes", 1, function() {
-			var sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
+				it("should get the total number of series", () => {
+					Series.count.should.have.been.calledWith(aboutController.seriesCount);
+					aboutController.seriesCount.should.have.been.calledWith(1);
+				});
 
-			var totalEpisodes = $("<input>")
-				.attr("id", "totalEpisodes")
-				.appendTo(sandbox);
+				it("should get the total number of episodes", () => {
+					Episode.totalCount.should.have.been.calledWith(sinon.match.func);
+					aboutController.episodeCount.should.have.been.calledWith(1);
+				});
 
-			jQueryMock.setDefaultContext(sandbox);
-			this.aboutController.episodeTotalCount = 0;
-			this.aboutController.watchedCount();
-			QUnit.equal(totalEpisodes.val(), "0 (0% watched)", "Total Episodes");
-			jQueryMock.clearDefaultContext();
-			sandbox.remove();
-		});
+				it("should set the database version", () => databaseVersion.val().should.equal("v1.0"));
+				it("should set the app version", () => appVersion.val().should.equal("v1.0"));
 
-		QUnit.test("checkForUpdate - updating", 1, function() {
-			this.aboutController.updating = true;
-			this.aboutController.checkForUpdate();
-			QUnit.ok(this.aboutController.updating, "Update blocked by semaphore");
-		});
+				it("should attach an update click event handler", () => {
+					update.trigger("click");
+					aboutController.checkForUpdate.should.have.been.called;
+				});
 
-		QUnit.test("checkForUpdate - not updating", 2, function() {
-			this.aboutController.checkForUpdate();
-			QUnit.deepEqual(appController.notice.pop(), {
-				label: "Updated",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}, "Update notice");
-			QUnit.ok(!this.aboutController.updating, "Reset semaphore");
+				it("should set the scroll position", () => appController.setScrollPosition.should.have.been.called);
+
+				afterEach(() => {
+					databaseVersion.remove();
+					appVersion.remove();
+					update.remove();
+				});
+			});
+
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					aboutController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
+
+			describe("programCount", () => {
+				it("should set the program count", () => {
+					const count = 1,
+								totalPrograms = $("<input>")
+									.attr("id", "totalPrograms")
+									.appendTo(document.body);
+
+					aboutController.programCount(count);
+					totalPrograms.val().should.equal(count.toString());
+					totalPrograms.remove();
+				});
+			});
+
+			describe("seriesCount", () => {
+				it("should set the series count", () => {
+					const count = 1,
+								totalSeries = $("<input>")
+									.attr("id", "totalSeries")
+									.appendTo(document.body);
+
+					aboutController.seriesCount(count);
+					totalSeries.val().should.equal(count.toString());
+					totalSeries.remove();
+				});
+			});
+
+			describe("episodeCount", () => {
+				let count;
+
+				beforeEach(() => {
+					count = 1;
+					sinon.stub(aboutController, "watchedCount");
+					aboutController.episodeCount(count);
+				});
+
+				it("should set the episode total count", () => aboutController.episodeTotalCount.should.equal(count));
+				it("should get the total number of watched episodes", () => {
+					Episode.countByStatus.should.have.been.calledWith("Watched", sinon.match.func);
+					aboutController.watchedCount.should.have.been.calledWith(1);
+				});
+			});
+
+			describe("watchedCount", () => {
+				let totalEpisodes;
+
+				beforeEach(() => {
+					totalEpisodes = $("<input>")
+						.attr("id", "totalEpisodes")
+						.appendTo(document.body);
+				});
+
+				describe("no episodes", () => {
+					it("should set the watched percent to zero", () => {
+						aboutController.episodeTotalCount = 0;
+						aboutController.watchedCount(1);
+						totalEpisodes.val().should.equal("0 (0% watched)");
+					});
+				});
+
+				describe("with episodes", () => {
+					it("should set the watched percent", () => {
+						aboutController.episodeTotalCount = 1;
+						aboutController.watchedCount(1);
+						totalEpisodes.val().should.equal("1 (100% watched)");
+					});
+				});
+
+				afterEach(() => totalEpisodes.remove());
+			});
+
+			describe("checkForUpdate", () => {
+				describe("updating", () => {
+					it("should do nothing", () => {
+						aboutController.updating = true;
+						aboutController.checkForUpdate();
+						appController.cache.update.should.not.have.been.called;
+					});
+				});
+
+				describe("not updating", () => {
+					beforeEach(() => aboutController.checkForUpdate());
+
+					it("should update the application cache", () => appController.cache.update.should.have.been.calledWith(aboutController.updateChecked));
+					it("should reset the updating flag", () => aboutController.updating.should.be.false);
+				});
+			});
+
+			describe("updateChecked", () => {
+				it("should show a notice", () => {
+					const message = "test message";
+
+					aboutController.updateChecked(true, message);
+					appController.showNotice.should.have.been.calledWith({
+						label: message,
+						leftButton: {
+							style: "cautionButton",
+							label: "OK"
+						}
+					});
+				});
+			});
 		});
 	}
 );

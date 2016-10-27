@@ -1,77 +1,165 @@
 define(
 	[
-		'controllers/settings-controller',
-		'controllers/application-controller',
-		'models/series-model',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"controllers/settings-controller",
+		"controllers/application-controller",
+		"models/series-model",
+		"framework/jquery"
 	],
 
-	function(SettingsController, ApplicationController, Series, $, jQueryMock) {
+	(SettingsController, ApplicationController, Series, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("settings-controller", {
-			setup: function() {
-				this.settingsController = new SettingsController();
-			}
-		});
+		describe("SettingsController", () => {
+			const reports = [
+				{
+					description: "Recorded",
+					viewArgs: {
+						reportName: "All Recorded",
+						dataSource: Series.listByStatus,
+						args: "Recorded"
+					}
+				},
+				{
+					description: "Expected",
+					viewArgs: {
+						reportName: "All Expected",
+						dataSource: Series.listByStatus,
+						args: "Expected"
+					}
+				},
+				{
+					description: "Missed",
+					viewArgs: {
+						reportName: "All Missed",
+						dataSource: Series.listByStatus,
+						args: "Missed"
+					}
+				},
+				{
+					description: "Incomplete",
+					viewArgs: {
+						reportName: "All Incomplete",
+						dataSource: Series.listByIncomplete,
+						args: null
+					}
+				}
+			];
 
-		QUnit.test("object constructor", 1, function() {
-			QUnit.ok(this.settingsController, "Instantiate SettingsController object");
-		});
+			let settingsController;
 
-		QUnit.test("setup", 11, function() {
-			var sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-			var dataSyncRow = $("<div>")
-				.attr("id", "dataSyncRow")
-				.appendTo(sandbox);
+			beforeEach(() => {
+				settingsController = new SettingsController();
+			});
 
-			var aboutRow = $("<div>")
-				.attr("id", "aboutRow")
-				.appendTo(sandbox);
+			describe("object constructor", () => {
+				it("should return a SettingsController instance", () => settingsController.should.be.an.instanceOf(SettingsController));
+			});
 
-			var recordedReportRow = $("<div>")
-				.attr("id", "recordedReportRow")
-				.appendTo(sandbox);
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(settingsController, "goBack");
+					sinon.stub(settingsController, "activate");
+					settingsController.setup();
+				});
 
-			var expectedReportRow = $("<div>")
-				.attr("id", "expectedReportRow")
-				.appendTo(sandbox);
+				it("should set the header label", () => settingsController.header.label.should.equal("Settings"));
 
-			var missedReportRow = $("<div>")
-				.attr("id", "missedReportRow")
-				.appendTo(sandbox);
+				it("should attach a header left button event handler", () => {
+					settingsController.header.leftButton.eventHandler();
+					settingsController.goBack.should.have.been.called;
+				});
 
-			var incompleteReportRow = $("<div>")
-				.attr("id", "incompleteReportRow")
-				.appendTo(sandbox);
+				it("should set the header left button style", () => settingsController.header.leftButton.style.should.equal("backButton"));
+				it("should set the header left button label", () => settingsController.header.leftButton.label.should.equal("Schedule"));
 
-			this.settingsController.goBack = function() {
-				QUnit.ok(true, "Bind back button event listener");
-			};
+				it("should activate the controller", () => settingsController.activate.should.have.been.called);
+			});
 
-			jQueryMock.setDefaultContext(sandbox);
-			this.settingsController.setup();
-			dataSyncRow.trigger("click");
-			aboutRow.trigger("click");
-			recordedReportRow.trigger("click");
-			QUnit.deepEqual(appController.viewArgs, { reportName: "All Recorded", dataSource: Series.listByStatus, args: 'Recorded' }, "View arguments");
-			expectedReportRow.trigger("click");
-			QUnit.deepEqual(appController.viewArgs, { reportName: "All Expected", dataSource: Series.listByStatus, args: 'Expected' }, "View arguments");
-			missedReportRow.trigger("click");
-			QUnit.deepEqual(appController.viewArgs, { reportName: "All Missed", dataSource: Series.listByStatus, args: 'Missed' }, "View arguments");
-			incompleteReportRow.trigger("click");
-			QUnit.deepEqual(appController.viewArgs, { reportName: "All Incomplete", dataSource: Series.listByIncomplete, args: null }, "View arguments");
-			this.settingsController.header.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-			sandbox.remove();
-		});
+			describe("activate", () => {
+				const testParams = [
+					{
+						description: "data sync",
+						id: "dataSyncRow",
+						handler: "viewDataSync"
+					},
+					{
+						description: "about",
+						id: "aboutRow",
+						handler: "viewAbout"
+					},
+					{
+						description: "recorded report",
+						id: "recordedReportRow",
+						handler: "viewRecordedReport"
+					},
+					{
+						description: "expected report",
+						id: "expectedReportRow",
+						handler: "viewExpectedReport"
+					},
+					{
+						description: "missed report",
+						id: "missedReportRow",
+						handler: "viewMissedReport"
+					},
+					{
+						description: "incomplete report",
+						id: "incompleteReportRow",
+						handler: "viewIncompleteReport"
+					}
+				];
 
-		QUnit.test("goBack", 1, function() {
-			this.settingsController.goBack();
+				testParams.forEach(params => {
+					it(`should attach a ${params.description} click event handler`, () => {
+						const element = $("<div>")
+							.attr("id", params.id)
+							.appendTo(document.body);
+
+						sinon.stub(settingsController, params.handler);
+						settingsController.activate();
+						element.trigger("click");
+						settingsController[params.handler].should.have.been.called;
+						element.remove();
+					});
+				});
+			});
+
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					settingsController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
+
+			describe("viewDataSync", () => {
+				it("should push the data sync view", () => {
+					settingsController.viewDataSync();
+					appController.pushView.should.have.been.calledWith("dataSync");
+				});
+			});
+
+			describe("viewAbout", () => {
+				it("should push the about view", () => {
+					settingsController.viewAbout();
+					appController.pushView.should.have.been.calledWith("about");
+				});
+			});
+
+			reports.forEach(report => {
+				describe(`view${report.description}Report`, () => {
+					it(`should push the ${report.description.toLowerCase()} report view`, () => {
+						settingsController[`view${report.description}Report`]();
+						appController.pushView.should.have.been.calledWith("report", sinon.match({
+							reportName: report.viewArgs.reportName,
+							dataSource: sinon.match.func,
+							args: report.viewArgs.args
+						}));
+					});
+				});
+			});
 		});
 	}
 );

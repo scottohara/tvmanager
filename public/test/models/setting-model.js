@@ -1,144 +1,186 @@
 define(
 	[
-		'models/setting-model',
-		'controllers/application-controller',
-		'framework/jquery'
+		"models/setting-model",
+		"controllers/application-controller"
 	],
 
-	function(Setting, ApplicationController, $) {
+	(Setting, ApplicationController) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("setting-model", {
-			setup: function() {
-				this.settingName = "test-setting";
-				this.settingValue = "test-value";
-				this.setting = new Setting(this.settingName, this.settingValue);
-			},
-			teardown: function() {
-				appController.db.reset();
-			}
-		});
+		describe("Setting", () => {
+			let settingName,
+					settingValue,
+					setting,
+					callback;
 
-		QUnit.test("object constructor", 3, function() {
-			QUnit.ok(this.setting, "Instantiate Setting object");
-			QUnit.equal(this.setting.settingName, this.settingName, "settingName property");
-			QUnit.equal(this.setting.settingValue, this.settingValue, "settingValue property");
-		});
-
-		QUnit.test("save - delete fail", 2, function() {
-			appController.db.failAt("DELETE FROM Setting WHERE Name = " + this.settingName);
-			this.setting.save();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - insert fail without callback", 3, function() {
-			appController.db.failAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
-			this.setting.save();
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands OK");
-			QUnit.equal(appController.db.errorMessage, "Setting.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - insert fail with callback", 4, function() {
-			appController.db.failAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
-
-			this.setting.save(function(success) {
-				QUnit.ok(!success, "Invoke callback with false");
+			beforeEach(() => {
+				settingName = "test-setting";
+				settingValue = "test-value";
+				setting = new Setting(settingName, settingValue);
 			});
-			
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands OK");
-			QUnit.equal(appController.db.errorMessage, "Setting.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("save - no rows affected without callback", 3, function() {
-			appController.db.noRowsAffectedAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
-			this.setting.save();
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Setting.save: no rows affected", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - no rows affected with callback", 4, function() {
-			appController.db.noRowsAffectedAt("INSERT INTO Setting (Name, Value) VALUES (" + this.settingName + ", " + this.settingValue + ")");
-			this.setting.save(function(success) {
-				QUnit.ok(!success, "Invoke callback with false");
+			describe("object constructor", () => {
+				it("should return a Setting instance", () => setting.should.be.an.instanceOf(Setting));
+				it("should set the setting name", () => setting.settingName.should.equal(settingName));
+				it("should set the setting value", () => setting.settingValue.should.equal(settingValue));
 			});
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Setting.save: no rows affected", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("save - success without callback", 3, function() {
-			this.setting.save();
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
+			describe("save", () => {
+				describe("delete fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`DELETE FROM Setting WHERE Name = ${settingName}`);
+						setting.save();
+					});
 
-		QUnit.test("save - success with callback", 4, function() {
-			this.setting.save(function(success) {
-				QUnit.ok(success, "Invoke callback with true");
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+				});
+
+				describe("insert fail", () => {
+					beforeEach(() => appController.db.failAt(`INSERT INTO Setting (Name, Value) VALUES (${settingName}, ${settingValue})`));
+
+					describe("without callback", () => {
+						beforeEach(() => setting.save());
+
+						it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+						it("should rollback the transaction", () => appController.db.commit.should.be.false);
+						it("should return an error message", () => appController.db.errorMessage.should.equal("Setting.save: Force failed"));
+					});
+
+					describe("with callback", () => {
+						beforeEach(() => {
+							callback = sinon.stub();
+							setting.save(callback);
+						});
+
+						it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+						it("should rollback the transaction", () => appController.db.commit.should.be.false);
+						it("should invoke the callback", () => callback.should.have.been.calledWith(false));
+						it("should return an error message", () => appController.db.errorMessage.should.equal("Setting.save: Force failed"));
+					});
+				});
+
+				describe("no rows affected", () => {
+					beforeEach(() => appController.db.noRowsAffectedAt(`INSERT INTO Setting (Name, Value) VALUES (${settingName}, ${settingValue})`));
+
+					describe("without callback", () => {
+						beforeEach(() => setting.save());
+
+						it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+						it("should rollback the transaction", () => appController.db.commit.should.be.false);
+						it("should return an error message", () => appController.db.errorMessage.should.equal("Setting.save: no rows affected"));
+					});
+
+					describe("with callback", () => {
+						beforeEach(() => {
+							callback = sinon.stub();
+							setting.save(callback);
+						});
+
+						it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+						it("should rollback the transaction", () => appController.db.commit.should.be.false);
+						it("should invoke the callback", () => callback.should.have.been.calledWith(false));
+						it("should return an error message", () => appController.db.errorMessage.should.equal("Setting.save: no rows affected"));
+					});
+				});
+
+				describe("success", () => {
+					describe("without callback", () => {
+						beforeEach(() => setting.save());
+
+						it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+						it("should commit the transaction", () => appController.db.commit.should.be.true);
+						it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+					});
+
+					describe("with callback", () => {
+						beforeEach(() => {
+							callback = sinon.stub();
+							setting.save(callback);
+						});
+
+						it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+						it("should commit the transaction", () => appController.db.commit.should.be.true);
+						it("should invoke the callback", () => callback.should.have.been.calledWith(true));
+						it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+					});
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
 
-		QUnit.test("remove - fail", 4, function() {
-			appController.db.failAt("DELETE FROM Setting WHERE Name = " + this.settingName);
-			this.setting.remove();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.setting.settingName, this.settingName, "settingName property");
-			QUnit.equal(this.setting.settingValue, this.settingValue, "settingValue property");
-		});
+			describe("remove", () => {
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`DELETE FROM Setting WHERE Name = ${settingName}`);
+						setting.remove();
+					});
 
-		QUnit.test("remove - success", 5, function() {
-			this.setting.remove();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-			QUnit.equal(this.setting.settingName, null, "settingName property");
-			QUnit.equal(this.setting.settingValue, null, "settingValue property");
-		});
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the setting name", () => setting.settingName.should.equal(settingName));
+					it("should not clear the setting value", () => setting.settingValue.should.equal(settingValue));
+				});
 
-		QUnit.test("get - fail", 4, function() {
-			appController.db.failAt("SELECT Value AS SettingValue FROM Setting WHERE Name = " + this.settingName);
-			Setting.get(this.settingName, function() {
-				QUnit.ok(true, "Invoke callback");
+				describe("success", () => {
+					beforeEach(() => setting.remove());
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should clear the setting name", () => (null === setting.settingName).should.be.true);
+					it("should clear the setting value", () => (null === setting.settingValue).should.be.true);
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Setting.get: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("get - no rows affected", 5, function() {
-			appController.db.noRowsAffectedAt("SELECT Value AS SettingValue FROM Setting WHERE Name = " + this.settingName);
-			Setting.get(this.settingName, $.proxy(function(setting) {
-				QUnit.equal(setting.settingName, this.settingName, "settingName property");
-				QUnit.equal(setting.settingValue, undefined, "settingValue property");
-			}, this));
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
+			describe("get", () => {
+				let sql;
 
-		QUnit.test("get - success", 5, function() {
-			appController.db.addResultRows([{
-				SettingValue: this.settingValue
-			}]);
-			Setting.get(this.settingName, $.proxy(function(setting) {
-				QUnit.equal(setting.settingName, this.settingName, "settingName property");
-				QUnit.equal(setting.settingValue, this.settingValue, "settingValue property");
-			}, this));
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
+				beforeEach(() => (sql = `SELECT Value AS SettingValue FROM Setting WHERE Name = ${settingName}`));
+
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(sql);
+						callback = sinon.stub();
+						Setting.get(settingName, callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.called);
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Setting.get: Force failed"));
+				});
+
+				describe("success", () => {
+					describe("doesn't exist", () => {
+						beforeEach(() => {
+							appController.db.noRowsAffectedAt(sql);
+							callback = sinon.stub().withArgs(sinon.match(new Setting(settingName)));
+							Setting.get(settingName, callback);
+						});
+
+						it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+						it("should commit the transaction", () => appController.db.commit.should.be.true);
+						it("should invoke the callback", () => callback.should.have.been.called);
+						it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+					});
+
+					describe("exists", () => {
+						beforeEach(() => {
+							appController.db.addResultRows([{SettingValue: this.settingValue}]);
+							callback = sinon.stub().withArgs(sinon.match(setting));
+							Setting.get(settingName, callback);
+						});
+
+						it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+						it("should commit the transaction", () => appController.db.commit.should.be.true);
+						it("should invoke the callback", () => callback.should.have.been.called);
+						it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+					});
+				});
+			});
+
+			afterEach(() => appController.db.reset());
 		});
 	}
 );

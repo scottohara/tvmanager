@@ -1,43 +1,36 @@
 define(
-	[
-		'test/mocks/jQuery-mock',
-		'framework/jquery'
-	],
-
-	function(jQueryMock, $) {
+	() => {
 		"use strict";
 
-		var DatabaseControllerMock = function(databaseName, callback, errorCallback) {
-			var mode = DatabaseControllerMock.mode,
-					stopFakeServer = DatabaseControllerMock.stopFakeServer;
+		let dbMode;
 
-			DatabaseControllerMock.mode = null;
-			DatabaseControllerMock.stopFakeServer = null;
+		class DatabaseControllerMock {
+			constructor(databaseName, callback, errorCallback) {
+				this.name = databaseName;
 
-			switch (mode) {
-				case "NotModified":
-					stopFakeServer();
-					$.get = jQueryMock.originalGet;
-					QUnit.equal(databaseName, "TVManager", "databaseName property");
-					QUnit.start();
-					break;
+				switch (dbMode) {
+					case "304":
+						break;
 
-				case "Fail":
-					errorCallback({message: "Error"});
-					return {};
+					case "Fail":
+						errorCallback({message: "Error"});
+						break;
 
-				case "Upgrade":
-					callback({initial: "1.0", current: "1.1"});
-					return { version: "1.1" };
+					case "Upgrade":
+						this.version = "1.1";
+						callback({initial: "1.0", current: "1.1"});
+						break;
 
-				default:
-					callback({initial: "1.1", current: "1.1"});
-					return { version: "1.1" };
+					default:
+						this.version = "1.1";
+						callback({initial: "1.1", current: "1.1"});
+				}
 			}
-		};
 
-		DatabaseControllerMock.mode = null;
-		DatabaseControllerMock.stopFakeServer = null;
+			static set mode(mode) {
+				dbMode = mode;
+			}
+		}
 
 		return DatabaseControllerMock;
 	}

@@ -1,23 +1,27 @@
 define(
 	[
-		'models/episode-model',
-		'controllers/episodes-controller',
-		'components/list',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock',
-		'framework/jquery.ui.touch-punch'
+		"models/episode-model",
+		"controllers/episodes-controller",
+		"components/list",
+		"controllers/application-controller",
+		"framework/jquery",
+		"framework/jquery.ui.touch-punch"
 	],
 
-	function(Episode, EpisodesController, List, ApplicationController, $, jQueryMock) {
+	(Episode, EpisodesController, List, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("episodes-controller", {
-			setup: function() {
-				this.listItem = {
+		describe("EpisodesController", () => {
+			let listItem,
+					items,
+					episodeList,
+					episodesController;
+
+			beforeEach(() => {
+				listItem = {
 					source: "test-source",
 					series: {
 						id: 1,
@@ -28,447 +32,539 @@ define(
 						recordedCount: 2,
 						expectedCount: 2,
 						statusWarningCount: 2,
-						setEpisodeCount: function(count) {
-							this.episodeCount = count;
-						},
-						setWatchedCount: function(count) {
-							this.watchedCount = count;
-						},
-						setRecordedCount: function(count) {
-							this.recordedCount = count;
-						},
-						setExpectedCount: function(count) {
-							this.expectedCount = count;
-						},
-						setStatusWarning: function(count) {
-							this.statusWarningCount = count;
-						}
+						setEpisodeCount: sinon.stub(),
+						setWatchedCount: sinon.stub(),
+						setRecordedCount: sinon.stub(),
+						setExpectedCount: sinon.stub(),
+						setStatusWarning: sinon.stub()
 					}
 				};
-				this.items = [{
+
+				items = [{
 					id: 1,
 					episodeName: "test-episode",
 					status: "Watched",
-					statusWarning: "warning",
-					remove: function() {
-						QUnit.ok(true, "Remove episode");
-					}
+					statusWarning: "warning"
 				}];
 
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-				$("<ul>")
+				episodeList = $("<ul>")
 					.attr("id", "list")
-					.appendTo(this.sandbox);
+					.appendTo(document.body);
 
-				this.episodesController = new EpisodesController(this.listItem);
-			},
-			teardown: function() {
-				this.sandbox.remove();
-			}
-		});
+				episodesController = new EpisodesController(listItem);
+			});
 
-		QUnit.test("object constructor", 3, function() {
-			QUnit.ok(this.episodesController, "Instantiate EpisodesController object");
-			QUnit.deepEqual(this.episodesController.listItem, this.listItem, "listItem property");
-			QUnit.ok(this.episodesController.scrollToFirstUnwatched, "scrollToFirstUnwatched property");
-		});
+			describe("object constructor", () => {
+				it("should return a EpisodesController instance", () => episodesController.should.be.an.instanceOf(EpisodesController));
+				it("should set the list item", () => episodesController.listItem.should.equal(listItem));
+				it("should enable scrolling to the first unwatched episode", () => episodesController.scrollToFirstUnwatched.should.be.true);
+			});
 
-		QUnit.test("setup", function() {
-			var testParams = [
-				{
-					description: "with source",
-					expected: this.listItem.source
-				},
-				{
-					description: "without source",
-					noSource: true,
-					expected: "Series"
-				}
-			];
-
-			this.episodesController.viewItem = function() {
-				QUnit.ok(true, "Bind list view event handler");
-			};
-			this.episodesController.deleteItem = function() {
-				QUnit.ok(true, "Bind list delete event handler");
-			};
-			this.episodesController.onPopulateListItem = function() {
-				QUnit.ok(true, "Bind list populate event handler");
-			};
-			this.episodesController.goBack = function() {
-				QUnit.ok(true, "Bind back button event handler");
-			};
-			this.episodesController.addItem = function() {
-				QUnit.ok(true, "Bind add action event handler");
-			};
-			this.episodesController.editItems = function() {
-				QUnit.ok(true, "Bind edit action event handler");
-			};
-			this.episodesController.deleteItems = function() {
-				QUnit.ok(true, "Bind delete action event handler");
-			};
-
-			Episode.episodes = this.items;
-
-			QUnit.expect(testParams.length * 11);
-
-			for (var i = 0; i < testParams.length; i++) {
-				jQueryMock.setDefaultContext(this.sandbox);
-				if (testParams[i].noSource) {
-					this.listItem.source = null;
-				}
-				this.episodesController.setup();
-				QUnit.equal(this.episodesController.header.label, this.listItem.series.programName + " : " + this.listItem.series.seriesName, testParams[i].description + " - Header label");
-				QUnit.equal(this.episodesController.header.leftButton.label, testParams[i].expected, testParams[i].description + " - Back button label");
-				this.episodesController.header.leftButton.eventHandler();
-				this.episodesController.header.rightButton.eventHandler();
-				QUnit.deepEqual(this.episodesController.episodeList.items, this.items, testParams[i].description + " - List items");
-				QUnit.equal(this.episodesController.episodeList.action, "view", testParams[i].description + " - List action");
-				this.episodesController.footer.leftButton.eventHandler();
-				this.episodesController.footer.rightButton.eventHandler();
-				jQueryMock.clearDefaultContext();
-			}
-		});
-
-		QUnit.test("goBack", 1, function() {
-			this.episodesController.goBack();
-		});
-
-		QUnit.test("activate", function() {
-			var testParams = [
-				{
-					description: "update",
-					addEpisodes: 0,
-					addWatched: 0,
-					addRecorded: 0,
-					addExpected: 0,
-					addStatusWarning: 0,
-					listItem: {
-						listIndex: 0,
-						episode: {
-							episodeName: "test-episode-2",
-							status: "Watched"
-						}
+			describe("setup", () => {
+				const testParams = [
+					{
+						description: "from source",
+						source: "source",
+						leftButtonLabel: "source"
+					},
+					{
+						description: "from series list",
+						leftButtonLabel: "Series"
 					}
-				},
-				{
-					description: "update",
-					addEpisodes: 0,
-					addWatched: -1,
-					addRecorded: 1,
-					addExpected: 0,
-					addStatusWarning: 0,
-					listItem: {
-						listIndex: 0,
-						episode: {
-							episodeName: "test-episode-2",
-							status: "Recorded"
-						}
-					}
-				},
-				{
-					description: "add",
-					addEpisodes: 1,
-					addWatched: 0,
-					addRecorded: 0,
-					addExpected: 1,
-					addStatusWarning: 1,
-					listItem: {
-						listIndex: -1,
-						episode: {
-							episodeName: "test-episode-2",
-							status: "Expected",
-							statusWarning: "warning"
-						}
-					}
-				}
-			];
+				];
 
-			QUnit.expect(testParams.length * 6);
-			for (var i = 0; i < testParams.length; i++) {
-				var origEpisodeCount = this.listItem.series.episodeCount;
-				var origWatchedCount = this.listItem.series.watchedCount;
-				var origRecordedCount = this.listItem.series.recordedCount;
-				var origExpectedCount = this.listItem.series.expectedCount;
-				var origStatusWarningCount = this.listItem.series.statusWarningCount;
-				var itemsCopy = JSON.parse(JSON.stringify(this.items));
-				this.episodesController.episodeList = new List(null, null, null, JSON.parse(JSON.stringify(this.items)));
-				this.episodesController.origWatchedCount = 1;
-				this.episodesController.origRecordedCount = 0;
-				this.episodesController.origExpectedCount = 0;
-				this.episodesController.origStatusWarningCount = 0;
-				this.episodesController.activate(testParams[i].listItem);
-				itemsCopy[testParams[i].listItem.listIndex * -1] = testParams[i].listItem.episode;
-				QUnit.deepEqual(this.episodesController.episodeList.items, itemsCopy, testParams[i].description + " - List items");
-				QUnit.equal(this.episodesController.listItem.series.episodeCount, origEpisodeCount + testParams[i].addEpisodes, testParams[i].description + " - listItem.series.episodeCount property");
-				QUnit.equal(this.episodesController.listItem.series.watchedCount, origWatchedCount + testParams[i].addWatched, testParams[i].description + " - listItem.series.watchedCount property");
-				QUnit.equal(this.episodesController.listItem.series.recordedCount, origRecordedCount + testParams[i].addRecorded, testParams[i].description + " - listItem.series.recordedCount property");
-				QUnit.equal(this.episodesController.listItem.series.expectedCount, origExpectedCount + testParams[i].addExpected, testParams[i].description + " - listItem.series.expectedCount property");
-				QUnit.equal(this.episodesController.listItem.series.statusWarningCount, origStatusWarningCount + testParams[i].addStatusWarning, testParams[i].description + " - listItem.series.statusWarningCount property");
-			}
-		});
-
-		QUnit.test("onPopulateListItem", function() {
-			var testParams = [
-				{
-					description: "watched",
-					status: "Watched",
-					scrollPos: 1,
-					scrollToFirstUnwatched: true
-				},
-				{
-					description: "not watched",
-					status: "",
-					scrollPos: 0,
-					scrollToFirstUnwatched: false
-				},
-				{
-					description: "another not watched",
-					status: "",
-					scrollPos: 0,
-					scrollToFirstUnwatched: false
-				}
-			];
-
-			var listItem = $("<li>")
-				.outerHeight(1)
-				.hide()
-				.appendTo(this.sandbox);
-
-			$("<a>")
-				.attr("id", "test-episode")
-				.hide()
-				.appendTo(listItem);
-
-			QUnit.expect(testParams.length * 2);
-			jQueryMock.setDefaultContext(this.sandbox);
-			for (var i = 0; i < testParams.length; i++) {
-				appController.viewStack = [{ scrollPos: 0 }];
-				this.episodesController.onPopulateListItem({
-					id: "test-episode",
-					status: testParams[i].status
+				beforeEach(() => {
+					sinon.stub(episodesController, "viewItem");
+					sinon.stub(episodesController, "deleteItem");
+					sinon.stub(episodesController, "onPopulateListItem");
+					sinon.stub(episodesController, "goBack");
+					sinon.stub(episodesController, "addItem");
+					sinon.stub(episodesController, "listRetrieved");
+					Episode.episodes = items;
 				});
-				QUnit.equal(appController.viewStack[0].scrollPos, testParams[i].scrollPos, testParams[i].description + " - Scroll position");
-				QUnit.equal(this.episodesController.scrollToFirstUnwatched, testParams[i].scrollToFirstUnwatched, testParams[i].description + " - scrollToFirstUnwathced property");
-			}
-			jQueryMock.clearDefaultContext();
-		});
 
-		QUnit.test("viewItem", function() {
-			var testParams = [
-				{
-					description: "Watched",
-					statusWarning: "warning",
-					expectedWatchedCount: 1,
-					expectedRecordedCount: 0,
-					expectedExpectedCount: 0,
-					expectedStatusWarningCount: 1
-				},
-				{
-					description: "Recorded",
-					statusWarning: null,
-					expectedWatchedCount: 0,
-					expectedRecordedCount: 1,
-					expectedExpectedCount: 0,
-					expectedStatusWarningCount: 0
-				},
-				{
-					description: "Expected",
-					statusWarning: null,
-					expectedWatchedCount: 0,
-					expectedRecordedCount: 0,
-					expectedExpectedCount: 1,
-					expectedStatusWarningCount: 0
-				}
-			];
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							listItem.source = params.source;
+							episodesController.setup();
+						});
 
-			var index = 0;
+						it("should set the header label", () => episodesController.header.label.should.equal(`${listItem.series.programName} : ${listItem.series.seriesName}`));
 
-			QUnit.expect(testParams.length * 6);
+						it("should attach a header left button event handler", () => {
+							episodesController.header.leftButton.eventHandler();
+							episodesController.goBack.should.have.been.called;
+						});
 
-			for (var i = 0; i < testParams.length; i++) {
-				this.items[index].status = testParams[i].description;
-				this.items[index].statusWarning = testParams[i].statusWarning;
-				this.episodesController.episodeList = { items: this.items };
-				this.episodesController.viewItem(index);
-				QUnit.equal(this.episodesController.origWatchedCount, testParams[i].expectedWatchedCount, testParams[i].description + " - watchedCount property");
-				QUnit.equal(this.episodesController.origRecordedCount, testParams[i].expectedRecordedCount, testParams[i].description + " - recordedCount property");
-				QUnit.equal(this.episodesController.origExpectedCount, testParams[i].expectedExpectedCount, testParams[i].description + " - expectedCount property");
-				QUnit.equal(this.episodesController.origStatusWarningCount, testParams[i].expectedStatusWarningCount, testParams[i].description + " - statusWarningCount property");
-				QUnit.deepEqual(appController.viewArgs, { listIndex: index, episode: this.items[index] }, testParams[i].description + " - View arguments");
-			}
-		});
+						it("should set the header left button style", () => episodesController.header.leftButton.style.should.equal("backButton"));
+						it("should set the header left button label", () => episodesController.header.leftButton.label.should.equal(params.leftButtonLabel));
 
-		QUnit.test("addItem", 2, function() {
-			this.episodesController.episodeList = { items: this.items };
-			this.episodesController.addItem();
-			QUnit.deepEqual(appController.viewArgs, { series: this.listItem.series, sequence: this.items.length }, "View arguments");
-		});
+						it("should attach a header right button event handler", () => {
+							episodesController.header.rightButton.eventHandler();
+							episodesController.addItem.should.have.been.called;
+						});
 
-		QUnit.test("deleteItem", function() {
-			var testParams = [
-				{
-					description: "Watched",
-					statusWarning: "warning",
-					expectedWatchedCount: 1,
-					expectedRecordedCount: 0,
-					expectedExpectedCount: 0,
-					expectedStatusWarningCount: 1
-				},
-				{
-					description: "Recorded",
-					statusWarning: null,
-					expectedWatchedCount: 0,
-					expectedRecordedCount: 1,
-					expectedExpectedCount: 0,
-					expectedStatusWarningCount: 0
-				},
-				{
-					description: "Expected",
-					statusWarning: null,
-					expectedWatchedCount: 0,
-					expectedRecordedCount: 0,
-					expectedExpectedCount: 1,
-					expectedStatusWarningCount: 0
-				}
-			];
+						it("should set the header right button label", () => episodesController.header.rightButton.label.should.equal("+"));
 
-			var index = 0;
+						it("should attach a view event handler to the episodes list", () => {
+							episodesController.episodeList.viewEventHandler();
+							episodesController.viewItem.should.have.been.called;
+						});
 
-			QUnit.expect(testParams.length * 8);
+						it("should attach a delete event handler to the episodes list", () => {
+							episodesController.episodeList.deleteEventHandler();
+							episodesController.deleteItem.should.have.been.called;
+						});
 
-			for (var i = 0; i < testParams.length; i++) {
-				this.items[index].status = testParams[i].description;
-				this.items[index].statusWarning = testParams[i].statusWarning;
-				jQueryMock.setDefaultContext(this.sandbox);
-				var list = $("#list");
+						it("should attach a populate item event handler to the episodes list", () => {
+							episodesController.episodeList.populateItemEventHandler();
+							episodesController.onPopulateListItem.should.have.been.called;
+						});
 
-				$("<a>")
-					.attr("id", this.items[index].id)
-					.hide()
-					.appendTo($("<li>")
+						it("should get the list of episodes for the series", () => {
+							Episode.listBySeries.should.have.been.calledWith(listItem.series.id, sinon.match.func);
+							episodesController.listRetrieved.should.have.been.calledWith(items);
+						});
+					});
+				});
+			});
+
+			describe("activate", () => {
+				beforeEach(() => {
+					sinon.stub(episodesController, "viewItems");
+					episodesController.episodeList = {
+						items: [Object.assign({}, items[0])],
+						refresh: sinon.stub()
+					};
+				});
+
+				describe("from series list view", () => {
+					beforeEach(() => episodesController.activate());
+
+					it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+					it("should set the list to view mode", () => episodesController.viewItems.should.have.been.called);
+				});
+
+				describe("from episode view", () => {
+					const testParams = [
+						{
+							description: "watched",
+							status: "Watched",
+							watched: true
+						},
+						{
+							description: "recorded",
+							status: "Recorded",
+							recorded: true
+						},
+						{
+							description: "expected",
+							status: "Expected",
+							expected: true
+						},
+						{
+							description: "warning",
+							statusWarning: "warning",
+							warning: true
+						}
+					];
+
+					testParams.forEach(params => {
+						describe(params.description, () => {
+							describe("edit", () => {
+								beforeEach(() => {
+									listItem.listIndex = 0;
+									listItem.episode = Object.assign(items[0], {
+										episodeName: "edited-episode",
+										status: params.status,
+										statusWarning: params.statusWarning
+									});
+									episodesController.origWatchedCount = 1;
+									episodesController.origRecordedCount = 0;
+									episodesController.origExpectedCount = 0;
+									episodesController.origStatusWarningCount = 1;
+									items[0] = listItem.episode;
+									episodesController.activate(listItem);
+								});
+
+								it("should update the item in the episodes list", () => episodesController.episodeList.items.should.deep.equal(items));
+								it("should update the series watched count", () => listItem.series.setWatchedCount.should.have.been.calledWith(1 + (params.watched || 0)));
+								it("should update the series recorded count", () => listItem.series.setRecordedCount.should.have.been.calledWith(2 + (params.recorded || 0)));
+								it("should update the series expected count", () => listItem.series.setExpectedCount.should.have.been.calledWith(2 + (params.expected || 0)));
+								it("should update the series status warning count", () => listItem.series.setStatusWarning.should.have.been.calledWith(1 + (params.warning || 0)));
+								it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+								it("should set the list to view mode", () => episodesController.viewItems.should.have.been.called);
+							});
+
+							describe("add", () => {
+								beforeEach(() => {
+									listItem.episode = {
+										episodeName: "new-episode",
+										status: params.status,
+										statusWarning: params.statusWarning
+									};
+									items.push(listItem.episode);
+									episodesController.activate(listItem);
+								});
+
+								it("should add the item to the episodes list", () => episodesController.episodeList.items.should.deep.equal(items));
+								it("should increment the series episode count", () => listItem.series.setEpisodeCount.should.have.been.calledWith(7));
+								it("should increment the series watched count", () => listItem.series.setWatchedCount.should.have.been.calledWith(2 + (params.watched || 0)));
+								it("should increment the series recorded count", () => listItem.series.setRecordedCount.should.have.been.calledWith(2 + (params.recorded || 0)));
+								it("should increment the series expected count", () => listItem.series.setExpectedCount.should.have.been.calledWith(2 + (params.expected || 0)));
+								it("should increment the series status warning count", () => listItem.series.setStatusWarning.should.have.been.calledWith(2 + (params.warning || 0)));
+								it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+								it("should set the list to view mode", () => episodesController.viewItems.should.have.been.called);
+							});
+						});
+					});
+				});
+			});
+
+			describe("onPopulateListItem", () => {
+				beforeEach(() => (appController.viewStack = [{scrollPos: 0}]));
+
+				describe("scrolling disabled", () => {
+					it("should do nothing", () => {
+						episodesController.scrollToFirstUnwatched = false;
+						episodesController.onPopulateListItem();
+						appController.viewStack[0].scrollPos.should.equal(0);
+					});
+				});
+
+				describe("scrolling enabled", () => {
+					describe("item watched", () => {
+						it("should scroll past the item", () => {
+							const item = $("<li>")
+								.outerHeight(1)
+								.hide()
+								.appendTo(document.body);
+
+							$("<a>")
+								.attr("id", "test-episode")
+								.hide()
+								.appendTo(item);
+
+							episodesController.onPopulateListItem({id: "test-episode", status: "Watched"});
+							appController.viewStack[0].scrollPos.should.equal(1);
+							item.remove();
+						});
+					});
+
+					describe("item unwatched", () => {
+						beforeEach(() => episodesController.onPopulateListItem({}));
+
+						it("should not scroll past the item", () => appController.viewStack[0].scrollPos.should.equal(0));
+						it("should disable scrolling", () => episodesController.scrollToFirstUnwatched.should.be.false);
+					});
+				});
+			});
+
+			describe("listRetrieved", () => {
+				beforeEach(() => {
+					sinon.stub(episodesController, "activate");
+					episodesController.episodeList = {};
+					episodesController.listRetrieved(items);
+				});
+
+				it("should set the episode list items", () => episodesController.episodeList.items.should.deep.equal(items));
+				it("should activate the controller", () => episodesController.activate.should.have.been.called);
+			});
+
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					episodesController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
+
+			describe("viewItem", () => {
+				const testParams = [
+					{
+						description: "watched",
+						status: "Watched",
+						watched: 1
+					},
+					{
+						description: "recorded",
+						status: "Recorded",
+						recorded: 1
+					},
+					{
+						description: "expected",
+						status: "Expected",
+						expected: 1
+					},
+					{
+						description: "warning",
+						statusWarning: "warning",
+						warning: 1
+					}
+				];
+
+				let index;
+
+				beforeEach(() => (index = 0));
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							items[0].status = params.status;
+							items[0].statusWarning = params.statusWarning;
+							episodesController.episodeList = {items};
+							episodesController.viewItem(index);
+						});
+
+						it("should save the current episode details", () => {
+							episodesController.origWatchedCount.should.equal(params.watched || 0);
+							episodesController.origRecordedCount.should.equal(params.recorded || 0);
+							episodesController.origExpectedCount.should.equal(params.expected || 0);
+							episodesController.origStatusWarningCount.should.equal(params.warning || 0);
+						});
+
+						it("should push the episode view for the selected item", () => appController.pushView.should.have.been.calledWith("episode", {
+							listIndex: index,
+							episode: items[index]
+						}));
+					});
+				});
+			});
+
+			describe("addItem", () => {
+				it("should push the episode view with no selected item", () => {
+					episodesController.episodeList = {items};
+					episodesController.addItem();
+					appController.pushView.should.have.been.calledWithExactly("episode", {series: listItem.series, sequence: 1});
+				});
+			});
+
+			describe("deleteItem", () => {
+				const testParams = [
+					{
+						description: "watched",
+						status: "Watched",
+						watched: 1
+					},
+					{
+						description: "recorded",
+						status: "Recorded",
+						recorded: 1
+					},
+					{
+						description: "expected",
+						status: "Expected",
+						expected: 1
+					},
+					{
+						description: "warning",
+						statusWarning: "warning",
+						warning: 1
+					}
+				];
+
+				let index,
+						item;
+
+				beforeEach(() => {
+					index = 0;
+					sinon.stub(episodesController, "resequenceItems");
+
+					$("<a>")
+						.attr("id", items[0].id)
 						.hide()
-						.appendTo(list));
+						.appendTo($("<li>")
+							.hide()
+							.appendTo(episodeList));
+				});
 
-				this.episodesController.episodeList = new List(null, null, null, this.items.slice(0));
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							item = Object.assign(items[0], {
+								status: params.status,
+								statusWarning: params.statusWarning,
+								remove: sinon.stub()
+							});
+							episodesController.episodeList = {items: [item]};
+							episodesController.deleteItem(index);
+						});
 
-				var origEpisodeCount = this.listItem.series.episodeCount;
-				var origWatchedCount = this.listItem.series.watchedCount;
-				var origRecordedCount = this.listItem.series.recordedCount;
-				var origExpectedCount = this.listItem.series.expectedCount;
-				var origStatusWarningCount = this.listItem.series.statusWarningCount;
+						it("should decrement the series episode count", () => listItem.series.setEpisodeCount.should.have.been.calledWith(5));
+						it("should decrement the series watched count", () => listItem.series.setWatchedCount.should.have.been.calledWith(2 - (params.watched || 0)));
+						it("should decrement the series recorded count", () => listItem.series.setRecordedCount.should.have.been.calledWith(2 - (params.recorded || 0)));
+						it("should decrement the series expected count", () => listItem.series.setExpectedCount.should.have.been.calledWith(2 - (params.expected || 0)));
+						it("should decrement the series status warning count", () => listItem.series.setStatusWarning.should.have.been.calledWith(2 - (params.warning || 0)));
+						it("should remove the item from the DOM", () => $("#list li a#1").length.should.equal(0));
+						it("should remove the item from the database", () => item.remove.should.have.been.called);
+						it("should remove the item from the episodes list", () => episodesController.episodeList.items.should.deep.equal([]));
+						it("should refresh the list", () => episodesController.resequenceItems.should.have.been.called);
+					});
+				});
+			});
 
-				this.episodesController.deleteItem(index);
-				QUnit.equal(this.episodesController.listItem.series.episodeCount, origEpisodeCount - 1, testParams[i].description + " - listItem.series.episodeCount property");
-				QUnit.equal(this.episodesController.listItem.series.watchedCount, origWatchedCount - testParams[i].expectedWatchedCount, testParams[i].description + " - listItem.series.watchedCount property");
-				QUnit.equal(this.episodesController.listItem.series.recordedCount, origRecordedCount - testParams[i].expectedRecordedCount, testParams[i].description + " - listItem.series.recordedCount property");
-				QUnit.equal(this.episodesController.listItem.series.expectedCount, origExpectedCount - testParams[i].expectedExpectedCount, testParams[i].description + " - listItem.series.expectedCount property");
-				QUnit.equal(this.episodesController.listItem.series.statusWarningCount, origStatusWarningCount - testParams[i].expectedStatusWarningCount, testParams[i].description + " - listItem.series.statusWarningCount property");
-				QUnit.deepEqual(this.episodesController.episodeList.items, this.items.slice(1), testParams[i].description + " - List items");
-				QUnit.equal($("#list li a").length, 0, testParams[i].description + " - Remove list item from DOM");
-				jQueryMock.clearDefaultContext();
-			}
-		});
+			describe("deleteItems", () => {
+				beforeEach(() => {
+					sinon.stub(episodesController, "listRetrieved");
+					sinon.stub(episodesController, "viewItems");
+					episodesController.setup();
+					episodesController.deleteItems();
+				});
 
-		QUnit.test("deleteItems", 3, function() {
-			this.episodesController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+				it("should set the list to delete mode", () => episodesController.episodeList.action.should.equal("delete"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
 
-			this.episodesController.episodeList = new List();
+				it("should set the list item icons", () => {
+					episodeList.hasClass("delete").should.be.true;
+					episodeList.hasClass("edit").should.be.false;
+				});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.episodesController.deleteItems();
-			QUnit.equal(this.episodesController.episodeList.action, "delete", "List action");
-			QUnit.ok($("#list").hasClass("delete"), "Set list delete style");
-			this.episodesController.footer.rightButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
+				it("should set the footer label", () => episodesController.footer.label.should.equal("v1.0"));
 
-		QUnit.test("requenceItems", function() {
-			var save = function() {
-				QUnit.ok(true, "Save episode " + this.sequence);
-			};
+				it("should attach a footer right button event handler", () => {
+					episodesController.footer.rightButton.eventHandler();
+					episodesController.viewItems.should.have.been.called;
+				});
 
-			var items = [
-				{
-					id: "1",
-					sequence: 1,
-					save: save
-				},
-				{
-					id: "2",
-					sequence: 2,
-					save: save
-				},
-				{
-					id: "3",
-					sequence: 3,
-					save: save
-				},
-				{
-					id: "4",
-					sequence: 3,
-					save: save
-				}
-			];
+				it("should set the footer right button style", () => episodesController.footer.rightButton.style.should.equal("confirmButton"));
+				it("should set the footer right button label", () => episodesController.footer.rightButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
 
-			var sortedItems = [
-				items[1],
-				items[0],
-				items[2],
-				items[3]
-			];
+			describe("resequenceItems", () => {
+				let sortedItems;
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			var list = $("#list");
+				beforeEach(() => {
+					items = [
+						{
+							id: "1",
+							sequence: 1,
+							save: sinon.stub()
+						},
+						{
+							id: "2",
+							sequence: 2,
+							save: sinon.stub()
+						},
+						{
+							id: "3",
+							sequence: 3,
+							save: sinon.stub()
+						},
+						{
+							id: "4",
+							sequence: 3,
+							save: sinon.stub()
+						}
+					];
 
-			for (var i = 0; i < items.length; i++) {
-				$("<a>")
-					.attr("id", sortedItems[i].id)
-					.hide()
-					.appendTo($("<li>")
-						.hide()
-						.appendTo(list));
-			}
+					sortedItems = [
+						items[1],
+						items[0],
+						items[2],
+						items[3]
+					];
 
-			this.episodesController.episodeList = new List(null, null, null, items);
-			QUnit.expect(items.length - 1);
-			this.episodesController.resequenceItems();
-			QUnit.deepEqual(this.episodesController.episodeList.items, sortedItems, "List items");
-			jQueryMock.clearDefaultContext();
-		});
+					episodeList.append(sortedItems.map(item => $("<li>").append($("<a>").attr("id", item.id))));
 
-		QUnit.test("editItems", 3, function() {
-			this.episodesController.resequenceItems = function() {
-			};
-			this.episodesController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+					episodesController.episodeList = {
+						items,
+						refresh: sinon.stub()
+					};
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.episodesController.episodeList = new List();
-			this.episodesController.editItems();
-			QUnit.equal(this.episodesController.episodeList.action, "edit", "List action");
-			QUnit.ok($("#list").hasClass("edit"), "Set list edit style");
-			this.episodesController.footer.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
+					episodesController.resequenceItems();
+				});
 
-		QUnit.test("sortItems", 1, function() {
-			var e = {
-				clientY: 100
-			};
+				it("should update the sequence of items that have changed position", () => {
+					items[0].save.should.have.been.called;
+					items[1].save.should.have.been.called;
+					items[2].save.should.not.have.been.called;
+					items[3].save.should.not.have.been.called;
+				});
 
-			var ui = {
-				helper: $("<div>")
-					.appendTo(document.body)
-					.offset({top: 0})
-			};
+				it("should sort the list by sequence", () => episodesController.episodeList.items.should.deep.equal(sortedItems));
+				it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+			});
 
-			this.episodesController.sortItems(e, ui);
-			QUnit.equal(ui.helper.offset().top, 80, "UI helper offset top");
-			ui.helper.remove();
+			describe("editItems", () => {
+				beforeEach(() => {
+					sinon.stub(episodesController, "listRetrieved");
+					sinon.stub(episodesController, "resequenceItems");
+					sinon.stub(episodesController, "viewItems");
+					episodesController.setup();
+					episodesController.editItems();
+				});
+
+				it("should set the list to edit mode", () => episodesController.episodeList.action.should.equal("edit"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					episodeList.hasClass("delete").should.be.false;
+					episodeList.hasClass("edit").should.be.true;
+				});
+
+				it("should set the footer label", () => episodesController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					episodesController.footer.leftButton.eventHandler();
+					episodesController.resequenceItems.should.have.been.called;
+					episodesController.viewItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => episodesController.footer.leftButton.style.should.equal("confirmButton"));
+				it("should set the footer left button label", () => episodesController.footer.leftButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			describe("sortItems", () => {
+				it("should reposition the sort helper", () => {
+					const helper = $("<div>")
+						.appendTo(document.body)
+						.offset({top: 0});
+
+					episodesController.sortItems({clientY: 100}, {helper});
+					helper.offset().top.should.equal(80);
+					helper.remove();
+				});
+			});
+
+			describe("viewItems", () => {
+				beforeEach(() => {
+					sinon.stub(episodesController, "listRetrieved");
+					sinon.stub(episodesController, "editItems");
+					sinon.stub(episodesController, "deleteItems");
+					episodesController.setup();
+					episodesController.viewItems();
+				});
+
+				it("should set the list to view mode", () => episodesController.episodeList.action.should.equal("view"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+
+				it("should set the list item icons", () => {
+					episodeList.hasClass("delete").should.be.false;
+					episodeList.hasClass("edit").should.be.false;
+				});
+
+				it("should set the footer label", () => episodesController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					episodesController.footer.leftButton.eventHandler();
+					episodesController.editItems.should.have.been.called;
+				});
+
+				it("should set the footer left button label", () => episodesController.footer.leftButton.label.should.equal("Sort"));
+
+				it("should attach a footer right button event handler", () => {
+					episodesController.footer.rightButton.eventHandler();
+					episodesController.deleteItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => episodesController.footer.rightButton.style.should.equal("cautionButton"));
+				it("should set the footer right button label", () => episodesController.footer.rightButton.label.should.equal("Delete"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			afterEach(() => episodeList.remove());
 		});
 	}
 );

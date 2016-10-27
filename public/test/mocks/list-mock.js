@@ -1,33 +1,21 @@
 define(
-	function() {
+	() => {
 		"use strict";
 
-		var ListMock = function(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
-			this.items = items;
-
-			if (viewEventHandler) {
-				viewEventHandler();
+		class ListMock {
+			constructor(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
+				this.items = items;
+				this.viewEventHandler = viewEventHandler;
+				this.editEventHandler = editEventHandler;
+				this.deleteEventHandler = deleteEventHandler;
+				this.populateItemEventHandler = populateItemEventHandler;
+				this.refresh = sinon.stub();
 			}
 
-			if (editEventHandler) {
-				editEventHandler();
+			setAction(action) {
+				this.action = action;
 			}
-
-			if (deleteEventHandler) {
-				deleteEventHandler();
-			}
-
-			if (populateItemEventHandler) {
-				populateItemEventHandler();
-			}
-		};
-
-		ListMock.prototype.refresh = function() {
-		};
-
-		ListMock.prototype.setAction = function(action) {
-			this.action = action;
-		};
+		}
 
 		return ListMock;
 	}

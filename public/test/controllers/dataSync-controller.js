@@ -1,957 +1,1447 @@
 define(
 	[
-		'models/setting-model',
-		'models/sync-model',
-		'models/program-model',
-		'models/series-model',
-		'models/episode-model',
-		'controllers/dataSync-controller',
-		'controllers/application-controller',
-		'test/mocks/jQuery-mock',
-		'framework/jshash/md5-min',
-		'framework/jquery'
+		"models/setting-model",
+		"models/sync-model",
+		"models/program-model",
+		"models/series-model",
+		"models/episode-model",
+		"controllers/dataSync-controller",
+		"controllers/application-controller",
+		"framework/jshash/md5-min",
+		"framework/jquery"
 	],
 
-	function(Setting, Sync, Program, Series, Episode, DataSyncController, ApplicationController, jQueryMock, hex_md5, $) {
+	(Setting, Sync, Program, Series, Episode, DataSyncController, ApplicationController, hexMD5, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("dataSync-controller", {
-			setup: function() {
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
+		describe("DataSyncController", () => {
+			let dataSyncController;
 
-				$("<input>")
-					.attr("id", "deviceName")
-					.appendTo(this.sandbox);
+			beforeEach(() => (dataSyncController = new DataSyncController()));
 
-				$("<div>")
-					.attr("id", "registrationMessage")
-					.hide()
-					.appendTo(this.sandbox);
+			describe("object constructor", () => {
+				it("should return a DataSyncController instance", () => dataSyncController.should.be.an.instanceOf(DataSyncController));
+			});
 
-				$("<div>")
-					.attr("id", "syncControls")
-					.hide()
-					.appendTo(this.sandbox);
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "goBack");
+					sinon.stub(dataSyncController, "activate");
+					dataSyncController.setup();
+				});
 
-				$("<input>")
+				it("should set the header label", () => dataSyncController.header.label.should.equal("Import/Export"));
+
+				it("should attach a header left button event handler", () => {
+					dataSyncController.header.leftButton.eventHandler();
+					dataSyncController.goBack.should.have.been.called;
+				});
+
+				it("should set the header left button style", () => dataSyncController.header.leftButton.style.should.equal("backButton"));
+				it("should set the header left button label", () => dataSyncController.header.leftButton.label.should.equal("Settings"));
+
+				it("should activate the controller", () => dataSyncController.activate.should.have.been.called);
+			});
+
+			describe("activate", () => {
+				const lastSyncTime = "1 Jan 2010",
+							device = "test-device";
+
+				let registrationRow,
+						importButton,
+						exportButton,
+						localChanges;
+
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "viewRegistration");
+					sinon.stub(dataSyncController, "dataImport");
+					sinon.stub(dataSyncController, "dataExport");
+					sinon.stub(dataSyncController, "gotLastSyncTime");
+					sinon.stub(dataSyncController, "gotDevice");
+					sinon.stub(dataSyncController, "checkForLocalChanges");
+					Setting.get.reset().withArgs("LastSyncTime").yields(lastSyncTime);
+					Setting.get.withArgs("Device").yields(device);
+
+					registrationRow = $("<div>")
+						.attr("id", "registrationRow")
+						.hide()
+						.appendTo(document.body);
+
+					importButton = $("<div>")
+						.attr("id", "import")
+						.hide()
+						.appendTo(document.body);
+
+					exportButton = $("<div>")
+						.attr("id", "export")
+						.hide()
+						.appendTo(document.body);
+
+					localChanges = $("<div>")
+						.attr("id", "localChanges")
+						.hide()
+						.appendTo(document.body);
+
+					Sync.syncList.push("");
+					dataSyncController.activate();
+				});
+
+				it("should attach a registration click event handler", () => {
+					registrationRow.trigger("click");
+					dataSyncController.viewRegistration.should.have.been.called;
+				});
+
+				it("should attach an import click event handler", () => {
+					importButton.trigger("click");
+					dataSyncController.dataImport.should.have.been.called;
+				});
+
+				it("should attach an export click event handler", () => {
+					exportButton.trigger("click");
+					dataSyncController.dataExport.should.have.been.called;
+				});
+
+				it("should set the initial status message", () => localChanges.val().should.equal("Checking..."));
+				it("should get the last sync time", () => dataSyncController.gotLastSyncTime.should.have.been.calledWith(lastSyncTime));
+				it("should get the registered device", () => dataSyncController.gotDevice.should.have.been.calledWith(device));
+				it("should count how many local changes there are to be synced", () => dataSyncController.checkForLocalChanges.should.have.been.calledWith(1));
+
+				afterEach(() => {
+					registrationRow.remove();
+					importButton.remove();
+					exportButton.remove();
+					localChanges.remove();
+					Sync.syncList.pop();
+				});
+			});
+
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					dataSyncController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
+
+			describe("viewRegistration", () => {
+				it("should push the registration view", () => {
+					dataSyncController.viewRegistration();
+					appController.pushView.should.have.been.calledWith("registration");
+				});
+			});
+
+			describe("gotLastSyncTime", () => {
+				let lastSyncTime;
+
+				beforeEach(() => (lastSyncTime = $("<div>")
 					.attr("id", "lastSyncTime")
-					.appendTo(this.sandbox);
+					.hide()
+					.appendTo(document.body)
+				));
 
-				$("<input>")
+				describe("with last sync time", () => {
+					it("should display the last sync time", () => {
+						dataSyncController.gotLastSyncTime({settingValue: new Date(2010, 1, 1, 1, 2, 11)});
+						lastSyncTime.val().should.equal("1-Feb-2010 01:02:11");
+					});
+				});
+
+				describe("without last sync time", () => {
+					it("should display unknown", () => {
+						dataSyncController.gotLastSyncTime({});
+						lastSyncTime.val().should.equal("Unknown");
+					});
+				});
+
+				afterEach(() => lastSyncTime.remove());
+			});
+
+			describe("gotDevice", () => {
+				let deviceName,
+						syncControls,
+						importChangesOnly,
+						importChangesOnlyRow,
+						registrationMessage;
+
+				beforeEach(() => {
+					deviceName = $("<div>")
+						.attr("id", "deviceName")
+						.hide()
+						.appendTo(document.body);
+
+					syncControls = $("<div>")
+						.attr("id", "syncControls")
+						.hide()
+						.appendTo(document.body);
+
+					importChangesOnlyRow = $("<div>")
+						.attr("id", "importChangesOnlyRow")
+						.hide()
+						.appendTo(document.body);
+
+					importChangesOnly = $("<import type='checkbox'>")
+						.attr("id", "importChangesOnly")
+						.prop("checked", false)
+						.hide()
+						.appendTo(importChangesOnlyRow);
+
+					registrationMessage = $("<div>")
+						.attr("id", "registrationMessage")
+						.hide()
+						.appendTo(document.body);
+				});
+
+				describe("with device", () => {
+					let device;
+
+					beforeEach(() => (device = {name: "test-device"}));
+
+					describe("first import", () => {
+						beforeEach(() => dataSyncController.gotDevice({settingValue: JSON.stringify(device)}));
+
+						it("should set the device", () => dataSyncController.device.should.deep.equal(device));
+						it("should display the device name", () => deviceName.val().should.equal(device.name));
+						it("should show the sync controls", () => syncControls.css("display").should.not.equal("none"));
+						it("should not check the import changes only checkbox", () => importChangesOnly.prop("checked").should.be.false);
+						it("should not show the import changes only row", () => importChangesOnlyRow.css("display").should.equal("none"));
+						it("should not show the registration message", () => registrationMessage.css("display").should.equal("none"));
+					});
+
+					describe("subsequent import", () => {
+						beforeEach(() => {
+							device.imported = true;
+							dataSyncController.gotDevice({settingValue: JSON.stringify(device)});
+						});
+
+						it("should set the device", () => dataSyncController.device.should.deep.equal(device));
+						it("should display the device name", () => deviceName.val().should.equal(device.name));
+						it("should show the sync controls", () => syncControls.css("display").should.not.equal("none"));
+						it("should check the import changes only checkbox", () => importChangesOnly.prop("checked").should.be.true);
+						it("should show the import changes only row", () => importChangesOnlyRow.css("display").should.not.equal("none"));
+						it("should not show the registration message", () => registrationMessage.css("display").should.equal("none"));
+					});
+				});
+
+				describe("without device", () => {
+					beforeEach(() => dataSyncController.gotDevice({}));
+
+					it("should not set the device", () => (Reflect.undefined === dataSyncController.device).should.be.true);
+					it("should display unregistered", () => deviceName.val().should.equal("< Unregistered >"));
+					it("should show the registration message", () => registrationMessage.css("display").should.not.equal("none"));
+					it("should not show the sync controls", () => syncControls.css("display").should.equal("none"));
+					it("should not check the import changes only checkbox", () => importChangesOnly.prop("checked").should.be.false);
+					it("should not show the import changes only row", () => importChangesOnlyRow.css("display").should.equal("none"));
+				});
+
+				afterEach(() => {
+					deviceName.remove();
+					syncControls.remove();
+					importChangesOnlyRow.remove();
+					registrationMessage.remove();
+				});
+			});
+
+			describe("checkForLocalChanges", () => {
+				let localChanges;
+
+				beforeEach(() => (localChanges = $("<div>")
 					.attr("id", "localChanges")
-					.appendTo(this.sandbox);
-
-				var importChangesOnlyRow = $("<div>")
-					.attr("id", "importChangesOnlyRow")
 					.hide()
-					.appendTo(this.sandbox);
+					.appendTo(document.body)
+				));
 
-				$("<input type='checkbox'>")
-					.attr("id", "importChangesOnly")
-					.appendTo(importChangesOnlyRow);
-				
-				var statusRow = $("<div>")
-					.attr("id", "statusRow")
-					.appendTo(this.sandbox);
+				describe("one change", () => {
+					beforeEach(() => dataSyncController.checkForLocalChanges(1));
 
-				$("<progress>")
-					.attr("id", "progress")
-					.appendTo(statusRow);
+					it("should set the local changes flag", () => dataSyncController.localChanges.should.be.true);
+					it("should display the number of changes", () => localChanges.val().should.equal("1 change pending"));
+				});
 
-				$("<input>")
+				describe("multiple changes", () => {
+					beforeEach(() => dataSyncController.checkForLocalChanges(2));
+
+					it("should set the local changes flag", () => dataSyncController.localChanges.should.be.true);
+					it("should display the number of changes", () => localChanges.val().should.equal("2 changes pending"));
+				});
+
+				describe("no changes", () => {
+					beforeEach(() => dataSyncController.checkForLocalChanges(0));
+
+					it("should not set the local changes flag", () => dataSyncController.localChanges.should.be.false);
+					it("should display no pending changes", () => localChanges.val().should.equal("None pending"));
+				});
+
+				afterEach(() => localChanges.remove());
+			});
+
+			describe("dataExport", () => {
+				it("should start an export", () => {
+					sinon.stub(dataSyncController, "syncStart");
+					dataSyncController.dataExport();
+					dataSyncController.syncStart.should.have.been.calledWith("Export", "Are you sure you want to export?", sinon.match.func);
+				});
+			});
+
+			describe("dataImport", () => {
+				beforeEach(() => sinon.stub(dataSyncController, "syncStart"));
+
+				describe("with local changes", () => {
+					it("should start an import", () => {
+						dataSyncController.localChanges = true;
+						dataSyncController.dataImport();
+						dataSyncController.syncStart.should.have.been.calledWith("Import", "Warning: Local changes have been made. Are you sure you want to import?", sinon.match.func);
+					});
+				});
+
+				describe("without local changes", () => {
+					it("should start an import", () => {
+						dataSyncController.dataImport();
+						dataSyncController.syncStart.should.have.been.calledWith("Import", "Are you sure you want to import?", sinon.match.func);
+					});
+				});
+			});
+
+			describe("syncStart", () => {
+				let status;
+
+				beforeEach(() => (status = $("<div>")
 					.attr("id", "status")
-					.appendTo(statusRow);
-
-				var syncErrors = $("<div>")
-					.attr("id", "syncErrors")
 					.hide()
-					.appendTo(this.sandbox);
+					.appendTo(document.body)
+				));
 
-				$("<ul>")
-					.attr("id", "errorList")
-					.appendTo(syncErrors);
+				describe("syncing", () => {
+					it("should do nothing", () => {
+						dataSyncController.syncing = true;
+						dataSyncController.syncStart("Operation");
+						status.val().should.equal("An operation is already running");
+					});
+				});
 
-				this.syncList = [
+				describe("not syncing", () => {
+					let progress,
+							statusRow,
+							callback;
+
+					beforeEach(() => {
+						sinon.stub(dataSyncController, "syncFinish");
+
+						progress = $("<div>")
+							.attr("id", "progress")
+							.appendTo(document.body);
+
+						statusRow = $("<div>")
+							.attr("id", "statusRow")
+							.hide()
+							.appendTo(document.body);
+
+						callback = sinon.stub();
+					});
+
+					describe("confirmed", () => {
+						beforeEach(() => {
+							sinon.stub(window, "confirm").returns(true);
+							dataSyncController.syncStart("Operation", "prompt", callback);
+						});
+
+						it("should set the syncing flag", () => dataSyncController.syncing.should.be.true);
+						it("should hide the progress", () => progress.css("display").should.equal("none"));
+						it("should set the status", () => status.val().should.equal("Starting operation"));
+						it("should show the status", () => status.css("display").should.not.equal("none"));
+						it("should show the status row", () => statusRow.css("display").should.not.equal("none"));
+						it("should prompt the user to confirm the operation", () => window.confirm.should.have.been.calledWith("prompt"));
+						it("should invoke the sync callback", () => callback.should.have.been.called);
+						it("should not finish the sync", () => dataSyncController.syncFinish.should.not.have.been.called);
+					});
+
+					describe("cancelled", () => {
+						beforeEach(() => {
+							sinon.stub(window, "confirm").returns(false);
+							dataSyncController.syncStart("Operation", "prompt");
+						});
+
+						it("should set the syncing flag", () => dataSyncController.syncing.should.be.true);
+						it("should hide the progress", () => progress.css("display").should.equal("none"));
+						it("should show the status", () => status.css("display").should.not.equal("none"));
+						it("should show the status row", () => statusRow.css("display").should.not.equal("none"));
+						it("should prompt the user to confirm the operation", () => window.confirm.should.have.been.calledWith("prompt"));
+						it("should not invoke the sync callback", () => callback.should.not.have.been.called);
+						it("should set the status", () => status.val().should.equal("Operation aborted"));
+						it("should finish the sync", () => dataSyncController.syncFinish.should.have.been.calledWith("Operation", false));
+					});
+
+					afterEach(() => {
+						progress.remove();
+						statusRow.remove();
+						window.confirm.restore();
+					});
+				});
+
+				afterEach(() => status.remove());
+			});
+
+			describe("syncFinish", () => {
+				let statusRow;
+
+				beforeEach(() => (statusRow = $("<div>")
+					.attr("id", "statusRow")
+					.appendTo(document.body)
+				));
+
+				describe("successful", () => {
+					beforeEach(() => dataSyncController.syncFinish("Sync", true));
+
+					it("should hide the status row", () => statusRow.css("display").should.equal("none"));
+
+					it("should display a notice to the user", () => appController.showNotice.should.have.been.calledWith({
+						label: "Database has been successfully synced.",
+						leftButton: {
+							style: "cautionButton",
+							label: "OK"
+						}
+					}));
+
+					it("should clear the syncing flag", () => dataSyncController.syncing.should.equal.false);
+				});
+
+				describe("not successful", () => {
+					beforeEach(() => dataSyncController.syncFinish("Sync", false));
+
+					it("should not hide the status row", () => statusRow.css("display").should.not.equal("none"));
+
+					it("should display a notice to the user", () => appController.showNotice.should.have.been.calledWith({
+						label: "Sync failed.",
+						leftButton: {
+							style: "cautionButton",
+							label: "OK"
+						}
+					}));
+
+					it("should clear the syncing flag", () => dataSyncController.syncing.should.equal.false);
+				});
+
+				afterEach(() => statusRow.remove());
+			});
+
+			describe("doExport", () => {
+				it("should get the list of local changes to be synced", () => {
+					sinon.stub(dataSyncController, "listRetrieved");
+					Sync.syncList.push({});
+					dataSyncController.doExport();
+					dataSyncController.listRetrieved.should.have.been.calledWith([{}]);
+					Sync.syncList.pop();
+				});
+			});
+
+			describe("listRetrieved", () => {
+				let syncList,
+						status,
+						progress;
+
+				beforeEach(() => {
+					status = $("<div>")
+						.attr("id", "status")
+						.appendTo(document.body);
+
+					progress = $("<progress>")
+						.attr("id", "progress")
+						.attr("max", 10)
+						.val(5)
+						.hide()
+						.appendTo(document.body);
+
+					syncList = [
+						{action: "modified"},
+						{action: "modified"},
+						{action: "deleted"}
+					];
+
+					sinon.stub(dataSyncController, "sendChange");
+					sinon.stub(dataSyncController, "sendDelete");
+					dataSyncController.syncProcess = 1;
+					dataSyncController.syncErrors = ["error"];
+					dataSyncController.listRetrieved(syncList);
+				});
+
+				it("should reset the number of sync items processed", () => dataSyncController.syncProcessed.should.equal(0));
+				it("should reset the sync errors", () => dataSyncController.syncErrors.should.be.empty);
+				it("should set the list of changes to be sync", () => dataSyncController.syncList.should.equal(syncList));
+				it("should hide the status", () => status.css("display").should.equal("none"));
+				it("should reset the progress", () => progress.val().should.equal(0));
+				it("should set the progress total", () => progress.attr("max").should.equal("3"));
+				it("should show the progress", () => progress.css("display").should.not.equal("none"));
+
+				it("should send any changes", () => {
+					dataSyncController.sendChange.callCount.should.equal(2);
+					dataSyncController.sendChange.should.have.been.calledWith({action: "modified"});
+				});
+
+				it("should send any deletes", () => {
+					dataSyncController.sendDelete.callCount.should.equal(1);
+					dataSyncController.sendDelete.should.have.been.calledWith({action: "deleted"});
+				});
+
+				afterEach(() => {
+					status.remove();
+					progress.remove();
+				});
+			});
+
+			describe("sendChange", () => {
+				let fakeServer,
+						sync;
+
+				beforeEach(() => {
+					fakeServer = sinon.fakeServer.create();
+					fakeServer.respondImmediately = true;
+					sinon.stub(dataSyncController, "changeSent");
+					sinon.stub(dataSyncController, "syncError");
+					dataSyncController.device = {id: "test-device"};
+				});
+
+				["Program", "Series", "Episode"].forEach(type => {
+					describe(type, () => {
+						beforeEach(() => (sync = {
+							type,
+							id: 1,
+							remove: sinon.stub()
+						}));
+
+						describe("success", () => {
+							describe("hash match", () => {
+								beforeEach(() => {
+									fakeServer.respondWith("POST", "/documents", request => {
+										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+										request.requestBody.should.equal(JSON.stringify({type}));
+										request.respond(200, {Etag: request.requestHeaders["Content-MD5"]});
+									});
+
+									dataSyncController.sendChange(sync);
+								});
+
+								it("should remove the sync record", () => sync.remove.should.have.been.called);
+								it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+								it("should mark the change as sent", () => dataSyncController.changeSent.should.have.been.called);
+							});
+
+							describe("hash mismatch", () => {
+								beforeEach(() => {
+									fakeServer.respondWith("POST", "/documents", request => {
+										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+										request.requestBody.should.equal(JSON.stringify({type}));
+										request.respond(200, {Etag: "bad-hash"});
+									});
+
+									dataSyncController.sendChange(sync);
+								});
+
+								it("should not remove the sync record", () => sync.remove.should.not.have.been.called);
+								it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Checksum mismatch", type, "Expected: test-hash, got: bad-hash", 1));
+								it("should mark the change as sent", () => dataSyncController.changeSent.should.have.been.called);
+							});
+						});
+
+						describe("error", () => {
+							beforeEach(() => {
+								fakeServer.respondWith("POST", "/documents", request => {
+									request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+									request.requestBody.should.equal(JSON.stringify({type}));
+									request.respond(500, null, "Force failed");
+								});
+
+								dataSyncController.sendChange(sync);
+							});
+
+							it("should not remove the sync record", () => sync.remove.should.not.have.been.called);
+							it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Send error", type, "error, 500 (Internal Server Error)", 1));
+							it("should mark the change as sent", () => dataSyncController.changeSent.should.have.been.called);
+						});
+					});
+				});
+
+				afterEach(() => fakeServer.restore());
+			});
+
+			describe("sendDelete", () => {
+				let fakeServer,
+						sync;
+
+				beforeEach(() => {
+					fakeServer = sinon.fakeServer.create();
+					fakeServer.respondImmediately = true;
+
+					sync = {
+						id: 1,
+						type: "type",
+						remove: sinon.stub()
+					};
+
+					sinon.stub(dataSyncController, "changeSent");
+					sinon.stub(dataSyncController, "syncError");
+					dataSyncController.device = {id: "test-device"};
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("DELETE", "/documents/1", request => {
+							request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+							request.respond(200);
+						});
+
+						dataSyncController.sendDelete(sync);
+					});
+
+					it("should remove the sync record", () => sync.remove.should.have.been.called);
+					it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+					it("should mark the delete as sent", () => dataSyncController.changeSent.should.have.been.called);
+				});
+
+				describe("error", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("DELETE", "/documents/1", request => {
+							request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+							request.respond(500, null, "Force failed");
+						});
+
+						dataSyncController.sendDelete(sync);
+					});
+
+					it("should not remove the sync record", () => sync.remove.should.not.have.been.called);
+					it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Delete error", "type", "error, 500 (Internal Server Error)", 1));
+					it("should mark the delete as sent", () => dataSyncController.changeSent.should.have.been.called);
+				});
+
+				afterEach(() => fakeServer.restore());
+			});
+
+			describe("changeSent", () => {
+				let progress,
+						syncErrors;
+
+				beforeEach(() => {
+					progress = $("<progress>")
+						.attr("id", "progress")
+						.attr("max", 3)
+						.hide()
+						.appendTo(document.body);
+
+					syncErrors = $("<div>")
+						.attr("id", "syncErrors")
+						.appendTo(document.body);
+
+					sinon.stub(dataSyncController, "setLastSyncTime");
+					sinon.stub(dataSyncController, "checkForLocalChanges");
+					sinon.stub(dataSyncController, "syncFinish");
+					sinon.stub(dataSyncController, "showErrors");
+					dataSyncController.syncProcessed = 0;
+				});
+
+				describe("not finished", () => {
+					beforeEach(() => {
+						dataSyncController.syncList = [{}, {}];
+						dataSyncController.changeSent();
+					});
+
+					it("should increment the number of sync items processed", () => dataSyncController.syncProcessed.should.equal(1));
+					it("should update the progress", () => progress.val().should.equal(1));
+					it("should not update the last sync time", () => dataSyncController.setLastSyncTime.should.not.have.been.called);
+					it("should not count how many local changes there are to be synced", () => dataSyncController.checkForLocalChanges.should.not.have.been.called);
+					it("should not finish the sync", () => dataSyncController.syncFinish.should.not.have.been.called);
+					it("should not show any errors", () => dataSyncController.showErrors.should.not.have.been.called);
+				});
+
+				describe("finished", () => {
+					beforeEach(() => {
+						Sync.syncList.push({});
+						dataSyncController.syncList = [{}];
+					});
+
+					describe("without errors", () => {
+						beforeEach(() => {
+							dataSyncController.syncErrors = [];
+							dataSyncController.changeSent();
+						});
+
+						it("should increment the number of sync items processed", () => dataSyncController.syncProcessed.should.equal(1));
+						it("should update the progress", () => progress.val().should.equal(1));
+						it("should update the last sync time", () => dataSyncController.setLastSyncTime.should.have.been.called);
+						it("should count how many local changes there are to be synced", () => dataSyncController.checkForLocalChanges.should.have.been.calledWith(1));
+						it("should hide the sync errors", () => syncErrors.css("display").should.equal("none"));
+						it("should finish the sync", () => dataSyncController.syncFinish.should.have.been.calledWith("Export", true));
+						it("should not show any errors", () => dataSyncController.showErrors.should.not.have.been.called);
+					});
+
+					describe("with errors", () => {
+						beforeEach(() => {
+							dataSyncController.syncErrors = [{}];
+							dataSyncController.changeSent();
+						});
+
+						it("should increment the number of sync items processed", () => dataSyncController.syncProcessed.should.equal(1));
+						it("should update the progress", () => progress.val().should.equal(1));
+						it("should update the last sync time", () => dataSyncController.setLastSyncTime.should.have.been.called);
+						it("should count how many local changes there are to be synced", () => dataSyncController.checkForLocalChanges.should.have.been.calledWith(1));
+						it("should not hide the sync errors", () => syncErrors.css("display").should.not.equal("none"));
+						it("should not finish the sync", () => dataSyncController.syncFinish.should.not.have.been.called);
+						it("should show any errors", () => dataSyncController.showErrors.should.have.been.calledWith("Export"));
+					});
+
+					afterEach(() => Sync.syncList.pop());
+				});
+
+				afterEach(() => {
+					progress.remove();
+					syncErrors.remove();
+				});
+			});
+
+			describe("setLastSyncTime", () => {
+				let lastSyncTime;
+
+				beforeEach(() => {
+					const clock = sinon.useFakeTimers();
+
+					lastSyncTime = new Date();
+					sinon.stub(dataSyncController, "gotLastSyncTime");
+					dataSyncController.setLastSyncTime();
+					clock.restore();
+				});
+
+				it("should save the last sync time", () => Setting.prototype.save.should.have.been.called);
+
+				it("should display the last sync time", () => dataSyncController.gotLastSyncTime.should.have.been.calledWith(sinon.match({
+					settingName: "LastSyncTime",
+					settingValue: lastSyncTime
+				})));
+			});
+
+			describe("doImport", () => {
+				let importChangesOnly;
+
+				beforeEach(() => {
+					importChangesOnly = $("<input type='checkbox'>")
+						.attr("id", "importChangesOnly")
+						.hide()
+						.appendTo(document.body);
+
+					sinon.stub(dataSyncController, "importData");
+					sinon.stub(dataSyncController, "syncError");
+					sinon.stub(dataSyncController, "importDone");
+					dataSyncController.programsReady = false;
+					dataSyncController.seriesReady = false;
+					dataSyncController.episodesReady = false;
+				});
+
+				describe("fast import", () => {
+					beforeEach(() => {
+						importChangesOnly.prop("checked", true);
+						dataSyncController.doImport();
+					});
+
+					it("should reset the sync errors", () => dataSyncController.syncErrors.should.be.empty);
+					it("should check if fast import is selected", () => dataSyncController.importChangesOnly.should.be.true);
+
+					it("should mark all models as ready", () => {
+						dataSyncController.programsReady.should.be.true;
+						dataSyncController.seriesReady.should.be.true;
+						dataSyncController.episodesReady.should.be.true;
+					});
+
+					it("should start the import", () => dataSyncController.importData.should.have.been.calledOnce);
+					it("should not add any errors to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+					it("should not mark the import as done", () => dataSyncController.importDone.should.not.have.been.called);
+				});
+
+				describe("full import", () => {
+					beforeEach(() => importChangesOnly.prop("checked", false));
+
+					describe("with errors", () => {
+						beforeEach(() => {
+							Program.removeAllFail();
+							Series.removeAllFail();
+							Episode.removeAllFail();
+							dataSyncController.doImport();
+						});
+
+						it("should reset the sync errors", () => dataSyncController.syncErrors.should.be.empty);
+						it("should check if fast import is selected", () => dataSyncController.importChangesOnly.should.be.false);
+						it("should attempt to delete all existing programs", () => Program.removeAll.should.have.been.called);
+						it("should attempt to delete all existing series", () => Series.removeAll.should.have.been.called);
+						it("should attempt to delete all existing episodes", () => Episode.removeAll.should.have.been.called);
+
+						it("should mark all models as ready", () => {
+							dataSyncController.programsReady.should.be.true;
+							dataSyncController.seriesReady.should.be.true;
+							dataSyncController.episodesReady.should.be.true;
+						});
+
+						it("should add 3 errors to the errors list", () => {
+							dataSyncController.syncError.callCount.should.equal(3);
+							dataSyncController.syncError.should.have.been.calledWith("Delete error", "Program", "Force failed");
+							dataSyncController.syncError.should.have.been.calledWith("Delete error", "Series", "Force failed");
+							dataSyncController.syncError.should.have.been.calledWith("Delete error", "Episode", "Force failed");
+						});
+
+						it("should mark the import as done", () => dataSyncController.importDone.should.have.been.calledThrice);
+					});
+
+					describe("without errors", () => {
+						beforeEach(() => {
+							Program.removeAllOK();
+							Series.removeAllOK();
+							Episode.removeAllOK();
+							dataSyncController.doImport();
+						});
+
+						it("should reset the sync errors", () => dataSyncController.syncErrors.should.be.empty);
+						it("should check if fast import is selected", () => dataSyncController.importChangesOnly.should.be.false);
+						it("should attempt to delete all existing programs", () => Program.removeAll.should.have.been.called);
+						it("should attempt to delete all existing series", () => Series.removeAll.should.have.been.called);
+						it("should attempt to delete all existing episodes", () => Episode.removeAll.should.have.been.called);
+
+						it("should mark all models as ready", () => {
+							dataSyncController.programsReady.should.be.true;
+							dataSyncController.seriesReady.should.be.true;
+							dataSyncController.episodesReady.should.be.true;
+						});
+
+						it("should start the import", () => dataSyncController.importData.should.have.been.calledThrice);
+					});
+				});
+
+				afterEach(() => importChangesOnly.remove());
+			});
+
+			describe("importData", () => {
+				beforeEach(() => {
+					dataSyncController.objectsToImport = 1;
+					dataSyncController.objectsImported = 1;
+				});
+
+				describe("models not ready", () => {
+					it("should do nothing", () => {
+						dataSyncController.programsReady = false;
+						dataSyncController.importData();
+						dataSyncController.objectsToImport.should.equal(1);
+						dataSyncController.objectsImported.should.equal(1);
+					});
+				});
+
+				describe("models ready", () => {
+					const testParams = [
+						{
+							description: "fast import",
+							importChangesOnly: true,
+							resource: "pending"
+						},
+						{
+							description: "full import",
+							importChangesOnly: false,
+							resource: "all"
+						}
+					];
+
+					let fakeServer;
+
+					beforeEach(() => {
+						fakeServer = sinon.fakeServer.create();
+						fakeServer.respondImmediately = true;
+						sinon.stub(dataSyncController, "syncError");
+						sinon.stub(dataSyncController, "importDone");
+						sinon.stub(dataSyncController, "getImportData", data => ({importJson: data.data, returnedHash: data.checksum}));
+						dataSyncController.device = {id: "test-device"};
+						dataSyncController.programsReady = true;
+						dataSyncController.seriesReady = true;
+						dataSyncController.episodesReady = true;
+					});
+
+					testParams.forEach(params => {
+						describe(params.description, () => {
+							beforeEach(() => (dataSyncController.importChangesOnly = params.importChangesOnly));
+
+							describe("success", () => {
+								describe("hash match", () => {
+									describe("with data", () => {
+										let status,
+												progress;
+
+										beforeEach(() => {
+											fakeServer.respondWith("GET", `/documents/${params.resource}`, request => {
+												request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+												request.respond(200, null, JSON.stringify({data: [{}, {}], checksum: "test-hash"}));
+											});
+
+											status = $("<div>")
+												.attr("id", "status")
+												.hide()
+												.appendTo(document.body);
+
+											progress = $("<progress>")
+												.attr("id", "progress")
+												.hide()
+												.appendTo(document.body);
+
+											sinon.stub(dataSyncController, "importObject");
+											dataSyncController.importData();
+										});
+
+										it("should reset the number of objects imported", () => dataSyncController.objectsImported.should.equal(0));
+										it("should set the number of objects to import", () => dataSyncController.objectsToImport.should.equal(2));
+										it("should hide the status", () => status.css("display").should.equal("none"));
+										it("should reset the progress", () => progress.val().should.equal(0));
+										it("should set the progress total", () => progress.attr("max").should.equal("2"));
+										it("should show the progress", () => progress.css("display").should.not.equal("none"));
+										it("should process each object to import", () => dataSyncController.importObject.should.have.been.calledTwice);
+
+										afterEach(() => {
+											status.remove();
+											progress.remove();
+										});
+									});
+
+									describe("no data", () => {
+										beforeEach(() => {
+											fakeServer.respondWith("GET", `/documents/${params.resource}`, request => {
+												request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+												request.respond(200, null, JSON.stringify({data: [], checksum: "test-hash"}));
+											});
+
+											dataSyncController.importData();
+										});
+
+										it("should reset the number of objects to import", () => dataSyncController.objectsToImport.should.equal(0));
+										it("should reset the number of objects imported", () => dataSyncController.objectsImported.should.equal(0));
+
+										if (params.importChangesOnly) {
+											it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+										} else {
+											it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Receive error", "Sync", "No data found"));
+										}
+
+										it("should mark the import as done", () => dataSyncController.importDone.should.have.been.called);
+									});
+								});
+
+								describe("hash mismatch", () => {
+									beforeEach(() => {
+										fakeServer.respondWith("GET", `/documents/${params.resource}`, request => {
+											request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+											request.respond(200, null, JSON.stringify({checksum: "bad-hash"}));
+										});
+
+										dataSyncController.importData();
+									});
+
+									it("should reset the number of objects to import", () => dataSyncController.objectsToImport.should.equal(0));
+									it("should reset the number of objects imported", () => dataSyncController.objectsImported.should.equal(0));
+									it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Checksum mismatch", "Sync", "Expected: test-hash, got: bad-hash"));
+									it("should mark the import as done", () => dataSyncController.importDone.should.have.been.called);
+								});
+							});
+
+							describe("error", () => {
+								beforeEach(() => {
+									fakeServer.respondWith("GET", `/documents/${params.resource}`, request => {
+										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+										request.respond(500, null, "Force failed");
+									});
+
+									dataSyncController.importData();
+								});
+
+								it("should reset the number of objects to import", () => dataSyncController.objectsToImport.should.equal(0));
+								it("should reset the number of objects imported", () => dataSyncController.objectsImported.should.equal(0));
+								it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Receive error", "Sync", "error, 500 (Internal Server Error)"));
+								it("should mark the import as done", () => dataSyncController.importDone.should.have.been.called);
+							});
+						});
+					});
+
+					afterEach(() => fakeServer.restore());
+				});
+			});
+
+			describe("getImportData", () => {
+				const data = {},
+							checksum = "test-hash",
+							testParams = [
+								{
+									description: "200 OK, fast import",
+									importChangesOnly: true,
+									data,
+									jqXHR: {getResponseHeader: sinon.stub().withArgs("Etag").returns("\"test-hash")}
+								},
+								{
+									description: "200 OK, full import",
+									importChangesOnly: false,
+									data: {data, checksum}
+								},
+								{
+									description: "304 Not Modified, fast import",
+									importChangesOnly: true,
+									jqXHR: {
+										responseText: JSON.stringify(data),
+										getResponseHeader: sinon.stub().withArgs("Etag").returns("\"test-hash")
+									}
+								},
+								{
+									description: "304 Not Modified, full import",
+									importChangesOnly: false,
+									jqXHR: {responseText: JSON.stringify({data, checksum})}
+								}
+							];
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						let result;
+
+						beforeEach(() => {
+							dataSyncController.importChangesOnly = params.importChangesOnly;
+							result = dataSyncController.getImportData(params.data, params.jqXHR);
+						});
+
+						it("should return the object JSON", () => result.importJson.should.deep.equal(data));
+						it("should return the checksum", () => result.returnedHash.should.equal(checksum));
+					});
+				});
+			});
+
+			describe("importObject", () => {
+				const testParams = [
 					{
-						type: "Program",
-						id: "1",
-						action: "modified"
+						model: Program,
+						doc: {
+							type: "Program"
+						},
+						isPending: Reflect.undefined
 					},
 					{
-						type: "Series",
-						id: "2",
-						action: "deleted"
+						model: Series,
+						doc: {
+							type: "Series",
+							pending: ["other-device"]
+						},
+						isPending: false
 					},
 					{
-						type: "Episode",
-						id: "3",
-						action: "unknown"
+						model: Episode,
+						doc: {
+							type: "Episode",
+							pending: ["test-device"]
+						},
+						isPending: true
 					}
 				];
 
-				this.ajaxMock = $.proxy(function(options) {
-					if (this.importData) {
-						options.success.apply(options.context, [
-							this.importData,
-							200,
-							{
-								getResponseHeader: function() { return "test-hash"; }
-							}
-						]);
-					} else {
-						options.error.apply(options.context, [{
-							status: "404",
-							statusText: "Not found"
-						}, "Force failed"]);
-					}
+				let callback;
 
-					if (options.complete) {
-						options.complete();
-					}
-				}, this);
+				beforeEach(() => {
+					dataSyncController.device = {id: "test-device"};
+					callback = sinon.stub();
+					sinon.stub(dataSyncController, "saveCallback").returns(callback);
+				});
 
-				QUnit.stop();
-				$.get("/base/test/database.json", $.proxy(function(docs) {
-					this.docs = docs;
-					QUnit.start();
-				}, this));
+				testParams.forEach(params => {
+					describe(params.doc.type, () => {
+						beforeEach(() => (params.doc.id = 1));
 
-				this.startFakeServer = $.proxy(function() {
-					this.fakeServer = sinon.fakeServer.create();
-					this.fakeServer.autoRespond = true;
-					this.fakeServer.respondWith("POST", "/documents", function(request) {
-						request.respond(200, {"Etag": request.requestHeaders["Content-MD5"]});
+						describe("deleted", () => {
+							beforeEach(() => {
+								params.doc.isDeleted = true;
+								dataSyncController.importObject({doc: params.doc});
+							});
+
+							it("should create an instance from the JSON", () => params.model.fromJson.should.have.been.calledWith(params.doc));
+							it("should remove the object", () => params.model.prototype.remove.should.have.been.called);
+							it("should get the callback", () => dataSyncController.saveCallback.should.have.been.calledWith(params.doc.type, params.isPending));
+							it("should invoke the callback", () => callback.should.have.been.calledWith(params.doc.id));
+						});
+
+						describe("created or updated", () => {
+							beforeEach(() => {
+								params.doc.isDeleted = false;
+								dataSyncController.importObject({doc: params.doc});
+							});
+
+							it("should create an instance from the JSON", () => params.model.fromJson.should.have.been.calledWith(params.doc));
+							it("should get the callback", () => dataSyncController.saveCallback.should.have.been.calledWith(params.doc.type, params.isPending));
+							it("should save the object", () => params.model.prototype.save.should.have.been.calledWith(callback));
+						});
 					});
-					this.fakeServer.respondWith("DELETE", /\/documents\/\d+/, "");
-					this.fakeServer.respondWith("GET", "/documents/all", [200, {}, JSON.stringify({
-						data: this.docs,
-						checksum: "test-hash"
-					})]);
-					this.fakeServer.respondWith("GET", "/documents/pending", [200, {"Etag": "test-hash"}, JSON.stringify(this.docs)]);
-					this.fakeServer.respondWith("DELETE", /\/documents\/\d+\/pending/, "");
-				}, this);
+				});
+			});
 
-				this.stopFakeServer = $.proxy(function() {
-					this.fakeServer.restore();
-				}, this);
+			describe("saveCallback", () => {
+				let callback;
 
-				this.originalSyncError = DataSyncController.prototype.syncError;
-				this.dataSyncController = new DataSyncController();
-				this.dataSyncController.syncError = function(error, type, message, id) {
-					this.syncErrors.push({
-						error: error,
-						type: type,
-						message: message,
-						id: id
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "dataImported");
+					sinon.stub(dataSyncController, "removePending");
+					sinon.stub(dataSyncController, "syncError");
+					Sync.reset();
+					callback = dataSyncController.saveCallback("type", true);
+				});
+
+				it("should return a function", () => callback.should.be.a.Function);
+
+				describe("id supplied", () => {
+					describe("pending", () => {
+						describe("fast import", () => {
+							beforeEach(() => {
+								dataSyncController.importChangesOnly = true;
+								callback(1);
+							});
+
+							it("should clear any sync record for the imported object", () => {
+								Sync.syncList.pop().should.deep.equal({type: "type", id: 1});
+								Sync.prototype.remove.should.have.been.called;
+							});
+
+							it("should clear the pending status for the imported object", () => dataSyncController.removePending.should.have.been.calledWith(1, "type"));
+							it("should return early", () => dataSyncController.dataImported.should.not.have.been.called);
+							it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+						});
+
+						describe("full import", () => {
+							beforeEach(() => {
+								dataSyncController.importChangesOnly = false;
+								callback(1);
+							});
+
+							it("should not clear any sync record for the imported object", () => {
+								Sync.syncList.should.be.empty;
+								Sync.prototype.remove.should.not.have.been.called;
+							});
+
+							it("should clear the pending status for the imported object", () => dataSyncController.removePending.should.have.been.calledWith(1, "type"));
+							it("should return early", () => dataSyncController.dataImported.should.not.have.been.called);
+							it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+						});
 					});
-				};
-
-				this.dataSyncController.device = {
-					id: "1",
-					name: "test-device",
-					imported: false
-				};
-			},
-			teardown: function() {
-				this.sandbox.remove();
-				appController.db.reset();
-			}
-		});
-
-		QUnit.test("object constructor", 1, function() {
-			QUnit.ok(this.dataSyncController, "Instantiate DataSyncController object");
-		});
-
-		QUnit.test("setup", 7, function() {
-			var registrationRow = $("<div>")
-				.attr("id", "registrationRow")
-				.appendTo(this.sandbox);
-
-			var importButton = $("<div>")
-				.attr("id", "import")
-				.appendTo(this.sandbox);
-
-			var exportButton = $("<div>")
-				.attr("id", "export")
-				.appendTo(this.sandbox);
-
-			Setting.setting.LastSyncTime = new Date(1900, 0, 1, 12, 0, 0);
-
-			this.dataSyncController.dataImport = function() {
-				QUnit.ok(true, "Bind import click event listener");
-			};
-
-			this.dataSyncController.dataExport = function() {
-				QUnit.ok(true, "Bind export click event listener");
-			};
-			this.dataSyncController.goBack = function() {
-				QUnit.ok(true, "Bind back button event listener");
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.setup();
-			QUnit.equal($("#lastSyncTime").val(), "1-Jan-1900 12:00:00", "Last Sync Time");
-			QUnit.ok(!this.dataSyncController.localChanges, "Detect no changes");
-			QUnit.equal($("#localChanges").val(), "None pending", "Changes");
-			registrationRow.trigger("click");
-			importButton.trigger("click");
-			exportButton.trigger("click");
-			this.dataSyncController.header.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("goBack", 1, function() {
-			this.dataSyncController.goBack();
-		});
-
-		QUnit.test("gotLastSyncTime", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.gotLastSyncTime({ settingValue: null });
-			QUnit.equal($("#lastSyncTime").val(), "Unknown", "Last Sync Time");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("gotDevice - unregistered", 3, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.gotDevice({}); 
-			QUnit.equal($("#deviceName").val(), "< Unregistered >", "Device");
-			QUnit.notEqual($("#registrationMessage").css("display"), "none", "Show registration message");
-			QUnit.equal($("#syncControls").css("display"), "none", "Hide sync controls");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("gotDevice - registered, not imported", 5, function() {
-			var device = {
-				settingValue: JSON.stringify(this.dataSyncController.device)
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.gotDevice(device);
-			QUnit.equal($("#deviceName").val(), this.dataSyncController.device.name, "Device");
-			QUnit.notEqual($("#syncControls").css("display"), "none", "Show sync controls");
-			QUnit.equal($("#registrationMessage").css("display"), "none", "Hide registration message");
-			QUnit.equal($("#importChangesOnlyRow").css("display"), "none", "Hide import changes only row");
-			QUnit.ok(!$("#importChangesOnly").is(":checked"), "Import changes only");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("gotDevice - registered, imported", 2, function() {
-			this.dataSyncController.device.imported = true;
-			var device = {
-				settingValue: JSON.stringify(this.dataSyncController.device)
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.gotDevice(device);
-			QUnit.notEqual($("#importChangesOnlyRow").css("display"), "none", "Show import changes only row");
-			QUnit.ok($("#importChangesOnly").is(":checked"), "Import changes only");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("checkForLocalChanges - single change", 2, function() {
-			var count = 1;
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.checkForLocalChanges(count);
-			QUnit.ok(this.dataSyncController.localChanges, "Detect changes");
-			QUnit.equal($("#localChanges").val(), count + " change pending", "Changes");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("checkForLocalChanges - multiple change", 2, function() {
-			var count = 2;
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.checkForLocalChanges(count);
-			QUnit.ok(this.dataSyncController.localChanges, "Detect changes");
-			QUnit.equal($("#localChanges").val(), count + " changes pending", "Changes");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("dataExport - exporting", 2, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.exporting = true;
-			this.dataSyncController.dataExport();
-			QUnit.ok(this.dataSyncController.exporting, "Export blocked by semaphore");
-			QUnit.equal($("#status").val(), "An export is already running", "Status");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("dataExport - not exporting", function() {
-			var testParams = [
-				{
-					description: "abort",
-					proceed: false,
-					status: "Export aborted",
-					notice: "Export failed."
-				},
-				{
-					description: "export",
-					proceed: true,
-					status: "Starting export",
-					notice: "Database has been successfully exported."
-				}
-			];
-
-			QUnit.expect(testParams.length * 7 + 2);
-
-			var i;
-
-			window.confirm = function(message) {
-				QUnit.equal(message, "Are you sure you want to export?", "confirm");
-				return testParams[i].proceed;
-			};
-
-			this.dataSyncController.listRetrieved = $.proxy(function(syncList) {
-				QUnit.equal(syncList, this.syncList, "Sync list");
-				Sync.syncList = [];
-				QUnit.ok(true, "List retrieved");
-				this.dataSyncController.callback(true);
-			}, this);
-
-			Sync.syncList = this.syncList;
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			for (i = 0; i < testParams.length; i++) {
-				this.dataSyncController.dataExport();
-				QUnit.equal($("#progress").css("display"), "none", testParams[i].description + " - Hide progress");
-				QUnit.equal($("#status").val(), testParams[i].status, testParams[i].description + " - Status");
-				QUnit.notEqual($("#status").css("display"), "none", testParams[i].description + " - Show status");
-				QUnit.equal($("#statusRow").css("display") === "none", testParams[i].proceed, testParams[i].description + " - Hide status row");
-				QUnit.deepEqual(appController.notice.pop(), {
-					label: testParams[i].notice,
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				}, "Update notice");
-				QUnit.ok(!this.dataSyncController.exporting, testParams[i].description + " - Reset semaphore");
-			}
-
-			jQueryMock.clearDefaultContext();
-			delete window.confirm;
-		});
-
-		QUnit.test("dataImport - importing", 2, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.importing = true;
-			this.dataSyncController.dataImport();
-			QUnit.ok(this.dataSyncController.importing, "Import blocked by semaphore");
-			QUnit.equal($("#status").val(), "An import is already running", "Status");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("dataImport - not importing", function() {
-			var testParams = [
-				{
-					description: "abort",
-					localChanges: true,
-					prompt: "Warning: Local changes have been made. ",
-					proceed: false,
-					status: "Import aborted",
-					notice: "Import failed."
-				},
-				{
-					description: "import",
-					localChanges: true,
-					prompt: "Warning: Local changes have been made. ",
-					proceed: true,
-					status: "Starting import",
-					notice: "Database has been successfully imported."
-				},
-				{
-					description: "no local changes",
-					localChanges: false,
-					prompt: "",
-					proceed: true,
-					status: "Starting import",
-					notice: "Database has been successfully imported."
-				}
-			];
-
-			QUnit.expect(testParams.length * 7 + 2);
-
-			var i;
-
-			window.confirm = function(message) {
-				QUnit.equal(message, testParams[i].prompt + "Are you sure you want to import?", "confirm");
-				return testParams[i].proceed;
-			};
-
-			this.dataSyncController.doImport = function() {
-				QUnit.ok(true, "Do import");
-				this.callback(true);
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			for (i = 0; i < testParams.length; i++) {
-				this.dataSyncController.localChanges = testParams[i].localChanges;
-				this.dataSyncController.dataImport();
-				QUnit.equal($("#progress").css("display"), "none", testParams[i].description + " - Hide progress");
-				QUnit.equal($("#status").val(), testParams[i].status, testParams[i].description + " - Status");
-				QUnit.notEqual($("#status").css("display"), "none", testParams[i].description + " - Show status");
-				QUnit.equal($("#statusRow").css("display") === "none", testParams[i].proceed, testParams[i].description + " - Hide status row");
-				QUnit.deepEqual(appController.notice.pop(), {
-					label: testParams[i].notice,
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				}, "Update notice");
-				QUnit.ok(!this.dataSyncController.importing, testParams[i].description + " - Reset semaphore");
-			}
-
-			jQueryMock.clearDefaultContext();
-			delete window.confirm;
-		});
-
-		QUnit.test("listRetrieved", 10, function() {
-			this.dataSyncController.sendChange = $.proxy(function(sync) {
-				QUnit.equal(sync, this.syncList[0], "Sync - modified");
-				QUnit.ok(true, "Send change");
-			}, this);
-
-			this.dataSyncController.sendDelete = $.proxy(function(sync) {
-				QUnit.equal(sync, this.syncList[1], "Sync - deleted");
-				QUnit.ok(true, "Send delete");
-			}, this);
-
-			this.dataSyncController.listRetrieved(this.syncList.slice(0));
-			QUnit.equal(this.dataSyncController.syncProcessed, 0, "syncProcessed property");
-			QUnit.deepEqual(this.dataSyncController.syncErrors, [], "syncErrors property");
-			QUnit.equal($("#status").css("display"), "none", "Hide status");
-			QUnit.equal($("#progress").attr("value"), 0, "Progress value");
-			QUnit.equal($("#progress").attr("max"), this.syncList.length, "Progress max");
-			QUnit.notEqual($("#progress").css("display"), "none", "Show progress");
-		});
-
-		QUnit.asyncTest("sendChange - checksum mismatch", 2, function() {
-			var originalHash = hex_md5();
-			hex_md5.setHash("\"");
-
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.changeSent = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Checksum mismatch", "Sync error");
-				QUnit.ok(true, "Change sent");
-				hex_md5.setHash(originalHash);
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.sendChange(this.syncList[0]);
-		});
-
-		QUnit.asyncTest("sendChange - ajax fail", 2, function() {
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
-
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.changeSent = $.proxy(function() {
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Send error", "Sync error");
-				QUnit.ok(true, "Change sent");
-				QUnit.start();
-			}, this);
-
-			this.dataSyncController.sendChange(this.syncList[0]);
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("sendChange - success", 2, function() {
-			this.syncList[0].remove = function() {
-				QUnit.ok(true, "Sync removed");
-			};
-
-			this.dataSyncController.changeSent = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.ok(true, "Change sent");
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.sendChange(this.syncList[0]);
-		});
-
-		QUnit.asyncTest("sendDelete - ajax fail", 2, function() {
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
-
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.changeSent = $.proxy(function() {
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Delete error", "Sync error");
-				QUnit.ok(true, "Change sent");
-				QUnit.start();
-			}, this);
-
-			this.dataSyncController.sendDelete(this.syncList[0]);
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("sendDelete - success", 2, function() {
-			this.syncList[0].remove = function() {
-				QUnit.ok(true, "Sync removed");
-			};
-
-			this.dataSyncController.changeSent = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.ok(true, "Change sent");
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.sendDelete(this.syncList[0]);
-		});
-
-		QUnit.test("changeSent - not finished", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.syncProcessed = 0;
-			this.dataSyncController.syncList = this.syncList;
-			this.dataSyncController.changeSent();
-			QUnit.equal($("#progress").attr("value"), 1, "Progress value");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("changeSent - finished with errors", 1, function() {
-			this.dataSyncController.syncProcessed = 0;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.syncList = this.syncList;
-			this.dataSyncController.syncProcessed = this.syncList.length - 1;
-
-			this.dataSyncController.showErrors = function() {
-				QUnit.ok(true, "Show errors");
-			};
-
-			this.dataSyncController.syncError("Force failed");
-			this.dataSyncController.changeSent();
-		});
-
-		QUnit.test("changeSent - finished without errors", 4, function() {
-			this.dataSyncController.syncProcessed = 0;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.syncList = this.syncList;
-			this.dataSyncController.syncProcessed = this.syncList.length - 1;
-
-			this.dataSyncController.callback = function(success) {
-				QUnit.ok(success, "Invoke callback with true");
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.changeSent();
-			QUnit.equal($("#progress").attr("value"), this.dataSyncController.syncProcessed, "Progress value");
-			QUnit.ok($("#errorList").is(":empty"), "Empty error list");
-			QUnit.equal($("#syncErrors").css("display"), "none", "Hide sync errors");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("setLastSyncTime", 1, function() {
-			var originalDate = Date;
-			var fakeDate = new Date(1900, 0, 1, 12, 0, 0);
-			Date = function() {
-				return fakeDate;
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.setLastSyncTime();
-			QUnit.equal($("#lastSyncTime").val(), "1-Jan-1900 12:00:00", "Last Sync Time");
-			jQueryMock.clearDefaultContext();
-			Date = originalDate;
-		});
-
-		QUnit.test("doImport - changes only", 4, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			$("#importChangesOnly").prop("checked", true);
-			var changesOnly = $("#importChangesOnly").is(":checked");
-			
-			this.dataSyncController.importData = $.proxy(function() {
-				QUnit.equal(this.importChangesOnly, changesOnly, "Import changes only property");
-				QUnit.ok(this.programsReady, "Programs ready");
-				QUnit.ok(this.seriesReady, "Series ready");
-				QUnit.ok(this.episodesReady, "Episodes ready");
-			}, this.dataSyncController);
-
-			this.dataSyncController.doImport();
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.asyncTest("doImport - delete fail", function() {
-			var testParams = ["Program", "Series", "Episode"];
-			Program.removed = false;
-			Series.removed = false;
-			Episode.removed = false;
-			this.dataSyncController.syncErrors = [];
-			jQueryMock.setDefaultContext(this.sandbox);
-			var changesOnly = $("#importChangesOnly").is(":checked");
-			jQueryMock.clearDefaultContext();
-
-			QUnit.expect(testParams.length * 3 + 1);
-
-			this.dataSyncController.importDone = $.proxy(function() {
-				if (this.programsReady && this.seriesReady && this.episodesReady) {
-					QUnit.equal(this.importChangesOnly, changesOnly, "Import changes only property");
-					for (var i = 0; i < testParams.length; i++) {
-						QUnit.equal(this.syncErrors[i].error, "Delete error", "Sync error");
-						QUnit.equal(this.syncErrors[i].type, testParams[i], "Error type");
-						QUnit.equal(this.syncErrors[i].message, "Force failed", "Error message");
-					}
-					QUnit.start();
-				}
-			}, this.dataSyncController);
-			
-			this.dataSyncController.doImport();
-		});
-
-		QUnit.asyncTest("doImport - success", 2, function() {
-			var objectsReceived = [];
-			Program.removed = true;
-			Series.removed = true;
-			Episode.removed = true;
-			this.dataSyncController.syncErrors = [];
-			jQueryMock.setDefaultContext(this.sandbox);
-			var changesOnly = $("#importChangesOnly").is(":checked");
-			jQueryMock.clearDefaultContext();
-			
-			this.dataSyncController.importData = $.proxy(function() {
-				if (this.programsReady && this.seriesReady && this.episodesReady) {
-					QUnit.equal(this.importChangesOnly, false, "Import changes only property");
-					QUnit.deepEqual(this.syncErrors, [], "syncErrors property");
-					QUnit.start();
-				}
-			}, this.dataSyncController);
-
-			this.dataSyncController.doImport();
-		});
-
-		QUnit.test("importData - not finished", 2, function() {
-			this.dataSyncController.importData();
-			QUnit.equal(this.dataSyncController.objectsToImport, undefined, "objectsToImport property");
-			QUnit.equal(this.dataSyncController.objectsImported, undefined, "objectsImported property");
-		});
-
-		QUnit.asyncTest("importData - full import, no data", 2, function() {
-			this.dataSyncController.importChangesOnly = false;
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.importData = {
-				data: [],
-				checksum: "test-hash"
-			};
-
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
-
-			this.dataSyncController.importDone = $.proxy(function() {
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Receive error", "Sync error");
-				QUnit.equal(this.dataSyncController.syncErrors[0].message, "No data found", "Error message");
-				QUnit.start();
-			}, this);
-
-			this.dataSyncController.importData();
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("importData - changes only, no data", 1, function() {
-			this.dataSyncController.importChangesOnly = true;
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.importData = [];
-
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
-
-			this.dataSyncController.importDone = $.proxy(function() {
-				QUnit.equal(this.dataSyncController.syncErrors.length, 0, "Number of errors");
-				QUnit.start();
-			}, this);
-
-			this.dataSyncController.importData();
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("importData - checksum mismatch", 1, function() {
-			var originalHash = hex_md5();
-			hex_md5.setHash("\"");
-
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.importDone = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Checksum mismatch", "Sync error");
-				hex_md5.setHash(originalHash);
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.importData();
-		});
-
-		QUnit.asyncTest("importData - ajax fail", 1, function() {
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
-
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.importDone = $.proxy(function() {
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Receive error", "Sync error");
-				QUnit.start();
-			}, this);
-
-			this.dataSyncController.importData();
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("importData - save fail", 1, function() {
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.objectsToImport = 0;
-			this.dataSyncController.objectsImported = 0;
-			Program.saved = false;
-
-			this.dataSyncController.importDone = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.equal(this.dataSyncController.syncErrors[0].error, "Save error", "Sync error");
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.importData();
-		});
-
-		QUnit.asyncTest("importData - 304 Not Modified", 1, function() {
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.objectsToImport = 0;
-			this.dataSyncController.objectsImported = 0;
-			$.ajax = jQueryMock.ajax;
-			Program.saved = true;
-
-			this.dataSyncController.importDone = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.equal(this.dataSyncController.syncErrors.length, 0, "Number of errors");
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.importData();
-		});
-
-		QUnit.asyncTest("importData - success", 7, function() {
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.objectsToImport = 0;
-			this.dataSyncController.objectsImported = 0;
-			this.dataSyncController.importChangesOnly = true;
-
-			var originalProgramRemove = Program.prototype.remove;
-			Program.prototype.remove = function() {
-				QUnit.ok(true, "Program removed");
-			};
-
-			Sync.removedCount = 0;
-			var originalSyncRemove = Sync.prototype.remove;
-			Sync.prototype.remove = function() {
-				Sync.removedCount++;
-			};
-
-			this.dataSyncController.importDone = $.proxy(function() {
-				this.stopFakeServer();
-				Program.prototype.remove = originalProgramRemove;
-				Sync.prototype.remove = originalSyncRemove;
-				QUnit.equal(this.dataSyncController.objectsImported, Sync.removedCount, "Number of Syncs removed");
-				QUnit.equal(this.dataSyncController.syncErrors.length, 0, "Number of errors");
-				QUnit.equal($("#status").css("display"), "none", "Hide status");
-				QUnit.equal($("#progress").attr("value"), this.dataSyncController.objectsImported, "Progress value");
-				QUnit.equal($("#progress").attr("max"), this.dataSyncController.objectsImported, "Progress max");
-				QUnit.notEqual($("#progress").css("display"), "none", "Show progress");
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.importData();
-		});
-
-		QUnit.asyncTest("removePending - ajax fail", 3, function() {
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
-
-			this.dataSyncController.syncError = $.proxy(function(error, type, message) {
-				QUnit.equal(error, "Save error", "Sync error");
-				QUnit.equal(type, this.syncList[0].type, "Type");
-			}, this);
-			
-			this.dataSyncController.dataImported = $.proxy(function() {
-				QUnit.ok(true, "Data imported");
-				QUnit.start();
-			}, this);
-
-			this.dataSyncController.removePending(this.syncList[0].id, this.syncList[0].type);
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("removePending - success", 1, function() {
-			this.dataSyncController.dataImported = $.proxy(function() {
-				this.stopFakeServer();
-				QUnit.ok(true, "Data imported");
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.dataSyncController.removePending(this.syncList[0].id, this.syncList[0].type);
-		});
-
-		QUnit.test("dataImported", 2, function() {
-			this.dataSyncController.objectsToImport = 1;
-			this.dataSyncController.objectsImported = 0;
-			
-			this.dataSyncController.importDone = function() {
-				QUnit.ok(true, "Import done");
-			};
-
-			this.dataSyncController.dataImported();
-			QUnit.equal($("#progress").attr("value"), 1, "Progress value");
-		});
-
-		QUnit.test("importDone - not finished", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.importDone();
-			QUnit.equal($("#syncErrors").css("display"), "none", "Hide sync errors");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("importDone - finished with errors", 1, function() {
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.syncError = this.originalSyncError;
-
-			this.dataSyncController.showErrors = function() {
-				QUnit.ok(true, "Show errors");
-			};
-
-			this.dataSyncController.syncError("Force failed");
-			this.dataSyncController.importDone();
-		});
-
-		QUnit.test("importDone - delete fail", 1, function() {
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-
-			Sync.removed = false;
-
-			this.dataSyncController.showErrors = function() {
-				QUnit.ok(true, "Show errors");
-			};
-
-			this.dataSyncController.importDone();
-		});
-
-		QUnit.test("importDone - finished without errors", function() {
-			var testParams = [
-				{
-					description: "first full import",
-					changesOnly: false,
-					imported: false,
-					expectedImported: true
-				},
-				{
-					description: "subsequent full import",
-					changesOnly: false,
-					imported: true,
-					expectedImported: true
-				},
-				{
-					description: "import changes only",
-					changesOnly: true,
-					imported: false,
-					expectedImported: false
-				}
-			];
-
-			QUnit.expect(testParams.length * 2);
-
-			this.dataSyncController.programsReady = true;
-			this.dataSyncController.seriesReady = true;
-			this.dataSyncController.episodesReady = true;
-			this.dataSyncController.syncErrors = [];
-
-			Sync.removed = true;
-
-			var i;
-
-			this.dataSyncController.importSuccessful = function() {
-				QUnit.ok(true, testParams[i].description + " - Import successful");
-				QUnit.equal(this.device.imported, testParams[i].expectedImported, testParams[i].description + " - Device imported property");
-			};
-
-			for (i = 0; i < testParams.length; i++) {
-				this.dataSyncController.device.imported = testParams[i].imported;
-				this.dataSyncController.importChangesOnly = testParams[i].changesOnly;
-				this.dataSyncController.importDone();
-			}
-		});
-
-		QUnit.test("importSuccessful", 3, function() {
-			this.dataSyncController.callback = function(success) {
-				QUnit.ok(success, "Invoke callback with true");
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.dataSyncController.importSuccessful();
-			QUnit.ok($("#errorList").is(":empty"), "Empty error list");
-			QUnit.equal($("#syncErrors").css("display"), "none", "Hide sync errors");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("syncError - with id", 3, function() {
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.syncError = this.originalSyncError;
-			this.dataSyncController.syncError("Test error", "test", "Test message", 1);
-			QUnit.equal(this.dataSyncController.syncErrors.length, 1, "Number of errors");
-			QUnit.ok(this.dataSyncController.syncErrors[0].is("li"), "syncErrors property type");
-			QUnit.deepEqual(this.dataSyncController.syncErrors[0].html(), "Test error<br>Type: test 1<br>Test message", "syncErrors property content");
-		});
-
-		QUnit.test("syncError - without id", 3, function() {
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.syncError = this.originalSyncError;
-			this.dataSyncController.syncError("Test error", "test", "Test message");
-			QUnit.equal(this.dataSyncController.syncErrors.length, 1, "Number of errors");
-			QUnit.ok(this.dataSyncController.syncErrors[0].is("li"), "syncErrors property type");
-			QUnit.deepEqual(this.dataSyncController.syncErrors[0].html(), "Test error<br>Type: test<br>Test message", "syncErrors property content");
-		});
-
-		QUnit.test("showErrors", 3, function() {
-			this.dataSyncController.syncErrors = [];
-			this.dataSyncController.syncError = this.originalSyncError;
-
-			this.dataSyncController.callback = function(success) {
-				QUnit.ok(!success, "Invoke callback with false");
-			};
-
-			jQueryMock.setDefaultContext(this.sandbox);
-
-			this.dataSyncController.syncError("Test error", "test", "Test message");
-			this.dataSyncController.showErrors();
-			QUnit.ok(!$("#errorList").is(":empty"), "Display error list");
-			QUnit.notEqual($("#syncErrors").css("display"), "none", "Show sync errors");
-			jQueryMock.clearDefaultContext();
+
+					describe("not pending", () => {
+						beforeEach(() => (callback = dataSyncController.saveCallback("type", false)));
+
+						describe("fast import", () => {
+							beforeEach(() => {
+								dataSyncController.importChangesOnly = true;
+								callback(1);
+							});
+
+							it("should clear any sync record for the imported object", () => {
+								Sync.syncList.pop().should.deep.equal({type: "type", id: 1});
+								Sync.prototype.remove.should.have.been.called;
+							});
+
+							it("should not clear the pending status for the imported object", () => dataSyncController.removePending.should.not.have.been.called);
+							it("should not return early", () => dataSyncController.dataImported.should.have.been.called);
+							it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+						});
+
+						describe("full import", () => {
+							beforeEach(() => {
+								dataSyncController.importChangesOnly = false;
+								callback(1);
+							});
+
+							it("should not clear any sync record for the imported object", () => {
+								Sync.syncList.should.be.empty;
+								Sync.prototype.remove.should.not.have.been.called;
+							});
+
+							it("should not clear the pending status for the imported object", () => dataSyncController.removePending.should.not.have.been.called);
+							it("should not return early", () => dataSyncController.dataImported.should.have.been.called);
+							it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+						});
+					});
+				});
+
+				describe("no id supplied", () => {
+					beforeEach(() => callback());
+
+					it("should not clear any sync record for the imported object", () => {
+						Sync.syncList.should.be.empty;
+						Sync.prototype.remove.should.not.have.been.called;
+					});
+
+					it("should not clear the pending status for the imported object", () => dataSyncController.removePending.should.not.have.been.called);
+					it("should not return early", () => dataSyncController.dataImported.should.have.been.called);
+					it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Save error", "type", "Error saving type"));
+				});
+			});
+
+			describe("removePending", () => {
+				let fakeServer;
+
+				beforeEach(() => {
+					fakeServer = sinon.fakeServer.create();
+					fakeServer.respondImmediately = true;
+
+					sinon.stub(dataSyncController, "syncError");
+					sinon.stub(dataSyncController, "dataImported");
+					dataSyncController.device = {id: "test-device"};
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("DELETE", "/documents/1/pending", request => {
+							request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+							request.respond(200);
+						});
+
+						dataSyncController.removePending(1, "type");
+					});
+
+					it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+					it("should continue processing", () => dataSyncController.dataImported.should.have.been.called);
+				});
+
+				describe("error", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("DELETE", "/documents/1/pending", request => {
+							request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
+							request.respond(500, null, "Force failed");
+						});
+
+						dataSyncController.removePending(1, "type");
+					});
+
+					it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Save error", "type", "Error saving type"));
+					it("should continue processing", () => dataSyncController.dataImported.should.have.been.called);
+				});
+
+				afterEach(() => fakeServer.restore());
+			});
+
+			describe("dataImported", () => {
+				let progress;
+
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "importDone");
+
+					progress = $("<progress>")
+						.attr("id", "progress")
+						.hide()
+						.appendTo(document.body);
+
+					dataSyncController.objectsToImport = 2;
+				});
+
+				describe("not finished", () => {
+					beforeEach(() => {
+						dataSyncController.objectsImported = 0;
+						dataSyncController.dataImported();
+					});
+
+					it("should increment the number of objects imported", () => dataSyncController.objectsImported.should.equal(1));
+					it("should update the import progress", () => progress.val().should.equal(1));
+					it("should not finalise the import", () => dataSyncController.importDone.should.not.have.been.called);
+				});
+
+				describe("finished", () => {
+					beforeEach(() => {
+						dataSyncController.objectsImported = 1;
+						progress.attr("max", 3);
+						dataSyncController.dataImported();
+					});
+
+					it("should increment the number of objects imported", () => dataSyncController.objectsImported.should.equal(2));
+					it("should update the import progress", () => progress.val().should.equal(2));
+					it("should not finalise the import", () => dataSyncController.importDone.should.have.been.called);
+				});
+
+				afterEach(() => progress.remove());
+			});
+
+			describe("importDone", () => {
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "showErrors");
+					sinon.stub(dataSyncController, "importSuccessful");
+				});
+
+				describe("models not ready", () => {
+					it("should do nothing", () => {
+						dataSyncController.programsReady = false;
+						dataSyncController.importDone();
+						dataSyncController.showErrors.should.not.have.been.called;
+					});
+				});
+
+				describe("models ready", () => {
+					beforeEach(() => {
+						dataSyncController.programsReady = true;
+						dataSyncController.seriesReady = true;
+						dataSyncController.episodesReady = true;
+					});
+
+					describe("with errors", () => {
+						beforeEach(() => {
+							dataSyncController.syncErrors = [{}];
+							dataSyncController.importDone();
+						});
+
+						it("should not mark the import as successful", () => dataSyncController.importSuccessful.should.not.have.been.called);
+						it("should not clear all pending local changes", () => Sync.removeAll.should.not.have.been.called);
+						it("should show the errors", () => dataSyncController.showErrors.should.have.been.calledWith("Import"));
+					});
+
+					describe("without errors", () => {
+						beforeEach(() => (dataSyncController.syncErrors = []));
+
+						describe("fast import", () => {
+							beforeEach(() => {
+								dataSyncController.importChangesOnly = true;
+								dataSyncController.importDone();
+							});
+
+							it("should mark the import as successful", () => dataSyncController.importSuccessful.should.have.been.called);
+							it("should not clear all pending local changes", () => Sync.removeAll.should.not.have.been.called);
+							it("should not show any errors", () => dataSyncController.showErrors.should.not.have.been.called);
+						});
+
+						describe("full import", () => {
+							beforeEach(() => (dataSyncController.importChangesOnly = false));
+
+							describe("initial import", () => {
+								beforeEach(() => {
+									dataSyncController.device = {imported: false};
+									dataSyncController.importDone();
+								});
+
+								it("should mark the device as having imported", () => {
+									dataSyncController.device.imported.should.be.true;
+									Setting.setting.should.deep.equal({name: "Device", value: JSON.stringify({imported: true})});
+									Setting.prototype.save.should.have.been.called;
+								});
+
+								it("should clear all pending local changes", () => Sync.removeAll.should.have.been.calledWith(sinon.match.func));
+								it("should not show any errors", () => dataSyncController.showErrors.should.not.have.been.called);
+							});
+
+							describe("subsequent import", () => {
+								beforeEach(() => {
+									Setting.prototype.save.reset();
+									dataSyncController.device = {imported: true};
+									dataSyncController.importDone();
+								});
+
+								it("should not mark the device as having imported", () => Setting.prototype.save.should.not.have.been.called);
+								it("should clear all pending local changes", () => Sync.removeAll.should.have.been.calledWith(sinon.match.func));
+								it("should not show any errors", () => dataSyncController.showErrors.should.not.have.been.called);
+							});
+						});
+					});
+				});
+			});
+
+			describe("pendingChangesCleared", () => {
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "syncError");
+					sinon.stub(dataSyncController, "showErrors");
+					sinon.stub(dataSyncController, "importSuccessful");
+				});
+
+				describe("with error", () => {
+					beforeEach(() => dataSyncController.pendingChangesCleared("error"));
+
+					it("should add an error to the errors list", () => dataSyncController.syncError.should.have.been.calledWith("Delete error", "Sync", "error"));
+					it("should show the errors", () => dataSyncController.showErrors.should.have.been.calledWith("Import"));
+					it("should not mark the import as successful", () => dataSyncController.importSuccessful.should.not.have.been.called);
+				});
+
+				describe("without error", () => {
+					beforeEach(() => dataSyncController.pendingChangesCleared());
+
+					it("should not add an error to the errors list", () => dataSyncController.syncError.should.not.have.been.called);
+					it("should not show the errors", () => dataSyncController.showErrors.should.not.have.been.called);
+					it("should mark the import as successful", () => dataSyncController.importSuccessful.should.have.been.called);
+				});
+			});
+
+			describe("importSuccessful", () => {
+				let syncErrors;
+
+				beforeEach(() => {
+					sinon.stub(dataSyncController, "setLastSyncTime");
+					sinon.stub(dataSyncController, "checkForLocalChanges");
+					sinon.stub(dataSyncController, "syncFinish");
+					Sync.syncList.push("");
+
+					syncErrors = $("<div>")
+						.attr("id", "syncErrors")
+						.appendTo(document.body);
+
+					dataSyncController.importSuccessful();
+				});
+
+				it("should update the last sync time", () => dataSyncController.setLastSyncTime.should.have.been.called);
+				it("should update the number of local changes to be synced", () => dataSyncController.checkForLocalChanges.should.have.been.calledWith(1));
+				it("should hide the errors container", () => syncErrors.css("display").should.equal("none"));
+				it("should finish the sync", () => dataSyncController.syncFinish.should.have.been.calledWith("Import", true));
+
+				afterEach(() => {
+					syncErrors.remove();
+					Sync.syncList.pop();
+				});
+			});
+
+			describe("syncError", () => {
+				beforeEach(() => (dataSyncController.syncErrors = []));
+
+				describe("with id", () => {
+					it("should append the error to the list", () => {
+						dataSyncController.syncError("error", "type", "message", "id");
+						const error = dataSyncController.syncErrors.pop();
+
+						error.prop("tagName").should.equal("LI");
+						error.html().should.equal("error<br>Type: type id<br>message");
+					});
+				});
+
+				describe("without id", () => {
+					it("should append the error to the list", () => {
+						dataSyncController.syncError("error", "type", "message");
+						const error = dataSyncController.syncErrors.pop();
+
+						error.prop("tagName").should.equal("LI");
+						error.html().should.equal("error<br>Type: type<br>message");
+					});
+				});
+			});
+
+			describe("showErrors", () => {
+				let syncErrors,
+						errorList;
+
+				beforeEach(() => {
+					syncErrors = $("<div>")
+						.attr("id", "syncErrors")
+						.hide()
+						.appendTo(document.body);
+
+					errorList = $("<div>")
+						.attr("id", "errorList")
+						.append($("<div>").attr("id", "oldError"))
+						.css("position", "absolute")
+						.offset({top: 20})
+						.appendTo(syncErrors);
+
+					sinon.stub(dataSyncController, "syncFinish");
+					dataSyncController.syncErrors = $("<div>").attr("id", "newError");
+					window.innerHeight = 50;
+					dataSyncController.showErrors("Operation");
+				});
+
+				it("should clear any old errors", () => errorList.children("#oldError").length.should.equal(0));
+				it("should add any new errors", () => errorList.children("#newError").length.should.equal(1));
+				it("should display the errors container", () => syncErrors.css("display").should.not.equal("none"));
+				it("should update the list height", () => errorList.height().should.equal(20));
+				it("should finish the sync", () => dataSyncController.syncFinish.should.have.been.calledWith("Operation", false));
+
+				afterEach(() => syncErrors.remove());
+			});
 		});
 	}
 );

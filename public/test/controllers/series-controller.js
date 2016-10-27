@@ -1,229 +1,367 @@
 define(
 	[
-		'models/series-model',
-		'framework/sw/spinningwheel',
-		'controllers/series-controller',
-		'controllers/application-controller',
-		'models/program-model',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"models/series-model",
+		"framework/sw/spinningwheel",
+		"controllers/series-controller",
+		"controllers/application-controller",
+		"models/program-model",
+		"framework/jquery"
 	],
 
-	function(Series, SpinningWheel, SeriesController, ApplicationController, Program, $, jQueryMock) {
+	(Series, SpinningWheel, SeriesController, ApplicationController, Program, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("series-controller", {
-			setup: function() {
-				this.listItem = {
+		describe("SeriesController", () => {
+			let listItem,
+					seriesController;
+
+			beforeEach(() => {
+				listItem = {
 					listIndex: 0,
 					series: {
 						seriesName: "test-series",
-						nowShowing: null,
+						nowShowing: 1,
 						nowShowingDisplay: "Not Showing",
 						programId: 1,
-						save: function() {
-							QUnit.ok(true, "Save series");
-						},
-						setNowShowing: function(nowShowing) {
-							this.nowShowing = nowShowing;
-							this.nowShowingDisplay = Series.NOW_SHOWING[this.nowShowing];
-						}
+						save: sinon.stub(),
+						setNowShowing: sinon.stub()
 					}
 				};
 
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
+				seriesController = new SeriesController(listItem);
+			});
 
-				$("<input>")
-					.attr("id", "seriesName")
-					.appendTo(this.sandbox);
+			describe("object constructor", () => {
+				describe("update", () => {
+					it("should return a SeriesController instance", () => seriesController.should.be.an.instanceOf(SeriesController));
+					it("should set the list item", () => seriesController.listItem.should.deep.equal(listItem));
+					it("should save the original now showing", () => seriesController.originalNowShowing.should.equal(listItem.series.nowShowing));
+					it("should save the original program id", () => seriesController.originalProgramId.should.equal(listItem.series.programId));
+				});
 
-				$("<input>")
-					.attr("id", "nowShowing")
-					.appendTo(this.sandbox);
+				describe("add", () => {
+					beforeEach(() => {
+						listItem = {
+							program: {
+								id: 1,
+								programName: "test-program"
+							}
+						};
+						seriesController = new SeriesController(listItem);
+					});
 
-				$("<input>")
-					.attr("id", "moveTo")
-					.appendTo(this.sandbox);
+					it("should return a SeriesController instance", () => seriesController.should.be.an.instanceOf(SeriesController));
 
-				$("<div>")
-					.attr("id", "sw-wrapper")
-					.appendTo(this.sandbox);
+					it("should create a list item", () => {
+						seriesController.listItem.series.programId.should.equal(listItem.program.id);
+						seriesController.listItem.series.programName.should.equal(listItem.program.programName);
+					});
+				});
+			});
 
-				this.seriesController = new SeriesController(this.listItem);
-			},
-			teardown: function() {
-				this.sandbox.remove();
-				SpinningWheel.slots = [];
-			}
-		});
+			describe("setup", () => {
+				let seriesName,
+						nowShowing,
+						moveTo;
 
-		QUnit.test("constructor - update", 4, function() {
-			QUnit.ok(this.seriesController, "Instantiate SeriesController object");
-			QUnit.deepEqual(this.seriesController.listItem, this.listItem, "listItem property");
-			QUnit.equal(this.seriesController.originalNowShowing, this.listItem.series.nowShowing, "originalNowShowing property");
-			QUnit.equal(this.seriesController.originalProgramId, this.listItem.series.programId, "originalProgramId property");
-		});
+				beforeEach(() => {
+					sinon.stub(seriesController, "cancel");
+					sinon.stub(seriesController, "save");
+					sinon.stub(seriesController, "getNowShowing");
+					sinon.stub(seriesController, "getProgramId");
 
-		QUnit.test("constructor - add", 2, function() {
-			var program = {
-				id: 1,
-				programName: "test-program"
-			};
+					seriesName = $("<input>")
+						.attr("id", "seriesName")
+						.appendTo(document.body);
 
-			var listItem = {
-				series: new Series(null, "", "", program.id, program.programName, 0, 0, 0, 0, 0, 0)
-			};
+					nowShowing = $("<input>")
+						.attr("id", "nowShowing")
+						.appendTo(document.body);
 
-			this.seriesController = new SeriesController({ program: program });
-			QUnit.ok(this.seriesController, "Instantiate SeriesController object");
-			QUnit.deepEqual(this.seriesController.listItem, listItem, "listItem property");
-		});
+					moveTo = $("<input>")
+						.attr("id", "moveTo")
+						.appendTo(document.body);
 
-		QUnit.test("setup", 6, function() {
-			this.seriesController.cancel = function() {
-				QUnit.ok(true, "Bind back button event handler");
-			};
-			this.seriesController.save = function() {
-				QUnit.ok(true, "Bind save button event handler");
-			};
-			this.seriesController.getNowShowing = function() {
-				QUnit.ok(true, "Bind now showing click event listener");
-			};
-			this.seriesController.getProgramId = function() {
-				QUnit.ok(true, "Bind move to click event listener");
-			};
+					seriesController.setup();
+				});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.seriesController.setup();
-			this.seriesController.header.leftButton.eventHandler();
-			this.seriesController.header.rightButton.eventHandler();
-			QUnit.equal($("#seriesName").val(), this.listItem.series.seriesName, "Series name");
-			QUnit.equal($("#nowShowing").val(), this.listItem.series.nowShowingDisplay, "Now showing");
-			$("#nowShowing").trigger("click");
-			$("#moveTo").trigger("click");
-			jQueryMock.clearDefaultContext();
-		});
+				it("should set the header label", () => seriesController.header.label.should.equal("Add/Edit Series"));
 
-		QUnit.test("save", function() {
-			var testParams = [
-				{
-					description: "update",
-					listIndex: 0,
-					scrollPos: 0
-				},
-				{
-					description: "insert",
-					listIndex: -1,
-					scrollPos: -1
-				}
-			];
+				it("should attach a header left button event handler", () => {
+					seriesController.header.leftButton.eventHandler();
+					seriesController.cancel.should.have.been.called;
+				});
 
-			QUnit.expect(testParams.length * 4);
+				it("should set the header left button label", () => seriesController.header.leftButton.label.should.equal("Cancel"));
 
-			for (var i = 0; i < testParams.length; i++) {
-				jQueryMock.setDefaultContext(this.sandbox);
-				var seriesName = "test-series-2";
-				$("#seriesName").val(seriesName);
-				appController.viewStack = [
-					{ scrollPos: 0 },
-					{ scrollPos: 0 }
+				it("should attach a header right button event handler", () => {
+					seriesController.header.rightButton.eventHandler();
+					seriesController.save.should.have.been.called;
+				});
+
+				it("should set the header right button style", () => seriesController.header.rightButton.style.should.equal("confirmButton"));
+				it("should set the header right button label", () => seriesController.header.rightButton.label.should.equal("Save"));
+				it("should set the series name", () => seriesName.val().should.equal(listItem.series.seriesName));
+				it("should set the now showing", () => nowShowing.val().should.equal(listItem.series.nowShowingDisplay));
+
+				it("should attach a now showing click event handler", () => {
+					nowShowing.trigger("click");
+					seriesController.getNowShowing.should.have.been.called;
+				});
+
+				it("should attach a move to click event handler", () => {
+					moveTo.trigger("click");
+					seriesController.getProgramId.should.have.been.called;
+				});
+
+				afterEach(() => {
+					seriesName.remove();
+					nowShowing.remove();
+					moveTo.remove();
+				});
+			});
+
+			describe("save", () => {
+				const testParams = [
+					{
+						description: "update",
+						listIndex: 0,
+						scrollPos: 0
+					},
+					{
+						description: "insert",
+						listIndex: -1,
+						scrollPos: -1
+					}
 				];
-				this.seriesController.listItem.listIndex = testParams[i].listIndex;
-				this.seriesController.save();
-				QUnit.equal(this.seriesController.listItem.series.seriesName, seriesName, testParams[i].description + " - listItem.series.seriesName property");
-				QUnit.equal(appController.viewStack[0].scrollPos, testParams[i].scrollPos, testParams[i].description + " - Scroll position");
-				jQueryMock.clearDefaultContext();
-			}
-		});
 
-		QUnit.test("cancel", 3, function() {
-			this.seriesController.listItem.series.nowShowing = 2;
-			this.seriesController.listItem.series.programId = 2;
-			this.seriesController.cancel();
-			QUnit.equal(this.seriesController.listItem.series.nowShowing, this.listItem.series.nowShowing, "listItem.series.nowShowing property");
-			QUnit.equal(this.seriesController.listItem.series.programId, this.listItem.series.programId, "listItem.series.programId property");
-		});
+				let seriesName,
+						seriesNameInput;
 
-		QUnit.test("getNowShowing - getting", 1, function() {
-			this.seriesController.gettingNowShowing = true;
-			this.seriesController.getNowShowing();
-			QUnit.ok(this.seriesController.gettingNowShowing, "Blocked by semaphore");
-		});
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							seriesName = "test-series-2";
 
-		QUnit.test("getNowShowing - not getting", function() {
-			var testParams = [
-				{
-					description: "showing",
-					nowShowing: 1,
-					expected: 1
-				},
-				{
-					description: "not showing",
-					nowShowing: null,
-					expected: 0
-				}
-			];
+							seriesNameInput = $("<input>")
+								.attr("id", "seriesName")
+								.val(seriesName)
+								.appendTo(document.body);
 
-			this.seriesController.setNowShowing = function() {
-				QUnit.ok(true, "Set done action callback");
-			};
+							appController.viewStack = [
+								{scrollPos: 0},
+								{scrollPos: 0}
+							];
+							seriesController.listItem.listIndex = params.listIndex;
+							seriesController.save();
+						});
 
-			QUnit.expect(testParams.length * 3);
+						it("should get the series name", () => seriesController.listItem.series.seriesName.should.equal(seriesName));
+						it("should save the series", () => listItem.series.save.should.have.been.called);
+						it("should set the series list view scroll position", () => appController.viewStack[0].scrollPos.should.equal(params.scrollPos));
+						it("should pop the view", () => appController.popView.should.have.been.called);
 
-			for (var i = 0; i < testParams.length; i++) {
-				this.seriesController.listItem.series.nowShowing = testParams[i].nowShowing;
-				this.seriesController.getNowShowing();
-				QUnit.equal(SpinningWheel.slots[i], testParams[i].expected, testParams[i].description + " - Selected value");
-				QUnit.ok(!this.seriesController.gettingNowShowing, testParams[i].description + " - Reset semaphore");
-			}
-		});
+						afterEach(() => seriesNameInput.remove());
+					});
+				});
+			});
 
-		QUnit.test("setNowShowing", 2, function() {
-			var nowShowing = 1;
-			var nowShowingDisplay = "Mondays";
-			SpinningWheel.selectedValues.keys = [nowShowing];
-			SpinningWheel.selectedValues.values = [nowShowingDisplay];
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.seriesController.setNowShowing();
-			QUnit.equal(this.seriesController.listItem.series.nowShowing, nowShowing, "listItem.series.nowShowing property");
-			QUnit.equal($("#nowShowing").val(), nowShowingDisplay, "Now showing");
-			jQueryMock.clearDefaultContext();
-		});
+			describe("cancel", () => {
+				beforeEach(() => {
+					seriesController.listItem.series.programId = 2;
+					seriesController.cancel();
+				});
 
-		QUnit.test("getProgramId - getting", 1, function() {
-			this.seriesController.gettingProgramId = true;
-			this.seriesController.getProgramId();
-			QUnit.ok(this.seriesController.gettingProgramId, "Blocked by semaphore");
-		});
+				it("should revert any changes", () => {
+					seriesController.listItem.series.setNowShowing.should.have.been.calledWith(1);
+					seriesController.listItem.series.programId.should.equal(1);
+				});
 
-		QUnit.test("getProgramId - not getting", 3, function() {
-			this.seriesController.setProgramId = function() {
-				QUnit.ok(true, "Set done action callback");
-			};
+				it("should pop the view", () => appController.popView.should.have.been.called);
+			});
 
-			Program.programs = [{
-				id: 1,
-				programName: "test-program-1"
-			}];
+			describe("getNowShowing", () => {
+				describe("in progress", () => {
+					it("should do nothing", () => {
+						seriesController.gettingNowShowing = true;
+						seriesController.getNowShowing();
+						seriesController.gettingNowShowing.should.be.true;
+					});
+				});
 
-			this.seriesController.getProgramId();
-			QUnit.equal(SpinningWheel.slots[0], this.listItem.series.programId, "Selected value");
-			QUnit.ok(!this.seriesController.gettingProgramId, "Reset semaphore");
-		});
+				describe("not in progress", () => {
+					const testParams = [
+						{
+							description: "showing",
+							nowShowing: 1,
+							expected: 1
+						},
+						{
+							description: "not showing",
+							nowShowing: null,
+							expected: 0
+						}
+					];
 
-		QUnit.test("setProgramId", 2, function() {
-			var programId = 2;
-			var programName = "test-program-2";
-			SpinningWheel.selectedValues.keys = [programId];
-			SpinningWheel.selectedValues.values = [programName];
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.seriesController.setProgramId();
-			QUnit.equal(this.seriesController.listItem.series.programId, programId, "listItem.series.nowShowing property");
-			QUnit.equal($("#moveTo").val(), programName, "Move to");
-			jQueryMock.clearDefaultContext();
+					let swWrapper;
+
+					beforeEach(() => {
+						sinon.stub(seriesController, "setNowShowing");
+						SpinningWheel.addSlot.reset();
+						SpinningWheel.setDoneAction.reset();
+						SpinningWheel.open.reset();
+
+						swWrapper = $("<div>")
+							.attr("id", "sw-wrapper")
+							.appendTo(document.body);
+					});
+
+					testParams.forEach(params => {
+						describe(params.description, () => {
+							beforeEach(() => {
+								seriesController.listItem.series.nowShowing = params.nowShowing;
+								seriesController.getNowShowing();
+							});
+
+							it("should initialise the SpinningWheel", () => SpinningWheel.addSlot.should.have.been.calledWith(Series.NOW_SHOWING, "left", params.expected));
+
+							it("should attach a done callback to the SpinningWheel", () => {
+								SpinningWheel.setDoneAction.should.have.been.called;
+								seriesController.setNowShowing.should.have.been.called;
+							});
+
+							it("should open the SpinningWheel", () => SpinningWheel.open.should.have.been.called);
+							it("should wrap the SpinningWheel in a touch event proxy", () => seriesController.swtoucheventproxy.element.should.deep.equal(swWrapper.get(0)));
+							it("should clear the semaphore", () => seriesController.gettingNowShowing.should.be.false);
+						});
+					});
+
+					afterEach(() => swWrapper.remove());
+				});
+			});
+
+			describe("setNowShowing", () => {
+				let nowShowing;
+
+				beforeEach(() => {
+					SpinningWheel.getSelectedValues.reset().returns({
+						keys: [1],
+						values: ["Mondays"]
+					});
+
+					seriesController.swtoucheventproxy = {};
+					seriesController.listItem.series.nowShowingDisplay = "Mondays";
+
+					nowShowing = $("<input>")
+						.attr("id", "nowShowing")
+						.appendTo(document.body);
+
+					seriesController.setNowShowing();
+				});
+
+				it("should get the selected value from the SpinningWheel", () => listItem.series.setNowShowing.should.have.been.calledWith(1));
+				it("should update the view", () => nowShowing.val().should.equal("Mondays"));
+				it("should remove the touch event proxy", () => (null === seriesController.swtoucheventproxy).should.be.true);
+
+				afterEach(() => nowShowing.remove());
+			});
+
+			describe("getProgramId", () => {
+				beforeEach(() => sinon.stub(seriesController, "listRetrieved"));
+
+				describe("in progress", () => {
+					it("should do nothing", () => {
+						seriesController.gettingProgramId = true;
+						seriesController.getProgramId();
+						seriesController.listRetrieved.should.not.have.been.called;
+					});
+				});
+
+				describe("not in progress", () => {
+					let programs;
+
+					beforeEach(() => {
+						programs = ["program 1", "program 2"];
+						Program.programs = programs;
+						seriesController.getProgramId();
+					});
+
+					it("should set the semaphore", () => seriesController.gettingProgramId.should.be.true);
+					it("should get the list of programs", () => seriesController.listRetrieved.should.have.been.calledWith(programs));
+				});
+			});
+
+			describe("listRetrieved", () => {
+				let swWrapper,
+						programs;
+
+				beforeEach(() => {
+					sinon.stub(seriesController, "setProgramId");
+					SpinningWheel.addSlot.reset();
+					SpinningWheel.setDoneAction.reset();
+					SpinningWheel.open.reset();
+
+					swWrapper = $("<div>")
+						.attr("id", "sw-wrapper")
+						.appendTo(document.body);
+
+					programs = {
+						1: "program 1",
+						2: "program 2"
+					};
+
+					seriesController.gettingProgramId = true;
+					seriesController.listRetrieved([
+						{id: 1, programName: "program 1"},
+						{id: 2, programName: "program 2"}
+					]);
+				});
+
+				it("should initialise the SpinningWheel", () => SpinningWheel.addSlot.should.have.been.calledWith(programs, "left", listItem.series.programId));
+
+				it("should attach a done callback to the SpinningWheel", () => {
+					SpinningWheel.setDoneAction.should.have.been.called;
+					seriesController.setProgramId.should.have.been.called;
+				});
+
+				it("should open the SpinningWheel", () => SpinningWheel.open.should.have.been.called);
+				it("should wrap the SpinningWheel in a touch event proxy", () => (null !== seriesController.swtoucheventproxy).should.be.true);
+				it("should clear the semaphore", () => seriesController.gettingProgramId.should.be.false);
+
+				afterEach(() => swWrapper.remove());
+			});
+
+			describe("setProgramId", () => {
+				let moveTo;
+
+				beforeEach(() => {
+					SpinningWheel.getSelectedValues.reset().returns({
+						keys: [2],
+						values: ["program 2"]
+					});
+
+					seriesController.swtoucheventproxy = {};
+
+					moveTo = $("<input>")
+						.attr("id", "moveTo")
+						.appendTo(document.body);
+
+					seriesController.setProgramId();
+				});
+
+				it("should get the selected value from the SpinningWheel", () => {
+					listItem.series.programId.should.equal(2);
+					listItem.series.programName.should.equal("program 2");
+				});
+
+				it("should update the view", () => moveTo.val().should.equal("program 2"));
+				it("should remove the touch event proxy", () => (null === seriesController.swtoucheventproxy).should.be.true);
+
+				afterEach(() => moveTo.remove());
+			});
 		});
 	}
 );

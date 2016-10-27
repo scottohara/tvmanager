@@ -1,67 +1,122 @@
 define(
 	[
-		'controllers/report-controller',
-		'controllers/application-controller',
-		'framework/jquery'
+		"controllers/report-controller",
+		"controllers/application-controller"
 	],
 
-	function(ReportController, ApplicationController, $) {
+	(ReportController, ApplicationController) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("report-controller", {
-			setup: function() {
-				this.args = "test-args";
+		describe("ReportController", () => {
+			let args,
+					items,
+					report,
+					reportController;
 
-				this.items = [
+			beforeEach(() => {
+				args = "test-args";
+				items = [
 					"test-item-1",
 					"test-item-2"
 				];
-
-				this.report = {
+				report = {
 					reportName: "test-report",
-					dataSource: $.proxy(function(callback, args) {
-						QUnit.equal(args, this.args, "data source arguments");
-						callback(this.items);
-					}, this),
-					args: this.args
+					dataSource: sinon.stub().yields(items),
+					args
 				};
 
-				this.reportController = new ReportController(this.report);
-			}
-		});
+				reportController = new ReportController(report);
+			});
 
-		QUnit.test("object constructor", 2, function() {
-			QUnit.ok(this.reportController, "Instantiate ReportController object");
-			QUnit.deepEqual(this.reportController.report, this.report, "report property");
-		});
+			describe("object constructor", () => {
+				it("should return a ReportController instance", () => reportController.should.be.an.instanceOf(ReportController));
+				it("should set the report", () => reportController.report.should.deep.equal(report));
+			});
 
-		QUnit.test("setup", 6, function() {
-			this.reportController.viewItem = function() {
-				QUnit.ok(true, "Bind list view event handler");
-			};
-			this.reportController.goBack = function() {
-				QUnit.ok(true, "Bind back button event listener");
-			};
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(reportController, "viewItem");
+					sinon.stub(reportController, "goBack");
+					sinon.stub(reportController, "activate");
+					reportController.setup();
+				});
 
-			this.reportController.setup();
-			QUnit.equal(this.reportController.header.label, this.report.reportName, "Header label");
-			this.reportController.header.leftButton.eventHandler();
-			QUnit.deepEqual(this.reportController.reportList.items, this.items, "List items");
-			QUnit.equal(this.reportController.reportList.action, "view", "List action");
-		});
+				it("should set the header label", () => reportController.header.label.should.equal(report.reportName));
 
-		QUnit.test("goBack", 1, function() {
-			this.reportController.goBack();
-		});
+				it("should attach a header left button event handler", () => {
+					reportController.header.leftButton.eventHandler();
+					reportController.goBack.should.have.been.called;
+				});
 
-		QUnit.test("viewItem", 2, function() {
-			var index = 1;
-			this.reportController.reportList = { items: this.items };
-			this.reportController.viewItem(index);
-			QUnit.deepEqual(appController.viewArgs, { source: "Report", listIndex: index, series: this.items[index] }, "View arguments");
+				it("should set the header left button style", () => reportController.header.leftButton.style.should.equal("backButton"));
+				it("should set the header left button label", () => reportController.header.leftButton.label.should.equal("Settings"));
+
+				it("should attach a view event handler to the report list", () => {
+					reportController.reportList.viewEventHandler();
+					reportController.viewItem.should.have.been.called;
+				});
+
+				it("should activate the controller", () => reportController.activate.should.have.been.called);
+			});
+
+			describe("activate", () => {
+				it("should get the list of unscheduled episodes", () => {
+					sinon.stub(reportController, "listRetrieved");
+					reportController.activate();
+					report.dataSource.should.have.been.calledWith(sinon.match.func, report.args);
+					reportController.listRetrieved.should.have.been.calledWith(items);
+				});
+			});
+
+			describe("listRetrieved", () => {
+				beforeEach(() => {
+					sinon.stub(reportController, "activate");
+					sinon.stub(reportController, "viewItems");
+					reportController.setup();
+					reportController.listRetrieved(items);
+				});
+
+				it("should set the report list items", () => reportController.reportList.items.should.deep.equal(items));
+				it("should refresh the list", () => reportController.reportList.refresh.should.have.been.called);
+				it("should set the list to view mode", () => reportController.viewItems.should.have.been.called);
+			});
+
+			describe("goBack", () => {
+				it("should pop the view", () => {
+					reportController.goBack();
+					appController.popView.should.have.been.called;
+				});
+			});
+
+			describe("viewItem", () => {
+				it("should push the episodes view for the selected item", () => {
+					const index = 0;
+
+					reportController.reportList = {items};
+					reportController.viewItem(index);
+					appController.pushView.should.have.been.calledWith("episodes", {
+						source: "Report",
+						listIndex: index,
+						series: items[index]
+					});
+				});
+			});
+
+			describe("viewItems", () => {
+				beforeEach(() => {
+					sinon.stub(reportController, "activate");
+					reportController.setup();
+					reportController.viewItems();
+				});
+
+				it("should set the list to view mode", () => reportController.reportList.action.should.equal("view"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+				it("should set the footer label", () => reportController.footer.label.should.equal("v1.0"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
 		});
 	}
 );

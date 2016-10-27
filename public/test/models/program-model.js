@@ -1,473 +1,618 @@
 define(
 	[
-		'models/program-model',
-		'controllers/application-controller',
-		'framework/jquery'
+		"models/program-model",
+		"controllers/application-controller"
 	],
 
-	function(Program, ApplicationController, $) {
+	(Program, ApplicationController) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("program-model", {
-			setup: function() {
-				this.id = 1;
-				this.programName = "test-program";
-				this.seriesCount = 1;
-				this.episodeCount = 1;
-				this.watchedCount = 1;
-				this.recordedCount = 1;
-				this.expectedCount = 1;
-				this.program = new Program(this.id, this.programName, this.seriesCount, this.episodeCount, this.watchedCount, this.recordedCount, this.expectedCount);
-			},
-			teardown: function() {
-				appController.db.reset();
-			}
-		});
+		describe("Program", () => {
+			let id,
+					programName,
+					seriesCount,
+					episodeCount,
+					watchedCount,
+					recordedCount,
+					expectedCount,
+					program,
+					callback;
 
-		QUnit.test("object constructor", 9, function() {
-			QUnit.ok(this.program, "Instantiate Program object");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-			QUnit.equal(this.program.progressBar.total, this.episodeCount, "progressBar.total property");
-			QUnit.equal(this.program.seriesCount, this.seriesCount, "seriesCount property");
-			QUnit.equal(this.program.episodeCount, this.episodeCount, "episodeCount property");
-			QUnit.equal(this.program.watchedCount, this.watchedCount, "watchedCount property");
-			QUnit.equal(this.program.recordedCount, this.recordedCount, "recordedCount property");
-			QUnit.equal(this.program.expectedCount, this.expectedCount, "expectedCount property");
-		});
-
-		QUnit.test("save - update fail without callback", 3, function() {
-			appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
-			this.program.save();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - update fail with callback", 4, function() {
-			appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
-			this.program.save(function(id) {
-				QUnit.equal(id, null, "Invoke callback");
+			beforeEach(() => {
+				id = 1;
+				programName = "test-program";
+				seriesCount = 1;
+				episodeCount = 1;
+				watchedCount = 1;
+				recordedCount = 1;
+				expectedCount = 1;
+				program = new Program(id, programName, seriesCount, episodeCount, watchedCount, recordedCount, expectedCount);
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("save - update no rows affected", 4, function() {
-			appController.db.noRowsAffectedAt("REPLACE INTO Program (ProgramID, Name) VALUES (" + this.id + ", " + this.programName + ")");
-			this.program.save(function(id) {
-				QUnit.equal(id, null, "Invoke callback");
+			describe("object constructor", () => {
+				it("should return a Program instance", () => program.should.be.an.instanceOf(Program));
+				it("should set the id", () => program.id.should.equal(id));
+				it("should set the program name", () => program.programName.should.equal(programName));
+				it("should set the progress bar total", () => program.progressBar.total.should.equal(episodeCount));
+				it("should set the series count", () => program.seriesCount.should.equal(seriesCount));
+				it("should set the episode count", () => program.episodeCount.should.equal(episodeCount));
+				it("should set the watched count", () => program.watchedCount.should.equal(watchedCount));
+				it("should set the recorded count", () => program.recordedCount.should.equal(recordedCount));
+				it("should set the expected count", () => program.expectedCount.should.equal(expectedCount));
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: no rows affected", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("save - update Sync fail", 4, function() {
-			appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Program', " + this.id + ", 'modified')");
-			this.program.save(function(id) {
-				QUnit.equal(id, null, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - update success without callback", 4, function() {
-			this.program.save();
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
-
-		QUnit.test("save - update success with callback", 5, function() {
-			this.program.save($.proxy(function(id) {
-				QUnit.equal(id, this.id, "Invoke callback");
-			}, this));
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
-
-		QUnit.test("save - insert fail", 4, function() {
-			this.program.id = null;
-			appController.db.failAt("REPLACE INTO Program (ProgramID, Name) VALUES (%, " + this.programName + ")");
-			this.program.save(function(id) {
-				QUnit.equal(id, null, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - insert no rows affected", 4, function() {
-			this.program.id = null;
-			appController.db.noRowsAffectedAt("REPLACE INTO Program (ProgramID, Name) VALUES (%, " + this.programName + ")");
-			this.program.save(function(id) {
-				QUnit.equal(id, null, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: no rows affected", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - insert Sync fail", 4, function() {
-			appController.db.failAt("INSERT OR IGNORE INTO Sync (Type, ID, Action) VALUES ('Program', %, 'modified')");
-			this.program.save(function(id) {
-				QUnit.equal(id, null, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.save: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("save - insert success", 5, function() {
-			this.program.id = null;
-			this.program.save(function(id) {
-				QUnit.notEqual(id, null, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.notEqual(this.program.id, null, "id property");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
-
-		QUnit.test("remove - no rows affected", 1, function() {
-			this.program.id = null;
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 0, "Number of SQL commands");
-		});
-
-		QUnit.test("remove - insert Episode Sync fail", 4, function() {
-			appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = " + this.id);
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-		});
-
-		QUnit.test("remove - delete Episode fail", 4, function() {
-			appController.db.failAt("DELETE FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = " + this.id + ")");
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 2, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-		});
-
-		QUnit.test("remove - insert Series Sync fail", 4, function() {
-			appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'deleted' FROM Series WHERE ProgramID = " + this.id);
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 3, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-		});
-
-		QUnit.test("remove - delete Series fail", 4, function() {
-			appController.db.failAt("DELETE FROM Series WHERE ProgramID = " + this.id);
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 4, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-		});
-
-		QUnit.test("remove - insert Program Sync fail", 4, function() {
-			appController.db.failAt("REPLACE INTO Sync (Type, ID, Action) VALUES ('Program', " + this.id + ", 'deleted')");
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 5, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-		});
-
-		QUnit.test("remove - delete Program fail", 4, function() {
-			appController.db.failAt("DELETE FROM Program WHERE ProgramID = " + this.id);
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 6, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-			QUnit.equal(this.program.id, this.id, "id property");
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-		});
-
-		QUnit.test("remove - success", 5, function() {
-			this.program.remove();
-			QUnit.equal(appController.db.commands.length, 6, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-			QUnit.equal(this.program.id, null, "id property");
-			QUnit.equal(this.program.programName, null, "programName property");
-		});
-
-		QUnit.test("toJson", 1, function() {
-			QUnit.deepEqual(this.program.toJson(), {
-				id: this.id,
-				programName: this.programName
-			}, "program JSON");
-		});
-
-		QUnit.test("setProgramName", 2, function() {
-			this.programName = "another-test-program";
-			this.programGroup = "A";
-			this.program.setProgramName(this.programName);
-			QUnit.equal(this.program.programName, this.programName, "programName property");
-			QUnit.equal(this.program.programGroup, this.programGroup, "programGroup property");
-		});
-
-		QUnit.test("setEpisodeCount", 2, function() {
-			this.episodeCount = 2;
-			this.program.setEpisodeCount(this.episodeCount);
-			QUnit.equal(this.program.episodeCount, this.episodeCount, "episodeCount property");
-			QUnit.equal(this.program.progressBar.total, this.episodeCount, "progressBar.total property");
-		});
-
-		QUnit.test("setWatchedCount", 1, function() {
-			this.watchedCount = 2;
-			this.program.setWatchedCount(this.watchedCount);
-			QUnit.equal(this.program.watchedCount, this.watchedCount, "watchedCount property");
-		});
-
-		QUnit.test("setWatchedProgress", function() {
-			var testParams = [
-				{
-					description: "null watched count",
-					watchedCount: null,
-					progressBarDisplay: {
-						label: null,
-						percent: 0,
-						style: "watched"
+			describe("save", () => {
+				const testParams = [
+					{
+						description: "update",
+						useId: true
+					},
+					{
+						description: "insert",
+						useId: false
 					}
-				},
-				{
-					description: "zero watched count",
-					watchedCount: 0,
-					progressBarDisplay: {
-						label: 0,
-						percent: 0,
-						style: "watched"
-					}
-				},
-				{
-					description: "with watched count",
-					watchedCount: 1,
-					progressBarDisplay: {
-						label: 1,
-						percent: 100,
-						style: "watched"
-					}
-				}
-			];
+				];
 
-			QUnit.expect(testParams.length);
-			for (var i = 0; i < testParams.length; i++) {
-				this.program.watchedCount = testParams[i].watchedCount;
-				this.program.setWatchedProgress();
-				QUnit.deepEqual(this.program.progressBarDisplay, testParams[i].progressBarDisplay, testParams[i].description + " - progressBarDisplay property");
-			}
-		});
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						let programId,
+								sql;
 
-		QUnit.test("setRecordedCount", function() {
-			var testParams = [
-				{
-					description: "null recorded count",
-					recordedCount: null,
-					progressBarDisplay: {
-						label: null,
-						percent: 0,
-						style: "recorded"
-					}
-				},
-				{
-					description: "zero recorded count",
-					recordedCount: 0,
-					progressBarDisplay: {
-						label: 0,
-						percent: 0,
-						style: "recorded"
-					}
-				},
-				{
-					description: "with recorded count",
-					recordedCount: 1,
-					progressBarDisplay: {
-						label: 1,
-						percent: 100,
-						style: "recorded"
-					}
-				}
-			];
+						beforeEach(() => {
+							if (params.useId) {
+								programId = id;
+							} else {
+								programId = "%";
+								program.id = null;
+							}
 
-			QUnit.expect(testParams.length * 2);
-			for (var i = 0; i < testParams.length; i++) {
-				this.program.setRecordedCount(testParams[i].recordedCount);
-				QUnit.equal(this.program.recordedCount, testParams[i].recordedCount, testParams[i].description + " - recordedCount property");
-				QUnit.deepEqual(this.program.progressBarDisplay, testParams[i].progressBarDisplay, testParams[i].description + " - progressBarDisplay property");
-			}
-		});
+							sql = `
+								REPLACE INTO Program (ProgramID, Name)
+								VALUES (${programId}, ${programName})
+							`;
+						});
 
-		QUnit.test("setExpectedCount", function() {
-			var testParams = [
-				{
-					description: "null expected count",
-					expectedCount: null,
-					progressBarDisplay: {
-						label: null,
-						percent: 0,
-						style: "expected"
-					}
-				},
-				{
-					description: "zero expected count",
-					expectedCount: 0,
-					progressBarDisplay: {
-						label: 0,
-						percent: 0,
-						style: "expected"
-					}
-				},
-				{
-					description: "with expected count",
-					expectedCount: 1,
-					progressBarDisplay: {
-						label: 1,
-						percent: 100,
-						style: "expected"
-					}
-				}
-			];
+						describe("fail", () => {
+							beforeEach(() => appController.db.failAt(sql));
 
-			QUnit.expect(testParams.length * 2);
-			for (var i = 0; i < testParams.length; i++) {
-				this.program.setExpectedCount(testParams[i].expectedCount);
-				QUnit.equal(this.program.expectedCount, testParams[i].expectedCount, testParams[i].description + " - expectedCount property");
-				QUnit.deepEqual(this.program.progressBarDisplay, testParams[i].progressBarDisplay, testParams[i].description + " - progressBarDisplay property");
-			}
-		});
+							describe("without callback", () => {
+								beforeEach(() => program.save());
 
-		QUnit.test("list - fail", 4, function() {
-			appController.db.failAt("SELECT p.ProgramID, p.Name, COUNT(DISTINCT s.SeriesID) AS SeriesCount, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e on s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY p.ProgramID ORDER BY p.Name");
-			Program.list(function(programList) {
-				QUnit.deepEqual(programList, [], "Invoke callback");
+								it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+								it("should rollback the transaction", () => appController.db.commit.should.be.false);
+								it("should return an error message", () => appController.db.errorMessage.should.equal("Program.save: Force failed"));
+							});
+
+							describe("with callback", () => {
+								beforeEach(() => {
+									callback = sinon.stub();
+									program.save(callback);
+								});
+
+								it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+								it("should rollback the transaction", () => appController.db.commit.should.be.false);
+								it("should invoke the callback", () => callback.should.have.been.called);
+								it("should return an error message", () => appController.db.errorMessage.should.equal("Program.save: Force failed"));
+							});
+						});
+
+						describe("no rows affected", () => {
+							beforeEach(() => appController.db.noRowsAffectedAt(sql));
+
+							describe("without callback", () => {
+								beforeEach(() => program.save());
+
+								it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+								it("should rollback the transaction", () => appController.db.commit.should.be.false);
+								it("should return an error message", () => appController.db.errorMessage.should.equal("Program.save: no rows affected"));
+							});
+
+							describe("with callback", () => {
+								beforeEach(() => {
+									callback = sinon.stub();
+									program.save(callback);
+								});
+
+								it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+								it("should rollback the transaction", () => appController.db.commit.should.be.false);
+								it("should invoke the callback", () => callback.should.have.been.called);
+								it("should return an error message", () => appController.db.errorMessage.should.equal("Program.save: no rows affected"));
+							});
+						});
+
+						describe(`${params.description} Sync fail`, () => {
+							beforeEach(() => appController.db.failAt(`
+								INSERT OR IGNORE INTO Sync (Type, ID, Action)
+								VALUES ('Program', ${programId}, 'modified')
+							`));
+
+							describe("without callback", () => {
+								beforeEach(() => program.save());
+
+								it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+								it("should rollback the transaction", () => appController.db.commit.should.be.false);
+								it("should return an error message", () => appController.db.errorMessage.should.equal("Program.save: Force failed"));
+							});
+
+							describe("with callback", () => {
+								beforeEach(() => {
+									callback = sinon.stub();
+									program.save(callback);
+								});
+
+								it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+								it("should rollback the transaction", () => appController.db.commit.should.be.false);
+								it("should invoke the callback", () => callback.should.have.been.called);
+								it("should return an error message", () => appController.db.errorMessage.should.equal("Program.save: Force failed"));
+							});
+						});
+
+						describe("success", () => {
+							describe("without callback", () => {
+								beforeEach(() => program.save());
+
+								it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+								it("should commit the transaction", () => appController.db.commit.should.be.true);
+								it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+							});
+
+							describe("with callback", () => {
+								beforeEach(() => {
+									callback = sinon.stub();
+									program.save(callback);
+								});
+
+								it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+								it("should commit the transaction", () => appController.db.commit.should.be.true);
+								it("should invoke the callback", () => callback.should.have.been.calledWith(program.id));
+								it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+							});
+						});
+					});
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.list: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("list - no rows affected", 4, function() {
-			appController.db.noRowsAffectedAt("SELECT p.ProgramID, p.Name, COUNT(DISTINCT s.SeriesID) AS SeriesCount, COUNT(e.EpisodeID) AS EpisodeCount, COUNT(e2.EpisodeID) AS WatchedCount, COUNT(e3.EpisodeID) AS RecordedCount, COUNT(e4.EpisodeID) AS ExpectedCount FROM Program p LEFT OUTER JOIN Series s on p.ProgramID = s.ProgramID LEFT OUTER JOIN Episode e on s.SeriesID = e.SeriesID LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched' LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded' LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected' GROUP BY p.ProgramID ORDER BY p.Name");
-			Program.list(function(programList) {
-				QUnit.deepEqual(programList, [], "Invoke callback");
+			describe("remove", () => {
+				describe("no ID", () => {
+					it("should execute no SQL commands", () => {
+						program.id = null;
+						program.remove();
+						appController.db.commands.length.should.equal(0);
+					});
+				});
+
+				describe("insert Episode Sync fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = ${id})`);
+						program.remove();
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the id", () => program.id.should.equal(id));
+					it("should not clear the program name", () => program.programName.should.equal(programName));
+				});
+
+				describe("delete Episode fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`DELETE FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = ${id})`);
+						program.remove();
+					});
+
+					it("should execute two SQL commands", () => appController.db.commands.length.should.equal(2));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the id", () => program.id.should.equal(id));
+					it("should not clear the program name", () => program.programName.should.equal(programName));
+				});
+
+				describe("insert Series Sync fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'deleted' FROM Series WHERE ProgramID = ${id}`);
+						program.remove();
+					});
+
+					it("should execute three SQL commands", () => appController.db.commands.length.should.equal(3));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the id", () => program.id.should.equal(id));
+					it("should not clear the program name", () => program.programName.should.equal(programName));
+				});
+
+				describe("delete Series fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`DELETE FROM Series	WHERE ProgramID = ${id}`);
+						program.remove();
+					});
+
+					it("should execute four SQL commands", () => appController.db.commands.length.should.equal(4));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the id", () => program.id.should.equal(id));
+					it("should not clear the program name", () => program.programName.should.equal(programName));
+				});
+
+				describe("insert Program Sync fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) VALUES ('Program', ${id}, 'deleted')`);
+						program.remove();
+					});
+
+					it("should execute five SQL commands", () => appController.db.commands.length.should.equal(5));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the id", () => program.id.should.equal(id));
+					it("should not clear the program name", () => program.programName.should.equal(programName));
+				});
+
+				describe("delete Program fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`DELETE FROM Program WHERE ProgramID = ${id}`);
+						program.remove();
+					});
+
+					it("should execute six SQL commands", () => appController.db.commands.length.should.equal(6));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the id", () => program.id.should.equal(id));
+					it("should not clear the program name", () => program.programName.should.equal(programName));
+				});
+
+				describe("success", () => {
+					beforeEach(() => program.remove());
+
+					it("should execute six SQL commands", () => appController.db.commands.length.should.equal(6));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+					it("should clear the id", () => (null === program.id).should.be.true);
+					it("should clear the program name", () => (null === program.programName).should.be.true);
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
 
-		QUnit.test("list - success", 4, function() {
-			appController.db.addResultRows([{
-				ProgramID: this.id,
-				Name: this.programName,
-				SeriesCount: this.seriesCount,
-				EpisodeCount: this.episodeCount,
-				WatchedCount: this.watchedCount,
-				RecordedCount: this.recordedCount,
-				ExpectedCount: this.expectedCount
-			}]);
-			Program.list($.proxy(function(programList) {
-				QUnit.deepEqual(programList, [this.program], "Invoke callback");
-			}, this));
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
-
-		QUnit.test("find - fail", 4, function() {
-			appController.db.failAt("SELECT ProgramID, Name FROM Program WHERE ProgramID = " + this.id);
-			Program.find(this.id, function(program) {
-				QUnit.equal(program, null, "Invoke callback");
+			describe("toJson", () => {
+				it("should return a JSON representation of the program", () => program.toJson().should.deep.equal({id, programName}));
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.find: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("find - success", 4, function() {
-			appController.db.addResultRows([{
-				ProgramID: this.id,
-				Name: this.programName
-			}]);
+			describe("setProgramName", () => {
+				let programGroup;
 
-			this.program.seriesCount = undefined;
-			this.program.setEpisodeCount(undefined);
-			this.program.setWatchedCount(undefined);
-			this.program.setRecordedCount(undefined);
-			this.program.setExpectedCount(undefined);
+				beforeEach(() => {
+					programName = "another-test-program";
+					programGroup = "A";
+					program.setProgramName(programName);
+				});
 
-			Program.find(this.id, $.proxy(function(program) {
-				QUnit.deepEqual(program, this.program, "Invoke callback");
-			}, this));
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
-
-		QUnit.test("count - fail", 4, function() {
-			appController.db.failAt("SELECT COUNT(*) AS ProgramCount FROM Program");
-			Program.count(function(count) {
-				QUnit.equal(count, 0, "Invoke callback");
+				it("should set the program name", () => program.programName.should.equal(programName));
+				it("should set the program group", () => program.programGroup.should.equal(programGroup));
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.count: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("count - success", 4, function() {
-			appController.db.addResultRows([{
-				ProgramCount: 1
-			}]);
-			Program.count(function(count) {
-				QUnit.equal(count, 1, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
+			describe("setEpisodeCount", () => {
+				beforeEach(() => {
+					episodeCount = 2;
+					program.setEpisodeCount(episodeCount);
+				});
 
-		QUnit.test("removeAll - fail", 4, function() {
-			appController.db.failAt("DELETE FROM Program");
-			Program.removeAll(function(message) {
-				QUnit.notEqual(message, null, "Invoke callback");
+				it("should set the episode count", () => program.episodeCount.should.equal(episodeCount));
+				it("should set the progress bar total", () => program.progressBar.total.should.equal(episodeCount));
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Program.removeAll: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("removeAll - success", 4, function() {
-			Program.removeAll(function(message) {
-				QUnit.equal(message, null, "Invoke callback");
+			describe("setWatchedCount", () => {
+				it("should set the watched count", () => {
+					watchedCount = 2;
+					program.setWatchedCount(watchedCount);
+					program.watchedCount.should.equal(watchedCount);
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
 
-		QUnit.test("fromJson", 1, function() {
-			var program = Program.fromJson({
-				id: this.id,
-				programName: this.programName
+			describe("setWatchedProgress", () => {
+				const testParams = [
+					{
+						description: "null",
+						watchedCount: null,
+						progressBarDisplay: {
+							label: null,
+							percent: 0,
+							style: "watched"
+						}
+					},
+					{
+						description: "zero",
+						watchedCount: 0,
+						progressBarDisplay: {
+							label: 0,
+							percent: 0,
+							style: "watched"
+						}
+					},
+					{
+						description: "non-zero",
+						watchedCount: 1,
+						progressBarDisplay: {
+							label: 1,
+							percent: 100,
+							style: "watched"
+						}
+					}
+				];
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						it("should update the progress bar display", () => {
+							program.watchedCount = params.watchedCount;
+							program.setWatchedProgress();
+							program.progressBarDisplay.should.deep.equal(params.progressBarDisplay);
+						});
+					});
+				});
 			});
-			
-			QUnit.deepEqual(program, new Program(this.id, this.programName), "Program object");
+
+			describe("setRecordedCount", () => {
+				const testParams = [
+					{
+						description: "null",
+						recordedCount: null,
+						progressBarDisplay: {
+							label: null,
+							percent: 0,
+							style: "recorded"
+						}
+					},
+					{
+						description: "zero",
+						recordedCount: 0,
+						progressBarDisplay: {
+							label: 0,
+							percent: 0,
+							style: "recorded"
+						}
+					},
+					{
+						description: "non-zero",
+						recordedCount: 1,
+						progressBarDisplay: {
+							label: 1,
+							percent: 100,
+							style: "recorded"
+						}
+					}
+				];
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => program.setRecordedCount(params.recordedCount));
+
+						it("should set the recorded count", () => {
+							if (null === params.recordedCount) {
+								(null === program.recordedCount).should.be.true;
+							} else {
+								program.recordedCount.should.equal(params.recordedCount);
+							}
+						});
+
+						it("should update the progress bar display", () => program.progressBarDisplay.should.deep.equal(params.progressBarDisplay));
+					});
+				});
+			});
+
+			describe("setExpectedCount", () => {
+				const testParams = [
+					{
+						description: "null",
+						expectedCount: null,
+						progressBarDisplay: {
+							label: null,
+							percent: 0,
+							style: "expected"
+						}
+					},
+					{
+						description: "zero",
+						expectedCount: 0,
+						progressBarDisplay: {
+							label: 0,
+							percent: 0,
+							style: "expected"
+						}
+					},
+					{
+						description: "non-zero",
+						expectedCount: 1,
+						progressBarDisplay: {
+							label: 1,
+							percent: 100,
+							style: "expected"
+						}
+					}
+				];
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => program.setExpectedCount(params.expectedCount));
+
+						it("should set the expected count", () => {
+							if (null === params.expectedCount) {
+								(null === program.expectedCount).should.be.true;
+							} else {
+								program.expectedCount.should.equal(params.expectedCount);
+							}
+						});
+
+						it("should update the progress bar display", () => program.progressBarDisplay.should.deep.equal(params.progressBarDisplay));
+					});
+				});
+			});
+
+			describe("list", () => {
+				let sql;
+
+				beforeEach(() => {
+					callback = sinon.stub();
+					sql = `
+						SELECT					p.ProgramID,
+														p.Name,
+														COUNT(DISTINCT s.SeriesID) AS SeriesCount,
+														COUNT(e.EpisodeID) AS EpisodeCount,
+														COUNT(e2.EpisodeID) AS WatchedCount,
+														COUNT(e3.EpisodeID) AS RecordedCount,
+														COUNT(e4.EpisodeID) AS ExpectedCount
+						FROM						Program p
+						LEFT OUTER JOIN	Series s on p.ProgramID = s.ProgramID
+						LEFT OUTER JOIN	Episode e on s.SeriesID = e.SeriesID
+						LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
+						LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
+						LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
+						GROUP BY		 		p.ProgramID
+						ORDER BY p.Name
+					`;
+				});
+
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(sql);
+						Program.list(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith([]));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Program.list: Force failed"));
+				});
+
+				describe("no rows affected", () => {
+					beforeEach(() => {
+						appController.db.noRowsAffectedAt(sql);
+						Program.list(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith([]));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						appController.db.addResultRows([{
+							ProgramID: id,
+							Name: programName,
+							SeriesCount: seriesCount,
+							EpisodeCount: episodeCount,
+							WatchedCount: watchedCount,
+							RecordedCount: recordedCount,
+							ExpectedCount: expectedCount
+						}]);
+						Program.list(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith([program]));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+			});
+
+			describe("find", () => {
+				beforeEach(() => (callback = sinon.stub()));
+
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`
+							SELECT	ProgramID,
+											Name
+							FROM		Program
+							WHERE		ProgramID = ${id}
+						`);
+						Program.find(id, callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(null));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Program.find: Force failed"));
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						appController.db.addResultRows([{
+							ProgramID: id,
+							Name: programName
+						}]);
+
+						program.seriesCount = Reflect.undefined;
+						program.setEpisodeCount();
+						program.setWatchedCount();
+						program.setRecordedCount();
+						program.setExpectedCount();
+
+						Program.find(id, callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(program));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+			});
+
+			describe("count", () => {
+				beforeEach(() => (callback = sinon.stub()));
+
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`
+							SELECT	COUNT(*) AS ProgramCount
+							FROM Program
+						`);
+						Program.count(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(0));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Program.count: Force failed"));
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						appController.db.addResultRows([{ProgramCount: 1}]);
+						Program.count(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(1));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+			});
+
+			describe("removeAll", () => {
+				beforeEach(() => (callback = sinon.stub()));
+
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt("DELETE FROM Program");
+						Program.removeAll(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(appController.db.errorMessage));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Program.removeAll: Force failed"));
+				});
+
+				describe("success", () => {
+					beforeEach(() => Program.removeAll(callback));
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.called);
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+			});
+
+			describe("fromJson", () => {
+				it("should construct a Program object from the JSON", () => Program.fromJson({id, programName}).should.deep.equal(new Program(id, programName)));
+			});
+
+			afterEach(() => appController.db.reset());
 		});
 	}
 );

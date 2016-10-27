@@ -1,761 +1,1453 @@
 define(
 	[
-		'test/mocks/test-controller',
-		'controllers/cache-controller',
-		'controllers/database-controller',
-		'models/setting-model',
-		'controllers/application-controller',
-		'test/mocks/application-controller-mock',
-		'test/mocks/jQuery-mock',
-		'framework/sw/spinningwheel',
-		'framework/jquery'
+		"test/mocks/test-controller",
+		"controllers/cache-controller",
+		"controllers/database-controller",
+		"models/setting-model",
+		"controllers/application-controller",
+		"framework/sw/spinningwheel",
+		"framework/jquery"
 	],
 
-	function(TestController, CacheController, DatabaseController, Setting, ApplicationController, ApplicationControllerMock, jQueryMock, SpinningWheel, $) {
+	(TestController, CacheController, DatabaseController, Setting, ApplicationController, SpinningWheel, $) => {
 		"use strict";
 
-		QUnit.module("application-controller", {
-			setup: function() {
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
+		describe("ApplicationController", () => {
+			let contentWrapper,
+					content,
+					abc,
+					applicationController;
 
-				var contentWrapper = $("<div>")
+			beforeEach(() => {
+				contentWrapper = $("<div>")
 					.attr("id", "contentWrapper")
-					.appendTo(this.sandbox);
+					.appendTo(document.body);
 
-				$("<div>")
+				content = $("<div>")
 					.attr("id", "content")
 					.appendTo(contentWrapper);
 
-				$("<ul>")
+				abc = $("<ul>")
 					.attr("id", "abc")
 					.hide()
-					.appendTo(this.sandbox);
+					.appendTo(document.body);
 
-				$("<div>")
-					.attr("id", "notices")
-					.css("position", "absolute")
-					.appendTo(this.sandbox);
-
-				var header = $("<div>")
-					.attr("id", "header")
-					.appendTo(this.sandbox);
-
-				$("<a>")
-					.attr("id", "headerLeftButton")
-					.hide()
-					.appendTo(header);
-
-				$("<h1>")
-					.attr("id", "headerLabel")
-					.hide()
-					.appendTo(header);
-
-				$("<a>")
-					.attr("id", "headerRightButton")
-					.hide()
-					.appendTo(header);
-
-				var footer = $("<div>")
-					.attr("id", "footer")
-					.appendTo(this.sandbox);
-
-				$("<a>")
-					.attr("id", "footerLeftButton")
-					.hide()
-					.appendTo(footer);
-
-				$("<footer>")
-					.attr("id", "footerLabel")
-					.hide()
-					.appendTo(footer);
-
-				$("<a>")
-					.attr("id", "footerRightButton")
-					.hide()
-					.appendTo(footer);
-
-				this.appCacheUpdateNoticeId = "appCacheUpdateNotice";
-				this.notice = [];
-				this.testView = {
-					name: "test",
-					controller: new TestController({}),
-					scrollPos: 1
-				};
-
-				this.startFakeServer = $.proxy(function() {
-					this.fakeServer = sinon.fakeServer.create();
-					this.fakeServer.autoRespond = true;
-					this.fakeServer.respondWith("GET", "/dbConfig", [200, {}, JSON.stringify({databaseName: "TVManager"})]);
-					this.fakeServer.respondWith("GET", "/appConfig", [200, {}, JSON.stringify({appVersion: "", maxDataAgeDays: 1})]);
-				}, this);
-
-				this.stopFakeServer = $.proxy(function() {
-					this.fakeServer.restore();
-				}, this);
-
-				this.originalLoadDependencies = ApplicationController.prototype.loadDependencies;
-				this.originalGotAppConfig = ApplicationController.prototype.gotAppConfig;
-				this.originalShowNotice = ApplicationController.prototype.showNotice;
-				this.originalContentShown = ApplicationController.prototype.contentShown;
-				this.originalPushView = ApplicationController.prototype.pushView;
-				this.originalNoticesMoved = ApplicationController.prototype.noticesMoved;
-
-				var singletonInstance = ApplicationController.prototype.singletonInstance;
+				sinon.stub(ApplicationController.prototype, "contentShown");
+				sinon.stub(ApplicationController.prototype, "updateChecked");
 				ApplicationController.prototype.singletonInstance = null;
-				ApplicationController.prototype.contentShown = ApplicationControllerMock.prototype.contentShown;
-				jQueryMock.setDefaultContext(this.sandbox);
-				this.appController = new ApplicationController();
-				jQueryMock.clearDefaultContext();
-				this.appController.loadDependencies = ApplicationControllerMock.prototype.loadDependencies;
-				this.appController.gotAppConfig = $.proxy(ApplicationControllerMock.prototype.gotAppConfig, this);
-				this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.showNotice, this);
-				this.appController.pushView = ApplicationControllerMock.prototype.pushView;
-				this.appController.noticesMoved = ApplicationControllerMock.prototype.noticesMoved;
-				ApplicationController.prototype.contentShown = this.originalContentShown;
-				ApplicationController.prototype.singletonInstance = singletonInstance;
-
-				this.appController.viewStack.push(this.testView);
-				this.appController.viewControllers = {
-					TestController: TestController
-				};
-			},
-			teardown: function() {
-				this.sandbox.remove();
-				$.fn.load = jQueryMock.originalLoad;
-				$.fn.scrollTop = jQueryMock.originalScrollTop;
-				$.fn.position = jQueryMock.originalPosition;
-			}
-		});
-
-		QUnit.test("object constructor", 8, function() {
-			QUnit.ok(this.appController, "Instantiate ApplicationController object");
-			QUnit.deepEqual(this.appController.viewStack, [this.testView], "viewStack property");
-			QUnit.deepEqual(this.appController.noticeStack, {
-				height: 0,
-				notice: []
-			}, "noticeStack property");
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			$("#contentWrapper").trigger("transitionend");
-			QUnit.equal(SpinningWheel.cellHeight, 45, "SpinningWheel.cellHeight property");
-			QUnit.deepEqual(this.appController.abc.element, $("#abc").get(0), "abc.element property");
-			QUnit.deepEqual(this.appController.abc.scrollElement, $("#content"), "abc.scrollElement property");
-			QUnit.deepEqual(this.appController.abctoucheventproxy.element, this.appController.abc.element, "abctoucheventproxy.element property");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("constructor - cache update", 1, function() {
-			CacheController.prototype.updated = true;
-			var singletonInstance = ApplicationController.prototype.singletonInstance;
-			ApplicationController.prototype.singletonInstance = null;
-			ApplicationController.prototype.showNotice = $.proxy(ApplicationControllerMock.prototype.showNotice, this);
-			this.appController = new ApplicationController();
-			ApplicationController.prototype.showNotice = this.originalShowNotice;
-			ApplicationController.prototype.singletonInstance = singletonInstance;
-			QUnit.deepEqual(this.notice.pop(), {
-				id: this.appCacheUpdateNoticeId,
-				label: "Updated",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}, "Notice");
-			CacheController.prototype.updated = false;
-		});
-
-		QUnit.test("constructor - cache update progress", 1, function() {
-			CacheController.prototype.updated = true;
-			$("#" + this.appCacheUpdateNoticeId).remove();
-			$("<p>")
-				.attr("id", this.appCacheUpdateNoticeId)
-				.hide()
-				.appendTo(this.sandbox);
-			jQueryMock.setDefaultContext(this.sandbox);
-			var singletonInstance = ApplicationController.prototype.singletonInstance;
-			ApplicationController.prototype.singletonInstance = null;
-			this.appController = new ApplicationController();
-			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.showNotice, this);
-			ApplicationController.prototype.singletonInstance = singletonInstance;
-			QUnit.equal($("#" + this.appCacheUpdateNoticeId).html(), "Updated", "Notice");
-			jQueryMock.clearDefaultContext();
-			CacheController.prototype.updated = false;
-		});
-
-		QUnit.test("constructor - no singleton", 1, function() {
-			var singletonInstance = ApplicationController.prototype.singletonInstance;
-			ApplicationController.prototype.singletonInstance = null;
-			this.appController = new ApplicationController();
-			QUnit.ok(!this.appController.test, "test property");
-			ApplicationController.prototype.singletonInstance = singletonInstance;
-		});
-
-		QUnit.test("constructor - singleton", 1, function() {
-			var singletonInstance = ApplicationController.prototype.singletonInstance;
-			var testProperty = "test";
-			this.appController = new ApplicationController();
-			this.appController.test = testProperty;
-			this.appController = new ApplicationController();
-			QUnit.equal(this.appController.test, testProperty, "test property");
-			ApplicationController.prototype.singletonInstance = singletonInstance;
-		});
-
-		QUnit.asyncTest("start - dbConfig 304 Not Modified", 1, function() {
-			$.get = jQueryMock.get;
-			DatabaseController.mode = "NotModified";
-			DatabaseController.stopFakeServer = this.stopFakeServer;
-			this.startFakeServer();
-			this.appController.start();
-		});
-
-		QUnit.asyncTest("start - fail", 1, function() {
-			DatabaseController.mode = "Fail";
-			this.expectedNotice = {
-				label: "Error",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			};
-			this.appController.showNotice = $.proxy(function(notice) {
-				this.stopFakeServer();
-				$.proxy(ApplicationControllerMock.prototype.checkNotice, this)(notice);
-				QUnit.start();
-			}, this);
-
-			this.startFakeServer();
-			this.appController.start();
-		});
-
-		QUnit.asyncTest("start - database upgrade", 2, function() {
-			DatabaseController.mode = "Upgrade";
-			this.expectedNotice = {
-				label: "Database has been successfully upgraded from version 1.0 to version 1.1. Please restart the application.",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			};
-			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
-
-			this.startFakeServer();
-			this.appController.start();
-		});
-
-		QUnit.asyncTest("start - success", 2, function() {
-			DatabaseController.stopFakeServer = this.stopFakeServer;
-			this.startFakeServer();
-			this.appController.start();
-		});
-
-		QUnit.asyncTest("loadDependencies", 1, function() {
-			this.appController.loadDependencies = this.originalLoadDependencies;
-			var callback = function() {
-				QUnit.ok(true, "Dependencies loaded");
-				QUnit.start();
-			};
-			this.appController.loadDependencies([], callback);
-		});
-
-		QUnit.test("gotAppConfig - 304 Not Modified", 2, function() {
-			this.appController.gotAppConfig = this.originalGotAppConfig;
-			var appVersion = "1.0";
-			var maxDataAgeDays = 1;
-			Setting.setting.LastSyncTime = new Date();
-			this.appController.gotAppConfig(undefined, "notmodified", { responseText: JSON.stringify({ "appVersion": appVersion, "maxDataAgeDays": maxDataAgeDays }) });
-			QUnit.equal(this.appController.appVersion, appVersion, "appVersion property");
-			QUnit.equal(this.appController.maxDataAgeDays, maxDataAgeDays, "maxDataAgeDays property");
-		});
-
-		QUnit.test("gotAppConfig - sync warning", 1, function() {
-			this.appController.gotAppConfig = this.originalGotAppConfig;
-			var maxDataAgeDays = 1;
-			this.expectedNotice = {
-				label: "The last data sync was over " + maxDataAgeDays + " days ago",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			};
-			this.appController.showNotice = $.proxy(ApplicationControllerMock.prototype.checkNotice, this);
-			Setting.setting.LastSyncTime = new Date(1900, 0, 1);
-			this.appController.gotAppConfig({ "maxDataAgeDays": maxDataAgeDays });
-		});
-
-		QUnit.asyncTest("pushView - initial view", 2, function() {
-			this.appController.viewStack = [];
-			jQueryMock.setDefaultContext(this.sandbox);
-			TestController.sandbox = this.sandbox;
-			$("#content").children(":first").scrollTop(1);
-			this.appController.pushView = this.originalPushView;
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.pushView("test", {});
-			this.testView.scrollPos = 0;
-			QUnit.deepEqual(this.appController.viewStack[0], this.testView, "viewStack property");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.asyncTest("pushView - subsequent view", 3, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			TestController.sandbox = this.sandbox;
-			$("#content").children(":first").scrollTop(1);
-			this.appController.pushView = this.originalPushView;
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.pushView("test", {});
-			QUnit.equal(this.appController.viewStack[0].scrollPos, $("#content").children(":first").scrollTop(), "Previous scroll position");
-			this.testView.scrollPos = 0;
-			QUnit.deepEqual(this.appController.viewStack[1], this.testView, "viewStack property");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.asyncTest("pushView - 304 Not Modified", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			TestController.sandbox = this.sandbox;
-			$.fn.load = jQueryMock.load;
-			this.appController.pushView = this.originalPushView;
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.pushView("test", {});
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.asyncTest("popView", 3, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			TestController.sandbox = this.sandbox;
-			this.appController.viewStack.push(this.testView);
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.popView("Activated");
-			QUnit.deepEqual(this.appController.viewStack, [this.testView], "viewStack property");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("setScrollPosition", function() {
-			$.fn.scrollTop = jQueryMock.scrollTop;
-			$.fn.position = jQueryMock.position;
-
-			var testParams = [
-				{
-					description: "scroll to position",
-					scrollPos: 1,
-					expectedPos: 1
-				},
-				{
-					description: "scroll to end",
-					scrollPos: -1,
-					expectedPos: jQueryMock.position().top
-				}
-			];
-
-			var i;
-			
-			QUnit.expect(testParams.length);
-			jQueryMock.setDefaultContext(this.sandbox);
-			for (i = 0; i < testParams.length; i++) {
-				this.appController.viewStack[0].scrollPos = testParams[i].scrollPos;
-				this.appController.setScrollPosition();
-				QUnit.equal($("#content").children(":first").scrollTop(), testParams[i].expectedPos, testParams[i].description);
-			}
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("contentShown - loading", 3, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			$("#contentWrapper").addClass("loading");
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.contentShown();
-			QUnit.ok(!$("#contentWrapper").hasClass("loading"), "Unmark contentWrapper as loading");
-			QUnit.ok($("#contentWrapper").hasClass("loaded"), "Mark contentWrapper as loaded");
-			QUnit.ok(!$("#nowLoading").hasClass("loading"), "Hide Now Loading... message");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("contentShown - loaded", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			$("#contentWrapper").addClass("loaded");
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.contentShown();
-			QUnit.ok(!$("#contentWrapper").hasClass("loaded"), "Unmark contentWrapper as loaded");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("contentShown - unknown state", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.contentShown = this.originalContentShown;
-			this.appController.contentShown();
-			QUnit.ok(!$("#contentWrapper").hasClass("loaded"), "contentWrapper not marked as loaded");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("setHeader - with header content", 10, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.setHeader();
-			$("#headerLeftButton").trigger("click", "left");
-			QUnit.ok($("#headerLeftButton").hasClass(this.testView.controller.header.leftButton.style), "Set left button style");
-			QUnit.equal($("#headerLeftButton").text(), this.testView.controller.header.leftButton.label, "Left button label");
-			QUnit.notEqual($("#headerLeftButton").css("display"), "none", "Show left button");
-			QUnit.equal($("#headerLabel").text(), this.testView.controller.header.label, "Header label");
-			QUnit.notEqual($("#headerLabel").css("display"), "none", "Show header label");
-			$("#headerRightButton").trigger("click", "right");
-			QUnit.ok($("#headerRightButton").hasClass(this.testView.controller.header.rightButton.style), "Set right button style");
-			QUnit.equal($("#headerRightButton").text(), this.testView.controller.header.rightButton.label, "Right button label");
-			QUnit.notEqual($("#headerRightButton").css("display"), "none", "Show right button");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("setHeader - without header content", 8, function() {
-			var originalHeader = Object.create(this.testView.controller.header);
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.viewStack[this.appController.viewStack.length - 1].controller.header = {};
-			this.appController.setHeader();
-			$("#headerLeftButton").trigger("click", "left");
-			QUnit.ok(!$("#headerLeftButton").hasClass(originalHeader.leftButton.style), "Set left button style");
-			QUnit.notEqual($("#headerLeftButton").text(), originalHeader.leftButton.label, "Left button label");
-			QUnit.equal($("#headerLeftButton").css("display"), "none", "Show left button");
-			QUnit.notEqual($("#headerLabel").text(), originalHeader.label, "Header label");
-			QUnit.equal($("#headerLabel").css("display"), "none", "Show header label");
-			$("#headerRightButton").trigger("click", "right");
-			QUnit.ok(!$("#headerRightButton").hasClass(originalHeader.rightButton.style), "Set right button style");
-			QUnit.notEqual($("#headerRightButton").text(), originalHeader.rightButton.label, "Right button label");
-			QUnit.equal($("#headerRightButton").css("display"), "none", "Show right button");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("clearHeader", function() {
-			var testParams = [
-				{
-					description: "with buttons",
-					header: this.testView.controller.header
-				},
-				{
-					description: "without buttons",
-					header: {}
-				}
-			];
-
-			QUnit.expect(testParams.length * 3);
-
-			for (var i = 0; i < testParams.length; i++) {
-				jQueryMock.setDefaultContext(this.sandbox);
-				this.appController.viewStack[this.appController.viewStack.length - 1].controller.header = testParams[i].header;
-				this.appController.clearHeader();
-				$("#headerLeftButton").trigger("click", "left");
-				$("#headerRightButton").trigger("click", "right");
-				QUnit.equal($("#headerLeftButton").css("display"), "none", testParams[i].description + " - Hide left button");
-				QUnit.equal($("#headerLabel").css("display"), "none", testParams[i].description + " - Hide header label");
-				QUnit.equal($("#headerRightButton").css("display"), "none", testParams[i].description + " - Hide right button");
-				jQueryMock.clearDefaultContext();
-			}
-		});
-
-		QUnit.test("setFooter - with footer content", 10, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.setFooter();
-			$("#footerLeftButton").trigger("click", "left");
-			QUnit.ok($("#footerLeftButton").hasClass(this.testView.controller.footer.leftButton.style), "Set left button style");
-			QUnit.equal($("#footerLeftButton").text(), this.testView.controller.footer.leftButton.label, "Left button label");
-			QUnit.notEqual($("#footerLeftButton").css("display"), "none", "Show left button");
-			QUnit.equal($("#footerLabel").text(), this.testView.controller.footer.label, "Footer label");
-			QUnit.notEqual($("#footerLabel").css("display"), "none", "Show footer label");
-			$("#footerRightButton").trigger("click", "right");
-			QUnit.ok($("#footerRightButton").hasClass(this.testView.controller.footer.rightButton.style), "Set right button style");
-			QUnit.equal($("#footerRightButton").text(), this.testView.controller.footer.rightButton.label, "Right button label");
-			QUnit.notEqual($("#footerRightButton").css("display"), "none", "Show right button");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("setFooter - without footer content", 8, function() {
-			var originalFooter = Object.create(this.testView.controller.footer);
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.viewStack[this.appController.viewStack.length - 1].controller.footer = {};
-			this.appController.setFooter();
-			$("#footerLeftButton").trigger("click", "left");
-			QUnit.ok(!$("#footerLeftButton").hasClass(originalFooter.leftButton.style), "Set left button style");
-			QUnit.notEqual($("#footerLeftButton").text(), originalFooter.leftButton.label, "Left button label");
-			QUnit.equal($("#footerLeftButton").css("display"), "none", "Show left button");
-			QUnit.notEqual($("#footerLabel").text(), originalFooter.label, "Footer label");
-			QUnit.notEqual($("#footerLabel").css("display"), "none", "Show footer label");
-			$("#footerRightButton").trigger("click", "right");
-			QUnit.ok(!$("#footerRightButton").hasClass(originalFooter.rightButton.style), "Set right button style");
-			QUnit.notEqual($("#footerRightButton").text(), originalFooter.rightButton.label, "Right button label");
-			QUnit.equal($("#footerRightButton").css("display"), "none", "Show right button");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("setFooter - without footer", 3, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.viewStack[this.appController.viewStack.length - 1].controller.footer = null;
-			this.appController.setFooter();
-			$("#footerLeftButton").trigger("click", "left");
-			QUnit.equal($("#footerLeftButton").css("display"), "none", "Show left button");
-			QUnit.equal($("#footerLabel").css("display"), "none", "Show footer label");
-			$("#footerRightButton").trigger("click", "right");
-			QUnit.equal($("#footerRightButton").css("display"), "none", "Show right button");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("clearFooter", function() {
-			var testParams = [
-				{
-					description: "with buttons",
-					footer: this.testView.controller.footer
-				},
-				{
-					description: "without buttons",
-					footer: {}
-				},
-				{
-					description: "without footer",
-					footer: null
-				}
-			];
-
-			QUnit.expect(testParams.length * 4);
-
-			for (var i = 0; i < testParams.length; i++) {
-				jQueryMock.setDefaultContext(this.sandbox);
-				this.appController.viewStack[this.appController.viewStack.length - 1].controller.footer = testParams[i].footer;
-				this.appController.clearFooter();
-				$("#footerLeftButton").trigger("click", "left");
-				$("#footerRightButton").trigger("click", "right");
-				QUnit.equal($("#footerLeftButton").css("display"), "none", testParams[i].description + " - Hide left button");
-				QUnit.equal($("#footerLabel").val(), "", testParams[i].description + " - Footer label");
-				QUnit.equal($("#footerLabel").css("display"), "none", testParams[i].description + " - Hide footer label");
-				QUnit.equal($("#footerRightButton").css("display"), "none", testParams[i].description + " - Hide right button");
-				jQueryMock.clearDefaultContext();
-			}
-		});
-
-		QUnit.test("setContentHeight", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			$("<ul>").appendTo($("#content"));
-			$("#header").outerHeight(1);
-			$("#footer").outerHeight(1);
-			window.innerHeight = 3;
-			this.appController.setContentHeight();
-			QUnit.equal($("#content").children(":first").height(), 1, "Content height");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.asyncTest("showNotice", 14, function() {
-			var buttonClicked = function(e, button) {
-				QUnit.ok(true, "Bind " + button + " button " + e.type + " event listener");
-			};
-
-			var notice = {
-				id: "test-notice",
-				label: "<b>test-notice</b>",
-				leftButton: {
-					eventHandler: buttonClicked,
-					style: "left-button-style",
-					label: "left-button"
-				},
-				rightButton: {
-					eventHandler: buttonClicked,
-					style: "right-button-style",
-					label: "right-button"
-				}
-			};
-
-			this.appController.showNotice = this.originalShowNotice;
-			this.appController.hideNotice = function(noticeContainer) {
-				QUnit.ok(noticeContainer.hasClass("notice"), "Bind hideNotice event listener");
-			};
-			window.innerHeight = 1;
-
-			var originalAnimate = $.fn.animate;
-			$.fn.animate = $.proxy(function(args, callback) {
-				$.fn.animate = originalAnimate;
-
-				var leftButton = $("#notices div a." + notice.leftButton.style);
-				QUnit.ok(leftButton.hasClass(notice.leftButton.style), "Set left button style");
-				QUnit.equal(leftButton.text(), notice.leftButton.label, "Left button label");
-
-				QUnit.equal($("#test-notice").html(), notice.label, "Notice label");
-
-				var rightButton = $("#notices div a." + notice.rightButton.style);
-				QUnit.ok(rightButton.hasClass(notice.rightButton.style), "Set right button style");
-				QUnit.equal(rightButton.text(), notice.rightButton.label, "Right button label");
-
-				QUnit.equal($("#notices").css("visibility"), "visible", "Notices visibility");
-				QUnit.equal($("#notices").css("top"), 1 + window.pageYOffset + "px", "Notices position");
-
-				var noticeContainer = $("#notices div");
-				QUnit.equal(this.appController.noticeStack.height, -noticeContainer.height(), "noticeStack height");
-				QUnit.equal(this.appController.noticeStack.notice[0].html(), noticeContainer.html(), "Notice");
-
-				$("#notices div a." + notice.rightButton.style).trigger("click", "right");
-				$("#notices div a." + notice.leftButton.style).trigger("click", "left");
-				
-				QUnit.deepEqual(args, { top: $(window).height() + this.appController.noticeStack.height }, "Animate arguments");
-				callback();
-				jQueryMock.clearDefaultContext();
-			}, this);
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.showNotice(notice);
-		});
-
-		QUnit.asyncTest("showNotice - without button events", 12, function() {
-			var notice = {
-				id: "test-notice",
-				label: "<b>test-notice</b>",
-				leftButton: {
-					style: "left-button-style",
-					label: "left-button"
-				},
-				rightButton: {
-					style: "right-button-style",
-					label: "right-button"
-				}
-			};
-
-			this.appController.showNotice = this.originalShowNotice;
-			this.appController.hideNotice = function(noticeContainer) {
-				QUnit.ok(noticeContainer.hasClass("notice"), "Bind hideNotice event listener");
-			};
-			window.innerHeight = 1;
-
-			var originalAnimate = $.fn.animate;
-			$.fn.animate = $.proxy(function(args, callback) {
-				$.fn.animate = originalAnimate;
-
-				var leftButton = $("#notices div a." + notice.leftButton.style);
-				QUnit.ok(leftButton.hasClass(notice.leftButton.style), "Set left button style");
-				QUnit.equal(leftButton.text(), notice.leftButton.label, "Left button label");
-
-				QUnit.equal($("#test-notice").html(), notice.label, "Notice label");
-
-				var rightButton = $("#notices div a." + notice.rightButton.style);
-				QUnit.ok(rightButton.hasClass(notice.rightButton.style), "Set right button style");
-				QUnit.equal(rightButton.text(), notice.rightButton.label, "Right button label");
-
-				QUnit.equal($("#notices").css("visibility"), "visible", "Notices visibility");
-				QUnit.equal($("#notices").css("top"), 1 + window.pageYOffset + "px", "Notices position");
-
-				var noticeContainer = $("#notices div");
-				QUnit.equal(this.appController.noticeStack.height, -noticeContainer.height(), "noticeStack height");
-				QUnit.equal(this.appController.noticeStack.notice[0].html(), noticeContainer.html(), "Notice");
-
-				$("#notices div a." + notice.rightButton.style).trigger("click", "right");
-				$("#notices div a." + notice.leftButton.style).trigger("click", "left");
-				
-				QUnit.deepEqual(args, { top: $(window).height() + this.appController.noticeStack.height }, "Animate arguments");
-				callback();
-				jQueryMock.clearDefaultContext();
-			}, this);
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.showNotice(notice);
-		});
-
-		QUnit.asyncTest("showNotice - without buttons or id", 7, function() {
-			var notice = {
-				label: "<b>test-notice</b>"
-			};
-
-			this.appController.showNotice = this.originalShowNotice;
-			window.innerHeight = 1;
-
-			var originalAnimate = $.fn.animate;
-			$.fn.animate = $.proxy(function(args, callback) {
-				$.fn.animate = originalAnimate;
-
-				var noticeContainer = $("#notices div");
-
-				QUnit.equal(noticeContainer.children("p").first().html(), notice.label, "Notice label");
-
-				QUnit.equal($("#notices").css("visibility"), "visible", "Notices visibility");
-				QUnit.equal($("#notices").css("top"), "auto", "Notices position");
-
-				QUnit.equal(this.appController.noticeStack.height, -noticeContainer.height(), "noticeStack height");
-				QUnit.equal(this.appController.noticeStack.notice[1].html(), noticeContainer.html(), "Notice");
-
-				QUnit.deepEqual(args, { top: $(window).height() + this.appController.noticeStack.height }, "Animate arguments");
-				callback();
-				jQueryMock.clearDefaultContext();
-			}, this);
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.noticeStack.notice.push($("<span>"));
-			this.appController.showNotice(notice);
-		});
-
-		QUnit.asyncTest("hideNotice", 5, function() {
-			var notice = {
-				height: function() {
-					return 1;
-				},
-				data: function(key, value) {
-					QUnit.equal(key, "acknowledged", "Notice data key");
-					QUnit.equal(value, true, "Notice data value");
-				},
-				animate: function(args, callback) {
-					QUnit.deepEqual(args, { height: 0 }, "Animate arguments");
-					callback();
-				}
-			};
-
-			this.appController.noticeHidden = $.proxy(function() {
-				QUnit.equal(this.appController.noticeStack.height, 1, "noticeStack height");
-				QUnit.ok(true, "Shrink notice");
-				QUnit.start();
-			}, this);
-
-			this.appController.hideNotice(notice);
-		});
-
-		QUnit.asyncTest("noticeHidden", 2, function() {
-			var originalAnimate = $.fn.animate;
-			$.fn.animate = $.proxy(function(args, callback) {
-				$.fn.animate = originalAnimate;
-				QUnit.deepEqual(args, { top: "-=" + this.appController.noticeStack.height }, "Animate arguments");
-				callback();
-			}, this);
-			
-			this.appController.noticeHidden();
-		});
-
-		QUnit.test("noticesMoved", 4, function() {
-			var notice1 = $("<div>")
-				.attr("id", "test-notice-1")
-				.data("acknowledged", true)
-				.appendTo(this.sandbox);
-
-			var notice2 = $("<div>")
-				.attr("id", "test-notice-2")
-				.data("acknowleged", false)
-				.appendTo(this.sandbox);
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.noticeStack.notice.push(notice1);
-			this.appController.noticeStack.notice.push(notice2);
-			this.appController.noticesMoved = this.originalNoticesMoved;
-			this.appController.noticesMoved();
-			QUnit.equal(this.appController.noticeStack.notice[0].attr("id"), notice2.attr("id"), "Notice ID");
-			QUnit.equal($("#notices").css("visibility"), "visible", "Notices visibility");
-			this.appController.noticeStack.notice[0].data("acknowledged", true);
-			this.appController.noticesMoved();
-			QUnit.equal(this.appController.noticeStack.notice.length, 0, "noticeStack.notice length");
-			QUnit.equal($("#notices").css("visibility"), "hidden", "Notices visibility");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("showScrollHelper", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.showScrollHelper();
-			QUnit.notEqual($("#abc").css("display"), "none", "Show scroll helper");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("hideScrollHelper", 1, function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.appController.hideScrollHelper();
-			QUnit.equal($("#abc").css("display"), "none", "Hide scroll helper");
-			jQueryMock.clearDefaultContext();
-		});
-
-		QUnit.test("gotLastTyncTime - no value", 1, function() {
-			this.appController.maxDataAgeDays = 1;
-			this.appController.gotLastSyncTime({});
-			QUnit.equal(this.notice.length, 0, "notice length");
+				applicationController = new ApplicationController();
+			});
+
+			describe("object constructor", () => {
+				it("should return an ApplicationController instance", () => applicationController.should.be.an.instanceOf(ApplicationController));
+				it("should make the instance a singleton", () => applicationController.should.equal(ApplicationController.prototype.singletonInstance));
+				it("should initialise the view stack", () => applicationController.viewStack.should.deep.equal([]));
+				it("should initialise the notice stack", () => applicationController.noticeStack.should.deep.equal({height: 0, notice: []}));
+
+				it("should attach a transition end event handler", () => {
+					contentWrapper.trigger("transitionend");
+					applicationController.contentShown.should.have.been.called;
+				});
+
+				it("should set the SpinningWheel cell height", () => SpinningWheel.cellHeight.should.equal(45));
+				it("should create a scroll helper", () => applicationController.abc.element.should.deep.equal(abc.get(0)));
+				it("should associate the scroll helper with the content", () => applicationController.abc.scrollElement.should.deep.equal($("#content")));
+				it("should wrap the scroll helper in a touch event proxy", () => applicationController.abctoucheventproxy.element.should.deep.equal(abc.get(0)));
+				it("should create a cache controller", () => applicationController.cache.should.be.an.instanceOf(CacheController));
+
+				it("should check for updates", () => {
+					applicationController.cache.update.should.have.been.called;
+					applicationController.updateChecked.should.have.been.called;
+				});
+
+				describe("instance already exists", () => {
+					let anotherApplicationController;
+
+					beforeEach(() => (anotherApplicationController = new ApplicationController()));
+
+					it("should return an ApplicationController instance", () => anotherApplicationController.should.be.an.instanceOf(ApplicationController));
+					it("should be the same instance", () => anotherApplicationController.should.equal(applicationController));
+				});
+			});
+
+			describe("updateChecked", () => {
+				let message,
+						noticeId;
+
+				beforeEach(() => {
+					sinon.stub(applicationController, "showNotice");
+					applicationController.updateChecked.restore();
+					message = "<p>update message</p>";
+					noticeId = "updateNotice";
+				});
+
+				describe("not updated", () => {
+					it("should do nothing", () => {
+						applicationController.updateChecked(false, message, noticeId);
+						$(`#${noticeId}`).length.should.equal(0);
+						applicationController.showNotice.should.not.have.been.called;
+					});
+				});
+
+				describe("updated", () => {
+					describe("notice visible", () => {
+						it("should update the notice message", () => {
+							const notice = $("<div>")
+											.attr("id", noticeId)
+											.appendTo(document.body);
+
+							applicationController.updateChecked(true, message, "updateNotice");
+							applicationController.showNotice.should.not.have.been.called;
+							notice.html().should.equal(message);
+							notice.remove();
+						});
+					});
+
+					describe("notice not visible", () => {
+						it("should create a new notice", () => {
+							applicationController.updateChecked(true, message, "updateNotice");
+							applicationController.showNotice.should.have.been.calledWith({
+								id: noticeId,
+								label: message,
+								leftButton: {
+									style: "cautionButton",
+									label: "OK"
+								}
+							});
+						});
+					});
+				});
+
+				afterEach(() => sinon.stub(ApplicationController.prototype, "updateChecked"));
+			});
+
+			describe("start", () => {
+				let fakeServer,
+						appConfig;
+
+				beforeEach(() => {
+					appConfig = {appVersion: "", maxDataAgeDays: 1};
+					fakeServer = sinon.fakeServer.create();
+					fakeServer.respondImmediately = true;
+					fakeServer.respondWith("GET", "/appConfig", [200, {}, JSON.stringify(appConfig)]);
+					fakeServer.respondWith("GET", "/dbConfig", [200, {}, JSON.stringify({databaseName: "TVManager"})]);
+					sinon.stub(applicationController, "showNotice");
+					sinon.stub(applicationController, "gotAppConfig");
+				});
+
+				describe("304 Not Modified", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("GET", "/dbConfig", [304, {}, JSON.stringify({databaseName: "TVManager"})]);
+						DatabaseController.mode = "304";
+						applicationController.start();
+					});
+
+					it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
+				});
+
+				describe("error opening database", () => {
+					beforeEach(() => {
+						DatabaseController.mode = "Fail";
+						applicationController.start();
+					});
+
+					it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
+
+					it("should display an error notice", () => applicationController.showNotice.should.have.been.calledWith({
+						label: "Error",
+						leftButton: {
+							style: "cautionButton",
+							label: "OK"
+						}
+					}));
+
+					it("should not set the database version", () => (Reflect.undefined === applicationController.db.version).should.be.true);
+					it("should not get the application configuration settings", () => applicationController.gotAppConfig.should.not.have.been.called);
+				});
+
+				describe("database upgraded", () => {
+					beforeEach(() => {
+						DatabaseController.mode = "Upgrade";
+						applicationController.start();
+					});
+
+					it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
+
+					it("should display a restart notice", () => applicationController.showNotice.should.have.been.calledWith({
+						label: "Database has been successfully upgraded from version 1.0 to version 1.1. Please restart the application.",
+						leftButton: {
+							style: "cautionButton",
+							label: "OK"
+						}
+					}));
+
+					it("should set the database version", () => applicationController.db.version.should.equal("1.1"));
+					it("should get the application configuration settings", () => applicationController.gotAppConfig.should.have.been.calledWith(appConfig));
+				});
+
+				describe("database opened", () => {
+					beforeEach(done => {
+						sinon.stub(applicationController, "pushView", () => done());
+						DatabaseController.mode = null;
+						applicationController.start();
+					});
+
+					it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
+					it("should load all view controllers", () => Object.keys(applicationController.viewControllers).length.should.equal(13));
+					it("should display the schedule view", () => applicationController.pushView.should.have.been.calledWith("schedule"));
+					it("should not display a notice", () => applicationController.showNotice.should.not.have.been.called);
+					it("should set the database version", () => applicationController.db.version.should.equal("1.1"));
+					it("should get the application configuration settings", () => applicationController.gotAppConfig.should.have.been.calledWith(appConfig));
+				});
+
+				afterEach(() => fakeServer.restore());
+			});
+
+			describe("loadDependencies", () => {
+				let callback;
+
+				beforeEach(done => {
+					callback = sinon.spy(() => done());
+					applicationController.loadDependencies(["test/mocks/test-controller"], callback);
+				});
+
+				it("should load the specified dependencies", () => callback.should.have.been.calledWith(TestController));
+			});
+
+			describe("gotAppConfig", () => {
+				const appConfig = {
+								appVersion: "1.0",
+								maxDataAgeDays: 2
+							},
+							testParams = [
+								{
+									description: "200 OK",
+									config: appConfig
+								},
+								{
+									description: "304 not modified",
+									jqXHR: {
+										responseText: JSON.stringify(appConfig)
+									}
+								}
+							];
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(done => {
+							sinon.stub(applicationController, "gotLastSyncTime", () => done());
+							Setting.get.reset().withArgs("LastSyncTime").yields("1");
+							applicationController.gotAppConfig(params.config, null, params.jqXHR);
+						});
+
+						it("should set the application version", () => applicationController.appVersion.should.equal(appConfig.appVersion));
+						it("should set the max data age days", () => applicationController.maxDataAgeDays.should.equal(appConfig.maxDataAgeDays));
+						it("should get the last sync time", () => applicationController.gotLastSyncTime.should.have.been.calledWith("1"));
+					});
+				});
+			});
+
+			describe("pushView", () => {
+				const testParams = [
+					{
+						description: "initial view",
+						viewStack: []
+					},
+					{
+						description: "subsequent view",
+						viewStack: [{}]
+					}
+				];
+
+				beforeEach(() => {
+					sinon.stub(applicationController, "getScrollPosition");
+					sinon.stub(applicationController, "clearFooter");
+					sinon.stub(applicationController, "clearHeader");
+					sinon.stub(applicationController, "viewPushed");
+					sinon.stub(applicationController, "show").yields();
+					applicationController.viewControllers = {TestController};
+				});
+
+				let view;
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							applicationController.viewStack = params.viewStack;
+							applicationController.pushView("test", {});
+							view = applicationController.viewStack.pop();
+						});
+
+						if (params.viewStack.length > 0) {
+							it("should get the scroll position", () => applicationController.getScrollPosition.should.have.been.called);
+							it("should clear the footer", () => applicationController.clearFooter.should.have.been.called);
+							it("should clear the header", () => applicationController.clearHeader.should.have.been.called);
+						} else {
+							it("should not get the scroll position", () => applicationController.getScrollPosition.should.not.have.been.called);
+							it("should not clear the footer", () => applicationController.clearFooter.should.not.have.been.called);
+							it("should not clear the header", () => applicationController.clearHeader.should.not.have.been.called);
+						}
+
+						it("should push the view onto the view stack", () => view.should.deep.equal[{
+							name: "test",
+							controller: sinon.match.instanceOf(TestController),
+							scrollPos: 0
+						}]);
+
+						it("should instantiate the view controller", () => view.controller.args.should.deep.equal({}));
+
+						it("should display the view", () => {
+							applicationController.show.should.have.been.called;
+							applicationController.viewPushed.should.have.been.called;
+						});
+					});
+				});
+			});
+
+			describe("viewPushed", () => {
+				let setup,
+						clock;
+
+				beforeEach(() => {
+					setup = sinon.stub();
+					clock = sinon.useFakeTimers();
+					sinon.stub(applicationController, "setHeader");
+					applicationController.viewStack.push({controller: {setup}});
+					applicationController.viewPushed();
+					clock.tick(1000);
+				});
+
+				it("should setup the view controller", () => setup.should.have.been.called);
+				it("should set the header", () => applicationController.setHeader.should.have.been.called);
+				it("should indicate that the view has loaded after 1s", () => applicationController.contentShown.should.have.been.called);
+
+				afterEach(() => clock.restore());
+			});
+
+			describe("popView", () => {
+				beforeEach(() => {
+					sinon.stub(applicationController, "clearFooter");
+					sinon.stub(applicationController, "clearHeader");
+					sinon.stub(applicationController, "viewPopped");
+					sinon.stub(applicationController, "show").yields({});
+					applicationController.viewStack = [{}];
+					applicationController.popView({});
+				});
+
+				it("should clear the footer", () => applicationController.clearFooter.should.have.been.called);
+				it("should clear the header", () => applicationController.clearHeader.should.have.been.called);
+				it("should pop the view off the view stack", () => applicationController.viewStack.should.be.empty);
+				it("should display the previous view", () => {
+					applicationController.show.should.have.been.calledWith(sinon.match.func, {});
+					applicationController.viewPopped.should.have.been.calledWith({});
+				});
+			});
+
+			describe("viewPopped", () => {
+				let activate,
+						clock;
+
+				beforeEach(() => {
+					activate = sinon.stub();
+					clock = sinon.useFakeTimers();
+					sinon.stub(applicationController, "setHeader");
+					applicationController.viewStack.push({controller: {activate}});
+					applicationController.viewPopped({});
+					clock.tick(1000);
+				});
+
+				it("should activate the view controller", () => activate.should.have.been.calledWith({}));
+				it("should set the header", () => applicationController.setHeader.should.have.been.called);
+				it("should indicate that the view has loaded after 1s", () => applicationController.contentShown.should.have.been.called);
+
+				afterEach(() => clock.restore());
+			});
+
+			describe("show", () => {
+				let nowLoading,
+						callback;
+
+				beforeEach(() => {
+					nowLoading = $("<div>")
+						.attr("id", "nowLoading")
+						.appendTo(document.body);
+
+					sinon.stub(applicationController, "hideScrollHelper");
+					applicationController.viewStack.push({name: "test"});
+				});
+
+				describe("200 OK", () => {
+					beforeEach(done => {
+						callback = sinon.spy(() => done());
+						applicationController.show(callback, {});
+					});
+
+					it("should hide the scroll helper", () => applicationController.hideScrollHelper.should.have.been.called);
+					it("should show the now loading indicator", () => nowLoading.hasClass("loading").should.be.true);
+					it("should load the view template", () => content.html().should.equal("<div></div>"));
+					it("should slide the new view in from the right", () => contentWrapper.hasClass("loading").should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith({}));
+				});
+
+				describe("304 Not Modified", () => {
+					let fakeServer;
+
+					beforeEach(done => {
+						fakeServer = sinon.fakeServer.create();
+						fakeServer.respondImmediately = true;
+						fakeServer.respondWith("GET", "views/test-view.html", [304, {}, "<div></div>"]);
+						callback = sinon.spy(() => done());
+						applicationController.show(callback, {});
+					});
+
+					it("should hide the scroll helper", () => applicationController.hideScrollHelper.should.have.been.called);
+					it("should show the now loading indicator", () => nowLoading.hasClass("loading").should.be.true);
+					it("should load the view template", () => content.html().should.equal("<div></div>"));
+					it("should slide the new view in from the right", () => contentWrapper.hasClass("loading").should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith({}));
+
+					afterEach(() => fakeServer.restore());
+				});
+
+				afterEach(() => nowLoading.remove());
+			});
+
+			describe("getScrollPosition", () => {
+				it("should save the current scroll position of the active view", () => {
+					$("<div>")
+						.height(50)
+						.css("overflow-y", "scroll")
+						.append($("<div>").height(100))
+						.appendTo(content)
+						.scrollTop(10);
+
+					applicationController.viewStack.push({});
+					applicationController.getScrollPosition();
+					applicationController.viewStack.pop().scrollPos.should.equal(10);
+				});
+			});
+
+			describe("setScrollPosition", () => {
+				let scrollingElement;
+
+				beforeEach(() => {
+					scrollingElement = $("<div>")
+					.height(50)
+					.css("overflow-y", "scroll")
+					.append($("<div>").height(100))
+					.append($("<div>").height(100))
+					.appendTo(content);
+				});
+
+				describe("scroll position is -1", () => {
+					it("should scroll to the bottom", () => {
+						applicationController.viewStack.push({scrollPos: -1});
+						applicationController.setScrollPosition();
+						scrollingElement.scrollTop().should.equal(100 + scrollingElement.position().top);
+					});
+				});
+
+				describe("scoll position is not -1", () => {
+					it("should restore the saved scroll position of the active view", () => {
+						applicationController.viewStack.push({scrollPos: 20});
+						applicationController.setScrollPosition();
+						scrollingElement.scrollTop().should.equal(20);
+					});
+				});
+			});
+
+			describe("contentShown", () => {
+				let nowLoading;
+
+				beforeEach(() => {
+					nowLoading = $("<div>")
+						.attr("id", "nowLoading")
+						.addClass("loading")
+						.appendTo(document.body);
+
+					applicationController.contentShown.restore();
+				});
+
+				describe("loading", () => {
+					beforeEach(() => {
+						contentWrapper.addClass("loading");
+						applicationController.contentShown();
+					});
+
+					it("should unmark the content wrapper as loading", () => contentWrapper.hasClass("loading").should.be.false);
+					it("should mark the content wrapper as loaded", () => contentWrapper.hasClass("loaded").should.be.true);
+					it("should hide the now loading indicator", () => nowLoading.hasClass("loading").should.be.false);
+				});
+
+				describe("loaded", () => {
+					it("should unmark the content wrapper as loaded", () => {
+						contentWrapper.addClass("loaded");
+						applicationController.contentShown();
+						contentWrapper.hasClass("loaded").should.be.false;
+					});
+				});
+
+				describe("unknown state", () => {
+					it("should do nothing", () => {
+						applicationController.contentShown();
+						contentWrapper.hasClass("loading").should.be.false;
+						contentWrapper.hasClass("loaded").should.be.false;
+						nowLoading.hasClass("loading").should.be.true;
+					});
+				});
+
+				afterEach(() => {
+					nowLoading.remove();
+					sinon.stub(ApplicationController.prototype, "contentShown");
+				});
+			});
+
+			describe("setHeader", () => {
+				let header,
+						buttonConfig,
+						button,
+						label;
+
+				beforeEach(() => {
+					header = {};
+
+					buttonConfig = {
+						eventHandler: sinon.stub(),
+						style: "testButton",
+						label: "Test button"
+					};
+
+					button = $("<a>")
+						.hide()
+						.appendTo(document.body);
+
+					label = $("<h1>")
+						.attr("id", "headerLabel")
+						.hide()
+						.appendTo(document.body);
+
+					sinon.stub(applicationController, "setContentHeight");
+					applicationController.viewStack.push({controller: {header}});
+				});
+
+				describe("with left button", () => {
+					beforeEach(() => {
+						button.attr("id", "headerLeftButton");
+						header.leftButton = buttonConfig;
+						applicationController.setHeader();
+					});
+
+					it("should attach a click event handler", () => {
+						button.trigger("click");
+						buttonConfig.eventHandler.should.have.been.called;
+					});
+
+					it("should style the button", () => {
+						button.hasClass("button").should.be.true;
+						button.hasClass("header").should.be.true;
+						button.hasClass("left").should.be.true;
+						button.hasClass("testButton").should.be.true;
+					});
+
+					it("should set the button label", () => button.text().should.equal("Test button"));
+					it("should show the button", () => button.css("display").should.not.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("without left button", () => {
+					beforeEach(() => applicationController.setHeader());
+
+					it("should not attach a click event handler", () => {
+						button.trigger("click");
+						buttonConfig.eventHandler.should.not.have.been.called;
+					});
+
+					it("should not style the button", () => {
+						button.hasClass("button").should.be.false;
+						button.hasClass("header").should.be.false;
+						button.hasClass("left").should.be.false;
+						button.hasClass("testButton").should.be.false;
+					});
+
+					it("should not set the button label", () => button.text().should.equal(""));
+					it("should not show the button", () => button.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("with header label", () => {
+					beforeEach(() => {
+						header.label = "Test header";
+						applicationController.setHeader();
+					});
+
+					it("should set the header label", () => label.text().should.equal("Test header"));
+					it("should show the header label", () => label.css("display").should.not.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("without header label", () => {
+					beforeEach(() => applicationController.setHeader());
+
+					it("should not set the header label", () => label.text().should.equal(""));
+					it("should not show the header label", () => label.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("with right button", () => {
+					beforeEach(() => {
+						button.attr("id", "headerRightButton");
+						header.rightButton = buttonConfig;
+						applicationController.setHeader();
+					});
+
+					it("should attach a click event handler", () => {
+						button.trigger("click");
+						buttonConfig.eventHandler.should.have.been.called;
+					});
+
+					it("should style the button", () => {
+						button.hasClass("button").should.be.true;
+						button.hasClass("header").should.be.true;
+						button.hasClass("right").should.be.true;
+						button.hasClass("testButton").should.be.true;
+					});
+
+					it("should set the button label", () => button.text().should.equal("Test button"));
+					it("should show the button", () => button.css("display").should.not.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("without right button", () => {
+					beforeEach(() => applicationController.setHeader());
+
+					it("should not attach a click event handler", () => {
+						button.trigger("click");
+						buttonConfig.eventHandler.should.not.have.been.called;
+					});
+
+					it("should not style the button", () => {
+						button.hasClass("button").should.be.false;
+						button.hasClass("header").should.be.false;
+						button.hasClass("right").should.be.false;
+						button.hasClass("testButton").should.be.false;
+					});
+
+					it("should not set the button label", () => button.text().should.equal(""));
+					it("should not show the button", () => button.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				afterEach(() => {
+					button.remove();
+					label.remove();
+				});
+			});
+
+			describe("clearHeader", () => {
+				let header,
+						buttonConfig,
+						leftButton,
+						rightButton,
+						label;
+
+				beforeEach(() => {
+					header = {};
+					buttonConfig = {eventHandler: sinon.stub()};
+
+					leftButton = $("<a>")
+						.attr("id", "headerLeftButton")
+						.on("click", buttonConfig.eventHandler)
+						.show()
+						.appendTo(document.body);
+
+					rightButton = $("<a>")
+						.attr("id", "headerRightButton")
+						.on("click", buttonConfig.eventHandler)
+						.show()
+						.appendTo(document.body);
+
+					label = $("<h1>")
+						.attr("id", "headerLabel")
+						.show()
+						.appendTo(document.body);
+
+					sinon.stub(applicationController, "setContentHeight");
+					applicationController.viewStack.push({controller: {header}});
+				});
+
+				describe("with left button", () => {
+					beforeEach(() => {
+						header.leftButton = buttonConfig;
+						applicationController.clearHeader();
+					});
+
+					it("should detach the click event handler", () => {
+						leftButton.trigger("click");
+						buttonConfig.eventHandler.should.not.have.been.called;
+					});
+
+					it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+					it("should hide the header label", () => label.css("display").should.equal("none"));
+					it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("without left button", () => {
+					beforeEach(() => applicationController.clearHeader());
+
+					it("should not detach the click event handler", () => {
+						leftButton.trigger("click");
+						buttonConfig.eventHandler.should.have.been.called;
+					});
+
+					it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+					it("should hide the header label", () => label.css("display").should.equal("none"));
+					it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("with right button", () => {
+					beforeEach(() => {
+						header.rightButton = buttonConfig;
+						applicationController.clearHeader();
+					});
+
+					it("should detach the click event handler", () => {
+						rightButton.trigger("click");
+						buttonConfig.eventHandler.should.not.have.been.called;
+					});
+
+					it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+					it("should hide the header label", () => label.css("display").should.equal("none"));
+					it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("without right button", () => {
+					beforeEach(() => applicationController.clearHeader());
+
+					it("should not detach the click event handler", () => {
+						rightButton.trigger("click");
+						buttonConfig.eventHandler.should.have.been.called;
+					});
+
+					it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+					it("should hide the header label", () => label.css("display").should.equal("none"));
+					it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				afterEach(() => {
+					leftButton.remove();
+					rightButton.remove();
+					label.remove();
+				});
+			});
+
+			describe("setFooter", () => {
+				let footer,
+						buttonConfig,
+						button,
+						label;
+
+				beforeEach(() => {
+					footer = {};
+
+					buttonConfig = {
+						eventHandler: sinon.stub(),
+						style: "testButton",
+						label: "Test button"
+					};
+
+					button = $("<a>")
+						.hide()
+						.appendTo(document.body);
+
+					label = $("<h1>")
+						.attr("id", "footerLabel")
+						.hide()
+						.appendTo(document.body);
+
+					sinon.stub(applicationController, "setContentHeight");
+				});
+
+				describe("without footer", () => {
+					beforeEach(() => {
+						applicationController.viewStack.push({controller: {}});
+						applicationController.setFooter();
+					});
+
+					it("should not show the footer label", () => label.css("display").should.equal("none"));
+					it("should not update the content height", () => applicationController.setContentHeight.should.not.have.been.called);
+				});
+
+				describe("with footer", () => {
+					beforeEach(() => applicationController.viewStack.push({controller: {footer}}));
+
+					describe("with left button", () => {
+						beforeEach(() => {
+							button.attr("id", "footerLeftButton");
+							footer.leftButton = buttonConfig;
+							applicationController.setFooter();
+						});
+
+						it("should attach a click event handler", () => {
+							button.trigger("click");
+							buttonConfig.eventHandler.should.have.been.called;
+						});
+
+						it("should style the button", () => {
+							button.hasClass("button").should.be.true;
+							button.hasClass("footer").should.be.true;
+							button.hasClass("left").should.be.true;
+							button.hasClass("testButton").should.be.true;
+						});
+
+						it("should set the button label", () => button.text().should.equal("Test button"));
+						it("should show the button", () => button.css("display").should.not.equal("none"));
+						it("should show the footer label", () => label.css("display").should.not.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("without left button", () => {
+						beforeEach(() => applicationController.setFooter());
+
+						it("should not attach a click event handler", () => {
+							button.trigger("click");
+							buttonConfig.eventHandler.should.not.have.been.called;
+						});
+
+						it("should not style the button", () => {
+							button.hasClass("button").should.be.false;
+							button.hasClass("footer").should.be.false;
+							button.hasClass("left").should.be.false;
+							button.hasClass("testButton").should.be.false;
+						});
+
+						it("should not set the button label", () => button.text().should.equal(""));
+						it("should not show the button", () => button.css("display").should.equal("none"));
+						it("should show the footer label", () => label.css("display").should.not.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("with footer label", () => {
+						beforeEach(() => {
+							footer.label = "Test footer";
+							applicationController.setFooter();
+						});
+
+						it("should set the footer label", () => label.text().should.equal("Test footer"));
+						it("should show the footer label", () => label.css("display").should.not.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("without footer label", () => {
+						beforeEach(() => applicationController.setFooter());
+
+						it("should not set the footer label", () => label.text().should.equal(""));
+						it("should show the footer label", () => label.css("display").should.not.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("with right button", () => {
+						beforeEach(() => {
+							button.attr("id", "footerRightButton");
+							footer.rightButton = buttonConfig;
+							applicationController.setFooter();
+						});
+
+						it("should attach a click event handler", () => {
+							button.trigger("click");
+							buttonConfig.eventHandler.should.have.been.called;
+						});
+
+						it("should style the button", () => {
+							button.hasClass("button").should.be.true;
+							button.hasClass("footer").should.be.true;
+							button.hasClass("right").should.be.true;
+							button.hasClass("testButton").should.be.true;
+						});
+
+						it("should set the button label", () => button.text().should.equal("Test button"));
+						it("should show the button", () => button.css("display").should.not.equal("none"));
+						it("should show the footer label", () => label.css("display").should.not.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("without right button", () => {
+						beforeEach(() => applicationController.setFooter());
+
+						it("should not attach a click event handler", () => {
+							button.trigger("click");
+							buttonConfig.eventHandler.should.not.have.been.called;
+						});
+
+						it("should not style the button", () => {
+							button.hasClass("button").should.be.false;
+							button.hasClass("footer").should.be.false;
+							button.hasClass("right").should.be.false;
+							button.hasClass("testButton").should.be.false;
+						});
+
+						it("should not set the button label", () => button.text().should.equal(""));
+						it("should not show the button", () => button.css("display").should.equal("none"));
+						it("should show the footer label", () => label.css("display").should.not.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+				});
+
+				afterEach(() => {
+					button.remove();
+					label.remove();
+				});
+			});
+
+			describe("clearFooter", () => {
+				let footer,
+						buttonConfig,
+						leftButton,
+						rightButton,
+						label;
+
+				beforeEach(() => {
+					footer = {};
+					buttonConfig = {eventHandler: sinon.stub()};
+
+					leftButton = $("<a>")
+						.attr("id", "footerLeftButton")
+						.on("click", buttonConfig.eventHandler)
+						.show()
+						.appendTo(document.body);
+
+					rightButton = $("<a>")
+						.attr("id", "footerRightButton")
+						.on("click", buttonConfig.eventHandler)
+						.show()
+						.appendTo(document.body);
+
+					label = $("<h1>")
+						.attr("id", "footerLabel")
+						.show()
+						.val("Test footer")
+						.appendTo(document.body);
+
+					sinon.stub(applicationController, "setContentHeight");
+				});
+
+				describe("without footer", () => {
+					beforeEach(() => {
+						applicationController.viewStack.push({controller: {}});
+						applicationController.clearFooter();
+					});
+
+					it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+					it("should clear the footer label", () => label.val().should.equal(""));
+					it("should hide the footer label", () => label.css("display").should.equal("none"));
+					it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+					it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+				});
+
+				describe("with footer", () => {
+					beforeEach(() => applicationController.viewStack.push({controller: {footer}}));
+
+					describe("with left button", () => {
+						beforeEach(() => {
+							footer.leftButton = buttonConfig;
+							applicationController.clearFooter();
+						});
+
+						it("should detach the click event handler", () => {
+							leftButton.trigger("click");
+							buttonConfig.eventHandler.should.not.have.been.called;
+						});
+
+						it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+						it("should clear the footer label", () => label.val().should.equal(""));
+						it("should hide the footer label", () => label.css("display").should.equal("none"));
+						it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("without left button", () => {
+						beforeEach(() => applicationController.clearFooter());
+
+						it("should not detach the click event handler", () => {
+							leftButton.trigger("click");
+							buttonConfig.eventHandler.should.have.been.called;
+						});
+
+						it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+						it("should clear the footer label", () => label.val().should.equal(""));
+						it("should hide the footer label", () => label.css("display").should.equal("none"));
+						it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("with right button", () => {
+						beforeEach(() => {
+							footer.rightButton = buttonConfig;
+							applicationController.clearFooter();
+						});
+
+						it("should detach the click event handler", () => {
+							rightButton.trigger("click");
+							buttonConfig.eventHandler.should.not.have.been.called;
+						});
+
+						it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+						it("should clear the footer label", () => label.val().should.equal(""));
+						it("should hide the footer label", () => label.css("display").should.equal("none"));
+						it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+
+					describe("without right button", () => {
+						beforeEach(() => applicationController.clearFooter());
+
+						it("should not detach the click event handler", () => {
+							rightButton.trigger("click");
+							buttonConfig.eventHandler.should.have.been.called;
+						});
+
+						it("should hide the left button", () => leftButton.css("display").should.equal("none"));
+						it("should clear the footer label", () => label.val().should.equal(""));
+						it("should hide the footer label", () => label.css("display").should.equal("none"));
+						it("should hide the right button", () => rightButton.css("display").should.equal("none"));
+						it("should update the content height", () => applicationController.setContentHeight.should.have.been.called);
+					});
+				});
+
+				afterEach(() => {
+					leftButton.remove();
+					rightButton.remove();
+					label.remove();
+				});
+			});
+
+			describe("setContentHeight", () => {
+				it("should set the height of the content area minus the header and footer", () => {
+					const header = $("<div>")
+									.attr("id", "header")
+									.appendTo(document.body)
+									.outerHeight(20),
+								footer = $("<div>")
+									.attr("id", "footer")
+									.appendTo(document.body)
+									.outerHeight(10),
+								scrollingElement = $("<div>")
+									.appendTo(content);
+
+					window.innerHeight = 50;
+					applicationController.setContentHeight();
+					scrollingElement.outerHeight().should.equal(20);
+					header.remove();
+					footer.remove();
+				});
+			});
+
+			describe("showNotice", () => {
+				let notices,
+						notice,
+						buttonConfig,
+						eventHandler,
+						noticeContainer,
+						button;
+
+				beforeEach(() => {
+					notices = $("<div>")
+						.attr("id", "notices")
+						.css("position", "absolute")
+						.css("visibility", "hidden")
+						.css("top", "0px")
+						.appendTo(document.body);
+
+					buttonConfig = {
+						style: "testButton",
+						label: "Test button"
+					};
+
+					sinon.stub(applicationController, "noticesMoved");
+					sinon.stub(applicationController, "hideNotice");
+					notice = {label: "<b>test-notice</b>"};
+					eventHandler = sinon.stub();
+					applicationController.noticeStack = {notice: []};
+					window.innerHeight = 1;
+					$.fx.off = true;
+				});
+
+				it("should create a new notice", () => {
+					applicationController.showNotice(notice);
+					noticeContainer = notices.children("div");
+
+					noticeContainer.length.should.equal(1);
+					noticeContainer.html().should.equal("<a></a><p><b>test-notice</b></p><a></a>");
+				});
+
+				describe("with left button", () => {
+					beforeEach(() => (notice.leftButton = buttonConfig));
+
+					describe("with custom event handler", () => {
+						beforeEach(() => {
+							buttonConfig.eventHandler = eventHandler;
+							applicationController.showNotice(notice);
+							noticeContainer = notices.children("div");
+							button = noticeContainer.children("a:first");
+							button.trigger("click");
+						});
+
+						it("should attach a custom click event handler", () => eventHandler.should.have.been.called);
+						it("should attach a hide click event handler", () => applicationController.hideNotice.should.have.been.calledWith(sinon.match(value => value[0] === noticeContainer[0])));
+
+						it("should style the button", () => {
+							button.hasClass("button").should.be.true;
+							button.hasClass("left").should.be.true;
+							button.hasClass("testButton").should.be.true;
+						});
+
+						it("should set the button label", () => button.text().should.equal("Test button"));
+					});
+
+					describe("without custom event handler", () => {
+						beforeEach(() => {
+							applicationController.showNotice(notice);
+							noticeContainer = notices.children("div");
+							button = noticeContainer.children("a:first");
+							button.trigger("click");
+						});
+
+						it("should not attach a custom click event handler", () => eventHandler.should.not.have.been.called);
+						it("should attach a hide click event handler", () => applicationController.hideNotice.should.have.been.calledWith(sinon.match(value => value[0] === noticeContainer[0])));
+
+						it("should style the button", () => {
+							button.hasClass("button").should.be.true;
+							button.hasClass("left").should.be.true;
+							button.hasClass("testButton").should.be.true;
+						});
+
+						it("should set the button label", () => button.text().should.equal("Test button"));
+					});
+				});
+
+				describe("without left button", () => {
+					beforeEach(() => {
+						applicationController.showNotice(notice);
+						noticeContainer = notices.children("div");
+						button = noticeContainer.children("a:first");
+						button.trigger("click");
+					});
+
+					it("should not attach a hide click event handler", () => applicationController.hideNotice.should.not.have.been.called);
+
+					it("should not style the button", () => {
+						button.hasClass("button").should.be.false;
+						button.hasClass("left").should.be.false;
+						button.hasClass("testButton").should.be.false;
+					});
+
+					it("should not set the button label", () => button.text().should.equal(""));
+				});
+
+				describe("with notice id", () => {
+					it("should set the notice id", () => {
+						notice.id = "test-notice";
+						applicationController.showNotice(notice);
+						notices.find("div p#test-notice").length.should.equal(1);
+					});
+				});
+
+				describe("without notice id", () => {
+					it("should not set the notice id", () => {
+						applicationController.showNotice(notice);
+						notices.find("div p#test-notice").length.should.equal(0);
+					});
+				});
+
+				describe("with right button", () => {
+					beforeEach(() => (notice.rightButton = buttonConfig));
+
+					describe("with custom event handler", () => {
+						beforeEach(() => {
+							buttonConfig.eventHandler = eventHandler;
+							applicationController.showNotice(notice);
+							noticeContainer = notices.children("div");
+							button = noticeContainer.children("a:last");
+							button.trigger("click");
+						});
+
+						it("should attach a custom click event handler", () => eventHandler.should.have.been.called);
+
+						it("should style the button", () => {
+							button.hasClass("button").should.be.true;
+							button.hasClass("right").should.be.true;
+							button.hasClass("testButton").should.be.true;
+						});
+
+						it("should set the button label", () => button.text().should.equal("Test button"));
+					});
+
+					describe("without custom event handler", () => {
+						beforeEach(() => {
+							applicationController.showNotice(notice);
+							noticeContainer = notices.children("div");
+							button = noticeContainer.children("a:last");
+							button.trigger("click");
+						});
+
+						it("should not attach a custom click event handler", () => eventHandler.should.not.have.been.called);
+
+						it("should style the button", () => {
+							button.hasClass("button").should.be.true;
+							button.hasClass("right").should.be.true;
+							button.hasClass("testButton").should.be.true;
+						});
+
+						it("should set the button label", () => button.text().should.equal("Test button"));
+					});
+				});
+
+				describe("without right button", () => {
+					beforeEach(() => {
+						applicationController.showNotice(notice);
+						noticeContainer = notices.children("div");
+						button = noticeContainer.children("a:last");
+						button.trigger("click");
+					});
+
+					it("should not style the button", () => {
+						button.hasClass("button").should.be.false;
+						button.hasClass("right").should.be.false;
+						button.hasClass("testButton").should.be.false;
+					});
+
+					it("should not set the button label", () => button.text().should.equal(""));
+				});
+
+				describe("initial notice", () => {
+					beforeEach(() => applicationController.showNotice(notice));
+
+					it("should position the notice stack off screen", () => notices.css("top").should.equal("1px"));
+					it("should make the notice stack visible", () => notices.css("visibility").should.equal("visible"));
+				});
+
+				describe("subsequent notice", () => {
+					beforeEach(() => {
+						applicationController.noticeStack.notice.push({});
+						applicationController.showNotice(notice);
+					});
+
+					it("should not position the notice stack off screen", () => notices.css("top").should.equal("0px"));
+					it("should make the notice stack visible", () => notices.css("visibility").should.equal("hidden"));
+				});
+
+				it("should update the height of the notice stack to accomodate the new notice", () => {
+					applicationController.noticeStack.height = 0;
+					applicationController.showNotice(notice);
+					noticeContainer = notices.children("div");
+					applicationController.noticeStack.height.should.equal(-noticeContainer.height());
+				});
+
+				it("should push the notice onto the stack", () => {
+					applicationController.showNotice(notice);
+					noticeContainer = notices.children("div");
+					applicationController.noticeStack.notice.pop()[0].should.equal(noticeContainer[0]);
+				});
+
+				describe("animation", () => {
+					let windowHeight;
+
+					beforeEach(done => {
+						applicationController.noticesMoved.restore();
+						sinon.stub(applicationController, "noticesMoved", () => done());
+						sinon.spy($.fn, "animate");
+						applicationController.noticeStack.height = 0;
+						windowHeight = $(window).height();
+						applicationController.showNotice(notice);
+					});
+
+					it("should slide up the notices container to reveal the notice", () => {
+						noticeContainer = notices.children("div");
+						$.fn.animate.should.have.been.calledWith({top: windowHeight - noticeContainer.height()});
+					});
+
+					it("should invoke the completed callback", () => applicationController.noticesMoved.should.have.been.called);
+
+					afterEach(() => $.fn.animate.restore());
+				});
+
+				afterEach(() => {
+					notices.remove();
+					$.fx.off = false;
+				});
+			});
+
+			describe("hideNotice", () => {
+				let notice;
+
+				beforeEach(() => {
+					sinon.stub(applicationController, "noticeHidden");
+					applicationController.noticeStack = {height: 5};
+
+					notice = {
+						height: sinon.stub().returns(10),
+						data: sinon.stub(),
+						animate: sinon.stub().yields()
+					};
+
+					applicationController.hideNotice(notice);
+				});
+
+				it("should update the height of the notice stack to reclaim the space for the notice", () => applicationController.noticeStack.height.should.equal(15));
+				it("should mark the notice as acknowledged", () => notice.data.should.have.been.calledWith("acknowledged", true));
+				it("should slide down the notice to hide it", () => notice.animate.should.have.been.calledWith({height: 0}, sinon.match.func));
+				it("should invoke the completed callback", () => applicationController.noticeHidden.should.have.been.called);
+			});
+
+			describe("noticeHidden", () => {
+				let notices;
+
+				beforeEach(done => {
+					notices = $("<div>")
+						.attr("id", "notices")
+						.appendTo(document.body);
+
+					sinon.stub(applicationController, "noticesMoved", () => done());
+					sinon.spy($.fn, "animate");
+					$.fx.off = true;
+					applicationController.noticeStack.height = 10;
+					applicationController.noticeHidden();
+				});
+
+				it("should slide down the notices container to the height of the notice stack", () => {
+					$.fn.animate.should.have.been.calledWith({top: "-=10"});
+				});
+
+				it("should invoke the completed callback", () => applicationController.noticesMoved.should.have.been.called);
+
+				afterEach(() => {
+					$.fn.animate.restore();
+					notices.remove();
+					$.fx.off = false;
+				});
+			});
+
+			describe("noticesMoved", () => {
+				const testParams = [
+					{
+						description: "all notices acknowledged",
+						notices: [true, true, true],
+						containerVisibility: "hidden"
+					},
+					{
+						description: "some notices acknowledged",
+						notices: [true, false, true],
+						containerVisibility: "visible"
+					}
+				];
+
+				let	data,
+						remove,
+						notices,
+						acknowledged,
+						unacknowledged;
+
+				beforeEach(() => {
+					notices = $("<div>")
+						.attr("id", "notices")
+						.css("visibility", "visible")
+						.appendTo(document.body);
+				});
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							remove = sinon.stub();
+
+							params.notices.forEach(noticeAcknowledged => {
+								data = sinon.stub().withArgs("acknowledged").returns(noticeAcknowledged);
+								applicationController.noticeStack.notice.push({data, remove});
+							});
+
+							acknowledged = params.notices.filter(notice => notice);
+							unacknowledged = params.notices.filter(notice => !notice);
+							applicationController.noticesMoved();
+						});
+
+						it("should remove any acknowledged notices from the DOM", () => remove.callCount.should.equal(acknowledged.length));
+						it("should remove any acknowledged notices from the notice stack", () => applicationController.noticeStack.notice.length.should.equal(unacknowledged.length));
+						it(`should ${"hidden" === params.containerVisibility ? "hide" : "not hide"} the notices container`, () => notices.css("visibility").should.equal(params.containerVisibility));
+					});
+				});
+
+				afterEach(() => notices.remove());
+			});
+
+			describe("showScrollHelper", () => {
+				it("should show the scroll helper", () => {
+					applicationController.showScrollHelper();
+					abc.css("display").should.not.equal("none");
+				});
+			});
+
+			describe("hideScrollHelper", () => {
+				it("should hide the scroll helper", () => {
+					abc.css("display", "block");
+					applicationController.hideScrollHelper();
+					abc.css("display").should.equal("none");
+				});
+			});
+
+			describe("gotLastSyncTime", () => {
+				beforeEach(() => sinon.stub(applicationController, "showNotice"));
+
+				describe("without last sync time", () => {
+					it("should do nothing", () => {
+						applicationController.gotLastSyncTime({});
+						applicationController.showNotice.should.not.have.been.called;
+					});
+				});
+
+				describe("with last sync time", () => {
+					let clock,
+							settingValue;
+
+					beforeEach(() => {
+						applicationController.maxDataAgeDays = 2;
+						clock = sinon.useFakeTimers((new Date()).valueOf());
+						settingValue = new Date() - (2 * 24 * 60 * 60 * 1000);
+					});
+
+					describe("younger than max data data age days", () => {
+						it("should do nothing", () => {
+							applicationController.gotLastSyncTime({settingValue});
+							applicationController.showNotice.should.not.have.been.called;
+						});
+					});
+
+					describe("older than max data age days", () => {
+						beforeEach(() => (applicationController.maxDataAgeDays = 1));
+
+						it("should display a sync notice", () => {
+							applicationController.gotLastSyncTime({settingValue});
+							applicationController.showNotice.should.have.been.calledWith({
+								label: "The last data sync was over 1 days ago",
+								leftButton: {
+									style: "cautionButton",
+									label: "OK"
+								}
+							});
+						});
+					});
+
+					afterEach(() => clock.restore());
+				});
+			});
+
+			afterEach(() => {
+				contentWrapper.remove();
+				abc.remove();
+				ApplicationController.prototype.contentShown.restore();
+				ApplicationController.prototype.updateChecked.restore();
+			});
 		});
 	}
 );

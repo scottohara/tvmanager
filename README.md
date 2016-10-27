@@ -56,18 +56,6 @@ On the server side, it's a Ruby Sinatra app. There's not much happening on the s
 
 [require.js](http://requirejs.org) is used for asynchronous module loading.
 
-[QUnit](http://docs.jquery.com/Qunit) is used for unit testing.
-
-[Karma](http://karma-runner.github.io/0.12/index.html) is used to run the test suite.
-
-[Istanbul](https://github.com/gotwarlost/istanbul) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) is used for unit test coverage.
-
-[jslint_on_rails](https://github.com/psionides/jslint_on_rails) is used to run JSLint over the entire code base.
-
-[phantom.js](http://phantomjs.org) is used to run the unit test suite and code coverage headlessly.
-
-[JSDoc3](http://usejsdoc.org) is used to generate API documentation.
-
 Requirements
 ============
 * WebKit-based browser, with HTML5 database support
@@ -169,39 +157,44 @@ To remind users to backup regularly, a warning prompt appears at startup if the 
 
 The above setting would prompt the user to backup after three days instead of the default seven days. In development, it is useful to set this to a very high number (eg. 9999) so that you are not constantly prompted to backup.
 
-Test Suite
-==========
-To run the QUnit test suite:
-* install the dependencies (`npm install`)
-* start the test runner (`karma start`)
+Running Tests
+=============
+Frontend specs are implemented using [mocha](http://visionmedia.github.io/mocha/)+[chai](http://chaijs.com/)+[sinon](http://sinonjs.org/).
 
-By default, the tests will run in both Chrome and PhantomJS.
+Two [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
+
+1. `npm run bdd` watches for any file changes and runs the full test suite
+2. `npm test` does the same, but includes [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available for each browser in `/tvmanager/coverage/{browser}/index.html`
+
+By default, the tests will run in both Chrome and [PhantomJS](http://phantomjs.org).
 
 To run the tests in the iOS Simulator, use `rake simulator:test`. This rake task will start the test runner, prompt for the device & iOS version to launch the simulator for, and open the the test URL (ie. `http://localhost:9876`) in Mobile Safari. Quitting the simulator will automatically shutdown the test runner.
 
 To run the tests in Mobile Safari on a physical device:
-* start the test runner *without* launching the default browsers (`karma start --browsers`)
+* start the test runner *without* launching the default browsers (`npm test -- --browsers`)
 * the Karma server will pause waiting for a browser connection
 * manually launch Mobile Safari and browse to the URL shown in the terminal window (eg. `http://localhost:9876`)
 
-Test results will be displayed in the terminal, along with code coverage statistics.
-
-Additionally, a HTML coverage report is generated which can be viewed at [file://path_to_local_repository/coverage/browser_name/index.html](file://path_to_local_repository/coverage/browser_name/index.html).
-
 (Note: The name of the subdirectory for Mobile Safari coverage reports is 'mobile', ie. `coverage/mobile/index.html`)
 
-To run the backend test suite:
-* `rake spec`
+Backend specs are implemented using [RSpec](http://rspec.info/):
 
-To run code checks:
+1. Ensure the database server is running (e.g. `couchdb`)
+2. Run the RSpec rake task (`rake spec`). To run specific specs, use RSpec filtering (`fdescribe`, `fit`, `xdescribe`, `xit`)
 
-* `rake jslint` (configuration options are set in `config/jslint.yml`), or
-* `rake jshint` (configuration options are set in `config/jshint.yml`)
+Code Quality
+============
+Frontend checks are implemented using [eslint](http://eslint.org):
+
+* `npm run lint`
+
+Backend checks are implemented using [rubocop](http://batsov.com/rubocop/):
+
 * `bundle exec rubocop`
 
 API Documentation
 =================
-The JavaScript source is fully annotated with JSDoc3 tags, allowing HTML documentation of the API to be automatically generated.
+The JavaScript source is fully annotated with [JSDoc3](http://usejsdoc.org) tags, allowing HTML documentation of the API to be automatically generated.
 
 To generate documentation:
 

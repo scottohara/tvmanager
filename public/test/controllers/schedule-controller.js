@@ -1,208 +1,322 @@
 define(
 	[
-		'controllers/schedule-controller',
-		'components/list',
-		'models/series-model',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"controllers/schedule-controller",
+		"components/list",
+		"models/series-model",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
-	function(ScheduleController, List, Series, ApplicationController, $, jQueryMock) {
+	(ScheduleController, List, Series, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("schedule-controller", {
-			setup: function() {
-				this.items = [
+		describe("ScheduleController", () => {
+			let items,
+					scheduleList,
+					scheduleController;
+
+			beforeEach(() => {
+				items = [
 					{
+						seriesName: "test-series",
+						nowShowing: 1,
+						programId: 2,
 						programName: "test-program-2",
-						seriesName: "test-series",
-						nowShowing: 1,
 						recordedCount: 0,
 						expectedCount: 0
 					},
 					{
+						seriesName: "test-series",
+						nowShowing: 1,
+						programId: 3,
 						programName: "test-program-3",
-						seriesName: "test-series",
-						nowShowing: 1,
 						recordedCount: 0,
 						expectedCount: 0
 					},
 					{
-						programName: "test-program-1",
 						seriesName: "test-series",
 						nowShowing: null,
+						programId: 1,
+						programName: "test-program-1",
 						recordedCount: 0,
 						expectedCount: 0
 					},
 					{
-						programName: "test-program-1",
 						seriesName: "test-series",
 						nowShowing: null,
+						programId: 1,
+						programName: "test-program-1",
 						recordedCount: 0,
 						expectedCount: 0
 					}
 				];
-				this.scheduleController = new ScheduleController();
-			}
-		});
 
-		QUnit.test("object constructor", 1, function() {
-			QUnit.ok(this.scheduleController, "Instantiate ScheduleController object");
-		});
+				scheduleList = $("<ul>")
+					.attr("id", "list")
+					.appendTo(document.body);
 
-		QUnit.test("setup", 8, function() {
-			Series.series = this.items;
+				scheduleController = new ScheduleController();
+			});
 
-			this.scheduleController.viewItem = function() {
-				QUnit.ok(true, "Bind list view event handler");
-			};
-			this.scheduleController.editItem = function() {
-				QUnit.ok(true, "Bind list edit event handler");
-			};
-			this.scheduleController.editItems = function() {
-				QUnit.ok(true, "Bind edit action event handler");
-			};
-			this.scheduleController.viewUnscheduled = function() {
-				QUnit.ok(true, "Bind view unscheduled event handler");
-			};
-			this.scheduleController.viewPrograms = function() {
-				QUnit.ok(true, "Bind view programs event handler");
-			};
-			this.scheduleController.viewSettings = function() {
-				QUnit.ok(true, "Bind view settings event handler");
-			};
+			describe("object constructor", () => {
+				it("should return a ScheduleController instance", () => scheduleController.should.be.an.instanceOf(ScheduleController));
+			});
 
-			this.scheduleController.setup();
-			QUnit.deepEqual(this.scheduleController.scheduleList.items, this.items, "List items");
-			QUnit.equal(this.scheduleController.scheduleList.action, "view", "List action");
-			this.scheduleController.header.leftButton.eventHandler();
-			this.scheduleController.header.rightButton.eventHandler();
-			this.scheduleController.footer.leftButton.eventHandler();
-			this.scheduleController.footer.rightButton.eventHandler();
-		});
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(scheduleController, "viewItem");
+					sinon.stub(scheduleController, "editItem");
+					sinon.stub(scheduleController, "viewUnscheduled");
+					sinon.stub(scheduleController, "viewPrograms");
+					sinon.stub(scheduleController, "activate");
+					scheduleController.setup();
+				});
 
-		QUnit.test("activate - item not in schedule", 1, function() {
-			var listItem = {
-				listIndex: 0,
-				series: {
-					nowShowing: null,
-					recordedCount: 0,
-					expectedCount: 0
-				}
-			};
+				it("should set the header label", () => scheduleController.header.label.should.equal("Schedule"));
 
-			this.scheduleController.scheduleList = new List(null, null, null, this.items.slice(0));
-			this.scheduleController.activate(listItem);
-			QUnit.deepEqual(this.scheduleController.scheduleList.items, this.items.slice(1), "List items");
-		});
+				it("should attach a header left button event handler", () => {
+					scheduleController.header.leftButton.eventHandler();
+					scheduleController.viewUnscheduled.should.have.been.called;
+				});
 
-		QUnit.test("activate - item in schedule", function() {
-			var testParams = [
-				{
-					description: "series name change",
-					listItem: {
-						listIndex: 0,
-						series: {
-							programName: "test-program-4",
-							seriesName: "test-series-2",
-							nowShowing: 1,
-							recordedCount: 0,
-							expectedCount: 0
-						}
-					}
-				},
-				{
-					description: "now showing change",
-					listItem: {
-						listIndex: 0,
-						series: {
-							programName: "test-program-2",
-							seriesName: "test-series",
-							nowShowing: 2,
-							recordedCount: 0,
-							expectedCount: 0
-						}
-					}
-				},
-				{
-					description: "no change",
-					listItem: {
-						listIndex: 0,
-						series: {
-							programName: "test-program-3",
-							seriesName: "test-series",
-							nowShowing: 1,
-							recordedCount: 0,
-							expectedCount: 0
-						}
-					}
-				}
-			];
+				it("should set the header left button label", () => scheduleController.header.leftButton.label.should.equal("Unscheduled"));
 
-			QUnit.expect(testParams.length);
-			for (var i = 0; i < testParams.length; i++) {
-				var itemsCopy = JSON.parse(JSON.stringify(this.items));
-				this.scheduleController.scheduleList = new List(null, null, null, JSON.parse(JSON.stringify(this.items)));
-				this.scheduleController.origSeriesName = this.items[0].seriesName;
-				this.scheduleController.origNowShowing = this.items[0].nowShowing;
-				this.scheduleController.activate(testParams[i].listItem);
-				itemsCopy[0].programName = "test-program-3";
-				itemsCopy[1] = testParams[i].listItem.series;
-				QUnit.deepEqual(this.scheduleController.scheduleList.items, itemsCopy, testParams[i].description + " - List items");
-			}
-		});
+				it("should attach a header right button event handler", () => {
+					scheduleController.header.rightButton.eventHandler();
+					scheduleController.viewPrograms.should.have.been.called;
+				});
 
-		QUnit.test("viewItem", 2, function() {
-			var index = 0;
-			this.scheduleController.scheduleList = { items: this.items };
-			this.scheduleController.viewItem(index);
-			QUnit.deepEqual(appController.viewArgs, { source: "Schedule", listIndex: index, series: this.items[index] }, "View arguments");
-		});
+				it("should set the header right button label", () => scheduleController.header.rightButton.label.should.equal("Programs"));
 
-		QUnit.test("viewUnscheduled", 1, function() {
-			this.scheduleController.viewUnscheduled();
-		});
+				it("should attach a view event handler to the schedule list", () => {
+					scheduleController.scheduleList.viewEventHandler();
+					scheduleController.viewItem.should.have.been.called;
+				});
 
-		QUnit.test("viewPrograms", 1, function() {
-			this.scheduleController.viewPrograms();
-		});
+				it("should attach an edit event handler to the programs list", () => {
+					scheduleController.scheduleList.editEventHandler();
+					scheduleController.editItem.should.have.been.called;
+				});
 
-		QUnit.test("viewSettings", 1, function() {
-			this.scheduleController.viewSettings();
-		});
+				it("should activate the controller", () => scheduleController.activate.should.have.been.called);
+			});
 
-		QUnit.test("editItem", 4, function() {
-			var index = 0;
-			this.scheduleController.scheduleList = { items: this.items };
-			this.scheduleController.editItem(index);
-			QUnit.equal(this.scheduleController.origSeriesName, this.items[index].seriesName, "origSeriesName property");
-			QUnit.equal(this.scheduleController.origNowShowing, this.items[index].nowShowing, "origNowShowing property");
-			QUnit.deepEqual(appController.viewArgs, { listIndex: index, series: this.items[index] }, "View arguments");
-		});
+			describe("activate", () => {
+				describe("from launch", () => {
+					beforeEach(() => {
+						sinon.stub(scheduleController, "listRetrieved");
+						Series.series = items;
+						scheduleController.activate();
+					});
 
-		QUnit.test("editItems", 3, function() {
-			var sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-			$("<ul>")
-				.attr("id", "list")
-				.appendTo(sandbox);
+					it("should get the list of scheduled series", () => {
+						Series.listByNowShowing.should.have.been.calledWith(sinon.match.func);
+						scheduleController.listRetrieved.should.have.been.calledWith(items);
+					});
+				});
 
-			this.scheduleController.viewItems = function() {
-				QUnit.ok(true, "Bind done action event handler");
-			};
+				describe("from episodes view", () => {
+					let listItem;
 
-			this.scheduleController.scheduleList = new List();
+					beforeEach(() => {
+						sinon.stub(scheduleController, "viewItems");
 
-			jQueryMock.setDefaultContext(sandbox);
-			this.scheduleController.editItems();
-			QUnit.equal(this.scheduleController.scheduleList.action, "edit", "List action");
-			QUnit.ok($("#list").hasClass("edit"), "Set list edit style");
-			this.scheduleController.footer.leftButton.eventHandler();
-			jQueryMock.clearDefaultContext();
-			sandbox.remove();
+						scheduleController.scheduleList = {
+							items: items.slice(0),
+							refresh: sinon.stub()
+						};
+					});
+
+					describe("not scheduled", () => {
+						beforeEach(() => {
+							listItem = {
+								listIndex: 0,
+								series: {
+									nowShowing: null,
+									recordedCount: 0,
+									expectedCount: 0
+								}
+							};
+							scheduleController.activate(listItem);
+						});
+
+						it("should remove the item from the schedule list", () => scheduleController.scheduleList.items.should.deep.equal(items.slice(1)));
+						it("should refresh the list", () => scheduleController.scheduleList.refresh.should.have.been.called);
+						it("should set the list to view mode", () => scheduleController.viewItems.should.have.been.called);
+					});
+
+					describe("scheduled", () => {
+						const testParams = [
+							{
+								description: "program edited",
+								programId: 4,
+								programName: "test-program-4",
+								newIndex: 1
+							},
+							{
+								description: "now showing edited",
+								nowShowing: 2,
+								newIndex: 1
+							},
+							{
+								description: "recorded count edited",
+								recordedCount: 1,
+								newIndex: 0
+							}
+						];
+
+						testParams.forEach(params => {
+							describe(params.description, () => {
+								beforeEach(() => {
+									listItem = {
+										listIndex: 0,
+										series: {
+											seriesName: items[0].seriesName,
+											nowShowing: params.nowShowing || items[0].nowShowing,
+											programId: params.programId || items[0].programId,
+											programName: params.programName || items[0].programName,
+											recordedCount: params.recordedCount || items[0].recordedCount,
+											expectedCount: items[0].expectedCount
+										}
+									};
+
+									items = items.slice(1);
+									items.splice(params.newIndex, 0, listItem.series);
+									scheduleController.origProgramId = items[0].programId;
+									scheduleController.origNowShowing = items[0].nowShowing;
+									scheduleController.activate(listItem);
+								});
+
+								it("should update the schedule list", () => scheduleController.scheduleList.items.should.deep.equal(items));
+								it("should refresh the list", () => scheduleController.scheduleList.refresh.should.have.been.called);
+								it("should set the list to view mode", () => scheduleController.viewItems.should.have.been.called);
+							});
+						});
+					});
+				});
+			});
+
+			describe("listRetrieved", () => {
+				beforeEach(() => {
+					sinon.stub(scheduleController, "viewItems");
+					scheduleController.scheduleList = {refresh: sinon.stub()};
+					scheduleController.listRetrieved(items);
+				});
+
+				it("should set the schedule list items", () => scheduleController.scheduleList.items.should.deep.equal(items));
+				it("should refresh the list", () => scheduleController.scheduleList.refresh.should.have.been.called);
+				it("should set the list to view mode", () => scheduleController.viewItems.should.have.been.called);
+			});
+
+			describe("viewItem", () => {
+				it("should push the episodes view for the selected item", () => {
+					const index = 0;
+
+					scheduleController.scheduleList = {items};
+					scheduleController.viewItem(index);
+					appController.pushView.should.have.been.calledWith("episodes", {
+						source: "Schedule",
+						listIndex: index,
+						series: items[index]
+					});
+				});
+			});
+
+			describe("viewUnscheduled", () => {
+				it("should push the unscheduled view", () => {
+					scheduleController.viewUnscheduled();
+					appController.pushView.should.have.been.calledWithExactly("unscheduled");
+				});
+			});
+
+			describe("viewPrograms", () => {
+				it("should push the programs view", () => {
+					scheduleController.viewPrograms();
+					appController.pushView.should.have.been.calledWithExactly("programs");
+				});
+			});
+
+			describe("viewSettings", () => {
+				it("should push the settings view", () => {
+					scheduleController.viewSettings();
+					appController.pushView.should.have.been.calledWithExactly("settings");
+				});
+			});
+
+			describe("editItem", () => {
+				let index;
+
+				beforeEach(() => {
+					index = 0;
+					scheduleController.scheduleList = {items};
+					scheduleController.editItem(index);
+				});
+
+				it("should save the original program id", () => scheduleController.origProgramId.should.equal(items[index].programId));
+				it("should save the original now showing", () => scheduleController.origNowShowing.should.equal(items[index].nowShowing));
+				it("should push the series view for the selected item", () => appController.pushView.should.have.been.calledWith("series", {
+					listIndex: index,
+					series: items[index]
+				}));
+			});
+
+			describe("editItems", () => {
+				beforeEach(() => {
+					sinon.stub(scheduleController, "activate");
+					sinon.stub(scheduleController, "viewItems");
+					scheduleController.setup();
+					scheduleController.editItems();
+				});
+
+				it("should set the list to edit mode", () => scheduleController.scheduleList.action.should.equal("edit"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+				it("should set the list item icons", () => scheduleList.hasClass("edit").should.be.true);
+				it("should set the footer label", () => scheduleController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					scheduleController.footer.leftButton.eventHandler();
+					scheduleController.viewItems.should.have.been.called;
+				});
+
+				it("should set the footer left button style", () => scheduleController.footer.leftButton.style.should.equal("confirmButton"));
+				it("should set the footer left button label", () => scheduleController.footer.leftButton.label.should.equal("Done"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			describe("viewItems", () => {
+				beforeEach(() => {
+					sinon.stub(scheduleController, "activate");
+					sinon.stub(scheduleController, "editItems");
+					sinon.stub(scheduleController, "viewSettings");
+					scheduleController.setup();
+					scheduleController.viewItems();
+				});
+
+				it("should set the list to view mode", () => scheduleController.scheduleList.action.should.equal("view"));
+				it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+				it("should set the list item icons", () => scheduleList.hasClass("edit").should.be.false);
+				it("should set the footer label", () => scheduleController.footer.label.should.equal("v1.0"));
+
+				it("should attach a footer left button event handler", () => {
+					scheduleController.footer.leftButton.eventHandler();
+					scheduleController.editItems.should.have.been.called;
+				});
+
+				it("should set the footer left button label", () => scheduleController.footer.leftButton.label.should.equal("Edit"));
+
+				it("should attach a footer right button event handler", () => {
+					scheduleController.footer.rightButton.eventHandler();
+					scheduleController.viewSettings.should.have.been.called;
+				});
+
+				it("should set the footer right button label", () => scheduleController.footer.rightButton.label.should.equal("Settings"));
+				it("should set the view footer", () => appController.setFooter.should.have.been.called);
+			});
+
+			afterEach(() => scheduleList.remove());
 		});
 	}
 );

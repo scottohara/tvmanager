@@ -18,11 +18,11 @@ define(
 	/**
 	 * @exports controllers/series-controller
 	 */
-	function(Series, ApplicationController, TouchEventProxy, Program, SpinningWheel, $) {
+	(Series, ApplicationController, TouchEventProxy, Program, SpinningWheel, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
 		/**
 		 * @class SeriesController
@@ -34,205 +34,205 @@ define(
 		 * @property {Boolean} gettingNowShowing - indicates that the now showing status is currently being set
 		 * @property {TouchEventProxy} swtoucheventproxy - remaps touch events for the SpinningWheel
 		 * @property {Boolean} gettingProgramId - indicates that the programs list is currently being retrieved
-		 * @this SeriesController
-		 * @constructor SeriesController
-		 * @param {SeriesListItem} listItem - a list item from the SeriesList or Schedule view
 		 */
-		var SeriesController = function (listItem) {
-			// If the passed item has an index, we're editing an existing series
-			if (listItem.listIndex >= 0) {
-				this.listItem = listItem;
-				this.originalNowShowing = this.listItem.series.nowShowing;
-				this.originalProgramId = this.listItem.series.programId;
-			} else {
-				// Otherwise, we're adding a new series
-				this.listItem = { series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0, 0, 0) };
-			}
-		};
-
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method setup
-		 * @desc Initialises the controller
-		 */
-		SeriesController.prototype.setup = function() {
-			// Setup the header
-			this.header = {
-				label: "Add/Edit Series",
-				leftButton: {
-					eventHandler: $.proxy(this.cancel, this),
-					label: "Cancel"
-				},
-				rightButton: {
-					eventHandler: $.proxy(this.save, this),
-					style: "confirmButton",
-					label: "Save"
+		class SeriesController {
+			/**
+			 * @constructor SeriesController
+			 * @this SeriesController
+			 * @param {SeriesListItem} listItem - a list item from the SeriesList or Schedule view
+			 */
+			constructor(listItem) {
+				// If the passed item has an index, we're editing an existing series
+				if (listItem.listIndex >= 0) {
+					this.listItem = listItem;
+					this.originalNowShowing = this.listItem.series.nowShowing;
+					this.originalProgramId = this.listItem.series.programId;
+				} else {
+					// Otherwise, we're adding a new series
+					this.listItem = {series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0, 0, 0)};
 				}
-			};
-
-			// Set the series details
-			$("#seriesName").val(this.listItem.series.seriesName);
-			$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
-
-			// Bind events for all of the buttons/controls
-			$("#nowShowing").on("click", $.proxy(this.getNowShowing, this));
-			$("#moveTo").on("click", $.proxy(this.getProgramId, this));
-		};
-
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method save
-		 * @desc Saves the series details to the database and returns to the previous view
-		 */
-		SeriesController.prototype.save = function() {
-			// Get the series details
-			this.listItem.series.seriesName = $("#seriesName").val();
-
-			// Update the database
-			this.listItem.series.save();
-
-			// If a new series was added, scroll the SeriesList view to the end of the list to reveal the new item
-			if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
-				appController.viewStack[appController.viewStack.length - 2].scrollPos = -1;
 			}
 
-			// Pop the view off the stack
-			appController.popView(this.listItem);
-		};
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method setup
+			 * @desc Initialises the controller
+			 */
+			setup() {
+				// Setup the header
+				this.header = {
+					label: "Add/Edit Series",
+					leftButton: {
+						eventHandler: this.cancel.bind(this),
+						label: "Cancel"
+					},
+					rightButton: {
+						eventHandler: this.save.bind(this),
+						style: "confirmButton",
+						label: "Save"
+					}
+				};
 
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method cancel
-		 * @desc Reverts any changes and returns to the previous view
-		 */
-		SeriesController.prototype.cancel = function() {
-			// Revert to the original series details
-			this.listItem.series.setNowShowing(this.originalNowShowing);
-			this.listItem.series.programId = (this.originalProgramId);
+				// Set the series details
+				$("#seriesName").val(this.listItem.series.seriesName);
+				$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
 
-			// Pop the view off the stack
-			appController.popView();
-		};
+				// Bind events for all of the buttons/controls
+				$("#nowShowing").on("click", this.getNowShowing.bind(this));
+				$("#moveTo").on("click", this.getProgramId.bind(this));
+			}
 
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method getNowShowing
-		 * @desc Displays a SpinningWheel control for capturing the now showing status
-		 */
-		SeriesController.prototype.getNowShowing = function() {
-			// Only proceed if the now showing status is not already being set
-			if (!this.gettingNowShowing) {
-				// Set the getting flag
-				this.gettingNowShowing = true;
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method save
+			 * @desc Saves the series details to the database and returns to the previous view
+			 */
+			save() {
+				const PREVIOUS_VIEW_OFFSET = 2;
 
-				// Get the current now showing status, and default to "Not Showing" if not set
-				var nowShowing = this.listItem.series.nowShowing;
-				if (!nowShowing) {
-					nowShowing = 0;
+				// Get the series details
+				this.listItem.series.seriesName = $("#seriesName").val();
+
+				// Update the database
+				this.listItem.series.save();
+
+				// If a new series was added, scroll the SeriesList view to the end of the list to reveal the new item
+				if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
+					appController.viewStack[appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
 				}
 
-				// Initialise the SpinningWheel with one slot for the now showing values; and show the control
-				SpinningWheel.addSlot(Series.NOW_SHOWING, "left", nowShowing);
-				SpinningWheel.setDoneAction($.proxy(this.setNowShowing, this));
+				// Pop the view off the stack
+				appController.popView(this.listItem);
+			}
+
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method cancel
+			 * @desc Reverts any changes and returns to the previous view
+			 */
+			cancel() {
+				// Revert to the original series details
+				this.listItem.series.setNowShowing(this.originalNowShowing);
+				this.listItem.series.programId = this.originalProgramId;
+
+				// Pop the view off the stack
+				appController.popView();
+			}
+
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method getNowShowing
+			 * @desc Displays a SpinningWheel control for capturing the now showing status
+			 */
+			getNowShowing() {
+				// Only proceed if the now showing status is not already being set
+				if (!this.gettingNowShowing) {
+					// Set the getting flag
+					this.gettingNowShowing = true;
+
+					// Get the current now showing status, and default to "Not Showing" if not set
+					const nowShowing = this.listItem.series.nowShowing || 0;
+
+					// Initialise the SpinningWheel with one slot for the now showing values; and show the control
+					SpinningWheel.addSlot(Series.NOW_SHOWING, "left", nowShowing);
+					SpinningWheel.setDoneAction(this.setNowShowing.bind(this));
+					SpinningWheel.open();
+
+					// SpinningWheel only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
+					this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
+
+					// Clear the getting flag
+					this.gettingNowShowing = false;
+				}
+			}
+
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method setNowShowing
+			 * @desc Gets the selected value from the SpinningWheel and updates the model and view
+			 */
+			setNowShowing() {
+				// Update the model with the selected values in the SpinningWheel
+				this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues().keys[0]);
+
+				// Update the view
+				$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
+
+				// Remove the touch event proxy
+				this.swtoucheventproxy = null;
+			}
+
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method getProgramId
+			 * @desc Gets the list of programs that the user can move the series to
+			 */
+			getProgramId() {
+				// Only proceed if the programs list is not already being retrieved
+				if (!this.gettingProgramId) {
+					// Set the getting flag
+					this.gettingProgramId = true;
+
+					// Get the list of programs
+					Program.list(this.listRetrieved.bind(this));
+				}
+			}
+
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method listRetrieved
+			 * @desc Displays a SpinningWheel control for moving the series to a different program
+			 * @param {Array<Program>} programList - array of program objects
+			 */
+			listRetrieved(programList) {
+				// Reduce the list of programs into an object for the SpinningWheel
+				const programs = programList.reduce((memo, program) => Object.assign(memo, {[program.id]: program.programName}), {});
+
+				// Initialise the SpinningWheel with one slot for the programs; and show the control
+				SpinningWheel.addSlot(programs, "left", this.listItem.series.programId);
+				SpinningWheel.setDoneAction(this.setProgramId.bind(this));
 				SpinningWheel.open();
 
 				// SpinningWheel only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
 				this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
 
 				// Clear the getting flag
-				this.gettingNowShowing = false;
-			}
-		};
-
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method setNowShowing
-		 * @desc Gets the selected value from the SpinningWheel and updates the model and view
-		 */
-		SeriesController.prototype.setNowShowing = function() {
-			// Update the model with the selected values in the SpinningWheel
-			this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues().keys[0]);
-
-			// Update the view
-			$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
-
-			// Remove the touch event proxy
-			this.swtoucheventproxy = null;
-		};
-
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method getProgramId
-		 * @desc Gets the list of programs that the user can move the series to
-		 */
-		SeriesController.prototype.getProgramId = function() {
-			// Only proceed if the programs list is not already being retrieved
-			if (!this.gettingProgramId) {
-				// Set the getting flag
-				this.gettingProgramId = true;
-
-				// Get the list of programs
-				Program.list($.proxy(this.listRetrieved, this));
-			}
-		};
-
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method listRetrieved
-		 * @desc Displays a SpinningWheel control for moving the series to a different program
-		 * @param {Array<Program>} programList - array of program objects
-		 */
-		SeriesController.prototype.listRetrieved = function(programList) {
-			var programs = {};
-
-			// Iterate of the list of programs and setup the data for the SpinningWheel
-			for (var i = 0; i < programList.length; i++) {
-				programs[programList[i].id] = programList[i].programName;
+				this.gettingProgramId = false;
 			}
 
-			// Initialise the SpinningWheel with one slot for the programs; and show the control
-			SpinningWheel.addSlot(programs, "left", this.listItem.series.programId);
-			SpinningWheel.setDoneAction($.proxy(this.setProgramId, this));
-			SpinningWheel.open();
+			/**
+			 * @memberof SeriesController
+			 * @this SeriesController
+			 * @instance
+			 * @method setProgramId
+			 * @desc Gets the selected value from the SpinningWheel and updates the model and view
+			 */
+			setProgramId() {
+				// Update the model with the selected values in the SpinningWheel
+				this.listItem.series.programId = SpinningWheel.getSelectedValues().keys[0];
+				this.listItem.series.programName = SpinningWheel.getSelectedValues().values[0];
 
-			// SpinningWheel only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
-			this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
+				// Update the view
+				$("#moveTo").val(this.listItem.series.programName);
 
-			// Clear the getting flag
-			this.gettingProgramId = false;
-		};
-
-		/**
-		 * @memberof SeriesController
-		 * @this SeriesController
-		 * @instance
-		 * @method setProgramId
-		 * @desc Gets the selected value from the SpinningWheel and updates the model and view
-		 */
-		SeriesController.prototype.setProgramId = function() {
-			// Update the model with the selected values in the SpinningWheel
-			this.listItem.series.programId = SpinningWheel.getSelectedValues().keys[0];
-
-			// Update the view
-			$("#moveTo").val(SpinningWheel.getSelectedValues().values[0]);
-
-			// Remove the touch event proxy
-			this.swtoucheventproxy = null;
-		};
+				// Remove the touch event proxy
+				this.swtoucheventproxy = null;
+			}
+		}
 
 		return SeriesController;
 	}

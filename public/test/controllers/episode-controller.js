@@ -1,22 +1,24 @@
 define(
 	[
-		'framework/sw/spinningwheel',
-		'controllers/episode-controller',
-		'models/episode-model',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"framework/sw/spinningwheel",
+		"controllers/episode-controller",
+		"models/episode-model",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
-	function(SpinningWheel, EpisodeController, Episode, ApplicationController, $, jQueryMock) {
+	(SpinningWheel, EpisodeController, Episode, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("episode-controller", {
-			setup: function() {
-				this.listItem = {
+		describe("EpisodeController", () => {
+			let listItem,
+					episodeController;
+
+			beforeEach(() => {
+				listItem = {
 					listIndex: 0,
 					episode: {
 						episodeName: "test-episode",
@@ -24,335 +26,507 @@ define(
 						statusDate: "01-Jan",
 						unverified: false,
 						unscheduled: false,
-						save: function() {
-							QUnit.ok(true, "Save episode");
-						},
-						setStatus: function(status) {
-							this.status = status;
-						},
-						setStatusDate: function(statusDate) {
-							this.statusDate = statusDate;
-						},
-						setUnverified: function(unverified) {
-							this.unverified = unverified;
-						}
+						save: sinon.stub(),
+						setStatus: sinon.stub(),
+						setStatusDate: sinon.stub(),
+						setUnverified: sinon.stub()
 					}
 				};
 
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-
-				$("<input>")
-					.attr("id", "episodeName")
-					.appendTo(this.sandbox);
-
-				$("<div>")
-					.attr("id", "watched")
-					.appendTo(this.sandbox);
-
-				$("<div>")
-					.attr("id", "recorded")
-					.appendTo(this.sandbox);
-
-				$("<div>")
-					.attr("id", "expected")
-					.appendTo(this.sandbox);
-
-				$("<div>")
-					.attr("id", "missed")
-					.appendTo(this.sandbox);
-
-				$("<input>")
-					.attr("id", "statusDate")
-					.appendTo(this.sandbox);
-
-				$("<input type='checkbox'>")
-					.attr("id", "unverified")
-					.appendTo(this.sandbox);
-
-				$("<input type='checkbox'>")
-					.attr("id", "unscheduled")
-					.appendTo(this.sandbox);
-
-				$("<div>")
-					.attr("id", "sw-wrapper")
-					.appendTo(this.sandbox);
-
-				this.episodeController = new EpisodeController(this.listItem);
-			},
-			teardown: function() {
-				this.sandbox.remove();
-				SpinningWheel.slots = [];
-			}
-		});
-
-		QUnit.test("constructor - update", 4, function() {
-			QUnit.ok(this.episodeController, "Instantiate EpisodeController object");
-			QUnit.deepEqual(this.episodeController.listItem, this.listItem, "listItem property");
-			QUnit.equal(this.episodeController.originalStatus, this.listItem.episode.status, "originalStatus property");
-			QUnit.equal(this.episodeController.originalStatusDate, this.listItem.episode.statusDate, "originalStatusDate property");
-		});
-
-		QUnit.test("constructor - add", 2, function() {
-			var series = { id: 1 };
-			var sequence = 1;
-
-			var listItem = {
-				episode: new Episode(null, "", "", "", false, false, sequence, series.id)
-			};
-
-			this.episodeController = new EpisodeController({
-				series: series,
-				sequence: sequence
+				episodeController = new EpisodeController(listItem);
 			});
-			
-			QUnit.ok(this.episodeController, "Instantiate EpisodeController object");
-			QUnit.deepEqual(this.episodeController.listItem, listItem, "listItem property");
-		});
 
-		QUnit.test("setup", 13, function() {
-			this.episodeController.cancel = function() {
-				QUnit.ok(true, "Bind back button event handler");
-			};
-			this.episodeController.save = function() {
-				QUnit.ok(true, "Bind save button event handler");
-			};
-			this.episodeController.setStatus = function(status) {
-				QUnit.ok(true, "Bind " + status + " click event listener");
-			};
-			this.episodeController.getStatusDate = function() {
-				QUnit.ok(true, "Bind status date click event listener");
-			};
-			this.episodeController.toggleStatusDateRow = function() {
-				QUnit.ok(true, "Bind unscheduled click event listener");
-			};
+			describe("object constructor", () => {
+				describe("update", () => {
+					it("should return a EpisodeController instance", () => episodeController.should.be.an.instanceOf(EpisodeController));
+					it("should set the list item", () => episodeController.listItem.should.deep.equal(listItem));
+					it("should save the original status", () => episodeController.originalStatus.should.equal(listItem.episode.status));
+					it("should save the original status date", () => episodeController.originalStatusDate.should.equal(listItem.episode.statusDate));
+				});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.episodeController.setup();
-			this.episodeController.header.leftButton.eventHandler();
-			this.episodeController.header.rightButton.eventHandler();
-			QUnit.equal($("#episodeName").val(), this.listItem.episode.episodeName, "Episode name");
-			QUnit.equal($("#unverified").is(":checked"), this.listItem.episode.unverified, "Unverified");
-			QUnit.equal($("#unscheduled").is(":checked"), this.listItem.episode.unscheduled, "Unscheduled");
-			$("#watched").trigger("click");
-			$("#recorded").trigger("click");
-			$("#expected").trigger("click");
-			$("#missed").trigger("click");
-			$("#statusDate").trigger("click");
-			$("#unscheduled").trigger("click");
-			QUnit.equal($("#statusDate").val(), this.listItem.episode.statusDate, "Status date");
-			jQueryMock.clearDefaultContext();
-		});
+				describe("add", () => {
+					beforeEach(() => {
+						listItem = {
+							sequence: 1,
+							series: {id: 1}
+						};
+						episodeController = new EpisodeController(listItem);
+					});
 
-		QUnit.test("save", function() {
-			var testParams = [
-				{
-					description: "update",
-					listIndex: 0,
-					scrollPos: 0
-				},
-				{
-					description: "insert",
-					listIndex: -1,
-					scrollPos: -1
-				}
-			];
+					it("should return a EpisodeController instance", () => episodeController.should.be.an.instanceOf(EpisodeController));
 
-			QUnit.expect(testParams.length * 6);
+					it("should create a list item", () => {
+						episodeController.listItem.episode.sequence.should.equal(listItem.sequence);
+						episodeController.listItem.episode.seriesId.should.equal(listItem.series.id);
+					});
+				});
+			});
 
-			for (var i = 0; i < testParams.length; i++) {
-				jQueryMock.setDefaultContext(this.sandbox);
-				var episodeName = "test-episode-2";
-				var unverified = true;
-				var unscheduled = true;
-				$("#episodeName").val(episodeName);
-				$("#unverified").prop("checked", unverified);
-				$("#unscheduled").prop("checked", unscheduled);
-				appController.viewStack = [
-					{ scrollPos: 0 },
-					{ scrollPos: 0 }
+			describe("setup", () => {
+				let episodeName,
+						unverified,
+						unscheduled,
+						watched,
+						recorded,
+						expected,
+						missed,
+						statusDate;
+
+				beforeEach(() => {
+					sinon.stub(episodeController, "cancel");
+					sinon.stub(episodeController, "save");
+					sinon.stub(episodeController, "setStatus");
+					sinon.stub(episodeController, "getStatusDate");
+					sinon.stub(episodeController, "toggleStatusDateRow");
+
+					episodeName = $("<input>")
+						.attr("id", "episodeName")
+						.appendTo(document.body);
+
+					unverified = $("<input type='checkbox'>")
+						.attr("id", "unverified")
+						.appendTo(document.body);
+
+					unscheduled = $("<input type='checkbox'>")
+						.attr("id", "unscheduled")
+						.appendTo(document.body);
+
+					watched = $("<div>")
+						.attr("id", "watched")
+						.appendTo(document.body);
+
+					recorded = $("<div>")
+						.attr("id", "recorded")
+						.appendTo(document.body);
+
+					expected = $("<div>")
+						.attr("id", "expected")
+						.appendTo(document.body);
+
+					missed = $("<div>")
+						.attr("id", "missed")
+						.appendTo(document.body);
+
+					statusDate = $("<input>")
+						.attr("id", "statusDate")
+						.appendTo(document.body);
+
+					episodeController.setup();
+				});
+
+				it("should set the header label", () => episodeController.header.label.should.equal("Add/Edit Episode"));
+
+				it("should attach a header left button event handler", () => {
+					episodeController.header.leftButton.eventHandler();
+					episodeController.cancel.should.have.been.called;
+				});
+
+				it("should set the header left button label", () => episodeController.header.leftButton.label.should.equal("Cancel"));
+
+				it("should attach a header right button event handler", () => {
+					episodeController.header.rightButton.eventHandler();
+					episodeController.save.should.have.been.called;
+				});
+
+				it("should set the header right button style", () => episodeController.header.rightButton.style.should.equal("confirmButton"));
+				it("should set the header right button label", () => episodeController.header.rightButton.label.should.equal("Save"));
+				it("should set the episode name", () => episodeName.val().should.equal(listItem.episode.episodeName));
+				it("should set the unverified toggle", () => unverified.prop("checked").should.equal(listItem.episode.unverified));
+				it("should set the unscheduled toggle", () => unscheduled.prop("checked").should.equal(listItem.episode.unscheduled));
+
+				it("should attach a watched click event handler", () => {
+					watched.trigger("click");
+					episodeController.setStatus.should.have.been.calledWith("Watched");
+				});
+
+				it("should attach a recorded click event handler", () => {
+					recorded.trigger("click");
+					episodeController.setStatus.should.have.been.calledWith("Recorded");
+				});
+
+				it("should attach an expected click event handler", () => {
+					expected.trigger("click");
+					episodeController.setStatus.should.have.been.calledWith("Expected");
+				});
+
+				it("should attach a missed click event handler", () => {
+					missed.trigger("click");
+					episodeController.setStatus.should.have.been.calledWith("Missed");
+				});
+
+				it("should attach a status date click event handler", () => {
+					statusDate.trigger("click");
+					episodeController.getStatusDate.should.have.been.called;
+				});
+
+				it("should attach an unscheduled click event handler", () => {
+					unscheduled.trigger("click");
+					episodeController.toggleStatusDateRow.should.have.been.called;
+				});
+
+				it("should toggle the current status", () => {
+					listItem.episode.setStatus.should.have.been.calledWith("");
+					episodeController.setStatus.should.have.been.calledWith(listItem.episode.status);
+				});
+
+				it("should set the status date", () => statusDate.val().should.equal(listItem.episode.statusDate));
+
+				afterEach(() => {
+					episodeName.remove();
+					unverified.remove();
+					unscheduled.remove();
+					watched.remove();
+					recorded.remove();
+					expected.remove();
+					missed.remove();
+					statusDate.remove();
+				});
+			});
+
+			describe("save", () => {
+				const testParams = [
+					{
+						description: "update",
+						listIndex: 0,
+						scrollPos: 0
+					},
+					{
+						description: "insert",
+						listIndex: -1,
+						scrollPos: -1
+					}
 				];
-				this.episodeController.listItem.listIndex = testParams[i].listIndex;
-				this.episodeController.save();
-				QUnit.equal(this.episodeController.listItem.episode.episodeName, episodeName, testParams[i].description + " - listItem.episode.episodeName property");
-				QUnit.equal(this.episodeController.listItem.episode.unverified, unverified, testParams[i].description + " - listItem.episode.unverified property");
-				QUnit.equal(this.episodeController.listItem.episode.unscheduled, unscheduled, testParams[i].description + " - listItem.episode.unscheduled property");
-				QUnit.equal(appController.viewStack[0].scrollPos, testParams[i].scrollPos, testParams[i].description + " - Scroll position");
-				jQueryMock.clearDefaultContext();
-			}
-		});
 
-		QUnit.test("cancel", 3, function() {
-			this.episodeController.listItem.episode.status = "Recorded";
-			this.episodeController.listItem.episode.statusDate = "02-Jan";
-			this.episodeController.cancel();
-			QUnit.equal(this.episodeController.listItem.episode.status, this.listItem.episode.status, "listItem.episode.status property");
-			QUnit.equal(this.episodeController.listItem.episode.statusDate, this.listItem.episode.statusDate, "listItem.episode.statusDate property");
-		});
+				let episodeName,
+						episodeNameInput,
+						unverified,
+						unscheduled;
 
-		QUnit.test("setStatus - setting", 1, function() {
-			this.episodeController.settingStatus = true;
-			this.episodeController.setStatus();
-			QUnit.ok(this.episodeController.settingStatus, "Blocked by semaphore");
-		});
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							episodeName = "test-episode-2";
 
-		QUnit.test("setStatus", function() {
-			jQueryMock.setDefaultContext(this.sandbox);
-			var testParams = [
-				{
-					description: "unset",
-					unverifiedVisible: false
-				},
-				{
-					description: "Watched",
-					status: "Watched",
-					button: $("#watched"),
-					unverifiedVisible: false
-				},
-				{
-					description: "Recorded",
-					status: "Recorded",
-					button: $("#recorded"),
-					unverifiedVisible: true
-				},
-				{
-					description: "Expected",
-					status: "Expected",
-					button: $("#expected"),
-					unverifiedVisible: true
-				},
-				{
-					description: "Missed",
-					status: "Missed",
-					button: $("#missed"),
-					unverifiedVisible: true
-				}
-			];
+							episodeNameInput = $("<input>")
+								.attr("id", "episodeName")
+								.val(episodeName)
+								.appendTo(document.body);
 
-			this.episodeController.toggleStatusDateRow = function() {
-			};
+							unverified = $("<input type='checkbox'>")
+								.attr("id", "unverified")
+								.prop("checked", true)
+								.appendTo(document.body);
 
-			var unverifiedRow = $("<div>")
-				.attr("id", "unverifiedRow")
-				.hide()
-				.appendTo(this.sandbox);
+							unscheduled = $("<input type='checkbox'>")
+								.attr("id", "unscheduled")
+								.prop("checked", true)
+								.appendTo(document.body);
 
-			QUnit.expect(testParams.length * 3);
-			for (var i = 0; i < testParams.length; i++) {
-				if (!testParams[i].status) {
-					testParams[i].status = this.episodeController.listItem.episode.status;
-					testParams[i].expectedStatus = "";
-				} else {
-					this.episodeController.listItem.episode.status = "";
-					testParams[i].expectedStatus = testParams[i].status;
-				}
-				this.episodeController.setStatus(testParams[i].status);
-				QUnit.equal(this.episodeController.listItem.episode.status, testParams[i].expectedStatus, testParams[i].description + " - listItem.episode.status property");
-				if (testParams[i].button) {
-					QUnit.ok(testParams[i].button.hasClass("status"), testParams[i].description + " - Toggle button style");
-				}
-				QUnit.notEqual(unverifiedRow.css("display") === "none", testParams[i].unverifiedVisible, testParams[i].description + " - Unverified row visible");
-			}
+							appController.viewStack = [
+								{scrollPos: 0},
+								{scrollPos: 0}
+							];
+							episodeController.listItem.listIndex = params.listIndex;
+							episodeController.save();
+						});
 
-			QUnit.ok(!this.episodeController.settingStatus, "Reset semaphore");
-			jQueryMock.clearDefaultContext();
-		});
+						it("should get the episode name", () => episodeController.listItem.episode.episodeName.should.equal(episodeName));
+						it("should get the unverified toggle", () => episodeController.listItem.episode.setUnverified.should.have.been.calledWith(true));
+						it("should get the unscheduled toggle", () => episodeController.listItem.episode.unscheduled.should.be.true);
+						it("should save the episode", () => listItem.episode.save.should.have.been.called);
+						it("should set the series list view scroll position", () => appController.viewStack[0].scrollPos.should.equal(params.scrollPos));
+						it("should pop the view", () => appController.popView.should.have.been.called);
 
-		QUnit.test("getStatusDate - without date", 3, function() {
-			var originalDate = Date;
-			var fakeDate = new Date(1900, 1, 2, 12, 0, 0);
-			Date = function() {
-				return fakeDate;
-			};
+						afterEach(() => {
+							episodeNameInput.remove();
+							unverified.remove();
+							unscheduled.remove();
+						});
+					});
+				});
+			});
 
-			this.episodeController.listItem.episode.statusDate = "";
-			this.episodeController.setStatusDate = function() {
-				QUnit.ok(true, "Set done action callback");
-			};
+			describe("cancel", () => {
+				beforeEach(() => {
+					episodeController.listItem.episode.status = "Recorded";
+					episodeController.listItem.episode.statusDate = "02-Jan";
+					episodeController.cancel();
+				});
 
-			this.episodeController.getStatusDate();
-			QUnit.equal(SpinningWheel.slots[0], 2, "Slot 1 value");
-			QUnit.equal(SpinningWheel.slots[1], "Feb", "Slot 2 value");
-			Date = originalDate;
-		});
+				it("should revert any changes", () => {
+					episodeController.listItem.episode.status.should.equal("Watched");
+					episodeController.listItem.episode.statusDate.should.equal("01-Jan");
+				});
 
-		QUnit.test("getStatusDate - with date", 3, function() {
-			this.episodeController.setStatusDate = function() {
-				QUnit.ok(true, "Set done action callback");
-			};
+				it("should pop the view", () => appController.popView.should.have.been.called);
+			});
 
-			this.episodeController.getStatusDate();
-			QUnit.equal(SpinningWheel.slots[0], 1, "Slot 1 value");
-			QUnit.equal(SpinningWheel.slots[1], "Jan", "Slot 2 value");
-		});
+			describe("setStatus", () => {
+				beforeEach(() => sinon.stub(episodeController, "toggleStatusDateRow"));
 
-		QUnit.test("setStatusDate", 2, function() {
-			var statusDateDay = "02";
-			var statusDateMonth = "Feb";
-			SpinningWheel.selectedValues.values = [statusDateDay, statusDateMonth];
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.episodeController.setStatusDate();
-			QUnit.equal(this.episodeController.listItem.episode.statusDate, statusDateDay + "-" + statusDateMonth, "listItem.episode.statusDate property");
-			QUnit.equal($("#statusDate").val(), statusDateDay + "-" + statusDateMonth, "Now showing");
-			jQueryMock.clearDefaultContext();
-		});
+				describe("in progress", () => {
+					it("should do nothing", () => {
+						episodeController.settingStatus = true;
+						episodeController.setStatus();
+						episodeController.toggleStatusDateRow.should.not.have.been.called;
+						episodeController.settingStatus.should.be.true;
+					});
+				});
 
-		QUnit.test("toggleStatusDateRow", function() {
-			var testParams = [
-				{
-					description: "hidden",
-					unscheduled: false,
-					status: "Watched",
-					visible: false
-				},
-				{
-					description: "unscheduled",
-					unscheduled: true,
-					status: "Watched",
-					statusDate: "",
-					visible: true
-				},
-				{
-					description: "recorded",
-					unscheduled: false,
-					status: "Recorded",
-					visible: true
-				},
-				{
-					description: "expected",
-					unscheduled: false,
-					status: "Expected",
-					visible: true
-				},
-				{
-					description: "missed",
-					unscheduled: false,
-					status: "Missed",
-					visible: true
-				}
-			];
+				describe("not in progress", () => {
+					const testParams = [
+						{
+							description: "no change",
+							previousStatus: "Watched",
+							newStatus: "Watched",
+							expected: "",
+							highlight: "watched",
+							unverifiedRowHidden: true
+						},
+						{
+							description: "watched",
+							previousStatus: "",
+							newStatus: "Watched",
+							expected: "Watched",
+							highlight: "watched",
+							unverifiedRowHidden: true
+						},
+						{
+							description: "recorded",
+							previousStatus: "Watched",
+							newStatus: "Recorded",
+							expected: "Recorded",
+							highlight: "recorded",
+							unverifiedRowHidden: false
+						},
+						{
+							description: "expected",
+							previousStatus: "Watched",
+							newStatus: "Expected",
+							expected: "Expected",
+							highlight: "expected",
+							unverifiedRowHidden: false
+						},
+						{
+							description: "missed",
+							previousStatus: "Watched",
+							newStatus: "Missed",
+							expected: "Missed",
+							highlight: "missed",
+							unverifiedRowHidden: false
+						}
+					];
 
-			var statusDateRow = $("<div>")
-				.attr("id", "statusDateRow")
-				.hide()
-				.appendTo(this.sandbox);
+					let watched,
+							recorded,
+							expected,
+							missed,
+							unverifiedRow;
 
-			var i;
+					beforeEach(() => {
+						watched = $("<div>")
+							.attr("id", "watched")
+							.appendTo(document.body);
 
-			this.episodeController.getStatusDate = function() {
-				QUnit.ok(true, testParams[i].description + " - Show spinning wheel");
-			};
+						recorded = $("<div>")
+							.attr("id", "recorded")
+							.appendTo(document.body);
 
-			QUnit.expect(testParams.length + 1);
-			jQueryMock.setDefaultContext(this.sandbox);
-			for (i = 0; i < testParams.length; i++) {
-				$("#unscheduled").prop("checked", testParams[i].unscheduled);
-				this.episodeController.listItem.episode.status = testParams[i].status;
-				this.episodeController.listItem.episode.statusDate = testParams[i].statusDate;
-				this.episodeController.toggleStatusDateRow();
-				QUnit.notEqual(statusDateRow.css("display") === "none", testParams[i].visible, testParams[i].description + " - Status date row visible");
-			}
+						expected = $("<div>")
+							.attr("id", "expected")
+							.appendTo(document.body);
 
-			jQueryMock.clearDefaultContext();
+						missed = $("<div>")
+							.attr("id", "missed")
+							.appendTo(document.body);
+
+						unverifiedRow = $("<div>")
+							.attr("id", "unverifiedRow")
+							.appendTo(document.body);
+					});
+
+					testParams.forEach(params => {
+						describe(params.description, () => {
+							beforeEach(() => {
+								listItem.episode.status = params.previousStatus;
+								episodeController.setStatus(params.newStatus);
+							});
+
+							it("should set the episode status", () => listItem.episode.setStatus.should.have.been.calledWith(params.expected));
+
+							it("should toggle the status", () => {
+								watched.hasClass("status").should.equal("Watched" === params.expected);
+								recorded.hasClass("status").should.equal("Recorded" === params.expected);
+								expected.hasClass("status").should.equal("Expected" === params.expected);
+								missed.hasClass("status").should.equal("Missed" === params.expected);
+							});
+
+							it("should toggle the unverified row", () => ("none" === unverifiedRow.css("display")).should.equal(params.unverifiedRowHidden));
+							it("should toggle the status date row", () => episodeController.toggleStatusDateRow.should.have.been.called);
+							it("should clear the semaphore", () => episodeController.settingStatus.should.be.false);
+						});
+					});
+
+					afterEach(() => {
+						watched.remove();
+						recorded.remove();
+						expected.remove();
+						missed.remove();
+						unverifiedRow.remove();
+					});
+				});
+			});
+
+			describe("getStatusDate", () => {
+				const testParams = [
+					{
+						description: "without date",
+						statusDate: "",
+						expectedDay: 1,
+						expectedMonth: "Jan"
+					},
+					{
+						description: "with date",
+						statusDate: "02-Feb",
+						expectedDay: 2,
+						expectedMonth: "Feb"
+					}
+				];
+
+				let swWrapper,
+						clock;
+
+				beforeEach(() => {
+					sinon.stub(episodeController, "setStatusDate");
+					clock = sinon.useFakeTimers();
+					SpinningWheel.addSlot.reset();
+					SpinningWheel.setDoneAction.reset();
+					SpinningWheel.open.reset();
+
+					swWrapper = $("<div>")
+						.attr("id", "sw-wrapper")
+						.appendTo(document.body);
+				});
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							episodeController.listItem.episode.statusDate = params.statusDate;
+							episodeController.getStatusDate();
+						});
+
+						it("should initialise the SpinningWheel", () => {
+							SpinningWheel.addSlot.should.have.been.calledWith(sinon.match.object, "right", params.expectedDay);
+							SpinningWheel.addSlot.should.have.been.calledWith(sinon.match.object, null, params.expectedMonth);
+						});
+
+						it("should attach a done callback to the SpinningWheel", () => {
+							SpinningWheel.setDoneAction.should.have.been.called;
+							episodeController.setStatusDate.should.have.been.called;
+						});
+
+						it("should open the SpinningWheel", () => SpinningWheel.open.should.have.been.called);
+						it("should wrap the SpinningWheel in a touch event proxy", () => episodeController.swtoucheventproxy.element.should.deep.equal(swWrapper.get(0)));
+					});
+				});
+
+				afterEach(() => {
+					swWrapper.remove();
+					clock.restore();
+				});
+			});
+
+			describe("setStatusDate", () => {
+				let statusDate;
+
+				beforeEach(() => {
+					SpinningWheel.getSelectedValues.reset().returns({
+						keys: [2, "Feb"],
+						values: ["02", "Feb"]
+					});
+
+					episodeController.swtoucheventproxy = {};
+
+					statusDate = $("<input>")
+						.attr("id", "statusDate")
+						.appendTo(document.body);
+
+					listItem.episode.statusDate = "02-Feb";
+					episodeController.setStatusDate();
+				});
+
+				it("should get the selected value from the SpinningWheel", () => listItem.episode.setStatusDate.should.have.been.calledWith(listItem.episode.statusDate));
+				it("should update the view", () => statusDate.val().should.equal(listItem.episode.statusDate));
+				it("should remove the touch event proxy", () => (null === episodeController.swtoucheventproxy).should.be.true);
+
+				afterEach(() => statusDate.remove());
+			});
+
+			describe("toggleStatusDateRow", () => {
+				const testParams = [
+					{
+						description: "hidden",
+						hidden: true
+					},
+					{
+						description: "unscheduled",
+						unscheduled: true
+					},
+					{
+						description: "recorded",
+						status: "Recorded"
+					},
+					{
+						description: "expected",
+						status: "Expected"
+					},
+					{
+						description: "missed",
+						status: "Missed"
+					},
+					{
+						description: "no date specified",
+						unscheduled: true,
+						noDate: true
+					}
+				];
+
+				let statusDateRow,
+						unscheduled;
+
+				beforeEach(() => {
+					sinon.stub(episodeController, "getStatusDate");
+					statusDateRow = $("<div>")
+						.attr("id", "statusDateRow")
+						.appendTo(document.body);
+
+					unscheduled = $("<input type='checkbox'>")
+						.attr("id", "unscheduled")
+						.appendTo(document.body);
+				});
+
+				testParams.forEach(params => {
+					describe(params.description, () => {
+						beforeEach(() => {
+							unscheduled.prop("checked", params.unscheduled);
+							listItem.episode.status = params.status;
+							listItem.episode.statusDate = params.noDate ? "" : listItem.episode.statusDate;
+							episodeController.toggleStatusDateRow();
+						});
+
+						it(`should ${params.hidden ? "hide" : "show"} the status date`, () => ("none" === statusDateRow.css("display")).should.equal(Boolean(params.hidden)));
+
+						if (params.noDate) {
+							it("should prompt for a date", () => episodeController.getStatusDate.should.have.been.called);
+						}
+					});
+				});
+
+				afterEach(() => {
+					statusDateRow.remove();
+					unscheduled.remove();
+				});
+			});
 		});
 	}
 );

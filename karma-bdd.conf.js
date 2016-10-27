@@ -26,29 +26,15 @@ module.exports = config => {
 		// preprocess matching files before serving them to the browser
 		// available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: {
-			"!(framework)/**/*.js": ["coverage"]
 		},
 
 		// test results reporter to use
 		// possible values: 'dots', 'progress'
 		// available reporters: https://npmjs.org/browse/keyword/karma-reporter
-		reporters: ["mocha", "coverage"],
+		reporters: ["mocha"],
 
 		mochaReporter: {
 			showDiff: true
-		},
-
-		coverageReporter: {
-			reporters: [
-				{type: "html", dir: "../coverage"},
-				{type: "text"},
-				{type: "text-summary"},
-				{type: "lcovonly", dir: "../coverage"}
-			],
-			subdir(browser) {
-				// Normalise browser names
-				return browser.toLowerCase().split(/[ /-]/)[0];
-			}
 		},
 
 		// web server port
@@ -62,7 +48,7 @@ module.exports = config => {
 		logLevel: "INFO",
 
 		// enable / disable watching file and executing tests whenever any file changes
-		autoWatch: false,
+		autoWatch: true,
 
 		// start these browsers
 		// available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
@@ -70,6 +56,6 @@ module.exports = config => {
 
 		// Continuous Integration mode
 		// if true, Karma captures browsers, runs the tests and exits
-		singleRun: true
+		singleRun: false
 	});
 };

@@ -6,10 +6,11 @@
  */
 
 define(
+
 	/**
 	 * @exports components/window
 	 */
-	function() {
+	() => {
 		"use strict";
 
 		/**

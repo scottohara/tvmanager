@@ -1,125 +1,168 @@
 define(
 	[
-		'models/sync-model',
-		'controllers/application-controller',
-		'framework/jquery'
+		"models/sync-model",
+		"controllers/application-controller"
 	],
 
-	function(Sync, ApplicationController, $) {
+	(Sync, ApplicationController) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("sync-model", {
-			setup: function() {
-				this.type = "test-sync";
-				this.id = "1";
-				this.action = "modified";
-				this.sync = new Sync(this.type, this.id, this.action);
-			},
-			teardown: function() {
-				appController.db.reset();
-			}
-		});
+		describe("Sync", () => {
+			let type,
+					id,
+					action,
+					sync,
+					callback;
 
-		QUnit.test("object constructor", 4, function() {
-			QUnit.ok(this.sync, "Instantiate Sync object");
-			QUnit.equal(this.sync.type, this.type, "type property");
-			QUnit.equal(this.sync.id, this.id, "id property");
-			QUnit.equal(this.sync.action, this.action, "action property");
-		});
-
-
-		QUnit.test("remove - fail", 2, function() {
-			appController.db.failAt("DELETE FROM Sync WHERE Type = " + this.type + " AND ID = " + this.id);
-			this.sync.remove();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
-
-		QUnit.test("remove - success", 5, function() {
-			this.sync.remove();
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-			QUnit.equal(this.sync.type, null, "type property");
-			QUnit.equal(this.sync.id, null, "id property");
-		});
-
-		QUnit.test("list - fail", 4, function() {
-			appController.db.failAt("SELECT Type, ID, Action FROM Sync");
-			Sync.list(function(syncList) {
-				QUnit.deepEqual(syncList, [], "Invoke callback");
+			beforeEach(() => {
+				type = "test-sync";
+				id = "1";
+				action = "modified";
+				sync = new Sync(type, id, action);
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Sync.list: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("list - no rows affected", 4, function() {
-			appController.db.noRowsAffectedAt("SELECT Type, ID, Action FROM Sync");
-			Sync.list(function(syncList) {
-				QUnit.deepEqual(syncList, [], "Invoke callback");
+			describe("object constructor", () => {
+				it("should return a Sync instance", () => sync.should.be.an.instanceOf(Sync));
+				it("should set the type", () => sync.type.should.equal(type));
+				it("should set the id", () => sync.id.should.equal(id));
+				it("should set the action", () => sync.action.should.equal(action));
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
 
-		QUnit.test("list - success", 4, function() {
-			appController.db.addResultRows([{
-				Type: this.type,
-				ID: this.id,
-				Action: this.action
-			}]);
-			Sync.list($.proxy(function(syncList) {
-				QUnit.deepEqual(syncList, [this.sync], "Invoke callback");
-			}, this));
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
+			describe("remove", () => {
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(`
+							DELETE FROM Sync
+							WHERE	Type = ${type} AND
+										ID = ${id}
+						`);
+						sync.remove();
+					});
 
-		QUnit.test("count - fail", 4, function() {
-			appController.db.failAt("SELECT COUNT(*) AS SyncCount FROM Sync");
-			Sync.count(function(count) {
-				QUnit.equal(count, 0, "Invoke callback");
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should not clear the type", () => sync.type.should.equal(type));
+					it("should not clear the id", () => sync.id.should.equal(id));
+				});
+
+				describe("success", () => {
+					beforeEach(() => sync.remove());
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+					it("should clear the type", () => (null === sync.type).should.be.true);
+					it("should clear the id", () => (null === sync.id).should.be.true);
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Sync.count: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
 
-		QUnit.test("count - success", 4, function() {
-			appController.db.addResultRows([{
-				SyncCount: 1
-			}]);
-			Sync.count(function(count) {
-				QUnit.equal(count, 1, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
-		});
+			describe("list", () => {
+				let sql;
 
-		QUnit.test("removeAll - fail", 4, function() {
-			appController.db.failAt("DELETE FROM Sync");
-			Sync.removeAll(function(message) {
-				QUnit.notEqual(message, null, "Invoke callback");
-			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, "Sync.removeAll: Force failed", "Error message");
-			QUnit.ok(!appController.db.commit, "Rollback transaction");
-		});
+				beforeEach(() => {
+					callback = sinon.stub();
+					sql = `
+						SELECT	Type,
+										ID,
+										Action
+						FROM		Sync
+					`;
+				});
 
-		QUnit.test("removeAll - success", 4, function() {
-			Sync.removeAll(function(message) {
-				QUnit.equal(message, null, "Invoke callback");
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt(sql);
+						Sync.list(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith([]));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Sync.list: Force failed"));
+				});
+
+				describe("no rows affected", () => {
+					beforeEach(() => {
+						appController.db.noRowsAffectedAt(sql);
+						Sync.list(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith([]));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						appController.db.addResultRows([{
+							Type: type,
+							ID: id,
+							Action: action
+						}]);
+						Sync.list(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith([sync]));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
 			});
-			QUnit.equal(appController.db.commands.length, 1, "Number of SQL commands");
-			QUnit.equal(appController.db.errorMessage, null, "Error message");
-			QUnit.ok(appController.db.commit, "Commit transaction");
+
+			describe("count", () => {
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt("SELECT COUNT(*) AS SyncCount FROM Sync");
+						Sync.count(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(0));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Sync.count: Force failed"));
+				});
+
+				describe("success", () => {
+					beforeEach(() => {
+						appController.db.addResultRows([{SyncCount: 1}]);
+						Sync.count(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(1));
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+			});
+
+			describe("removeAll", () => {
+				describe("fail", () => {
+					beforeEach(() => {
+						appController.db.failAt("DELETE FROM Sync");
+						Sync.removeAll(callback);
+					});
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should rollback the transaction", () => appController.db.commit.should.be.false);
+					it("should invoke the callback", () => callback.should.have.been.calledWith(appController.db.errorMessage));
+					it("should return an error message", () => appController.db.errorMessage.should.equal("Sync.removeAll: Force failed"));
+				});
+
+				describe("success", () => {
+					beforeEach(() => Sync.removeAll(callback));
+
+					it("should execute one SQL command", () => appController.db.commands.length.should.equal(1));
+					it("should commit the transaction", () => appController.db.commit.should.be.true);
+					it("should invoke the callback", () => callback.should.have.been.called);
+					it("should not return an error message", () => (null === appController.db.errorMessage).should.be.true);
+				});
+			});
+
+			afterEach(() => appController.db.reset());
 		});
 	}
 );

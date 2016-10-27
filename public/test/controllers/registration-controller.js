@@ -1,191 +1,201 @@
 define(
 	[
-		'models/setting-model',
-		'controllers/registration-controller',
-		'controllers/application-controller',
-		'framework/jquery',
-		'test/mocks/jQuery-mock'
+		"models/setting-model",
+		"controllers/registration-controller",
+		"controllers/application-controller",
+		"framework/jquery"
 	],
 
-	function(Setting, RegistrationController, ApplicationController, $, jQueryMock) {
+	(Setting, RegistrationController, ApplicationController, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("registration-controller", {
-			setup: function() {
-				this.device = {
+		describe("RegistrationController", () => {
+			let device,
+					registrationController,
+					fakeServer;
+
+			beforeEach(() => {
+				device = {
 					id: 1,
 					name: "test-device",
 					imported: true
 				};
 
-				this.sandbox = jQueryMock.sandbox(QUnit.config.current.testNumber);
-				$("<input>")
-					.attr("id", "deviceName")
-					.appendTo(this.sandbox);
+				registrationController = new RegistrationController();
+			});
 
-				this.ajaxMock = $.proxy(function(options) {
-					options.error.apply(options.context, [{
-						status: "404",
-						statusText: "Not found"
-					}, "Force failed"]);
-				}, this);
+			describe("object constructor", () => {
+				it("should return a RegistrationController instance", () => registrationController.should.be.an.instanceOf(RegistrationController));
+			});
 
-				this.startFakeServer = $.proxy(function() {
-					this.fakeServer = sinon.fakeServer.create();
-					this.fakeServer.autoRespond = true;
-					this.fakeServer.respondWith("PUT", /\/devices\/(\w+)/, function(request, name) {
-						request.respond(200, {"Location": name});
+			describe("setup", () => {
+				beforeEach(() => {
+					sinon.stub(registrationController, "cancel");
+					sinon.stub(registrationController, "save");
+					sinon.stub(registrationController, "gotDevice");
+					Setting.get.reset().withArgs("Device").yields({settingValue: device});
+					registrationController.setup();
+				});
+
+				it("should set the header label", () => registrationController.header.label.should.equal("Register"));
+
+				it("should attach a header left button event handler", () => {
+					registrationController.header.leftButton.eventHandler();
+					registrationController.cancel.should.have.been.called;
+				});
+
+				it("should set the header left button label", () => registrationController.header.leftButton.label.should.equal("Cancel"));
+
+				it("should attach a header right button event handler", () => {
+					registrationController.header.rightButton.eventHandler();
+					registrationController.save.should.have.been.called;
+				});
+
+				it("should set the header right button style", () => registrationController.header.rightButton.style.should.equal("confirmButton"));
+				it("should set the header right button label", () => registrationController.header.rightButton.label.should.equal("Save"));
+				it("should get the device", () => registrationController.gotDevice.should.have.been.calledWith({settingValue: device}));
+			});
+
+			describe("gotDevice", () => {
+				describe("unregistered", () => {
+					beforeEach(() => registrationController.gotDevice());
+
+					it("should set an empty device", () => registrationController.device.should.deep.equal({
+						id: "",
+						name: "",
+						imported: false
+					}));
+
+					it("should clear the view footer", () => appController.clearFooter.should.have.been.called);
+				});
+
+				describe("registered", () => {
+					let deviceName;
+
+					beforeEach(() => {
+						sinon.stub(registrationController, "unregister");
+
+						deviceName = $("<input>")
+							.attr("id", "deviceName")
+							.appendTo(document.body);
+
+						registrationController.gotDevice({settingValue: JSON.stringify(device)});
 					});
-					this.fakeServer.respondWith("DELETE", /\/devices\/\w+/, "");
-				}, this);
 
-				this.stopFakeServer = $.proxy(function() {
-					this.fakeServer.restore();
-				}, this);
+					it("should set the device", () => registrationController.device.should.deep.equal(device));
+					it("should display the device name", () => deviceName.val().should.equal(device.name));
+					it("should set the footer label", () => registrationController.footer.label.should.equal("v1.0"));
 
-				this.registrationController = new RegistrationController();
-			},
-			teardown: function() {
-				this.sandbox.remove();
-			}
-		});
+					it("should attach a footer left button event handler", () => {
+						registrationController.footer.leftButton.eventHandler();
+						registrationController.unregister.should.have.been.called;
+					});
 
-		QUnit.test("setup", 3, function() {
-			this.registrationController.cancel = function() {
-				QUnit.ok(true, "Bind back button event handler");
-			};
-			this.registrationController.save = function() {
-				QUnit.ok(true, "Bind save button event handler");
-			};
-			this.registrationController.gotDevice = $.proxy(function(device) {
-				QUnit.deepEqual(JSON.parse(device.settingValue), this.device, "Device");
-			}, this);
+					it("should set the footer left button style", () => registrationController.footer.leftButton.style.should.equal("cautionButton"));
+					it("should set the footer left button label", () => registrationController.footer.leftButton.label.should.equal("Unregister"));
+					it("should set the view footer", () => appController.setFooter.should.have.been.called);
 
-			Setting.setting.Device = JSON.stringify(this.device);
+					afterEach(() => deviceName.remove());
+				});
+			});
 
-			this.registrationController.setup();
-			this.registrationController.header.leftButton.eventHandler();
-			this.registrationController.header.rightButton.eventHandler();
-		});
+			describe("unregister", () => {
+				beforeEach(() => {
+					fakeServer = sinon.fakeServer.create();
+					fakeServer.respondImmediately = true;
+					registrationController.device = device;
+				});
 
-		QUnit.test("gotDevice - unregistered", 2, function() {
-			var device = {
-				id: "",
-				name: "",
-				imported: false
-			};
+				describe("fail", () => {
+					it("should display a notice", () => {
+						registrationController.unregister();
+						appController.showNotice.should.have.been.calledWith({
+							label: "Unregister failed: error, 404 (Not Found)",
+							leftButton: {
+								style: "cautionButton",
+								label: "OK"
+							}
+						});
+					});
+				});
 
-			var originalClearFooter = appController.clearFooter;
-			appController.clearFooter = function() {
-				QUnit.ok(true, "Clear footer");
-			};
+				describe("success", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("DELETE", /\/devices\/\w+/, "");
+						registrationController.unregister();
+					});
 
-			this.registrationController.gotDevice({}); 
-			QUnit.deepEqual(this.registrationController.device, device, "device property");
-			appController.clearFooter = originalClearFooter;
-		});
+					it("should remove the device", () => {
+						Setting.setting.name.should.equal("Device");
+						(null === Setting.setting.value).should.be.true;
+						Setting.prototype.remove.should.have.been.called;
+					});
 
-		QUnit.test("gotDevice - registered", 2, function() {
-			var device = {
-				settingValue: JSON.stringify(this.device)
-			};
+					it("should pop the view", () => appController.popView.should.have.been.called);
+				});
 
-			this.registrationController.unregister = function() {
-				QUnit.ok(true, "Bind unregister button event handler");
-			};
+				afterEach(() => fakeServer.restore());
+			});
 
-			jQueryMock.setDefaultContext(this.sandbox);
-			this.registrationController.gotDevice(device);
-			this.registrationController.footer.leftButton.eventHandler();
-			QUnit.equal($("#deviceName").val(), this.device.name, "Device");
-			jQueryMock.clearDefaultContext();
-		});
+			describe("save", () => {
+				let deviceName;
 
-		QUnit.test("unregister - ajax fail", 1, function() {
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
+				beforeEach(() => {
+					fakeServer = sinon.fakeServer.create();
+					fakeServer.respondImmediately = true;
+					registrationController.device = device;
+					deviceName = $("<input>")
+						.attr("id", "deviceName")
+						.val("new-device")
+						.appendTo(document.body);
+				});
 
-			this.registrationController.device = this.device;
-			this.registrationController.unregister();
-			QUnit.deepEqual(appController.notice.pop(), {
-				label: "Unregister failed: Force failed, 404 (Not found)",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}, "Failure notice");
+				describe("fail", () => {
+					beforeEach(() => registrationController.save());
 
-			$.ajax = originalAjax;
-		});
+					it("should get the device name", () => registrationController.device.name.should.equal("new-device"));
+					it("should display a notice", () => appController.showNotice.should.have.been.calledWith({
+						label: "Registration failed: error, 404 (Not Found)",
+						leftButton: {
+							style: "cautionButton",
+							label: "OK"
+						}
+					}));
+				});
 
-		QUnit.asyncTest("unregister - success", 2, function() {
-			var originalSettingRemove = Setting.prototype.remove;
-			Setting.prototype.remove = function() {
-				Setting.prototype.remove = originalSettingRemove;
-				QUnit.ok(true, "Setting removed");
-			};
+				describe("success", () => {
+					beforeEach(() => {
+						fakeServer.respondWith("PUT", /\/devices\/\w+/, [200, {Location: "new-device-id"},	""]);
+						registrationController.save();
+					});
 
-			var originalPopView = appController.popView;
-			appController.popView = $.proxy(function() {
-				this.stopFakeServer();
-				appController.popView = originalPopView;
-				originalPopView();
-				QUnit.start();
-			}, this);
+					it("should get the device name", () => registrationController.device.name.should.equal("new-device"));
+					it("should set the device id", () => registrationController.device.id.should.equal("new-device-id"));
 
-			this.registrationController.device = this.device;
-			this.startFakeServer();
-			this.registrationController.unregister();
-		});
+					it("should save the device", () => {
+						Setting.setting.name.should.equal("Device");
+						Setting.setting.value.should.deep.equal(JSON.stringify(device));
+						Setting.prototype.save.should.have.been.called;
+					});
 
-		QUnit.test("save - ajax fail", 1, function() {
-			var originalAjax = $.ajax;
-			$.ajax = this.ajaxMock;
+					it("should pop the view", () => appController.popView.should.have.been.called);
+				});
 
-			this.registrationController.device = this.device;
-			this.registrationController.save();
-			QUnit.deepEqual(appController.notice.pop(), {
-				label: "Registration failed: Force failed, 404 (Not found)",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}, "Failure notice");
+				afterEach(() => {
+					deviceName.remove();
+					fakeServer.restore();
+				});
+			});
 
-			$.ajax = originalAjax;
-		});
-
-		QUnit.asyncTest("save - success", 3, function() {
-			var that = this;
-
-			var originalSettingSave = Setting.prototype.save;
-			Setting.prototype.save = function() {
-				Setting.prototype.save = originalSettingSave;
-				QUnit.deepEqual(JSON.parse(this.settingValue), that.device, "settingValue property");
-				QUnit.ok(true, "Setting saved");
-			};
-
-			var originalPopView = appController.popView;
-			appController.popView = $.proxy(function() {
-				this.stopFakeServer();
-				jQueryMock.clearDefaultContext();
-				appController.popView = originalPopView;
-				originalPopView();
-				QUnit.start();
-			}, this);
-
-			jQueryMock.setDefaultContext(this.sandbox);
-			$("#deviceName").val(this.device.name);
-			this.registrationController.device = this.device;
-			this.startFakeServer();
-			this.registrationController.save();
-		});
-
-		QUnit.test("cancel", 1, function() {
-			this.registrationController.cancel();
+			describe("cancel", () => {
+				it("should pop the view", () => {
+					registrationController.cancel();
+					appController.popView.should.have.been.called;
+				});
+			});
 		});
 	}
 );

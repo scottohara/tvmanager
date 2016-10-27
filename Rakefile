@@ -7,14 +7,10 @@ require_relative 'db/migrate'
 
 unless ENV[:RACK_ENV.to_s].eql? 'production'
 	require 'rspec/core/rake_task'
-	require 'jslint/tasks'
-	require 'jshint/tasks'
 	require 'open4'
 	require 'heroku-api'
 	require 'git'
 	require 'logger'
-	JSLint.config_path = 'config/jslint.yml'
-	JSHint.config_path = 'config/jshint.yml'
 	RSpec::Core::RakeTask.new(:spec)
 end
 

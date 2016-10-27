@@ -1,23 +1,34 @@
 define(
 	[
-		'controllers/application-controller',
-		'components/list',
-		'test/mocks/jQuery-mock',
-		'framework/jquery'
+		"controllers/application-controller",
+		"components/list",
+		"framework/jquery"
 	],
 
-	function(ApplicationController, List, jQueryMock, $) {
+	(ApplicationController, List, $) => {
 		"use strict";
 
 		// Get a reference to the application controller singleton
-		var appController = new ApplicationController();
+		const appController = new ApplicationController();
 
-		QUnit.module("list", {
-			setup: function() {
-				this.container = QUnit.config.current.module.name + "-" + QUnit.config.current.testName.replace(/\s/g, "") + "-list";
-				this.itemTemplate = "base/test/views/listTemplate.html";
-				this.groupBy = "name";
-				this.items = [
+		describe("List", () => {
+			const validActions = ["view", "edit", "delete"];
+
+			let container,
+					itemTemplate,
+					groupBy,
+					items,
+					currentItem,
+					eventHandler,
+					populateItemEventHandler,
+					action,
+					list;
+
+			beforeEach(() => {
+				container = "list";
+				itemTemplate = "base/test/views/listTemplate.html";
+				groupBy = "name";
+				items = [
 					// Object create is used to set a prototype, so we can test that the template correctly ignores inherited properties
 					Object.create({inheritedProperty: "ignore me"}, {
 						name: {enumerable: true, value: "group-one"},
@@ -32,139 +43,192 @@ define(
 						value: "item-three"
 					}
 				];
-				this.currentItem = 0;
-				this.eventHandler = $.proxy(function(index) {
-					QUnit.equal(index, this.currentItem, "Invoke tap event handler");
-				}, this);
-				this.populateItemEventHandler = $.proxy(function(item) {
-					QUnit.deepEqual(item, this.items[this.currentItem], "Invoke populate event handler");
-					this.currentItem++;
-				}, this);
-				this.action = "view";
-				this.validActions = [
-					"view",
-					"edit",
-					"delete"
-				];
-
-				var originalSetScrollPosition = appController.setScrollPosition;
-				this.mockSetScrollPosition = $.proxy(function() {
-					QUnit.equal($("#" + this.container).html(), this.renderHtml, "list items");
-					$("#" + this.container + " li:not([id])").each($.proxy(function(index, element) {
-						this.currentItem = index;
-						$(element).trigger("click");
-					}, this));
-					appController.setScrollPosition = originalSetScrollPosition;
-					QUnit.start();
-				}, this);
+				currentItem = 0;
+				eventHandler = index => index.should.equal(currentItem);
+				populateItemEventHandler = item => {
+					item.should.deep.equal(items[currentItem]);
+					currentItem++;
+				};
+				action = "view";
 
 				$("<ul>")
-				.attr("id", this.container)
-				.hide()
-				.appendTo(document.body);
-				this.list = new List(this.container, this.itemTemplate, this.groupBy, this.items, this.eventHandler, this.eventHandler, this.eventHandler, this.populateItemEventHandler);
-			},
-			teardown: function() {
-				$("#" + this.container).remove();
-			}
-		});
+					.attr("id", container)
+					.hide()
+					.appendTo(document.body);
 
-		QUnit.test("object constructor", 10, function() {
-			QUnit.ok(this.list, "Instantiate List object");
-			QUnit.equal(this.list.container, this.container, "container property");
-			QUnit.equal(this.list.itemTemplate, this.itemTemplate, "itemTemplate property");
-			QUnit.equal(this.list.groupBy, this.groupBy, "groupBy property");
-			QUnit.deepEqual(this.list.items, this.items, "items property");
-			QUnit.deepEqual(this.list.viewEventHandler, this.eventHandler, "viewEventHandler property");
-			QUnit.deepEqual(this.list.editEventHandler, this.eventHandler, "editEventHandler property");
-			QUnit.deepEqual(this.list.deleteEventHandler, this.eventHandler, "deleteEventHandler property");
-			QUnit.deepEqual(this.list.populateItemEventHandler, this.populateItemEventHandler, "populateItemEventHandler property");
-			QUnit.equal(this.list.action, this.action, "action property");
-		});
+				list = new List(container, itemTemplate, groupBy, items, eventHandler, eventHandler, eventHandler, populateItemEventHandler);
+			});
 
-		QUnit.asyncTest("refresh - 304 not modified", 7, function() {
-			$.get = jQueryMock.get;
-			this.list.groupBy = null;
-			this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
-			appController.setScrollPosition = this.mockSetScrollPosition;
-			this.list.refresh();
-		});
+			describe("object constructor", () => {
+				it("should return a List instance", () => list.should.be.an.instanceOf(List));
+				it("should set the container", () => list.container.should.equal(container));
+				it("should set the item template", () => list.itemTemplate.should.equal(itemTemplate));
+				it("should set the group by", () => list.groupBy.should.equal(groupBy));
+				it("should set the list items", () => list.items.should.deep.equal(items));
+				it("should attach a view event handler", () => list.viewEventHandler.should.equal(eventHandler));
+				it("should attach an edit event handler", () => list.editEventHandler.should.equal(eventHandler));
+				it("should attach a delete event handler", () => list.deleteEventHandler.should.equal(eventHandler));
+				it("should attach a populate item event handler", () => list.populateItemEventHandler.should.equal(populateItemEventHandler));
+				it("should set the action", () => list.action.should.equal(action));
+			});
 
-		QUnit.asyncTest("refresh - without event handler", 4, function() {
-			this.list = new List(this.container, this.itemTemplate, null, this.items, this.eventHandler, this.eventHandler, this.eventHandler, null);
-			this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
-			appController.setScrollPosition = this.mockSetScrollPosition;
-			this.list.refresh();
-		});
+			describe("refresh", () => {
+				let originalSetScrollPosition,
+						renderHtml,
+						resume;
 
-		QUnit.asyncTest("refresh - without grouping", 7, function() {
-			this.list.groupBy = null;
-			this.renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
-			appController.setScrollPosition = this.mockSetScrollPosition;
-			this.list.refresh();
-		});
+				beforeEach(() => {
+					originalSetScrollPosition = appController.setScrollPosition;
+					renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
+					appController.setScrollPosition = () => {
+						$(`#${container}`).html().should.equal(renderHtml);
+						$(`#${container} li:not([id])`).each((index, element) => {
+							currentItem = index;
+							$(element).trigger("click");
+						});
+						resume();
+					};
+				});
 
-		QUnit.asyncTest("refresh - with grouping", 7, function() {
-			this.renderHtml = '<li id="group-one" class="group">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id="group-two" class="group">group-two</li><li><a>group-two:item-three</a></li>';
-			appController.setScrollPosition = this.mockSetScrollPosition;
-			this.list.refresh();
-		});
+				describe("304 not modified", () => {
+					it("should refresh the list", done => {
+						const fakeServer = sinon.fakeServer.create();
 
-		QUnit.test("setAction - valid", function() {
-			QUnit.expect(this.validActions.length);
-			for (var i = 0; i < this.validActions.length; i++) {
-				this.list.action = "";
-				this.list.setAction(this.validActions[i]);
-				QUnit.equal(this.list.action, this.validActions[i], this.validActions[i] + " - action property");
-			}
-		});
+						fakeServer.respondImmediately = true;
+						fakeServer.respondWith("GET", itemTemplate, [304, {}, "<a>#{name}:#{value}</a>"]);
+						resume = done;
+						list.groupBy = null;
+						list.refresh();
+						fakeServer.restore();
+					});
+				});
 
-		QUnit.test("setAction - invalid", 2, function() {
-			window.alert = function(message) {
-				QUnit.equal(message, "invalid is not a valid action", "alert");
-			};
-			this.list.action = "";
-			this.list.setAction("invalid");
-			QUnit.equal(this.list.action, "", "action property");
-			delete window.alert;
-		});
+				describe("without event handler", () => {
+					it("should refresh the list", done => {
+						resume = done;
+						list = new List(container, itemTemplate, null, items, eventHandler, eventHandler, eventHandler, null);
+						list.refresh();
+					});
+				});
 
-		QUnit.test("tap - without event handlers", 0, function() {
-			this.list.viewEventHandler = null;
-			this.list.editEventHandler = null;
-			this.list.deleteEventHandler = null;
-			for (var i = 0; i < this.validActions.length; i++) {
-				this.list.action = this.validActions[i];
-				this.list.tap(0);
-			}
-		});
+				describe("without grouping", () => {
+					it("should refresh the list", done => {
+						resume = done;
+						list.groupBy = null;
+						list.refresh();
+					});
+				});
 
-		QUnit.test("tap - with event handlers", function() {
-			QUnit.expect(this.validActions.length + 1);
+				describe("with grouping", () => {
+					it("should refresh the list", done => {
+						resume = done;
+						renderHtml = "<li id=\"group-one\" class=\"group\">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id=\"group-two\" class=\"group\">group-two</li><li><a>group-two:item-three</a></li>";
+						list.refresh();
+					});
+				});
 
-			window.confirm = function(message) {
-				QUnit.equal(message, "Delete this item?", "confirm");
-				return true;
-			};
+				afterEach(() => (appController.setScrollPosition = originalSetScrollPosition));
+			});
 
-			for (var i = 0; i < this.validActions.length; i++) {
-				this.list.action = this.validActions[i];
-				this.list.tap(0);
-			}
+			describe("setAction", () => {
+				let windowAlert;
 
-			delete window.confirm;
-		});
+				beforeEach(() => {
+					windowAlert = sinon.stub(window, "alert");
+					appController.getScrollPosition.reset();
+					list.action = "";
+				});
 
-		QUnit.test("tap - delete abort", 1, function() {
-			window.confirm = function(message) {
-				QUnit.equal(message, "Delete this item?", "confirm");
-				return false;
-			};
+				validActions.forEach(validAction => {
+					describe(validAction, () => {
+						beforeEach(() => list.setAction(validAction));
 
-			this.list.action = "delete";
-			this.list.tap(0);
+						it("should set the action", () => list.action.should.equal(validAction));
 
-			delete window.confirm;
+						if ("view" === validAction) {
+							it("should not save the scroll position", () => appController.getScrollPosition.should.not.have.been.called);
+						} else {
+							it("should save the scroll position", () => appController.getScrollPosition.should.have.been.called);
+						}
+
+						it("should not show an alert", () => windowAlert.should.not.have.been.called);
+					});
+				});
+
+				describe("invalid action", () => {
+					beforeEach(() => list.setAction("invalid"));
+
+					it("should not save the scroll position", () => appController.getScrollPosition.should.not.have.been.called);
+					it("should show an alert", () => windowAlert.should.have.been.calledWith("invalid is not a valid action"));
+					it("should not set the action", () => list.action.should.equal(""));
+				});
+
+				afterEach(() => windowAlert.restore());
+			});
+
+			describe("tap", () => {
+				let windowConfirm;
+
+				beforeEach(() => {
+					eventHandler = sinon.stub();
+					windowConfirm = sinon.stub(window, "confirm");
+				});
+
+				validActions.forEach(validAction => {
+					describe(validAction, () => {
+						describe("without event handler", () => {
+							beforeEach(() => {
+								list[`${validAction}EventHandler`] = null;
+								list.action = validAction;
+								list.tap(0);
+							});
+
+							it("should not trigger a confirm prompt", () => windowConfirm.should.not.have.been.called);
+							it("should not trigger the event handler", () => eventHandler.should.not.have.been.called);
+						});
+
+						describe("with event handler", () => {
+							beforeEach(() => (list[`${validAction}EventHandler`] = eventHandler));
+
+							if ("delete" === validAction) {
+								describe("confirmed", () => {
+									beforeEach(() => {
+										windowConfirm.returns(true);
+										list.action = validAction;
+										list.tap(0);
+									});
+
+									it("should trigger a confirm prompt", () => windowConfirm.should.have.been.calledWith("Delete this item?"));
+									it("should trigger the event handler", () => eventHandler.should.have.been.called);
+								});
+
+								describe("aborted", () => {
+									beforeEach(() => {
+										windowConfirm.returns(false);
+										list.action = validAction;
+										list.tap(0);
+									});
+
+									it("should trigger a confirm prompt", () => windowConfirm.should.have.been.calledWith("Delete this item?"));
+									it("should not trigger the event handler", () => eventHandler.should.not.have.been.called);
+								});
+							} else {
+								beforeEach(() => {
+									list.action = validAction;
+									list.tap(0);
+								});
+
+								it("should not trigger a confirm prompt", () => windowConfirm.should.not.have.been.called);
+								it("should trigger the event handler", () => eventHandler.should.have.been.called);
+							}
+						});
+					});
+				});
+
+				afterEach(() => windowConfirm.restore());
+			});
+
+			afterEach(() => $(`#${container}`).remove());
 		});
 	}
-);	
+);
