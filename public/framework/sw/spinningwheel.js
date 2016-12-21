@@ -158,8 +158,8 @@ var SpinningWheel = {
 		this.calculateSlotsWidth();
 
 		// Global events
-		document.addEventListener('touchstart', this, false);			// Prevent page scrolling
-		document.addEventListener('touchmove', this, false);			// Prevent page scrolling
+		document.addEventListener('touchstart', this, {capture: false, passive: false});			// Prevent page scrolling
+		document.addEventListener('touchmove', this, {capture: false, passive: false});			// Prevent page scrolling
 		window.addEventListener('orientationchange', this, true);		// Optimize SW on orientation change
 		window.addEventListener('scroll', this, true);				// Reposition SW on page scroll
 
