@@ -58,6 +58,10 @@ abc.prototype = {
 		e.preventDefault();
 
 		var theTarget = document.elementFromPoint(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+
+		// SOH: Return early if no element found at point (eg. move outside document boundaries)
+		if (!theTarget) return false;
+
 		if(theTarget.nodeType == 3) theTarget = theTarget.parentNode;
 
 		theTarget = theTarget.innerText;
