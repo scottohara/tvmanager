@@ -33,7 +33,6 @@ define(
 					.appendTo(document.body);
 
 				sinon.stub(ApplicationController.prototype, "contentShown");
-				sinon.stub(ApplicationController.prototype, "updateChecked");
 				ApplicationController.prototype.singletonInstance = null;
 				applicationController = new ApplicationController();
 			});
@@ -53,12 +52,12 @@ define(
 				it("should create a scroll helper", () => applicationController.abc.element.should.deep.equal(abc.get(0)));
 				it("should associate the scroll helper with the content", () => applicationController.abc.scrollElement.should.deep.equal($("#content")));
 				it("should wrap the scroll helper in a touch event proxy", () => applicationController.abctoucheventproxy.element.should.deep.equal(abc.get(0)));
-				it("should create a cache controller", () => applicationController.cache.should.be.an.instanceOf(CacheController));
-
-				it("should check for updates", () => {
-					applicationController.cache.update.should.have.been.called;
-					applicationController.updateChecked.should.have.been.called;
+				it("should create a cache controller", () => {
+					applicationController.cache.should.be.an.instanceOf(CacheController);
+					applicationController.cache.callback.should.be.a.Function;
 				});
+
+				it("should check for updates", () => applicationController.cache.update.should.have.been.called);
 
 				describe("instance already exists", () => {
 					let anotherApplicationController;
@@ -76,12 +75,11 @@ define(
 
 				beforeEach(() => {
 					sinon.stub(applicationController, "showNotice");
-					applicationController.updateChecked.restore();
 					message = "<p>update message</p>";
 					noticeId = "updateNotice";
 				});
 
-				describe("not updated", () => {
+				describe("don't notify", () => {
 					it("should do nothing", () => {
 						applicationController.updateChecked(false, message, noticeId);
 						$(`#${noticeId}`).length.should.equal(0);
@@ -89,7 +87,7 @@ define(
 					});
 				});
 
-				describe("updated", () => {
+				describe("notify", () => {
 					describe("notice visible", () => {
 						it("should update the notice message", () => {
 							const notice = $("<div>")
@@ -117,8 +115,6 @@ define(
 						});
 					});
 				});
-
-				afterEach(() => sinon.stub(ApplicationController.prototype, "updateChecked"));
 			});
 
 			describe("start", () => {
@@ -1446,7 +1442,6 @@ define(
 				contentWrapper.remove();
 				abc.remove();
 				ApplicationController.prototype.contentShown.restore();
-				ApplicationController.prototype.updateChecked.restore();
 			});
 		});
 	}

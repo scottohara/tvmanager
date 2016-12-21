@@ -112,10 +112,10 @@ define(
 				this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
 
 				// Create the cache controller
-				this.cache = new CacheController();
+				this.cache = new CacheController(this.updateChecked.bind(this));
 
 				// Run an initial update check
-				this.cache.update(this.updateChecked.bind(this));
+				this.cache.update();
 
 				return this;
 			}
@@ -126,13 +126,13 @@ define(
 			 * @instance
 			 * @method updateChecked
 			 * @desc Shows a notice if the application was updated
-			 * @param {Boolean} updated - true if the application was updated
+			 * @param {Boolean} notify - whether to show a notice
 			 * @param {String} message - the notification message to display
 			 * @param {String} noticeId - the notice identifier
 			 */
-			updateChecked(updated, message, noticeId) {
-				// If an update occurred...
-				if (updated) {
+			updateChecked(notify, message, noticeId) {
+				// If an notice is needed...
+				if (notify) {
 					// We get notified as every file is downloaded, so if a notice is already visible just update the message
 					if ($(`#${noticeId}`).length > 0) {
 						$(`#${noticeId}`).html(message);

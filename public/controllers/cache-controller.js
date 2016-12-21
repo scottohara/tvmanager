@@ -21,18 +21,23 @@ define(
 		 * @class CacheController
 		 * @classdesc Manages the HTML5 application cache
 		 * @property {Function} callback - a function to call after updating the cache
+		 * @property {Boolean} notifyOnError - whether to show a notice for any errors/warnings
 		 */
 		class CacheController {
 			/**
 			 * @constructor CacheController
 			 * @this CacheController
+			 * @param {Function} callback - a function to call during/after the cache has been updated
 			 */
-			constructor() {
+			constructor(callback) {
+				this.callback = callback;
+
 				// Only proceed if the browser supports the HTML5 application cache
 				if (window.applicationCache) {
 					// Bind event handlers for the appCache events
 					window.applicationCache.addEventListener("downloading", this.downloading.bind(this), false);
 					window.applicationCache.addEventListener("progress", this.progress.bind(this), false);
+					window.applicationCache.addEventListener("cached", this.cached.bind(this), false);
 					window.applicationCache.addEventListener("updateready", this.updateReady.bind(this), false);
 					window.applicationCache.addEventListener("error", this.error.bind(this));
 					window.applicationCache.addEventListener("noupdate", this.noUpdate.bind(this));
@@ -97,6 +102,18 @@ define(
 			 * @memberof CacheController
 			 * @this CacheController
 			 * @instance
+			 * @method cached
+			 * @desc Cache ready event handler
+			 */
+			cached() {
+				// Display a notice indicating that the cache update has completed
+				this.callback(true, "Application has been updated to the latest version. Please restart the application.", this.NOTICE_ID);
+			}
+
+			/**
+			 * @memberof CacheController
+			 * @this CacheController
+			 * @instance
 			 * @method updateReady
 			 * @desc Update ready event handler
 			 */
@@ -122,7 +139,7 @@ define(
 				// It's only an error if we're online
 				if (window.navigator.onLine) {
 					// Display a notice indicating the error
-					this.callback(false, `Error reading application cache manifest (status: ${this.cacheStatusValues[window.applicationCache.status]})`);
+					this.callback(this.notifyOnError, `Error reading application cache manifest (status: ${this.cacheStatusValues[window.applicationCache.status]})`);
 				}
 			}
 
@@ -134,10 +151,8 @@ define(
 			 * @desc No update event handler
 			 */
 			noUpdate() {
-				// If a callback function was provided, display a notice indicating that no update was available
-				if (this.callback) {
-					this.callback(false, "You are currently running the latest version. No updates are available at this time.");
-				}
+				// Display a notice indicating that no update was available
+				this.callback(this.notifyOnError, "You are currently running the latest version. No updates are available at this time.");
 			}
 
 			/**
@@ -146,18 +161,20 @@ define(
 			 * @instance
 			 * @method update
 			 * @desc Updates the application cache
-			 * @param {Function} callback - a function to call during/after the cache has been updated
+			 * @param {Boolean} notifyOnError - whether to show a notice when an error occurs
 			 */
-			update(callback) {
-				// Check that the browser supports the HTML5 application cache
-				if (window.applicationCache) {
-					this.callback = callback;
+			update(notifyOnError) {
+				this.notifyOnError = notifyOnError;
 
-					// Update the cache
-					window.applicationCache.update();
+				// Check that the browser supports the HTML5 application cache and the status is idle
+				if (window.applicationCache) {
+					if ("idle" === this.cacheStatusValues[window.applicationCache.status]) {
+						// Update the cache
+						window.applicationCache.update();
+					}
 				} else {
 					// Call the callback function indicating that the application cache is not supported
-					callback(false, "This browser does not support application caching.");
+					this.callback(this.notifyOnError, "This browser does not support application caching.");
 				}
 			}
 		}

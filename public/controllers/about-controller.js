@@ -151,32 +151,12 @@ define(
 					// Set the updating flag
 					this.updating = true;
 
-					// Update the application cache
-					appController.cache.update(this.updateChecked);
+					// Update the application cache (and show a notice for any errors/warnings)
+					appController.cache.update(true);
 
 					// Clear the updating flag
 					this.updating = false;
 				}
-			}
-
-			/**
-			 * @memberof AboutController
-			 * @this AboutController
-			 * @instance
-			 * @method updateChecked
-			 * @desc Displays a notice from the application cache update
-			 * @param {Boolean} updated - whether or not the cache was updated
-			 * @param {String} message - a success/failure message from the cache controller
-			 */
-			updateChecked(updated, message) {
-				// Show the notice
-				appController.showNotice({
-					label: message,
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				});
 			}
 		}
 

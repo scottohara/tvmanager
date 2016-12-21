@@ -105,6 +105,8 @@ Note: In development, where files are constantly being modified, application cac
 
 For convenience, rake tasks are available that start the server with application caching enabled (`rake appcache:enable`) or disabled (`rake appcache:disable`), for quickly toggling between the two.
 
+(Note: During development, if you use the 'Disable cache' option in DevTools and have application caching enabled, Chrome will treat the manifest as if it has changed on each page load even when there have been no changes.)
+
 Import/Export
 =============
 The app includes a backup/restore facility. A log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.

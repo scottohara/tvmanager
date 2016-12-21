@@ -14,8 +14,8 @@ unless ENV[:RACK_ENV.to_s].eql? 'production'
 	RSpec::Core::RakeTask.new(:spec)
 end
 
-def start_server(open = nil, &block)
-	Open4.popen4 "shotgun#{open && ' -O -u /index.html'}", &block
+def start_server(browse = false, &block)
+	Open4.popen4 "shotgun#{browse && ' --browse --host localhost --url /index.html'}", &block
 end
 
 def start_simulator(description, url)

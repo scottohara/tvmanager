@@ -3,8 +3,9 @@ define(
 		"use strict";
 
 		class CacheControllerMock {
-			constructor() {
-				this.update = sinon.stub().yields();
+			constructor(callback) {
+				this.callback = callback;
+				this.update = sinon.stub();
 			}
 		}
 

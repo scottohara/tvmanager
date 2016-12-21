@@ -174,23 +174,8 @@ define(
 				describe("not updating", () => {
 					beforeEach(() => aboutController.checkForUpdate());
 
-					it("should update the application cache", () => appController.cache.update.should.have.been.calledWith(aboutController.updateChecked));
+					it("should update the application cache", () => appController.cache.update.should.have.been.calledWith(true));
 					it("should reset the updating flag", () => aboutController.updating.should.be.false);
-				});
-			});
-
-			describe("updateChecked", () => {
-				it("should show a notice", () => {
-					const message = "test message";
-
-					aboutController.updateChecked(true, message);
-					appController.showNotice.should.have.been.calledWith({
-						label: message,
-						leftButton: {
-							style: "cautionButton",
-							label: "OK"
-						}
-					});
 				});
 			});
 		});
