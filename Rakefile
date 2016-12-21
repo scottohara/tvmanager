@@ -14,17 +14,13 @@ unless ENV[:RACK_ENV.to_s].eql? 'production'
 	RSpec::Core::RakeTask.new(:spec)
 end
 
-def start_server(&block)
-	Open4.popen4 'shotgun -O -u /index.html', &block
-end
-
-def start_test_runner(&block)
-	Open4.popen4 'karma start --browsers', &block
+def start_server(open = nil, &block)
+	Open4.popen4 "shotgun#{open && ' -O -u /index.html'}", &block
 end
 
 def start_simulator(description, url)
 	# Get the list of available simulator devices into an array
-	devices = `xcrun instruments -s devices`.split '\n'
+	devices = `xcrun instruments -s devices`.split "\n"
 	selected_device = nil
 
 	until selected_device
@@ -47,15 +43,14 @@ def start_simulator(description, url)
 	sh "xcrun simctl openurl booted #{url}"
 	puts "#{description} in simulator"
 
-	# Find the pid of the running simulator process (if more than one, assume last one)
-	pid = `pgrep "iOS Simulator"`.split('\n').last.to_i
-
-	# Monitor the pid by sending kill 0 to it every second; until it no longer exists.
-	begin
-		sleep 1 while Process.kill 0, pid
-	rescue
-		puts 'Simulator closed'
+	# Monitor by looking for a Booted simulator; until one no longer exists.
+	loop do
+		sleep 5
+		count = `xcrun simctl list | grep Booted | wc -l`.to_i
+		break if count.eql? 0
 	end
+
+	puts 'Simulator closed'
 end
 
 namespace :db do
@@ -145,23 +140,13 @@ namespace :simulator do
 			Process.kill 'SIGTERM', server_pid
 		end
 	end
-
-	desc 'Run the test suite in an iOS simulator'
-	task :test do
-		start_test_runner do |server_pid, _stdin, stdout|
-			start_simulator 'Test suite started', 'http://localhost:9876'
-			puts 'Stopping test runner.'
-			puts stdout.read
-			Process.kill 'SIGTERM', server_pid
-		end
-	end
 end
 
 namespace :appcache do
 	desc 'Starts the server with the HTML5 application cache enabled'
 	task :enable do
 		ENV.delete :TVMANAGER_NO_APPCACHE.to_s
-		start_server do |_pid, _stdin, stdout|
+		start_server(true) do |_pid, _stdin, stdout|
 			puts 'Server started on port 9393. Browse to http://localhost:9393/index.html to run the application. Ctrl-C to quit.'
 			puts stdout.read
 		end
@@ -170,7 +155,7 @@ namespace :appcache do
 	desc 'Starts the server with the HTML5 application cache disabled'
 	task :disable do
 		ENV[:TVMANAGER_NO_APPCACHE.to_s] = 'true'
-		start_server do |_pid, _stdin, stdout|
+		start_server(true) do |_pid, _stdin, stdout|
 			puts 'Server started on port 9393. Browse to http://localhost:9393/index.html to run the application. Ctrl-C to quit.'
 			puts stdout.read
 		end

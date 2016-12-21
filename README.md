@@ -163,12 +163,10 @@ Frontend specs are implemented using [mocha](http://visionmedia.github.io/mocha/
 
 Two [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
 
-1. `npm run bdd` watches for any file changes and runs the full test suite
-2. `npm test` does the same, but includes [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available for each browser in `/tvmanager/coverage/{browser}/index.html`
+1. `npm test` runs the test suite once, and includes [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available for each browser in `/tvmanager/coverage/{browser}/index.html`
+2. `npm run bdd` continuously watches all Javascript files, and runs the full test suite when a change is detected
 
-By default, the tests will run in both Chrome and [PhantomJS](http://phantomjs.org).
-
-To run the tests in the iOS Simulator, use `rake simulator:test`. This rake task will start the test runner, prompt for the device & iOS version to launch the simulator for, and open the the test URL (ie. `http://localhost:9876`) in Mobile Safari. Quitting the simulator will automatically shutdown the test runner.
+By default, the test suite is run in Chrome, iOS Simulator and [PhantomJS](http://phantomjs.org)
 
 To run the tests in Mobile Safari on a physical device:
 * start the test runner *without* launching the default browsers (`npm test -- --browsers`)
