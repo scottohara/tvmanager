@@ -192,7 +192,7 @@ define(
 				const showing = Number(nowShowing) || 0;
 
 				// If the value passed (or defaulted) is "Not Showing", clear the property
-				if (0 === Number(showing)) {
+				if (0 === showing) {
 					this.nowShowing = null;
 				} else {
 					// Otherwise set it to the passed value
@@ -413,7 +413,7 @@ define(
 							filter = `
 								WHERE			p.ProgramID = ?
 								GROUP BY	s.SeriesID
-								ORDER BY	s.Name
+								ORDER BY	s.Name COLLATE NOCASE
 							`,
 							params = [programId];
 
@@ -474,7 +474,7 @@ define(
 														ELSE 0
 													END,
 													s.NowShowing,
-													p.Name
+													p.Name COLLATE NOCASE
 							`,
 							params = [];
 
@@ -503,8 +503,8 @@ define(
 							filter = `
 								WHERE			e.Status = ?
 								GROUP BY	s.SeriesID
-								ORDER BY	p.Name,
-													s.Name
+								ORDER BY	p.Name COLLATE NOCASE,
+													s.Name COLLATE NOCASE
 							`,
 							params = [status];
 
@@ -530,8 +530,8 @@ define(
 								GROUP BY	s.SeriesID
 								HAVING		COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND
 													COUNT(e2.EpisodeID) > 0
-								ORDER BY	p.Name,
-													s.Name
+								ORDER BY	p.Name COLLATE NOCASE,
+													s.Name COLLATE NOCASE
 							`,
 							params = [];
 

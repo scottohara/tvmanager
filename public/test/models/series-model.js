@@ -556,7 +556,7 @@ define(
 						LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
 						WHERE						p.ProgramID = ${programId}
 						GROUP BY				s.SeriesID
-						ORDER BY				s.Name
+						ORDER BY				s.Name COLLATE NOCASE
 					`;
 				});
 
@@ -708,7 +708,7 @@ define(
 															ELSE 0
 														END,
 														s.NowShowing,
-														p.Name
+														p.Name COLLATE NOCASE
 					`;
 				});
 
@@ -781,8 +781,8 @@ define(
 						JOIN			Episode e ON s.SeriesID = e.SeriesID
 						WHERE			e.Status = ${status}
 						GROUP BY	s.SeriesID
-						ORDER BY	p.Name,
-											s.Name
+						ORDER BY	p.Name COLLATE NOCASE,
+											s.Name COLLATE NOCASE
 					`;
 				});
 
@@ -859,8 +859,8 @@ define(
 						GROUP BY				s.SeriesID
 						HAVING					COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND
 														COUNT(e2.EpisodeID) > 0
-						ORDER BY				p.Name,
-														s.Name
+						ORDER BY				p.Name COLLATE NOCASE,
+														s.Name COLLATE NOCASE
 					`;
 				});
 

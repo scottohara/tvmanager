@@ -460,7 +460,7 @@ define(
 						LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
 						LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
 						GROUP BY		 		p.ProgramID
-						ORDER BY p.Name
+						ORDER BY p.Name COLLATE NOCASE
 					`;
 				});
 
