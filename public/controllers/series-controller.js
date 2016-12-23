@@ -92,18 +92,11 @@ define(
 			 * @desc Saves the series details to the database and returns to the previous view
 			 */
 			save() {
-				const PREVIOUS_VIEW_OFFSET = 2;
-
 				// Get the series details
 				this.listItem.series.seriesName = $("#seriesName").val();
 
 				// Update the database
 				this.listItem.series.save();
-
-				// If a new series was added, scroll the SeriesList view to the end of the list to reveal the new item
-				if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
-					appController.viewStack[appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
-				}
 
 				// Pop the view off the stack
 				appController.popView(this.listItem);

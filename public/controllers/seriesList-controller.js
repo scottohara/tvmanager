@@ -28,6 +28,7 @@ define(
 		 * @property {ProgramListItem} listItem - a list item from the Programs view
 		 * @property {HeaderFooter} header - the view header bar
 		 * @property {List} seriesList - the list of series to display
+		 * @property {String} origSeriesName - the series name before editing
 		 * @property {Number} origEpisodeCount - the total number of episodes in a series before viewing/editing
 		 * @property {Number} origWatchedCount - the number of watched episodes in a series before viewing/editing
 		 * @property {Number} origRecordedCount - the number of recorded episodes in a series before viewing/editing
@@ -82,12 +83,19 @@ define(
 			 * @param {SeriesListItem} [listItem] - a list item that was just view in the Episodes view, or added/edited in the Series view
 			 */
 			activate(listItem) {
+				let listResort = false;
+
 				// When returning from the Episodes or Series view, we need to update the list with the new values
 				if (listItem) {
 					// If an existing series was viewed/edited, check if the series was moved or increment/decrement the status counts for the series
 					if (listItem.listIndex >= 0) {
 						// If the series has not moved to a different program, increment/decrement the status counts for the program
 						if (listItem.series.programId === this.listItem.program.id) {
+							// If the series name has changed, we will need to resort the list and scroll to the new position
+							if (listItem.series.seriesName !== this.origSeriesName) {
+								listResort = true;
+							}
+
 							this.seriesList.items[listItem.listIndex] = listItem.series;
 							this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount + (listItem.series.episodeCount - this.origEpisodeCount));
 							this.listItem.program.setWatchedCount(this.listItem.program.watchedCount + (listItem.series.watchedCount - this.origWatchedCount));
@@ -101,11 +109,24 @@ define(
 						// Otherwise, add the new series and increment the series count for the program
 						this.seriesList.items.push(listItem.series);
 						this.listItem.program.seriesCount++;
+						listResort = true;
+					}
+
+					// If necessary, resort the list
+					if (listResort) {
+						this.seriesList.items = this.seriesList.items.sort((a, b) => a.seriesName.localeCompare(b.seriesName));
 					}
 				}
 
 				// Refresh the list
 				this.seriesList.refresh();
+
+				// If necessary, scroll the list item into view
+				if (listResort) {
+					const DELAY_MS = 300;
+
+					window.setTimeout(() => this.seriesList.scrollTo(listItem.series.id), DELAY_MS);
+				}
 
 				// Set to view mode
 				this.viewItems();
@@ -148,6 +169,7 @@ define(
 			 */
 			viewItem(itemIndex) {
 				// Save the current series details
+				this.origSeriesName = this.seriesList.items[itemIndex].seriesName;
 				this.origEpisodeCount = this.seriesList.items[itemIndex].episodeCount;
 				this.origWatchedCount = this.seriesList.items[itemIndex].watchedCount;
 				this.origRecordedCount = this.seriesList.items[itemIndex].recordedCount;
@@ -178,6 +200,7 @@ define(
 			 */
 			editItem(itemIndex) {
 				// Save the current series details
+				this.origSeriesName = this.seriesList.items[itemIndex].seriesName;
 				this.origEpisodeCount = this.seriesList.items[itemIndex].episodeCount;
 				this.origWatchedCount = this.seriesList.items[itemIndex].watchedCount;
 				this.origRecordedCount = this.seriesList.items[itemIndex].recordedCount;

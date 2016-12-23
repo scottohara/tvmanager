@@ -76,7 +76,6 @@ define(
 				beforeEach(() => {
 					sinon.stub(episodesController, "viewItem");
 					sinon.stub(episodesController, "deleteItem");
-					sinon.stub(episodesController, "onPopulateListItem");
 					sinon.stub(episodesController, "goBack");
 					sinon.stub(episodesController, "addItem");
 					sinon.stub(episodesController, "listRetrieved");
@@ -117,11 +116,6 @@ define(
 							episodesController.deleteItem.should.have.been.called;
 						});
 
-						it("should attach a populate item event handler to the episodes list", () => {
-							episodesController.episodeList.populateItemEventHandler();
-							episodesController.onPopulateListItem.should.have.been.called;
-						});
-
 						it("should get the list of episodes for the series", () => {
 							Episode.listBySeries.should.have.been.calledWith(listItem.series.id, sinon.match.func);
 							episodesController.listRetrieved.should.have.been.calledWith(items);
@@ -131,18 +125,25 @@ define(
 			});
 
 			describe("activate", () => {
+				let clock;
+
 				beforeEach(() => {
+					clock = sinon.useFakeTimers();
 					sinon.stub(episodesController, "viewItems");
+					sinon.spy(window, "setTimeout");
 					episodesController.episodeList = {
 						items: [Object.assign({}, items[0])],
-						refresh: sinon.stub()
+						refresh: sinon.stub(),
+						scrollTo: sinon.stub()
 					};
+					episodesController.scrollToFirstUnwatched = false;
 				});
 
 				describe("from series list view", () => {
 					beforeEach(() => episodesController.activate());
 
 					it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+					it("should not scroll to the first unwatched episode", () => window.setTimeout.should.not.have.been.called);
 					it("should set the list to view mode", () => episodesController.viewItems.should.have.been.called);
 				});
 
@@ -194,6 +195,7 @@ define(
 								it("should update the series expected count", () => listItem.series.setExpectedCount.should.have.been.calledWith(2 + (params.expected || 0)));
 								it("should update the series status warning count", () => listItem.series.setStatusWarning.should.have.been.calledWith(1 + (params.warning || 0)));
 								it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+								it("should not scroll to the first unwatched episode", () => window.setTimeout.should.not.have.been.called);
 								it("should set the list to view mode", () => episodesController.viewItems.should.have.been.called);
 							});
 
@@ -215,50 +217,58 @@ define(
 								it("should increment the series expected count", () => listItem.series.setExpectedCount.should.have.been.calledWith(2 + (params.expected || 0)));
 								it("should increment the series status warning count", () => listItem.series.setStatusWarning.should.have.been.calledWith(2 + (params.warning || 0)));
 								it("should refresh the list", () => episodesController.episodeList.refresh.should.have.been.called);
+								it("should not scroll to the first unwatched episode", () => window.setTimeout.should.not.have.been.called);
 								it("should set the list to view mode", () => episodesController.viewItems.should.have.been.called);
 							});
 						});
 					});
 				});
-			});
 
-			describe("onPopulateListItem", () => {
-				beforeEach(() => (appController.viewStack = [{scrollPos: 0}]));
+				describe("scroll to first unwatched", () => {
+					beforeEach(() => (episodesController.scrollToFirstUnwatched = true));
 
-				describe("scrolling disabled", () => {
-					it("should do nothing", () => {
-						episodesController.scrollToFirstUnwatched = false;
-						episodesController.onPopulateListItem();
-						appController.viewStack[0].scrollPos.should.equal(0);
-					});
-				});
-
-				describe("scrolling enabled", () => {
-					describe("item watched", () => {
-						it("should scroll past the item", () => {
-							const item = $("<li>")
-								.outerHeight(1)
-								.hide()
-								.appendTo(document.body);
-
-							$("<a>")
-								.attr("id", "test-episode")
-								.hide()
-								.appendTo(item);
-
-							episodesController.onPopulateListItem({id: "test-episode", status: "Watched"});
-							appController.viewStack[0].scrollPos.should.equal(1);
-							item.remove();
+					describe("all watched", () => {
+						beforeEach(() => {
+							episodesController.activate();
+							clock.tick(300);
 						});
+
+						it("should not scroll", () => episodesController.episodeList.scrollTo.should.not.have.been.called);
+						it("should disable scrolling to the first unwatched episode", () => episodesController.scrollToFirstUnwatched.should.be.false);
 					});
 
-					describe("item unwatched", () => {
-						beforeEach(() => episodesController.onPopulateListItem({}));
+					describe("none watched", () => {
+						beforeEach(() => {
+							episodesController.episodeList.items = [
+								{id: 1},
+								{id: 2},
+								{id: 3}
+							];
+							episodesController.activate();
+							clock.tick(300);
+						});
 
-						it("should not scroll past the item", () => appController.viewStack[0].scrollPos.should.equal(0));
-						it("should disable scrolling", () => episodesController.scrollToFirstUnwatched.should.be.false);
+						it("should scroll to the first unwatched episode", () => episodesController.episodeList.scrollTo.should.have.been.calledWith(1));
+						it("should disable scrolling to the first unwatched episode", () => episodesController.scrollToFirstUnwatched.should.be.false);
+					});
+
+					describe("some watched", () => {
+						beforeEach(() => {
+							episodesController.episodeList.items = [
+								{id: 1, status: "Watched"},
+								{id: 2, status: "Watched"},
+								{id: 3}
+							];
+							episodesController.activate();
+							clock.tick(300);
+						});
+
+						it("should scroll to the first unwatched episode", () => episodesController.episodeList.scrollTo.should.have.been.calledWith(3));
+						it("should disable scrolling to the first unwatched episode", () => episodesController.scrollToFirstUnwatched.should.be.false);
 					});
 				});
+
+				afterEach(() => clock.restore());
 			});
 
 			describe("listRetrieved", () => {

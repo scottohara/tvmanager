@@ -85,18 +85,11 @@ define(
 			 * @desc Saves the program details to the database and returns to the previous view
 			 */
 			save() {
-				const PREVIOUS_VIEW_OFFSET = 2;
-
 				// Get the program details
 				this.listItem.program.setProgramName($("#programName").val());
 
 				// Update the database
 				this.listItem.program.save();
-
-				// If a new program was added, scroll the Programs view to the end of the list to reveal the new item
-				if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
-					appController.viewStack[appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
-				}
 
 				// Pop the view off the stack
 				appController.popView(this.listItem);

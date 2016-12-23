@@ -125,48 +125,25 @@ define(
 			});
 
 			describe("save", () => {
-				const testParams = [
-					{
-						description: "update",
-						listIndex: 0,
-						scrollPos: 0
-					},
-					{
-						description: "insert",
-						listIndex: -1,
-						scrollPos: -1
-					}
-				];
-
 				let seriesName,
 						seriesNameInput;
 
-				testParams.forEach(params => {
-					describe(params.description, () => {
-						beforeEach(() => {
-							seriesName = "test-series-2";
+				beforeEach(() => {
+					seriesName = "test-series-2";
 
-							seriesNameInput = $("<input>")
-								.attr("id", "seriesName")
-								.val(seriesName)
-								.appendTo(document.body);
+					seriesNameInput = $("<input>")
+						.attr("id", "seriesName")
+						.val(seriesName)
+						.appendTo(document.body);
 
-							appController.viewStack = [
-								{scrollPos: 0},
-								{scrollPos: 0}
-							];
-							seriesController.listItem.listIndex = params.listIndex;
-							seriesController.save();
-						});
-
-						it("should get the series name", () => seriesController.listItem.series.seriesName.should.equal(seriesName));
-						it("should save the series", () => listItem.series.save.should.have.been.called);
-						it("should set the series list view scroll position", () => appController.viewStack[0].scrollPos.should.equal(params.scrollPos));
-						it("should pop the view", () => appController.popView.should.have.been.called);
-
-						afterEach(() => seriesNameInput.remove());
-					});
+					seriesController.save();
 				});
+
+				it("should get the series name", () => seriesController.listItem.series.seriesName.should.equal(seriesName));
+				it("should save the series", () => listItem.series.save.should.have.been.called);
+				it("should pop the view", () => appController.popView.should.have.been.called);
+
+				afterEach(() => seriesNameInput.remove());
 			});
 
 			describe("cancel", () => {

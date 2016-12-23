@@ -79,7 +79,7 @@ define(
 				};
 
 				// Instantiate a List object
-				this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this), this.onPopulateListItem.bind(this));
+				this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
 
 				// Get the list of episodes for the specified series
 				Episode.listBySeries(this.listItem.series.id, this.listRetrieved.bind(this));
@@ -123,29 +123,24 @@ define(
 				// Refresh the list
 				this.episodeList.refresh();
 
+				// If necessary, scroll to the first unwatched episode
+				if (this.scrollToFirstUnwatched) {
+					const DELAY_MS = 300;
+
+					window.setTimeout(() => {
+						// Find the first unwatched episode
+						const firstUnwatched = this.episodeList.items.find(item => "Watched" !== item.status);
+
+						if (firstUnwatched) {
+							this.episodeList.scrollTo(firstUnwatched.id);
+						}
+
+						this.scrollToFirstUnwatched = false;
+					}, DELAY_MS);
+				}
+
 				// Set to view mode
 				this.viewItems();
-			}
-
-			/**
-			 * @memberof EpisodesController
-			 * @this EpisodesController
-			 * @instance
-			 * @method onPopulateListItem
-			 * @desc Callback function after each episode is added to the list
-			 * @param {Episode} episode - the episode added to the list
-			 */
-			onPopulateListItem(episode) {
-				// Only proceed if we need to scroll to the first unwatched episode
-				if (this.scrollToFirstUnwatched) {
-					// If the status of the episode is Watched, update the scroll position to the top of this episode
-					if ("Watched" === episode.status) {
-						appController.viewStack[appController.viewStack.length - 1].scrollPos += $(`#${String(episode.id)}`).parent().outerHeight();
-					} else {
-						// We have reached the first unwatched episode, so no further scrolling is required
-						this.scrollToFirstUnwatched = false;
-					}
-				}
 			}
 
 			/**

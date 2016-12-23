@@ -19,7 +19,10 @@ define(
 					programsController;
 
 			beforeEach(() => {
-				items = [{programName: "test-program"}];
+				items = [
+					{id: 1, programName: "a-test-program"},
+					{id: 2, programName: "z-test-program"}
+				];
 
 				programList = $("<ul>")
 					.attr("id", "list")
@@ -87,7 +90,8 @@ define(
 					sinon.stub(programsController, "viewItems");
 					programsController.programList = {
 						items: [Object.assign({}, items[0])],
-						refresh: sinon.stub()
+						refresh: sinon.stub(),
+						scrollTo: sinon.stub()
 					};
 				});
 
@@ -99,34 +103,75 @@ define(
 				});
 
 				describe("from program view", () => {
-					let listItem;
+					let listItem,
+							sortedItems,
+							clock;
 
 					beforeEach(() => {
-						listItem = {program: {programName: "viewed-program"}};
+						clock = sinon.useFakeTimers();
+						programsController.programList.items = items;
 					});
 
 					describe("edit", () => {
 						beforeEach(() => {
-							listItem.listIndex = 0;
-							items[0] = listItem.program;
-							programsController.activate(listItem);
+							listItem = {
+								listIndex: 0,
+								program: {id: 1, programName: "edited-program"}
+							};
+
+							sortedItems = [
+								listItem.program,
+								items[1]
+							];
 						});
 
-						it("should update the item in the program list", () => programsController.programList.items.should.deep.equal(items));
-						it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
-						it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
+						describe("program name unchanged", () => {
+							beforeEach(() => {
+								programsController.origProgramName = listItem.program.programName;
+								programsController.activate(listItem);
+								clock.tick(300);
+							});
+
+							it("should update the item in the program list and resort by program name", () => programsController.programList.items.should.deep.equal(sortedItems));
+							it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+							it("should not scroll the list", () => programsController.programList.scrollTo.should.not.have.been.called);
+							it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
+						});
+
+						describe("program name changed", () => {
+							beforeEach(() => {
+								programsController.origProgramName = "original-program";
+								programsController.activate(listItem);
+								clock.tick(300);
+							});
+
+							it("should update the item in the program list and resort by program name", () => programsController.programList.items.should.deep.equal(sortedItems));
+							it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+							it("should scroll the list", () => programsController.programList.scrollTo.should.have.been.calledWith(1));
+							it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
+						});
 					});
 
 					describe("add", () => {
 						beforeEach(() => {
-							items.push(listItem.program);
+							listItem = {program: {id: 3, programName: "added-program"}};
+
+							sortedItems = [
+								items[0],
+								listItem.program,
+								items[1]
+							];
 							programsController.activate(listItem);
+							clock.tick(300);
 						});
 
-						it("should add the item to the program list", () => programsController.programList.items.should.deep.equal(items));
+						it("should add the item to the program list and resort by program name", () => programsController.programList.items.should.deep.equal(sortedItems));
 						it("should refresh the list", () => programsController.programList.refresh.should.have.been.called);
+						it("should scroll the list", () => programsController.programList.scrollTo.should.have.been.calledWith(3));
 						it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
 					});
+
+					afterEach(() => clock.restore());
 				});
 			});
 
@@ -149,16 +194,18 @@ define(
 			});
 
 			describe("viewItem", () => {
-				it("should push the series list view for the selected item", () => {
-					const index = 0;
+				const index = 0;
 
+				beforeEach(() => {
 					programsController.programList = {items};
 					programsController.viewItem(index);
-					appController.pushView.should.have.been.calledWith("seriesList", {
-						listIndex: index,
-						program: items[index]
-					});
 				});
+
+				it("should save the current program details", () => programsController.origProgramName.should.equal(items[0].programName));
+				it("should push the series list view for the selected item", () => appController.pushView.should.have.been.calledWith("seriesList", {
+					listIndex: index,
+					program: items[index]
+				}));
 			});
 
 			describe("addItem", () => {
@@ -169,16 +216,18 @@ define(
 			});
 
 			describe("editItem", () => {
-				it("should push the program view for the selected item", () => {
-					const index = 0;
+				const index = 0;
 
+				beforeEach(() => {
 					programsController.programList = {items};
 					programsController.editItem(index);
-					appController.pushView.should.have.been.calledWith("program", {
-						listIndex: index,
-						program: items[index]
-					});
 				});
+
+				it("should save the current program details", () => programsController.origProgramName.should.equal(items[0].programName));
+				it("should push the program view for the selected item", () => appController.pushView.should.have.been.calledWith("program", {
+					listIndex: index,
+					program: items[index]
+				}));
 			});
 
 			describe("deleteItem", () => {

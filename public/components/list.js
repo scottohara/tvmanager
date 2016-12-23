@@ -30,7 +30,6 @@ define(
 		 * @property {Function} viewEventHandler - function called to view a list item
 		 * @property {Function} editEventHandler - function called to edit a list item
 		 * @property {Function} deleteEventHandler - function called to delete a list item
-		 * @property {Function} populateItemEventHandler - function called after creating each list item
 		 * @property {String} action - the current list mode ("view", "edit" or "delete"), ie. what happens when an item is tapped
 		 */
 		class List {
@@ -44,9 +43,8 @@ define(
 			 * @param {Function} [viewEventHandler] - function called to view a list item
 			 * @param {Function} [editEventHandler] - function called to edit a list item
 			 * @param {Function} [deleteEventHandler] - function called to delete a list item
-			 * @param {Function} [populateItemEventHandler] - function called after creating each list item
 			 */
-			constructor(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
+			constructor(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler) {
 				this.container = container;
 				this.itemTemplate = itemTemplate;
 				this.groupBy = groupBy;
@@ -54,7 +52,6 @@ define(
 				this.viewEventHandler = viewEventHandler;
 				this.editEventHandler = editEventHandler;
 				this.deleteEventHandler = deleteEventHandler;
-				this.populateItemEventHandler = populateItemEventHandler;
 				this.setAction("view");
 			}
 
@@ -105,17 +102,44 @@ define(
 							.html(itemHTML)
 							.on("click", () => this.tap(index)));
 
-						// If a populate item event handler was specified, trigger it
-						if (this.populateItemEventHandler) {
-							this.populateItemEventHandler(item);
-						}
-
 						return itemElements;
 					}, []));
 
 					// Ask the application controller to set/restore the initial scroll position
 					appController.setScrollPosition();
 				});
+			}
+
+			/**
+			 * @memberof List
+			 * @this List
+			 * @instance
+			 * @method scrollTo
+			 * @description Scrolls a list item into view
+			 * @param {String} id - id of the item to scroll into view
+			 */
+			scrollTo(id) {
+				const item = $(`#${id}`),
+							containerElement = $(`#${this.container}`),
+							itemTop = item.get(0).offsetTop,
+							itemBottom = itemTop + item.height(),
+							listTop = containerElement.scrollTop(),
+							listBottom = listTop + containerElement.outerHeight();
+
+				let scrollPos;
+
+				// Determine if the program is off screen
+				if (itemTop < listTop) {
+					scrollPos = itemTop;
+				} else if (itemBottom > listBottom) {
+					scrollPos = itemBottom - containerElement.outerHeight();
+				}
+
+				// If we have somewhere to scroll, do it now
+				if (scrollPos) {
+					appController.viewStack[appController.viewStack.length - 1].scrollPos = scrollPos;
+					appController.setScrollPosition();
+				}
 			}
 
 			/**

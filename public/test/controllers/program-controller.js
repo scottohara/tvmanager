@@ -94,48 +94,25 @@ define(
 			});
 
 			describe("save", () => {
-				const testParams = [
-					{
-						description: "update",
-						listIndex: 0,
-						scrollPos: 0
-					},
-					{
-						description: "insert",
-						listIndex: -1,
-						scrollPos: -1
-					}
-				];
-
 				let programName,
 						programNameInput;
 
-				testParams.forEach(params => {
-					describe(params.description, () => {
-						beforeEach(() => {
-							programName = "test-program-2";
+				beforeEach(() => {
+					programName = "test-program-2";
 
-							programNameInput = $("<input>")
-								.attr("id", "programName")
-								.val(programName)
-								.appendTo(document.body);
+					programNameInput = $("<input>")
+						.attr("id", "programName")
+						.val(programName)
+						.appendTo(document.body);
 
-							appController.viewStack = [
-								{scrollPos: 0},
-								{scrollPos: 0}
-							];
-							programController.listItem.listIndex = params.listIndex;
-							programController.save();
-						});
-
-						it("should get the program name", () => programController.listItem.program.programName.should.equal(programName));
-						it("should save the program", () => listItem.program.save.should.have.been.called);
-						it("should set the Programs view scroll position", () => appController.viewStack[0].scrollPos.should.equal(params.scrollPos));
-						it("should pop the view", () => appController.popView.should.have.been.called);
-
-						afterEach(() => programNameInput.remove());
-					});
+					programController.save();
 				});
+
+				it("should get the program name", () => programController.listItem.program.programName.should.equal(programName));
+				it("should save the program", () => listItem.program.save.should.have.been.called);
+				it("should pop the view", () => appController.popView.should.have.been.called);
+
+				afterEach(() => programNameInput.remove());
 			});
 
 			describe("cancel", () => {

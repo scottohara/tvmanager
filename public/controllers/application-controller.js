@@ -131,7 +131,7 @@ define(
 			 * @param {String} noticeId - the notice identifier
 			 */
 			updateChecked(notify, message, noticeId) {
-				// If an notice is needed...
+				// If a notice is needed...
 				if (notify) {
 					// We get notified as every file is downloaded, so if a notice is already visible just update the message
 					if ($(`#${noticeId}`).length > 0) {

@@ -20,8 +20,8 @@ define(
 					items,
 					currentItem,
 					eventHandler,
-					populateItemEventHandler,
 					action,
+					containerElement,
 					list;
 
 			beforeEach(() => {
@@ -45,18 +45,17 @@ define(
 				];
 				currentItem = 0;
 				eventHandler = index => index.should.equal(currentItem);
-				populateItemEventHandler = item => {
-					item.should.deep.equal(items[currentItem]);
-					currentItem++;
-				};
 				action = "view";
 
-				$("<ul>")
+				containerElement = $("<ul>")
 					.attr("id", container)
+					.height(100)
+					.css("overflow-y", "scroll")
+					.css("margin", 0)
 					.hide()
 					.appendTo(document.body);
 
-				list = new List(container, itemTemplate, groupBy, items, eventHandler, eventHandler, eventHandler, populateItemEventHandler);
+				list = new List(container, itemTemplate, groupBy, items, eventHandler, eventHandler, eventHandler);
 			});
 
 			describe("object constructor", () => {
@@ -68,7 +67,6 @@ define(
 				it("should attach a view event handler", () => list.viewEventHandler.should.equal(eventHandler));
 				it("should attach an edit event handler", () => list.editEventHandler.should.equal(eventHandler));
 				it("should attach a delete event handler", () => list.deleteEventHandler.should.equal(eventHandler));
-				it("should attach a populate item event handler", () => list.populateItemEventHandler.should.equal(populateItemEventHandler));
 				it("should set the action", () => list.action.should.equal(action));
 			});
 
@@ -81,7 +79,7 @@ define(
 					originalSetScrollPosition = appController.setScrollPosition;
 					renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
 					appController.setScrollPosition = () => {
-						$(`#${container}`).html().should.equal(renderHtml);
+						containerElement.html().should.equal(renderHtml);
 						$(`#${container} li:not([id])`).each((index, element) => {
 							currentItem = index;
 							$(element).trigger("click");
@@ -103,14 +101,6 @@ define(
 					});
 				});
 
-				describe("without event handler", () => {
-					it("should refresh the list", done => {
-						resume = done;
-						list = new List(container, itemTemplate, null, items, eventHandler, eventHandler, eventHandler, null);
-						list.refresh();
-					});
-				});
-
 				describe("without grouping", () => {
 					it("should refresh the list", done => {
 						resume = done;
@@ -128,6 +118,46 @@ define(
 				});
 
 				afterEach(() => (appController.setScrollPosition = originalSetScrollPosition));
+			});
+
+			describe("scrollTo", () => {
+				const BODY_PADDING = 8;
+
+				beforeEach(() => {
+					for (let i = 0; i < 10; i++) {
+						$("<li>")
+							.attr("id", i)
+							.height(20)
+							.appendTo(containerElement);
+					}
+
+					containerElement.show();
+					containerElement.scrollTop(40);
+
+					appController.viewStack = [{scrollPos: 40}];
+					appController.setScrollPosition.reset();
+				});
+
+				describe("item above view", () => {
+					beforeEach(() => list.scrollTo(1));
+
+					it("should update the scroll position", () => appController.viewStack.pop().scrollPos.should.equal(20 + BODY_PADDING));
+					it("should set the scroll position", () => appController.setScrollPosition.should.have.been.called);
+				});
+
+				describe("item in view", () => {
+					beforeEach(() => list.scrollTo(5));
+
+					it("should not update the scroll position", () => appController.viewStack.pop().scrollPos.should.equal(40));
+					it("should not set the scroll position", () => appController.setScrollPosition.should.not.have.been.called);
+				});
+
+				describe("item below view", () => {
+					beforeEach(() => list.scrollTo(8));
+
+					it("should update the scroll position", () => appController.viewStack.pop().scrollPos.should.equal(80 + BODY_PADDING));
+					it("should set the scroll position", () => appController.setScrollPosition.should.have.been.called);
+				});
 			});
 
 			describe("setAction", () => {
@@ -228,7 +258,7 @@ define(
 				afterEach(() => windowConfirm.restore());
 			});
 
-			afterEach(() => $(`#${container}`).remove());
+			afterEach(() => containerElement.remove());
 		});
 	}
 );

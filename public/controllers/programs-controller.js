@@ -27,6 +27,7 @@ define(
 		 * @classdesc Controller for the programs view
 		 * @property {HeaderFooter} header - the view header bar
 		 * @property {List} programList - the list of programs to display
+		 * @property {String} origProgramName - the program name before editing
 		 * @property {HeaderFooter} footer - the view footer bar
 		 */
 		class ProgramsController {
@@ -68,19 +69,39 @@ define(
 			 * @param {ProgramListItem} [listItem] - a list item that was just added/edited in the Program view
 			 */
 			activate(listItem) {
+				let listResort = false;
+
 				// When returning from the Program view, we need to update the list with the new values
 				if (listItem) {
 					// If an existing program was edited, update the program details
 					if (listItem.listIndex >= 0) {
+						// If the program name has changed, we will need to resort the list and scroll to the new position
+						if (listItem.program.programName !== this.origProgramName) {
+							listResort = true;
+						}
+
 						this.programList.items[listItem.listIndex] = listItem.program;
 					} else {
 						// Otherwise add the new program to the list
 						this.programList.items.push(listItem.program);
+						listResort = true;
+					}
+
+					// If necessary, resort the list
+					if (listResort) {
+						this.programList.items = this.programList.items.sort((a, b) => a.programName.localeCompare(b.programName));
 					}
 				}
 
 				// Refresh the list
 				this.programList.refresh();
+
+				// If necessary, scroll the list item into view
+				if (listResort) {
+					const DELAY_MS = 300;
+
+					window.setTimeout(() => this.programList.scrollTo(listItem.program.id), DELAY_MS);
+				}
 
 				// Set to view mode
 				this.viewItems();
@@ -122,6 +143,8 @@ define(
 			 * @param {Number} itemIndex - the list index of the program to view
 			 */
 			viewItem(itemIndex) {
+				// Save the current program details
+				this.origProgramName = this.programList.items[itemIndex].programName;
 				appController.pushView("seriesList", {listIndex: itemIndex, program: this.programList.items[itemIndex]});
 			}
 
@@ -145,6 +168,8 @@ define(
 			 * @param {Number} itemIndex - the list index of the program to edit
 			 */
 			editItem(itemIndex) {
+				// Save the current program details
+				this.origProgramName = this.programList.items[itemIndex].programName;
 				appController.pushView("program", {listIndex: itemIndex, program: this.programList.items[itemIndex]});
 			}
 
