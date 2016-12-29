@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scottohara/tvmanager.png)](https://travis-ci.org/scottohara/tvmanager)
+[![Build Status](https://travis-ci.org/scottohara/tvmanager.svg?branch=master)](https://travis-ci.org/scottohara/tvmanager)
 [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)
 [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)
 [![Dependency Status](https://www.versioneye.com/user/projects/549d122f6b1b817159000788/badge.svg?style=flat)](https://www.versioneye.com/user/projects/549d122f6b1b817159000788)

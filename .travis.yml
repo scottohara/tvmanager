@@ -1,25 +1,26 @@
 language: ruby
+os: osx
+osx_image: xcode8.2
 
 # Cache gems
 cache:
-	bundler: true
-	directories:
+  bundler: true
+  directories:
     - node_modules
-
-# Required to use new Travis container-based infrastructure
-sudo: false
-
-# Enable couchdb
-services: couchdb
 
 # Code Climate token for coverage reporting
 addons:
   code_climate:
     repo_token: 1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
 
+env: TVMANAGER_COUCHDB_URL=http://localhost:5984/tvm  # Database URL
+
 before_install:
+  - export IOS_SIMULATOR_UDID=$(instruments -s devices | grep "iPhone 5s (10.1)" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
+  - open -b com.apple.iphonesimulator --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID  # Preload iOS Simulator as early as possible
   - nvm install                         # Install node version from .nvmrc
-  - export TVMANAGER_COUCHDB_URL=http://localhost:5984/tvm                    # Database URL
+  - brew update
+  - brew install couchdb                # Install couchdb
 
 install:
   - bundle install --without production --path=${BUNDLE_PATH:-vendor/bundle}  # Install ruby gems, excluding production only gems such as unicorn (already present by default in Travis)
@@ -27,12 +28,16 @@ install:
   - npm install codeclimate-test-reporter
 
 # Setup the database
-before_script: bundle exec rake db:migrate
+before_script:
+  - couchdb -b                          # Run couch as a background process
+  - bundle exec rake db:migrate
 
 # Run the test suite
 script:
+  - bundle exec rubocop
+  - npm run lint
   - bundle exec rake spec               # Backend specs
-  - npm test -- --browsers PhantomJS    # Frontend specs
+  - npm test -- --browsers MobileSafari # Frontend specs
 
 # Pipe the JS coverage data to Code Climate
-after_script: cat ./coverage/phantomjs/lcov.info | codeclimate-test-reporter
+after_script: cat ./coverage/mobile/lcov.info | codeclimate-test-reporter
