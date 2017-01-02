@@ -1,3 +1,8 @@
+AllCops:
+  Exclude:
+    - 'bin/*'
+    - 'vendor/**/*'
+
 # Cops that are disabled by default
 Style/AutoResourceCleanup:
   Enabled: true
