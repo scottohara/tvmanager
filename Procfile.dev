@@ -1,2 +1,2 @@
-web: bundle exec shotgun
-db: bundle exec rake db:start
+web: bundle exec shotgun -p 9393
+db: couchdb

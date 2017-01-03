@@ -54,11 +54,6 @@ def start_simulator(description, url)
 end
 
 namespace :db do
-	desc 'Start the development database'
-	task :start do
-		sh 'couchdb'
-	end
-
 	desc 'Run database migrations (for CouchDB, this means updating the _design docs)'
 	task :migrate do
 		TVManager::Database.migrate!
