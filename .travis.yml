@@ -40,4 +40,4 @@ script:
   - npm test -- --browsers MobileSafari # Frontend specs
 
 # Pipe the JS coverage data to Code Climate
-after_script: cat ./coverage/mobile/lcov.info | codeclimate-test-reporter
+after_script: cat ./coverage/mobile/lcov.info | ./node_modules/.bin/codeclimate-test-reporter
