@@ -61,17 +61,6 @@ namespace :db do
 	end
 end
 
-namespace :docs do
-	desc 'Generates JSDoc3 documentation'
-	task :generate do
-		root_dir = __dir__
-		source_dir = File.join(root_dir, 'public')
-		config_path = File.join(root_dir, 'config', 'jsdoc3.json')
-		dest_dir = File.join(root_dir, 'docs')
-		sh "jsdoc #{source_dir} --recurse --private --configure #{config_path} --destination #{dest_dir}"
-	end
-end
-
 namespace :deploy do
 	# Assumes two git remotes, named staging and production
 	%i[staging production].each do |remote|

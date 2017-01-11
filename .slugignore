@@ -1,17 +1,17 @@
+.codeclimate.yml
+.editorconfig
+.eslintignore
+.eslinrc.json
 .gitignore
-.jshintignore
-.jshintrc
+.rspec
+.rubocop.yml
 .travis.yml
+jsdoc.json
 karma.conf.js
+karma-bdd.conf.js
 LICENCE
-package.json
 Procfile.dev
 README.md
+bin
 build
-config
-public/test
 spec
-
-# ignore uncompressed jquery and source maps
-public/framework/jquery-*[^min].js
-public/framework/*.map

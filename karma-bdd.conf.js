@@ -1,22 +1,23 @@
-module.exports = config => {
-	"use strict";
+const path = require("path"),
+			webpack = require("webpack");
 
+module.exports = config => {
 	config.set({
 		// base path that will be used to resolve all patterns (eg. files, exclude)
-		basePath: "public",
+		basePath: "",
 
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ["requirejs", "mocha", "chai-sinon"],
+		frameworks: ["mocha", "chai-sinon"],
 
 		// list of files / patterns to load in the browser
 		files: [
-			"test/index.js",
-			{pattern: "**/*", included: false}
+			"spec/public/**/*_spec.js",
+			"spec/public/views/*"
 		],
 
 		proxies: {
-			"/views/": "/base/test/views/"
+			"/views/": "/base/spec/public/views/"
 		},
 
 		// list of files to exclude
@@ -26,6 +27,56 @@ module.exports = config => {
 		// preprocess matching files before serving them to the browser
 		// available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: {
+			"spec/public/**/*_spec.js": ["webpack", "sourcemap"]
+		},
+
+		webpackMiddleware: {
+			stats: "none"
+		},
+
+		webpack: {
+			performance: {
+				hints: false
+			},
+			module: {
+				rules: [
+					{
+						test: /\.css$/,
+						loader: "ignore-loader"
+					}
+				]
+			},
+			resolve: {
+				// For testing, remap all modules to their mock versions by default
+				alias: {
+					"components/list": "mocks/list-mock",
+					"components/progressbar": "mocks/progressbar-mock",
+					"components/window": "mocks/window-mock",
+					"controllers/application-controller": "mocks/application-controller-mock",
+					"controllers/cache-controller": "mocks/cache-controller-mock",
+					"controllers/database-controller": "mocks/database-controller-mock",
+					"models/episode-model": "mocks/episode-model-mock",
+					"models/program-model": "mocks/program-model-mock",
+					"models/series-model": "mocks/series-model-mock",
+					"models/setting-model": "mocks/setting-model-mock",
+					"models/sync-model": "mocks/sync-model-mock",
+					"framework/sw/spinningwheel": "mocks/sw-mock",
+					md5: "mocks/md5-mock",
+					"uuid/v4": "mocks/uuid-mock"
+				},
+				modules: [
+					path.resolve("./src"),
+					path.resolve("./spec/public"),
+					path.resolve("./node_modules")
+				]
+			},
+			devtool: "inline-source-map",
+			plugins: [
+				// Exposes a global jQuery object (for jQuery UI, Touch Punch etc. that expect this global to exist)
+				new webpack.ProvidePlugin({
+					jQuery: "jquery"
+				})
+			]
 		},
 
 		// test results reporter to use
@@ -52,7 +103,7 @@ module.exports = config => {
 
 		// start these browsers
 		// available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-		browsers: ["Chrome", "MobileSafari"],
+		browsers: ["Chrome"],
 
 		// Continuous Integration mode
 		// if true, Karma captures browsers, runs the tests and exits

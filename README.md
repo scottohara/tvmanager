@@ -52,10 +52,6 @@ Database schema changes are managed via an upgrade routine on startup (similar t
 
 On the server side, it's a Ruby Sinatra app. There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO CouchDB database).
 
-[jQuery](http://jquery.com/) is used throughout, for DOM manipulation & AJAX calls.
-
-[require.js](http://requirejs.org) is used for asynchronous module loading.
-
 Requirements
 ============
 * WebKit-based browser, with HTML5 database support
@@ -65,8 +61,9 @@ Requirements
 Installation (Development)
 ==========================
 1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
-2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle`) (--path ensures that gems are installed locally in the project)
-3. Start the server (`bundle exec rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes). Better yet, using [foreman](https://github.com/ddollar/foreman) and a Procfile, you can start the server and the CouchDB database in a single command (`bundle exec foreman start -f Procfile.dev`)
+2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle && yarn install`) (--path ensures that gems are installed locally in the project)
+3. Build the app (`npm build`)
+3. Start the server (`bundle exec rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes). Better yet, using the [heroku cli](https://devcenter.heroku.com/articles/heroku-cli) and a Procfile, you can start the server and the CouchDB database in a single command (`heroku local -f Procfile.dev`)
 2. Point your browser at /index.html
 
 For running in the iOS Simulator, use `rake simulator:run`. This rake task will start a server process, prompt for the device & iOS version to launch the simulator for, and open the application in Mobile Safari. Quitting the simulator will automatically shutdown the server process it started.
@@ -202,6 +199,5 @@ The JavaScript source is fully annotated with [JSDoc3](http://usejsdoc.org) tags
 
 To generate documentation:
 
-* install [JSDoc3](http://usejsdoc.org)
-* run the docs:generate rake task (eg. `rake docs:generate`). This generates the documentation in the `/docs` directory of the project's root.
-* browse to file://path_to_project/docs/index.html
+* `npm run docs`
+* browse to file://path_to_project/docs/tvmanager/1.0.0/index.html

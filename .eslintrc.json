@@ -1,15 +1,7 @@
 {
 	"extends": "oharagroup",
-	"parserOptions": {
-		"sourceType": "script",
-		"ecmaFeatures": {
-			"impliedStrict": false
-		}
-	},
 	"env": {
-		"amd": true,
-		"mocha": true,
-		"jquery": true
+		"mocha": true
 	},
 	"rules": {
 		"no-alert": "off"						// disabled to allow for import/export/delete confirmation prompts,

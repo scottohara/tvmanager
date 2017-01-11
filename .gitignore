@@ -19,5 +19,8 @@ npm-debug.log
 # Ignore node_modules
 /node_modules
 
+# Ignore build directory
+/public
+
 # Ignore vendored gems
 /vendor/bundle

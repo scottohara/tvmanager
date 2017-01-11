@@ -51,12 +51,8 @@ module TVManager
 			manifest_options = {
 				timestamp: false,
 				directory: settings.public_folder,
-				excludes: ["#{settings.public_folder}/test"],
 				network_includes: %w[/devices /documents]
 			}
-
-			# In dev/test configuration, make unit tests network resources as well
-			manifest_options[:network_includes] << '/test/*' if settings.development? || settings.test?
 
 			# Generate the manifest
 			manifest = Manifesto.cache manifest_options

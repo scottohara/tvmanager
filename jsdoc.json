@@ -1,0 +1,13 @@
+{
+	"opts": {
+		"destination": "./docs/",
+		"package": "./package.json",
+		"private": true,
+		"readme": "./README.md",
+		"recurse": true
+	},
+	"source": {
+		"include": "./src",
+		"excludePattern": "\\/framework\\/"
+	}
+}

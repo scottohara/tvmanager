@@ -5,8 +5,8 @@ The app icon (as referenced by the `apple-touch-icon` links in index.html) is ge
 To create a new icon size:
 1. Edit `tv-icon.svg` and set the width and height attributes of the `<svg>` element to the desired size.
 2. Use an [SVG to PNG converter](http://www.fileformat.info/convert/image/svg2raster.htm) to generate a PNG file of the same dimensions
-3. Save the generated PNG file as `public/tv-icon-{height}x{width}.png`
-4. Add the appropriate `<link rel="apple-touch-icon" href="tv-icon-{height}x{width}.png" sizes="{height}x{width}"/>` tag to `index.html`
+3. Save the generated PNG file as `src/images/tv-icon-{height}x{width}.png`
+4. Add the appropriate `<link rel="apple-touch-icon" href="${require('images/tv-icon-{height}x{width}.png')}" sizes="{height}x{width}"/>` tag to `src/index.html`
 
 Application startup image
 =========================
@@ -18,8 +18,8 @@ To create a new startup image:
 3. The `Show Guides` checkbox enables alignment guides that show the center point (turn these off before saving the image though)
 4. Choose the device type/size/orientation from the dropdown list
 5. Use a [screen capture utility](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=en) to save the `#container` element as a PNG (see note below)
-6. Save the PNG file as `public/images/startup-{width}x{height}.png`
-7. Add the appropriate `<link rel="apple-touch-startup-image" href="images/startup-{width}x{height}.png" media="{media query}"/>` tag to `index.html`
+6. Save the PNG file as `src/images/startup-{width}x{height}.png`
+7. Add the appropriate `<link rel="apple-touch-startup-image" href="${require('images/startup-{width}x{height}.png')}" media="{media query}"/>` tag to `src/index.html`
 
 Note: Many browser plugins/extensions such as the screen capture extension above are disabled when the file:// protocol is used. This means you will need to open `tv-splash.html` using http. The simplest way to do this is to run `python -m SimpleHTTPServer {port}` from the `/build` directory, then browse to `http://localhost:{port}/tv-splash.html`
 
