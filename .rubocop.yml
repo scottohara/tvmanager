@@ -4,6 +4,10 @@ AllCops:
     - 'vendor/**/*'
 
 # Cops that are disabled by default
+
+# Rails (not a rails app)
+# Rails/SaveBang (not a rails app)
+
 Style/AutoResourceCleanup:
   Enabled: true
 
@@ -13,6 +17,11 @@ Style/CollectionMethods:
 Style/Copyright:
   Enabled: true
   Notice: 'Copyright \(c\) 2016 Scott O.Hara, oharagroup.net'
+
+# Style/DocumentationMethod (disabled due to no documentation)
+
+Style/Encoding:
+  Enabled: true
 
 Style/FirstArrayElementLineBreak:
   Enabled: true
@@ -29,8 +38,13 @@ Style/FirstMethodParameterLineBreak:
 Style/ImplicitRuntimeError:
   Enabled: true
 
+# Style/InlineComment (disabled due to use of inline comments)
+# Style/MethodCallWithArgsParentheses (prefer no parens)
+
 Style/MethodCalledOnDoEndBlock:
   Enabled: true
+
+# Style/MissingElse (else not required)
 
 Style/MultilineAssignmentLayout:
   Enabled: true
@@ -47,6 +61,11 @@ Style/StringMethods:
 Style/SymbolArray:
   Enabled: true
 
+Style/SingleLineBlockParams:
+  Enabled: true
+
+# END disabled by default cops
+
 # Block comment in spec_helper
 Style/BlockComments:
   Enabled: false
@@ -58,10 +77,6 @@ Style/ClassVars:
 # Changed from 2 (spaces) to 1 (tab)
 Style/IndentationWidth:
   Width: 1
-
-# Waiting for https://github.com/bbatsov/rubocop/pull/3461
-Style/LeadingCommentSpace:
-  Enabled: false
 
 # Only require parens where absolutely necessary
 Style/NestedParenthesizedCalls:
@@ -76,6 +91,9 @@ Style/Tab:
 
 # Disable metrics
 Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
   Enabled: false
 
 Metrics/LineLength:

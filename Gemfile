@@ -1,29 +1,29 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-ruby '2.3.1'
+ruby '2.4.0'
 
 source 'https://rubygems.org'
 
 group :development do
 	gem 'foreman'
-	gem 'shotgun'
+	gem 'git'
+	gem 'heroku-api'
 	gem 'open4'
 	gem 'rake'
-	gem 'heroku-api'
-	gem 'git'
 	gem 'rubocop', require: false
+	gem 'shotgun'
 end
 
-gem 'thin'
-gem 'sinatra'
-gem 'manifesto'
 gem 'couchrest'
 gem 'json'
+gem 'manifesto'
+gem 'sinatra'
+gem 'thin'
 
 group :development, :test do
-	gem 'rspec'
 	gem 'rack-test'
+	gem 'rspec'
 	gem 'simplecov'
 end
 

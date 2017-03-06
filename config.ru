@@ -1,5 +1,5 @@
-# Copyright (c) 2016 Scott O'Hara, oharagroup.net
 #\ -s thin
+# Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 require_relative 'app/controllers/application_controller'
 require_relative 'app/controllers/manifest_controller'

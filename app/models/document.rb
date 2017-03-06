@@ -69,28 +69,28 @@ module TVManager
 
 		# Deletes the document
 		def delete!(device_id)
-			unless document.nil?
-				if Device.other_devices(device_id).empty?
-					# No other devices to notify, so document can be deleted
-					document.destroy
-				else
-					# Mark the document as deleted and notify all other devices
-					document['isDeleted'] = true
-					save! device_id
-				end
+			return if document.nil?
+
+			if Device.other_devices(device_id).empty?
+				# No other devices to notify, so document can be deleted
+				document.destroy
+			else
+				# Mark the document as deleted and notify all other devices
+				document['isDeleted'] = true
+				save! device_id
 			end
 		end
 
 		# Remove a pending device
 		def remove_pending!(device_id)
-			unless document.nil?
-				# Remove the devices from the pending array
-				document['pending'].reject! { |device| device.eql? device_id }
+			return if document.nil?
 
-				# If there are no other pending devices and the document is marked as deleted,
-				# delete the document; otherwise save
-				document['pending'].empty? && document['isDeleted'] ? document.destroy : save!
-			end
+			# Remove the devices from the pending array
+			document['pending'].reject! { |device| device.eql? device_id }
+
+			# If there are no other pending devices and the document is marked as deleted,
+			# delete the document; otherwise save
+			document['pending'].empty? && document['isDeleted'] ? document.destroy : save!
 		end
 
 		private unless ENV['RACK_ENV'].eql? 'test'
