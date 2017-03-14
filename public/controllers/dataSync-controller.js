@@ -353,7 +353,7 @@ define(
 							this.sendDelete(record);
 							break;
 
-						// no default
+						// No default
 					}
 				});
 			}

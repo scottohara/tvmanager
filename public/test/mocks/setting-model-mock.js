@@ -9,8 +9,10 @@ define(
 
 		class SettingMock {
 			constructor(settingName, settingValue) {
-				this.settingName = setting.name = settingName;
-				this.settingValue = setting.value = settingValue;
+				setting.name = settingName;
+				setting.value = settingValue;
+				this.settingName = settingName;
+				this.settingValue = settingValue;
 				saveStub.reset();
 				removeStub.reset();
 			}

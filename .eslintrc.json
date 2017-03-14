@@ -1,6 +1,7 @@
 {
 	"extends": "oharagroup",
 	"parserOptions": {
+		"sourceType": "script",
 		"ecmaFeatures": {
 			"impliedStrict": false
 		}

@@ -168,7 +168,7 @@ Two [karma](http://karma-runner.github.io/0.12/index.html) configurations are av
 1. `npm test` runs the test suite once, and includes [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available for each browser in `/tvmanager/coverage/{browser}/index.html`
 2. `npm run bdd` continuously watches all Javascript files, and runs the full test suite when a change is detected
 
-By default, the test suite is run in Chrome, iOS Simulator and [PhantomJS](http://phantomjs.org)
+By default, the test suite is run in Chrome and iOS Simulator.
 
 To run the tests in Mobile Safari on a physical device:
 * start the test runner *without* launching the default browsers (`npm test -- --browsers`)

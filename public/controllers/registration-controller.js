@@ -113,7 +113,7 @@ define(
 					headers: {
 						"X-DEVICE-ID": this.device.id
 					},
-					success: () => {
+					success() {
 						const device = new Setting("Device", null);
 
 						// Remove the device from the database

@@ -217,7 +217,7 @@ define(
 				// Note: As the status date only captures day & month (no year), a date more than 3 months in the past is considered to be a future date
 				this.statusWarning = "";
 				if ("Expected" === this.status && "" !== this.statusDate) {
-					// tempStatusDate is the status date in "MMDD" format
+					// TempStatusDate is the status date in "MMDD" format
 					// endMonth is the end of the warning range (3 months ago).
 					//  - in Jan, Feb or Mar, need to cross the year boundary (eg. Jan - 3 months = Oct; Feb - 3 month = Nov; Mar - 3 months = Dec)
 					//  - otherwise it's just a simple subtraction of three months

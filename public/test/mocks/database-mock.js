@@ -55,7 +55,7 @@ define(
 				// Escape the following special regex characters so that they match literally:
 				// - dashes, square brackets, curly braces, parens, star, plus, question mark
 				// - dot, comma, backslash, caret, dollar, pipe, hash, whitespace
-				return new RegExp(sql.replace(WHITESPACE, SINGLE_SPACE).replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&").replace(PERCENT, ANY_CHARACTER), "g");
+				return new RegExp(sql.replace(WHITESPACE, SINGLE_SPACE).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&").replace(PERCENT, ANY_CHARACTER), "g");
 			}
 
 			failAt(sql) {

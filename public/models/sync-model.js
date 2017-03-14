@@ -55,12 +55,12 @@ define(
 									ID = ?
 					`,
 					[this.type, this.id]),
-				null,
-				() => {
-					// Clear the instance properties
-					this.type = null;
-					this.id = null;
-				});
+					null,
+					() => {
+						// Clear the instance properties
+						this.type = null;
+						this.id = null;
+					});
 			}
 
 			/**

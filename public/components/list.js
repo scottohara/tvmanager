@@ -91,7 +91,7 @@ define(
 
 						// Iterate over the properties of the JSON object
 						for (const prop in item) {
-							if (Reflect.apply({}.hasOwnProperty, item, [prop])) {
+							if (Object.prototype.hasOwnProperty.call(item, prop)) {
 								// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
 								itemHTML = itemHTML.replace(`#{${prop}}`, item[prop]);
 							}
@@ -213,7 +213,7 @@ define(
 						}
 						break;
 
-					// no default
+					// No default
 				}
 			}
 		}

@@ -90,7 +90,7 @@ define(
 			tx.executeSql("?", []);
 		} finally {
 
-			// no op
+			// No op
 		}
 
 		return TransactionMock;

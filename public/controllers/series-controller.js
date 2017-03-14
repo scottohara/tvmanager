@@ -216,8 +216,8 @@ define(
 			 */
 			setProgramId() {
 				// Update the model with the selected values in the SpinningWheel
-				this.listItem.series.programId = SpinningWheel.getSelectedValues().keys[0];
-				this.listItem.series.programName = SpinningWheel.getSelectedValues().values[0];
+				[this.listItem.series.programId] = SpinningWheel.getSelectedValues().keys;
+				[this.listItem.series.programName] = SpinningWheel.getSelectedValues().values;
 
 				// Update the view
 				$("#moveTo").val(this.listItem.series.programName);

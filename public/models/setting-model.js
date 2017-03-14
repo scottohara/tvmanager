@@ -97,12 +97,12 @@ define(
 						WHERE	Name = ?
 					`,
 					[this.settingName]),
-				null,
-				() => {
-					// Clear the instance properties
-					this.settingName = null;
-					this.settingValue = null;
-				});
+					null,
+					() => {
+						// Clear the instance properties
+						this.settingName = null;
+						this.settingValue = null;
+					});
 			}
 
 			/**

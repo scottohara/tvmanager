@@ -150,7 +150,7 @@ define(
 						let originalExpectedVersion;
 
 						beforeEach(() => {
-							originalExpectedVersion = Reflect.getOwnPropertyDescriptor(DatabaseController, "expectedVersion");
+							originalExpectedVersion = Object.getOwnPropertyDescriptor(DatabaseController, "expectedVersion");
 							sinon.stub(DatabaseController, "expectedVersion", {
 								get: () => params.expectedVersion
 							});
@@ -180,7 +180,7 @@ define(
 							it("should not invoke the error callback", () => errorCallback.should.not.have.been.called);
 						});
 
-						afterEach(() => Reflect.defineProperty(DatabaseController, "expectedVersion", originalExpectedVersion));
+						afterEach(() => Object.defineProperty(DatabaseController, "expectedVersion", originalExpectedVersion));
 					});
 				});
 			});

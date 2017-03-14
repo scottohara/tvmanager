@@ -151,9 +151,7 @@ define(
 
 						// Execute the SQL to delete the series
 						tx.executeSql("DELETE FROM Series WHERE SeriesID = ?", [this.id]);
-					},
-					null,
-					() => {
+					}, null, () => {
 						// Clear the instance properties
 						this.id = null;
 						this.seriesName = null;

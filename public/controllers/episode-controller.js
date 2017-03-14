@@ -97,7 +97,7 @@ define(
 				$("#unscheduled").on("click", this.toggleStatusDateRow.bind(this));
 
 				// Toggle the current status
-				const status = this.listItem.episode.status;
+				const {status} = this.listItem.episode;
 
 				this.listItem.episode.setStatus("");
 				this.setStatus(status);
@@ -196,7 +196,7 @@ define(
 								$("#unverifiedRow").show();
 								break;
 
-							// no default
+							// No default
 						}
 					}
 

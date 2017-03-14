@@ -74,7 +74,7 @@ define(
 						this.isTouchDevice(e);
 						break;
 
-					// no default
+					// No default
 				}
 			}
 
