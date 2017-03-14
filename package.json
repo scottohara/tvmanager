@@ -20,7 +20,7 @@
   "devDependencies": {
     "chai": "3.5.0",
     "eslint": "3.17.1",
-    "eslint-config-oharagroup": "2.0.0",
+    "eslint-config-oharagroup": "2.1.1",
     "karma": "1.5.0",
     "karma-chai-sinon": "0.1.5",
     "karma-chrome-launcher": "2.0.0",
