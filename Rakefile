@@ -1,5 +1,6 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
+
 require 'rubygems'
 require 'bundler/setup'
 require_relative 'app/models/error'
@@ -73,7 +74,7 @@ end
 
 namespace :deploy do
 	# Assumes two git remotes, named staging and production
-	%i(staging production).each do |remote|
+	%i[staging production].each do |remote|
 		desc "Deploy to #{remote}"
 		task remote do
 			logger = Logger.new STDOUT

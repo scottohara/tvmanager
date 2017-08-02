@@ -1,5 +1,6 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
+
 require_relative '../spec_helper'
 require_relative '../../app/models/device'
 
@@ -57,7 +58,7 @@ describe TVManager::Device do
 			end
 
 			it 'should return an array of device ids excluding the current device' do
-				expect(described_class.other_devices device_id).to eql %w(test_device_id_1 test_device_id_2 test_device_id_3)
+				expect(described_class.other_devices device_id).to eql %w[test_device_id_1 test_device_id_2 test_device_id_3]
 			end
 		end
 	end

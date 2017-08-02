@@ -1,5 +1,6 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
+
 require 'manifesto'
 require_relative 'base_controller'
 require_relative '../helpers/environment'
@@ -51,7 +52,7 @@ module TVManager
 				timestamp: false,
 				directory: settings.public_folder,
 				excludes: ["#{settings.public_folder}/test"],
-				network_includes: %w(/devices /documents)
+				network_includes: %w[/devices /documents]
 			}
 
 			# In dev/test configuration, make unit tests network resources as well

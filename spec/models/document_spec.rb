@@ -1,5 +1,6 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
+
 require_relative '../spec_helper'
 require_relative '../../app/models/document'
 
@@ -7,7 +8,7 @@ describe TVManager::Document do
 	let(:device_id) { 'test_device_id' }
 	let(:document_id) { 'test_document_id' }
 	let(:document_doc) { {'type' => 'document', 'name' => 'test document'} }
-	let(:other_devices) { %w(device_1 device_2 device_3) }
+	let(:other_devices) { %w[device_1 device_2 device_3] }
 
 	matcher :match_document do |expected|
 		match do |actual|
