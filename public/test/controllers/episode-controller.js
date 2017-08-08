@@ -400,7 +400,7 @@ define(
 					sinon.stub(episodeController, "setStatusDate");
 					clock = sinon.useFakeTimers();
 					SpinningWheel.addSlot.reset();
-					SpinningWheel.setDoneAction.reset();
+					SpinningWheel.setDoneAction.resetHistory();
 					SpinningWheel.open.reset();
 
 					swWrapper = $("<div>")
@@ -440,7 +440,8 @@ define(
 				let statusDate;
 
 				beforeEach(() => {
-					SpinningWheel.getSelectedValues.reset().returns({
+					SpinningWheel.getSelectedValues.reset();
+					SpinningWheel.getSelectedValues.returns({
 						keys: [2, "Feb"],
 						values: ["02", "Feb"]
 					});

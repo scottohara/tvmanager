@@ -188,7 +188,7 @@ define(
 					beforeEach(() => {
 						sinon.stub(seriesController, "setNowShowing");
 						SpinningWheel.addSlot.reset();
-						SpinningWheel.setDoneAction.reset();
+						SpinningWheel.setDoneAction.resetHistory();
 						SpinningWheel.open.reset();
 
 						swWrapper = $("<div>")
@@ -224,7 +224,8 @@ define(
 				let nowShowing;
 
 				beforeEach(() => {
-					SpinningWheel.getSelectedValues.reset().returns({
+					SpinningWheel.getSelectedValues.reset();
+					SpinningWheel.getSelectedValues.returns({
 						keys: [1],
 						values: ["Mondays"]
 					});
@@ -278,7 +279,7 @@ define(
 				beforeEach(() => {
 					sinon.stub(seriesController, "setProgramId");
 					SpinningWheel.addSlot.reset();
-					SpinningWheel.setDoneAction.reset();
+					SpinningWheel.setDoneAction.resetHistory();
 					SpinningWheel.open.reset();
 
 					swWrapper = $("<div>")
@@ -315,7 +316,8 @@ define(
 				let moveTo;
 
 				beforeEach(() => {
-					SpinningWheel.getSelectedValues.reset().returns({
+					SpinningWheel.getSelectedValues.reset();
+					SpinningWheel.getSelectedValues.returns({
 						keys: [2],
 						values: ["program 2"]
 					});

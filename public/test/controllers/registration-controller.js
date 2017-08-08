@@ -36,7 +36,8 @@ define(
 					sinon.stub(registrationController, "cancel");
 					sinon.stub(registrationController, "save");
 					sinon.stub(registrationController, "gotDevice");
-					Setting.get.reset().withArgs("Device").yields({settingValue: device});
+					Setting.get.reset();
+					Setting.get.withArgs("Device").yields({settingValue: device});
 					registrationController.setup();
 				});
 

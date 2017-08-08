@@ -62,7 +62,8 @@ define(
 					sinon.stub(dataSyncController, "gotLastSyncTime");
 					sinon.stub(dataSyncController, "gotDevice");
 					sinon.stub(dataSyncController, "checkForLocalChanges");
-					Setting.get.reset().withArgs("LastSyncTime").yields(lastSyncTime);
+					Setting.get.reset();
+					Setting.get.withArgs("LastSyncTime").yields(lastSyncTime);
 					Setting.get.withArgs("Device").yields(device);
 
 					registrationRow = $("<div>")
@@ -403,7 +404,7 @@ define(
 						}
 					}));
 
-					it("should clear the syncing flag", () => dataSyncController.syncing.should.equal.false);
+					it("should clear the syncing flag", () => dataSyncController.syncing.should.be.false);
 				});
 
 				describe("not successful", () => {
@@ -419,7 +420,7 @@ define(
 						}
 					}));
 
-					it("should clear the syncing flag", () => dataSyncController.syncing.should.equal.false);
+					it("should clear the syncing flag", () => dataSyncController.syncing.should.be.false);
 				});
 
 				afterEach(() => statusRow.remove());
@@ -850,7 +851,7 @@ define(
 						fakeServer.respondImmediately = true;
 						sinon.stub(dataSyncController, "syncError");
 						sinon.stub(dataSyncController, "importDone");
-						sinon.stub(dataSyncController, "getImportData", data => ({importJson: data.data, returnedHash: data.checksum}));
+						sinon.stub(dataSyncController, "getImportData").callsFake(data => ({importJson: data.data, returnedHash: data.checksum}));
 						dataSyncController.device = {id: "test-device"};
 						dataSyncController.programsReady = true;
 						dataSyncController.seriesReady = true;
@@ -1084,7 +1085,7 @@ define(
 					callback = dataSyncController.saveCallback("type", true);
 				});
 
-				it("should return a function", () => callback.should.be.a.Function);
+				it("should return a function", () => callback.should.be.a("function"));
 
 				describe("id supplied", () => {
 					describe("pending", () => {

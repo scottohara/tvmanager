@@ -85,7 +85,7 @@ define(
 			});
 
 			describe("upgrades", () => {
-				it("should return an array of upgrade routines", () => db.upgrades.should.be.an.Array);
+				it("should return an array of upgrade routines", () => db.upgrades.should.be.an("array"));
 			});
 
 			describe("openDb", () => {
@@ -151,9 +151,7 @@ define(
 
 						beforeEach(() => {
 							originalExpectedVersion = Object.getOwnPropertyDescriptor(DatabaseController, "expectedVersion");
-							sinon.stub(DatabaseController, "expectedVersion", {
-								get: () => params.expectedVersion
-							});
+							sinon.stub(DatabaseController, "expectedVersion").get(() => params.expectedVersion);
 							db.initialVersion = params.initialVersion;
 						});
 
@@ -165,7 +163,7 @@ define(
 
 							it("should determine the upgrades to apply", () => db.upgradesToApply.should.deep.equal(db.upgrades.slice(params.startIndex, params.endIndex)));
 							it("should change the database version", () => database.changeVersion.should.have.been.calledWith(params.initialVersion, DatabaseController.expectedVersion, sinon.match.func));
-							it("should invoke the first upgrade handler", () => db.nextUpgrade.should.have.been.called.once);
+							it("should invoke the first upgrade handler", () => db.nextUpgrade.should.have.been.calledOnce);
 							it("should invoke the error callback", () => errorCallback.should.have.been.called);
 							it("should not determine that the version is OK", () => db.versionOK.should.not.have.been.called);
 						});
@@ -175,7 +173,7 @@ define(
 
 							it("should determine the upgrades to apply", () => db.upgradesToApply.should.deep.equal(db.upgrades.slice(params.startIndex, params.endIndex)));
 							it("should change the database version", () => database.changeVersion.should.have.been.calledWith(params.initialVersion, DatabaseController.expectedVersion, sinon.match.func));
-							it("should invoke the first upgrade handler", () => db.nextUpgrade.should.have.been.called.once);
+							it("should invoke the first upgrade handler", () => db.nextUpgrade.should.have.been.calledOnce);
 							it("should determine that the version is OK", () => db.versionOK.should.have.been.called);
 							it("should not invoke the error callback", () => errorCallback.should.not.have.been.called);
 						});

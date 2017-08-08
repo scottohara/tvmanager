@@ -54,7 +54,7 @@ define(
 				it("should wrap the scroll helper in a touch event proxy", () => applicationController.abctoucheventproxy.element.should.deep.equal(abc.get(0)));
 				it("should create a cache controller", () => {
 					applicationController.cache.should.be.an.instanceOf(CacheController);
-					applicationController.cache.callback.should.be.a.Function;
+					applicationController.cache.callback.should.be.a("function");
 				});
 
 				it("should check for updates", () => applicationController.cache.update.should.have.been.called);
@@ -183,7 +183,7 @@ define(
 
 				describe("database opened", () => {
 					beforeEach(done => {
-						sinon.stub(applicationController, "pushView", () => done());
+						sinon.stub(applicationController, "pushView").callsFake(() => done());
 						DatabaseController.mode = null;
 						applicationController.start();
 					});
@@ -231,8 +231,9 @@ define(
 				testParams.forEach(params => {
 					describe(params.description, () => {
 						beforeEach(done => {
-							sinon.stub(applicationController, "gotLastSyncTime", () => done());
-							Setting.get.reset().withArgs("LastSyncTime").yields("1");
+							sinon.stub(applicationController, "gotLastSyncTime").callsFake(() => done());
+							Setting.get.reset();
+							Setting.get.withArgs("LastSyncTime").yields("1");
 							applicationController.gotAppConfig(params.config, null, params.jqXHR);
 						});
 
@@ -284,11 +285,11 @@ define(
 							it("should not clear the header", () => applicationController.clearHeader.should.not.have.been.called);
 						}
 
-						it("should push the view onto the view stack", () => view.should.deep.equal[{
-							name: "test",
-							controller: sinon.match.instanceOf(TestController),
-							scrollPos: 0
-						}]);
+						it("should push the view onto the view stack", () => {
+							view.name.should.equal("test");
+							view.controller.should.be.an.instanceOf(TestController),
+							view.scrollPos.should.equal(0);
+						});
 
 						it("should instantiate the view controller", () => view.controller.args.should.deep.equal({}));
 
@@ -1253,7 +1254,7 @@ define(
 
 					beforeEach(done => {
 						applicationController.noticesMoved.restore();
-						sinon.stub(applicationController, "noticesMoved", () => done());
+						sinon.stub(applicationController, "noticesMoved").callsFake(() => done());
 						sinon.spy($.fn, "animate");
 						applicationController.noticeStack.height = 0;
 						windowHeight = $(window).height();
@@ -1306,7 +1307,7 @@ define(
 						.attr("id", "notices")
 						.appendTo(document.body);
 
-					sinon.stub(applicationController, "noticesMoved", () => done());
+					sinon.stub(applicationController, "noticesMoved").callsFake(() => done());
 					sinon.spy($.fn, "animate");
 					$.fx.off = true;
 					applicationController.noticeStack.height = 10;

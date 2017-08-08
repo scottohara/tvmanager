@@ -49,7 +49,7 @@ define(
 			});
 
 			describe("cacheStatusValues", () => {
-				it("should return an array of status values", () => cacheController.cacheStatusValues.should.be.an.Array);
+				it("should return an array of status values", () => cacheController.cacheStatusValues.should.be.an("array"));
 			});
 
 			describe("downloading", () => {
