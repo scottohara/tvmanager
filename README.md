@@ -180,7 +180,7 @@ To run the tests in Mobile Safari on a physical device:
 Backend specs are implemented using [RSpec](http://rspec.info/):
 
 1. Ensure the database server is running (e.g. `couchdb`)
-2. Run the RSpec rake task (`rake spec`). To run specific specs, use RSpec filtering (`fdescribe`, `fit`, `xdescribe`, `xit`)
+2. Run the RSpec rake task (`bundle exec rake spec`). To run specific specs, use RSpec filtering (`fdescribe`, `fit`, `xdescribe`, `xit`)
 
 Code Quality
 ============
