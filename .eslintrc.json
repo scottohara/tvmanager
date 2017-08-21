@@ -12,7 +12,6 @@
 		"jquery": true
 	},
 	"rules": {
-		"no-alert": "off",						// disabled to allow for import/export/delete confirmation prompts,
-		"no-confusing-arrow": "off"		// disabled due to https://github.com/eslint/eslint/issues/6196
+		"no-alert": "off"						// disabled to allow for import/export/delete confirmation prompts,
 	}
 }

@@ -331,7 +331,8 @@ define(
 				const episodeList = [];
 
 				// Start a new readonly database transaction and execute the SQL to retrieve the list of episodes
-				appController.db.readTransaction(tx => tx.executeSql(`
+				appController.db.readTransaction(tx => tx.executeSql(
+					`
 						SELECT	e.EpisodeID,
 										e.Name,
 										e.Status,
@@ -378,7 +379,8 @@ define(
 			 */
 			static find(id, callback) {
 				// Start a new readonly database transaction and execute the SQL to retrieve the episode
-				appController.db.readTransaction(tx => tx.executeSql(`
+				appController.db.readTransaction(tx => tx.executeSql(
+					`
 						SELECT	EpisodeID,
 										Name,
 										SeriesID,
@@ -445,7 +447,8 @@ define(
 			 */
 			static count(filter, params, callback) {
 				// Start a new readonly database transaction and execute the SQL to retrieve the count of episodes and invoke the callback function
-				appController.db.readTransaction(tx => tx.executeSql(`
+				appController.db.readTransaction(tx => tx.executeSql(
+					`
 						SELECT	COUNT(*) AS EpisodeCount
 						FROM		Episode
 						${filter}

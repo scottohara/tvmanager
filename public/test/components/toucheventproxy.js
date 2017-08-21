@@ -179,7 +179,7 @@ define(
 								toucheventproxy.handleEvent(event);
 							});
 
-							it(`should ${params.stopPropagation ? "" : "not "}stop the event from propagating further`, () => params.stopPropagation ? event.stopPropagation.should.have.been.called : event.stopPropagation.should.not.have.been.called);
+							it(`should ${params.stopPropagation ? "" : "not "}stop the event from propagating further`, () => (params.stopPropagation ? event.stopPropagation.should.have.been.called : event.stopPropagation.should.not.have.been.called));
 						});
 					});
 				});

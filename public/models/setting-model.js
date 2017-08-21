@@ -96,13 +96,14 @@ define(
 						DELETE FROM Setting
 						WHERE	Name = ?
 					`,
-					[this.settingName]),
-					null,
-					() => {
-						// Clear the instance properties
-						this.settingName = null;
-						this.settingValue = null;
-					});
+					[this.settingName]
+				),
+				null,
+				() => {
+					// Clear the instance properties
+					this.settingName = null;
+					this.settingValue = null;
+				});
 			}
 
 			/**

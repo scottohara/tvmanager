@@ -297,7 +297,7 @@ define(
 				});
 
 				// Resort the list items based on the update sequences
-				this.episodeList.items = this.episodeList.items.sort((a, b) => a.sequence < b.sequence ? -1 : a.sequence > b.sequence ? 1 : 0);
+				this.episodeList.items = this.episodeList.items.sort((a, b) => (a.sequence < b.sequence ? -1 : a.sequence > b.sequence ? 1 : 0));
 
 				// Refresh the list
 				this.episodeList.refresh();

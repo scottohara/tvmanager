@@ -54,13 +54,14 @@ define(
 						WHERE	Type = ? AND
 									ID = ?
 					`,
-					[this.type, this.id]),
-					null,
-					() => {
-						// Clear the instance properties
-						this.type = null;
-						this.id = null;
-					});
+					[this.type, this.id]
+				),
+				null,
+				() => {
+					// Clear the instance properties
+					this.type = null;
+					this.id = null;
+				});
 			}
 
 			/**

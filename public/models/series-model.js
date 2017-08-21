@@ -550,7 +550,8 @@ define(
 				const seriesList = [];
 
 				// Start a new readonly database transaction and execute the SQL to retrieve the list of series
-				appController.db.readTransaction(tx => tx.executeSql(`
+				appController.db.readTransaction(tx => tx.executeSql(
+					`
 						${query}
 						${filter}
 					`,

@@ -91,8 +91,8 @@ define(
 					describe("notice visible", () => {
 						it("should update the notice message", () => {
 							const notice = $("<div>")
-											.attr("id", noticeId)
-											.appendTo(document.body);
+								.attr("id", noticeId)
+								.appendTo(document.body);
 
 							applicationController.updateChecked(true, message, "updateNotice");
 							applicationController.showNotice.should.not.have.been.called;
@@ -287,7 +287,7 @@ define(
 
 						it("should push the view onto the view stack", () => {
 							view.name.should.equal("test");
-							view.controller.should.be.an.instanceOf(TestController),
+							view.controller.should.be.an.instanceOf(TestController);
 							view.scrollPos.should.equal(0);
 						});
 
@@ -429,11 +429,11 @@ define(
 
 				beforeEach(() => {
 					scrollingElement = $("<div>")
-					.height(50)
-					.css("overflow-y", "scroll")
-					.append($("<div>").height(100))
-					.append($("<div>").height(100))
-					.appendTo(content);
+						.height(50)
+						.css("overflow-y", "scroll")
+						.append($("<div>").height(100))
+						.append($("<div>").height(100))
+						.appendTo(content);
 				});
 
 				describe("scroll position is -1", () => {

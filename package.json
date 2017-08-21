@@ -19,8 +19,8 @@
   "homepage": "https://github.com/scottohara/tvmanager",
   "devDependencies": {
     "chai": "4.1.1",
-    "eslint": "4.4.0",
-    "eslint-config-oharagroup": "2.1.1",
+    "eslint": "4.5.0",
+    "eslint-config-oharagroup": "2.2.0",
     "karma": "1.7.0",
     "karma-chai-sinon": "0.1.5",
     "karma-chrome-launcher": "2.2.0",
