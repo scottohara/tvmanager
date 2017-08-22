@@ -79,6 +79,10 @@ Deployment (Staging/Production)
 ===============================
 If you use use heroku, it's a simple `rake deploy:staging` and `rake deploy:production`. These rake tasks assume that you have heroku remotes named staging and production configured; and you must create an annotated tag before deploying (eg. `git tag -a -m "Version 1.00" v1.00`); which is what will be pushed to heroku.
 
+The deploy rake task needs to be authorised with heroku to read/write the `APP_VERSION` config variable. To do this:
+1. Create a new OAuth authorisation with `write-protected` scope: `heroku authorizations:create --description "TVManager Deployment" --scope write-protected"`
+2. Store the token returned in an environment variable: `export TVMANAGER_HEROKU_TOKEN='{token}'`
+
 By default, the name of the client-side HTML5 database is "TVManager". Database names must be unique for the domain (origin), so in the event that you are hosting multiple environments under the same domain (eg. tvmanager.mydomain.com/production and tvmanager.mydomain.com/staging), you can override the default database name for one or both environments using an environment variable. For example, in development:
 
 `export DATABASE_NAME='TVManagerDev'`

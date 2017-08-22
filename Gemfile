@@ -8,8 +8,8 @@ source 'https://rubygems.org'
 group :development do
 	gem 'foreman'
 	gem 'git'
-	gem 'heroku-api'
 	gem 'open4'
+	gem 'platform-api'
 	gem 'rake'
 	gem 'rubocop', require: false
 	gem 'shotgun'

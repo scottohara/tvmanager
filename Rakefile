@@ -9,7 +9,7 @@ require_relative 'db/migrate'
 unless ENV[:RACK_ENV.to_s].eql? 'production'
 	require 'rspec/core/rake_task'
 	require 'open4'
-	require 'heroku-api'
+	require 'platform-api'
 	require 'git'
 	require 'logger'
 	RSpec::Core::RakeTask.new(:spec)
@@ -96,11 +96,10 @@ namespace :deploy do
 			latest_version = `git describe --abbrev=0`.chomp
 
 			# Connect to the heroku API
-			# (Assumes that ENV['HEROKU_API_KEY'] is defined)
-			heroku = Heroku::API.new
+			heroku = PlatformAPI.connect_oauth ENV[:TVMANAGER_HEROKU_TOKEN.to_s]
 
 			# Get the APP_VERSION config var for the application
-			previous_version = heroku.get_config_vars(app_name).body['APP_VERSION']
+			previous_version = heroku.config_var.info_for_app(app_name)['APP_VERSION']
 
 			# Abort if the version being pushed is already deployed
 			if latest_version.eql? previous_version
@@ -120,7 +119,7 @@ namespace :deploy do
 			git.push remote, "#{latest_version}^{}:master"
 
 			# Update the APP_VERSION config var
-			heroku.put_config_vars app_name, 'APP_VERSION' => latest_version
+			heroku.config_var.update app_name, 'APP_VERSION' => latest_version
 
 			puts 'Deployment done'
 		end
