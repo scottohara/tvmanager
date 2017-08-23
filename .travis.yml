@@ -8,12 +8,10 @@ cache:
   directories:
     - node_modules
 
-# Code Climate token for coverage reporting
-addons:
-  code_climate:
-    repo_token: 1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
-
-env: TVMANAGER_COUCHDB_URL=http://localhost:5984/tvm  # Database URL
+env:
+  global:
+    - TVMANAGER_COUCHDB_URL=http://localhost:5984/tvm  # Database URL
+    - CC_TEST_REPORTER_ID=1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
 
 before_install:
   - export IOS_SIMULATOR_UDID=$(instruments -s devices | grep "iPhone 5s (10.1)" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
@@ -21,11 +19,12 @@ before_install:
   - nvm install                         # Install node version from .nvmrc
   - brew update
   - brew install couchdb                # Install couchdb
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-darwin-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
 
 install:
   - bundle install --without production --path=${BUNDLE_PATH:-vendor/bundle}  # Install ruby gems, excluding production only gems such as unicorn (already present by default in Travis)
   - npm install                         # Install npm dependencies
-  - npm install codeclimate-test-reporter
 
 # Setup the database
 before_script:
@@ -41,5 +40,7 @@ script:
 
 # Pipe the JS coverage data to Code Climate
 after_script:
-  - cat ./coverage/mobile/lcov.info | ./node_modules/.bin/codeclimate-test-reporter
-  - bundle exec codeclimate-test-reporter coverage/backend/.resultset.json
+  - cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
+  - cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/mobile/lcov.info  # Format frontend coverage
+  - cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json

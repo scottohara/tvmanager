@@ -26,6 +26,3 @@ group :development, :test do
 	gem 'rspec'
 	gem 'simplecov'
 end
-
-# Code Climate test coverage
-gem 'codeclimate-test-reporter', group: :test, require: nil
