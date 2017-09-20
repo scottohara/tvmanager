@@ -1,101 +1,33 @@
+inherit_gem:
+  rubocop-config-oharagroup:
+    - default.yml
+
 AllCops:
   Exclude:
     - 'bin/*'
     - 'node_modules/**/*'
     - 'vendor/**/*'
 
-# Cops that are disabled by default
+# ------------------------------------------------------------
+# Cops that rubocop disables by default, but we want to enable
+# ------------------------------------------------------------
 
-Layout/FirstArrayElementLineBreak:
-  Enabled: true
-
-Layout/FirstHashElementLineBreak:
-  Enabled: true
-
-Layout/FirstMethodArgumentLineBreak:
-  Enabled: true
-
-Layout/FirstMethodParameterLineBreak:
-  Enabled: true
-
-Layout/MultilineAssignmentLayout:
-  Enabled: true
-
-# Rails (not a rails app)
-# Rails/SaveBang (not a rails app)
-
-Style/AutoResourceCleanup:
-  Enabled: true
-
-Style/CollectionMethods:
-  Enabled: true
-
-Style/Copyright:
-  Enabled: true
-  Notice: 'Copyright \(c\) 2016 Scott O.Hara, oharagroup.net'
-
-# Style/DocumentationMethod (disabled due to no documentation)
-
-Style/Encoding:
-  Enabled: true
-
-Style/ImplicitRuntimeError:
-  Enabled: true
-
-# Style/InlineComment (disabled due to use of inline comments)
-# Style/MethodCallWithArgsParentheses (prefer no parens)
-
-Style/MethodCalledOnDoEndBlock:
-  Enabled: true
-
-# Style/MissingElse (else not required)
-
-Style/OptionHash:
-  Enabled: true
-
-Style/Send:
-  Enabled: true
-
-Style/StringMethods:
-  Enabled: true
-
-Style/SingleLineBlockParams:
-  Enabled: true
-
+# ------------------------------------------------------------
 # END disabled by default cops
-
-# Block comment in spec_helper
-Style/BlockComments:
-  Enabled: false
+# ------------------------------------------------------------
+# Cops that rubocop enables by default, but we want to disable
+# ------------------------------------------------------------
 
 # Needed for @@db
 Style/ClassVars:
   Enabled: false
 
-# Changed from 2 (spaces) to 1 (tab)
-Layout/IndentationWidth:
-  Width: 1
+# ------------------------------------------------------------
+# END enabled by default cops
+# ------------------------------------------------------------
+# Cops that we want to reconfigure
+# ------------------------------------------------------------
 
-Layout/SpaceInsideHashLiteralBraces:
-  EnforcedStyle: no_space
-
-# Prefer tabs over spaces
-Layout/Tab:
-  Enabled: false
-
-# Only require parens where absolutely necessary
-Style/NestedParenthesizedCalls:
-  Enabled: false
-
-# Disable metrics
-Metrics/AbcSize:
-  Enabled: false
-
-Metrics/BlockLength:
-  Enabled: false
-
-Metrics/LineLength:
-  Enabled: false
-
-Metrics/MethodLength:
-  Enabled: false
+# ------------------------------------------------------------
+# END reconfigured cops
+# ------------------------------------------------------------

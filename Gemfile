@@ -11,7 +11,6 @@ group :development do
 	gem 'open4'
 	gem 'platform-api'
 	gem 'rake'
-	gem 'rubocop', require: false
 	gem 'shotgun'
 end
 
@@ -24,5 +23,7 @@ gem 'thin'
 group :development, :test do
 	gem 'rack-test'
 	gem 'rspec'
+	gem 'rubocop', require: false
+	gem 'rubocop-config-oharagroup', require: false
 	gem 'simplecov'
 end
