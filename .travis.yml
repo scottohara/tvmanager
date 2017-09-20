@@ -33,14 +33,14 @@ before_script:
 
 # Run the test suite
 script:
-  - bundle exec rubocop
-  - npm run lint
+  - bundle exec rubocop -DESP           # Backend linting
+  - npm run lint                        # Frontend linting
   - bundle exec rake spec               # Backend specs
   - npm test -- --browsers MobileSafari # Frontend specs
 
 # Pipe the JS coverage data to Code Climate
 after_script:
-  - cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
-  - cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/mobile/lcov.info  # Format frontend coverage
-  - cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
-  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
+  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/mobile/lcov.info  # Format frontend coverage
+  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
