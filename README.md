@@ -165,7 +165,7 @@ The above setting would prompt the user to backup after three days instead of th
 
 Running Tests
 =============
-Frontend specs are implemented using [mocha](http://visionmedia.github.io/mocha/)+[chai](http://chaijs.com/)+[sinon](http://sinonjs.org/).
+Frontend specs are implemented using [mocha](https://mochajs.org/)+[chai](http://chaijs.com/)+[sinon](http://sinonjs.org/).
 
 Two [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
 
