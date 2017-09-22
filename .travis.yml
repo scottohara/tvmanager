@@ -14,7 +14,7 @@ env:
     - CC_TEST_REPORTER_ID=1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
 
 before_install:
-  - export IOS_SIMULATOR_UDID=$(instruments -s devices | grep "iPhone 5s (10.1)" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
+  - export IOS_SIMULATOR_UDID=$(instruments -s devices | grep "iPhone 5s (11.0)" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
   - open -b com.apple.iphonesimulator --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID  # Preload iOS Simulator as early as possible
   - nvm install                         # Install node version from .nvmrc
   - brew update
