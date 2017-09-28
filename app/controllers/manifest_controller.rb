@@ -62,12 +62,12 @@ module TVManager
 			manifest = Manifesto.cache manifest_options
 
 			# Add cache entries for dbConfig & appConfig
-			config_entries = <<~END
+			config_entries = <<~CACHE
 				/dbConfig
 				/appConfig
 				# databaseName: #{database_name}
 				# appVersion: #{app_version}
-			END
+			CACHE
 			manifest.gsub! "\nNETWORK:", "#{config_entries}\nNETWORK:"
 		end
 	end

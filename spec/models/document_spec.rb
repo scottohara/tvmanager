@@ -40,7 +40,7 @@ describe TVManager::Document do
 		end
 
 		it 'should return the list of all documents' do
-			out = String.new
+			out = +''	# The '+' unary operator gives us an unfrozen string
 			described_class.all.call out
 			expect(out).to eql stream.to_json
 		end
