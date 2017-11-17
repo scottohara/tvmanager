@@ -1,7 +1,7 @@
 import ApplicationController from "controllers/application-controller";
 import Episode from "../../../src/models/episode-model";
 
-	// Get a reference to the application controller singleton
+// Get a reference to the application controller singleton
 const appController = new ApplicationController();
 
 describe("Episode", () => {

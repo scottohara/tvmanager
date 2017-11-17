@@ -1,7 +1,12 @@
-[![Build Status](https://travis-ci.org/scottohara/tvmanager.svg?branch=master)](https://travis-ci.org/scottohara/tvmanager)
-[![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)
-[![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)
-[![Dependency Status](https://www.versioneye.com/user/projects/549d122f6b1b817159000788/badge.svg?style=flat)](https://www.versioneye.com/user/projects/549d122f6b1b817159000788)
+| Service					| Status																																																																																										|
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Travis CI				| [![Build Status](https://travis-ci.org/scottohara/tvmanager.svg?branch=master)](https://travis-ci.org/scottohara/tvmanager)																																|
+| Code Climate		| [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)																														|
+| Code Climate		| [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)																					|
+| Gemnasium     	| [![Dependency Status](https://gemnasium.com/badges/github.com/scottohara/tvmanager.svg)](https://gemnasium.com/github.com/scottohara/tvmanager)																						|
+| Dependency CI 	| [![Dependency Status](https://dependencyci.com/github/scottohara/tvmanager/badge)](https://dependencyci.com/github/scottohara/tvmanager)																									|
+| Snyk (npm)			| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)																									|
+| Snyk (Gemfile)	| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/scottohara/tvmanager?targetFile=Gemfile.lock)	|
 
 What is TV Manager?
 ===================
@@ -61,10 +66,8 @@ Requirements
 Installation (Development)
 ==========================
 1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
-2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle && yarn install`) (--path ensures that gems are installed locally in the project)
-3. Build the app (`npm build`)
-3. Start the server (`bundle exec rackup`, or I prefer [shotgun](http://rtomayko.github.com/shotgun) as it automatically reloads as you make changes). Better yet, using the [heroku cli](https://devcenter.heroku.com/articles/heroku-cli) and a Procfile, you can start the server and the CouchDB database in a single command (`heroku local -f Procfile.dev`)
-2. Point your browser at /index.html
+2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle && npm install`) (`--path` ensures that gems are installed locally in the project)
+3. Start the server (`npm start`)
 
 For running in the iOS Simulator, use `rake simulator:run`. This rake task will start a server process, prompt for the device & iOS version to launch the simulator for, and open the application in Mobile Safari. Quitting the simulator will automatically shutdown the server process it started.
 
@@ -90,7 +93,7 @@ For staging/production, if you use Heroku:
 
 The default database name doesn't need to be overriden if each environment is hosted under a separate domain (eg. tvmanager.mydomain.com and tvmanagerstaging.mydomain.com)
 
-After deployment, if you are using the import/export functionality to backup/restore a CouchDB database, you should run `rake db:migrate` (see Import/Export below)
+During deployment, the `rake db:migrate` task automatically runs (see Import/Export below).
 
 Offline Mode
 ============
@@ -152,7 +155,7 @@ heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager --r
 
 (Assumes you have setup two Heroku remotes, one for staging and one for production)
 
-After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. You should run this rake task after each deployment, to ensure the latest design documents are being used.
+After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. This tasks automatically runs on each deployment, to ensure the latest design documents are being used.
 
 To remind users to backup regularly, a warning prompt appears at startup if the last backup was more than 7 days ago.  You can override the number of days that this warning appears using the following environment variable:
 
@@ -166,13 +169,13 @@ Frontend specs are implemented using [mocha](https://mochajs.org/)+[chai](http:/
 
 Two [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
 
-1. `npm test` runs the test suite once, and includes [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available for each browser in `/tvmanager/coverage/{browser}/index.html`
-2. `npm run bdd` continuously watches all Javascript files, and runs the full test suite when a change is detected
+1. `npm run test:bdd` watches for any file changes and runs the full test suite (without code coverage)
+2. `npm run test:coverage` performs a single full test suite run, including [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available in `/tvmanager/coverage/{browser}/index.html`
 
-By default, the test suite is run in Chrome and iOS Simulator.
+By default, the `test:bdd` suite is run in Chrome, and the `test:coverage` suite is run in headless Chrome and iOS Simulator.
 
 To run the tests in Mobile Safari on a physical device:
-* start the test runner *without* launching the default browsers (`npm test -- --browsers`)
+* start the test runner *without* launching the default browsers (`npm run test:coverage -- --browsers`)
 * the Karma server will pause waiting for a browser connection
 * manually launch Mobile Safari and browse to the URL shown in the terminal window (eg. `http://localhost:9876`)
 

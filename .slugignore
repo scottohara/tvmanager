@@ -1,3 +1,6 @@
+bin
+build
+spec
 .codeclimate.yml
 .editorconfig
 .eslintignore
@@ -12,6 +15,6 @@ karma-bdd.conf.js
 LICENCE
 Procfile.dev
 README.md
-bin
-build
-spec
+webpack.coverage.js
+webpack.dev.js
+webpack.test.j

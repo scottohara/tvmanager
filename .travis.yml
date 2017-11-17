@@ -36,9 +36,8 @@ before_script:
 # Run the test suite
 script:
   - bundle exec rubocop -DESP           # Backend linting
-  - npm run lint                        # Frontend linting
   - bundle exec rake spec               # Backend specs
-  - npm test -- --browsers MobileSafari # Frontend specs
+  - npm test -- --browsers MobileSafari # Frontend linting and specs
 
 # Pipe the JS coverage data to Code Climate
 after_script:
