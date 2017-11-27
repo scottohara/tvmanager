@@ -607,13 +607,13 @@ export default class ApplicationController {
 	}
 
 	/**
-		* @memberof ApplicationController
-		* @this ApplicationController
-		* @instance
-		* @method showNotice
-		* @desc Pushes a notice onto the notice stack and displays it
-		* @param {Notice} notice - the notice to display
-		*/
+	 * @memberof ApplicationController
+	 * @this ApplicationController
+	 * @instance
+	 * @method showNotice
+	 * @desc Pushes a notice onto the notice stack and displays it
+	 * @param {Notice} notice - the notice to display
+	 */
 	showNotice(notice) {
 		// Create a div for the new notice
 		const noticeContainer = $("<div>")

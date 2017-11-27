@@ -82,11 +82,9 @@ export default class Series extends Base {
 
 			// Execute the SQL to insert/update the program
 			tx.executeSql(`
-					REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID)
-					VALUES (?, ?, ?, ?)
-				`,
-				[this.id, this.seriesName, this.nowShowing, this.programId],
-				(innerTx, resultSet) => {
+				REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID)
+				VALUES (?, ?, ?, ?)
+			`, [this.id, this.seriesName, this.nowShowing, this.programId], (innerTx, resultSet) => {
 					// Regardless of whether the series existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
 					if (!resultSet.rowsAffected) {
 						throw new Error("no rows affected");
@@ -94,11 +92,9 @@ export default class Series extends Base {
 
 					// Execute the SQL to flag the series as a pending local change
 					innerTx.executeSql(`
-							INSERT OR IGNORE INTO Sync (Type, ID, Action)
-							VALUES ('Series', ?, 'modified')
-						`,
-						[this.id],
-						() => {
+						INSERT OR IGNORE INTO Sync (Type, ID, Action)
+						VALUES ('Series', ?, 'modified')
+					`, [this.id], () => {
 							// If a callback was provided, call it now with the series' id
 							if (callback) {
 								callback(this.id);
@@ -107,10 +103,8 @@ export default class Series extends Base {
 						(_, error) => {
 							// Something went wrong
 							throw error;
-						}
-					);
-				}
-			);
+						});
+				});
 		}, error => {
 			// Something went wrong. If a callback was provided, call it now with no parameters
 			if (callback) {
@@ -396,8 +390,10 @@ export default class Series extends Base {
 	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 */
 	static listByProgram(programId, callback) {
-		// Set the SELECT and FROM clauses to use the standard
-		// Set the WHERE clause to filter by the specified program, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by series name
+		/*
+		 * Set the SELECT and FROM clauses to use the standard
+		 * Set the WHERE clause to filter by the specified program, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by series name
+		 */
 		const query = `
 						${this.standardQuery.baseData}
 						${this.standardQuery.summaryData}
@@ -422,8 +418,10 @@ export default class Series extends Base {
 	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 */
 	static listByNowShowing(callback) {
-		// Set the SELECT and FROM clauses to use the standard, plus a calculation of the number of episodes with a warning
-		// Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by now showing or recorded/expected counts, and the ORDER BY clause to sort by now showing and program name
+		/*
+		 * Set the SELECT and FROM clauses to use the standard, plus a calculation of the number of episodes with a warning
+		 * Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by now showing or recorded/expected counts, and the ORDER BY clause to sort by now showing and program name
+		 */
 		const	monthNumberCase = `
 						CASE SUBSTR(e4.StatusDate, 4, 3)
 							WHEN 'Jan' THEN '01'
@@ -485,8 +483,10 @@ export default class Series extends Base {
 	 * @param {String} status - the episode status
 	 */
 	static listByStatus(callback, status) {
-		// Set the SELECT clause to the standard, plus a calculation of the number of episodes in the specified status
-		// Set the WHERE clause to filter by the specified status, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by program name and series name
+		/*
+		 * Set the SELECT clause to the standard, plus a calculation of the number of episodes in the specified status
+		 * Set the WHERE clause to filter by the specified status, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by program name and series name
+		 */
 		const query = `
 						${this.standardQuery.baseData}
 									COUNT(e.EpisodeID) AS EpisodeCount,
@@ -515,8 +515,10 @@ export default class Series extends Base {
 	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 */
 	static listByIncomplete(callback) {
-		// Set the SELECT and FROM clauses to use the standard
-		// Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by any series that have some but not all episodes watched, and the ORDER BY clause to sort by program name and series name
+		/*
+		 * Set the SELECT and FROM clauses to use the standard
+		 * Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by any series that have some but not all episodes watched, and the ORDER BY clause to sort by program name and series name
+		 */
 		const query = `
 						${this.standardQuery.baseData}
 						${this.standardQuery.summaryData}
@@ -549,30 +551,26 @@ export default class Series extends Base {
 		const seriesList = [];
 
 		// Start a new readonly database transaction and execute the SQL to retrieve the list of series
-		this.db.readTransaction(tx => tx.executeSql(
-			`
-				${query}
-				${filter}
-			`,
-			params,
-			(_, resultSet) => {
-				// Iterate of the rows returned
-				for (let i = 0; i < resultSet.rows.length; i++) {
-					const series = resultSet.rows.item(i);
+		this.db.readTransaction(tx => tx.executeSql(`
+			${query}
+			${filter}
+		`, params, (_, resultSet) => {
+			// Iterate of the rows returned
+			for (let i = 0; i < resultSet.rows.length; i++) {
+				const series = resultSet.rows.item(i);
 
-					// Instantiate a new Series object and add it to the array
-					seriesList.push(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount));
-				}
-
-				// Invoke the callback function, passing the list of series
-				callback(seriesList);
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing the series list (which should be empty)
-				callback(seriesList);
-
-				return `Series.list: ${error.message}`;
+				// Instantiate a new Series object and add it to the array
+				seriesList.push(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount));
 			}
-		));
+
+			// Invoke the callback function, passing the list of series
+			callback(seriesList);
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing the series list (which should be empty)
+			callback(seriesList);
+
+			return `Series.list: ${error.message}`;
+		}));
 	}
 
 	/**
@@ -586,15 +584,13 @@ export default class Series extends Base {
 	static find(id, callback) {
 		// Start a new readonly database transaction and execute the SQL to retrieve the series
 		this.db.readTransaction(tx => tx.executeSql(`
-				SELECT	SeriesID,
-								Name,
-								ProgramID,
-								NowShowing
-				FROM		Series
-				WHERE		SeriesID = ?
-			`,
-			[id],
-			(_, resultSet) => {
+			SELECT	SeriesID,
+							Name,
+							ProgramID,
+							NowShowing
+			FROM		Series
+			WHERE		SeriesID = ?
+		`, [id], (_, resultSet) => {
 				const series = resultSet.rows.item(0);
 
 				// Instantiate a new Series object, and invoke the callback function passing the series
@@ -604,8 +600,7 @@ export default class Series extends Base {
 				callback(null);
 
 				return `Series.find: ${error.message}`;
-			}
-		));
+			}));
 	}
 
 	/**
@@ -618,18 +613,16 @@ export default class Series extends Base {
 	static count(callback) {
 		// Start a new readonly database transaction and execute the SQL to retrieve the count of series
 		this.db.readTransaction(tx => tx.executeSql(`
-				SELECT	COUNT(*) AS SeriesCount
-				FROM		Series
-			`,
-			[],
+			SELECT	COUNT(*) AS SeriesCount
+			FROM		Series
+		`, [],
 			(_, resultSet) => callback(resultSet.rows.item(0).SeriesCount),
 			(_, error) => {
 				// Something went wrong. Call the callback passing zero
 				callback(0);
 
 				return `Series.count: ${error.message}`;
-			}
-		));
+			}));
 	}
 
 	/**
@@ -650,8 +643,7 @@ export default class Series extends Base {
 				callback(message);
 
 				return message;
-			}
-		));
+			}));
 	}
 
 	/**

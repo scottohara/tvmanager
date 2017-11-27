@@ -642,13 +642,15 @@ export default class DataSyncController extends ViewController {
 		let importJson = data || JSON.parse(jqXHR.responseText),
 				returnedHash;
 
-		// Get the Etag value returned by the server
-		// For a fast import, look in the Etag header; for a full import there will be a checksum
-		// property in the body content.
-		// (This is because to avoid the full import from timing out, the response is streamed back
-		// as it is generated; so we're unable to calculate a checksum for the response header.
-		// Ideally, we would be able to use a HTTP Trailer header to provide this information
-		// after the body content; but no browsers support HTTP Trailer headers)
+		/*
+		 * Get the Etag value returned by the server
+		 * For a fast import, look in the Etag header; for a full import there will be a checksum
+		 * property in the body content.
+		 * (This is because to avoid the full import from timing out, the response is streamed back
+		 * as it is generated; so we're unable to calculate a checksum for the response header.
+		 * Ideally, we would be able to use a HTTP Trailer header to provide this information
+		 * after the body content; but no browsers support HTTP Trailer headers)
+		 */
 		if (this.importChangesOnly) {
 			returnedHash = jqXHR.getResponseHeader("Etag").replace(/"/g, "");
 		} else {

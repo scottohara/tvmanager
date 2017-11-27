@@ -41,12 +41,10 @@ export default class Sync extends Base {
 	remove() {
 		// Start a new database transaction and execute the SQL to delete the local change
 		this.db.transaction(tx => tx.executeSql(`
-				DELETE FROM Sync
-				WHERE	Type = ? AND
-							ID = ?
-			`,
-			[this.type, this.id]
-		), null, () => {
+			DELETE FROM Sync
+			WHERE	Type = ? AND
+						ID = ?
+		`, [this.type, this.id]), null, () => {
 			// Clear the instance properties
 			this.type = null;
 			this.id = null;
@@ -65,13 +63,11 @@ export default class Sync extends Base {
 
 		// Start a new readonly database transaction and execute the SQL to retrieve the list of local changes
 		this.db.readTransaction(tx => tx.executeSql(`
-				SELECT	Type,
-								ID,
-								Action
-				FROM		Sync
-			`,
-			[],
-			(_, resultSet) => {
+			SELECT	Type,
+							ID,
+							Action
+			FROM		Sync
+		`, [], (_, resultSet) => {
 				// Iterate of the rows returned
 				for (let i = 0; i < resultSet.rows.length; i++) {
 					const sync = resultSet.rows.item(i);
@@ -87,8 +83,7 @@ export default class Sync extends Base {
 				callback(syncList);
 
 				return `Sync.list: ${error.message}`;
-			}
-		));
+			}));
 	}
 
 	/**
@@ -107,8 +102,7 @@ export default class Sync extends Base {
 				callback(0);
 
 				return `Sync.count: ${error.message}`;
-			}
-		));
+			}));
 	}
 
 	/**
@@ -129,7 +123,6 @@ export default class Sync extends Base {
 				callback(message);
 
 				return message;
-			}
-		));
+			}));
 	}
 }

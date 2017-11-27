@@ -78,11 +78,9 @@ export default class Episode extends Base {
 
 			// Execute the SQL to insert/update the episode
 			tx.executeSql(`
-					REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence)
-					VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-				`,
-				[this.id, this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence],
-				(innerTx, resultSet) => {
+				REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			`, [this.id, this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence], (innerTx, resultSet) => {
 					// Regardless of whether the episode existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
 					if (!resultSet.rowsAffected) {
 						throw new Error("no rows affected");
@@ -90,11 +88,9 @@ export default class Episode extends Base {
 
 					// Execute the SQL to flag the episode as a pending local change
 					innerTx.executeSql(`
-							INSERT OR IGNORE INTO Sync (Type, ID, Action)
-							VALUES ('Episode', ?, 'modified')
-						`,
-						[this.id],
-						() => {
+						INSERT OR IGNORE INTO Sync (Type, ID, Action)
+						VALUES ('Episode', ?, 'modified')
+					`, [this.id], () => {
 							// If a callback was provided, call it now with the episode's id
 							if (callback) {
 								callback(this.id);
@@ -102,10 +98,8 @@ export default class Episode extends Base {
 						}, (_, error) => {
 							// Something went wrong
 							throw error;
-						}
-					);
-				}
-			);
+						});
+				});
 		}, error => {
 			// Something went wrong. If a callback was provided, call it now with no parameters
 			if (callback) {
@@ -204,16 +198,20 @@ export default class Episode extends Base {
 			this.statusDateDisplay = "";
 		}
 
-		// Recalculate the status warning based on the current status and date
-		// The warning is used to highlight any expected episodes that are on or past their expected date
-		// Note: As the status date only captures day & month (no year), a date more than 3 months in the past is considered to be a future date
+		/*
+		 * Recalculate the status warning based on the current status and date
+		 * The warning is used to highlight any expected episodes that are on or past their expected date
+		 * Note: As the status date only captures day & month (no year), a date more than 3 months in the past is considered to be a future date
+		 */
 		this.statusWarning = "";
 		if ("Expected" === this.status && "" !== this.statusDate) {
-			// TempStatusDate is the status date in "MMDD" format
-			// endMonth is the end of the warning range (3 months ago).
-			//  - in Jan, Feb or Mar, need to cross the year boundary (eg. Jan - 3 months = Oct; Feb - 3 month = Nov; Mar - 3 months = Dec)
-			//  - otherwise it's just a simple subtraction of three months
-			// start/end is the period in "MMDD" format
+			/*
+			 * TempStatusDate is the status date in "MMDD" format
+			 * endMonth is the end of the warning range (3 months ago).
+			 *  - in Jan, Feb or Mar, need to cross the year boundary (eg. Jan - 3 months = Oct; Feb - 3 month = Nov; Mar - 3 months = Dec)
+			 *  - otherwise it's just a simple subtraction of three months
+			 * start/end is the period in "MMDD" format
+			 */
 			const today = new Date(),
 						months = {Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"},
 						parts = this.statusDate.split("-"),
@@ -326,43 +324,39 @@ export default class Episode extends Base {
 		const episodeList = [];
 
 		// Start a new readonly database transaction and execute the SQL to retrieve the list of episodes
-		this.db.readTransaction(tx => tx.executeSql(
-			`
-				SELECT	e.EpisodeID,
-								e.Name,
-								e.Status,
-								e.StatusDate,
-								e.Unverified,
-								e.Unscheduled,
-								e.Sequence,
-								e.SeriesID,
-								s.Name AS SeriesName,
-								s.ProgramID,
-								p.Name AS ProgramName
-				FROM		Episode e
-				JOIN		Series s ON e.SeriesID = s.SeriesID
-				JOIN		Program p ON s.ProgramID = p.ProgramID
-				${filter}
-			`,
-			params,
-			(_, resultSet) => {
-				// Iterate over the rows returned
-				for (let i = 0; i < resultSet.rows.length; i++) {
-					const ep = resultSet.rows.item(i);
+		this.db.readTransaction(tx => tx.executeSql(`
+			SELECT	e.EpisodeID,
+							e.Name,
+							e.Status,
+							e.StatusDate,
+							e.Unverified,
+							e.Unscheduled,
+							e.Sequence,
+							e.SeriesID,
+							s.Name AS SeriesName,
+							s.ProgramID,
+							p.Name AS ProgramName
+			FROM		Episode e
+			JOIN		Series s ON e.SeriesID = s.SeriesID
+			JOIN		Program p ON s.ProgramID = p.ProgramID
+			${filter}
+		`, params, (_, resultSet) => {
+			// Iterate over the rows returned
+			for (let i = 0; i < resultSet.rows.length; i++) {
+				const ep = resultSet.rows.item(i);
 
-					// Instantiate a new Episode object and add it to the array
-					episodeList.push(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
-				}
-
-				// Invoke the callback function, passing the list of episodes
-				callback(episodeList);
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing the episode list (which should be empty)
-				callback(episodeList);
-
-				return `Episode.list: ${error.message}`;
+				// Instantiate a new Episode object and add it to the array
+				episodeList.push(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramID, ep.ProgramName));
 			}
-		));
+
+			// Invoke the callback function, passing the list of episodes
+			callback(episodeList);
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing the episode list (which should be empty)
+			callback(episodeList);
+
+			return `Episode.list: ${error.message}`;
+		}));
 	}
 
 	/**
@@ -375,21 +369,18 @@ export default class Episode extends Base {
 	 */
 	static find(id, callback) {
 		// Start a new readonly database transaction and execute the SQL to retrieve the episode
-		this.db.readTransaction(tx => tx.executeSql(
-			`
-				SELECT	EpisodeID,
-								Name,
-								SeriesID,
-								Status,
-								StatusDate,
-								Unverified,
-								Unscheduled,
-								Sequence
-				FROM		Episode
-				WHERE		EpisodeID = ?
-			`,
-			[id],
-			(_, resultSet) => {
+		this.db.readTransaction(tx => tx.executeSql(`
+			SELECT	EpisodeID,
+							Name,
+							SeriesID,
+							Status,
+							StatusDate,
+							Unverified,
+							Unscheduled,
+							Sequence
+			FROM		Episode
+			WHERE		EpisodeID = ?
+		`, [id], (_, resultSet) => {
 				const ep = resultSet.rows.item(0);
 
 				// Instantiate a new Episode object, and invoke the callback function passing the episode
@@ -399,8 +390,7 @@ export default class Episode extends Base {
 				callback(null);
 
 				return `Episode.find: ${error.message}`;
-			})
-		);
+			}));
 	}
 
 	/**
@@ -446,21 +436,18 @@ export default class Episode extends Base {
 	 */
 	static count(filter, params, callback) {
 		// Start a new readonly database transaction and execute the SQL to retrieve the count of episodes and invoke the callback function
-		this.db.readTransaction(tx => tx.executeSql(
-			`
-				SELECT	COUNT(*) AS EpisodeCount
-				FROM		Episode
-				${filter}
-			`,
-			params,
-			(_, resultSet) => callback(resultSet.rows.item(0).EpisodeCount),
-			(_, error) => {
-				// Something went wrong. Call the callback passing zero
-				callback(0);
+		this.db.readTransaction(tx => tx.executeSql(`
+			SELECT	COUNT(*) AS EpisodeCount
+			FROM		Episode
+			${filter}
+		`, params,
+		(_, resultSet) => callback(resultSet.rows.item(0).EpisodeCount),
+		(_, error) => {
+			// Something went wrong. Call the callback passing zero
+			callback(0);
 
-				return `Episode.count: ${error.message}`;
-			}
-		));
+			return `Episode.count: ${error.message}`;
+		}));
 	}
 
 	/**
@@ -481,8 +468,7 @@ export default class Episode extends Base {
 				callback(message);
 
 				return message;
-			}
-		));
+			}));
 	}
 
 	/**

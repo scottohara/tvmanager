@@ -44,11 +44,9 @@ export default class Setting extends Base {
 
 			// Execute the SQL to insert the new setting
 			tx.executeSql(`
-					INSERT INTO Setting (Name, Value)
-					VALUES (?, ?)
-				`,
-				[this.settingName, this.settingValue],
-				(_, resultSet) => {
+				INSERT INTO Setting (Name, Value)
+				VALUES (?, ?)
+			`, [this.settingName, this.settingValue], (_, resultSet) => {
 					// We expect one row to be affected; so it's an error if this isn't the case
 					if (!resultSet.rowsAffected) {
 						// If a callback was provided, call it now with false to indicate an error
@@ -69,8 +67,7 @@ export default class Setting extends Base {
 					}
 
 					return `Setting.save: ${error.message}`;
-				}
-			);
+				});
 		});
 	}
 
@@ -83,13 +80,10 @@ export default class Setting extends Base {
 	 */
 	remove() {
 		// Start a new database transaction and execute the SQL to delete the setting
-		this.db.transaction(tx => tx.executeSql(
-			`
-				DELETE FROM Setting
-				WHERE	Name = ?
-			`,
-			[this.settingName]
-		), null, () => {
+		this.db.transaction(tx => tx.executeSql(`
+			DELETE FROM Setting
+			WHERE	Name = ?
+		`, [this.settingName]), null, () => {
 			// Clear the instance properties
 			this.settingName = null;
 			this.settingValue = null;
@@ -106,12 +100,10 @@ export default class Setting extends Base {
 	static get(settingName, callback) {
 		// Start a new readonly database transaction and execute the SQL to retrieve the setting
 		this.db.readTransaction(tx => tx.executeSql(`
-				SELECT	Value AS SettingValue
-				FROM		Setting
-				WHERE		Name = ?
-			`,
-			[settingName],
-			(_, resultSet) => {
+			SELECT	Value AS SettingValue
+			FROM		Setting
+			WHERE		Name = ?
+		`, [settingName], (_, resultSet) => {
 				let settingValue;
 
 				// If the setting existed, get the existing value (otherwise the value defaults to null)
@@ -129,7 +121,6 @@ export default class Setting extends Base {
 				callback();
 
 				return `Setting.get: ${error.message}`;
-			}
-		));
+			}));
 	}
 }
