@@ -70,7 +70,7 @@
     "docs": "jsdoc --configure jsdoc.json"
   },
   "engines": {
-    "node": "8.4.0",
-    "npm": "5.3.0"
+    "node": "9.11.1",
+    "npm": "5.8.0"
   }
 }
