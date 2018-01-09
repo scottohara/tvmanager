@@ -35,7 +35,7 @@ before_script:
 
 # Run the test suite
 script:
-  - bundle exec rubocop -DESP           # Backend linting
+  - bundle exec rubocop -ESP            # Backend linting
   - bundle exec rake spec               # Backend specs
   - npm test -- --browsers MobileSafari # Frontend linting and specs
 
