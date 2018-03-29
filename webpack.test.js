@@ -1,7 +1,6 @@
 const merge = require("webpack-merge"),
 			path = require("path"),
 			{
-				defineEnvironment,
 				providejQuery,
 				config
 			} = require("./webpack.common");
@@ -41,7 +40,6 @@ module.exports = merge(config, {
 	},
 	devtool: "inline-source-map",
 	plugins: [
-		defineEnvironment("test"),
 		providejQuery
 	]
 });

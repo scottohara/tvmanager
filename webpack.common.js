@@ -1,6 +1,6 @@
 const path = require("path"),
 			webpack = require("webpack"),
-			ExtractTextPlugin = require("extract-text-webpack-plugin"),
+			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
 			CleanWebpackPlugin = require("clean-webpack-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
 			CopyWebpackPlugin = require("copy-webpack-plugin"),
@@ -67,19 +67,6 @@ const path = require("path"),
 				jQuery: "jquery"
 			}),
 
-			/*
-			 * Ensures all vendor dependencies are bundled separately to app code, and that the webpack manifest is kept
-			 * separate so that changes to app code don't change the hash of the vendor chunk (or vice versa)
-			 */
-			separateBundles = new webpack.optimize.CommonsChunkPlugin({
-				names: [
-					"cubiq",
-					"vendor",
-					"manifest"
-				],
-				minChunks: Infinity
-			}),
-
 			// Creates index.html with the bundled resources
 			createIndexHtml = new HtmlWebpackPlugin({template: "./src/index.html"}),
 
@@ -90,6 +77,8 @@ const path = require("path"),
 
 			// Default config
 			config = {
+				mode: "development",
+
 				// Ensure that the context is the directory where the webpack.*.js config file is
 				context: path.resolve(__dirname),
 
@@ -106,54 +95,59 @@ const path = require("path"),
 					]
 				},
 
+				optimization: {
+					splitChunks: {
+						chunks: "all",
+						minSize: 0,
+						cacheGroups: {
+							app: {
+								name: "app",
+								priority: 10,
+								reuseExistingChunk: true
+							},
+							cubiq: {
+								name: "cubiq",
+								test: /[\\/]src[\\/]framework[\\/]/,
+								priority: 20,
+								reuseExistingChunk: true
+							},
+							vendor: {
+								name: "vendor",
+								test: /[\\/]node_modules[\\/]/,
+								priority: 30,
+								reuseExistingChunk: true
+							}
+						}
+					},
+					runtimeChunk: "single"
+				},
+
 				// Abort on first error
 				bail: true
 			};
 
 // Rule for *.css processing
-function cssRule(extractor, {minimize, include}) {
+function cssRule({minimize} = {}) {
 	return {
 		test: /\.css$/,
+		use: [
+			MiniCssExtractPlugin.loader,
+			{
+				loader: "css-loader",
+				options: {
+					// Minify using cssnano
+					minimize,
 
-		// Include specify paths
-		include,
-
-		use: extractor.extract({
-			loader: "css-loader",
-			options: {
-				// Minify using cssnano
-				minimize,
-
-				// Generate sourcemaps
-				sourceMap: true
+					// Generate sourcemaps
+					sourceMap: true
+				}
 			}
-		})
+		]
 	};
 }
 
-// Ensure that the environment is set
-function defineEnvironment(env) {
-	return new webpack.DefinePlugin({"process.env.NODE_ENV": JSON.stringify(`${env}`)});
-}
-
-/*
- * Creates external *.css files from any imported styles (e.g. import "./my-styles.css";)
- * Note: HtmlWebpackPlugin injects <link> tags in the order listed in the plugins array, so vendor must be first
- */
-function extractAppCss(hashFilename) {
-	return new ExtractTextPlugin({
-		filename: hashFilename ? "app-[contenthash:6].css" : "app.css",
-		disable: false,
-		allChunks: true
-	});
-}
-
-function extractCubiqCss(hashFilename) {
-	return new ExtractTextPlugin({
-		filename: hashFilename ? "cubiq-[contenthash:6].css" : "cubiq.css",
-		disable: false,
-		allChunks: true
-	});
+function extractCss(hashFilename) {
+	return new MiniCssExtractPlugin({filename: hashFilename ? "[name]-[chunkhash:6].css" : "[name].css"});
 }
 
 module.exports = {
@@ -162,12 +156,9 @@ module.exports = {
 	cssRule,
 	iconRule,
 	imageRule,
-	defineEnvironment,
 	cleanBuildDirectory,
 	providejQuery,
-	separateBundles,
-	extractAppCss,
-	extractCubiqCss,
+	extractCss,
 	createIndexHtml,
 	copyViewTemplates,
 	config

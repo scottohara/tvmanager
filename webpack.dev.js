@@ -1,5 +1,4 @@
-const webpack = require("webpack"),
-			merge = require("webpack-merge"),
+const merge = require("webpack-merge"),
 			LiveReloadPlugin = require("webpack-livereload-plugin"),
 			OpenBrowserPlugin = require("open-browser-webpack-plugin"),
 			{
@@ -8,18 +7,13 @@ const webpack = require("webpack"),
 				cssRule,
 				iconRule,
 				imageRule,
-				defineEnvironment,
 				cleanBuildDirectory,
 				providejQuery,
-				separateBundles,
-				extractAppCss,
-				extractCubiqCss,
+				extractCss,
 				createIndexHtml,
 				copyViewTemplates,
 				config
-			} = require("./webpack.common"),
-			appCss = extractAppCss(),
-			cubiqCss = extractCubiqCss();
+			} = require("./webpack.common");
 
 module.exports = merge(config, {
 	// Use default entry
@@ -27,16 +21,12 @@ module.exports = merge(config, {
 
 	// Use default output, with no hash in file names
 	output: merge(output, {
-		filename: "[name].js",
-
-		// Include detailed path info to assist with debugging
-		pathinfo: true
+		filename: "[name].js"
 	}),
 
 	module: {
 		rules: [
-			cssRule(appCss, {include: /stylesheets/}),
-			cssRule(cubiqCss, {include: /framework/}),
+			cssRule(),
 			merge(iconRule, {
 				options: {
 					// No hash in file names
@@ -56,15 +46,9 @@ module.exports = merge(config, {
 	devtool: "eval-source-map",
 
 	plugins: [
-		// Use module names instead of numbers to assist with debugging
-		new webpack.NamedModulesPlugin(),
-
-		defineEnvironment("development"),
 		providejQuery,
 		cleanBuildDirectory,
-		separateBundles,
-		cubiqCss,
-		appCss,
+		extractCss(),
 		createIndexHtml,
 		copyViewTemplates,
 
