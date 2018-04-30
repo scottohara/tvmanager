@@ -10,7 +10,7 @@
 
 What is TV Manager?
 ===================
-TV Manager is a HTML5 webapp that keeps track of which episodes of your favourite TV shows you:
+TV Manager is a Progressive Web App (PWA) that keeps track of which episodes of your favourite TV shows you:
 
 * have seen,
 * have recorded to your DVR (or downloaded by other means),
@@ -45,23 +45,19 @@ Screenshots
 
 Architecture
 ============
-As mentioned above, the app is purely a HTML5 web application.
+The PWA uses a service worker, application manifest and a local WebSQL database. When installed to the homescreen of a device, it functions like an app including when offline/disconnected or in airplane mode.
 
-It was developed with the iPhone in mind, so the styling is very "iPhone-ish"; however it runs on any WebKit-based browsers (mobile or desktop) that support client-side storage (eg. runs great in Chrome on the desktop).
+The code is developed in an MVC-style architecture, with a custom "view stack" for navigating through the screens (ie. opening a view 'pushes' it onto the top of the stack; closing the view 'pops' it off the stack, revealing the previous view underneath).
 
-It uses the HTML5 application cache, so it continues to function when offline/disconnected.
-
-The code uses an MVC-style architecture, with a custom "view stack" for navigating through the screens (ie. opening a view 'pushes' it onto the top of the stack; closing the view 'pops' it off the stack, revealing the previous view underneath).
+On the server side it's a Ruby Sinatra app, however as all of the static resources (HTML, JS, CSS) are cached on the client by the service worker, there isn't much happening on the server. It provides import/export services that allows the client-side WebSQL database to be backed up/restored (BYO CouchDB database).
 
 Database schema changes are managed via an upgrade routine on startup (similar to Rails-style migrations).
 
-On the server side, it's a Ruby Sinatra app. There's not much happening on the server though, the only things are a dynamically-generated cache manifest file used for the HTML5 application cache, and import/export services that allows the client-side HTML5 WebSQL database to be backed up/restored (BYO CouchDB database).
-
 Requirements
 ============
-* WebKit-based browser, with HTML5 database support
-* In development, Ruby/RubyGems/Bundler (recommend [RVM](http://beginrescueend.com/))
-* In production/staging, somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
+* Browser with support for ECMAScript 2017, Service Workers, App Manifest & WebSQL
+* For development: npm/nvm/Ruby/RubyGems/Bundler (recommend [RVM](http://beginrescueend.com/))
+* For production/staging: somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
 
 Installation (Development)
 ==========================
@@ -83,7 +79,7 @@ The deploy rake task needs to be authorised with heroku to read/write the `APP_V
 1. Create a new OAuth authorisation with `write-protected` scope: `heroku authorizations:create --description "TVManager Deployment" --scope write-protected"`
 2. Store the token returned in an environment variable: `export TVMANAGER_HEROKU_TOKEN='{token}'`
 
-By default, the name of the client-side HTML5 database is "TVManager". Database names must be unique for the domain (origin), so in the event that you are hosting multiple environments under the same domain (eg. tvmanager.mydomain.com/production and tvmanager.mydomain.com/staging), you can override the default database name for one or both environments using an environment variable. For example, in development:
+By default, the name of the client-side WebSQL database is "TVManager". Database names must be unique for the domain (origin), so in the event that you are hosting multiple environments under the same domain (eg. tvmanager.mydomain.com/production and tvmanager.mydomain.com/staging), you can override the default database name for one or both environments using an environment variable. For example, in development:
 
 `export DATABASE_NAME='TVManagerDev'`
 
@@ -95,25 +91,9 @@ The default database name doesn't need to be overriden if each environment is ho
 
 During deployment, the `rake db:migrate` task automatically runs (see Import/Export below).
 
-Offline Mode
-============
-HTML5 application caching uses a manifest file to indicate which files are allowed to be cached. If the manifest file changes (in any way), all cached resources are refreshed from the server.
-
-To avoid having to manually keep the manifest file up to date with new/changed files, it is dynamically generated on the server using the [Manifesto gem](https://github.com/johntopley/manifesto).
-
-You can test that the application cache is working by disconnecting from the network (or turning your mobile device to flight mode); and if everything goes well you should be able to continue using the app even though you're disconnected.
-
-Note: In development, where files are constantly being modified, application caching can sometimes be a hindrance. You can disable application caching using the following environment variable:
-
-`export TVMANAGER_NO_APPCACHE='true'`
-
-For convenience, rake tasks are available that start the server with application caching enabled (`rake appcache:enable`) or disabled (`rake appcache:disable`), for quickly toggling between the two.
-
-(Note: During development, if you use the 'Disable cache' option in DevTools and have application caching enabled, Chrome will treat the manifest as if it has changed on each page load even when there have been no changes.)
-
 Import/Export
 =============
-The app includes a backup/restore facility. A log of all changes made to the local HTML5 database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
+The app includes a backup/restore facility. A log of all changes made to the local WebSQL database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
 
 Restoring the database does the reverse, pulling JSON objects from CouchDB (via the server) and loading them into the local database.
 

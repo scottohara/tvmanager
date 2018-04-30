@@ -125,23 +125,3 @@ namespace :simulator do
 		end
 	end
 end
-
-namespace :appcache do
-	desc 'Starts the server with the HTML5 application cache enabled'
-	task :enable do
-		ENV.delete :TVMANAGER_NO_APPCACHE.to_s
-		start_server(true) do |_pid, _stdin, stdout|
-			puts 'Server started on port 9393. Browse to http://localhost:9393/index.html to run the application. Ctrl-C to quit.'
-			puts stdout.read
-		end
-	end
-
-	desc 'Starts the server with the HTML5 application cache disabled'
-	task :disable do
-		ENV[:TVMANAGER_NO_APPCACHE.to_s] = 'true'
-		start_server(true) do |_pid, _stdin, stdout|
-			puts 'Server started on port 9393. Browse to http://localhost:9393/index.html to run the application. Ctrl-C to quit.'
-			puts stdout.read
-		end
-	end
-end

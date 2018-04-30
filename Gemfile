@@ -16,7 +16,6 @@ end
 
 gem 'couchrest'
 gem 'json'
-gem 'manifesto'
 gem 'sinatra'
 gem 'thin'
 
