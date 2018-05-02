@@ -1,6 +1,5 @@
 import $ from "jquery";
 import ApplicationController from "../../../src/controllers/application-controller";
-import CacheController from "controllers/cache-controller";
 import DatabaseController from "controllers/database-controller";
 import Setting from "models/setting-model";
 import SpinningWheel from "framework/sw/spinningwheel";
@@ -46,12 +45,6 @@ describe("ApplicationController", () => {
 		it("should create a scroll helper", () => applicationController.abc.element.should.deep.equal(abc.get(0)));
 		it("should associate the scroll helper with the content", () => applicationController.abc.scrollElement.should.deep.equal($("#content")));
 		it("should wrap the scroll helper in a touch event proxy", () => applicationController.abctoucheventproxy.element.should.deep.equal(abc.get(0)));
-		it("should create a cache controller", () => {
-			applicationController.cache.should.be.an.instanceOf(CacheController);
-			applicationController.cache.callback.should.be.a("function");
-		});
-
-		it("should check for updates", () => applicationController.cache.update.should.have.been.called);
 
 		describe("instance already exists", () => {
 			let anotherApplicationController;
@@ -63,76 +56,12 @@ describe("ApplicationController", () => {
 		});
 	});
 
-	describe("updateChecked", () => {
-		let message,
-				noticeId;
-
-		beforeEach(() => {
-			sinon.stub(applicationController, "showNotice");
-			message = "<p>update message</p>";
-			noticeId = "updateNotice";
-		});
-
-		describe("don't notify", () => {
-			it("should do nothing", () => {
-				applicationController.updateChecked(false, message, noticeId);
-				$(`#${noticeId}`).length.should.equal(0);
-				applicationController.showNotice.should.not.have.been.called;
-			});
-		});
-
-		describe("notify", () => {
-			describe("notice visible", () => {
-				it("should update the notice message", () => {
-					const notice = $("<div>")
-						.attr("id", noticeId)
-						.appendTo(document.body);
-
-					applicationController.updateChecked(true, message, "updateNotice");
-					applicationController.showNotice.should.not.have.been.called;
-					notice.html().should.equal(message);
-					notice.remove();
-				});
-			});
-
-			describe("notice not visible", () => {
-				it("should create a new notice", () => {
-					applicationController.updateChecked(true, message, "updateNotice");
-					applicationController.showNotice.should.have.been.calledWith({
-						id: noticeId,
-						label: message,
-						leftButton: {
-							style: "cautionButton",
-							label: "OK"
-						}
-					});
-				});
-			});
-		});
-	});
-
 	describe("start", () => {
-		let fakeServer,
-				appConfig;
-
 		beforeEach(() => {
-			appConfig = {appVersion: "", maxDataAgeDays: 1};
-			fakeServer = sinon.fakeServer.create();
-			fakeServer.respondImmediately = true;
-			fakeServer.respondWith("GET", "/appConfig", [200, {}, JSON.stringify(appConfig)]);
-			fakeServer.respondWith("GET", "/dbConfig", [200, {}, JSON.stringify({databaseName: "TVManager"})]);
 			sinon.stub(applicationController, "showNotice");
-			sinon.stub(applicationController, "gotAppConfig");
-		});
-
-		describe("304 Not Modified", () => {
-			beforeEach(() => {
-				fakeServer.respondWith("GET", "/dbConfig", [304, {}, JSON.stringify({databaseName: "TVManager"})]);
-				DatabaseController.mode = "304";
-				applicationController.start();
-			});
-
-			it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
+			sinon.stub(applicationController, "gotLastSyncTime");
+			Setting.get.reset();
+			Setting.get.withArgs("LastSyncTime").yields("1");
 		});
 
 		describe("error opening database", () => {
@@ -152,7 +81,9 @@ describe("ApplicationController", () => {
 			}));
 
 			it("should not set the database version", () => (Reflect.undefined === applicationController.db.version).should.be.true);
-			it("should not get the application configuration settings", () => applicationController.gotAppConfig.should.not.have.been.called);
+			it("should not set the application version", () => (Reflect.undefined === applicationController.appVersion).should.be.true);
+			it("should not set the max data age days", () => (Reflect.undefined === applicationController.maxDataAgeDays).should.be.true);
+			it("should not get the last sync time", () => applicationController.gotLastSyncTime.should.not.have.been.called);
 		});
 
 		describe("database upgraded", () => {
@@ -172,14 +103,20 @@ describe("ApplicationController", () => {
 			}));
 
 			it("should set the database version", () => applicationController.db.version.should.equal("1.1"));
-			it("should get the application configuration settings", () => applicationController.gotAppConfig.should.have.been.calledWith(appConfig));
+			it("should set the application version", () => applicationController.appVersion.should.equal(APP_VERSION));
+			it("should set the max data age days", () => applicationController.maxDataAgeDays.should.equal(7));
+			it("should get the last sync time", () => applicationController.gotLastSyncTime.should.have.been.calledWith("1"));
 		});
 
 		describe("database opened", () => {
+			let clock;
+
 			beforeEach(() => {
 				sinon.stub(applicationController, "pushView");
+				clock = sinon.useFakeTimers();
 				DatabaseController.mode = null;
 				applicationController.start();
+				clock.tick(0);
 			});
 
 			it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
@@ -187,43 +124,9 @@ describe("ApplicationController", () => {
 			it("should display the schedule view", () => applicationController.pushView.should.have.been.calledWith("schedule"));
 			it("should not display a notice", () => applicationController.showNotice.should.not.have.been.called);
 			it("should set the database version", () => applicationController.db.version.should.equal("1.1"));
-			it("should get the application configuration settings", () => applicationController.gotAppConfig.should.have.been.calledWith(appConfig));
-		});
-
-		afterEach(() => fakeServer.restore());
-	});
-
-	describe("gotAppConfig", () => {
-		const appConfig = {
-						appVersion: "1.0",
-						maxDataAgeDays: 2
-					},
-					testParams = [
-						{
-							description: "200 OK",
-							config: appConfig
-						},
-						{
-							description: "304 not modified",
-							jqXHR: {
-								responseText: JSON.stringify(appConfig)
-							}
-						}
-					];
-
-		testParams.forEach(params => {
-			describe(params.description, () => {
-				beforeEach(done => {
-					sinon.stub(applicationController, "gotLastSyncTime").callsFake(() => done());
-					Setting.get.reset();
-					Setting.get.withArgs("LastSyncTime").yields("1");
-					applicationController.gotAppConfig(params.config, null, params.jqXHR);
-				});
-
-				it("should set the application version", () => applicationController.appVersion.should.equal(appConfig.appVersion));
-				it("should set the max data age days", () => applicationController.maxDataAgeDays.should.equal(appConfig.maxDataAgeDays));
-				it("should get the last sync time", () => applicationController.gotLastSyncTime.should.have.been.calledWith("1"));
-			});
+			it("should set the application version", () => applicationController.appVersion.should.equal(APP_VERSION));
+			it("should set the max data age days", () => applicationController.maxDataAgeDays.should.equal(7));
+			it("should get the last sync time", () => applicationController.gotLastSyncTime.should.have.been.calledWith("1"));
 		});
 	});
 
@@ -245,7 +148,7 @@ describe("ApplicationController", () => {
 			sinon.stub(applicationController, "clearHeader");
 			sinon.stub(applicationController, "viewPushed");
 			sinon.stub(applicationController, "show").yields();
-			applicationController.viewControllers = {TestController};
+			applicationController.viewControllers = {test: TestController};
 		});
 
 		let view;
@@ -269,7 +172,6 @@ describe("ApplicationController", () => {
 				}
 
 				it("should push the view onto the view stack", () => {
-					view.name.should.equal("test");
 					view.controller.should.be.an.instanceOf(TestController);
 					view.scrollPos.should.equal(0);
 				});
@@ -353,41 +255,16 @@ describe("ApplicationController", () => {
 				.appendTo(document.body);
 
 			sinon.stub(applicationController, "hideScrollHelper");
-			applicationController.viewStack.push({name: "test"});
+			applicationController.viewStack.push({controller: new TestController()});
+			callback = sinon.spy();
+			applicationController.show(callback, {});
 		});
 
-		describe("200 OK", () => {
-			beforeEach(done => {
-				callback = sinon.spy(() => done());
-				applicationController.show(callback, {});
-			});
-
-			it("should hide the scroll helper", () => applicationController.hideScrollHelper.should.have.been.called);
-			it("should show the now loading indicator", () => nowLoading.hasClass("loading").should.be.true);
-			it("should load the view template", () => content.html().should.equal("<div></div>"));
-			it("should slide the new view in from the right", () => contentWrapper.hasClass("loading").should.be.true);
-			it("should invoke the callback", () => callback.should.have.been.calledWith({}));
-		});
-
-		describe("304 Not Modified", () => {
-			let fakeServer;
-
-			beforeEach(done => {
-				fakeServer = sinon.fakeServer.create();
-				fakeServer.respondImmediately = true;
-				fakeServer.respondWith("GET", "views/test-view.html", [304, {}, "<div></div>"]);
-				callback = sinon.spy(() => done());
-				applicationController.show(callback, {});
-			});
-
-			it("should hide the scroll helper", () => applicationController.hideScrollHelper.should.have.been.called);
-			it("should show the now loading indicator", () => nowLoading.hasClass("loading").should.be.true);
-			it("should load the view template", () => content.html().should.equal("<div></div>"));
-			it("should slide the new view in from the right", () => contentWrapper.hasClass("loading").should.be.true);
-			it("should invoke the callback", () => callback.should.have.been.calledWith({}));
-
-			afterEach(() => fakeServer.restore());
-		});
+		it("should hide the scroll helper", () => applicationController.hideScrollHelper.should.have.been.called);
+		it("should show the now loading indicator", () => nowLoading.hasClass("loading").should.be.true);
+		it("should load the view template", () => content.html().should.equal("<div></div>"));
+		it("should slide the new view in from the right", () => contentWrapper.hasClass("loading").should.be.true);
+		it("should invoke the callback", () => callback.should.have.been.calledWith({}));
 
 		afterEach(() => nowLoading.remove());
 	});

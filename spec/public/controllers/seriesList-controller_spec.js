@@ -2,6 +2,7 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import Series from "models/series-model";
 import SeriesListController from "controllers/seriesList-controller";
+import SeriesListView from "views/seriesList-view.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -60,6 +61,10 @@ describe("SeriesListController", () => {
 	describe("object constructor", () => {
 		it("should return a SeriesListController instance", () => seriesListController.should.be.an.instanceOf(SeriesListController));
 		it("should set the list item", () => seriesListController.listItem.should.equal(listItem));
+	});
+
+	describe("view", () => {
+		it("should return the series list view", () => seriesListController.view.should.equal(SeriesListView));
 	});
 
 	describe("setup", () => {

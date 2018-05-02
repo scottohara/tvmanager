@@ -18,7 +18,7 @@ import ApplicationController from "controllers/application-controller";
  * @classdesc Generic scrolling list view. Takes an array of JSON objects and a HTML template path, and renders a HTML list.
  * @this List
  * @property {String} container - id of the parent HTML DOM element
- * @property {String} itemTemplate - path (from root) to the HTML template to use for list items
+ * @property {String} itemTemplate - HTML template to use for list items
  * @property {String} groupBy - a property of the JSON objects to group the items by (ie. shows group headers in the list)
  * @property {Array<Object>} items - array of objects to render as list items
  * @property {Function} viewEventHandler - function called to view a list item
@@ -26,7 +26,7 @@ import ApplicationController from "controllers/application-controller";
  * @property {Function} deleteEventHandler - function called to delete a list item
  * @property {String} action - the current list mode ("view", "edit" or "delete"), ie. what happens when an item is tapped
  * @param {String} container - id of the parent HTML DOM element
- * @param {String} itemTemplate - path (from root) to the HTML template to use for list items
+ * @param {String} itemTemplate - HTML template to use for list items
  * @param {String} groupBy - a property of the JSON objects to group the items by (ie. shows group headers in the list)
  * @param {Array<Object>} items - array of objects to render as list items
  * @param {Function} [viewEventHandler] - function called to view a list item
@@ -56,51 +56,46 @@ export default class List {
 	 * @desc (Re)Populates and renders the HTML list
 	 */
 	refresh() {
-		// Load the HTML template to use for the list items
-		$.get(this.itemTemplate, (template, status, jqXHR) => {
-			// A 304 Not Modified returns undefined, so we need to get the template from the jqXHR object instead
-			const itemTemplate = template || jqXHR.responseText,
-						containerElement = $(`#${this.container}`);
+		const containerElement = $(`#${this.container}`);
 
-			// Clear any existing content from the container element
-			containerElement.html("");
+		// Clear any existing content from the container element
+		containerElement.html("");
 
-			let itemHTML,
-					group = "";
+		let itemHTML,
+				group = "";
 
-			// Loop through the array of JSON objects
-			containerElement.append(this.items.reduce((itemElements, item, index) => {
-				// If grouping is required, when the property used for the group changes, output a group header item
-				if (this.groupBy && group !== item[this.groupBy]) {
-					itemElements.push($("<li>")
-						.attr("id", item[this.groupBy])
-						.addClass("group")
-						.text(item[this.groupBy]));
-					group = item[this.groupBy];
-				}
-
-				// Start with the HTML template
-				itemHTML = itemTemplate;
-
-				// Iterate over the properties of the JSON object
-				for (const prop in item) {
-					if (Object.prototype.hasOwnProperty.call(item, prop)) {
-						// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
-						itemHTML = itemHTML.replace(`#{${prop}}`, item[prop]);
-					}
-				}
-
-				// Append the item to the list and bind the click event handler
+		// Loop through the array of JSON objects
+		containerElement.append(this.items.reduce((itemElements, item, index) => {
+			// If grouping is required, when the property used for the group changes, output a group header item
+			if (this.groupBy && group !== item[this.groupBy]) {
 				itemElements.push($("<li>")
-					.html(itemHTML)
-					.on("click", () => this.tap(index)));
+					.attr("id", item[this.groupBy])
+					.addClass("group")
+					.text(item[this.groupBy]));
+				group = item[this.groupBy];
+			}
 
-				return itemElements;
-			}, []));
+			// Start with the HTML template
+			itemHTML = this.itemTemplate;
 
-			// Ask the application controller to set/restore the initial scroll position
-			this.appController.setScrollPosition();
-		});
+			// Iterate over the properties of the JSON object
+			for (const prop in item) {
+				if (Object.prototype.hasOwnProperty.call(item, prop)) {
+					// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
+					itemHTML = itemHTML.replace(`#{${prop}}`, item[prop]);
+				}
+			}
+
+			// Append the item to the list and bind the click event handler
+			itemElements.push($("<li>")
+				.html(itemHTML)
+				.on("click", () => this.tap(index)));
+
+			return itemElements;
+		}, []));
+
+		// Ask the application controller to set/restore the initial scroll position
+		this.appController.setScrollPosition();
 	}
 
 	/**

@@ -1,6 +1,7 @@
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import RegistrationController from "controllers/registration-controller";
+import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
 
 // Get a reference to the application controller singleton
@@ -23,6 +24,10 @@ describe("RegistrationController", () => {
 
 	describe("object constructor", () => {
 		it("should return a RegistrationController instance", () => registrationController.should.be.an.instanceOf(RegistrationController));
+	});
+
+	describe("view", () => {
+		it("should return the registration view", () => registrationController.view.should.equal(RegistrationView));
 	});
 
 	describe("setup", () => {

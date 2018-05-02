@@ -13,6 +13,8 @@
  */
 import $ from "jquery";
 import List from "components/list";
+import ReportListTemplate from "views/reportListTemplate.html";
+import ReportView from "views/report-view.html";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -45,6 +47,17 @@ export default class ReportController extends ViewController {
 	 * @memberof ReportController
 	 * @this ReportController
 	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return ReportView;
+	}
+
+	/**
+	 * @memberof ReportController
+	 * @this ReportController
+	 * @instance
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
@@ -60,7 +73,7 @@ export default class ReportController extends ViewController {
 		};
 
 		// Instantiate a List object
-		this.reportList = new List("list", "views/reportListTemplate.html", null, [], this.viewItem.bind(this));
+		this.reportList = new List("list", ReportListTemplate, null, [], this.viewItem.bind(this));
 
 		// Activate the controller
 		this.activate();

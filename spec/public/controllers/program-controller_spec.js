@@ -2,6 +2,7 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import Program from "models/program-model";
 import ProgramController from "controllers/program-controller";
+import ProgramView from "views/program-view.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -49,6 +50,10 @@ describe("ProgramController", () => {
 				it("should set the list item", () => programController.listItem.program.programName.should.equal(listItem.program.programName));
 			});
 		});
+	});
+
+	describe("view", () => {
+		it("should return the program view", () => programController.view.should.equal(ProgramView));
 	});
 
 	describe("setup", () => {

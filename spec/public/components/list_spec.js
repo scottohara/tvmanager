@@ -1,6 +1,7 @@
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import List from "../../../src/components/list";
+import ListTemplate from "views/listTemplate.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -12,7 +13,6 @@ describe("List", () => {
 			itemTemplate,
 			groupBy,
 			items,
-			currentItem,
 			eventHandler,
 			action,
 			containerElement,
@@ -20,7 +20,7 @@ describe("List", () => {
 
 	beforeEach(() => {
 		container = "list";
-		itemTemplate = "base/spec/public/views/listTemplate.html";
+		itemTemplate = ListTemplate;
 		groupBy = "name";
 		items = [
 			// Object create is used to set a prototype, so we can test that the template correctly ignores inherited properties
@@ -37,8 +37,7 @@ describe("List", () => {
 				value: "item-three"
 			}
 		];
-		currentItem = 0;
-		eventHandler = index => index.should.equal(currentItem);
+		eventHandler = sinon.stub();
 		action = "view";
 
 		containerElement = $("<ul>")
@@ -65,53 +64,44 @@ describe("List", () => {
 	});
 
 	describe("refresh", () => {
-		let originalSetScrollPosition,
-				renderHtml,
-				resume;
+		let renderHtml;
 
-		beforeEach(() => {
-			originalSetScrollPosition = appController.setScrollPosition;
-			renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
-			appController.setScrollPosition = () => {
-				containerElement.html().should.equal(renderHtml);
-				$(`#${container} li:not([id])`).each((index, element) => {
-					currentItem = index;
-					$(element).trigger("click");
-				});
-				resume();
-			};
-		});
-
-		describe("304 not modified", () => {
-			it("should refresh the list", done => {
-				const fakeServer = sinon.fakeServer.create();
-
-				fakeServer.respondImmediately = true;
-				fakeServer.respondWith("GET", itemTemplate, [304, {}, "<a>#{name}:#{value}</a>"]);
-				resume = done;
-				list.groupBy = null;
-				list.refresh();
-				fakeServer.restore();
-			});
-		});
+		beforeEach(() => sinon.stub(list, "tap"));
 
 		describe("without grouping", () => {
-			it("should refresh the list", done => {
-				resume = done;
+			beforeEach(() => {
+				renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
 				list.groupBy = null;
 				list.refresh();
+			});
+
+			it("should render the list", () => containerElement.html().should.equal(renderHtml));
+
+			it("should attach a click handler to each item", () => {
+				$(`#${container} li:not([id])`).each((index, element) => {
+					$(element).trigger("click");
+					list.tap.should.have.been.calledWith(index);
+				});
+				list.tap.callCount.should.equal(3);
 			});
 		});
 
 		describe("with grouping", () => {
-			it("should refresh the list", done => {
-				resume = done;
+			beforeEach(() => {
 				renderHtml = "<li id=\"group-one\" class=\"group\">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id=\"group-two\" class=\"group\">group-two</li><li><a>group-two:item-three</a></li>";
 				list.refresh();
 			});
-		});
 
-		afterEach(() => (appController.setScrollPosition = originalSetScrollPosition));
+			it("should render the list", () => containerElement.html().should.equal(renderHtml));
+
+			it("should attach a click handler to each item", () => {
+				$(`#${container} li:not([id])`).each((index, element) => {
+					$(element).trigger("click");
+					list.tap.should.have.been.calledWith(index);
+				});
+				list.tap.callCount.should.equal(3);
+			});
+		});
 	});
 
 	describe("scrollTo", () => {

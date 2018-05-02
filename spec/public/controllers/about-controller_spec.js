@@ -1,5 +1,6 @@
 import $ from "jquery";
 import AboutController from "../../../src/controllers/about-controller";
+import AboutView from "views/about-view.html";
 import ApplicationController from "controllers/application-controller";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
@@ -17,23 +18,24 @@ describe("AboutController", () => {
 		it("should return an AboutController instance", () => aboutController.should.be.an.instanceOf(AboutController));
 	});
 
+	describe("view", () => {
+		it("should return the about view", () => aboutController.view.should.equal(AboutView));
+	});
+
 	describe("setup", () => {
 		let databaseVersion,
-				appVersion,
-				update;
+				appVersion;
 
 		beforeEach(() => {
 			databaseVersion = $("<input>").attr("id", "databaseVersion");
 			appVersion = $("<input>").attr("id", "appVersion");
-			update = $("<div>").attr("id", "update");
 
 			sinon.stub(aboutController, "goBack");
 			sinon.stub(aboutController, "programCount");
 			sinon.stub(aboutController, "seriesCount");
 			sinon.stub(aboutController, "episodeCount");
-			sinon.stub(aboutController, "checkForUpdate");
 
-			$(document.body).append(databaseVersion, appVersion, update);
+			$(document.body).append(databaseVersion, appVersion);
 			aboutController.setup();
 		});
 
@@ -65,17 +67,11 @@ describe("AboutController", () => {
 		it("should set the database version", () => databaseVersion.val().should.equal("v1.0"));
 		it("should set the app version", () => appVersion.val().should.equal("v1.0"));
 
-		it("should attach an update click event handler", () => {
-			update.trigger("click");
-			aboutController.checkForUpdate.should.have.been.called;
-		});
-
 		it("should set the scroll position", () => appController.setScrollPosition.should.have.been.called);
 
 		afterEach(() => {
 			databaseVersion.remove();
 			appVersion.remove();
-			update.remove();
 		});
 	});
 
@@ -154,22 +150,5 @@ describe("AboutController", () => {
 		});
 
 		afterEach(() => totalEpisodes.remove());
-	});
-
-	describe("checkForUpdate", () => {
-		describe("updating", () => {
-			it("should do nothing", () => {
-				aboutController.updating = true;
-				aboutController.checkForUpdate();
-				appController.cache.update.should.not.have.been.called;
-			});
-		});
-
-		describe("not updating", () => {
-			beforeEach(() => aboutController.checkForUpdate());
-
-			it("should update the application cache", () => appController.cache.update.should.have.been.calledWith(true));
-			it("should reset the updating flag", () => aboutController.updating.should.be.false);
-		});
 	});
 });

@@ -13,6 +13,7 @@
  */
 import $ from "jquery";
 import Series from "models/series-model";
+import SettingsView from "views/settings-view.html";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -22,6 +23,17 @@ import ViewController from "controllers/view-controller";
  * @property {HeaderFooter} header - the view header bar
  */
 export default class SettingsController extends ViewController {
+	/**
+	 * @memberof SettingsController
+	 * @this SettingsController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return SettingsView;
+	}
+
 	/**
 	 * @memberof SettingsController
 	 * @this SettingsController

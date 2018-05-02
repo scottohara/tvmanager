@@ -2,6 +2,7 @@ const merge = require("webpack-merge"),
 			path = require("path"),
 			{
 				providejQuery,
+				defineAppConfig,
 				config
 			} = require("./webpack.common");
 
@@ -21,7 +22,6 @@ module.exports = merge(config, {
 			"components/progressbar": "mocks/progressbar-mock",
 			"components/window": "mocks/window-mock",
 			"controllers/application-controller": "mocks/application-controller-mock",
-			"controllers/cache-controller": "mocks/cache-controller-mock",
 			"controllers/database-controller": "mocks/database-controller-mock",
 			"models/episode-model": "mocks/episode-model-mock",
 			"models/program-model": "mocks/program-model-mock",
@@ -40,6 +40,7 @@ module.exports = merge(config, {
 	},
 	devtool: "inline-source-map",
 	plugins: [
-		providejQuery
+		providejQuery,
+		defineAppConfig()
 	]
 });

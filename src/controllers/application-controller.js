@@ -10,7 +10,6 @@
  * @requires jquery
  * @requires framework/abc/abc
  * @requires controllers/about-controller
- * @requires controllers/cache-controller
  * @requires controllers/dataSync-controller
  * @requires controllers/database-controller
  * @requires controllers/episode-controller
@@ -31,7 +30,6 @@
 import $ from "jquery";
 import Abc from "framework/abc/abc";
 import AboutController from "controllers/about-controller";
-import CacheController from "controllers/cache-controller";
 import DataSyncController from "controllers/dataSync-controller";
 import DatabaseController from "controllers/database-controller";
 import EpisodeController from "controllers/episode-controller";
@@ -62,7 +60,6 @@ import UnscheduledController from "controllers/unscheduled-controller";
  * @class View
  * @classdesc Anonymous object containing the properties of a view
  * @private
- * @property {String} name - the name of the view
  * @property {Object} controller - instance of the view controller
  * @property {Number} scrollPos - the current scroll position for the view
  */
@@ -101,7 +98,6 @@ import UnscheduledController from "controllers/unscheduled-controller";
  * @property {NoticeStack} noticeStack - contains the array of notices displayed, and the total height of the notices
  * @property {abc} abc - scroll helper object
  * @property {TouchEventProxy} abctoucheventproxy - remaps touch events for the scroll helper
- * @property {CacheController} cache - the application cache controller
  * @property {DatabaseController} db - the database controller
  * @property {String} appVersion - the application version number
  * @property {Number} maxDataAgeDays - the number of days since the last import/export before a warning notice is displayed
@@ -135,43 +131,7 @@ export default class ApplicationController {
 		// Scroll helper only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
 		this.abctoucheventproxy = new TouchEventProxy($("#abc").get(0));
 
-		// Create the cache controller
-		this.cache = new CacheController(this.updateChecked.bind(this));
-
-		// Run an initial update check
-		this.cache.update();
-
 		return this;
-	}
-
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method updateChecked
-	 * @desc Shows a notice if the application was updated
-	 * @param {Boolean} notify - whether to show a notice
-	 * @param {String} message - the notification message to display
-	 * @param {String} noticeId - the notice identifier
-	 */
-	updateChecked(notify, message, noticeId) {
-		// If a notice is needed...
-		if (notify) {
-			// We get notified as every file is downloaded, so if a notice is already visible just update the message
-			if ($(`#${noticeId}`).length > 0) {
-				$(`#${noticeId}`).html(message);
-			} else {
-				// Otherwise, create a new notice
-				this.showNotice({
-					id: noticeId,
-					label: message,
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				});
-			}
-		}
 	}
 
 	/**
@@ -182,84 +142,61 @@ export default class ApplicationController {
 	 * @desc Start the application
 	 */
 	start() {
-		// Load the database configuration settings
-		$.get("/dbConfig", (config, status, jqXHR) => {
-			// A 304 Not Modified returns undefined, so we need to get the config from the jqXHR object instead
-			const dbConfig = config || JSON.parse(jqXHR.responseText);
+		// Create the database controller
+		this.db = new DatabaseController("TVManager", version => {
+			// If the version number changed, it means we ran a migration so we need the user to restart the application
+			if (version.initial === version.current) {
+				// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
+				this.viewControllers = {
+					about: AboutController,
+					dataSync: DataSyncController,
+					episode: EpisodeController,
+					episodes: EpisodesController,
+					program: ProgramController,
+					programs: ProgramsController,
+					registration: RegistrationController,
+					report: ReportController,
+					schedule: ScheduleController,
+					series: SeriesController,
+					seriesList: SeriesListController,
+					settings: SettingsController,
+					unscheduled: UnscheduledController
+				};
 
-			// Create the database controller
-			this.db = new DatabaseController(dbConfig.databaseName, version => {
-				// If the version number changed, it means we ran a migration so we need the user to restart the application
-				if (version.initial === version.current) {
-					// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
-					this.viewControllers = {
-						AboutController,
-						DataSyncController,
-						EpisodeController,
-						EpisodesController,
-						ProgramController,
-						ProgramsController,
-						RegistrationController,
-						ReportController,
-						ScheduleController,
-						SeriesController,
-						SeriesListController,
-						SettingsController,
-						UnscheduledController
-					};
-
-					// Display the schedule view
-					this.pushView("schedule");
-				} else {
-					// Show a notice to the user asking them to restart
-					this.showNotice({
-						label: `Database has been successfully upgraded from version ${version.initial} to version ${version.current}. Please restart the application.`,
-						leftButton: {
-							style: "cautionButton",
-							label: "OK"
-						}
-					});
-				}
-			}, error => {
-				// An error occurred opening the database, so display a notice to the user
+				// Display the schedule view
+				window.setTimeout(() => this.pushView("schedule"), 0);
+			} else {
+				// Show a notice to the user asking them to restart
 				this.showNotice({
-					label: error.message,
+					label: `Database has been successfully upgraded from version ${version.initial} to version ${version.current}. Please restart the application.`,
 					leftButton: {
 						style: "cautionButton",
 						label: "OK"
 					}
 				});
-			});
-
-			// If no errors occurred, get the application configuration settings
-			if (this.db.version) {
-				$.get("/appConfig", this.gotAppConfig.bind(this), "json");
 			}
-		}, "json");
-	}
+		}, error => {
+			// An error occurred opening the database, so display a notice to the user
+			this.showNotice({
+				label: error.message,
+				leftButton: {
+					style: "cautionButton",
+					label: "OK"
+				}
+			});
+		});
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method gotAppConfig
-	 * @desc Parses the application configuration settings and sets the application version
-	 * @param {ApplicationConfig} config - the application configuration settings
-	 * @param {String} status - the HTTP response code
-	 * @param {Object} jqXHR - the jQuery jqXHR object
-	 */
-	gotAppConfig(config, status, jqXHR) {
-		// A 304 Not Modified returns undefined, so we need to get the config from the jqXHR object instead
-		const appConfig = config || JSON.parse(jqXHR.responseText);
+		// If no errors occurred, get the application configuration settings
+		if (this.db.version) {
+			// Set the application version
+			this.appVersion = APP_VERSION;
 
-		// Set the application version
-		this.appVersion = appConfig.appVersion;
+			// Set the max data age days
+			this.maxDataAgeDays = Number(MAX_DATA_AGE_DAYS);
 
-		// Set the max data age days
-		this.maxDataAgeDays = appConfig.maxDataAgeDays;
-
-		// Get the last sync time
-		Setting.get("LastSyncTime", this.gotLastSyncTime.bind(this));
+			// Get the last sync time
+			Setting.get("LastSyncTime", this.gotLastSyncTime.bind(this));
+		}
 	}
 
 	/**
@@ -281,8 +218,7 @@ export default class ApplicationController {
 
 		// Push the view onto the stack and instantiate the controller with the specified arguments
 		this.viewStack.push({
-			name: view,
-			controller: new this.viewControllers[`${view.charAt(0).toUpperCase()}${view.substr(1)}Controller`](args),
+			controller: new this.viewControllers[view](args),
 			scrollPos: 0
 		});
 
@@ -368,16 +304,13 @@ export default class ApplicationController {
 		$("#nowLoading").addClass("loading");
 
 		// Load the view template
-		$("#content").load(`views/${this.viewStack[this.viewStack.length - 1].name}-view.html`, (responseText, status, jqXHR) => {
-			// A 304 Not Modified returns undefined, so we need to get the template from the jqXHR object instead
-			$("#content").html(responseText || jqXHR.responseText);
+		$("#content").html(this.viewStack[this.viewStack.length - 1].controller.view);
 
-			// Slide in the new view from the right
-			$("#contentWrapper").addClass("loading");
+		// Slide in the new view from the right
+		$("#contentWrapper").addClass("loading");
 
-			// Call the success function, passing through the arguments
-			onSuccess(args);
-		});
+		// Call the success function, passing through the arguments
+		onSuccess(args);
 	}
 
 	/**

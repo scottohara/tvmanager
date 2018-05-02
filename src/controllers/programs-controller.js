@@ -15,6 +15,8 @@
 import $ from "jquery";
 import List from "components/list";
 import Program from "models/program-model";
+import ProgramListTemplate from "views/programListTemplate.html";
+import ProgramsView from "views/programs-view.html";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -27,6 +29,17 @@ import ViewController from "controllers/view-controller";
  * @property {HeaderFooter} footer - the view footer bar
  */
 export default class ProgramsController extends ViewController {
+	/**
+	 * @memberof ProgramsController
+	 * @this ProgramsController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return ProgramsView;
+	}
+
 	/**
 	 * @memberof ProgramsController
 	 * @this ProgramsController
@@ -50,7 +63,7 @@ export default class ProgramsController extends ViewController {
 		};
 
 		// Instantiate a List object
-		this.programList = new List("list", "views/programListTemplate.html", "programGroup", [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
+		this.programList = new List("list", ProgramListTemplate, "programGroup", [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
 
 		// Get the list of programs
 		Program.list(this.listRetrieved.bind(this));

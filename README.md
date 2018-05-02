@@ -71,26 +71,6 @@ For running in the iOS Simulator, use `rake simulator:run`. This rake task will 
 
 The first time it runs it will create the database (you should receive a message saying that the database has been upgraded, and to restart the app).
 
-Deployment (Staging/Production)
-===============================
-If you use use heroku, it's a simple `rake deploy:staging` and `rake deploy:production`. These rake tasks assume that you have heroku remotes named staging and production configured; and you must create an annotated tag before deploying (eg. `git tag -a -m "Version 1.00" v1.00`); which is what will be pushed to heroku.
-
-The deploy rake task needs to be authorised with heroku to read/write the `APP_VERSION` config variable. To do this:
-1. Create a new OAuth authorisation with `write-protected` scope: `heroku authorizations:create --description "TVManager Deployment" --scope write-protected"`
-2. Store the token returned in an environment variable: `export TVMANAGER_HEROKU_TOKEN='{token}'`
-
-By default, the name of the client-side WebSQL database is "TVManager". Database names must be unique for the domain (origin), so in the event that you are hosting multiple environments under the same domain (eg. tvmanager.mydomain.com/production and tvmanager.mydomain.com/staging), you can override the default database name for one or both environments using an environment variable. For example, in development:
-
-`export DATABASE_NAME='TVManagerDev'`
-
-For staging/production, if you use Heroku:
-
-`heroku config:add DATABASE_NAME=TVManagerStaging --remote staging`
-
-The default database name doesn't need to be overriden if each environment is hosted under a separate domain (eg. tvmanager.mydomain.com and tvmanagerstaging.mydomain.com)
-
-During deployment, the `rake db:migrate` task automatically runs (see Import/Export below).
-
 Import/Export
 =============
 The app includes a backup/restore facility. A log of all changes made to the local WebSQL database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
@@ -137,11 +117,8 @@ heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager --r
 
 After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. This tasks automatically runs on each deployment, to ensure the latest design documents are being used.
 
-To remind users to backup regularly, a warning prompt appears at startup if the last backup was more than 7 days ago.  You can override the number of days that this warning appears using the following environment variable:
-
-`export TVMANAGER_MAX_DATA_AGE_DAYS=3`
-
-The above setting would prompt the user to backup after three days instead of the default seven days. In development, it is useful to set this to a very high number (eg. 9999) so that you are not constantly prompted to backup.
+To remind users to backup regularly, a warning prompt appears at startup if the last backup was more than 7 days ago.
+In development, this prompt is configured to appear after 9999 days so that you are not constantly prompted to backup.
 
 Running Tests
 =============
@@ -184,3 +161,15 @@ To generate documentation:
 
 * `npm run docs`
 * browse to file://path_to_project/docs/tvmanager/1.0.0/index.html
+
+Deployment (Staging/Production)
+===============================
+Before deploying, you should first create an annotated tag (e.g. `git tag -am "Version 1.00" v1.00`).
+
+If you use use heroku, it's a simple `git push heroku master`. If there are additional commits after the tag that shouldn't be deployed, just push the tag (`git push heroku v1.00:master`).
+
+The `Procfile` includes a `release` phase that automatically runs `db:migrate` before release is deployed.
+
+If you use heroku pipelines, the recommendation is that your `heroku` git remote maps to a `staging` app in the pipeline. This allows you to verify the release before promoting it to a `production` app in the pipeline.
+
+(Note: You must configure your heroku app to use the multi buildpack, e.g. `heroku buildpack:set https://github.com/heroku/heroku-buildpack-multi`)

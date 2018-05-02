@@ -15,6 +15,7 @@
  */
 import $ from "jquery";
 import Episode from "models/episode-model";
+import EpisodeView from "views/episode-view.html";
 import SpinningWheel from "framework/sw/spinningwheel";
 import TouchEventProxy from "components/toucheventproxy";
 import ViewController from "controllers/view-controller";
@@ -55,6 +56,17 @@ export default class EpisodeController extends ViewController {
 			// Otherwise, we're adding a new episode
 			this.listItem = {episode: new Episode(null, "", "", "", false, false, listItem.sequence, listItem.series.id)};
 		}
+	}
+
+	/**
+	 * @memberof EpisodeController
+	 * @this EpisodeController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return EpisodeView;
 	}
 
 	/**

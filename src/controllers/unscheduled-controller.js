@@ -15,6 +15,8 @@
 import $ from "jquery";
 import Episode from "models/episode-model";
 import List from "components/list";
+import UnscheduledListTemplate from "views/unscheduledListTemplate.html";
+import UnscheduledView from "views/unscheduled-view.html";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -26,6 +28,17 @@ import ViewController from "controllers/view-controller";
  * @property {HeaderFooter} footer - the view footer bar
  */
 export default class UnscheduledController extends ViewController {
+	/**
+	 * @memberof UnscheduledController
+	 * @this UnscheduledController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return UnscheduledView;
+	}
+
 	/**
 	 * @memberof UnscheduledController
 	 * @this UnscheduledController
@@ -45,7 +58,7 @@ export default class UnscheduledController extends ViewController {
 		};
 
 		// Instantiate a List object
-		this.unscheduledList = new List("list", "views/unscheduledListTemplate.html", null, [], this.viewItem.bind(this));
+		this.unscheduledList = new List("list", UnscheduledListTemplate, null, [], this.viewItem.bind(this));
 
 		// Activate the controller
 		this.activate();

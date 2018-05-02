@@ -11,7 +11,8 @@ const merge = require("webpack-merge"),
 				providejQuery,
 				extractCss,
 				createIndexHtml,
-				copyViewTemplates,
+				defineAppConfig,
+				generateServiceWorker,
 				config
 			} = require("./webpack.common");
 
@@ -50,7 +51,8 @@ module.exports = merge(config, {
 		cleanBuildDirectory,
 		extractCss(),
 		createIndexHtml,
-		copyViewTemplates,
+		defineAppConfig({maxDataAgeDays: 9999}),
+		generateServiceWorker,
 
 		// Live reload when in watch mode
 		new LiveReloadPlugin({

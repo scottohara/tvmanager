@@ -5,9 +5,6 @@ export default class DatabaseControllerMock {
 		this.name = databaseName;
 
 		switch (dbMode) {
-			case "304":
-				break;
-
 			case "Fail":
 				errorCallback({message: "Error"});
 				break;

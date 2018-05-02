@@ -14,6 +14,7 @@
  * @requires controllers/view-controller
  */
 import $ from "jquery";
+import AboutView from "views/about-view.html";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
 import Series from "models/series-model";
@@ -28,6 +29,17 @@ import ViewController from "controllers/view-controller";
  * @property {Boolean} updating - indicates whether an application cache update is currently running
  */
 export default class AboutController extends ViewController {
+	/**
+	 * @memberof AboutController
+	 * @this AboutController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return AboutView;
+	}
+
 	/**
 	 * @memberof AboutController
 	 * @this AboutController
@@ -58,9 +70,6 @@ export default class AboutController extends ViewController {
 		// Set the version information
 		$("#databaseVersion").val(`v${this.appController.db.version}`);
 		$("#appVersion").val(this.appController.appVersion);
-
-		// Bind an event to the check for updates button
-		$("#update").on("click", this.checkForUpdate.bind(this));
 
 		// Set the scroll position
 		this.appController.setScrollPosition();
@@ -133,26 +142,5 @@ export default class AboutController extends ViewController {
 
 		// Display the total number of episodes and percent watched
 		$("#totalEpisodes").val(`${this.episodeTotalCount} (${watchedPercent}% watched)`);
-	}
-
-	/**
-	 * @memberof AboutController
-	 * @this AboutController
-	 * @instance
-	 * @method checkForUpdate
-	 * @desc Updates the application cache
-	 */
-	checkForUpdate() {
-		// Check that an update is not currently in progress
-		if (!this.updating) {
-			// Set the updating flag
-			this.updating = true;
-
-			// Update the application cache (and show a notice for any errors/warnings)
-			this.appController.cache.update(true);
-
-			// Clear the updating flag
-			this.updating = false;
-		}
 	}
 }

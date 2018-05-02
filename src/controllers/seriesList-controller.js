@@ -15,6 +15,8 @@
 import $ from "jquery";
 import List from "components/list";
 import Series from "models/series-model";
+import SeriesListTemplate from "views/seriesListTemplate.html";
+import SeriesListView from "views/seriesList-view.html";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -43,6 +45,17 @@ export default class SeriesListController extends ViewController {
 	 * @memberof SeriesListController
 	 * @this SeriesListController
 	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return SeriesListView;
+	}
+
+	/**
+	 * @memberof SeriesListController
+	 * @this SeriesListController
+	 * @instance
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
@@ -62,7 +75,7 @@ export default class SeriesListController extends ViewController {
 		};
 
 		// Instantiate a List object
-		this.seriesList = new List("list", "views/seriesListTemplate.html", null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
+		this.seriesList = new List("list", SeriesListTemplate, null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
 
 		// Get the list of series for the specified program
 		Series.listByProgram(this.listItem.program.id, this.listRetrieved.bind(this));

@@ -3,7 +3,10 @@ const path = require("path"),
 			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
 			CleanWebpackPlugin = require("clean-webpack-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
-			CopyWebpackPlugin = require("copy-webpack-plugin"),
+			GitRevisionWebpackPlugin = require("git-revision-webpack-plugin"),
+			{GenerateSW} = require("workbox-webpack-plugin"),
+			packageJson = require("./package"),
+			MAX_DATA_AGE_DAYS = 7,
 
 			// Default entry
 			entry = {
@@ -70,10 +73,18 @@ const path = require("path"),
 			// Creates index.html with the bundled resources
 			createIndexHtml = new HtmlWebpackPlugin({template: "./src/index.html"}),
 
-			// Copies view templates to the build directory
-			copyViewTemplates = new CopyWebpackPlugin([
-				{from: "./src/views", to: "views", ignore: ["*~"]}
-			]),
+			// Generate a service worker to precache static assets
+			generateServiceWorker = new GenerateSW({
+				cacheId: packageJson.name,
+				skipWaiting: true,
+				clientsClaim: true,
+				runtimeCaching: [
+					{
+						urlPattern: /(app|db)Config$/,
+						handler: "staleWhileRevalidate"
+					}
+				]
+			}),
 
 			// Default config
 			config = {
@@ -150,6 +161,13 @@ function extractCss(hashFilename) {
 	return new MiniCssExtractPlugin({filename: hashFilename ? "[name]-[chunkhash:6].css" : "[name].css"});
 }
 
+function defineAppConfig({maxDataAgeDays} = {maxDataAgeDays: MAX_DATA_AGE_DAYS}) {
+	return new webpack.DefinePlugin({
+		APP_VERSION: JSON.stringify((new GitRevisionWebpackPlugin()).version()),
+		MAX_DATA_AGE_DAYS: maxDataAgeDays
+	});
+}
+
 module.exports = {
 	entry,
 	output,
@@ -160,6 +178,7 @@ module.exports = {
 	providejQuery,
 	extractCss,
 	createIndexHtml,
-	copyViewTemplates,
+	defineAppConfig,
+	generateServiceWorker,
 	config
 };

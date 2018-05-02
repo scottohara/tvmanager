@@ -7,9 +7,7 @@ source 'https://rubygems.org'
 
 group :development do
 	gem 'foreman'
-	gem 'git'
 	gem 'open4'
-	gem 'platform-api'
 	gem 'rake'
 	gem 'shotgun'
 end

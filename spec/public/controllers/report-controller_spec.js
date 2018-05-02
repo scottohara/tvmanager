@@ -1,5 +1,6 @@
 import ApplicationController from "controllers/application-controller";
 import ReportController from "controllers/report-controller";
+import ReportView from "views/report-view.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -28,6 +29,10 @@ describe("ReportController", () => {
 	describe("object constructor", () => {
 		it("should return a ReportController instance", () => reportController.should.be.an.instanceOf(ReportController));
 		it("should set the report", () => reportController.report.should.deep.equal(report));
+	});
+
+	describe("view", () => {
+		it("should return the report view", () => reportController.view.should.equal(ReportView));
 	});
 
 	describe("setup", () => {

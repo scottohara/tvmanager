@@ -18,6 +18,8 @@ import "jquery-ui/ui/widgets/sortable";
 import "jquery-ui-touch-punch";
 import $ from "jquery";
 import Episode from "models/episode-model";
+import EpisodeListTemplate from "views/episodeListTemplate.html";
+import EpisodesView from "views/episodes-view.html";
 import List from "components/list";
 import ViewController from "controllers/view-controller";
 
@@ -57,6 +59,17 @@ export default class EpisodesController extends ViewController {
 	 * @memberof EpisodesController
 	 * @this EpisodesController
 	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return EpisodesView;
+	}
+
+	/**
+	 * @memberof EpisodesController
+	 * @this EpisodesController
+	 * @instance
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
@@ -76,7 +89,7 @@ export default class EpisodesController extends ViewController {
 		};
 
 		// Instantiate a List object
-		this.episodeList = new List("list", "views/episodeListTemplate.html", null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
+		this.episodeList = new List("list", EpisodeListTemplate, null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
 
 		// Get the list of episodes for the specified series
 		Episode.listBySeries(this.listItem.series.id, this.listRetrieved.bind(this));

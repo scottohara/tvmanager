@@ -1,4 +1,3 @@
-import CacheControllerMock from "mocks/cache-controller-mock";
 import DatabaseMock from "mocks/database-mock";
 
 export default class ApplicationControllerMock {
@@ -12,7 +11,6 @@ export default class ApplicationControllerMock {
 		ApplicationControllerMock.prototype.singletonInstance = this;
 
 		this.db = new DatabaseMock();
-		this.cache = new CacheControllerMock();
 		this.notice = [];
 		this.appVersion = "v1.0";
 

@@ -13,6 +13,7 @@
  */
 import $ from "jquery";
 import Program from "models/program-model";
+import ProgramView from "views/program-view.html";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -43,6 +44,17 @@ export default class ProgramController extends ViewController {
 			// Otherwise we're adding a new program
 			this.listItem = {program: new Program(null, "", 0, 0, 0, 0, 0)};
 		}
+	}
+
+	/**
+	 * @memberof ProgramController
+	 * @this ProgramController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return ProgramView;
 	}
 
 	/**

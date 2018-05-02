@@ -10,13 +10,8 @@ module.exports = {
 
 	// List of files / patterns to load in the browser
 	files: [
-		"spec/public/**/*_spec.js",
-		"spec/public/views/*"
+		"spec/public/**/*_spec.js"
 	],
-
-	proxies: {
-		"/views/": "/base/spec/public/views/"
-	},
 
 	mochaReporter: {
 		showDiff: true

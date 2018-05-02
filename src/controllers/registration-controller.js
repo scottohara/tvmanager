@@ -12,6 +12,7 @@
  * @requires controllers/view-controller
  */
 import $ from "jquery";
+import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
 import ViewController from "controllers/view-controller";
 
@@ -24,6 +25,17 @@ import ViewController from "controllers/view-controller";
  * @property {HeaderFooter} footer - the view footer bar
  */
 export default class RegistrationController extends ViewController {
+	/**
+	 * @memberof RegistrationController
+	 * @this RegistrationController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return RegistrationView;
+	}
+
 	/**
 	 * @memberof RegistrationController
 	 * @this RegistrationController

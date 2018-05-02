@@ -17,6 +17,7 @@
  * @requires md5
  */
 import $ from "jquery";
+import DataSyncView from "views/dataSync-view.html";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
 import Series from "models/series-model";
@@ -56,6 +57,17 @@ const models = {Episode, Program, Series};
  * @property {Number} objectsImported - running total number of objects imported
  */
 export default class DataSyncController extends ViewController {
+	/**
+	 * @memberof DataSyncController
+	 * @this DataSyncController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return DataSyncView;
+	}
+
 	/**
 	 * @memberof DataSyncController
 	 * @this DataSyncController

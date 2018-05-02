@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import Program from "models/program-model";
 import Series from "models/series-model";
 import SeriesController from "controllers/series-controller";
+import SeriesView from "views/series-view.html";
 import SpinningWheel from "framework/sw/spinningwheel";
 
 // Get a reference to the application controller singleton
@@ -54,6 +55,10 @@ describe("SeriesController", () => {
 				seriesController.listItem.series.programName.should.equal(listItem.program.programName);
 			});
 		});
+	});
+
+	describe("view", () => {
+		it("should return the series view", () => seriesController.view.should.equal(SeriesView));
 	});
 
 	describe("setup", () => {

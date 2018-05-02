@@ -17,6 +17,7 @@
 import $ from "jquery";
 import Program from "models/program-model";
 import Series from "models/series-model";
+import SeriesView from "views/series-view.html";
 import SpinningWheel from "framework/sw/spinningwheel";
 import TouchEventProxy from "components/toucheventproxy";
 import ViewController from "controllers/view-controller";
@@ -48,6 +49,17 @@ export default class SeriesController extends ViewController {
 			// Otherwise, we're adding a new series
 			this.listItem = {series: new Series(null, "", "", listItem.program.id, listItem.program.programName, 0, 0, 0, 0, 0, 0)};
 		}
+	}
+
+	/**
+	 * @memberof SeriesController
+	 * @this SeriesController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return SeriesView;
 	}
 
 	/**

@@ -1,6 +1,7 @@
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import EpisodeController from "controllers/episode-controller";
+import EpisodeView from "views/episode-view.html";
 import SpinningWheel from "framework/sw/spinningwheel";
 
 // Get a reference to the application controller singleton
@@ -53,6 +54,10 @@ describe("EpisodeController", () => {
 				episodeController.listItem.episode.seriesId.should.equal(listItem.series.id);
 			});
 		});
+	});
+
+	describe("view", () => {
+		it("should return the episode view", () => episodeController.view.should.equal(EpisodeView));
 	});
 
 	describe("setup", () => {

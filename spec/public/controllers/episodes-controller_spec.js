@@ -2,6 +2,7 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import Episode from "models/episode-model";
 import EpisodesController from "controllers/episodes-controller";
+import EpisodesView from "views/episodes-view.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -50,6 +51,10 @@ describe("EpisodesController", () => {
 		it("should return a EpisodesController instance", () => episodesController.should.be.an.instanceOf(EpisodesController));
 		it("should set the list item", () => episodesController.listItem.should.equal(listItem));
 		it("should enable scrolling to the first unwatched episode", () => episodesController.scrollToFirstUnwatched.should.be.true);
+	});
+
+	describe("view", () => {
+		it("should return the episodes view", () => episodesController.view.should.equal(EpisodesView));
 	});
 
 	describe("setup", () => {

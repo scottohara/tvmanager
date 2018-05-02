@@ -14,6 +14,8 @@
  */
 import $ from "jquery";
 import List from "components/list";
+import ScheduleListTemplate from "views/scheduleListTemplate.html";
+import ScheduleView from "views/schedule-view.html";
 import Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
@@ -28,6 +30,17 @@ import ViewController from "controllers/view-controller";
  * @property {HeaderFooter} footer - the view footer bar
  */
 export default class ScheduleController extends ViewController {
+	/**
+	 * @memberof ScheduleController
+	 * @this ScheduleController
+	 * @instance
+	 * @property {String} view - the view template HTML
+	 * @desc Returns the HTML for the controller's view
+	 */
+	get view() {
+		return ScheduleView;
+	}
+
 	/**
 	 * @memberof ScheduleController
 	 * @this ScheduleController
@@ -50,7 +63,7 @@ export default class ScheduleController extends ViewController {
 		};
 
 		// Instantiate a List object
-		this.scheduleList = new List("list", "views/scheduleListTemplate.html", "nowShowingDisplay", [], this.viewItem.bind(this), this.editItem.bind(this));
+		this.scheduleList = new List("list", ScheduleListTemplate, "nowShowingDisplay", [], this.viewItem.bind(this), this.editItem.bind(this));
 
 		// Activate the controller
 		this.activate();

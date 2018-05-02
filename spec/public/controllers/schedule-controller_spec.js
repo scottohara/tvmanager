@@ -1,6 +1,7 @@
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import ScheduleController from "controllers/schedule-controller";
+import ScheduleView from "views/schedule-view.html";
 import Series from "models/series-model";
 
 // Get a reference to the application controller singleton
@@ -56,6 +57,10 @@ describe("ScheduleController", () => {
 
 	describe("object constructor", () => {
 		it("should return a ScheduleController instance", () => scheduleController.should.be.an.instanceOf(ScheduleController));
+	});
+
+	describe("view", () => {
+		it("should return the schedule view", () => scheduleController.view.should.equal(ScheduleView));
 	});
 
 	describe("setup", () => {

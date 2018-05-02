@@ -1,6 +1,7 @@
 import ApplicationController from "controllers/application-controller";
 import Episode from "models/episode-model";
 import UnscheduledController from "controllers/unscheduled-controller";
+import UnscheduledView from "views/unscheduled-view.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -16,6 +17,10 @@ describe("UnscheduledController", () => {
 
 	describe("object constructor", () => {
 		it("should return an UnscheduledController instance", () => unscheduledController.should.be.an.instanceOf(UnscheduledController));
+	});
+
+	describe("view", () => {
+		it("should return the unscheduled view", () => unscheduledController.view.should.equal(UnscheduledView));
 	});
 
 	describe("setup", () => {

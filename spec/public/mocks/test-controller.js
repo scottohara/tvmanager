@@ -1,3 +1,5 @@
+import TestView from "views/test-view.html";
+
 export default class TestController {
 	constructor(args) {
 		this.args = args;
@@ -28,5 +30,9 @@ export default class TestController {
 				label: "right-button"
 			}
 		};
+	}
+
+	get view() {
+		return TestView;
 	}
 }

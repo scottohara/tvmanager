@@ -1,6 +1,7 @@
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import DataSyncController from "controllers/dataSync-controller";
+import DataSyncView from "views/dataSync-view.html";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
 import Series from "models/series-model";
@@ -17,6 +18,10 @@ describe("DataSyncController", () => {
 
 	describe("object constructor", () => {
 		it("should return a DataSyncController instance", () => dataSyncController.should.be.an.instanceOf(DataSyncController));
+	});
+
+	describe("view", () => {
+		it("should return the data sync view", () => dataSyncController.view.should.equal(DataSyncView));
 	});
 
 	describe("setup", () => {

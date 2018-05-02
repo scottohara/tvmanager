@@ -10,7 +10,8 @@ const webpack = require("webpack"),
 				providejQuery,
 				extractCss,
 				createIndexHtml,
-				copyViewTemplates,
+				defineAppConfig,
+				generateServiceWorker,
 				config
 			} = require("./webpack.common");
 
@@ -47,7 +48,8 @@ module.exports = merge(config, {
 		cleanBuildDirectory,
 		extractCss(true),
 		createIndexHtml,
-		copyViewTemplates
+		defineAppConfig(),
+		generateServiceWorker
 	],
 
 	// Fail if any chunks exceed performance budget

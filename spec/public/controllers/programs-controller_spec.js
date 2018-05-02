@@ -2,6 +2,7 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import Program from "models/program-model";
 import ProgramsController from "controllers/programs-controller";
+import ProgramsView from "views/programs-view.html";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -26,6 +27,10 @@ describe("ProgramsController", () => {
 
 	describe("object constructor", () => {
 		it("should return a ProgramsController instance", () => programsController.should.be.an.instanceOf(ProgramsController));
+	});
+
+	describe("view", () => {
+		it("should return the programs view", () => programsController.view.should.equal(ProgramsView));
 	});
 
 	describe("setup", () => {
