@@ -4,6 +4,7 @@ import DatabaseController from "controllers/database-controller";
 import Setting from "models/setting-model";
 import SpinningWheel from "framework/sw/spinningwheel";
 import TestController from "mocks/test-controller";
+import window from "components/window";
 
 describe("ApplicationController", () => {
 	let contentWrapper,
@@ -109,14 +110,10 @@ describe("ApplicationController", () => {
 		});
 
 		describe("database opened", () => {
-			let clock;
-
 			beforeEach(() => {
 				sinon.stub(applicationController, "pushView");
-				clock = sinon.useFakeTimers();
 				DatabaseController.mode = null;
 				applicationController.start();
-				clock.tick(0);
 			});
 
 			it("should create the database controller", () => applicationController.db.name.should.equal("TVManager"));
@@ -187,23 +184,18 @@ describe("ApplicationController", () => {
 	});
 
 	describe("viewPushed", () => {
-		let setup,
-				clock;
+		let setup;
 
 		beforeEach(() => {
 			setup = sinon.stub();
-			clock = sinon.useFakeTimers();
 			sinon.stub(applicationController, "setHeader");
 			applicationController.viewStack.push({controller: {setup}});
 			applicationController.viewPushed();
-			clock.tick(1000);
 		});
 
 		it("should setup the view controller", () => setup.should.have.been.called);
 		it("should set the header", () => applicationController.setHeader.should.have.been.called);
 		it("should indicate that the view has loaded after 1s", () => applicationController.contentShown.should.have.been.called);
-
-		afterEach(() => clock.restore());
 	});
 
 	describe("popView", () => {
@@ -226,23 +218,18 @@ describe("ApplicationController", () => {
 	});
 
 	describe("viewPopped", () => {
-		let activate,
-				clock;
+		let activate;
 
 		beforeEach(() => {
 			activate = sinon.stub();
-			clock = sinon.useFakeTimers();
 			sinon.stub(applicationController, "setHeader");
 			applicationController.viewStack.push({controller: {activate}});
 			applicationController.viewPopped({});
-			clock.tick(1000);
 		});
 
 		it("should activate the view controller", () => activate.should.have.been.calledWith({}));
 		it("should set the header", () => applicationController.setHeader.should.have.been.called);
 		it("should indicate that the view has loaded after 1s", () => applicationController.contentShown.should.have.been.called);
-
-		afterEach(() => clock.restore());
 	});
 
 	describe("show", () => {

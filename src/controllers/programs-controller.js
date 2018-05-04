@@ -18,6 +18,7 @@ import Program from "models/program-model";
 import ProgramListTemplate from "views/programListTemplate.html";
 import ProgramsView from "views/programs-view.html";
 import ViewController from "controllers/view-controller";
+import window from "components/window";
 
 /**
  * @class ProgramsController

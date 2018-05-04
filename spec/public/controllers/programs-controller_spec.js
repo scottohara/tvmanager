@@ -102,13 +102,9 @@ describe("ProgramsController", () => {
 
 		describe("from program view", () => {
 			let listItem,
-					sortedItems,
-					clock;
+					sortedItems;
 
-			beforeEach(() => {
-				clock = sinon.useFakeTimers();
-				programsController.programList.items = items;
-			});
+			beforeEach(() => (programsController.programList.items = items));
 
 			describe("edit", () => {
 				beforeEach(() => {
@@ -127,7 +123,6 @@ describe("ProgramsController", () => {
 					beforeEach(() => {
 						programsController.origProgramName = listItem.program.programName;
 						programsController.activate(listItem);
-						clock.tick(300);
 					});
 
 					it("should update the item in the program list and resort by program name", () => programsController.programList.items.should.deep.equal(sortedItems));
@@ -140,7 +135,6 @@ describe("ProgramsController", () => {
 					beforeEach(() => {
 						programsController.origProgramName = "original-program";
 						programsController.activate(listItem);
-						clock.tick(300);
 					});
 
 					it("should update the item in the program list and resort by program name", () => programsController.programList.items.should.deep.equal(sortedItems));
@@ -160,7 +154,6 @@ describe("ProgramsController", () => {
 						items[1]
 					];
 					programsController.activate(listItem);
-					clock.tick(300);
 				});
 
 				it("should add the item to the program list and resort by program name", () => programsController.programList.items.should.deep.equal(sortedItems));
@@ -168,8 +161,6 @@ describe("ProgramsController", () => {
 				it("should scroll the list", () => programsController.programList.scrollTo.should.have.been.calledWith(3));
 				it("should set the list to view mode", () => programsController.viewItems.should.have.been.called);
 			});
-
-			afterEach(() => clock.restore());
 		});
 	});
 

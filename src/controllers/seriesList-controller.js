@@ -18,6 +18,7 @@ import Series from "models/series-model";
 import SeriesListTemplate from "views/seriesListTemplate.html";
 import SeriesListView from "views/seriesList-view.html";
 import ViewController from "controllers/view-controller";
+import window from "components/window";
 
 /**
  * @class SeriesListController

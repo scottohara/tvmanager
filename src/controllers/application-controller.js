@@ -46,6 +46,7 @@ import SettingsController from "controllers/settings-controller";
 import SpinningWheel from "framework/sw/spinningwheel";
 import TouchEventProxy from "components/toucheventproxy";
 import UnscheduledController from "controllers/unscheduled-controller";
+import window from "components/window";
 
 /**
  * @class HeaderFooter

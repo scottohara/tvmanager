@@ -7,6 +7,7 @@ import Program from "models/program-model";
 import Series from "models/series-model";
 import Setting from "models/setting-model";
 import Sync from "models/sync-model";
+import window from "components/window";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -341,7 +342,7 @@ describe("DataSyncController", () => {
 
 			describe("confirmed", () => {
 				beforeEach(() => {
-					sinon.stub(window, "confirm").returns(true);
+					window.confirm.returns(true);
 					dataSyncController.syncStart("Operation", "prompt", callback);
 				});
 
@@ -357,7 +358,7 @@ describe("DataSyncController", () => {
 
 			describe("cancelled", () => {
 				beforeEach(() => {
-					sinon.stub(window, "confirm").returns(false);
+					window.confirm.returns(false);
 					dataSyncController.syncStart("Operation", "prompt");
 				});
 
@@ -374,7 +375,6 @@ describe("DataSyncController", () => {
 			afterEach(() => {
 				progress.remove();
 				statusRow.remove();
-				window.confirm.restore();
 			});
 		});
 

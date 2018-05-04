@@ -25,6 +25,7 @@ import Setting from "models/setting-model";
 import Sync from "models/sync-model";
 import ViewController from "controllers/view-controller";
 import md5 from "md5";
+import window from "components/window";
 
 /**
  * @class Device

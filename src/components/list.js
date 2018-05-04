@@ -12,6 +12,7 @@
  */
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
+import window from "components/window";
 
 /**
  * @class List

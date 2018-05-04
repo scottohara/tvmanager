@@ -22,6 +22,7 @@ import EpisodeListTemplate from "views/episodeListTemplate.html";
 import EpisodesView from "views/episodes-view.html";
 import List from "components/list";
 import ViewController from "controllers/view-controller";
+import window from "components/window";
 
 /**
  * @class SeriesListItem

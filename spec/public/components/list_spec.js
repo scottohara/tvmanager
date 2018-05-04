@@ -2,6 +2,7 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import List from "../../../src/components/list";
 import ListTemplate from "views/listTemplate.html";
+import window from "components/window";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -145,10 +146,7 @@ describe("List", () => {
 	});
 
 	describe("setAction", () => {
-		let windowAlert;
-
 		beforeEach(() => {
-			windowAlert = sinon.stub(window, "alert");
 			appController.getScrollPosition.reset();
 			list.action = "";
 		});
@@ -165,7 +163,7 @@ describe("List", () => {
 					it("should save the scroll position", () => appController.getScrollPosition.should.have.been.called);
 				}
 
-				it("should not show an alert", () => windowAlert.should.not.have.been.called);
+				it("should not show an alert", () => window.alert.should.not.have.been.called);
 			});
 		});
 
@@ -173,20 +171,13 @@ describe("List", () => {
 			beforeEach(() => list.setAction("invalid"));
 
 			it("should not save the scroll position", () => appController.getScrollPosition.should.not.have.been.called);
-			it("should show an alert", () => windowAlert.should.have.been.calledWith("invalid is not a valid action"));
+			it("should show an alert", () => window.alert.should.have.been.calledWith("invalid is not a valid action"));
 			it("should not set the action", () => list.action.should.equal(""));
 		});
-
-		afterEach(() => windowAlert.restore());
 	});
 
 	describe("tap", () => {
-		let windowConfirm;
-
-		beforeEach(() => {
-			eventHandler = sinon.stub();
-			windowConfirm = sinon.stub(window, "confirm");
-		});
+		beforeEach(() => (eventHandler = sinon.stub()));
 
 		validActions.forEach(validAction => {
 			describe(validAction, () => {
@@ -197,7 +188,7 @@ describe("List", () => {
 						list.tap(0);
 					});
 
-					it("should not trigger a confirm prompt", () => windowConfirm.should.not.have.been.called);
+					it("should not trigger a confirm prompt", () => window.confirm.should.not.have.been.called);
 					it("should not trigger the event handler", () => eventHandler.should.not.have.been.called);
 				});
 
@@ -207,23 +198,23 @@ describe("List", () => {
 					if ("delete" === validAction) {
 						describe("confirmed", () => {
 							beforeEach(() => {
-								windowConfirm.returns(true);
+								window.confirm.returns(true);
 								list.action = validAction;
 								list.tap(0);
 							});
 
-							it("should trigger a confirm prompt", () => windowConfirm.should.have.been.calledWith("Delete this item?"));
+							it("should trigger a confirm prompt", () => window.confirm.should.have.been.calledWith("Delete this item?"));
 							it("should trigger the event handler", () => eventHandler.should.have.been.called);
 						});
 
 						describe("aborted", () => {
 							beforeEach(() => {
-								windowConfirm.returns(false);
+								window.confirm.returns(false);
 								list.action = validAction;
 								list.tap(0);
 							});
 
-							it("should trigger a confirm prompt", () => windowConfirm.should.have.been.calledWith("Delete this item?"));
+							it("should trigger a confirm prompt", () => window.confirm.should.have.been.calledWith("Delete this item?"));
 							it("should not trigger the event handler", () => eventHandler.should.not.have.been.called);
 						});
 					} else {
@@ -232,14 +223,12 @@ describe("List", () => {
 							list.tap(0);
 						});
 
-						it("should not trigger a confirm prompt", () => windowConfirm.should.not.have.been.called);
+						it("should not trigger a confirm prompt", () => window.confirm.should.not.have.been.called);
 						it("should trigger the event handler", () => eventHandler.should.have.been.called);
 					}
 				});
 			});
 		});
-
-		afterEach(() => windowConfirm.restore());
 	});
 
 	afterEach(() => containerElement.remove());

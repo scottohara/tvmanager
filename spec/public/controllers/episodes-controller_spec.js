@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import Episode from "models/episode-model";
 import EpisodesController from "controllers/episodes-controller";
 import EpisodesView from "views/episodes-view.html";
+import window from "components/window";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
@@ -122,12 +123,8 @@ describe("EpisodesController", () => {
 	});
 
 	describe("activate", () => {
-		let clock;
-
 		beforeEach(() => {
-			clock = sinon.useFakeTimers();
 			sinon.stub(episodesController, "viewItems");
-			sinon.spy(window, "setTimeout");
 			episodesController.episodeList = {
 				items: [Object.assign({}, items[0])],
 				refresh: sinon.stub(),
@@ -227,7 +224,6 @@ describe("EpisodesController", () => {
 			describe("all watched", () => {
 				beforeEach(() => {
 					episodesController.activate();
-					clock.tick(300);
 				});
 
 				it("should not scroll", () => episodesController.episodeList.scrollTo.should.not.have.been.called);
@@ -242,7 +238,6 @@ describe("EpisodesController", () => {
 						{id: 3}
 					];
 					episodesController.activate();
-					clock.tick(300);
 				});
 
 				it("should scroll to the first unwatched episode", () => episodesController.episodeList.scrollTo.should.have.been.calledWith(1));
@@ -257,15 +252,12 @@ describe("EpisodesController", () => {
 						{id: 3}
 					];
 					episodesController.activate();
-					clock.tick(300);
 				});
 
 				it("should scroll to the first unwatched episode", () => episodesController.episodeList.scrollTo.should.have.been.calledWith(3));
 				it("should disable scrolling to the first unwatched episode", () => episodesController.scrollToFirstUnwatched.should.be.false);
 			});
 		});
-
-		afterEach(() => clock.restore());
 	});
 
 	describe("listRetrieved", () => {

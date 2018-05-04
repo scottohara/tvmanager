@@ -138,10 +138,7 @@ describe("SeriesListController", () => {
 		});
 
 		describe("from series or episodes view", () => {
-			let sortedItems,
-					clock;
-
-			beforeEach(() => (clock = sinon.useFakeTimers()));
+			let sortedItems;
 
 			describe("edit", () => {
 				beforeEach(() => {
@@ -154,7 +151,6 @@ describe("SeriesListController", () => {
 					beforeEach(() => {
 						listItem.series.programId = 2;
 						seriesListController.activate(listItem);
-						clock.tick(300);
 					});
 
 					it("should not update the program episode count", () => listItem.program.setEpisodeCount.should.not.have.been.called);
@@ -179,7 +175,6 @@ describe("SeriesListController", () => {
 						beforeEach(() => {
 							seriesListController.origSeriesName = listItem.series.seriesName;
 							seriesListController.activate(listItem);
-							clock.tick(300);
 						});
 
 						it("should update the item in the series list and resort by series name", () => seriesListController.seriesList.items.should.deep.equal(items));
@@ -197,7 +192,6 @@ describe("SeriesListController", () => {
 						beforeEach(() => {
 							seriesListController.origSeriesName = "original-program";
 							seriesListController.activate(listItem);
-							clock.tick(300);
 						});
 
 						it("should update the item in the series list and resort by series name", () => seriesListController.seriesList.items.should.deep.equal(items));
@@ -222,7 +216,6 @@ describe("SeriesListController", () => {
 						items[1]
 					];
 					seriesListController.activate(listItem);
-					clock.tick(300);
 				});
 
 				it("should add the item to the series list and resort by series name", () => seriesListController.seriesList.items.should.deep.equal(sortedItems));
@@ -231,8 +224,6 @@ describe("SeriesListController", () => {
 				it("should scroll the list", () => seriesListController.seriesList.scrollTo.should.have.been.calledWith(3));
 				it("should set the list to view mode", () => seriesListController.viewItems.should.have.been.called);
 			});
-
-			afterEach(() => clock.restore());
 		});
 	});
 
