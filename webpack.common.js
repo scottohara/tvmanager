@@ -59,7 +59,10 @@ const path = require("path"),
 			htmlRule = {
 				test: /\.html$/,
 				include: /views/,
-				loader: "html-loader"
+				loader: "html-loader",
+				options: {
+					minimize: true
+				}
 			},
 
 			// Cleans the build directory
@@ -95,7 +98,7 @@ const path = require("path"),
 
 				// Default rules for all environments
 				module: {
-					rules: [htmlRule]
+					rules: []
 				},
 
 				// Default resolve paths
@@ -174,6 +177,7 @@ module.exports = {
 	cssRule,
 	iconRule,
 	imageRule,
+	htmlRule,
 	cleanBuildDirectory,
 	providejQuery,
 	extractCss,

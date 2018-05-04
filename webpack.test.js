@@ -1,6 +1,7 @@
 const merge = require("webpack-merge"),
 			path = require("path"),
 			{
+				htmlRule,
 				providejQuery,
 				defineAppConfig,
 				config
@@ -12,7 +13,8 @@ module.exports = merge(config, {
 			{
 				test: /\.css$/,
 				loader: "ignore-loader"
-			}
+			},
+			htmlRule
 		]
 	},
 	resolve: {

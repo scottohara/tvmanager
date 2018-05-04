@@ -7,6 +7,7 @@ const merge = require("webpack-merge"),
 				cssRule,
 				iconRule,
 				imageRule,
+				htmlRule,
 				cleanBuildDirectory,
 				providejQuery,
 				extractCss,
@@ -38,6 +39,12 @@ module.exports = merge(config, {
 				options: {
 					// No hash in file names
 					name: "images/[name].[ext]"
+				}
+			}),
+			merge(htmlRule, {
+				options: {
+					// Don't minify
+					minimize: false
 				}
 			})
 		]

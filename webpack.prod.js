@@ -6,6 +6,7 @@ const webpack = require("webpack"),
 				cssRule,
 				iconRule,
 				imageRule,
+				htmlRule,
 				cleanBuildDirectory,
 				providejQuery,
 				extractCss,
@@ -30,7 +31,8 @@ module.exports = merge(config, {
 		rules: [
 			cssRule({minimize: true}),
 			iconRule,
-			imageRule
+			imageRule,
+			htmlRule
 		]
 	},
 
