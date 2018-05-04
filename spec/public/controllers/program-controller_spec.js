@@ -15,7 +15,7 @@ describe("ProgramController", () => {
 		listItem = {
 			program: {
 				programName: "test-program",
-				save: sinon.stub(),
+				save: sinon.stub().yields(),
 				setProgramName(programName) {
 					this.programName = programName;
 				}

@@ -130,15 +130,15 @@ export default class EpisodeController extends ViewController {
 		this.listItem.episode.unscheduled = $("#unscheduled").is(":checked");
 
 		// Update the database
-		this.listItem.episode.save();
+		this.listItem.episode.save(() => {
+			// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
+			if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
+				this.appController.viewStack[this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
+			}
 
-		// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
-		if (isNaN(this.listItem.listIndex) || this.listItem.listIndex < 0) {
-			this.appController.viewStack[this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
-		}
-
-		// Pop the view off the stack
-		this.appController.popView(this.listItem);
+			// Pop the view off the stack
+			this.appController.popView(this.listItem);
+		});
 	}
 
 	/**

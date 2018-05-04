@@ -20,7 +20,7 @@ describe("EpisodeController", () => {
 				statusDate: "01-Jan",
 				unverified: false,
 				unscheduled: false,
-				save: sinon.stub(),
+				save: sinon.stub().yields(),
 				setStatus: sinon.stub(),
 				setStatusDate: sinon.stub(),
 				setUnverified: sinon.stub()

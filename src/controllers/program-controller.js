@@ -94,11 +94,8 @@ export default class ProgramController extends ViewController {
 		// Get the program details
 		this.listItem.program.setProgramName($("#programName").val());
 
-		// Update the database
-		this.listItem.program.save();
-
-		// Pop the view off the stack
-		this.appController.popView(this.listItem);
+		// Update the database and pop the view off the stack
+		this.listItem.program.save(() => this.appController.popView(this.listItem));
 	}
 
 	/**

@@ -21,7 +21,7 @@ describe("SeriesController", () => {
 				nowShowing: 1,
 				nowShowingDisplay: "Not Showing",
 				programId: 1,
-				save: sinon.stub(),
+				save: sinon.stub().yields(),
 				setNowShowing: sinon.stub()
 			}
 		};

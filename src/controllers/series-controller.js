@@ -104,11 +104,8 @@ export default class SeriesController extends ViewController {
 		// Get the series details
 		this.listItem.series.seriesName = $("#seriesName").val();
 
-		// Update the database
-		this.listItem.series.save();
-
-		// Pop the view off the stack
-		this.appController.popView(this.listItem);
+		// Update the database and pop the view off the stack
+		this.listItem.series.save(() => this.appController.popView(this.listItem));
 	}
 
 	/**
