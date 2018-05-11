@@ -124,10 +124,12 @@ Running Tests
 =============
 Frontend specs are implemented using [mocha](https://mochajs.org/)+[chai](http://chaijs.com/)+[sinon](http://sinonjs.org/).
 
-Two [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
+Four [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
 
 1. `npm run test:bdd` watches for any file changes and runs the full test suite (without code coverage)
 2. `npm run test:coverage` performs a single full test suite run, including [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available in `/tvmanager/coverage/{browser}/index.html`
+3. `npm run test:coverage:chrome` is the same as `npm run test:coverage`, except only for headless Chrome
+4. `npm run test:coverage:mobile` is the same as `npm run test:coverage`, except only for iOS Simulator
 
 By default, the `test:bdd` suite is run in Chrome, and the `test:coverage` suite is run in headless Chrome and iOS Simulator.
 

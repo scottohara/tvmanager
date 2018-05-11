@@ -65,9 +65,11 @@
     "build": "webpack --progress --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.dev.js",
     "lint": "eslint 'src/**/*.js' 'spec/public/**/*.js' '*.js'",
-    "test": "npm run lint && npm run test:coverage",
+    "test": "npm run lint && npm run test:coverage:mobile",
     "test:bdd": "karma start karma-bdd.conf.js",
     "test:coverage": "karma start",
+    "test:coverage:chrome": "karma start --browsers ChromeHeadless",
+    "test:coverage:mobile": "karma start --browsers MobileSafari",
     "docs": "jsdoc --configure jsdoc.json"
   },
   "engines": {
