@@ -40,6 +40,12 @@ module.exports = merge(config, {
 			path.resolve(__dirname, "node_modules")
 		]
 	},
+
+	// Remove this when https://github.com/webpack-contrib/karma-webpack/pull/325 is merged
+	optimization: {
+		splitChunks: false,
+		runtimeChunk: false
+	},
 	devtool: "inline-source-map",
 	plugins: [
 		providejQuery,
