@@ -8,6 +8,15 @@ To create a new icon size:
 3. Save the generated PNG file as `src/images/tv-icon-{height}x{width}.png`
 4. Add the appropriate `<link rel="apple-touch-icon" href="${require('images/tv-icon-{height}x{width}.png')}" sizes="{height}x{width}"/>` tag to `src/index.html`
 
+Sizes:
+* iPhone non-retina <= iOS6 : 57x57
+* iPhone retina <= iOS6 : 114x114
+* iPhone retina iOS7+ : 144x144
+* iPad non-retina <= iOS6 : 72x72
+* iPad non-retina iOS7+ : 76x76
+* iPad retina <= iOS6 : 120x120
+* iPad retina iOS7+ : 152x152
+
 Application startup image
 =========================
 The startup image (as referenced by the `apple-touch-startup-image` links in index.html) is generated from `tv-splash.html`

@@ -1,7 +1,7 @@
 {
   "name": "tvmanager",
   "version": "1.0.0",
-  "description": "iPhone web app for managing recorded TV",
+  "description": "Tracks recorded, watched & upcoming TV shows",
   "keywords": [
     "tv",
     "recording",
