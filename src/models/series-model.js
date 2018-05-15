@@ -85,26 +85,26 @@ export default class Series extends Base {
 				REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID)
 				VALUES (?, ?, ?, ?)
 			`, [this.id, this.seriesName, this.nowShowing, this.programId], (innerTx, resultSet) => {
-					// Regardless of whether the series existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
-					if (!resultSet.rowsAffected) {
-						throw new Error("no rows affected");
-					}
+				// Regardless of whether the series existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
+				if (!resultSet.rowsAffected) {
+					throw new Error("no rows affected");
+				}
 
-					// Execute the SQL to flag the series as a pending local change
-					innerTx.executeSql(`
-						INSERT OR IGNORE INTO Sync (Type, ID, Action)
-						VALUES ('Series', ?, 'modified')
-					`, [this.id], () => {
-							// If a callback was provided, call it now with the series' id
-							if (callback) {
-								callback(this.id);
-							}
-						},
-						(_, error) => {
-							// Something went wrong
-							throw error;
-						});
+				// Execute the SQL to flag the series as a pending local change
+				innerTx.executeSql(`
+					INSERT OR IGNORE INTO Sync (Type, ID, Action)
+					VALUES ('Series', ?, 'modified')
+				`, [this.id], () => {
+					// If a callback was provided, call it now with the series' id
+					if (callback) {
+						callback(this.id);
+					}
+				},
+				(_, error) => {
+					// Something went wrong
+					throw error;
 				});
+			});
 		}, error => {
 			// Something went wrong. If a callback was provided, call it now with no parameters
 			if (callback) {
@@ -591,16 +591,16 @@ export default class Series extends Base {
 			FROM		Series
 			WHERE		SeriesID = ?
 		`, [id], (_, resultSet) => {
-				const series = resultSet.rows.item(0);
+			const series = resultSet.rows.item(0);
 
-				// Instantiate a new Series object, and invoke the callback function passing the series
-				callback(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID));
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing a null
-				callback(null);
+			// Instantiate a new Series object, and invoke the callback function passing the series
+			callback(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID));
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing a null
+			callback(null);
 
-				return `Series.find: ${error.message}`;
-			}));
+			return `Series.find: ${error.message}`;
+		}));
 	}
 
 	/**
@@ -616,13 +616,13 @@ export default class Series extends Base {
 			SELECT	COUNT(*) AS SeriesCount
 			FROM		Series
 		`, [],
-			(_, resultSet) => callback(resultSet.rows.item(0).SeriesCount),
-			(_, error) => {
-				// Something went wrong. Call the callback passing zero
-				callback(0);
+		(_, resultSet) => callback(resultSet.rows.item(0).SeriesCount),
+		(_, error) => {
+			// Something went wrong. Call the callback passing zero
+			callback(0);
 
-				return `Series.count: ${error.message}`;
-			}));
+			return `Series.count: ${error.message}`;
+		}));
 	}
 
 	/**

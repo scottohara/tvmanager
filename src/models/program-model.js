@@ -72,25 +72,25 @@ export default class Program extends Base {
 				REPLACE INTO Program (ProgramID, Name)
 				VALUES (?, ?)
 			`, [this.id, this.programName], (innerTx, resultSet) => {
-					// Regardless of whether the program existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
-					if (!resultSet.rowsAffected) {
-						throw new Error("no rows affected");
-					}
+				// Regardless of whether the program existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
+				if (!resultSet.rowsAffected) {
+					throw new Error("no rows affected");
+				}
 
-					// Execute the SQL to flag the program as a pending local change
-					innerTx.executeSql(`
-						INSERT OR IGNORE INTO Sync (Type, ID, Action)
-						VALUES ('Program', ?, 'modified')
-					`, [this.id], () => {
-							// If a callback was provided, call it now with the program's id
-							if (callback) {
-								callback(this.id);
-							}
-						}, (_, error) => {
-							// Something went wrong
-							throw error;
-						});
+				// Execute the SQL to flag the program as a pending local change
+				innerTx.executeSql(`
+					INSERT OR IGNORE INTO Sync (Type, ID, Action)
+					VALUES ('Program', ?, 'modified')
+				`, [this.id], () => {
+					// If a callback was provided, call it now with the program's id
+					if (callback) {
+						callback(this.id);
+					}
+				}, (_, error) => {
+					// Something went wrong
+					throw error;
 				});
+			});
 		}, error => {
 			// Something went wrong. If a callback was provided, call it now with no parameters
 			if (callback) {
@@ -310,22 +310,22 @@ export default class Program extends Base {
 			GROUP BY		 		p.ProgramID
 			ORDER BY p.Name COLLATE NOCASE
 		`, [], (_, resultSet) => {
-				// Iterate of the rows returned
-				for (let i = 0; i < resultSet.rows.length; i++) {
-					const prog = resultSet.rows.item(i);
+			// Iterate of the rows returned
+			for (let i = 0; i < resultSet.rows.length; i++) {
+				const prog = resultSet.rows.item(i);
 
-					// Instantiate a new Program object and add it to the array
-					programList.push(new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount));
-				}
+				// Instantiate a new Program object and add it to the array
+				programList.push(new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount));
+			}
 
-				// Invoke the callback function, passing the list of programs
-				callback(programList);
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing the program list (which should be empty)
-				callback(programList);
+			// Invoke the callback function, passing the list of programs
+			callback(programList);
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing the program list (which should be empty)
+			callback(programList);
 
-				return `Program.list: ${error.message}`;
-			}));
+			return `Program.list: ${error.message}`;
+		}));
 	}
 
 	/**
@@ -344,16 +344,16 @@ export default class Program extends Base {
 			FROM		Program
 			WHERE		ProgramID = ?
 		`, [id], (_, resultSet) => {
-				const prog = resultSet.rows.item(0);
+			const prog = resultSet.rows.item(0);
 
-				// Instantiate a new Program object, and invoke the callback function passing the program
-				callback(new Program(prog.ProgramID, prog.Name));
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing a null
-				callback(null);
+			// Instantiate a new Program object, and invoke the callback function passing the program
+			callback(new Program(prog.ProgramID, prog.Name));
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing a null
+			callback(null);
 
-				return `Program.find: ${error.message}`;
-			}));
+			return `Program.find: ${error.message}`;
+		}));
 	}
 
 	/**
@@ -369,13 +369,13 @@ export default class Program extends Base {
 			SELECT	COUNT(*) AS ProgramCount
 			FROM Program
 		`, [],
-			(_, resultSet) => callback(resultSet.rows.item(0).ProgramCount),
-			(_, error) => {
-				// Something went wrong. Call the callback passing zero
-				callback(0);
+		(_, resultSet) => callback(resultSet.rows.item(0).ProgramCount),
+		(_, error) => {
+			// Something went wrong. Call the callback passing zero
+			callback(0);
 
-				return `Program.count: ${error.message}`;
-			}));
+			return `Program.count: ${error.message}`;
+		}));
 	}
 
 	/**

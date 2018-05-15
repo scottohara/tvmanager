@@ -81,25 +81,25 @@ export default class Episode extends Base {
 				REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			`, [this.id, this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence], (innerTx, resultSet) => {
-					// Regardless of whether the episode existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
-					if (!resultSet.rowsAffected) {
-						throw new Error("no rows affected");
-					}
+				// Regardless of whether the episode existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
+				if (!resultSet.rowsAffected) {
+					throw new Error("no rows affected");
+				}
 
-					// Execute the SQL to flag the episode as a pending local change
-					innerTx.executeSql(`
-						INSERT OR IGNORE INTO Sync (Type, ID, Action)
-						VALUES ('Episode', ?, 'modified')
-					`, [this.id], () => {
-							// If a callback was provided, call it now with the episode's id
-							if (callback) {
-								callback(this.id);
-							}
-						}, (_, error) => {
-							// Something went wrong
-							throw error;
-						});
+				// Execute the SQL to flag the episode as a pending local change
+				innerTx.executeSql(`
+					INSERT OR IGNORE INTO Sync (Type, ID, Action)
+					VALUES ('Episode', ?, 'modified')
+				`, [this.id], () => {
+					// If a callback was provided, call it now with the episode's id
+					if (callback) {
+						callback(this.id);
+					}
+				}, (_, error) => {
+					// Something went wrong
+					throw error;
 				});
+			});
 		}, error => {
 			// Something went wrong. If a callback was provided, call it now with no parameters
 			if (callback) {
@@ -381,16 +381,16 @@ export default class Episode extends Base {
 			FROM		Episode
 			WHERE		EpisodeID = ?
 		`, [id], (_, resultSet) => {
-				const ep = resultSet.rows.item(0);
+			const ep = resultSet.rows.item(0);
 
-				// Instantiate a new Episode object, and invoke the callback function passing the episode
-				callback(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID));
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing a null
-				callback(null);
+			// Instantiate a new Episode object, and invoke the callback function passing the episode
+			callback(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID));
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing a null
+			callback(null);
 
-				return `Episode.find: ${error.message}`;
-			}));
+			return `Episode.find: ${error.message}`;
+		}));
 	}
 
 	/**

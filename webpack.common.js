@@ -5,8 +5,9 @@ const path = require("path"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
 			GitRevisionWebpackPlugin = require("git-revision-webpack-plugin"),
 			{GenerateSW} = require("workbox-webpack-plugin"),
-			packageJson = require("./package"),
-			MAX_DATA_AGE_DAYS = 7,
+			packageJson = require("./package");
+
+const	MAX_DATA_AGE_DAYS = 7,
 
 			// Default entry
 			entry = {

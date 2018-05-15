@@ -47,27 +47,27 @@ export default class Setting extends Base {
 				INSERT INTO Setting (Name, Value)
 				VALUES (?, ?)
 			`, [this.settingName, this.settingValue], (_, resultSet) => {
-					// We expect one row to be affected; so it's an error if this isn't the case
-					if (!resultSet.rowsAffected) {
-						// If a callback was provided, call it now with false to indicate an error
-						if (callback) {
-							callback(false);
-						}
-						throw new Error("Setting.save: no rows affected");
-					}
-
-					// If a callback was provided, call it now with true to indicate success
-					if (callback) {
-						callback(true);
-					}
-				}, (_, error) => {
-					// Something went wrong. If a callback was provided, call it now with false to indicate an error
+				// We expect one row to be affected; so it's an error if this isn't the case
+				if (!resultSet.rowsAffected) {
+					// If a callback was provided, call it now with false to indicate an error
 					if (callback) {
 						callback(false);
 					}
+					throw new Error("Setting.save: no rows affected");
+				}
 
-					return `Setting.save: ${error.message}`;
-				});
+				// If a callback was provided, call it now with true to indicate success
+				if (callback) {
+					callback(true);
+				}
+			}, (_, error) => {
+				// Something went wrong. If a callback was provided, call it now with false to indicate an error
+				if (callback) {
+					callback(false);
+				}
+
+				return `Setting.save: ${error.message}`;
+			});
 		});
 	}
 
@@ -104,23 +104,23 @@ export default class Setting extends Base {
 			FROM		Setting
 			WHERE		Name = ?
 		`, [settingName], (_, resultSet) => {
-				let settingValue;
+			let settingValue;
 
-				// If the setting existed, get the existing value (otherwise the value defaults to null)
-				if (resultSet.rows.length > 0) {
-					settingValue = resultSet.rows.item(0).SettingValue;
-				}
+			// If the setting existed, get the existing value (otherwise the value defaults to null)
+			if (resultSet.rows.length > 0) {
+				settingValue = resultSet.rows.item(0).SettingValue;
+			}
 
-				// Instantiate a new Setting object
-				const setting = new Setting(settingName, settingValue);
+			// Instantiate a new Setting object
+			const setting = new Setting(settingName, settingValue);
 
-				// Invoke the callback function passing the setting
-				callback(setting);
-			}, (_, error) => {
-				// Something went wrong. Call the callback with no arguments
-				callback();
+			// Invoke the callback function passing the setting
+			callback(setting);
+		}, (_, error) => {
+			// Something went wrong. Call the callback with no arguments
+			callback();
 
-				return `Setting.get: ${error.message}`;
-			}));
+			return `Setting.get: ${error.message}`;
+		}));
 	}
 }

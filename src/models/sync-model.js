@@ -68,22 +68,22 @@ export default class Sync extends Base {
 							Action
 			FROM		Sync
 		`, [], (_, resultSet) => {
-				// Iterate of the rows returned
-				for (let i = 0; i < resultSet.rows.length; i++) {
-					const sync = resultSet.rows.item(i);
+			// Iterate of the rows returned
+			for (let i = 0; i < resultSet.rows.length; i++) {
+				const sync = resultSet.rows.item(i);
 
-					// Instantiate a new Sync object and add it to the array
-					syncList.push(new Sync(sync.Type, sync.ID, sync.Action));
-				}
+				// Instantiate a new Sync object and add it to the array
+				syncList.push(new Sync(sync.Type, sync.ID, sync.Action));
+			}
 
-				// Invoke the callback function, passing the list of local changes
-				callback(syncList);
-			}, (_, error) => {
-				// Something went wrong. Call the callback passing the local changes list (which should be empty)
-				callback(syncList);
+			// Invoke the callback function, passing the list of local changes
+			callback(syncList);
+		}, (_, error) => {
+			// Something went wrong. Call the callback passing the local changes list (which should be empty)
+			callback(syncList);
 
-				return `Sync.list: ${error.message}`;
-			}));
+			return `Sync.list: ${error.message}`;
+		}));
 	}
 
 	/**
