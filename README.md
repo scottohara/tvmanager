@@ -3,8 +3,7 @@
 | Travis CI				| [![Build Status](https://travis-ci.org/scottohara/tvmanager.svg?branch=master)](https://travis-ci.org/scottohara/tvmanager)																																|
 | Code Climate		| [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)																														|
 | Code Climate		| [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)																					|
-| Gemnasium     	| [![Dependency Status](https://gemnasium.com/badges/github.com/scottohara/tvmanager.svg)](https://gemnasium.com/github.com/scottohara/tvmanager)																						|
-| Dependency CI 	| [![Dependency Status](https://dependencyci.com/github/scottohara/tvmanager/badge)](https://dependencyci.com/github/scottohara/tvmanager)																									|
+| Tidelift        | [![Dependency Status](https://tidelift.com/badges/github/scottohara/tvmanager)](https://tidelift.com/repo/github/scottohara/tvmanager)																									|
 | Snyk (npm)			| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)																									|
 | Snyk (Gemfile)	| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/scottohara/tvmanager?targetFile=Gemfile.lock)	|
 
