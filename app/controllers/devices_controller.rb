@@ -29,6 +29,7 @@ module TVManager
 			device = Device.new device_id
 			device.check_access
 			raise Forbidden, 'Client device can only unregister itself' unless device_id.eql? params[:id]
+
 			device.delete!
 		end
 	end

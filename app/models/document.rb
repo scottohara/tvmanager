@@ -48,7 +48,7 @@ module TVManager
 				@id = document_or_id['id']
 				document_or_id['_id'] = @id
 				document_or_id['_rev'] = document['_rev'] unless document.nil?
-				@doc = document_or_id
+				@document = document_or_id
 			else
 				# Parameter is an id
 				@id = document_or_id
@@ -98,7 +98,7 @@ module TVManager
 
 		def document
 			# Find the matching document
-			@doc ||= db.get @id
+			@document ||= db.get @id
 		end
 	end
 end

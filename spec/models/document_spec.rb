@@ -91,7 +91,7 @@ describe TVManager::Document do
 					document = described_class.new json
 					expect(document).to be_a described_class
 					expect(document.instance_variable_get :@id).to eql document_id
-					expect(document.instance_variable_get :@doc).to be json
+					expect(document.instance_variable_get :@document).to be json
 					expect(json['_id']).to eql document_id
 					expect(json['_rev']).to eql fixtures.first['_rev'] if defined? fixtures
 				end

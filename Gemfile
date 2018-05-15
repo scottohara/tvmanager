@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-ruby '2.5.0'
+ruby '2.5.1'
 
 source 'https://rubygems.org'
 
@@ -18,6 +18,7 @@ gem 'sinatra'
 gem 'thin'
 
 group :development, :test do
+	gem 'dotenv'
 	gem 'rack-test'
 	gem 'rspec'
 	gem 'rubocop', require: false

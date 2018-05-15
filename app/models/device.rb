@@ -19,6 +19,7 @@ module TVManager
 			def id(request, required = true)
 				device_id = request.env['HTTP_X_DEVICE_ID']
 				raise BadRequest, 'Client device identifier was not supplied' if required && (device_id.nil? || device_id.empty?)
+
 				device_id
 			end
 
