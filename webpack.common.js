@@ -81,13 +81,7 @@ const	MAX_DATA_AGE_DAYS = 7,
 			generateServiceWorker = new GenerateSW({
 				cacheId: packageJson.name,
 				skipWaiting: true,
-				clientsClaim: true,
-				runtimeCaching: [
-					{
-						urlPattern: /(app|db)Config$/,
-						handler: "staleWhileRevalidate"
-					}
-				]
+				clientsClaim: true
 			}),
 
 			// Default config
