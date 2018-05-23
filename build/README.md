@@ -22,19 +22,16 @@ Application startup image
 The startup image (as referenced by the `apple-touch-startup-image` links in index.html) is generated from `tv-splash.html`
 
 To create a new startup image:
-1. Open `build/tv-splash.html` in a browser (see note below regarding the file:// protocol)
+1. Open `build/tv-splash.html` in a browser
 2. Move your mouse pointer to the top right-hand corner of the page to show the hidden editing controls
 3. The `Show Guides` checkbox enables alignment guides that show the center point (turn these off before saving the image though)
 4. Choose the device type/size/orientation from the dropdown list
-5. Use a [screen capture utility](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=en) to save the `#container` element as a PNG (see note below)
-6. Save the PNG file as `src/images/startup-{width}x{height}.png`
-7. Add the appropriate `<link rel="apple-touch-startup-image" href="${require('images/startup-{width}x{height}.png')}" media="{media query}"/>` tag to `src/index.html`
-
-Note: Many browser plugins/extensions such as the screen capture extension above are disabled when the file:// protocol is used. This means you will need to open `tv-splash.html` using http. The simplest way to do this is to run `python -m SimpleHTTPServer {port}` from the `/build` directory, then browse to `http://localhost:{port}/tv-splash.html`
-
-Note: For saving small startup images as PNG files, [Element Capture](https://chrome.google.com/webstore/detail/element-capture/kabgnkphidokfocflfangphgdjhkknjg?hl=en) is a Chrome extension that allows you to simply click on the element and it will create a PNG for it. Unfortunately, if the element is bigger than the current browser viewport, any off-screen content will be transparent in the generated PNG. For larger images, [Awesome Screenshot](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=en) allows you to select a region that is larger than the current viewport (by scrolling).
+5. Open DevTools, and with the `#container` element selected, press CMD+Shift+P and type `screenshot`.
+6. Choose `Capture node screenshot`
+7. Save the PNG file as `src/images/startup-{width}x{height}.png`
+8. Add the appropriate `<link rel="apple-touch-startup-image" href="${require('images/startup-{width}x{height}.png')}" media="{media query}"/>` tag to `src/index.html`
 
 To add a new device option to the devices dropdown list:
-1. Add a new CSS selector to the stylesheet, using the following convention: `#container.{device type}[.{pixel density}][.{screen height}][.{orientation}]`
+1. Add a new CSS selector to the stylesheet, using the following convention: `#container.{device type}.{orientation}.{screen height}[.{pixel density}]`
 2. Configure the dimensions & background position for the new CSS selector
-3. Add an option to the `#device` dropdown, with it's value being the list of CSS classes that match the above CSS selector (eg. `<option value="{device type}[ {pixel density}][ {screen height}][ {orientation}">`)
+3. Add an option to the `#device` dropdown, with it's value being the list of CSS classes that match the above CSS selector (eg. `<option value="{device type} {orientation} {screen height}">`)

@@ -21,20 +21,36 @@
 		<link rel="apple-touch-icon" href="${require('images/tv-icon-152x152.png')}" sizes="152x152"/>
 
 		<!-- Startup images -->
-		<!-- iPhone non-retina -->
-		<link href="${require('images/startup-320x460.png')}" media="(device-width: 320px) and (device-height: 480px)" rel="apple-touch-startup-image"/>
-		<!-- iPhone retina -->
-		<link href="${require('images/startup-640x920.png')}" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image"/>
-		<!-- iPhone 4" -->
-		<link href="${require('images/startup-640x1096.png')}" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image"/>
-		<!-- iPad non-retina (portrait) -->
-		<link href="${require('images/startup-768x1004.png')}" media="(device-width: 768px) and (device-height: 1024px)" rel="apple-touch-startup-image"/>
-		<!-- iPad retina (portrait) -->
-		<link href="${require('images/startup-1536x2008.png')}" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image"/>
-		<!-- iPad non-retina (landscape) -->
-		<link href="${require('images/startup-1024x748.png')}" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape)" rel="apple-touch-startup-image"/>
-		<!-- iPad retina (landscape) -->
-		<link href="${require('images/startup-2048x1496.png')}" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image"/>
+		<!-- iPhone 3.5" non-retina (1, 3g, 3gs) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-320x460.png')}" media="(device-width: 320px) and (device-height: 480px) and (orientation: portrait)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-480x320.png')}" media="(device-width: 320px) and (device-height: 480px) and (orientation: landscape)"/>
+		<!-- iPhone 3.5" retina (4, 4s) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-640x920.png')}" media="(device-width: 320px) and (device-height: 480px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-960x640.png')}" media="(device-width: 320px) and (device-height: 480px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"/>
+		<!-- iPhone 4" (5, 5s, 5c, SE) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-640x1096.png')}" media="(device-width: 320px) and (device-height: 568px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1136x640.png')}" media="(device-width: 320px) and (device-height: 568px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"/>
+		<!-- iPhone 4.7" (6, 6s, 7, 8) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-750x1294.png')}" media="(device-width: 375px) and (device-height: 667px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1334x750.png')}" media="(device-width: 375px) and (device-height: 667px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"/>
+		<!-- iPhone 5.5" (6 plus, 7 plus, 8 plus) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1242x2148.png')}" media="(device-width: 414px) and (device-height: 736px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 3)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-2208x1242.png')}" media="(device-width: 414px) and (device-height: 736px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 3)"/>
+		<!-- iPhone 5.8" (X) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1125x2436.png')}" media="(device-width: 375px) and (device-height: 812px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 3)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-2436x1125.png')}" media="(device-width: 375px) and (device-height: 812px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 3)"/>
+		<!-- iPad 9.7" & 7.9" non-retina (1, 2, Mini, Air) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-768x1004.png')}" media="(device-width: 768px) and (device-height: 1024px) and (orientation: portrait)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1024x748.png')}" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape)"/>
+		<!-- iPad 9.7" & 7.9" retina (3, 4, Pro) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1536x2008.png')}" media="(device-width: 768px) and (device-height: 1024px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-2048x1496.png')}" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"/>
+		<!-- iPad 10.5" (Pro) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-1668x2184.png')}" media="(device-width: 834px) and (device-height: 1112px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-2224x1628.png')}" media="(device-width: 834px) and (device-height: 1112px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"/>
+		<!-- iPad 12.9" (Pro) -->
+		<link rel="apple-touch-startup-image" href="${require('images/startup-2048x2692.png')}" media="(device-width: 1024px) and (device-height: 1366px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" href="${require('images/startup-2732x2008.png')}" media="(device-width: 1024px) and (device-height: 1366px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"/>
 
 		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0"/>
 		<meta name="apple-mobile-web-app-capable" content="yes"/>

@@ -3,7 +3,7 @@
 		<style>
 			@import url(http://fonts.googleapis.com/css?family=Chau+Philomene+One:400italic);
 			body {
-				font-family: 'Chau Philomene One';	
+				font-family: 'Chau Philomene One';
 				font-size: 24px;
 				font-style: italic;
 				color: white;
@@ -35,53 +35,145 @@
 				padding-right: 50px;
 			}
 
-			/* iPhone (3.5", non-retina) */
-			#container.iphone {
+			/* iPhone (3.5" non-retina, portrait) */
+			#container.iphone.portrait.threepointfiveinch.nonretina {
 				width: 320px;
 				height: 460px;
 			}
 
-			/* iPhone (retina) */
-			#container.iphone.retina {
+			/* iPhone (3.5" non-retina, landscape) */
+			#container.iphone.landscape.threepointfiveinch.nonretina {
+				width: 480px;
+				height: 320px;
+				background-position: 32% 44%;
+			}
+
+			/* iPhone (3.5" retina, portrait) */
+			#container.iphone.portrait.threepointfiveinch.retina {
 				width: 640px;
 				height: 920px;
 				background-position: 37% 46%;
 			}
 
-			/* iPhone (4") */
-			#container.iphone.retina.fourinch {
-				height: 1096px;
+			/* iPhone (3.5" retina, landscape) */
+			#container.iphone.landscape.threepointfiveinch.retina {
+				width: 960px;
+				height: 640px;
+				background-position: 42% 46%;
 			}
 
-			/* iPad (non-retina, portrait) */
+			/* iPhone (4", portrait) */
+			#container.iphone.portrait.fourinch {
+				width: 640px;
+				height: 1096px;
+				background-position: 37% 46%;
+			}
+
+			/* iPhone (4", landscape) */
+			#container.iphone.landscape.fourinch {
+				width: 1136px;
+				height: 640px;
+				background-position: 43% 46%;
+			}
+
+			/* iPhone (4.7", portrait) */
+			#container.iphone.portrait.fourpointseveninch {
+				width: 750px;
+				height: 1294px;
+				background-position: 39% 46%;
+			}
+
+			/* iPhone (4.7", landscape) */
+			#container.iphone.landscape.fourpointseveninch {
+				width: 1334px;
+				height: 750px;
+				background-position: 44% 46%;
+			}
+
+			/* iPhone (5.5", portrait) */
+			#container.iphone.portrait.fivepointfiveinch {
+				width: 1242px;
+				height: 2148px;
+				background-position: 43% 47%;
+			}
+
+			/* iPhone (5.5", landscape) */
+			#container.iphone.landscape.fivepointfiveinch {
+				width: 2208px;
+				height: 1242px;
+				background-position: 46% 47%;
+			}
+
+			/* iPhone (5.8", portrait) */
+			#container.iphone.portrait.fivepointeightinch {
+				width: 1125px;
+				height: 2436px;
+				background-position: 43% 47%;
+			}
+
+			/* iPhone (5.8", landscape) */
+			#container.iphone.landscape.fivepointeightinch {
+				width: 2436px;
+				height: 1125px;
+				background-position: 46% 47%;
+			}
+
+			/* iPad (9.7" & 7.9" non-retina, portrait) */
 			#container.ipad {
 				width: 768px;
 				height: 1004px;
 				background-position: 39% 46%;
 			}
 
-			/* iPad (retina, portrait) */
-			#container.ipad.retina {
-				width: 1536px;
-				height: 2008px;
-				background-position: 45% 46%;
-			}
-
-			/* iPad (non-retina, landscape) */
+			/* iPad (9.7" & 7.9" non-retina, landscape) */
 			#container.ipad.landscape {
 				width: 1024px;
 				height: 748px;
 				background-position: 42% 46%;
 			}
 
-			/* iPad (retina, landscape) */
+			/* iPad (9.7" & 7.9" retina, portrait) */
+			#container.ipad.retina {
+				width: 1536px;
+				height: 2008px;
+				background-position: 45% 46%;
+			}
+
+			/* iPad (9.7" & 7.9" retina, landscape) */
 			#container.ipad.retina.landscape {
 				width: 2048px;
 				height: 1496px;
 				background-position: 46% 46%;
 			}
 
-			/* Logo & text content */
+			/* iPad (10.5", portrait) */
+			#container.ipad.retina.tenpointfiveinch {
+				width: 1668px;
+				height: 2184px;
+				background-position: 45% 46%;
+			}
+
+			/* iPad (10.5", landscape) */
+			#container.ipad.retina.landscape.tenpointfiveinch {
+				width: 2224px;
+				height: 1628px;
+				background-position: 46% 46%;
+			}
+
+			/* iPad (12.9", portrait) */
+			#container.ipad.retina.twelvepointnineinch {
+				width: 2048px;
+				height: 2692px;
+				background-position: 45% 46%;
+			}
+
+			/* iPad (12.9", landscape) */
+			#container.ipad.retina.landscape.twelvepointnineinch {
+				width: 2732px;
+				height: 2008px;
+				background-position: 46% 46%;
+			}
+
 			#content {
 				position: absolute;
 				bottom: 53%;
@@ -119,7 +211,7 @@
 			}
 
 		</style>
-		<script src="../public/framework/jquery-1.8.3.min.js"></script>
+		<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
 				$("#showguides").click(function(){
@@ -129,14 +221,14 @@
 				$("#device").change(function(){
 					// Remove all device classes, and add back the current selection
 					$("#container")
-						.removeClass("iphone ipad retina fourinch landscape")
+						.removeClass()
 						.addClass(this.value);
 				});
 			})
 		</script>
 	</head>
 	<body>
-		<div id="container" class="iphone">
+		<div id="container" class="iphone portrait threepointfiveinch nonretina">
 			<div id="guideX" class="guide"></div>
 			<div id="guideY" class="guide"></div>
 			<div id="content"><span class="highlight">TV</span>manager</div>
@@ -152,14 +244,27 @@
 				<span>
 					<label for"device">Device</label>
 				</span>
-				<select id="device" value="iphone">
-					<option value="iphone">iPhone (3.5", non-retina)</option>
-					<option value="iphone retina">iPhone (3.5", retina)</option>
-					<option value="iphone retina fourinch">iPhone (4")</option>
-					<option value="ipad">iPad (non-retina, portrait)</option>
-					<option value="ipad retina">iPad (retina, portrait)</option>
-					<option value="ipad landscape">iPad (non-retina, landscape)</option>
-					<option value="ipad retina landscape">iPad (retina, landscape)</option>
+				<select id="device" value="iphone portrait threepointfiveinch nonretina">
+					<option value="iphone portrait threepointfiveinch nonretina">iPhone (3.5" non-retina, portrait)</option>
+					<option value="iphone landscape threepointfiveinch nonretina">iPhone (3.5" non-retina, landscape)</option>
+					<option value="iphone portrait threepointfiveinch retina">iPhone (3.5" retina, portrait)</option>
+					<option value="iphone landscape threepointfiveinch retina">iPhone (3.5" retina, landscape)</option>
+					<option value="iphone portrait fourinch">iPhone (4", portrait)</option>
+					<option value="iphone landscape fourinch">iPhone (4", landscape)</option>
+					<option value="iphone portrait fourpointseveninch">iPhone (4.7", portrait)</option>
+					<option value="iphone landscape fourpointseveninch">iPhone (4.7", landscape)</option>
+					<option value="iphone portrait fivepointfiveinch">iPhone (5.5", portrait)</option>
+					<option value="iphone landscape fivepointfiveinch">iPhone (5.5", landscape)</option>
+					<option value="iphone portrait fivepointeightinch">iPhone (5.8", portrait)</option>
+					<option value="iphone landscape fivepointeightinch">iPhone (5.8", landscape)</option>
+					<option value="ipad">iPad (9.7" & 7.9" non-retina, portrait)</option>
+					<option value="ipad landscape">iPad (9.7" & 7.9" non-retina, landscape)</option>
+					<option value="ipad retina">iPad (9.7" & 7.9" retina, portrait)</option>
+					<option value="ipad retina landscape">iPad (9.7" & 7.9" retina, landscape)</option>
+					<option value="ipad retina tenpointfiveinch">iPad (10.5", portrait)</option>
+					<option value="ipad retina landscape tenpointfiveinch">iPad (10.5", landscape)</option>
+					<option value="ipad retina twelvepointnineinch">iPad (12.9", portrait)</option>
+					<option value="ipad retina landscape twelvepointnineinch">iPad (12.9", landscape)</option>
 				</select>
 			</div>
 		</div>
