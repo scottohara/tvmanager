@@ -104,8 +104,7 @@ describe("RegistrationController", () => {
 
 	describe("unregister", () => {
 		beforeEach(() => {
-			fakeServer = sinon.fakeServer.create();
-			fakeServer.respondImmediately = true;
+			fakeServer = sinon.fakeServer.create({respondImmediately: true});
 			registrationController.device = device;
 		});
 
@@ -144,8 +143,7 @@ describe("RegistrationController", () => {
 		let deviceName;
 
 		beforeEach(() => {
-			fakeServer = sinon.fakeServer.create();
-			fakeServer.respondImmediately = true;
+			fakeServer = sinon.fakeServer.create({respondImmediately: true});
 			registrationController.device = device;
 			deviceName = $("<input>")
 				.attr("id", "deviceName")

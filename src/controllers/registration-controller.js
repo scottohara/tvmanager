@@ -118,7 +118,7 @@ export default class RegistrationController extends ViewController {
 			context: this,
 			type: "DELETE",
 			headers: {
-				"X-DEVICE-ID": this.device.id
+				"X-DEVICE-ID": String(this.device.id)
 			},
 			success() {
 				const device = new Setting("Device", null);
@@ -156,7 +156,7 @@ export default class RegistrationController extends ViewController {
 			context: this,
 			type: "PUT",
 			headers: {
-				"X-DEVICE-ID": this.device.id
+				"X-DEVICE-ID": String(this.device.id)
 			},
 			success(registrationReponse, status, jqXHR) {
 				// Get the device ID returned in the Location header

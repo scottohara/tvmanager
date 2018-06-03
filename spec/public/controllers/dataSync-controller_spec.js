@@ -493,8 +493,7 @@ describe("DataSyncController", () => {
 				sync;
 
 		beforeEach(() => {
-			fakeServer = sinon.fakeServer.create();
-			fakeServer.respondImmediately = true;
+			fakeServer = sinon.fakeServer.create({respondImmediately: true});
 			sinon.stub(dataSyncController, "changeSent");
 			sinon.stub(dataSyncController, "syncError");
 			dataSyncController.device = {id: "test-device"};
@@ -568,8 +567,7 @@ describe("DataSyncController", () => {
 				sync;
 
 		beforeEach(() => {
-			fakeServer = sinon.fakeServer.create();
-			fakeServer.respondImmediately = true;
+			fakeServer = sinon.fakeServer.create({respondImmediately: true});
 
 			sync = {
 				id: 1,
@@ -845,8 +843,7 @@ describe("DataSyncController", () => {
 			let fakeServer;
 
 			beforeEach(() => {
-				fakeServer = sinon.fakeServer.create();
-				fakeServer.respondImmediately = true;
+				fakeServer = sinon.fakeServer.create({respondImmediately: true});
 				sinon.stub(dataSyncController, "syncError");
 				sinon.stub(dataSyncController, "importDone");
 				sinon.stub(dataSyncController, "getImportData").callsFake(data => ({importJson: data.data, returnedHash: data.checksum}));
@@ -1175,9 +1172,7 @@ describe("DataSyncController", () => {
 		let fakeServer;
 
 		beforeEach(() => {
-			fakeServer = sinon.fakeServer.create();
-			fakeServer.respondImmediately = true;
-
+			fakeServer = sinon.fakeServer.create({respondImmediately: true});
 			sinon.stub(dataSyncController, "syncError");
 			sinon.stub(dataSyncController, "dataImported");
 			dataSyncController.device = {id: "test-device"};
