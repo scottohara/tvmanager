@@ -11,18 +11,7 @@ const	MAX_DATA_AGE_DAYS = 7,
 
 			// Default entry
 			entry = {
-				app: "index",
-				cubiq: [
-					"framework/abc/abc",
-					"framework/sw/spinningwheel"
-				],
-				vendor: [
-					"jquery",
-					"jquery-ui/ui/widgets/sortable",
-					"jquery-ui-touch-punch",
-					"md5",
-					"uuid"
-				]
+				app: "index"
 			},
 
 			// Default output
@@ -111,20 +100,17 @@ const	MAX_DATA_AGE_DAYS = 7,
 						cacheGroups: {
 							app: {
 								name: "app",
-								priority: 10,
-								reuseExistingChunk: true
+								priority: 10
 							},
 							cubiq: {
 								name: "cubiq",
 								test: /[\\/]src[\\/]framework[\\/]/,
-								priority: 20,
-								reuseExistingChunk: true
+								priority: 20
 							},
 							vendor: {
 								name: "vendor",
 								test: /[\\/]node_modules[\\/]/,
-								priority: 30,
-								reuseExistingChunk: true
+								priority: 30
 							}
 						}
 					},
