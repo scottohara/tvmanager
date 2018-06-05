@@ -8,12 +8,12 @@ source 'https://rubygems.org'
 group :development do
 	gem 'foreman'
 	gem 'open4'
-	gem 'rake'
 	gem 'shotgun'
 end
 
 gem 'couchrest'
 gem 'json'
+gem 'rake'
 gem 'sinatra'
 gem 'thin'
 
