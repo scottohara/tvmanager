@@ -4,7 +4,6 @@
 		"mocha": true
 	},
 	"globals": {
-		"APP_VERSION": false,
 		"MAX_DATA_AGE_DAYS": false
 	},
 	"rules": {

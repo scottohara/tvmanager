@@ -12,8 +12,6 @@ export default class ApplicationControllerMock {
 
 		this.db = new DatabaseMock();
 		this.notice = [];
-		this.appVersion = "v1.0";
-
 		this.pushView = sinon.stub();
 		this.popView = sinon.stub();
 		this.clearFooter = sinon.stub();

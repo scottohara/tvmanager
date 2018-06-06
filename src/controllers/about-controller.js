@@ -69,7 +69,6 @@ export default class AboutController extends ViewController {
 
 		// Set the version information
 		$("#databaseVersion").val(`v${this.appController.db.version}`);
-		$("#appVersion").val(this.appController.appVersion);
 
 		// Set the scroll position
 		this.appController.setScrollPosition();

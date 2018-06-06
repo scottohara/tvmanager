@@ -82,7 +82,6 @@ describe("ApplicationController", () => {
 			}));
 
 			it("should not set the database version", () => (Reflect.undefined === applicationController.db.version).should.be.true);
-			it("should not set the application version", () => (Reflect.undefined === applicationController.appVersion).should.be.true);
 			it("should not set the max data age days", () => (Reflect.undefined === applicationController.maxDataAgeDays).should.be.true);
 			it("should not get the last sync time", () => applicationController.gotLastSyncTime.should.not.have.been.called);
 		});
@@ -104,7 +103,6 @@ describe("ApplicationController", () => {
 			}));
 
 			it("should set the database version", () => applicationController.db.version.should.equal("1.1"));
-			it("should set the application version", () => applicationController.appVersion.should.equal(APP_VERSION));
 			it("should set the max data age days", () => applicationController.maxDataAgeDays.should.equal(7));
 			it("should get the last sync time", () => applicationController.gotLastSyncTime.should.have.been.calledWith("1"));
 		});
@@ -121,7 +119,6 @@ describe("ApplicationController", () => {
 			it("should display the schedule view", () => applicationController.pushView.should.have.been.calledWith("schedule"));
 			it("should not display a notice", () => applicationController.showNotice.should.not.have.been.called);
 			it("should set the database version", () => applicationController.db.version.should.equal("1.1"));
-			it("should set the application version", () => applicationController.appVersion.should.equal(APP_VERSION));
 			it("should set the max data age days", () => applicationController.maxDataAgeDays.should.equal(7));
 			it("should get the last sync time", () => applicationController.gotLastSyncTime.should.have.been.calledWith("1"));
 		});

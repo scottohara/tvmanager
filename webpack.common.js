@@ -3,7 +3,6 @@ const path = require("path"),
 			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
 			CleanWebpackPlugin = require("clean-webpack-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
-			GitRevisionWebpackPlugin = require("git-revision-webpack-plugin"),
 			{GenerateSW} = require("workbox-webpack-plugin"),
 			packageJson = require("./package");
 
@@ -146,10 +145,7 @@ function extractCss(hashFilename) {
 }
 
 function defineAppConfig({maxDataAgeDays} = {maxDataAgeDays: MAX_DATA_AGE_DAYS}) {
-	return new webpack.DefinePlugin({
-		APP_VERSION: JSON.stringify((new GitRevisionWebpackPlugin()).version()),
-		MAX_DATA_AGE_DAYS: maxDataAgeDays
-	});
+	return new webpack.DefinePlugin({MAX_DATA_AGE_DAYS: maxDataAgeDays});
 }
 
 module.exports = {

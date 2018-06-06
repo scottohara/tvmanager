@@ -100,7 +100,6 @@ import window from "components/window";
  * @property {abc} abc - scroll helper object
  * @property {TouchEventProxy} abctoucheventproxy - remaps touch events for the scroll helper
  * @property {DatabaseController} db - the database controller
- * @property {String} appVersion - the application version number
  * @property {Number} maxDataAgeDays - the number of days since the last import/export before a warning notice is displayed
  * @property {Object} viewControllers - a hash of all view controller objects that can be pushed
  */
@@ -189,9 +188,6 @@ export default class ApplicationController {
 
 		// If no errors occurred, get the application configuration settings
 		if (this.db.version) {
-			// Set the application version
-			this.appVersion = APP_VERSION;
-
 			// Set the max data age days
 			this.maxDataAgeDays = Number(MAX_DATA_AGE_DAYS);
 

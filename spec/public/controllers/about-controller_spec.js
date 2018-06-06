@@ -23,19 +23,17 @@ describe("AboutController", () => {
 	});
 
 	describe("setup", () => {
-		let databaseVersion,
-				appVersion;
+		let databaseVersion;
 
 		beforeEach(() => {
 			databaseVersion = $("<input>").attr("id", "databaseVersion");
-			appVersion = $("<input>").attr("id", "appVersion");
 
 			sinon.stub(aboutController, "goBack");
 			sinon.stub(aboutController, "programCount");
 			sinon.stub(aboutController, "seriesCount");
 			sinon.stub(aboutController, "episodeCount");
 
-			$(document.body).append(databaseVersion, appVersion);
+			$(document.body).append(databaseVersion);
 			aboutController.setup();
 		});
 
@@ -65,14 +63,9 @@ describe("AboutController", () => {
 		});
 
 		it("should set the database version", () => databaseVersion.val().should.equal("v1.0"));
-		it("should set the app version", () => appVersion.val().should.equal("v1.0"));
-
 		it("should set the scroll position", () => appController.setScrollPosition.should.have.been.called);
 
-		afterEach(() => {
-			databaseVersion.remove();
-			appVersion.remove();
-		});
+		afterEach(() => databaseVersion.remove());
 	});
 
 	describe("goBack", () => {
