@@ -537,7 +537,7 @@ input[type="checkbox"]:checked + label:after {
 
 /* Notices */
 div.notice {
-	min-height: 46px;
+	min-height: 60px;
 	border-top: 1px solid rgb(240, 240, 240);
 }
 
