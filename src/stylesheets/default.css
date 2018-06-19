@@ -44,19 +44,19 @@ footer {
 #contentWrapper {
 	position: relative;
 	transition-duration: 300ms;
-	transition-property: -webkit-transform;
+	transition-property: transform;
 }
 
 /* Hide the content wrapper while content is being loaded */
 #contentWrapper.loading {
 	visibility: hidden;
-	-webkit-transform: translateX(100%);
+	transform: translateX(100%);
 }
 
 /* Show the content wrapper once the content has finished loading */
 #contentWrapper.loaded {
 	visibility: visible;
-	-webkit-transform: translateX(0%);
+	transform: translateX(0%);
 }
 
 /* Now loading indicator */
@@ -126,7 +126,7 @@ a.backButton:before {
 	border-style: solid;
 	border-color: rgb(0, 122, 255);
 	border-width: 0 0 3px 3px;
-	-webkit-transform: rotate(45deg);
+	transform: rotate(45deg);
 }
 
 /* Confirm action buttons */
@@ -180,7 +180,7 @@ ul li a {
 	display: block;
 	margin: -2px 0px -2px -15px;
 	padding: 2px 32px 2px 15px;
-	-webkit-transform: rotate(0);
+	transform: rotate(0);
 }
 
 /* Chevron glyph for list items and navigating to a subview */
@@ -193,8 +193,8 @@ ul li a:before, .toView:before {
 	border-style: solid;
 	border-color: rgb(200, 199, 204);
 	border-width: 3px 3px 0 0;
-	-webkit-transform-origin: 100% 100%;
-	-webkit-transform: rotate(45deg) translate(0%, 240%);
+	transform-origin: 100% 100%;
+	transform: rotate(45deg) translate(0%, 240%);
 }
 
 /* Highlighted list items */
@@ -231,8 +231,8 @@ ul.edit li a:before {
 	font-family: serif;
 	color: rgb(200, 199, 204);
 	line-height: 20px;
-	-webkit-transform-origin: 100% 100%;
-	-webkit-transform: rotate(0);
+	transform-origin: 100% 100%;
+	transform: rotate(0);
 }
 
 /* Delete image for list items in delete mode */
@@ -249,8 +249,8 @@ ul.delete li a:before {
 	text-align: center;
 	color: #FFF;
 	line-height: 16px;
-	-webkit-transform-origin: 100% 100%;
-	-webkit-transform: rotate(0);
+	transform-origin: 100% 100%;
+	transform: rotate(0);
 }
 
 /* Episode status indicators for episode list */
@@ -350,7 +350,7 @@ h2 {
 	border-bottom: 1px solid #E0E0E0;
 	white-space: nowrap;
 	overflow: hidden;
-	-webkit-transform: rotate(0);
+	transform: rotate(0);
 }
 
 /* Top border for first row in a dialog or dialog section */
@@ -371,7 +371,7 @@ h2 + .row, .row:first-child {
 	height: 1px;
 	left: 0px;
 	background-color: inherit;
-	-webkit-transform: translateY(-1px);
+	transform: translateY(-1px);
 }
 /* Dialog labels */
 label {
