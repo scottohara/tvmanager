@@ -1,5 +1,6 @@
 import ApplicationController from "controllers/application-controller";
 import Setting from "../../../src/models/setting-model";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

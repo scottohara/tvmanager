@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import Program from "models/program-model";
 import ProgramController from "controllers/program-controller";
 import ProgramView from "views/program-view.html";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

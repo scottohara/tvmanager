@@ -1,3 +1,5 @@
+import sinon from "sinon";
+
 const saveStub = sinon.stub().yields(999),
 			removeStub = sinon.stub(),
 			listBySeriesStub = sinon.stub(),

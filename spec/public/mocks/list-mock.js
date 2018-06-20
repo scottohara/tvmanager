@@ -1,3 +1,5 @@
+import sinon from "sinon";
+
 export default class ListMock {
 	constructor(container, itemTemplate, groupBy, items, viewEventHandler, editEventHandler, deleteEventHandler, populateItemEventHandler) {
 		this.items = items;

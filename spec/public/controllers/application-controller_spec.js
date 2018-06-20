@@ -4,6 +4,7 @@ import DatabaseController from "controllers/database-controller";
 import Setting from "models/setting-model";
 import SpinningWheel from "framework/sw/spinningwheel";
 import TestController from "mocks/test-controller";
+import sinon from "sinon";
 import window from "components/window";
 
 describe("ApplicationController", () => {

@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import RegistrationController from "controllers/registration-controller";
 import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

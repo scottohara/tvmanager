@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import Episode from "models/episode-model";
 import EpisodesController from "controllers/episodes-controller";
 import EpisodesView from "views/episodes-view.html";
+import sinon from "sinon";
 import window from "components/window";
 
 // Get a reference to the application controller singleton

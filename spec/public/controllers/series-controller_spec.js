@@ -5,6 +5,7 @@ import Series from "models/series-model";
 import SeriesController from "controllers/series-controller";
 import SeriesView from "views/series-view.html";
 import SpinningWheel from "framework/sw/spinningwheel";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

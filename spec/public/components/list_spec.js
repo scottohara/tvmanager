@@ -2,6 +2,7 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import List from "../../../src/components/list";
 import ListTemplate from "views/listTemplate.html";
+import sinon from "sinon";
 import window from "components/window";
 
 // Get a reference to the application controller singleton

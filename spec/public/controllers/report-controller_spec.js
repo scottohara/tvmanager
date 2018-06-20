@@ -1,6 +1,7 @@
 import ApplicationController from "controllers/application-controller";
 import ReportController from "controllers/report-controller";
 import ReportView from "views/report-view.html";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

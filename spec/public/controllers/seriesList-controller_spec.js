@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import Series from "models/series-model";
 import SeriesListController from "controllers/seriesList-controller";
 import SeriesListView from "views/seriesList-view.html";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

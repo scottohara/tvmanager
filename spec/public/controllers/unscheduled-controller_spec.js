@@ -2,6 +2,7 @@ import ApplicationController from "controllers/application-controller";
 import Episode from "models/episode-model";
 import UnscheduledController from "controllers/unscheduled-controller";
 import UnscheduledView from "views/unscheduled-view.html";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

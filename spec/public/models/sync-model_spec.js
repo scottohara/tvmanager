@@ -1,5 +1,6 @@
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import Sync from "../../../src/models/sync-model";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();

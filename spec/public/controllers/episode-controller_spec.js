@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import EpisodeController from "controllers/episode-controller";
 import EpisodeView from "views/episode-view.html";
 import SpinningWheel from "framework/sw/spinningwheel";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();

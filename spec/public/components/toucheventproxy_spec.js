@@ -1,5 +1,6 @@
 import $ from "jquery";
 import TouchEventProxy from "components/toucheventproxy";
+import sinon from "sinon";
 
 describe("TouchEventProxy", () => {
 	let	element,

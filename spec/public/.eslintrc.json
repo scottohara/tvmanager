@@ -1,7 +1,4 @@
 {
-	"globals": {
-		"sinon": false
-	},
 	"rules": {
 		// Best practices
 		"no-magic-numbers": "off",												// Disable due to lots of numbers used in assertions

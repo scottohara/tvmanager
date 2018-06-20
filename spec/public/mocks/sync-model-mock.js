@@ -1,3 +1,5 @@
+import sinon from "sinon";
+
 const removeStub = sinon.stub(),
 			listStub = sinon.stub(),
 			countStub = sinon.stub(),

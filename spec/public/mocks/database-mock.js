@@ -1,4 +1,5 @@
 import TransactionMock from "mocks/transaction-mock";
+import sinon from "sinon";
 
 export default class DatabaseMock {
 	constructor() {

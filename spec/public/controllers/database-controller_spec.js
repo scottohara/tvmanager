@@ -1,6 +1,7 @@
 import DatabaseController from "../../../src/controllers/database-controller";
 import DatabaseMock from "mocks/database-mock";
 import TransactionMock from "mocks/transaction-mock";
+import sinon from "sinon";
 import window from "components/window";
 
 describe("DatabaseController", () => {

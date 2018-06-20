@@ -1,3 +1,5 @@
+import sinon from "sinon";
+
 export default class TransactionMock {
 	constructor(db) {
 		this.db = db;

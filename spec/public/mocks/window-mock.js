@@ -1,3 +1,5 @@
+import sinon from "sinon";
+
 class WindowMock {
 	constructor() {
 		this.navigator = {onLine: true};

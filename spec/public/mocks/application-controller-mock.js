@@ -1,4 +1,5 @@
 import DatabaseMock from "mocks/database-mock";
+import sinon from "sinon";
 
 export default class ApplicationControllerMock {
 	constructor() {

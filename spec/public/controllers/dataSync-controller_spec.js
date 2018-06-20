@@ -7,6 +7,7 @@ import Program from "models/program-model";
 import Series from "models/series-model";
 import Setting from "models/setting-model";
 import Sync from "models/sync-model";
+import sinon from "sinon";
 import window from "components/window";
 
 // Get a reference to the application controller singleton

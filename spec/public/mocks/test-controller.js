@@ -1,4 +1,5 @@
 import TestView from "views/test-view.html";
+import sinon from "sinon";
 
 export default class TestController {
 	constructor(args) {

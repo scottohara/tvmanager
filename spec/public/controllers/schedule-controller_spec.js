@@ -3,6 +3,7 @@ import ApplicationController from "controllers/application-controller";
 import ScheduleController from "controllers/schedule-controller";
 import ScheduleView from "views/schedule-view.html";
 import Series from "models/series-model";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
