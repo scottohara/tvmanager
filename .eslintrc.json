@@ -3,9 +3,6 @@
 	"env": {
 		"mocha": true
 	},
-	"globals": {
-		"MAX_DATA_AGE_DAYS": false
-	},
 	"rules": {
 		"no-alert": "off"						// disabled to allow for import/export/delete confirmation prompts,
 	}

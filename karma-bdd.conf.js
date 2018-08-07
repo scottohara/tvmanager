@@ -8,7 +8,7 @@ module.exports = config => {
 		 * available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		 */
 		preprocessors: {
-			"spec/public/**/*_spec.js": ["webpack", "sourcemap"]
+			"spec/public/index.js": ["webpack", "sourcemap"]
 		},
 
 		// Webpack configuration

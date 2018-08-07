@@ -18,6 +18,12 @@ const	MAX_DATA_AGE_DAYS = 7,
 				path: path.resolve(__dirname, "public")
 			},
 
+			// Rule for *.ts processing
+			tsRule = {
+				test: /\.ts$/,
+				loader: "ts-loader"
+			},
+
 			// Rule for icon processing
 			iconRule = {
 				test: /tv-icon-.*\.png$/,
@@ -81,11 +87,17 @@ const	MAX_DATA_AGE_DAYS = 7,
 
 				// Default rules for all environments
 				module: {
-					rules: []
+					rules: [
+						tsRule
+					]
 				},
 
 				// Default resolve paths
 				resolve: {
+					extensions: [
+						".ts",
+						".js"
+					],
 					modules: [
 						path.resolve(__dirname, "src"),
 						path.resolve(__dirname, "node_modules")

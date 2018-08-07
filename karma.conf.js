@@ -8,7 +8,7 @@ module.exports = config => {
 		 * available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		 */
 		preprocessors: {
-			"spec/public/**/*_spec.js": "webpack"
+			"spec/public/index.js": "webpack"
 		},
 
 		// Webpack configuration
@@ -19,18 +19,16 @@ module.exports = config => {
 		 * possible values: 'dots', 'progress'
 		 * available reporters: https://npmjs.org/browse/keyword/karma-reporter
 		 */
-		reporters: ["mocha", "coverage"],
+		reporters: ["mocha", "coverage-istanbul"],
 
-		coverageReporter: {
-			reporters: [
-				{type: "html", dir: "coverage"},
-				{type: "text"},
-				{type: "text-summary"},
-				{type: "lcovonly", dir: "coverage"}
-			],
-			subdir(browser) {
-				// Normalise browser names
-				return browser.toLowerCase().split(/[ /-]/)[0];
+		coverageIstanbulReporter: {
+			reports: ["html", "text", "text-summary", "lcovonly"],
+			dir: "coverage",
+			combineBrowserReports: true,
+			fixWebpackSourcePaths: true,
+			"report-config": {
+				html: {subdir: "frontend"},
+				lcovonly: {file: "frontend/lcov.info"}
 			}
 		},
 

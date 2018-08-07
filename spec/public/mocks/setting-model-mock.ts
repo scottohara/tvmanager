@@ -1,0 +1,37 @@
+import sinon, {SinonStub} from "sinon";
+
+interface Setting {
+	name?: string | null;
+	value?: string | null;
+}
+
+const saveStub: SinonStub = sinon.stub(),
+			removeStub: SinonStub = sinon.stub(),
+			getStub: SinonStub = sinon.stub(),
+			setting: Setting = {};
+
+export default class SettingMock {
+	public constructor(public readonly settingName: string | null,
+											public readonly settingValue: string | null) {
+		setting.name = this.settingName;
+		setting.value = this.settingValue;
+		saveStub.reset();
+		removeStub.reset();
+	}
+
+	public get save(): SinonStub {
+		return saveStub;
+	}
+
+	public get remove(): SinonStub {
+		return removeStub;
+	}
+
+	public static get setting(): Setting {
+		return setting;
+	}
+
+	public static get "get"(): SinonStub {
+		return getStub;
+	}
+}
