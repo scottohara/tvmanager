@@ -64,8 +64,6 @@ Installation (Development)
 2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle && npm install`) (`--path` ensures that gems are installed locally in the project)
 3. Start the server (`npm start`)
 
-For running in the iOS Simulator, use `rake simulator:run`. This rake task will start a server process, prompt for the device & iOS version to launch the simulator for, and open the application in Mobile Safari. Quitting the simulator will automatically shutdown the server process it started.
-
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
 
 The first time it runs it will create the database (you should receive a message saying that the database has been upgraded, and to restart the app).
@@ -126,7 +124,7 @@ Frontend specs are implemented using [mocha](https://mochajs.org/)+[chai](http:/
 Four [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
 
 1. `npm run test:bdd` watches for any file changes and runs the full test suite (without code coverage)
-2. `npm run test:coverage` performs a single full test suite run, including [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage reports are written to stdout, and detailed HTML reports are available in `/tvmanager/coverage/{browser}/index.html`
+2. `npm run test:coverage` performs a single full test suite run, including [instanbul](http://gotwarlost.github.io/istanbul/) (via [karma-coverage](https://github.com/karma-runner/karma-coverage)) code coverage reporting. Summary coverage report is written to stdout, and a detailed HTML report is available in `/tvmanager/coverage/frontend/index.html`
 3. `npm run test:coverage:chrome` is the same as `npm run test:coverage`, except only for headless Chrome
 4. `npm run test:coverage:mobile` is the same as `npm run test:coverage`, except only for iOS Simulator
 
@@ -136,8 +134,6 @@ To run the tests in Mobile Safari on a physical device:
 * start the test runner *without* launching the default browsers (`npm run test:coverage -- --browsers`)
 * the Karma server will pause waiting for a browser connection
 * manually launch Mobile Safari and browse to the URL shown in the terminal window (eg. `http://localhost:9876`)
-
-(Note: The name of the subdirectory for Mobile Safari coverage reports is 'mobile', ie. `coverage/mobile/index.html`)
 
 Backend specs are implemented using [RSpec](http://rspec.info/):
 

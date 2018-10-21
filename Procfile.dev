@@ -1,3 +1,3 @@
-web: bundle exec shotgun -p 9393
+web: bundle exec rerun --dir app --background -- puma
 db: couchdb
 watch: npm run watch

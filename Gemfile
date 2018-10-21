@@ -5,17 +5,13 @@ ruby '2.5.3'
 
 source 'https://rubygems.org'
 
-group :development do
-	gem 'foreman'
-	gem 'open4'
-	gem 'shotgun'
-end
-
 gem 'couchrest'
 gem 'json'
+gem 'puma'
 gem 'rake'
 gem 'sinatra'
-gem 'thin'
+
+gem 'rerun', group: :development
 
 group :development, :test do
 	gem 'dotenv'

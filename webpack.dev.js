@@ -67,6 +67,6 @@ module.exports = merge(config, {
 		}),
 
 		// Open a browser automatically
-		new OpenBrowserPlugin({url: "http://localhost:9393/index.html"})
+		new OpenBrowserPlugin({url: "http://localhost:3001/index.html"})
 	]
 });
