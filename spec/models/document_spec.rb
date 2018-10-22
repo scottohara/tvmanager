@@ -21,7 +21,7 @@ describe TVManager::Document do
 			let(:documents) { [*1..3].map { |i| document_doc.merge 'id' => "document_#{i}" } }
 			let(:fixtures) { documents }
 			let(:json) do
-				fixtures.reverse.map do |doc|
+				fixtures.reverse.map! do |doc|
 					{
 						'id' => doc['_id'],
 						'key' => doc['_id'],
@@ -51,7 +51,7 @@ describe TVManager::Document do
 			let(:documents) { [*1..3].map { |i| document_doc.merge 'id' => "document_#{i}", pending: [device_id] } }
 			let(:fixtures) { documents }
 			let(:json) do
-				fixtures.reverse.map do |doc|
+				fixtures.reverse.map! do |doc|
 					{
 						'id' => doc['_id'],
 						'key' => device_id,

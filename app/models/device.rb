@@ -28,7 +28,7 @@ module TVManager
 				db
 					.view('devices/all')['rows']
 					.reject { |device| device['id'].eql? device_id }
-					.map { |device| device['id'] }
+					.map! { |device| device['id'] }
 			end
 		end
 
