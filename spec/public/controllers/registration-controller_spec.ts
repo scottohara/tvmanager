@@ -138,7 +138,7 @@ describe("RegistrationController", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				fakeServer.respondWith("DELETE", /\/devices\/\w+/, "");
+				fakeServer.respondWith("DELETE", /\/devices\/\w+/u, "");
 				registrationController["unregister"]();
 			});
 
@@ -181,7 +181,7 @@ describe("RegistrationController", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				fakeServer.respondWith("PUT", /\/devices\/\w+/, [200, {Location: "new-device-id"},	""]);
+				fakeServer.respondWith("PUT", /\/devices\/\w+/u, [200, {Location: "new-device-id"},	""]);
 				registrationController["save"]();
 			});
 

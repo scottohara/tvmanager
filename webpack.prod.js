@@ -29,7 +29,7 @@ module.exports = merge(config, {
 
 	module: {
 		rules: [
-			cssRule({minimize: true}),
+			cssRule,
 			iconRule,
 			imageRule,
 			htmlRule

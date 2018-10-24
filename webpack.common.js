@@ -6,7 +6,7 @@ const path = require("path"),
 			{GenerateSW} = require("workbox-webpack-plugin"),
 			packageJson = require("./package");
 
-const	MAX_DATA_AGE_DAYS = 7,
+const MAX_DATA_AGE_DAYS = 7,
 
 			// Default entry
 			entry = {
@@ -20,13 +20,28 @@ const	MAX_DATA_AGE_DAYS = 7,
 
 			// Rule for *.ts processing
 			tsRule = {
-				test: /\.ts$/,
+				test: /\.ts$/u,
 				loader: "ts-loader"
+			},
+
+			// Rule for *.css processing
+			cssRule = {
+				test: /\.css$/u,
+				use: [
+					MiniCssExtractPlugin.loader,
+					{
+						loader: "css-loader",
+						options: {
+							// Generate sourcemaps
+							sourceMap: true
+						}
+					}
+				]
 			},
 
 			// Rule for icon processing
 			iconRule = {
-				test: /tv-icon-.*\.png$/,
+				test: /tv-icon-.*\.png$/u,
 				loader: "url-loader",
 				options: {
 					// Use file-loader for anything bigger than 1 byte
@@ -39,7 +54,7 @@ const	MAX_DATA_AGE_DAYS = 7,
 
 			// Rule for image processing
 			imageRule = {
-				test: /(\.gif|startup-.*\.png)$/,
+				test: /(\.gif|startup-.*\.png)$/u,
 				loader: "url-loader",
 				options: {
 					// Use file-loader for anything bigger than 1 byte
@@ -52,8 +67,8 @@ const	MAX_DATA_AGE_DAYS = 7,
 
 			// Rule for *.html processing
 			htmlRule = {
-				test: /\.html$/,
-				include: /views/,
+				test: /\.html$/u,
+				include: /views/u,
 				loader: "html-loader",
 				options: {
 					minimize: true
@@ -115,12 +130,12 @@ const	MAX_DATA_AGE_DAYS = 7,
 							},
 							cubiq: {
 								name: "cubiq",
-								test: /[\\/]src[\\/]framework[\\/]/,
+								test: /[\\/]src[\\/]framework[\\/]/u,
 								priority: 20
 							},
 							vendor: {
 								name: "vendor",
-								test: /[\\/]node_modules[\\/]/,
+								test: /[\\/]node_modules[\\/]/u,
 								priority: 30
 							}
 						}
@@ -131,26 +146,6 @@ const	MAX_DATA_AGE_DAYS = 7,
 				// Abort on first error
 				bail: true
 			};
-
-// Rule for *.css processing
-function cssRule({minimize} = {}) {
-	return {
-		test: /\.css$/,
-		use: [
-			MiniCssExtractPlugin.loader,
-			{
-				loader: "css-loader",
-				options: {
-					// Minify using cssnano
-					minimize,
-
-					// Generate sourcemaps
-					sourceMap: true
-				}
-			}
-		]
-	};
-}
 
 function extractCss(hashFilename) {
 	return new MiniCssExtractPlugin({filename: hashFilename ? "[name]-[chunkhash:6].css" : "[name].css"});

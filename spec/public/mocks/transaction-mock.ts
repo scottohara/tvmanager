@@ -9,8 +9,8 @@ export default class TransactionMock {
 			let commit = false;
 
 			try {
-				const tokens: RegExpMatchArray | null = originalSql.match(/\?/g),
-							WHITESPACE: RegExp = /\s+/g;
+				const tokens: RegExpMatchArray | null = originalSql.match(/\?/gu),
+							WHITESPACE: RegExp = /\s+/gu;
 
 				if (tokens && params && tokens.length !== params.length) {
 					this.db.commands.push({originalSql});
@@ -20,7 +20,7 @@ export default class TransactionMock {
 				let parsedSql: string = originalSql.replace(WHITESPACE, " ");
 
 				if (params) {
-					params.forEach((param: string): string => (parsedSql = parsedSql.replace(/\?/, param)));
+					params.forEach((param: string): string => (parsedSql = parsedSql.replace(/\?/u, param)));
 				}
 
 				this.db.commands.push({

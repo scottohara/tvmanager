@@ -28,7 +28,7 @@ module.exports = merge(config, {
 
 	module: {
 		rules: [
-			cssRule(),
+			cssRule,
 			merge(iconRule, {
 				options: {
 					// No hash in file names

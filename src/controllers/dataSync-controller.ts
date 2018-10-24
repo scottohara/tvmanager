@@ -429,7 +429,7 @@ export default class DataSyncController extends ViewController {
 				data: json,
 				success: (_exportResponse: string, _status: JQuery.Ajax.SuccessTextStatus, jqXHR: JQuery.jqXHR): void => {
 					// Get the Etag value returned by the server
-					const returnedHash: string = String(jqXHR.getResponseHeader("Etag")).replace(/"/g, "");
+					const returnedHash: string = String(jqXHR.getResponseHeader("Etag")).replace(/"/gu, "");
 
 					// Compare the Etag with the MD5 sum we sent
 					if (hash === returnedHash) {
@@ -713,7 +713,7 @@ export default class DataSyncController extends ViewController {
 		 */
 		if (this.importChangesOnly) {
 			importJson = importData as SerializedModel[];
-			returnedHash = String(jqXHR.getResponseHeader("Etag")).replace(/"/g, "");
+			returnedHash = String(jqXHR.getResponseHeader("Etag")).replace(/"/gu, "");
 		} else {
 			returnedHash = (importData as FullImport).checksum;
 			importJson = (importData as FullImport).data;

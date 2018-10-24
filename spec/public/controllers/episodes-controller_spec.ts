@@ -425,6 +425,7 @@ describe("EpisodesController", (): void => {
 						...items[0],
 						status: scenario.status,
 						statusWarning: scenario.statusWarning,
+						save: sinon.stub(),
 						remove: sinon.stub()
 					};
 					episodesController["episodeList"] = new ListMock("", "", "", [item]);
@@ -482,10 +483,10 @@ describe("EpisodesController", (): void => {
 
 		beforeEach((): void => {
 			items = [
-				{...new EpisodeMock("1", null, "", "", false, false, 1), save: sinon.stub()},
-				{...new EpisodeMock("2", null, "", "", false, false, 2), save: sinon.stub()},
-				{...new EpisodeMock("3", null, "", "", false, false, 3), save: sinon.stub()},
-				{...new EpisodeMock("4", null, "", "", false, false, 3), save: sinon.stub()}
+				{...new EpisodeMock("1", null, "", "", false, false, 1), save: sinon.stub(), remove: sinon.stub()},
+				{...new EpisodeMock("2", null, "", "", false, false, 2), save: sinon.stub(), remove: sinon.stub()},
+				{...new EpisodeMock("3", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub()},
+				{...new EpisodeMock("4", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub()}
 			];
 
 			sortedItems = [

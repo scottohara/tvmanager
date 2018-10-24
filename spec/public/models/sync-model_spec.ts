@@ -21,6 +21,7 @@ describe("Sync", (): void => {
 		id = "1";
 		action = "modified";
 		sync = new Sync(type, id, action);
+		callback = sinon.stub();
 	});
 
 	describe("object constructor", (): void => {
@@ -34,7 +35,6 @@ describe("Sync", (): void => {
 		let sql: string;
 
 		beforeEach((): void => {
-			callback = sinon.stub();
 			sql = `
 				SELECT	Type,
 								ID,

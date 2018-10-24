@@ -305,7 +305,7 @@ describe("SeriesListController", (): void => {
 
 		beforeEach((): void => {
 			index = 0;
-			item = {...items[0], remove: sinon.stub()};
+			item = {...items[0], save: sinon.stub(), remove: sinon.stub()};
 			seriesListController["seriesList"] = new ListMock("", "", "", [item]);
 		});
 

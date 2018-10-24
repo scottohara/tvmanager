@@ -85,16 +85,16 @@ export default class DatabaseMock {
 	}
 
 	private normaliseSql(sql: string): RegExp {
-		const WHITESPACE: RegExp = /\s+/g,
+		const WHITESPACE: RegExp = /\s+/gu,
 					SINGLE_SPACE = " ",
-					PERCENT: RegExp = /%/,
+					PERCENT: RegExp = /%/u,
 					ANY_CHARACTER = "(.*)";
 
 		/*
 		 * Escape the following special regex characters so that they match literally:
-		 * - dashes, square brackets, curly braces, parens, star, plus, question mark
-		 * - dot, comma, backslash, caret, dollar, pipe, hash, whitespace
+		 * - square brackets, curly braces, parens, star, plus, question mark
+		 * - dot, backslash, caret, dollar, pipe, hash
 		 */
-		return new RegExp(sql.replace(WHITESPACE, SINGLE_SPACE).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&").replace(PERCENT, ANY_CHARACTER), "g");
+		return new RegExp(sql.replace(WHITESPACE, SINGLE_SPACE).replace(/[[\]{}()*+?.\\^$|#]/gu, "\\$&").replace(PERCENT, ANY_CHARACTER), "gu");
 	}
 }
