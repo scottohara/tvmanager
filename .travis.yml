@@ -14,7 +14,7 @@ env:
     - CC_TEST_REPORTER_ID=1fdb47c1e2af8a9d9bbcb07b77d4286bbe4a80d7a249202161991318e1569d28
 
 before_install:
-  - export DEVICE="iPhone X (11.3)"     # Preferred test device
+  - export DEVICE="iPhone X (12.0)"     # Preferred test device
   - export DEVICE_UDID=$(instruments -s devices | grep "$DEVICE" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
   - xcrun simctl shutdown all           # Make sure all other simulators are shutdown
   - xcrun simctl boot $DEVICE_UDID      # Boot the preferred test device
