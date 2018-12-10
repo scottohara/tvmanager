@@ -1372,7 +1372,7 @@ describe("ApplicationController", (): void => {
 			});
 		});
 
-		describe.only("with last sync time", (): void => {
+		describe("with last sync time", (): void => {
 			let clock: SinonFakeTimers,
 					settingValue: Date;
 
