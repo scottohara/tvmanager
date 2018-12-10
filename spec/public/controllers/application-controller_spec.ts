@@ -1372,15 +1372,15 @@ describe("ApplicationController", (): void => {
 			});
 		});
 
-		describe("with last sync time", (): void => {
+		describe.only("with last sync time", (): void => {
 			let clock: SinonFakeTimers,
-					settingValue: number;
+					settingValue: Date;
 
 			beforeEach((): SinonFakeTimers => (clock = sinon.useFakeTimers((new Date()).valueOf())));
 
 			describe("younger than max data data age days", (): void => {
 				it("should do nothing", (): void => {
-					settingValue = Number(new Date()) - (7 * 24 * 60 * 60 * 1000);
+					settingValue = new Date((new Date()).valueOf() - (7 * 24 * 60 * 60 * 1000));
 					applicationController["gotLastSyncTime"](new SettingMock(null, String(settingValue)));
 					applicationController.showNotice.should.not.have.been.called;
 				});
@@ -1388,7 +1388,7 @@ describe("ApplicationController", (): void => {
 
 			describe("older than max data age days", (): void => {
 				it("should display a sync notice", (): void => {
-					settingValue = Number(new Date()) - (9 * 24 * 60 * 60 * 1000);
+					settingValue = new Date((new Date()).valueOf() - (9 * 24 * 60 * 60 * 1000));
 					applicationController["gotLastSyncTime"](new SettingMock(null, String(settingValue)));
 					applicationController.showNotice.should.have.been.calledWith({
 						label: "The last data sync was over 7 days ago",

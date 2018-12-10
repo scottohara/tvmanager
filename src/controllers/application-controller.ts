@@ -703,7 +703,7 @@ export default class ApplicationController {
 						MILLISECONDS_IN_ONE_SECOND = 1000,
 						MILLISECONDS_IN_ONE_DAY = MILLISECONDS_IN_ONE_SECOND * SECONDS_IN_ONE_MINUTE * MINUTES_IN_ONE_HOUR * HOURS_IN_ONE_DAY,
 						now: Date = new Date(),
-						lastSync: Date = new Date(Number(lastSyncTime.settingValue));
+						lastSync: Date = new Date(lastSyncTime.settingValue);
 
 			// Check if the last sync was more that the specified threshold
 			if (Math.round(Math.abs(now.getTime() - lastSync.getTime()) / MILLISECONDS_IN_ONE_DAY) > this.maxDataAgeDays) {
