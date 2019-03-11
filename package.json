@@ -72,7 +72,6 @@
   },
   "scripts": {
     "start": "heroku local --procfile Procfile.dev",
-    "postinstall": "npm run build",
     "build": "webpack --progress --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.dev.js",
     "lint": "eslint 'src/**/*.{ts,js}' 'spec/public/**/*.{ts,js}' '*.{ts,js}'",
