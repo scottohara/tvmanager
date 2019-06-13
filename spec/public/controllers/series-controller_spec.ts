@@ -217,7 +217,7 @@ describe("SeriesController", (): void => {
 					});
 
 					it("should open the SpinningWheel", (): Chai.Assertion => SpinningWheelMock.open.should.have.been.called);
-					it("should wrap the SpinningWheel in a touch event proxy", (): Chai.Assertion => ((seriesController.swtoucheventproxy as TouchEventProxy)["element"] as HTMLElement).should.deep.equal(swWrapper.get(0)));
+					it("should wrap the SpinningWheel in a touch event proxy", (): Chai.Assertion => (seriesController.swtoucheventproxy as TouchEventProxy)["element"].should.deep.equal(swWrapper.get(0)));
 					it("should clear the semaphore", (): Chai.Assertion => seriesController["gettingNowShowing"].should.be.false);
 				});
 			});
@@ -283,7 +283,7 @@ describe("SeriesController", (): void => {
 
 	describe("listRetrieved", (): void => {
 		let swWrapper: JQuery<HTMLElement>,
-				programs: {[key: string]: string};
+				programs: {[key: string]: string;};
 
 		beforeEach((): void => {
 			sinon.stub(seriesController, "setProgramId" as keyof SeriesController);

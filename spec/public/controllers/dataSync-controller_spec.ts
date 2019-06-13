@@ -1024,7 +1024,7 @@ describe("DataSyncController", (): void => {
 			description: string;
 			importChangesOnly: boolean;
 			importData?: FullImport | SerializedModel[];
-			jqXHROverrides?: {responseText?: string; getResponseHeader?: SinonStub};
+			jqXHROverrides?: {responseText?: string; getResponseHeader?: SinonStub;};
 		}
 
 		const data: SerializedModel[] = [],

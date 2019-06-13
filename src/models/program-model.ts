@@ -65,7 +65,7 @@ export default class Program extends Base {
 	private progressBar: ProgressBar;
 
 	public constructor(public id: string | null, programName: string | null,
-											public seriesCount: number = 0, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0) {
+						public seriesCount: number = 0, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0) {
 		super();
 		this.setProgramName(programName);
 		this.progressBar = new ProgressBar(episodeCount, []);

@@ -103,7 +103,7 @@ export default class ApplicationController {
 		ApplicationController.singletonInstance = this;
 
 		// Bind a handler for transition end events
-		$("#contentWrapper").on("transitionend", this.contentShown);
+		$("#contentWrapper").on("transitionend", this.contentShown.bind(this));
 
 		// Increase the default cell height of the SpinningWheel (44px default is incorrect)
 		SpinningWheel.cellHeight = 45;
@@ -338,7 +338,7 @@ export default class ApplicationController {
 	 */
 	public showNotice(notice: Notice): void {
 		// Create a div for the new notice
-		const noticeContainer: JQuery<HTMLElement> = $("<div>")
+		const	noticeContainer: JQuery<HTMLElement> = $("<div>")
 						.addClass("notice")
 						.appendTo($("#notices")),
 					noticeLeftButton: JQuery<HTMLElement> = $("<a>").appendTo(noticeContainer),
@@ -462,7 +462,7 @@ export default class ApplicationController {
 		this.setHeader();
 
 		// Tell the application controller that we've finished loading
-		window.setTimeout(this.contentShown, DELAY_MS);
+		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**
@@ -485,7 +485,7 @@ export default class ApplicationController {
 		this.setHeader();
 
 		// Tell the application controller that we've finished loading
-		window.setTimeout(this.contentShown, DELAY_MS);
+		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**

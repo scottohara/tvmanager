@@ -64,13 +64,13 @@ export default class Episode extends Base {
 	public unverified = false;
 
 	public constructor(public id: string | null,
-											public episodeName: string | null, status: EpisodeStatus,
-											public statusDate: string, unverified = false,
-											public unscheduled: boolean = false,
-											public sequence: number = 0,
-											private seriesId: string | null,
-											public readonly seriesName?: string,
-											public readonly programName?: string) {
+						public episodeName: string | null, status: EpisodeStatus,
+						public statusDate: string, unverified = false,
+						public unscheduled: boolean = false,
+						public sequence: number = 0,
+						private seriesId: string | null,
+						public readonly seriesName?: string,
+						public readonly programName?: string) {
 		super();
 		this.setStatus(status);
 		this.setUnverified(unverified);
@@ -86,7 +86,7 @@ export default class Episode extends Base {
 	 */
 	public static listBySeries(seriesId: string, callback: ListCallback): void {
 		// Set the WHERE clause to filter by the specified series, and the ORDER BY clause to sort by episode sequence
-		const filter: string = `
+		const filter = `
 						WHERE			e.SeriesID = ?
 						ORDER BY	e.Sequence,
 											e.EpisodeID
@@ -106,7 +106,7 @@ export default class Episode extends Base {
 	 */
 	public static listByUnscheduled(callback: ListCallback): void {
 		// Set the WHERE clause to filter by unscheduled episodes, and the ORDER BY clause to sort by status date
-		const monthNumberCase: string = `
+		const monthNumberCase = `
 						CASE SUBSTR(StatusDate, 4, 3)
 							WHEN 'Jan' THEN '01'
 							WHEN 'Feb' THEN '02'
@@ -122,13 +122,13 @@ export default class Episode extends Base {
 							WHEN 'Dec' THEN '12'
 						END
 					`,
-					filter: string = `WHERE			e.Unscheduled = 'true'
-														ORDER BY	CASE
-																				WHEN STRFTIME('%m%d', 'now') <= (${monthNumberCase} || SUBSTR(StatusDate, 1, 2)) THEN 0
-																				ELSE 1
-																			END,
-																			${monthNumberCase},
-																			SUBSTR(StatusDate, 1, 2)`,
+					filter = `WHERE			e.Unscheduled = 'true'
+										ORDER BY	CASE
+																WHEN STRFTIME('%m%d', 'now') <= (${monthNumberCase} || SUBSTR(StatusDate, 1, 2)) THEN 0
+																ELSE 1
+															END,
+															${monthNumberCase},
+															SUBSTR(StatusDate, 1, 2)`,
 					params: string[] = [];
 
 		// Get the list of episodes
@@ -214,7 +214,7 @@ export default class Episode extends Base {
 			(): void => callback(),
 			(_: SQLTransaction, error: SQLError): boolean => {
 				// Something went wrong. Call the callback passing the error message
-				const message: string = `Episode.removeAll: ${error.message}`;
+				const message = `Episode.removeAll: ${error.message}`;
 
 				callback(message);
 
@@ -450,7 +450,7 @@ export default class Episode extends Base {
 		// Helper function to ensure date parts are zero-padded as required
 		function leftPad(value: number | string): string {
 			const MIN_LENGTH = 2,
-						paddedValue: string = `0${value}`;
+						paddedValue = `0${value}`;
 
 			return paddedValue.substr(paddedValue.length - MIN_LENGTH);
 		}
@@ -479,13 +479,13 @@ export default class Episode extends Base {
 			 * start/end is the period in "MMDD" format
 			 */
 			const today: Date = new Date(),
-						months: {[month: string]: string} = {Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"},
+						months: {[month: string]: string;} = {Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"},
 						parts: string[] = this.statusDate.split("-"),
 						tempStatusDate: string = months[parts[1]] + parts[0],
 						APRIL = 3,
 						NINE_MONTHS = 10,
 						THREE_MONTHS = 2,
-						endMonth: string = String(today.getMonth() < APRIL ? NINE_MONTHS + today.getMonth() : today.getMonth() - THREE_MONTHS),
+						endMonth = String(today.getMonth() < APRIL ? NINE_MONTHS + today.getMonth() : today.getMonth() - THREE_MONTHS),
 						start: string = leftPad(today.getMonth() + 1) + leftPad(today.getDate()),
 						end: string = leftPad(endMonth) + leftPad(today.getDate());
 

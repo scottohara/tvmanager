@@ -2,7 +2,7 @@ import sinon, {SinonStub} from "sinon";
 
 interface NavigatorMock {
 	onLine: boolean;
-	serviceWorker: {register: SinonStub};
+	serviceWorker: {register: SinonStub;};
 }
 
 class WindowMock {
@@ -17,7 +17,7 @@ class WindowMock {
 
 	public readonly confirm: SinonStub = sinon.stub();
 
-	public readonly console: {log: SinonStub} = {log: sinon.stub()};
+	public readonly console: {log: SinonStub;} = {log: sinon.stub()};
 
 	public readonly setTimeout: SinonStub = sinon.stub().yields();
 

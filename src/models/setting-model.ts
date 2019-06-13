@@ -27,7 +27,7 @@ import Base from "models/base-model";
  */
 export default class Setting extends Base {
 	public constructor(private settingName: string | null,
-											public settingValue: string | null) {
+						public settingValue: string | null) {
 		super();
 	}
 

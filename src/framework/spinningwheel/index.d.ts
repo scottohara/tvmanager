@@ -9,7 +9,7 @@ export interface SelectedValues<T> {
 	values: string[];
 }
 
-export type SlotData < T > = T extends string ? StringSlotData : NumberSlotData;
+export type SlotData<T> = T extends string ? StringSlotData : NumberSlotData;
 
 interface StringSlotData {
 	[key: string]: string;

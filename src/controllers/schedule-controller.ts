@@ -98,8 +98,8 @@ export default class ScheduleController extends ViewController {
 				// If the program or now showing was edited, resort the list
 				if (listItem.series.programId !== this.origProgramId || listItem.series.nowShowing !== this.origNowShowing) {
 					this.scheduleList.items = this.scheduleList.items.sort((a: Series, b: Series): number => {
-						const x: string = `${a.nowShowing || "Z"}-${a.programName}`,
-									y: string = `${b.nowShowing || "Z"}-${b.programName}`;
+						const x = `${a.nowShowing || "Z"}-${a.programName}`,
+									y = `${b.nowShowing || "Z"}-${b.programName}`;
 
 						return x.localeCompare(y);
 					});

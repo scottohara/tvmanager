@@ -10,7 +10,7 @@ export default class TransactionMock {
 
 			try {
 				const tokens: RegExpMatchArray | null = originalSql.match(/\?/gu),
-							WHITESPACE: RegExp = /\s+/gu;
+							WHITESPACE = /\s+/gu;
 
 				if (tokens && params && tokens.length !== params.length) {
 					this.db.commands.push({originalSql});
@@ -34,7 +34,7 @@ export default class TransactionMock {
 					let rowsAffected = 1,
 							rows: SQLResultSetRowList = {
 								length: 0,
-								item(_: number): void {}
+								item(): void {}
 							};
 
 					if (this.db.noRowsAffectedAtSql && this.db.noRowsAffectedAtSql.test(parsedSql)) {
@@ -87,7 +87,7 @@ try {
 				tx: TransactionMock = new TransactionMock({commit: true, commands} as DatabaseMock);
 
 	// Override executeError so that it doesn't throw an "ExecuteError", to ensure 100% branch coverage of catch block
-	tx.executeError = sinon.stub().throws();
+	sinon.stub(tx, "executeError").throws();
 
 	// Attempt to execute a SQL statement with an incorrect number of param tokens
 	tx.executeSql("?", []);

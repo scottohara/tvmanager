@@ -623,7 +623,7 @@ describe("Episode", (): void => {
 			statusDate: string;
 			statusDateDisplay: string;
 			statusWarning: "" | "warning";
-			today?: {day: number; month: number};
+			today?: {day: number; month: number;};
 		}
 
 		const scenarios: Scenario[] = [

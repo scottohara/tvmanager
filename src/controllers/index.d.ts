@@ -50,13 +50,11 @@ export interface View {
 	scrollPos: number;
 }
 
-type ViewControllerConstructor = {
-	new(args?: object): ViewController;
-};
+type ViewControllerConstructor = new(args?: object) => ViewController;
 
-export type ViewControllerSet = {
+export interface ViewControllerSet {
 	[key: string]: ViewControllerConstructor;
-};
+}
 
 /**
  * @class NoticeStack
@@ -116,7 +114,7 @@ export interface ImportData {
 	returnedHash: string;
 }
 
-export type ImportObject = SerializedModel & {pending: string[]; isDeleted: boolean};
+export type ImportObject = SerializedModel & {pending: string[]; isDeleted: boolean;};
 
 /**
  * @class EpisodeListItem

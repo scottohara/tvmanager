@@ -83,9 +83,9 @@ export default class Series extends Base {
 	private missedCount = 0;
 
 	public constructor(public id: string | null,
-											public seriesName: string | null, nowShowing: number | null,
-											public programId: string | null,
-											public programName?: string, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0, missedCount = 0, statusWarningCount = 0) {
+						public seriesName: string | null, nowShowing: number | null,
+						public programId: string | null,
+						public programName?: string, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0, missedCount = 0, statusWarningCount = 0) {
 		super();
 		this.setNowShowing(nowShowing);
 		this.progressBar = new ProgressBar(episodeCount, []);
@@ -110,12 +110,12 @@ export default class Series extends Base {
 		 * Set the SELECT and FROM clauses to use the standard
 		 * Set the WHERE clause to filter by the specified program, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by series name
 		 */
-		const query: string = `
+		const query = `
 						${this.standardQuery.baseData}
 						${this.standardQuery.summaryData}
 						${this.standardQuery.entityList}
 					`,
-					filter: string = `
+					filter = `
 						WHERE			p.ProgramID = ?
 						GROUP BY	s.SeriesID
 						ORDER BY	s.Name COLLATE NOCASE
@@ -138,7 +138,7 @@ export default class Series extends Base {
 		 * Set the SELECT and FROM clauses to use the standard, plus a calculation of the number of episodes with a warning
 		 * Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by now showing or recorded/expected counts, and the ORDER BY clause to sort by now showing and program name
 		 */
-		const	monthNumberCase: string = `
+		const	monthNumberCase = `
 						CASE SUBSTR(e4.StatusDate, 4, 3)
 							WHEN 'Jan' THEN '01'
 							WHEN 'Feb' THEN '02'
@@ -154,7 +154,7 @@ export default class Series extends Base {
 							WHEN 'Dec' THEN '12'
 						END
 					`,
-					query: string = `
+					query = `
 						${this.standardQuery.baseData}
 						${this.standardQuery.summaryData},
 						SUM(CASE
@@ -172,7 +172,7 @@ export default class Series extends Base {
 						END) AS StatusWarningCount
 						${this.standardQuery.entityList}
 					`,
-					filter: string = `
+					filter = `
 						GROUP BY	s.SeriesID
 						HAVING		s.NowShowing IS NOT NULL OR
 											COUNT(e3.EpisodeID) > 0 OR
@@ -203,7 +203,7 @@ export default class Series extends Base {
 		 * Set the SELECT clause to the standard, plus a calculation of the number of episodes in the specified status
 		 * Set the WHERE clause to filter by the specified status, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by program name and series name
 		 */
-		const query: string = `
+		const query = `
 						${this.standardQuery.baseData}
 									COUNT(e.EpisodeID) AS EpisodeCount,
 									COUNT(e.EpisodeID) AS ${status}Count
@@ -211,7 +211,7 @@ export default class Series extends Base {
 						JOIN	Series s ON p.ProgramID = s.ProgramID
 						JOIN	Episode e ON s.SeriesID = e.SeriesID
 					`,
-					filter: string = `
+					filter = `
 						WHERE			e.Status = ?
 						GROUP BY	s.SeriesID
 						ORDER BY	p.Name COLLATE NOCASE,
@@ -235,12 +235,12 @@ export default class Series extends Base {
 		 * Set the SELECT and FROM clauses to use the standard
 		 * Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by any series that have some but not all episodes watched, and the ORDER BY clause to sort by program name and series name
 		 */
-		const query: string = `
+		const query = `
 						${this.standardQuery.baseData}
 						${this.standardQuery.summaryData}
 						${this.standardQuery.entityList}
 					`,
-					filter: string = `
+					filter = `
 						GROUP BY	s.SeriesID
 						HAVING		COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND
 											COUNT(e2.EpisodeID) > 0
@@ -608,7 +608,7 @@ export default class Series extends Base {
 	 * @param {Number} nowShowing - the now showing status of the series
 	 */
 	public setNowShowing(nowShowing: number | null = 0): void {
-		const showing: number = Number(nowShowing);
+		const showing = Number(nowShowing);
 
 		// If the value passed (or defaulted) is "Not Showing", clear the property
 		if (0 === showing) {

@@ -72,7 +72,7 @@ describe("UnscheduledController", (): void => {
 			sinon.stub(unscheduledController, "activate");
 			sinon.stub(unscheduledController, "viewItems" as keyof UnscheduledController);
 			unscheduledController.setup();
-			unscheduledController["listRetrieved"](items as EpisodeMock[]);
+			unscheduledController["listRetrieved"](items);
 		});
 
 		it("should set the unscheduled list items", (): Chai.Assertion => unscheduledController["unscheduledList"].items.should.deep.equal(items));

@@ -61,10 +61,10 @@ export default class AboutController extends ViewController {
 		};
 
 		// Get the total number of programs
-		Program.count(this.programCount);
+		Program.count(this.programCount.bind(this));
 
 		// Get the total number of series
-		Series.count(this.seriesCount);
+		Series.count(this.seriesCount.bind(this));
 
 		// Get the total number of episodes
 		Episode.totalCount(this.episodeCount.bind(this));

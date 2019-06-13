@@ -1,5 +1,12 @@
+import {
+	FindCallback,
+	ListCallback,
+	NowShowingEnum,
+	RemoveCallback,
+	SaveCallback,
+	SerializedModel
+} from "models";
 import sinon, {SinonStub} from "sinon";
-import {NowShowingEnum} from "models";
 
 interface Series {
 	seriesName: string | null;
@@ -12,12 +19,12 @@ interface Series {
 
 const saveStub: SinonStub = sinon.stub().yields(999),
 			removeStub: SinonStub = sinon.stub(),
-			listByProgramStub: SinonStub = sinon.stub(),
+			listByProgramStub: SinonStub<[string, ListCallback], Series[]> = sinon.stub(),
 			listByNowShowingStub: SinonStub = sinon.stub(),
-			findStub: SinonStub = sinon.stub(),
+			findStub: SinonStub<[string, FindCallback], SeriesMock> = sinon.stub(),
 			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub = sinon.stub(),
-			fromJsonStub: SinonStub = sinon.stub();
+			removeAllStub: SinonStub<[RemoveCallback], string> = sinon.stub(),
+			fromJsonStub: SinonStub<[SerializedModel], SeriesMock> = sinon.stub();
 
 let series: Series[] = [],
 		removeAllOK: boolean;
@@ -44,46 +51,46 @@ export default class SeriesMock {
 	public setNowShowing: SinonStub = sinon.stub();
 
 	public constructor(public readonly id: string | null,
-											public seriesName: string | null,
-											public nowShowing: number | null,
-											public programId: string | null,
-											public programName?: string,
-											public readonly episodeCount = 0,
-											public readonly watchedCount = 0,
-											public readonly recordedCount = 0,
-											public readonly expectedCount = 0,
-											public readonly _missedCount?: number,
-											public readonly statusWarningCount = 0) {
+						public seriesName: string | null,
+						public nowShowing: number | null,
+						public programId: string | null,
+						public programName?: string,
+						public readonly episodeCount = 0,
+						public readonly watchedCount = 0,
+						public readonly recordedCount = 0,
+						public readonly expectedCount = 0,
+						public readonly _missedCount?: number,
+						public readonly statusWarningCount = 0) {
 		this.toJson = sinon.stub().returns({});
 		saveStub.resetHistory();
 		removeStub.reset();
 	}
 
-	public static get listByProgram(): SinonStub {
+	public static get listByProgram(): SinonStub<[string, ListCallback], Series[]> {
 		return listByProgramStub.yields(this.series);
 	}
 
-	public static get listByNowShowing(): SinonStub {
+	public static get listByNowShowing(): SinonStub<void[], Series[]> {
 		return listByNowShowingStub.yields(this.series);
 	}
 
-	public static get listByStatus(): SinonStub {
+	public static get listByStatus(): SinonStub<[ListCallback, string], void> {
 		return sinon.stub();
 	}
 
-	public static get listByIncomplete(): SinonStub {
+	public static get listByIncomplete(): SinonStub<[ListCallback, string], void> {
 		return sinon.stub();
 	}
 
-	public static get find(): SinonStub {
+	public static get find(): SinonStub<[string, FindCallback], SeriesMock> {
 		return findStub.yields(new SeriesMock(String(findStub.args[0]), "test-series", null, null));
 	}
 
-	public static get count(): SinonStub {
+	public static get count(): SinonStub<void[], number> {
 		return countStub.yields(1);
 	}
 
-	public static get removeAll(): SinonStub {
+	public static get removeAll(): SinonStub<[RemoveCallback], string> {
 		if (removeAllOK) {
 			removeAllStub.yields();
 		} else {
@@ -93,7 +100,7 @@ export default class SeriesMock {
 		return removeAllStub;
 	}
 
-	public static get fromJson(): SinonStub {
+	public static get fromJson(): SinonStub<[SerializedModel], SeriesMock> {
 		return fromJsonStub.returns(new SeriesMock(null, null, null, null));
 	}
 
@@ -101,11 +108,11 @@ export default class SeriesMock {
 		return {1: "Mondays"};
 	}
 
-	public get save(): SinonStub {
+	public get save(): SinonStub<SaveCallback[], number> {
 		return saveStub;
 	}
 
-	public get remove(): SinonStub {
+	public get remove(): SinonStub<void[], void> {
 		return removeStub;
 	}
 

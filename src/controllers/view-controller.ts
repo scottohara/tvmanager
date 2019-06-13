@@ -19,11 +19,11 @@ import {HeaderFooter} from "controllers";
  * @property {ApplicationController} appController - the application controller singleton
  */
 export default abstract class ViewController {
-	protected appController: ApplicationController;
-
 	public header!: HeaderFooter;
 
 	public footer?: HeaderFooter;
+
+	protected appController: ApplicationController;
 
 	public constructor() {
 		// Get a reference to the application controller singleton

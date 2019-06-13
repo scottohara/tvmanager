@@ -12,7 +12,7 @@ export default class DatabaseMock {
 
 	public resultRows: SQLResultSetRowList = {
 		length: 0,
-		item(_: number): void {}
+		item(): void {}
 	};
 
 	public failAtSql: RegExp | null = null;
@@ -60,7 +60,7 @@ export default class DatabaseMock {
 		this.commands = [];
 		this.resultRows = {
 			length: 0,
-			item(_: number): void {}
+			item(): void {}
 		};
 		this.version = "1.0";
 		this.failAtSql = null;
@@ -85,9 +85,9 @@ export default class DatabaseMock {
 	}
 
 	private normaliseSql(sql: string): RegExp {
-		const WHITESPACE: RegExp = /\s+/gu,
+		const WHITESPACE = /\s+/gu,
 					SINGLE_SPACE = " ",
-					PERCENT: RegExp = /%/u,
+					PERCENT = /%/u,
 					ANY_CHARACTER = "(.*)";
 
 		/*

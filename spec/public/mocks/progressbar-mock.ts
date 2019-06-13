@@ -2,7 +2,7 @@ import {Section} from "components";
 
 export default class ProgressBarMock {
 	public constructor(private total: number,
-											private sections: Section[]) {}
+						private sections: Section[]) {}
 
 	public setTotal(total: number): number {
 		this.total = total;

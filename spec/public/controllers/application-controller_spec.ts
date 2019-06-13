@@ -882,7 +882,7 @@ describe("ApplicationController", (): void => {
 
 		describe("with activate", (): void => {
 			beforeEach((): void => {
-				controller.activate = activate;
+				Object.defineProperty(controller, "activate", {value: activate});
 				applicationController.viewStack.push({controller, scrollPos: 0});
 				applicationController["viewPopped"]({});
 			});
@@ -969,7 +969,7 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			controller = new TestController();
-			header = controller.header as HeaderFooter;
+			({header} = controller);
 			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as Function;
 			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as Function;
 
@@ -1143,7 +1143,7 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			controller = new TestController();
-			header = controller.header as HeaderFooter;
+			({header} = controller);
 			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
 			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
 
@@ -1185,7 +1185,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without left button", (): void => {
 			beforeEach((): void => {
-				(applicationController["currentView"].controller.header as HeaderFooter).leftButton = undefinedObject;
+				applicationController["currentView"].controller.header.leftButton = undefinedObject;
 				applicationController["clearHeader"]();
 			});
 
@@ -1216,7 +1216,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without right button", (): void => {
 			beforeEach((): void => {
-				(applicationController["currentView"].controller.header as HeaderFooter).rightButton = undefinedObject;
+				applicationController["currentView"].controller.header.rightButton = undefinedObject;
 				applicationController["clearHeader"]();
 			});
 
@@ -1344,7 +1344,7 @@ describe("ApplicationController", (): void => {
 
 					scenario.noticeAcknowledgements.forEach((noticeAcknowledged: boolean): void => {
 						notice = $("<div>").data("acknowledged", noticeAcknowledged);
-						notice.remove = remove;
+						sinon.stub(notice, "remove").callsFake(remove);
 						applicationController["noticeStack"].notice.push(notice);
 					});
 

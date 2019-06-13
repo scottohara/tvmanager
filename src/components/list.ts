@@ -41,12 +41,12 @@ export default class List {
 	private action?: ListAction;
 
 	public constructor(private readonly container: string,
-											private readonly itemTemplate: string,
-											private readonly groupBy: string | null,
-											public items: object[],
-											private readonly viewEventHandler: (index: number) => void,
-											private readonly editEventHandler?: ((index: number) => void) | null,
-											private readonly deleteEventHandler?: (index: number) => void) {
+						private readonly itemTemplate: string,
+						private readonly groupBy: string | null,
+						public items: object[],
+						private readonly viewEventHandler: (index: number) => void,
+						private readonly editEventHandler?: ((index: number) => void) | null,
+						private readonly deleteEventHandler?: (index: number) => void) {
 		// Get a reference to the application controller singleton
 		this.appController = new ApplicationController();
 		this.setAction("view");
@@ -74,7 +74,7 @@ export default class List {
 
 			// If grouping is required, when the property used for the group changes, output a group header item
 			if (this.groupBy) {
-				const itemGroup: string = String(listItem.get(this.groupBy));
+				const itemGroup = String(listItem.get(this.groupBy));
 
 				if (currentGroup !== itemGroup) {
 					itemElements.push($("<li>")
@@ -119,7 +119,7 @@ export default class List {
 					containerElement: JQuery<HTMLElement> = $(`#${this.container}`),
 					itemTop: number = item.get(0).offsetTop,
 					itemBottom: number = itemTop + Number(item.height()),
-					listTop: number = Number(containerElement.scrollTop()),
+					listTop = Number(containerElement.scrollTop()),
 					listBottom: number = listTop + Number(containerElement.outerHeight());
 
 		let scrollPos: number | undefined;

@@ -303,9 +303,7 @@ export default class EpisodesController extends ViewController {
 			// Only update items that have changed position
 			if ($(item).attr("id") !== (self.episodeList.items[index] as Episode).id) {
 				// Iterate over the list items array
-				for (let i = 0; i < self.episodeList.items.length; i++) {
-					const episode = self.episodeList.items[i] as Episode;
-
+				for (const episode of (self.episodeList.items as Episode[])) {
 					// If the array item at this position is not the same as the HTML DOM element at the same position, update the item's sequence in the database
 					if (episode.id === $(item).attr("id")) {
 						episode.sequence = index;
@@ -345,7 +343,7 @@ export default class EpisodesController extends ViewController {
 			.addClass("edit")
 			.sortable({
 				axis: "y",
-				sort: this.sortItems
+				sort: this.sortItems.bind(this)
 			});
 
 		// Setup the footer

@@ -4,6 +4,7 @@
 		"mocha": true
 	},
 	"rules": {
-		"no-alert": "off"						// disabled to allow for import/export/delete confirmation prompts,
+		"no-alert": "off",														// disabled to allow for import/export/delete confirmation prompts,
+		"@typescript-eslint/no-type-alias": "off"			// disabled to allow for PublicInterface, ViewControllerSet & SlotData
 	}
 }

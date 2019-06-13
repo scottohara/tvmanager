@@ -34,7 +34,7 @@ import window from "components/window";
 export default class ProgramsController extends ViewController {
 	private programList!: PublicInterface<List>;
 
-	private origProgramName: string | null = null
+	private origProgramName: string | null = null;
 
 	/**
 	 * @memberof ProgramsController

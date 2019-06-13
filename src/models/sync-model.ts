@@ -33,8 +33,8 @@ import Base from "models/base-model";
  */
 export default class Sync extends Base {
 	public constructor(public type: ModelType | null,
-											public id: string | null,
-											public readonly action?: SyncAction) {
+						public id: string | null,
+						public readonly action?: SyncAction) {
 		super();
 	}
 

@@ -52,12 +52,12 @@ describe("AboutController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Settings"));
 
 		it("should get the total number of programs", (): void => {
-			ProgramMock.count.should.have.been.calledWith(aboutController["programCount"]);
+			ProgramMock.count.should.have.been.calledWith(sinon.match.func);
 			aboutController["programCount"].should.have.been.calledWith(1);
 		});
 
 		it("should get the total number of series", (): void => {
-			SeriesMock.count.should.have.been.calledWith(aboutController["seriesCount"]);
+			SeriesMock.count.should.have.been.calledWith(sinon.match.func);
 			aboutController["seriesCount"].should.have.been.calledWith(1);
 		});
 

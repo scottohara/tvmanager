@@ -103,6 +103,6 @@ export interface StandardQuery {
 	entityList: string;
 }
 
-export type NowShowingEnum = {
+export interface NowShowingEnum {
 	[key: number]: string;
-};
+}

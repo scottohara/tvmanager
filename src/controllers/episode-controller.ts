@@ -110,7 +110,7 @@ export default class EpisodeController extends ViewController {
 		$("#unscheduled").on("click", this.toggleStatusDateRow.bind(this));
 
 		// Toggle the current status
-		const {status}: {status: EpisodeStatus} = this.listItem.episode;
+		const {status}: {status: EpisodeStatus;} = this.listItem.episode;
 
 		this.listItem.episode.setStatus("");
 		this.setStatus(status);

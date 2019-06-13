@@ -216,7 +216,7 @@ export default class SeriesController extends ViewController {
 	 */
 	private listRetrieved(programList: PublicInterface<Program>[]): void {
 		// Reduce the list of programs into an object for the SpinningWheel
-		const programs: {[key: string]: string} = programList.reduce((memo: {[key: string]: string}, program: Program): {[key: string]: string} => Object.assign(memo, {[String(program.id)]: program.programName}), {});
+		const programs: {[key: string]: string;} = programList.reduce((memo: {[key: string]: string;}, program: Program): {[key: string]: string;} => Object.assign(memo, {[String(program.id)]: program.programName}), {});
 
 		// Initialise the SpinningWheel with one slot for the programs; and show the control
 		SpinningWheel.addSlot<string>(programs, "left", String(this.listItem.series.programId));

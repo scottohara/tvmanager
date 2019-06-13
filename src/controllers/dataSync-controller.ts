@@ -139,7 +139,7 @@ export default class DataSyncController extends ViewController {
 		$("#localChanges").val("Checking...");
 
 		// Get the last sync time
-		Setting.get("LastSyncTime", this.gotLastSyncTime);
+		Setting.get("LastSyncTime", this.gotLastSyncTime.bind(this));
 
 		// Get the registered device
 		Setting.get("Device", this.gotDevice.bind(this));
@@ -182,7 +182,7 @@ export default class DataSyncController extends ViewController {
 		// Helper function to ensure date parts are zero-padded as required
 		function leftPad(value: number): string {
 			const MIN_LENGTH = 2,
-						paddedValue: string = `0${value}`;
+						paddedValue = `0${value}`;
 
 			return paddedValue.substr(paddedValue.length - MIN_LENGTH);
 		}
@@ -191,7 +191,7 @@ export default class DataSyncController extends ViewController {
 		if (lastSyncTime.settingValue) {
 			// Format the value as dd-mon-yyyy hh:mm:ss
 			const lastSync: Date = new Date(lastSyncTime.settingValue),
-						lastSyncDisplay: string = `${lastSync.getDate()}-${Months[lastSync.getMonth()]}-${lastSync.getFullYear()} ${leftPad(lastSync.getHours())}:${leftPad(lastSync.getMinutes())}:${leftPad(lastSync.getSeconds())}`;
+						lastSyncDisplay = `${lastSync.getDate()}-${Months[lastSync.getMonth()]}-${lastSync.getFullYear()} ${leftPad(lastSync.getHours())}:${leftPad(lastSync.getMinutes())}:${leftPad(lastSync.getSeconds())}`;
 
 			// Display the formatted value
 			$("#lastSyncTime").val(lastSyncDisplay);
@@ -330,7 +330,7 @@ export default class DataSyncController extends ViewController {
 	 * @param {Boolean} success - whether the sync was successful
 	 */
 	private syncFinish(operation: SyncOperation, successful: boolean): void {
-		let label: string = `Database has been successfully ${operation.toLowerCase()}ed.`;
+		let label = `Database has been successfully ${operation.toLowerCase()}ed.`;
 
 		// If the operation was successful, hide the status row
 		if (successful) {
@@ -730,7 +730,7 @@ export default class DataSyncController extends ViewController {
 	 * @desc Processes an imported object
 	 * @param {Object} object - The object to process
 	 */
-	private importObject(object: {doc: ImportObject}): void {
+	private importObject(object: {doc: ImportObject;}): void {
 		// Create an instance of the appropriate model from the JSON representation, and check if the current device is in the pending array
 		const obj: Model = this.jsonToModel(object.doc),
 					isPending: boolean = object.doc.pending && object.doc.pending.includes(this.device.id);
