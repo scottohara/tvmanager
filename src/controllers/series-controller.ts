@@ -20,7 +20,7 @@ import {
 } from "controllers";
 import $ from "jquery";
 import Program from "models/program-model";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import Series from "models/series-model";
 import SeriesView from "views/series-view.html";
 import SpinningWheel from "framework/spinningwheel";
@@ -64,7 +64,7 @@ export default class SeriesController extends ViewController {
 			this.originalProgramId = this.listItem.series.programId;
 		} else {
 			// Otherwise, we're adding a new series
-			this.listItem = {series: new Series(null, "", null, (listItem as ProgramListItem).program.id, String((listItem as ProgramListItem).program.programName), 0, 0, 0, 0, 0, 0)};
+			this.listItem = { series: new Series(null, "", null, (listItem as ProgramListItem).program.id, String((listItem as ProgramListItem).program.programName), 0, 0, 0, 0, 0, 0) };
 		}
 	}
 
@@ -216,7 +216,7 @@ export default class SeriesController extends ViewController {
 	 */
 	private listRetrieved(programList: PublicInterface<Program>[]): void {
 		// Reduce the list of programs into an object for the SpinningWheel
-		const programs: {[key: string]: string;} = programList.reduce((memo: {[key: string]: string;}, program: Program): {[key: string]: string;} => Object.assign(memo, {[String(program.id)]: program.programName}), {});
+		const programs: {[key: string]: string;} = programList.reduce((memo: {[key: string]: string;}, program: Program): {[key: string]: string;} => Object.assign(memo, { [String(program.id)]: program.programName }), {});
 
 		// Initialise the SpinningWheel with one slot for the programs; and show the control
 		SpinningWheel.addSlot<string>(programs, "left", String(this.listItem.series.programId));

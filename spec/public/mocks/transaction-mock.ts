@@ -1,4 +1,4 @@
-import DatabaseMock, {SQLCommand} from "mocks/database-mock";
+import DatabaseMock, { SQLCommand } from "mocks/database-mock";
 import sinon from "sinon";
 
 export default class TransactionMock {
@@ -13,7 +13,7 @@ export default class TransactionMock {
 							WHITESPACE = /\s+/gu;
 
 				if (tokens && params && tokens.length !== params.length) {
-					this.db.commands.push({originalSql});
+					this.db.commands.push({ originalSql });
 					this.executeError("Number of ?s doesn't match number of parameters");
 				}
 
@@ -44,7 +44,7 @@ export default class TransactionMock {
 					}
 
 					try {
-						successCallback(this, {insertId: 0, rowsAffected, rows});
+						successCallback(this, { insertId: 0, rowsAffected, rows });
 						commit = true;
 					} catch (successError) {
 						this.db.success = false;
@@ -84,7 +84,7 @@ export default class TransactionMock {
 // For full code coverage, we need to execute some code that is otherwise not covered in unit testing
 try {
 	const commands: SQLCommand[] = [],
-				tx: TransactionMock = new TransactionMock({commit: true, commands} as DatabaseMock);
+				tx: TransactionMock = new TransactionMock({ commit: true, commands } as DatabaseMock);
 
 	// Override executeError so that it doesn't throw an "ExecuteError", to ensure 100% branch coverage of catch block
 	sinon.stub(tx, "executeError").throws();

@@ -1,6 +1,6 @@
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import ApplicationControllerMock from "mocks/application-controller-mock";
-import {EpisodeStatus} from "models";
+import { EpisodeStatus } from "models";
 import Series from "../../../src/models/series-model";
 
 // Get a reference to the application controller singleton
@@ -496,7 +496,7 @@ describe("Series", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				appController.db.addResultRows([{SeriesCount: 1}]);
+				appController.db.addResultRows([{ SeriesCount: 1 }]);
 				Series.count(callback);
 			});
 
@@ -531,7 +531,7 @@ describe("Series", (): void => {
 	});
 
 	describe("fromJson", (): void => {
-		it("should construct a Series object from the JSON", (): Chai.Assertion => Series.fromJson({id, seriesName, nowShowing, programId, type: "Series"}).should.deep.equal(new Series(id, seriesName, nowShowing, programId)));
+		it("should construct a Series object from the JSON", (): Chai.Assertion => Series.fromJson({ id, seriesName, nowShowing, programId, type: "Series" }).should.deep.equal(new Series(id, seriesName, nowShowing, programId)));
 	});
 
 	describe("save", (): void => {
@@ -750,7 +750,7 @@ describe("Series", (): void => {
 	});
 
 	describe("toJson", (): void => {
-		it("should return a JSON representation of the series", (): Chai.Assertion => series.toJson().should.deep.equal({id, seriesName, nowShowing, programId, type: "Series"}));
+		it("should return a JSON representation of the series", (): Chai.Assertion => series.toJson().should.deep.equal({ id, seriesName, nowShowing, programId, type: "Series" }));
 	});
 
 	describe("setEpisodeCount", (): void => {

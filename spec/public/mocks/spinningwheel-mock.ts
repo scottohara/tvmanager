@@ -2,7 +2,7 @@ import {
 	SelectedValues,
 	SlotData
 } from "framework/spinningwheel/index.d.ts";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 
 interface SpinningWheel {
 	cellHeight: number;

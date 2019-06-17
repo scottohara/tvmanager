@@ -58,7 +58,7 @@ module.exports = merge(config, {
 		cleanBuildDirectory,
 		extractCss(),
 		createIndexHtml,
-		defineAppConfig({maxDataAgeDays: 9999}),
+		defineAppConfig({ maxDataAgeDays: 9999 }),
 		generateServiceWorker,
 
 		// Live reload when in watch mode
@@ -67,6 +67,6 @@ module.exports = merge(config, {
 		}),
 
 		// Open a browser automatically
-		new OpenBrowserPlugin({url: "http://localhost:3001/index.html"})
+		new OpenBrowserPlugin({ url: "http://localhost:3001/index.html" })
 	]
 });

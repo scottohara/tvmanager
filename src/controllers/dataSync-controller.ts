@@ -34,7 +34,7 @@ import $ from "jquery";
 import DataSyncView from "views/dataSync-view.html";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import Series from "models/series-model";
 import Setting from "models/setting-model";
 import Sync from "models/sync-model";
@@ -640,7 +640,7 @@ export default class DataSyncController extends ViewController {
 				},
 				success: (importObj: FullImport | SerializedModel[], _: JQuery.Ajax.SuccessTextStatus, jqXHR: JQuery.jqXHR): void => {
 					// Extract the JSON and checksum returned, and calculate a hash of the data
-					const {importJson, returnedHash}: ImportData = this.getImportData(importObj, jqXHR),
+					const { importJson, returnedHash }: ImportData = this.getImportData(importObj, jqXHR),
 								hash: string = md5(JSON.stringify(importJson));
 
 					// Compare the Etag with the MD5 sum we calculated
@@ -719,7 +719,7 @@ export default class DataSyncController extends ViewController {
 			importJson = (importData as FullImport).data;
 		}
 
-		return {importJson, returnedHash};
+		return { importJson, returnedHash };
 	}
 
 	/**

@@ -114,7 +114,7 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Recorded report view
 	 */
 	private viewRecordedReport(): void {
-		this.appController.pushView("report", {reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series), args: "Recorded"});
+		this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series), args: "Recorded" });
 	}
 
 	/**
@@ -125,7 +125,7 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Expected report view
 	 */
 	private viewExpectedReport(): void {
-		this.appController.pushView("report", {reportName: "All Expected", dataSource: Series.listByStatus.bind(Series), args: "Expected"});
+		this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series), args: "Expected" });
 	}
 
 	/**
@@ -136,7 +136,7 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Missed report view
 	 */
 	private viewMissedReport(): void {
-		this.appController.pushView("report", {reportName: "All Missed", dataSource: Series.listByStatus.bind(Series), args: "Missed"});
+		this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series), args: "Missed" });
 	}
 
 	/**
@@ -147,6 +147,6 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Incomplete report view
 	 */
 	private viewIncompleteReport(): void {
-		this.appController.pushView("report", {reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series), args: null});
+		this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series), args: null });
 	}
 }

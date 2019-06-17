@@ -38,12 +38,12 @@ import Abc from "framework/abc";
 import AboutController from "controllers/about-controller";
 import DataSyncController from "controllers/dataSync-controller";
 import DatabaseService from "services/database-service";
-import {DatabaseVersion} from "services";
+import { DatabaseVersion } from "services";
 import EpisodeController from "controllers/episode-controller";
 import EpisodesController from "controllers/episodes-controller";
 import ProgramController from "controllers/program-controller";
 import ProgramsController from "controllers/programs-controller";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import RegistrationController from "controllers/registration-controller";
 import ReportController from "controllers/report-controller";
 import ScheduleController from "controllers/schedule-controller";
@@ -400,7 +400,7 @@ export default class ApplicationController {
 		this.noticeStack.notice.push(noticeContainer);
 
 		// Slide up the notices container to reveal the notice
-		$("#notices").animate({top: Number($(window).height()) + this.noticeStack.height}, this.noticesMoved.bind(this));
+		$("#notices").animate({ top: Number($(window).height()) + this.noticeStack.height }, this.noticesMoved.bind(this));
 	}
 
 	/**
@@ -644,7 +644,7 @@ export default class ApplicationController {
 		notice.data("acknowledged", true);
 
 		// Slide down the notice element to hide the notice
-		notice.animate({height: 0}, this.noticeHidden.bind(this));
+		notice.animate({ height: 0 }, this.noticeHidden.bind(this));
 	}
 
 	/**
@@ -656,7 +656,7 @@ export default class ApplicationController {
 	 */
 	private noticeHidden(): void {
 		// Slide down the notices container to the height of the notices stack
-		$("#notices").animate({top: `-=${this.noticeStack.height}`}, this.noticesMoved.bind(this));
+		$("#notices").animate({ top: `-=${this.noticeStack.height}` }, this.noticesMoved.bind(this));
 	}
 
 	/**

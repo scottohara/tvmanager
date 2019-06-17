@@ -218,7 +218,7 @@ describe("DataSyncController", (): void => {
 		describe("with device", (): void => {
 			let device: Device;
 
-			beforeEach((): Device => (device = {id: "1", name: "test-device", imported: false}));
+			beforeEach((): Device => (device = { id: "1", name: "test-device", imported: false }));
 
 			describe("first import", (): void => {
 				beforeEach((): void => dataSyncController["gotDevice"](new SettingMock(null, JSON.stringify(device))));
@@ -499,12 +499,12 @@ describe("DataSyncController", (): void => {
 
 		it("should send any changes", (): void => {
 			sendChangeStub.callCount.should.equal(2);
-			sendChangeStub.should.have.been.calledWith(sinon.match({action: "modified"}));
+			sendChangeStub.should.have.been.calledWith(sinon.match({ action: "modified" }));
 		});
 
 		it("should send any deletes", (): void => {
 			sendDeleteStub.callCount.should.equal(1);
-			sendDeleteStub.should.have.been.calledWith(sinon.match({action: "deleted"}));
+			sendDeleteStub.should.have.been.calledWith(sinon.match({ action: "deleted" }));
 		});
 
 		afterEach((): void => {
@@ -519,12 +519,12 @@ describe("DataSyncController", (): void => {
 				sync: SyncMock;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({respondImmediately: true});
+			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 			fakeModel = new ProgramMock(null, null);
 			sinon.stub(dataSyncController, "changeSent" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "find" as keyof DataSyncController).yields(fakeModel);
-			dataSyncController["device"] = {id: "test-device", name: "Test Device", imported: false};
+			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 			sync = new SyncMock("Program", "1");
 		});
 
@@ -534,7 +534,7 @@ describe("DataSyncController", (): void => {
 					fakeServer.respondWith("POST", "/documents", (request: SinonFakeXMLHttpRequest): void => {
 						request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
 						request.requestBody.should.equal("{}");
-						request.respond(200, {Etag: request.requestHeaders["Content-MD5"]}, "");
+						request.respond(200, { Etag: request.requestHeaders["Content-MD5"] }, "");
 					});
 
 					dataSyncController["sendChange"](sync);
@@ -550,7 +550,7 @@ describe("DataSyncController", (): void => {
 					fakeServer.respondWith("POST", "/documents", (request: SinonFakeXMLHttpRequest): void => {
 						request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
 						request.requestBody.should.equal("{}");
-						request.respond(200, {Etag: "bad-hash"}, "");
+						request.respond(200, { Etag: "bad-hash" }, "");
 					});
 
 					dataSyncController["sendChange"](sync);
@@ -626,11 +626,11 @@ describe("DataSyncController", (): void => {
 				sync: SyncMock;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({respondImmediately: true});
+			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 			sync = new SyncMock("Program", "1");
 			sinon.stub(dataSyncController, "changeSent" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
-			dataSyncController["device"] = {id: "test-device", name: "Test Device", imported: false};
+			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 		});
 
 		describe("success", (): void => {
@@ -903,11 +903,11 @@ describe("DataSyncController", (): void => {
 			let fakeServer: SinonFakeServer;
 
 			beforeEach((): void => {
-				fakeServer = sinon.fakeServer.create({respondImmediately: true});
+				fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 				sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 				sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
-				sinon.stub(dataSyncController, "getImportData" as keyof DataSyncController).callsFake((data: FullImport): ImportData => ({importJson: data.data, returnedHash: data.checksum}));
-				dataSyncController["device"] = {id: "test-device", name: "Test Device", imported: false};
+				sinon.stub(dataSyncController, "getImportData" as keyof DataSyncController).callsFake((data: FullImport): ImportData => ({ importJson: data.data, returnedHash: data.checksum }));
+				dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 				dataSyncController["programsReady"] = true;
 				dataSyncController["seriesReady"] = true;
 				dataSyncController["episodesReady"] = true;
@@ -926,7 +926,7 @@ describe("DataSyncController", (): void => {
 								beforeEach((): void => {
 									fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
 										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-										request.respond(200, null, JSON.stringify({data: [{}, {}], checksum: "test-hash"}));
+										request.respond(200, null, JSON.stringify({ data: [{}, {}], checksum: "test-hash" }));
 									});
 
 									status = $("<div>")
@@ -961,7 +961,7 @@ describe("DataSyncController", (): void => {
 								beforeEach((): void => {
 									fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
 										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-										request.respond(200, null, JSON.stringify({data: [], checksum: "test-hash"}));
+										request.respond(200, null, JSON.stringify({ data: [], checksum: "test-hash" }));
 									});
 
 									dataSyncController["importData"]();
@@ -984,7 +984,7 @@ describe("DataSyncController", (): void => {
 							beforeEach((): void => {
 								fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
 									request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-									request.respond(200, null, JSON.stringify({checksum: "bad-hash"}));
+									request.respond(200, null, JSON.stringify({ checksum: "bad-hash" }));
 								});
 
 								dataSyncController["importData"]();
@@ -1034,12 +1034,12 @@ describe("DataSyncController", (): void => {
 							description: "200 OK, fast import",
 							importChangesOnly: true,
 							importData: data,
-							jqXHROverrides: {getResponseHeader: sinon.stub().withArgs("Etag").returns("\"test-hash")}
+							jqXHROverrides: { getResponseHeader: sinon.stub().withArgs("Etag").returns("\"test-hash") }
 						},
 						{
 							description: "200 OK, full import",
 							importChangesOnly: false,
-							importData: {data, checksum}
+							importData: { data, checksum }
 						},
 						{
 							description: "304 Not Modified, fast import",
@@ -1052,7 +1052,7 @@ describe("DataSyncController", (): void => {
 						{
 							description: "304 Not Modified, full import",
 							importChangesOnly: false,
-							jqXHROverrides: {responseText: JSON.stringify({data, checksum})}
+							jqXHROverrides: { responseText: JSON.stringify({ data, checksum }) }
 						}
 					];
 
@@ -1060,7 +1060,7 @@ describe("DataSyncController", (): void => {
 				jqXHR: JQuery.jqXHR;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({respondImmediately: true});
+			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 			jqXHR = $.get();
 		});
 
@@ -1070,7 +1070,7 @@ describe("DataSyncController", (): void => {
 
 				beforeEach((): void => {
 					dataSyncController["importChangesOnly"] = scenario.importChangesOnly;
-					result = dataSyncController["getImportData"](scenario.importData, {...jqXHR, ...scenario.jqXHROverrides});
+					result = dataSyncController["getImportData"](scenario.importData, { ...jqXHR, ...scenario.jqXHROverrides });
 				});
 
 				it("should return the object JSON", (): Chai.Assertion => result.importJson.should.deep.equal(data));
@@ -1116,7 +1116,7 @@ describe("DataSyncController", (): void => {
 		let callback: SinonStub;
 
 		beforeEach((): void => {
-			dataSyncController["device"] = {id: "test-device", name: "Test Device", imported: false};
+			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 			callback = sinon.stub();
 			sinon.stub(dataSyncController, "saveCallback" as keyof DataSyncController).returns(callback);
 		});
@@ -1128,7 +1128,7 @@ describe("DataSyncController", (): void => {
 				describe("deleted", (): void => {
 					beforeEach((): void => {
 						scenario.doc.isDeleted = true;
-						dataSyncController["importObject"]({doc: scenario.doc});
+						dataSyncController["importObject"]({ doc: scenario.doc });
 					});
 
 					it("should create an instance from the JSON", (): Chai.Assertion => scenario.model.fromJson.should.have.been.calledWith(scenario.doc));
@@ -1140,7 +1140,7 @@ describe("DataSyncController", (): void => {
 				describe("created or updated", (): void => {
 					beforeEach((): void => {
 						scenario.doc.isDeleted = false;
-						dataSyncController["importObject"]({doc: scenario.doc});
+						dataSyncController["importObject"]({ doc: scenario.doc });
 					});
 
 					it("should create an instance from the JSON", (): Chai.Assertion => scenario.model.fromJson.should.have.been.calledWith(scenario.doc));
@@ -1174,7 +1174,7 @@ describe("DataSyncController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.type, (): void => {
-				it(`should convert the JSON to an instance of ${scenario.type}`, (): Chai.Assertion => dataSyncController["jsonToModel"]({type: scenario.type} as SerializedModel).should.be.an.instanceOf(scenario.model));
+				it(`should convert the JSON to an instance of ${scenario.type}`, (): Chai.Assertion => dataSyncController["jsonToModel"]({ type: scenario.type } as SerializedModel).should.be.an.instanceOf(scenario.model));
 			});
 		});
 	});
@@ -1270,10 +1270,10 @@ describe("DataSyncController", (): void => {
 		let fakeServer: SinonFakeServer;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({respondImmediately: true});
+			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "dataImported" as keyof DataSyncController);
-			dataSyncController["device"] = {id: "test-device", name: "Test Device", imported: false};
+			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 		});
 
 		describe("success", (): void => {
@@ -1398,13 +1398,13 @@ describe("DataSyncController", (): void => {
 
 					describe("initial import", (): void => {
 						beforeEach((): void => {
-							dataSyncController["device"] = {id: "", name: "", imported: false};
+							dataSyncController["device"] = { id: "", name: "", imported: false };
 							dataSyncController["importDone"]();
 						});
 
 						it("should mark the device as having imported", (): void => {
 							dataSyncController["device"].imported.should.be.true;
-							SettingMock.setting.should.deep.equal({name: "Device", value: JSON.stringify({id: "", name: "", imported: true})});
+							SettingMock.setting.should.deep.equal({ name: "Device", value: JSON.stringify({ id: "", name: "", imported: true }) });
 							SettingMock.prototype.save.should.have.been.called;
 						});
 
@@ -1415,7 +1415,7 @@ describe("DataSyncController", (): void => {
 					describe("subsequent import", (): void => {
 						beforeEach((): void => {
 							SettingMock.prototype.save.reset();
-							dataSyncController["device"] = {id: "", name: "", imported: true};
+							dataSyncController["device"] = { id: "", name: "", imported: true };
 							dataSyncController["importDone"]();
 						});
 
@@ -1514,7 +1514,7 @@ describe("DataSyncController", (): void => {
 				.attr("id", "errorList")
 				.append($("<div>").attr("id", "oldError"))
 				.css("position", "absolute")
-				.offset({top: 20})
+				.offset({ top: 20 })
 				.appendTo(syncErrors);
 
 			sinon.stub(dataSyncController, "syncFinish" as keyof DataSyncController);

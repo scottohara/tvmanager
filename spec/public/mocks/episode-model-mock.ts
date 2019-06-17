@@ -6,7 +6,7 @@ import {
 	SaveCallback,
 	SerializedModel
 } from "models";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 
 interface Episode {
 	id: string | null;

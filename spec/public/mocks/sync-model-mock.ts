@@ -2,7 +2,7 @@ import {
 	ModelType,
 	SyncAction
 } from "models";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 
 const removeStub: SinonStub = sinon.stub(),
 			listStub: SinonStub = sinon.stub(),

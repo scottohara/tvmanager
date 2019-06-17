@@ -13,7 +13,7 @@
  */
 import $ from "jquery";
 import Program from "models/program-model";
-import {ProgramListItem} from "controllers";
+import { ProgramListItem } from "controllers";
 import ProgramView from "views/program-view.html";
 import ViewController from "controllers/view-controller";
 
@@ -37,7 +37,7 @@ export default class ProgramController extends ViewController {
 			this.listItem = listItem;
 		} else {
 			// Otherwise we're adding a new program
-			this.listItem = {program: new Program(null, "", 0, 0, 0, 0, 0)};
+			this.listItem = { program: new Program(null, "", 0, 0, 0, 0, 0) };
 		}
 	}
 

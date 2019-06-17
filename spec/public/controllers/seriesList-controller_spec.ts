@@ -24,7 +24,7 @@ describe("SeriesListController", (): void => {
 			programName: undefined;
 
 	beforeEach((): void => {
-		listItem = {program: new ProgramMock("1", "test-program", 1, 6, 2, 2, 2)};
+		listItem = { program: new ProgramMock("1", "test-program", 1, 6, 2, 2, 2) };
 		items = [
 			new SeriesMock("1", "a-test-series", null, "1", programName, 3, 1, 1, 1),
 			new SeriesMock("2", "z-test-series", null, "1", programName, 3, 1, 1, 1)
@@ -105,8 +105,8 @@ describe("SeriesListController", (): void => {
 		beforeEach((): void => {
 			sinon.stub(seriesListController, "viewItems" as keyof SeriesListController);
 			seriesListController["seriesList"] = new ListMock("", "", "", [
-				{...items[0]},
-				{...items[1]}
+				{ ...items[0] },
+				{ ...items[1] }
 			], sinon.stub());
 		});
 
@@ -123,10 +123,10 @@ describe("SeriesListController", (): void => {
 			describe("edit", (): void => {
 				beforeEach((): void => {
 					sinon.stub(seriesListController, "deleteItem" as keyof SeriesListController);
-					items[0] = {...items[0], seriesName: "edited-series"} as SeriesMock;
+					items[0] = { ...items[0], seriesName: "edited-series" } as SeriesMock;
 					seriesListItem = {
 						listIndex: 0,
-						series: {...items[0]} as SeriesMock
+						series: { ...items[0] } as SeriesMock
 					};
 				});
 
@@ -194,7 +194,7 @@ describe("SeriesListController", (): void => {
 				let sortedItems: SeriesMock[];
 
 				beforeEach((): void => {
-					seriesListItem = {series: new SeriesMock("3", "new-series", null, "1", programName)};
+					seriesListItem = { series: new SeriesMock("3", "new-series", null, "1", programName) };
 					sortedItems = [
 						items[0],
 						seriesListItem.series as SeriesMock,
@@ -256,7 +256,7 @@ describe("SeriesListController", (): void => {
 	describe("addItem", (): void => {
 		it("should push the series view with no selected item", (): void => {
 			seriesListController["addItem"]();
-			appController.pushView.should.have.been.calledWithExactly("series", {program: listItem.program});
+			appController.pushView.should.have.been.calledWithExactly("series", { program: listItem.program });
 		});
 	});
 
@@ -305,7 +305,7 @@ describe("SeriesListController", (): void => {
 
 		beforeEach((): void => {
 			index = 0;
-			item = {...items[0], save: sinon.stub(), remove: sinon.stub()};
+			item = { ...items[0], save: sinon.stub(), remove: sinon.stub() };
 			seriesListController["seriesList"] = new ListMock("", "", "", [item]);
 		});
 

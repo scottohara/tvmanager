@@ -4,7 +4,7 @@ import sinon, {
 } from "sinon";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import Episode from "../../../src/models/episode-model";
-import {EpisodeStatus} from "models";
+import { EpisodeStatus } from "models";
 
 // Get a reference to the application controller singleton
 const appController: ApplicationControllerMock = new ApplicationControllerMock();
@@ -303,7 +303,7 @@ describe("Episode", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				appController.db.addResultRows([{EpisodeCount: 1}]);
+				appController.db.addResultRows([{ EpisodeCount: 1 }]);
 				Episode.totalCount(callback);
 			});
 
@@ -333,7 +333,7 @@ describe("Episode", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				appController.db.addResultRows([{EpisodeCount: 1}]);
+				appController.db.addResultRows([{ EpisodeCount: 1 }]);
 				Episode.countByStatus(status, callback);
 			});
 
@@ -368,7 +368,7 @@ describe("Episode", (): void => {
 	});
 
 	describe("fromJson", (): void => {
-		it("should construct an Episode object from the JSON", (): Chai.Assertion => Episode.fromJson({id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode"}).should.deep.equal(new Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId)));
+		it("should construct an Episode object from the JSON", (): Chai.Assertion => Episode.fromJson({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }).should.deep.equal(new Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId)));
 	});
 
 	describe("save", (): void => {
@@ -556,7 +556,7 @@ describe("Episode", (): void => {
 	});
 
 	describe("toJson", (): void => {
-		it("should return a JSON representation of the episode", (): Chai.Assertion => episode.toJson().should.deep.equal({id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode"}));
+		it("should return a JSON representation of the episode", (): Chai.Assertion => episode.toJson().should.deep.equal({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }));
 	});
 
 	describe("setStatus", (): void => {

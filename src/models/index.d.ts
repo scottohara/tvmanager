@@ -1,7 +1,7 @@
 import Base from "models/base-model";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import Series from "models/series-model";
 
 export type EpisodeStatus = "Watched" | "Recorded" | "Expected" | "Missed" | "";

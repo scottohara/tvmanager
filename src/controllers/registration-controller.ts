@@ -12,8 +12,8 @@
  * @requires controllers/view-controller
  */
 import $ from "jquery";
-import {Device} from "controllers";
-import {PublicInterface} from "global";
+import { Device } from "controllers";
+import { PublicInterface } from "global";
 import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
 import ViewController from "controllers/view-controller";

@@ -14,7 +14,7 @@ export default class DatabaseServiceMock {
 
 		switch (dbMode) {
 			case "Fail":
-				errorCallback({code: 0, message: "Error"});
+				errorCallback({ code: 0, message: "Error" });
 				break;
 
 			case "Upgrade":
@@ -24,7 +24,7 @@ export default class DatabaseServiceMock {
 					readTransaction: sinon.stub(),
 					changeVersion: sinon.stub()
 				};
-				callback({initial: "1.0", current: "1.1"});
+				callback({ initial: "1.0", current: "1.1" });
 				break;
 
 			default:
@@ -34,7 +34,7 @@ export default class DatabaseServiceMock {
 					readTransaction: sinon.stub(),
 					changeVersion: sinon.stub()
 				};
-				callback({initial: "1.1", current: "1.1"});
+				callback({ initial: "1.1", current: "1.1" });
 		}
 
 		return db;

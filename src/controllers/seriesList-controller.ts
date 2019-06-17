@@ -18,7 +18,7 @@ import {
 } from "controllers";
 import $ from "jquery";
 import List from "components/list";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import Series from "models/series-model";
 import SeriesListTemplate from "views/seriesListTemplate.html";
 import SeriesListView from "views/seriesList-view.html";
@@ -202,7 +202,7 @@ export default class SeriesListController extends ViewController {
 		this.origExpectedCount = series.expectedCount;
 
 		// Display the Episodes view
-		this.appController.pushView("episodes", {listIndex, series});
+		this.appController.pushView("episodes", { listIndex, series });
 	}
 
 	/**
@@ -213,7 +213,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Displays the Series view for adding a series
 	 */
 	private addItem(): void {
-		this.appController.pushView("series", {program: this.listItem.program});
+		this.appController.pushView("series", { program: this.listItem.program });
 	}
 
 	/**
@@ -235,7 +235,7 @@ export default class SeriesListController extends ViewController {
 		this.origExpectedCount = series.expectedCount;
 
 		// Display the Series view
-		this.appController.pushView("series", {listIndex, series});
+		this.appController.pushView("series", { listIndex, series });
 	}
 
 	/**

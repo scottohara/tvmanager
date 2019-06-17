@@ -15,8 +15,8 @@
  */
 import $ from "jquery";
 import Episode from "models/episode-model";
-import {EpisodeListItem} from "controllers";
-import {EpisodeStatus} from "models";
+import { EpisodeListItem } from "controllers";
+import { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
 import Series from "models/series-model";
 import SpinningWheel from "framework/spinningwheel";
@@ -59,7 +59,7 @@ export default class EpisodeController extends ViewController {
 			this.originalStatusDate = this.listItem.episode.statusDate;
 		} else {
 			// Otherwise, we're adding a new episode
-			this.listItem = {episode: new Episode(null, "", "", "", false, false, Number(listItem.sequence), (listItem.series as Series).id)};
+			this.listItem = { episode: new Episode(null, "", "", "", false, false, Number(listItem.sequence), (listItem.series as Series).id) };
 		}
 	}
 
@@ -110,7 +110,7 @@ export default class EpisodeController extends ViewController {
 		$("#unscheduled").on("click", this.toggleStatusDateRow.bind(this));
 
 		// Toggle the current status
-		const {status}: {status: EpisodeStatus;} = this.listItem.episode;
+		const { status }: {status: EpisodeStatus;} = this.listItem.episode;
 
 		this.listItem.episode.setStatus("");
 		this.setStatus(status);
@@ -279,7 +279,7 @@ export default class EpisodeController extends ViewController {
 			31: "31"
 		}, "right", Number(parts[0]));
 
-		SpinningWheel.addSlot<string>({Jan: "Jan", Feb: "Feb", Mar: "Mar", Apr: "Apr", May: "May", Jun: "Jun", Jul: "Jul", Aug: "Aug", Sep: "Sep", Oct: "Oct", Nov: "Nov", Dec: "Dec"}, null, String(parts[1]));
+		SpinningWheel.addSlot<string>({ Jan: "Jan", Feb: "Feb", Mar: "Mar", Apr: "Apr", May: "May", Jun: "Jun", Jul: "Jul", Aug: "Aug", Sep: "Sep", Oct: "Oct", Nov: "Nov", Dec: "Dec" }, null, String(parts[1]));
 		SpinningWheel.setDoneAction(this.setStatusDate.bind(this));
 		SpinningWheel.open();
 

@@ -13,8 +13,8 @@
  */
 import $ from "jquery";
 import List from "components/list";
-import {PublicInterface} from "global";
-import {Report} from "controllers";
+import { PublicInterface } from "global";
+import { Report } from "controllers";
 import ReportListTemplate from "views/reportListTemplate.html";
 import ReportView from "views/report-view.html";
 import Series from "models/series-model";
@@ -125,7 +125,7 @@ export default class ReportController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
 	private viewItem(listIndex: number): void {
-		this.appController.pushView("episodes", {source: "Report", listIndex, series: this.reportList.items[listIndex]});
+		this.appController.pushView("episodes", { source: "Report", listIndex, series: this.reportList.items[listIndex] });
 	}
 
 	/**

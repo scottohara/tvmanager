@@ -1,5 +1,5 @@
-import DatabaseMock, {SQLCommand} from "mocks/database-mock";
-import sinon, {SinonStub} from "sinon";
+import DatabaseMock, { SQLCommand } from "mocks/database-mock";
+import sinon, { SinonStub } from "sinon";
 import DatabaseService from "../../../src/services/database-service";
 import TransactionMock from "mocks/transaction-mock";
 import WindowMock from "mocks/window-mock";
@@ -98,7 +98,7 @@ describe("DatabaseService", (): void => {
 			beforeEach((): void => DatabaseService["versionOK"]());
 
 			it("should reopen the database", (): Chai.Assertion => openDbStub.should.have.been.called);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({initial: "", current: DatabaseService["expectedVersion"]}));
+			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({ initial: "", current: DatabaseService["expectedVersion"] }));
 		});
 
 		describe("not upgraded", (): void => {
@@ -108,7 +108,7 @@ describe("DatabaseService", (): void => {
 			});
 
 			it("should not reopen the database", (): Chai.Assertion => openDbStub.should.not.have.been.called);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({initial: DatabaseService["expectedVersion"], current: DatabaseService["expectedVersion"]}));
+			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({ initial: DatabaseService["expectedVersion"], current: DatabaseService["expectedVersion"] }));
 		});
 	});
 
@@ -206,7 +206,7 @@ describe("DatabaseService", (): void => {
 			it("should invoke the next upgrade handler", (): void => {
 				const upgradeHandler: SinonStub = sinon.stub();
 
-				DatabaseService["upgradesToApply"] = [{version: "", upgradeHandler}];
+				DatabaseService["upgradesToApply"] = [{ version: "", upgradeHandler }];
 				DatabaseService["nextUpgrade"](tx);
 				upgradeHandler.should.have.been.calledWith(tx);
 			});
@@ -317,8 +317,8 @@ describe("DatabaseService", (): void => {
 					"ALTER TABLE tmp_Episode RENAME TO Episode"
 				],
 				data: [
-					{rowid: 1},
-					{rowid: 2}
+					{ rowid: 1 },
+					{ rowid: 2 }
 				]
 			},
 			{

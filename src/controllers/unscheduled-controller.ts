@@ -15,7 +15,7 @@
 import $ from "jquery";
 import Episode from "models/episode-model";
 import List from "components/list";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import UnscheduledListTemplate from "views/unscheduledListTemplate.html";
 import UnscheduledView from "views/unscheduled-view.html";
 import ViewController from "controllers/view-controller";
@@ -118,7 +118,7 @@ export default class UnscheduledController extends ViewController {
 	 * @param {Number} listIndex - the list index of the episode to edit
 	 */
 	private viewItem(listIndex: number): void {
-		this.appController.pushView("episode", {listIndex, episode: this.unscheduledList.items[listIndex]});
+		this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] });
 	}
 
 	/**

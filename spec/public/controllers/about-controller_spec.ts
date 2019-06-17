@@ -3,7 +3,7 @@ import AboutController from "../../../src/controllers/about-controller";
 import AboutView from "views/about-view.html";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeMock from "mocks/episode-model-mock";
-import {NavButton} from "controllers";
+import { NavButton } from "controllers";
 import ProgramMock from "mocks/program-model-mock";
 import SeriesMock from "mocks/series-model-mock";
 import sinon from "sinon";

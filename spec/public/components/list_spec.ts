@@ -1,11 +1,11 @@
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import List from "../../../src/components/list";
-import {ListAction} from "components";
+import { ListAction } from "components";
 import ListTemplate from "views/listTemplate.html";
 import TestController from "mocks/test-controller";
-import {View} from "controllers";
+import { View } from "controllers";
 import WindowMock from "mocks/window-mock";
 
 // Get a reference to the application controller singleton
@@ -29,9 +29,9 @@ describe("List", (): void => {
 		groupBy = "name";
 		items = [
 			// Object create is used to set a prototype, so we can test that the template correctly ignores inherited properties
-			Object.create({inheritedProperty: "ignore me"}, {
-				name: {enumerable: true, value: "group-one"},
-				value: {enumerable: true, value: "item-one"}
+			Object.create({ inheritedProperty: "ignore me" }, {
+				name: { enumerable: true, value: "group-one" },
+				value: { enumerable: true, value: "item-one" }
 			}),
 			{
 				name: "group-one",
@@ -124,7 +124,7 @@ describe("List", (): void => {
 			containerElement.show();
 			containerElement.scrollTop(40);
 
-			appController.viewStack = [{controller: new TestController(), scrollPos: 40}];
+			appController.viewStack = [{ controller: new TestController(), scrollPos: 40 }];
 			appController.setScrollPosition.reset();
 		});
 

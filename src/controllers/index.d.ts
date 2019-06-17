@@ -4,7 +4,7 @@ import {
 } from "models";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 

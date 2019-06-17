@@ -2,7 +2,7 @@ import {
 	ModelType,
 	SyncAction
 } from "models";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import Sync from "../../../src/models/sync-model";
 
@@ -99,7 +99,7 @@ describe("Sync", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				appController.db.addResultRows([{SyncCount: 1}]);
+				appController.db.addResultRows([{ SyncCount: 1 }]);
 				Sync.count(callback);
 			});
 

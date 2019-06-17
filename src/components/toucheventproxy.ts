@@ -8,7 +8,7 @@
 /**
  * @module components/toucheventproxy
  */
-import {SyntheticTouchEvent} from "components";
+import { SyntheticTouchEvent } from "components";
 
 /**
  * @class TouchEventProxy
@@ -83,17 +83,17 @@ export default class TouchEventProxy {
 	 */
 	private dispatchTouchEvent(event: MouseEvent, type: string): void {
 		// Create a new generic event, applying the original event coordinates as touch coordinates,
-		const {clientX, clientY, target} = event,
+		const { clientX, clientY, target } = event,
 					touchEvent: SyntheticTouchEvent = new Event(type, {
 						bubbles: true,
 						cancelable: true
 					}) as SyntheticTouchEvent;
 
 		// Assign an identifier to the event to indicate that it originated from here
-		touchEvent.targetTouches = [{identifier: -1, clientX, clientY}];
+		touchEvent.targetTouches = [{ identifier: -1, clientX, clientY }];
 
 		// Apply the original event target as the touch target
-		touchEvent.changedTouches = [{target}];
+		touchEvent.changedTouches = [{ target }];
 
 		// Dispatch the new event
 		if (event.target) {

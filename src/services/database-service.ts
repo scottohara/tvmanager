@@ -166,7 +166,7 @@ export default class DatabaseService {
 		}
 
 		// Call the success handler
-		this.successCallback({initial: this.initialVersion, current: this.expectedVersion});
+		this.successCallback({ initial: this.initialVersion, current: this.expectedVersion });
 	}
 
 	/**

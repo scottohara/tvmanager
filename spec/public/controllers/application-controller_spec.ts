@@ -47,7 +47,7 @@ describe("ApplicationController", (): void => {
 		it("should return an ApplicationController instance", (): Chai.Assertion => applicationController.should.be.an.instanceOf(ApplicationController));
 		it("should make the instance a singleton", (): Chai.Assertion => applicationController.should.equal(ApplicationController["singletonInstance"]));
 		it("should initialise the view stack", (): Chai.Assertion => applicationController.viewStack.should.deep.equal([]));
-		it("should initialise the notice stack", (): Chai.Assertion => applicationController["noticeStack"].should.deep.equal({height: 0, notice: []}));
+		it("should initialise the notice stack", (): Chai.Assertion => applicationController["noticeStack"].should.deep.equal({ height: 0, notice: [] }));
 		it("should set the max data age days", (): Chai.Assertion => applicationController["maxDataAgeDays"].should.equal(7));
 
 		it("should attach a transition end event handler", (): void => {
@@ -137,7 +137,7 @@ describe("ApplicationController", (): void => {
 			sinon.stub(applicationController, "clearHeader" as keyof ApplicationController);
 			sinon.stub(applicationController, "viewPopped" as keyof ApplicationController);
 			sinon.stub(applicationController, "show" as keyof ApplicationController).yields({});
-			applicationController["viewStack"] = [{controller: new TestController(), scrollPos: 0}];
+			applicationController["viewStack"] = [{ controller: new TestController(), scrollPos: 0 }];
 			applicationController.popView({});
 		});
 
@@ -159,7 +159,7 @@ describe("ApplicationController", (): void => {
 				.appendTo(content)
 				.scrollTop(10);
 
-			applicationController.viewStack.push({controller: new TestController(), scrollPos: 0});
+			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
 			applicationController.getScrollPosition();
 			(applicationController.viewStack.pop() as View).scrollPos.should.equal(10);
 		});
@@ -179,7 +179,7 @@ describe("ApplicationController", (): void => {
 
 		describe("scroll position is -1", (): void => {
 			it("should scroll to the bottom", (): void => {
-				applicationController.viewStack.push({controller: new TestController(), scrollPos: -1});
+				applicationController.viewStack.push({ controller: new TestController(), scrollPos: -1 });
 				applicationController.setScrollPosition();
 				Number(scrollingElement.scrollTop()).should.equal(100 + scrollingElement.position().top);
 			});
@@ -187,7 +187,7 @@ describe("ApplicationController", (): void => {
 
 		describe("scoll position is not -1", (): void => {
 			it("should restore the saved scroll position of the active view", (): void => {
-				applicationController.viewStack.push({controller: new TestController(), scrollPos: 20});
+				applicationController.viewStack.push({ controller: new TestController(), scrollPos: 20 });
 				applicationController.setScrollPosition();
 				Number(scrollingElement.scrollTop()).should.equal(20);
 			});
@@ -224,7 +224,7 @@ describe("ApplicationController", (): void => {
 		describe("without footer", (): void => {
 			beforeEach((): void => {
 				controller.footer = undefinedObject;
-				applicationController.viewStack.push({controller, scrollPos: 0});
+				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				applicationController.setFooter();
 			});
 
@@ -238,7 +238,7 @@ describe("ApplicationController", (): void => {
 					rightButtonEventHandler: Function;
 
 			beforeEach((): void => {
-				applicationController.viewStack.push({controller, scrollPos: 0});
+				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				footer = controller.footer as HeaderFooter;
 				leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as Function;
 				rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as Function;
@@ -417,7 +417,7 @@ describe("ApplicationController", (): void => {
 			},
 			{
 				description: "subsequent view",
-				viewStack: [{controller: new TestController(), scrollPos: 0}]
+				viewStack: [{ controller: new TestController(), scrollPos: 0 }]
 			}
 		];
 
@@ -427,7 +427,7 @@ describe("ApplicationController", (): void => {
 			sinon.stub(applicationController, "clearHeader" as keyof ApplicationController);
 			sinon.stub(applicationController, "viewPushed" as keyof ApplicationController);
 			sinon.stub(applicationController, "show" as keyof ApplicationController).yields();
-			applicationController["viewControllers"] = {test: TestController};
+			applicationController["viewControllers"] = { test: TestController };
 		});
 
 		let view: View;
@@ -488,9 +488,9 @@ describe("ApplicationController", (): void => {
 
 			sinon.stub(applicationController, "noticesMoved" as keyof ApplicationController);
 			sinon.stub(applicationController, "hideNotice" as keyof ApplicationController);
-			notice = {label: "<b>test-notice</b>"};
+			notice = { label: "<b>test-notice</b>" };
 			eventHandler = sinon.stub();
-			applicationController["noticeStack"] = {height: 0, notice: []};
+			applicationController["noticeStack"] = { height: 0, notice: [] };
 			WindowMock.innerHeight = 1;
 			$.fx.off = true;
 		});
@@ -693,7 +693,7 @@ describe("ApplicationController", (): void => {
 
 			it("should slide up the notices container to reveal the notice", (): void => {
 				noticeContainer = notices.children("div");
-				$.fn.animate.should.have.been.calledWith({top: windowHeight - Number(noticeContainer.height())});
+				$.fn.animate.should.have.been.calledWith({ top: windowHeight - Number(noticeContainer.height()) });
 			});
 
 			it("should invoke the completed callback", (): Chai.Assertion => applicationController["noticesMoved"].should.have.been.called);
@@ -746,7 +746,7 @@ describe("ApplicationController", (): void => {
 		describe("without footer", (): void => {
 			beforeEach((): void => {
 				controller.footer = undefinedObject;
-				applicationController.viewStack.push({controller, scrollPos: 0});
+				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				applicationController.clearFooter();
 			});
 
@@ -758,7 +758,7 @@ describe("ApplicationController", (): void => {
 		});
 
 		describe("with footer", (): void => {
-			beforeEach((): number => applicationController.viewStack.push({controller, scrollPos: 0}));
+			beforeEach((): number => applicationController.viewStack.push({ controller, scrollPos: 0 }));
 
 			describe("with left button", (): void => {
 				beforeEach((): void => applicationController.clearFooter());
@@ -836,7 +836,7 @@ describe("ApplicationController", (): void => {
 
 	describe("currentView", (): void => {
 		it("should return the view on the top of the stack", (): void => {
-			const view: View = {controller: new TestController(), scrollPos: 0};
+			const view: View = { controller: new TestController(), scrollPos: 0 };
 
 			applicationController["viewStack"] = [view];
 			applicationController["currentView"].should.deep.equal(view);
@@ -850,7 +850,7 @@ describe("ApplicationController", (): void => {
 			controller = new TestController();
 			sinon.spy(controller, "setup");
 			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
-			applicationController.viewStack.push({controller, scrollPos: 0});
+			applicationController.viewStack.push({ controller, scrollPos: 0 });
 			applicationController["viewPushed"]();
 		});
 
@@ -871,7 +871,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without activate", (): void => {
 			beforeEach((): void => {
-				applicationController.viewStack.push({controller, scrollPos: 0});
+				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				applicationController["viewPopped"]({});
 			});
 
@@ -882,8 +882,8 @@ describe("ApplicationController", (): void => {
 
 		describe("with activate", (): void => {
 			beforeEach((): void => {
-				Object.defineProperty(controller, "activate", {value: activate});
-				applicationController.viewStack.push({controller, scrollPos: 0});
+				Object.defineProperty(controller, "activate", { value: activate });
+				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				applicationController["viewPopped"]({});
 			});
 
@@ -903,7 +903,7 @@ describe("ApplicationController", (): void => {
 				.appendTo(document.body);
 
 			sinon.stub(applicationController, "hideScrollHelper");
-			applicationController.viewStack.push({controller: new TestController(), scrollPos: 0});
+			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
 			callback = sinon.spy();
 			applicationController["show"](callback, {});
 		});
@@ -969,7 +969,7 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			controller = new TestController();
-			({header} = controller);
+			({ header } = controller);
 			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as Function;
 			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as Function;
 
@@ -989,7 +989,7 @@ describe("ApplicationController", (): void => {
 				.appendTo(document.body);
 
 			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
-			applicationController.viewStack.push({controller, scrollPos: 0});
+			applicationController.viewStack.push({ controller, scrollPos: 0 });
 		});
 
 		describe("with left button", (): void => {
@@ -1143,7 +1143,7 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			controller = new TestController();
-			({header} = controller);
+			({ header } = controller);
 			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
 			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
 
@@ -1166,7 +1166,7 @@ describe("ApplicationController", (): void => {
 				.appendTo(document.body);
 
 			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
-			applicationController.viewStack.push({controller, scrollPos: 0});
+			applicationController.viewStack.push({ controller, scrollPos: 0 });
 		});
 
 		describe("with left button", (): void => {
@@ -1264,7 +1264,7 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			sinon.stub(applicationController, "noticeHidden" as keyof ApplicationController);
-			applicationController["noticeStack"] = {height: 5, notice: []};
+			applicationController["noticeStack"] = { height: 5, notice: [] };
 			notice = $("<div>");
 			sinon.stub(notice, "height").returns(10);
 			sinon.stub(notice, "data");
@@ -1274,7 +1274,7 @@ describe("ApplicationController", (): void => {
 
 		it("should update the height of the notice stack to reclaim the space for the notice", (): Chai.Assertion => applicationController["noticeStack"].height.should.equal(15));
 		it("should mark the notice as acknowledged", (): Chai.Assertion => notice.data.should.have.been.calledWith("acknowledged", true));
-		it("should slide down the notice to hide it", (): Chai.Assertion => notice.animate.should.have.been.calledWith({height: 0}, sinon.match.func));
+		it("should slide down the notice to hide it", (): Chai.Assertion => notice.animate.should.have.been.calledWith({ height: 0 }, sinon.match.func));
 		it("should invoke the completed callback", (): Chai.Assertion => applicationController["noticeHidden"].should.have.been.called);
 	});
 
@@ -1293,7 +1293,7 @@ describe("ApplicationController", (): void => {
 			applicationController["noticeHidden"]();
 		});
 
-		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion => $.fn.animate.should.have.been.calledWith({top: "-=10"}));
+		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion => $.fn.animate.should.have.been.calledWith({ top: "-=10" }));
 
 		it("should invoke the completed callback", (): Chai.Assertion => applicationController["noticesMoved"].should.have.been.called);
 

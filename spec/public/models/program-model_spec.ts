@@ -1,4 +1,4 @@
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import Program from "../../../src/models/program-model";
 
@@ -171,7 +171,7 @@ describe("Program", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				appController.db.addResultRows([{ProgramCount: 1}]);
+				appController.db.addResultRows([{ ProgramCount: 1 }]);
 				Program.count(callback);
 			});
 
@@ -208,7 +208,7 @@ describe("Program", (): void => {
 	});
 
 	describe("fromJson", (): void => {
-		it("should construct a Program object from the JSON", (): Chai.Assertion => Program.fromJson({id, programName, type: "Program"}).should.deep.equal(new Program(id, programName)));
+		it("should construct a Program object from the JSON", (): Chai.Assertion => Program.fromJson({ id, programName, type: "Program" }).should.deep.equal(new Program(id, programName)));
 	});
 
 	describe("save", (): void => {
@@ -441,7 +441,7 @@ describe("Program", (): void => {
 	});
 
 	describe("toJson", (): void => {
-		it("should return a JSON representation of the program", (): Chai.Assertion => program.toJson().should.deep.equal({id, programName, type: "Program"}));
+		it("should return a JSON representation of the program", (): Chai.Assertion => program.toJson().should.deep.equal({ id, programName, type: "Program" }));
 	});
 
 	describe("setProgramName", (): void => {

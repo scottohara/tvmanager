@@ -3,7 +3,7 @@ import {
 	HeaderFooter,
 	NavButton
 } from "controllers";
-import sinon, {SinonFakeServer} from "sinon";
+import sinon, { SinonFakeServer } from "sinon";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import RegistrationController from "controllers/registration-controller";
@@ -45,7 +45,7 @@ describe("RegistrationController", (): void => {
 			sinon.stub(registrationController, "save" as keyof RegistrationController);
 			sinon.stub(registrationController, "gotDevice" as keyof RegistrationController);
 			SettingMock.get.reset();
-			SettingMock.get.withArgs("Device").yields({settingValue: device});
+			SettingMock.get.withArgs("Device").yields({ settingValue: device });
 			registrationController.setup();
 			leftButton = registrationController.header.leftButton as NavButton;
 			rightButton = registrationController.header.rightButton as NavButton;
@@ -67,7 +67,7 @@ describe("RegistrationController", (): void => {
 
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
-		it("should get the device", (): Chai.Assertion => registrationController["gotDevice"].should.have.been.calledWith({settingValue: device}));
+		it("should get the device", (): Chai.Assertion => registrationController["gotDevice"].should.have.been.calledWith({ settingValue: device }));
 	});
 
 	describe("gotDevice", (): void => {
@@ -119,7 +119,7 @@ describe("RegistrationController", (): void => {
 
 	describe("unregister", (): void => {
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({respondImmediately: true});
+			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 			registrationController["device"] = device;
 		});
 
@@ -158,7 +158,7 @@ describe("RegistrationController", (): void => {
 		let deviceName: JQuery<HTMLElement>;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({respondImmediately: true});
+			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
 			registrationController["device"] = device;
 			deviceName = $("<input>")
 				.attr("id", "deviceName")
@@ -181,7 +181,7 @@ describe("RegistrationController", (): void => {
 
 		describe("success", (): void => {
 			beforeEach((): void => {
-				fakeServer.respondWith("PUT", /\/devices\/\w+/u, [200, {Location: "new-device-id"},	""]);
+				fakeServer.respondWith("PUT", /\/devices\/\w+/u, [200, { Location: "new-device-id" },	""]);
 				registrationController["save"]();
 			});
 

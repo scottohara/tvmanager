@@ -10,7 +10,7 @@
  * @requires controllers/application-controller
  */
 import ApplicationController from "controllers/application-controller";
-import {HeaderFooter} from "controllers";
+import { HeaderFooter } from "controllers";
 
 /**
  * @class ViewController

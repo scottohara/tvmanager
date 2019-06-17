@@ -17,7 +17,7 @@ describe("ProgramController", (): void => {
 			programController: ProgramController;
 
 	beforeEach((): void => {
-		listItem = {program: new ProgramMock(null, "test-program")};
+		listItem = { program: new ProgramMock(null, "test-program") };
 		programController = new ProgramController(listItem);
 	});
 
@@ -34,7 +34,7 @@ describe("ProgramController", (): void => {
 			},
 			{
 				description: "add",
-				listItem: {program: new ProgramMock(null, "")},
+				listItem: { program: new ProgramMock(null, "") },
 				programController: new ProgramController()
 			}
 		];

@@ -1,6 +1,6 @@
-import sinon, {SinonSpy} from "sinon";
+import sinon, { SinonSpy } from "sinon";
 import $ from "jquery";
-import {SyntheticTouchEvent} from "../../../src/components";
+import { SyntheticTouchEvent } from "../../../src/components";
 import TouchEventProxy from "components/toucheventproxy";
 
 describe("TouchEventProxy", (): void => {
@@ -49,7 +49,7 @@ describe("TouchEventProxy", (): void => {
 					clientX: 1,
 					clientY: 2
 				});
-				Object.defineProperty(event, "target", {value: target.get(0)});
+				Object.defineProperty(event, "target", { value: target.get(0) });
 				sinon.stub(event, "preventDefault");
 				target.on(mapsTo, eventHandler);
 
@@ -96,7 +96,7 @@ describe("TouchEventProxy", (): void => {
 					clientX: 1,
 					clientY: 2
 				});
-				Object.defineProperty(event, "target", {value: target.get(0)});
+				Object.defineProperty(event, "target", { value: target.get(0) });
 				target.on(mapsTo, eventHandler);
 				toucheventproxy.handleEvent(event);
 				eventHandler.should.have.been.called;
@@ -116,7 +116,7 @@ describe("TouchEventProxy", (): void => {
 					clientX: 1,
 					clientY: 2
 				});
-				Object.defineProperty(event, "target", {value: target.get(0)});
+				Object.defineProperty(event, "target", { value: target.get(0) });
 				target.on(mapsTo, eventHandler);
 				toucheventproxy.handleEvent(event);
 
@@ -171,7 +171,7 @@ describe("TouchEventProxy", (): void => {
 				describe(scenario.description, (): void => {
 					beforeEach((): void => {
 						toucheventproxy.enabled = scenario.enabled;
-						event = new MouseEvent("click", {cancelable: scenario.cancelable});
+						event = new MouseEvent("click", { cancelable: scenario.cancelable });
 						sinon.stub(event, "stopPropagation");
 						toucheventproxy.handleEvent(event);
 					});
@@ -197,16 +197,16 @@ describe("TouchEventProxy", (): void => {
 
 			describe("from proxy", (): void => {
 				beforeEach((): void => {
-					touchStartEvent.targetTouches = [{identifier: -1}];
+					touchStartEvent.targetTouches = [{ identifier: -1 }];
 					toucheventproxy["element"].dispatchEvent(touchStartEvent as Event);
 
-					touchEndEvent.targetTouches = [{identifier: -1}];
+					touchEndEvent.targetTouches = [{ identifier: -1 }];
 					toucheventproxy["element"].dispatchEvent(touchEndEvent as Event);
 
-					touchMoveEvent.targetTouches = [{identifier: -1}];
+					touchMoveEvent.targetTouches = [{ identifier: -1 }];
 					toucheventproxy["element"].dispatchEvent(touchMoveEvent as Event);
 
-					touchCancelEvent.targetTouches = [{identifier: -1}];
+					touchCancelEvent.targetTouches = [{ identifier: -1 }];
 					toucheventproxy["element"].dispatchEvent(touchCancelEvent as Event);
 				});
 

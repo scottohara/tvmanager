@@ -1,5 +1,5 @@
-import sinon, {SinonStub} from "sinon";
-import {SaveCallback} from "models";
+import sinon, { SinonStub } from "sinon";
+import { SaveCallback } from "models";
 
 interface Setting {
 	name?: string | null;

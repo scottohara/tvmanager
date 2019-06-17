@@ -1,6 +1,6 @@
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import DatabaseMock from "mocks/database-mock";
-import {View} from "controllers";
+import { View } from "controllers";
 
 export default class ApplicationControllerMock {
 	private static singletonInstance: ApplicationControllerMock;

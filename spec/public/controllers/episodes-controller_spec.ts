@@ -7,7 +7,7 @@ import {
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeMock from "mocks/episode-model-mock";
-import {EpisodeStatus} from "models";
+import { EpisodeStatus } from "models";
 import EpisodesController from "controllers/episodes-controller";
 import EpisodesView from "views/episodes-view.html";
 import ListMock from "mocks/list-mock";
@@ -127,7 +127,7 @@ describe("EpisodesController", (): void => {
 	describe("activate", (): void => {
 		beforeEach((): void => {
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
-			episodesController["episodeList"] = new ListMock("", "", "", [{...items[0]}]);
+			episodesController["episodeList"] = new ListMock("", "", "", [{ ...items[0] }]);
 			episodesController["scrollToFirstUnwatched"] = false;
 			WindowMock.setTimeout.resetHistory();
 		});
@@ -213,7 +213,7 @@ describe("EpisodesController", (): void => {
 
 					describe("add", (): void => {
 						beforeEach((): void => {
-							episodeListItem = {episode: new EpisodeMock(null, "new-episode", scenario.status, "")};
+							episodeListItem = { episode: new EpisodeMock(null, "new-episode", scenario.status, "") };
 							episodeListItem.episode.statusWarning = scenario.statusWarning;
 							items.push(episodeListItem.episode as EpisodeMock);
 							episodesController.activate(episodeListItem);
@@ -246,9 +246,9 @@ describe("EpisodesController", (): void => {
 			describe("none watched", (): void => {
 				beforeEach((): void => {
 					episodesController["episodeList"].items = [
-						{id: "1"},
-						{id: "2"},
-						{id: "3"}
+						{ id: "1" },
+						{ id: "2" },
+						{ id: "3" }
 					];
 					episodesController.activate();
 				});
@@ -260,9 +260,9 @@ describe("EpisodesController", (): void => {
 			describe("some watched", (): void => {
 				beforeEach((): void => {
 					episodesController["episodeList"].items = [
-						{id: "1", status: "Watched"},
-						{id: "2", status: "Watched"},
-						{id: "3"}
+						{ id: "1", status: "Watched" },
+						{ id: "2", status: "Watched" },
+						{ id: "3" }
 					];
 					episodesController.activate();
 				});
@@ -361,7 +361,7 @@ describe("EpisodesController", (): void => {
 		it("should push the episode view with no selected item", (): void => {
 			episodesController["episodeList"] = new ListMock("", "", "", items);
 			episodesController["addItem"]();
-			appController.pushView.should.have.been.calledWithExactly("episode", {series: listItem.series, sequence: 1});
+			appController.pushView.should.have.been.calledWithExactly("episode", { series: listItem.series, sequence: 1 });
 		});
 	});
 
@@ -483,10 +483,10 @@ describe("EpisodesController", (): void => {
 
 		beforeEach((): void => {
 			items = [
-				{...new EpisodeMock("1", null, "", "", false, false, 1), save: sinon.stub(), remove: sinon.stub()},
-				{...new EpisodeMock("2", null, "", "", false, false, 2), save: sinon.stub(), remove: sinon.stub()},
-				{...new EpisodeMock("3", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub()},
-				{...new EpisodeMock("4", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub()}
+				{ ...new EpisodeMock("1", null, "", "", false, false, 1), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("2", null, "", "", false, false, 2), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("3", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("4", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub() }
 			];
 
 			sortedItems = [
@@ -553,9 +553,9 @@ describe("EpisodesController", (): void => {
 		it("should reposition the sort helper", (): void => {
 			const helper: JQuery<HTMLElement> = $("<div>")
 				.appendTo(document.body)
-				.offset({top: 0});
+				.offset({ top: 0 });
 
-			episodesController["sortItems"]({clientY: 100} as JQueryEventObject, {helper} as JQueryUI.SortableUIParams);
+			episodesController["sortItems"]({ clientY: 100 } as JQueryEventObject, { helper } as JQueryUI.SortableUIParams);
 			(helper.offset() as JQuery.Coordinates).top.should.equal(80);
 			helper.remove();
 		});

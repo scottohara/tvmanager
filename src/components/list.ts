@@ -12,7 +12,7 @@
  */
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
-import {ListAction} from "components";
+import { ListAction } from "components";
 import window from "components/window";
 
 /**

@@ -98,7 +98,7 @@ describe("ProgramsController", (): void => {
 	describe("activate", (): void => {
 		beforeEach((): void => {
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
-			programsController["programList"] = new ListMock("", "", "", [{...items[0]}]);
+			programsController["programList"] = new ListMock("", "", "", [{ ...items[0] }]);
 		});
 
 		describe("from schedule", (): void => {
@@ -154,7 +154,7 @@ describe("ProgramsController", (): void => {
 
 			describe("add", (): void => {
 				beforeEach((): void => {
-					listItem = {program: new ProgramMock("3", "added-program")};
+					listItem = { program: new ProgramMock("3", "added-program") };
 
 					sortedItems = [
 						items[0],

@@ -25,7 +25,7 @@ import Episode from "models/episode-model";
 import EpisodeListTemplate from "views/episodeListTemplate.html";
 import EpisodesView from "views/episodes-view.html";
 import List from "components/list";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
 import window from "components/window";
 
@@ -205,7 +205,7 @@ export default class EpisodesController extends ViewController {
 		this.origStatusWarningCount = episode.statusWarning ? 1 : 0;
 
 		// Display the Episode view
-		this.appController.pushView("episode", {listIndex, episode});
+		this.appController.pushView("episode", { listIndex, episode });
 	}
 
 	/**
@@ -216,7 +216,7 @@ export default class EpisodesController extends ViewController {
 	 * @desc Displays the Episode view for adding an episode
 	 */
 	private addItem(): void {
-		this.appController.pushView("episode", {series: this.listItem.series, sequence: this.episodeList.items.length});
+		this.appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
 	}
 
 	/**
@@ -373,7 +373,7 @@ export default class EpisodesController extends ViewController {
 	private sortItems(e: JQueryEventObject, ui: JQueryUI.SortableUIParams): void {
 		const PADDING_PX = 20;
 
-		$(ui.helper).offset({top: e.clientY - PADDING_PX});
+		$(ui.helper).offset({ top: e.clientY - PADDING_PX });
 	}
 
 	/**

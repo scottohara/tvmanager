@@ -1,4 +1,4 @@
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import Setting from "../../../src/models/setting-model";
 
@@ -58,7 +58,7 @@ describe("Setting", (): void => {
 
 			describe("exists", (): void => {
 				beforeEach((): void => {
-					appController.db.addResultRows([{SettingValue: settingValue}]);
+					appController.db.addResultRows([{ SettingValue: settingValue }]);
 					callback = sinon.stub().withArgs(sinon.match(setting));
 					Setting.get(settingName, callback);
 				});

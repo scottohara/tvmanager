@@ -1,4 +1,4 @@
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 
 interface NavigatorMock {
 	onLine: boolean;
@@ -8,7 +8,7 @@ interface NavigatorMock {
 class WindowMock {
 	public readonly navigator: NavigatorMock = {
 		onLine: true,
-		serviceWorker: {register: sinon.stub()}
+		serviceWorker: { register: sinon.stub() }
 	};
 
 	public readonly openDatabase: SinonStub = sinon.stub();
@@ -17,7 +17,7 @@ class WindowMock {
 
 	public readonly confirm: SinonStub = sinon.stub();
 
-	public readonly console: {log: SinonStub;} = {log: sinon.stub()};
+	public readonly console: {log: SinonStub;} = { log: sinon.stub() };
 
 	public readonly setTimeout: SinonStub = sinon.stub().yields();
 

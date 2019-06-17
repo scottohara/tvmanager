@@ -6,7 +6,7 @@ import {
 	SaveCallback,
 	SerializedModel
 } from "models";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 
 interface Series {
 	seriesName: string | null;
@@ -105,7 +105,7 @@ export default class SeriesMock {
 	}
 
 	public static get NOW_SHOWING(): NowShowingEnum {
-		return {1: "Mondays"};
+		return { 1: "Mondays" };
 	}
 
 	public get save(): SinonStub<SaveCallback[], number> {

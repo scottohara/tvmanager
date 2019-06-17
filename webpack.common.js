@@ -3,7 +3,7 @@ const path = require("path"),
 			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
 			CleanWebpackPlugin = require("clean-webpack-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
-			{GenerateSW} = require("workbox-webpack-plugin"),
+			{ GenerateSW } = require("workbox-webpack-plugin"),
 			packageJson = require("./package");
 
 const MAX_DATA_AGE_DAYS = 7,
@@ -84,7 +84,7 @@ const MAX_DATA_AGE_DAYS = 7,
 			}),
 
 			// Creates index.html with the bundled resources
-			createIndexHtml = new HtmlWebpackPlugin({template: "./src/index.html"}),
+			createIndexHtml = new HtmlWebpackPlugin({ template: "./src/index.html" }),
 
 			// Generate a service worker to precache static assets
 			generateServiceWorker = new GenerateSW({
@@ -148,11 +148,11 @@ const MAX_DATA_AGE_DAYS = 7,
 			};
 
 function extractCss(hashFilename) {
-	return new MiniCssExtractPlugin({filename: hashFilename ? "[name]-[chunkhash:6].css" : "[name].css"});
+	return new MiniCssExtractPlugin({ filename: hashFilename ? "[name]-[chunkhash:6].css" : "[name].css" });
 }
 
-function defineAppConfig({maxDataAgeDays} = {maxDataAgeDays: MAX_DATA_AGE_DAYS}) {
-	return new webpack.DefinePlugin({MAX_DATA_AGE_DAYS: maxDataAgeDays});
+function defineAppConfig({ maxDataAgeDays } = { maxDataAgeDays: MAX_DATA_AGE_DAYS }) {
+	return new webpack.DefinePlugin({ MAX_DATA_AGE_DAYS: maxDataAgeDays });
 }
 
 module.exports = {

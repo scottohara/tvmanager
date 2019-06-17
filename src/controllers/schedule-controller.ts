@@ -14,11 +14,11 @@
  */
 import $ from "jquery";
 import List from "components/list";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import ScheduleListTemplate from "views/scheduleListTemplate.html";
 import ScheduleView from "views/schedule-view.html";
 import Series from "models/series-model";
-import {SeriesListItem} from "controllers";
+import { SeriesListItem } from "controllers";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -145,7 +145,7 @@ export default class ScheduleController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
 	private viewItem(listIndex: number): void {
-		this.appController.pushView("episodes", {source: "Schedule", listIndex, series: this.scheduleList.items[listIndex]});
+		this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] });
 	}
 
 	/**
@@ -197,7 +197,7 @@ export default class ScheduleController extends ViewController {
 		this.origNowShowing = series.nowShowing;
 
 		// Display the Series view
-		this.appController.pushView("series", {listIndex, series});
+		this.appController.pushView("series", { listIndex, series });
 	}
 
 	/**

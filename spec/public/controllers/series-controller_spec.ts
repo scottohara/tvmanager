@@ -3,7 +3,7 @@ import {
 	ProgramListItem,
 	SeriesListItem
 } from "controllers";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import ProgramMock from "mocks/program-model-mock";
@@ -41,7 +41,7 @@ describe("SeriesController", (): void => {
 			let programListItem: ProgramListItem;
 
 			beforeEach((): void => {
-				programListItem = {program: new ProgramMock("1", "test-program")};
+				programListItem = { program: new ProgramMock("1", "test-program") };
 				seriesController = new SeriesController(programListItem);
 			});
 

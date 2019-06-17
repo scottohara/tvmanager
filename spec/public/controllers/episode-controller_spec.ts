@@ -10,7 +10,7 @@ import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeController from "controllers/episode-controller";
 import EpisodeMock from "mocks/episode-model-mock";
-import {EpisodeStatus} from "models";
+import { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
 import SeriesMock from "mocks/series-model-mock";
 import SpinningWheelMock from "mocks/spinningwheel-mock";
@@ -235,8 +235,8 @@ describe("EpisodeController", (): void => {
 						.appendTo(document.body);
 
 					appController.viewStack = [
-						{controller: new TestController(), scrollPos: 0},
-						{controller: new TestController(), scrollPos: 0}
+						{ controller: new TestController(), scrollPos: 0 },
+						{ controller: new TestController(), scrollPos: 0 }
 					];
 					episodeController["listItem"].listIndex = scenario.listIndex;
 					episodeController["save"]();

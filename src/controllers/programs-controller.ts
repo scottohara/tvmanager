@@ -15,10 +15,10 @@
 import $ from "jquery";
 import List from "components/list";
 import Program from "models/program-model";
-import {ProgramListItem} from "controllers";
+import { ProgramListItem } from "controllers";
 import ProgramListTemplate from "views/programListTemplate.html";
 import ProgramsView from "views/programs-view.html";
-import {PublicInterface} from "global";
+import { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
 import window from "components/window";
 
@@ -163,7 +163,7 @@ export default class ProgramsController extends ViewController {
 
 		// Save the current program details
 		this.origProgramName = program.programName;
-		this.appController.pushView("seriesList", {listIndex, program});
+		this.appController.pushView("seriesList", { listIndex, program });
 	}
 
 	/**
@@ -190,7 +190,7 @@ export default class ProgramsController extends ViewController {
 
 		// Save the current program details
 		this.origProgramName = program.programName;
-		this.appController.pushView("program", {listIndex, program});
+		this.appController.pushView("program", { listIndex, program });
 	}
 
 	/**

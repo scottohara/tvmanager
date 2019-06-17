@@ -4,7 +4,7 @@ import {
 	SaveCallback,
 	SerializedModel
 } from "models";
-import sinon, {SinonStub} from "sinon";
+import sinon, { SinonStub } from "sinon";
 
 interface Program {
 	id: string | null;

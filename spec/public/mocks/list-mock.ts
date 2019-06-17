@@ -1,5 +1,5 @@
-import sinon, {SinonStub} from "sinon";
-import {ListAction} from "components";
+import sinon, { SinonStub } from "sinon";
+import { ListAction } from "components";
 
 export default class ListMock {
 	public action!: ListAction;
