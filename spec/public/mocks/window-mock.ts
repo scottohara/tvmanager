@@ -11,8 +11,6 @@ class WindowMock {
 		serviceWorker: { register: sinon.stub() }
 	};
 
-	public readonly openDatabase: SinonStub = sinon.stub();
-
 	public readonly alert: SinonStub = sinon.stub();
 
 	public readonly confirm: SinonStub = sinon.stub();

@@ -1,32 +1,19 @@
 import {
-	FindCallback,
-	ListCallback,
 	NowShowingEnum,
-	RemoveCallback,
-	SaveCallback,
 	SerializedModel
 } from "models";
 import sinon, { SinonStub } from "sinon";
 
-interface Series {
-	seriesName: string | null;
-	nowShowing: number | null;
-	programId: string | null;
-	programName?: string;
-	recordedCount?: number;
-	expectedCount?: number;
-}
-
-const saveStub: SinonStub = sinon.stub().yields(999),
+const saveStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),
-			listByProgramStub: SinonStub<[string, ListCallback], Series[]> = sinon.stub(),
+			listByProgramStub: SinonStub<string[], Promise<SeriesMock[]>> = sinon.stub(),
 			listByNowShowingStub: SinonStub = sinon.stub(),
-			findStub: SinonStub<[string, FindCallback], SeriesMock> = sinon.stub(),
+			findStub: SinonStub<string[], Promise<SeriesMock>> = sinon.stub(),
 			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub<[RemoveCallback], string> = sinon.stub(),
+			removeAllStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
 			fromJsonStub: SinonStub<[SerializedModel], SeriesMock> = sinon.stub();
 
-let series: Series[] = [],
+let series: SeriesMock[] = [],
 		removeAllOK: boolean;
 
 export default class SeriesMock {
@@ -66,35 +53,33 @@ export default class SeriesMock {
 		removeStub.reset();
 	}
 
-	public static get listByProgram(): SinonStub<[string, ListCallback], Series[]> {
-		return listByProgramStub.yields(this.series);
+	public static get listByProgram(): SinonStub<string[], Promise<SeriesMock[]>> {
+		return listByProgramStub.returns(Promise.resolve(this.series));
 	}
 
-	public static get listByNowShowing(): SinonStub<void[], Series[]> {
-		return listByNowShowingStub.yields(this.series);
+	public static get listByNowShowing(): SinonStub<void[], Promise<SeriesMock[]>> {
+		return listByNowShowingStub.returns(Promise.resolve(this.series));
 	}
 
-	public static get listByStatus(): SinonStub<[ListCallback, string], void> {
+	public static get listByStatus(): SinonStub<string[], Promise<SeriesMock[]>> {
 		return sinon.stub();
 	}
 
-	public static get listByIncomplete(): SinonStub<[ListCallback, string], void> {
+	public static get listByIncomplete(): SinonStub<undefined[], Promise<SeriesMock[]>> {
 		return sinon.stub();
 	}
 
-	public static get find(): SinonStub<[string, FindCallback], SeriesMock> {
-		return findStub.yields(new SeriesMock(String(findStub.args[0]), "test-series", null, null));
+	public static get find(): SinonStub<string[], Promise<SeriesMock>> {
+		return findStub.returns(Promise.resolve(new SeriesMock(String(findStub.args[0]), "test-series", null, null)));
 	}
 
-	public static get count(): SinonStub<void[], number> {
-		return countStub.yields(1);
+	public static get count(): SinonStub<void[], Promise<number>> {
+		return countStub.returns(Promise.resolve(1));
 	}
 
-	public static get removeAll(): SinonStub<[RemoveCallback], string> {
-		if (removeAllOK) {
-			removeAllStub.yields();
-		} else {
-			removeAllStub.yields("Force failed");
+	public static get removeAll(): SinonStub<void[], Promise<string | undefined>> {
+		if (!removeAllOK) {
+			removeAllStub.returns(Promise.resolve("Force failed"));
 		}
 
 		return removeAllStub;
@@ -108,11 +93,11 @@ export default class SeriesMock {
 		return { 1: "Mondays" };
 	}
 
-	public get save(): SinonStub<SaveCallback[], number> {
-		return saveStub;
+	public get save(): SinonStub<void[], Promise<string | undefined>> {
+		return saveStub.returns(Promise.resolve("1"));
 	}
 
-	public get remove(): SinonStub<void[], void> {
+	public get remove(): SinonStub<void[], Promise<void>> {
 		return removeStub;
 	}
 
@@ -124,11 +109,11 @@ export default class SeriesMock {
 		removeAllOK = false;
 	}
 
-	public static get series(): Series[] {
+	public static get series(): SeriesMock[] {
 		return series;
 	}
 
-	public static set series(items: Series[]) {
+	public static set series(items: SeriesMock[]) {
 		series = items;
 	}
 }

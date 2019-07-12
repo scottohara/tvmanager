@@ -27,7 +27,7 @@ describe("ReportController", (): void => {
 		];
 		report = {
 			reportName: "test-report",
-			dataSource: sinon.stub().yields(items),
+			dataSource: sinon.stub().returns(items),
 			args
 		};
 
@@ -46,11 +46,11 @@ describe("ReportController", (): void => {
 	describe("setup", (): void => {
 		let leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(reportController, "viewItem" as keyof ReportController);
 			sinon.stub(reportController, "goBack" as keyof ReportController);
 			sinon.stub(reportController, "activate");
-			reportController.setup();
+			await reportController.setup();
 			leftButton = reportController.header.leftButton as NavButton;
 		});
 
@@ -73,20 +73,20 @@ describe("ReportController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		it("should get the list of unscheduled episodes", (): void => {
+		it("should get the list of unscheduled episodes", async (): Promise<void> => {
 			sinon.stub(reportController, "listRetrieved" as keyof ReportController);
-			reportController.activate();
-			report.dataSource.should.have.been.calledWith(sinon.match.func, report.args);
+			await reportController.activate();
+			report.dataSource.should.have.been.calledWith(report.args);
 			reportController["listRetrieved"].should.have.been.calledWith(items);
 		});
 	});
 
 	describe("listRetrieved", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(reportController, "activate");
 			sinon.stub(reportController, "viewItems" as keyof ReportController);
-			reportController.setup();
-			reportController["listRetrieved"](items);
+			await reportController.setup();
+			await reportController["listRetrieved"](items);
 		});
 
 		it("should set the report list items", (): Chai.Assertion => reportController["reportList"].items.should.deep.equal(items));
@@ -95,18 +95,18 @@ describe("ReportController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			reportController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await reportController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
 
 	describe("viewItem", (): void => {
-		it("should push the episodes view for the selected item", (): void => {
+		it("should push the episodes view for the selected item", async (): Promise<void> => {
 			const index = 0;
 
 			reportController["reportList"] = new ListMock("", "", "", items);
-			reportController["viewItem"](index);
+			await reportController["viewItem"](index);
 			appController.pushView.should.have.been.calledWith("episodes", {
 				source: "Report",
 				listIndex: index,
@@ -116,15 +116,15 @@ describe("ReportController", (): void => {
 	});
 
 	describe("viewItems", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(reportController, "activate");
-			reportController.setup();
-			reportController["viewItems"]();
+			await reportController.setup();
+			await reportController["viewItems"]();
 		});
 
 		it("should set the list to view mode", (): Chai.Assertion => (reportController["reportList"] as ListMock).action.should.equal("view"));
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
-		it("should set the footer label", (): Chai.Assertion => String((reportController.footer as HeaderFooter).label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String((reportController.footer as HeaderFooter).label).should.equal("v1"));
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 });

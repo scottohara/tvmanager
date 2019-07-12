@@ -1,7 +1,7 @@
 declare class Abc {
-	private element: HTMLElement;
+	private readonly element: HTMLElement;
 
-	private scrollElement: JQuery<HTMLElement>;
+	private readonly scrollElement: JQuery<HTMLElement>;
 
 	public constructor(el: HTMLElement, scrollEl: JQuery<HTMLElement>);
 }

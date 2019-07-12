@@ -1,57 +1,49 @@
-import Base from "models/base-model";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
-import { PublicInterface } from "global";
 import Series from "models/series-model";
 
 export type EpisodeStatus = "Watched" | "Recorded" | "Expected" | "Missed" | "";
 
 export type SyncAction = "modified" | "deleted";
 
-export type SaveCallback = (id?: string | boolean | null) => void;
-
-export type ListCallback = (list: Base[]) => void;
-
-export type CountCallback = (count: number) => void;
-
-export type FindCallback = (model?: PublicInterface<Base> | null) => void;
-
-export type RemoveCallback = (message?: string) => void;
-
 export type ModelType = "Episode" | "Program" | "Series";
 
 export type Model = Program | Series | Episode;
 
-export type SerializedModel = SerializedProgram | SerializedSeries | SerializedEpisode;
+export interface NowShowingEnum {
+	[key: number]: string;
+}
+
+// Interfaces for persisting to local storage (IndexedDb)
 
 export interface PersistedProgram {
-	rowid: number;
+	rowid?: number;
 	ProgramID: string;
 	Name: string;
-	SeriesCount: number;
-	EpisodeCount: number;
-	WatchedCount: number;
-	RecordedCount: number;
-	ExpectedCount: number;
+	SeriesCount?: number;
+	EpisodeCount?: number;
+	WatchedCount?: number;
+	RecordedCount?: number;
+	ExpectedCount?: number;
 }
 
 export interface PersistedSeries {
-	rowid: number;
+	rowid?: number;
 	SeriesID: string;
 	Name: string;
-	NowShowing: number;
+	NowShowing: number | null;
 	ProgramID: string;
-	ProgramName: string;
-	EpisodeCount: number;
-	WatchedCount: number;
-	RecordedCount: number;
-	ExpectedCount: number;
-	MissedCount: number;
-	StatusWarningCount: number;
+	ProgramName?: string;
+	EpisodeCount?: number;
+	WatchedCount?: number;
+	RecordedCount?: number;
+	ExpectedCount?: number;
+	MissedCount?: number;
+	StatusWarningCount?: number;
 }
 
 export interface PersistedEpisode {
-	rowid: number;
+	rowid?: number;
 	EpisodeID: string;
 	Name: string;
 	Status: EpisodeStatus;
@@ -70,6 +62,15 @@ export interface PersistedSync {
 	ID: string;
 	Action: SyncAction;
 }
+
+interface PersistedSetting {
+	name: string;
+	value: string;
+}
+
+// Interfaces for import/exporting to remote storage (CouchDb)
+
+export type SerializedModel = SerializedProgram | SerializedSeries | SerializedEpisode;
 
 export interface SerializedProgram {
 	id: string | null;
@@ -95,14 +96,4 @@ export interface SerializedEpisode {
 	unscheduled: boolean;
 	sequence: number;
 	type: "Episode";
-}
-
-export interface StandardQuery {
-	baseData: string;
-	summaryData: string;
-	entityList: string;
-}
-
-export interface NowShowingEnum {
-	[key: number]: string;
 }

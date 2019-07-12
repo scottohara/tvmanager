@@ -15,6 +15,7 @@
  */
 import $ from "jquery";
 import AboutView from "views/about-view.html";
+import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
 import Series from "models/series-model";
@@ -49,7 +50,7 @@ export default class AboutController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "About",
@@ -61,16 +62,16 @@ export default class AboutController extends ViewController {
 		};
 
 		// Get the total number of programs
-		Program.count(this.programCount.bind(this));
+		this.programCount(await Program.count());
 
 		// Get the total number of series
-		Series.count(this.seriesCount.bind(this));
+		this.seriesCount(await Series.count());
 
 		// Get the total number of episodes
-		Episode.totalCount(this.episodeCount.bind(this));
+		await this.episodeCount(await Episode.totalCount());
 
 		// Set the version information
-		$("#databaseVersion").val(`v${this.appController.db.version}`);
+		$("#databaseVersion").val(`v${(await DatabaseService).version}`);
 
 		// Set the scroll position
 		this.appController.setScrollPosition();
@@ -83,8 +84,8 @@ export default class AboutController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): void {
-		this.appController.popView();
+	private goBack(): Promise<void> {
+		return this.appController.popView();
 	}
 
 	/**
@@ -119,12 +120,12 @@ export default class AboutController extends ViewController {
 	 * @desc Sets the total number episodes, and gets the total number of watched episdes
 	 * @param {Number} count - the total number of episodes
 	 */
-	private episodeCount(count: number): void {
+	private async episodeCount(count: number): Promise<void> {
 		// Save the total for later
 		this.episodeTotalCount = count;
 
 		// Get the total number of watched episodes
-		Episode.countByStatus("Watched", this.watchedCount.bind(this));
+		this.watchedCount(await Episode.countByStatus("Watched"));
 	}
 
 	/**

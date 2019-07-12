@@ -21,6 +21,7 @@ import {
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
+import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import EpisodeListTemplate from "views/episodeListTemplate.html";
 import EpisodesView from "views/episodes-view.html";
@@ -80,14 +81,14 @@ export default class EpisodesController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: `${this.listItem.series.programName} : ${this.listItem.series.seriesName}`,
 			leftButton: {
 				eventHandler: this.goBack.bind(this),
 				style: "backButton",
-				label: this.listItem.source || "Series"
+				label: undefined === this.listItem.source ? "Series" : this.listItem.source
 			},
 			rightButton: {
 				eventHandler: this.addItem.bind(this),
@@ -99,7 +100,7 @@ export default class EpisodesController extends ViewController {
 		this.episodeList = new List("list", EpisodeListTemplate, null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
 
 		// Get the list of episodes for the specified series
-		Episode.listBySeries(String(this.listItem.series.id), this.listRetrieved.bind(this));
+		return this.listRetrieved(await Episode.listBySeries(String(this.listItem.series.id)));
 	}
 
 	/**
@@ -110,9 +111,9 @@ export default class EpisodesController extends ViewController {
 	 * @desc Activates the controller
 	 * @param {EpisodeListItem} [listItem] - a list item that was just added/edited in the Episode view
 	 */
-	public activate(listItem?: EpisodeListItem): void {
+	public activate(listItem?: EpisodeListItem): Promise<void> {
 		// When returning from the Episode view, we need to update the list with the new values
-		if (listItem) {
+		if (undefined !== listItem) {
 			// Get the details of the added/edited episode
 			const newWatchedCount: number = "Watched" === listItem.episode.status ? 1 : 0,
 						newRecordedCount: number = "Recorded" === listItem.episode.status ? 1 : 0,
@@ -148,7 +149,7 @@ export default class EpisodesController extends ViewController {
 				// Find the first unwatched episode
 				const firstUnwatched: Episode | undefined = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as Episode;
 
-				if (firstUnwatched) {
+				if (undefined !== firstUnwatched) {
 					this.episodeList.scrollTo(String(firstUnwatched.id));
 				}
 
@@ -157,7 +158,7 @@ export default class EpisodesController extends ViewController {
 		}
 
 		// Set to view mode
-		this.viewItems();
+		return this.viewItems();
 	}
 
 	/**
@@ -165,15 +166,15 @@ export default class EpisodesController extends ViewController {
 	 * @this EpisodesController
 	 * @instance
 	 * @method listRetrieved
-	 * @desc Callback function after the list of episodes is retrieved
+	 * @desc Called after the list of episodes is retrieved
 	 * @param {Array<Episode>} episodeList - array of episode objects
 	 */
-	private listRetrieved(episodeList: PublicInterface<Episode>[]): void {
+	private listRetrieved(episodeList: PublicInterface<Episode>[]): Promise<void> {
 		// Set the list items
 		this.episodeList.items = episodeList;
 
 		// Activate the controller
-		this.activate();
+		return this.activate();
 	}
 
 	/**
@@ -183,8 +184,8 @@ export default class EpisodesController extends ViewController {
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
-	private goBack(): void {
-		this.appController.popView(this.listItem);
+	private goBack(): Promise<void> {
+		return this.appController.popView(this.listItem);
 	}
 
 	/**
@@ -195,17 +196,17 @@ export default class EpisodesController extends ViewController {
 	 * @desc Displays the Episode view for editing an episode
 	 * @param {Number} listIndex - the list index of the episode to edit
 	 */
-	private viewItem(listIndex: number): void {
+	private viewItem(listIndex: number): Promise<void> {
 		const episode = this.episodeList.items[listIndex] as Episode;
 
 		// Save the current episode details
 		this.origWatchedCount = "Watched" === episode.status ? 1 : 0;
 		this.origRecordedCount = "Recorded" === episode.status ? 1 : 0;
 		this.origExpectedCount = "Expected" === episode.status ? 1 : 0;
-		this.origStatusWarningCount = episode.statusWarning ? 1 : 0;
+		this.origStatusWarningCount = "" === episode.statusWarning ? 0 : 1;
 
 		// Display the Episode view
-		this.appController.pushView("episode", { listIndex, episode });
+		return this.appController.pushView("episode", { listIndex, episode });
 	}
 
 	/**
@@ -215,8 +216,8 @@ export default class EpisodesController extends ViewController {
 	 * @method addItem
 	 * @desc Displays the Episode view for adding an episode
 	 */
-	private addItem(): void {
-		this.appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
+	private addItem(): Promise<void> {
+		return this.appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
 	}
 
 	/**
@@ -227,7 +228,7 @@ export default class EpisodesController extends ViewController {
 	 * @desc Deletes an episode from the list
 	 * @param {Number} listIndex - the list index of the episode to delete
 	 */
-	private deleteItem(listIndex: number): void {
+	private async deleteItem(listIndex: number): Promise<void> {
 		// Get the details of the deleted episode
 		const episode = this.episodeList.items[listIndex] as Episode,
 					newWatchedCount = "Watched" === episode.status ? 1 : 0,
@@ -246,13 +247,13 @@ export default class EpisodesController extends ViewController {
 		$(`#list li a#${episode.id}`).remove();
 
 		// Remove the item from the database
-		episode.remove();
+		await episode.remove();
 
 		// Remove the item from the list
 		this.episodeList.items.splice(listIndex, 1);
 
 		// Resequence the remaining items
-		this.resequenceItems();
+		return this.resequenceItems();
 	}
 
 	/**
@@ -262,7 +263,7 @@ export default class EpisodesController extends ViewController {
 	 * @method deleteItems
 	 * @desc Sets the list to delete mode
 	 */
-	private deleteItems(): void {
+	private async deleteItems(): Promise<void> {
 		// Set the list to delete mode
 		this.episodeList.setAction("delete");
 
@@ -276,7 +277,7 @@ export default class EpisodesController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			rightButton: {
 				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
@@ -295,8 +296,9 @@ export default class EpisodesController extends ViewController {
 	 * @method resequenceItems
 	 * @desc Updates the sequence number of list items based on their current position in the list
 	 */
-	private resequenceItems(): void {
-		const self: this = this;
+	private async resequenceItems(): Promise<void> {
+		const self: this = this,
+					episodes: Promise<string | undefined>[] = [];
 
 		// Iterate over the HTML DOM elements in the list
 		$("#list li a").each((index: number, item: HTMLElement): void => {
@@ -307,7 +309,7 @@ export default class EpisodesController extends ViewController {
 					// If the array item at this position is not the same as the HTML DOM element at the same position, update the item's sequence in the database
 					if (episode.id === $(item).attr("id")) {
 						episode.sequence = index;
-						episode.save();
+						episodes.push(episode.save());
 
 						// Stop after the first update
 						break;
@@ -315,6 +317,8 @@ export default class EpisodesController extends ViewController {
 				}
 			}
 		});
+
+		await Promise.all(episodes);
 
 		// Resort the list items based on the update sequences
 		this.episodeList.items = this.episodeList.items.sort((a: Episode, b: Episode): number => (a.sequence < b.sequence ? -1 : a.sequence > b.sequence ? 1 : 0));
@@ -330,7 +334,7 @@ export default class EpisodesController extends ViewController {
 	 * @method editItems
 	 * @desc Sets the list to edit mode
 	 */
-	private editItems(): void {
+	private async editItems(): Promise<void> {
 		// Set the list to edit mode
 		this.episodeList.setAction("edit");
 
@@ -348,11 +352,12 @@ export default class EpisodesController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: (): void => {
-					this.resequenceItems();
-					this.viewItems();
+				eventHandler: async (): Promise<void> => {
+					await this.resequenceItems();
+
+					return this.viewItems();
 				},
 				style: "confirmButton",
 				label: "Done"
@@ -383,7 +388,7 @@ export default class EpisodesController extends ViewController {
 	 * @method viewItems
 	 * @desc Sets the list to view mode
 	 */
-	private viewItems(): void {
+	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.episodeList.setAction("view");
 
@@ -400,7 +405,7 @@ export default class EpisodesController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this),
 				label: "Sort"

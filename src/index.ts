@@ -10,6 +10,7 @@
  * @requires controllers/application-controller
  */
 import "stylesheets/default.css";
+import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import window from "components/window";
 
@@ -21,4 +22,4 @@ if ("serviceWorker" in window.navigator) {
 const appController: ApplicationController = new ApplicationController();
 
 // Start the application
-appController.start();
+appController.start().catch((error: Error): JQuery<HTMLElement> => $("#content").text(error.message));

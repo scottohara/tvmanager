@@ -27,17 +27,17 @@ import ViewController from "controllers/view-controller";
  * @param {ProgramListItem} listItem - a list item from the Programs view
  */
 export default class ProgramController extends ViewController {
-	private listItem: ProgramListItem;
+	private readonly listItem: ProgramListItem;
 
 	public constructor(listItem?: ProgramListItem) {
 		super();
 
-		// If a list item was passed, we're editing an existing program
-		if (listItem) {
-			this.listItem = listItem;
-		} else {
-			// Otherwise we're adding a new program
+		// If a list item was not passed, we're adding a new program
+		if (undefined === listItem) {
 			this.listItem = { program: new Program(null, "", 0, 0, 0, 0, 0) };
+		} else {
+			// Otherwise we're editing an existing program
+			this.listItem = listItem;
 		}
 	}
 
@@ -59,7 +59,7 @@ export default class ProgramController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Add/Edit Program",
@@ -76,6 +76,8 @@ export default class ProgramController extends ViewController {
 
 		// Set the program details
 		$("#programName").val(String(this.listItem.program.programName));
+
+		return Promise.resolve();
 	}
 
 	/**
@@ -85,12 +87,14 @@ export default class ProgramController extends ViewController {
 	 * @method save
 	 * @desc Saves the program details to the database and returns to the previous view
 	 */
-	private save(): void {
+	private async save(): Promise<void> {
 		// Get the program details
 		this.listItem.program.setProgramName(String($("#programName").val()));
 
 		// Update the database and pop the view off the stack
-		this.listItem.program.save((): void => this.appController.popView(this.listItem));
+		await this.listItem.program.save();
+
+		return this.appController.popView(this.listItem);
 	}
 
 	/**
@@ -100,7 +104,7 @@ export default class ProgramController extends ViewController {
 	 * @method cancel
 	 * @desc Pops the view off the stack
 	 */
-	private cancel(): void {
-		this.appController.popView();
+	private cancel(): Promise<void> {
+		return this.appController.popView();
 	}
 }

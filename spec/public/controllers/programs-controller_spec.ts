@@ -44,7 +44,7 @@ describe("ProgramsController", (): void => {
 		let leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "viewItem" as keyof ProgramsController);
 			sinon.stub(programsController, "editItem" as keyof ProgramsController);
 			sinon.stub(programsController, "deleteItem" as keyof ProgramsController);
@@ -52,7 +52,7 @@ describe("ProgramsController", (): void => {
 			sinon.stub(programsController, "addItem" as keyof ProgramsController);
 			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
 			ProgramMock.programs = items;
-			programsController.setup();
+			await programsController.setup();
 			leftButton = programsController.header.leftButton as NavButton;
 			rightButton = programsController.header.rightButton as NavButton;
 		});
@@ -90,7 +90,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should get the list of programs", (): void => {
-			ProgramMock.list.should.have.been.calledWith(sinon.match.func);
+			ProgramMock.list.should.have.been.called;
 			programsController["listRetrieved"].should.have.been.calledWith(items);
 		});
 	});
@@ -102,7 +102,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		describe("from schedule", (): void => {
-			beforeEach((): void => programsController.activate());
+			beforeEach(async (): Promise<void> => programsController.activate());
 
 			it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
@@ -128,9 +128,9 @@ describe("ProgramsController", (): void => {
 				});
 
 				describe("program name unchanged", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						programsController["origProgramName"] = listItem.program.programName;
-						programsController.activate(listItem);
+						await programsController.activate(listItem);
 					});
 
 					it("should update the item in the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
@@ -140,9 +140,9 @@ describe("ProgramsController", (): void => {
 				});
 
 				describe("program name changed", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						programsController["origProgramName"] = "original-program";
-						programsController.activate(listItem);
+						await programsController.activate(listItem);
 					});
 
 					it("should update the item in the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
@@ -153,7 +153,7 @@ describe("ProgramsController", (): void => {
 			});
 
 			describe("add", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					listItem = { program: new ProgramMock("3", "added-program") };
 
 					sortedItems = [
@@ -161,7 +161,7 @@ describe("ProgramsController", (): void => {
 						listItem.program as ProgramMock,
 						items[1]
 					];
-					programsController.activate(listItem);
+					await programsController.activate(listItem);
 				});
 
 				it("should add the item to the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
@@ -173,10 +173,10 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("listRetrieved", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "activate" as keyof ProgramsController);
 			programsController["programList"] = new ListMock("", "", "", []);
-			programsController["listRetrieved"](items);
+			await programsController["listRetrieved"](items);
 		});
 
 		it("should set the program list items", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(items));
@@ -184,8 +184,8 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			programsController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await programsController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
@@ -193,9 +193,9 @@ describe("ProgramsController", (): void => {
 	describe("viewItem", (): void => {
 		const index = 0;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			programsController["programList"] = new ListMock("", "", "", items);
-			programsController["viewItem"](index);
+			await programsController["viewItem"](index);
 		});
 
 		it("should save the current program details", (): Chai.Assertion => String(programsController["origProgramName"]).should.equal(items[0].programName));
@@ -206,8 +206,8 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("addItem", (): void => {
-		it("should push the program view with no selected item", (): void => {
-			programsController["addItem"]();
+		it("should push the program view with no selected item", async (): Promise<void> => {
+			await programsController["addItem"]();
 			appController.pushView.should.have.been.calledWithExactly("program");
 		});
 	});
@@ -215,9 +215,9 @@ describe("ProgramsController", (): void => {
 	describe("editItem", (): void => {
 		const index = 0;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			programsController["programList"] = new ListMock("", "", "", items);
-			programsController["editItem"](index);
+			await programsController["editItem"](index);
 		});
 
 		it("should save the current program details", (): Chai.Assertion => String(programsController["origProgramName"]).should.equal(items[0].programName));
@@ -231,11 +231,11 @@ describe("ProgramsController", (): void => {
 		let index: number,
 				item: ProgramMock;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			index = 0;
 			item = new ProgramMock(null, "test-program");
 			programsController["programList"] = new ListMock("", "", "", [item]);
-			programsController["deleteItem"](index);
+			await programsController["deleteItem"](index);
 		});
 
 		it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
@@ -247,11 +247,11 @@ describe("ProgramsController", (): void => {
 		let	footer: HeaderFooter,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
-			programsController.setup();
-			programsController["deleteItems"]();
+			await programsController.setup();
+			await programsController["deleteItems"]();
 			footer = programsController.footer as HeaderFooter;
 			rightButton = footer.rightButton as NavButton;
 		});
@@ -266,7 +266,7 @@ describe("ProgramsController", (): void => {
 			programList.hasClass("withHelper").should.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as Function)();
@@ -282,11 +282,11 @@ describe("ProgramsController", (): void => {
 		let	footer: HeaderFooter,
 				leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
-			programsController.setup();
-			programsController["editItems"]();
+			await programsController.setup();
+			await programsController["editItems"]();
 			footer = programsController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -301,7 +301,7 @@ describe("ProgramsController", (): void => {
 			programList.hasClass("withHelper").should.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as Function)();
@@ -318,12 +318,12 @@ describe("ProgramsController", (): void => {
 				leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
 			sinon.stub(programsController, "editItems" as keyof ProgramsController);
 			sinon.stub(programsController, "deleteItems" as keyof ProgramsController);
-			programsController.setup();
-			programsController["viewItems"]();
+			await programsController.setup();
+			await programsController["viewItems"]();
 			footer = programsController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -339,7 +339,7 @@ describe("ProgramsController", (): void => {
 			programList.hasClass("withHelper").should.be.true;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as Function)();

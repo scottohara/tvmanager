@@ -12,6 +12,7 @@
  * @requires controllers/view-controller
  */
 import $ from "jquery";
+import DatabaseService from "services/database-service";
 import { Device } from "controllers";
 import { PublicInterface } from "global";
 import RegistrationView from "views/registration-view.html";
@@ -47,7 +48,7 @@ export default class RegistrationController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Register",
@@ -63,7 +64,7 @@ export default class RegistrationController extends ViewController {
 		};
 
 		// Get the registered device
-		Setting.get("Device", this.gotDevice.bind(this));
+		return this.gotDevice(await Setting.get("Device"));
 	}
 
 	/**
@@ -74,28 +75,9 @@ export default class RegistrationController extends ViewController {
 	 * @desc Parses the registered device and displays it
 	 * @param {Setting} device - a Setting object containing the registered device
 	 */
-	private gotDevice(device: PublicInterface<Setting>): void {
+	private async gotDevice(device: PublicInterface<Setting>): Promise<void> {
 		// Check if we have a registered device
-		if (device && device.settingValue) {
-			// Parse the JSON
-			this.device = JSON.parse(device.settingValue) as Device;
-
-			// Display the device name
-			$("#deviceName").val(this.device.name);
-
-			// Setup the footer
-			this.footer = {
-				label: `v${this.appController.db.version}`,
-				leftButton: {
-					eventHandler: this.unregister.bind(this),
-					style: "cautionButton",
-					label: "Unregister"
-				}
-			};
-
-			// Set the view footer
-			this.appController.setFooter();
-		} else {
+		if (undefined === device.settingValue) {
 			// No registered device
 			this.device = {
 				id: "",
@@ -105,6 +87,25 @@ export default class RegistrationController extends ViewController {
 
 			// Clear the view footer
 			this.appController.clearFooter();
+		} else {
+			// Parse the JSON
+			this.device = JSON.parse(device.settingValue) as Device;
+
+			// Display the device name
+			$("#deviceName").val(this.device.name);
+
+			// Setup the footer
+			this.footer = {
+				label: `v${(await DatabaseService).version}`,
+				leftButton: {
+					eventHandler: this.unregister.bind(this),
+					style: "cautionButton",
+					label: "Unregister"
+				}
+			};
+
+			// Set the view footer
+			this.appController.setFooter();
 		}
 	}
 
@@ -115,32 +116,36 @@ export default class RegistrationController extends ViewController {
 	 * @method unregister
 	 * @desc Unregisters the current device
 	 */
-	private unregister(): void {
-		// Send a DELETE request to the server
-		$.ajax({
-			url: `/devices/${this.device.id}`,
-			context: this,
-			type: "DELETE",
-			headers: {
-				"X-DEVICE-ID": String(this.device.id)
-			},
-			success(): void {
-				const device: Setting = new Setting("Device", null);
+	private async unregister(): Promise<void> {
+		try {
+			// Send a DELETE request to the server
+			const response: Response = await fetch(`/devices/${this.device.name}`, {
+				method: "DELETE",
+				headers: {
+					"X-DEVICE-ID": String(this.device.id)
+				}
+			});
+
+			if (response.ok) {
+				const device: Setting = new Setting("Device");
 
 				// Remove the device from the database
-				device.remove();
+				await device.remove();
 
 				// Pop the view off the stack
-				this.appController.popView();
-			},
-			error: (request: JQuery.jqXHR, statusText: JQuery.Ajax.ErrorTextStatus): void => this.appController.showNotice({
-				label: `Unregister failed: ${statusText}, ${request.status} (${request.statusText})`,
+				await this.appController.popView();
+			} else {
+				throw new Error(`${response.status} (${response.statusText})`);
+			}
+		} catch (error) {
+			this.appController.showNotice({
+				label: `Unregister failed: ${error.message}`,
 				leftButton: {
 					style: "cautionButton",
 					label: "OK"
 				}
-			})
-		});
+			});
+		}
 	}
 
 	/**
@@ -150,38 +155,42 @@ export default class RegistrationController extends ViewController {
 	 * @method save
 	 * @desc Registers or updates the current device
 	 */
-	private save(): void {
+	private async save(): Promise<void> {
 		// Get the device details
 		this.device.name = String($("#deviceName").val());
 
 		// Send a PUT request to the server, including the device ID in the request headers
-		$.ajax({
-			url: `/devices/${this.device.name}`,
-			context: this,
-			type: "PUT",
-			headers: {
-				"X-DEVICE-ID": String(this.device.id)
-			},
-			success(_registrationReponse: string, _status: JQuery.Ajax.SuccessTextStatus, jqXHR: JQuery.jqXHR): void {
+		try {
+			const response: Response = await fetch(`/devices/${this.device.name}`, {
+				method: "PUT",
+				headers: {
+					"X-DEVICE-ID": String(this.device.id)
+				}
+			});
+
+			if (response.ok) {
 				// Get the device ID returned in the Location header
-				this.device.id = jqXHR.getResponseHeader("Location");
+				this.device.id = String(response.headers.get("Location"));
 
 				const device: Setting = new Setting("Device", JSON.stringify(this.device));
 
 				// Update the database
-				device.save();
+				await device.save();
 
 				// Pop the view off the stack
-				this.appController.popView();
-			},
-			error: (request: JQuery.jqXHR, statusText: JQuery.Ajax.ErrorTextStatus): void => this.appController.showNotice({
-				label: `Registration failed: ${statusText}, ${request.status} (${request.statusText})`,
+				await this.appController.popView();
+			} else {
+				throw new Error(`${response.status} (${response.statusText})`);
+			}
+		} catch (error) {
+			this.appController.showNotice({
+				label: `Registration failed: ${error.message}`,
 				leftButton: {
 					style: "cautionButton",
 					label: "OK"
 				}
-			})
-		});
+			});
+		}
 	}
 
 	/**
@@ -191,7 +200,7 @@ export default class RegistrationController extends ViewController {
 	 * @method cancel
 	 * @desc Pops the view off the stack
 	 */
-	private cancel(): void {
-		this.appController.popView();
+	private cancel(): Promise<void> {
+		return this.appController.popView();
 	}
 }

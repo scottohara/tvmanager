@@ -13,6 +13,7 @@
  * @requires controllers/view-controller
  */
 import $ from "jquery";
+import DatabaseService from "services/database-service";
 import List from "components/list";
 import { PublicInterface } from "global";
 import ScheduleListTemplate from "views/scheduleListTemplate.html";
@@ -56,7 +57,7 @@ export default class ScheduleController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Schedule",
@@ -74,7 +75,7 @@ export default class ScheduleController extends ViewController {
 		this.scheduleList = new List("list", ScheduleListTemplate, "nowShowingDisplay", [], this.viewItem.bind(this), this.editItem.bind(this));
 
 		// Activate the controller
-		this.activate();
+		return this.activate();
 	}
 
 	/**
@@ -85,36 +86,36 @@ export default class ScheduleController extends ViewController {
 	 * @desc Activates the controller
 	 * @param {SeriesListItem} [listItem] - a list item that was just view/added/edited
 	 */
-	public activate(listItem?: SeriesListItem): void {
+	public async activate(listItem?: SeriesListItem): Promise<void> {
 		// When returning from the Episodes view, we need to update the list with the new values
-		if (listItem) {
-			// If the series is now not showing or has no recorded/expected episodes, remove the item from the list
-			if (!listItem.series.nowShowing && 0 === listItem.series.recordedCount && 0 === listItem.series.expectedCount) {
-				this.scheduleList.items.splice(Number(listItem.listIndex), 1);
-			} else {
-				// Update the item in the list
-				this.scheduleList.items[Number(listItem.listIndex)] = listItem.series;
-
-				// If the program or now showing was edited, resort the list
-				if (listItem.series.programId !== this.origProgramId || listItem.series.nowShowing !== this.origNowShowing) {
-					this.scheduleList.items = this.scheduleList.items.sort((a: Series, b: Series): number => {
-						const x = `${a.nowShowing || "Z"}-${a.programName}`,
-									y = `${b.nowShowing || "Z"}-${b.programName}`;
-
-						return x.localeCompare(y);
-					});
-				}
-			}
-
-			// Refresh the list
-			this.scheduleList.refresh();
-
-			// Set to view mode
-			this.viewItems();
-		} else {
-			// Otherwise, get the list of scheduled series
-			Series.listByNowShowing(this.listRetrieved.bind(this));
+		if (undefined === listItem) {
+			// Get the list of scheduled series
+			return this.listRetrieved(await Series.listByNowShowing());
 		}
+
+		// If the series is now not showing or has no recorded/expected episodes, remove the item from the list
+		if (null === listItem.series.nowShowing && 0 === listItem.series.recordedCount && 0 === listItem.series.expectedCount) {
+			this.scheduleList.items.splice(Number(listItem.listIndex), 1);
+		} else {
+			// Update the item in the list
+			this.scheduleList.items[Number(listItem.listIndex)] = listItem.series;
+
+			// If the program or now showing was edited, resort the list
+			if (listItem.series.programId !== this.origProgramId || listItem.series.nowShowing !== this.origNowShowing) {
+				this.scheduleList.items = this.scheduleList.items.sort((a: Series, b: Series): number => {
+					const x = `${null === a.nowShowing ? "Z" : a.nowShowing}-${a.programName}`,
+								y = `${null === b.nowShowing ? "Z" : b.nowShowing}-${b.programName}`;
+
+					return x.localeCompare(y);
+				});
+			}
+		}
+
+		// Refresh the list
+		this.scheduleList.refresh();
+
+		// Set to view mode
+		return this.viewItems();
 	}
 
 	/**
@@ -122,10 +123,10 @@ export default class ScheduleController extends ViewController {
 	 * @this ScheduleController
 	 * @instance
 	 * @method listRetrieved
-	 * @desc Callback function after the list of series is retrieved
+	 * @desc Called after the list of series is retrieved
 	 * @param {Array<Series>} scheduleList - array of series objects
 	 */
-	private listRetrieved(scheduleList: PublicInterface<Series>[]): void {
+	private listRetrieved(scheduleList: PublicInterface<Series>[]): Promise<void> {
 		// Set the list items
 		this.scheduleList.items = scheduleList;
 
@@ -133,7 +134,7 @@ export default class ScheduleController extends ViewController {
 		this.scheduleList.refresh();
 
 		// Set to view mode
-		this.viewItems();
+		return this.viewItems();
 	}
 
 	/**
@@ -144,8 +145,8 @@ export default class ScheduleController extends ViewController {
 	 * @desc Displays the Episodes view for a series
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
-	private viewItem(listIndex: number): void {
-		this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] });
+	private viewItem(listIndex: number): Promise<void> {
+		return this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] });
 	}
 
 	/**
@@ -155,8 +156,8 @@ export default class ScheduleController extends ViewController {
 	 * @method viewUnscheduled
 	 * @desc Displays the Unscheduled view
 	 */
-	private viewUnscheduled(): void {
-		this.appController.pushView("unscheduled");
+	private viewUnscheduled(): Promise<void> {
+		return this.appController.pushView("unscheduled");
 	}
 
 	/**
@@ -166,8 +167,8 @@ export default class ScheduleController extends ViewController {
 	 * @method viewPrograms
 	 * @desc Displays the Programs view
 	 */
-	private viewPrograms(): void {
-		this.appController.pushView("programs");
+	private viewPrograms(): Promise<void> {
+		return this.appController.pushView("programs");
 	}
 
 	/**
@@ -177,8 +178,8 @@ export default class ScheduleController extends ViewController {
 	 * @method viewSettings
 	 * @desc Displays the Settings view
 	 */
-	private viewSettings(): void {
-		this.appController.pushView("settings");
+	private viewSettings(): Promise<void> {
+		return this.appController.pushView("settings");
 	}
 
 	/**
@@ -189,7 +190,7 @@ export default class ScheduleController extends ViewController {
 	 * @desc Displays the Series view for editing a series
 	 * @param {Number} listIndex - the list index of the series to edit
 	 */
-	private editItem(listIndex: number): void {
+	private editItem(listIndex: number): Promise<void> {
 		const series = this.scheduleList.items[listIndex] as Series;
 
 		// Save the current series details
@@ -197,7 +198,7 @@ export default class ScheduleController extends ViewController {
 		this.origNowShowing = series.nowShowing;
 
 		// Display the Series view
-		this.appController.pushView("series", { listIndex, series });
+		return this.appController.pushView("series", { listIndex, series });
 	}
 
 	/**
@@ -207,7 +208,7 @@ export default class ScheduleController extends ViewController {
 	 * @method editItems
 	 * @desc Sets the list to edit mode
 	 */
-	private editItems(): void {
+	private async editItems(): Promise<void> {
 		// Set the list to edit mode
 		this.scheduleList.setAction("edit");
 
@@ -221,7 +222,7 @@ export default class ScheduleController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
@@ -240,7 +241,7 @@ export default class ScheduleController extends ViewController {
 	 * @method viewItems
 	 * @desc Sets the list to view mode
 	 */
-	private viewItems(): void {
+	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.scheduleList.setAction("view");
 
@@ -252,7 +253,7 @@ export default class ScheduleController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this),
 				label: "Edit"

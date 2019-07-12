@@ -1,25 +1,15 @@
-import {
-	FindCallback,
-	RemoveCallback,
-	SaveCallback,
-	SerializedModel
-} from "models";
 import sinon, { SinonStub } from "sinon";
+import { SerializedModel } from "models";
 
-interface Program {
-	id: string | null;
-	programName: string | null;
-}
-
-const saveStub: SinonStub = sinon.stub().yields(999),
+const saveStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),
 			listStub: SinonStub = sinon.stub(),
-			findStub: SinonStub<[string, FindCallback], ProgramMock> = sinon.stub(),
+			findStub: SinonStub<string[], Promise<ProgramMock>> = sinon.stub(),
 			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub<[RemoveCallback], string> = sinon.stub(),
+			removeAllStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
 			fromJsonStub: SinonStub<[SerializedModel], ProgramMock> = sinon.stub();
 
-let	programs: Program[] = [],
+let	programs: ProgramMock[] = [],
 		removeAllOK: boolean;
 
 export default class ProgramMock {
@@ -51,23 +41,21 @@ export default class ProgramMock {
 		removeStub.reset();
 	}
 
-	public static get list(): SinonStub<void[], Program[]> {
-		return listStub.yields(this.programs);
+	public static get list(): SinonStub<void[], Promise<ProgramMock[]>> {
+		return listStub.returns(Promise.resolve(this.programs));
 	}
 
-	public static get find(): SinonStub<[string, FindCallback], ProgramMock> {
-		return findStub.yields(new ProgramMock(String(findStub.args[0]), "test-program"));
+	public static get find(): SinonStub<string[], Promise<ProgramMock>> {
+		return findStub.returns(Promise.resolve(new ProgramMock(String(findStub.args[0]), "test-program")));
 	}
 
-	public static get count(): SinonStub<void[], number> {
-		return countStub.yields(1);
+	public static get count(): SinonStub<void[], Promise<number>> {
+		return countStub.returns(Promise.resolve(1));
 	}
 
-	public static get removeAll(): SinonStub<[RemoveCallback], string> {
-		if (removeAllOK) {
-			removeAllStub.yields();
-		} else {
-			removeAllStub.yields("Force failed");
+	public static get removeAll(): SinonStub<void[], Promise<string | undefined>> {
+		if (!removeAllOK) {
+			removeAllStub.returns(Promise.resolve("Force failed"));
 		}
 
 		return removeAllStub;
@@ -77,11 +65,11 @@ export default class ProgramMock {
 		return fromJsonStub.returns(new ProgramMock("", ""));
 	}
 
-	public get save(): SinonStub<SaveCallback[], number> {
-		return saveStub;
+	public get save(): SinonStub<void[], Promise<string | undefined>> {
+		return saveStub.returns(Promise.resolve("1"));
 	}
 
-	public get remove(): SinonStub<void[], void> {
+	public get remove(): SinonStub<void[], Promise<void>> {
 		return removeStub;
 	}
 
@@ -93,11 +81,11 @@ export default class ProgramMock {
 		removeAllOK = false;
 	}
 
-	public static get programs(): Program[] {
+	public static get programs(): ProgramMock[] {
 		return programs;
 	}
 
-	public static set programs(items: Program[]) {
+	public static set programs(items: ProgramMock[]) {
 		programs = items;
 	}
 }

@@ -1,182 +1,107 @@
-import sinon, { SinonStub } from "sinon";
-import ApplicationControllerMock from "mocks/application-controller-mock";
+import DatabaseServiceMock from "mocks/database-service-mock";
 import Setting from "../../../src/models/setting-model";
-
-// Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+import { SinonStub } from "sinon";
 
 describe("Setting", (): void => {
-	let settingName: string,
-			settingValue: string,
-			setting: Setting,
-			callback: SinonStub;
+	let name: string,
+			value: string,
+			setting: Setting;
 
 	beforeEach((): void => {
-		settingName = "test-setting";
-		settingValue = "test-value";
-		setting = new Setting(settingName, settingValue);
+		name = "test-setting";
+		value = "test-value";
+		setting = new Setting(name, value);
 	});
 
 	describe("object constructor", (): void => {
 		it("should return a Setting instance", (): Chai.Assertion => setting.should.be.an.instanceOf(Setting));
-		it("should set the setting name", (): Chai.Assertion => String(setting["settingName"]).should.equal(settingName));
-		it("should set the setting value", (): Chai.Assertion => String(setting.settingValue).should.equal(settingValue));
+		it("should set the setting name", (): Chai.Assertion => String(setting["settingName"]).should.equal(name));
+		it("should set the setting value", (): Chai.Assertion => String(setting.settingValue).should.equal(value));
 	});
 
 	describe("get", (): void => {
-		let sql: string;
-
-		beforeEach((): string => (sql = `SELECT Value AS SettingValue FROM Setting WHERE Name = ${settingName}`));
-
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(sql);
-				callback = sinon.stub();
-				Setting.get(settingName, callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).settingsStore.get as SinonStub).throws();
+				setting = await Setting.get(name);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to get the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.get.should.have.been.calledWith(name));
+			it("should return and undefined value", (): Chai.Assertion => (undefined === setting.settingValue).should.be.true);
 		});
 
 		describe("success", (): void => {
 			describe("doesn't exist", (): void => {
-				beforeEach((): void => {
-					appController.db.noRowsAffectedAt(sql);
-					callback = sinon.stub().withArgs(sinon.match(new Setting(settingName, null)));
-					Setting.get(settingName, callback);
+				beforeEach(async (): Promise<void> => {
+					((await DatabaseServiceMock).settingsStore.get as SinonStub).returns(undefined);
+					setting = await Setting.get(name);
 				});
 
-				it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-				it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-				it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-				it("should not return an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal(""));
-				it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+				it("should attempt to get the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.get.should.have.been.calledWith(name));
+				it("should return an undefined value", (): Chai.Assertion => (undefined === setting.settingValue).should.be.true);
 			});
 
 			describe("exists", (): void => {
-				beforeEach((): void => {
-					appController.db.addResultRows([{ SettingValue: settingValue }]);
-					callback = sinon.stub().withArgs(sinon.match(setting));
-					Setting.get(settingName, callback);
+				beforeEach(async (): Promise<void> => {
+					((await DatabaseServiceMock).settingsStore.get as SinonStub).returns({ name, value });
+					setting = await Setting.get(name);
 				});
 
-				it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-				it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-				it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-				it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+				it("should attempt to get the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.get.should.have.been.called);
+				it("should return the setting value", (): Chai.Assertion => String(setting.settingValue).should.equal(value));
 			});
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).settingsStore.get as SinonStub).reset());
 	});
 
 	describe("save", (): void => {
-		describe("delete fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Setting WHERE Name = ${settingName}`);
-				setting.save();
+		let result: boolean;
+
+		describe("fail", (): void => {
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).settingsStore.save as SinonStub).throws();
+				result = await setting.save();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-		});
-
-		describe("insert fail", (): void => {
-			beforeEach((): void => appController.db.failAt(`INSERT INTO Setting (Name, Value) VALUES (${settingName}, ${settingValue})`));
-
-			describe("without callback", (): void => {
-				beforeEach((): void => setting.save());
-
-				it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-				it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-				it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-			});
-
-			describe("with callback", (): void => {
-				beforeEach((): void => {
-					callback = sinon.stub();
-					setting.save(callback);
-				});
-
-				it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-				it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-				it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(false));
-				it("should return an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-				it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-			});
-		});
-
-		describe("no rows affected", (): void => {
-			beforeEach((): void => appController.db.noRowsAffectedAt(`INSERT INTO Setting (Name, Value) VALUES (${settingName}, ${settingValue})`));
-
-			describe("without callback", (): void => {
-				beforeEach((): void => setting.save());
-
-				it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-				it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-				it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-			});
-
-			describe("with callback", (): void => {
-				beforeEach((): void => {
-					callback = sinon.stub();
-					setting.save(callback);
-				});
-
-				it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-				it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-				it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(false));
-				it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-			});
+			it("should attempt to save the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.save.should.have.been.calledWith(name, value));
+			it("should return false", (): Chai.Assertion => result.should.be.false);
 		});
 
 		describe("success", (): void => {
-			describe("without callback", (): void => {
-				beforeEach((): void => setting.save());
+			beforeEach(async (): Promise<boolean> => (result = await setting.save()));
 
-				it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-				it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-				it("should not return an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal(""));
-				it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
-			});
-
-			describe("with callback", (): void => {
-				beforeEach((): void => {
-					callback = sinon.stub();
-					setting.save(callback);
-				});
-
-				it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-				it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-				it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(true));
-				it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
-			});
+			it("should attempt to save the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.save.should.have.been.calledWith(name, value));
+			it("should return true", (): Chai.Assertion => result.should.be.true);
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).settingsStore.save as SinonStub).reset());
 	});
 
 	describe("remove", (): void => {
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Setting WHERE Name = ${settingName}`);
-				setting.remove();
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).settingsStore.remove as SinonStub).throws();
+				try {
+					await setting.remove();
+				} catch (_e) {
+					// No op
+				}
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the setting name", (): Chai.Assertion => String(setting["settingName"]).should.equal(settingName));
-			it("should not clear the setting value", (): Chai.Assertion => String(setting.settingValue).should.equal(settingValue));
+			it("should attempt to remove the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.remove.should.have.been.calledWith(name));
+			it("should not clear the setting name", (): Chai.Assertion => String(setting["settingName"]).should.equal(name));
+			it("should not clear the setting value", (): Chai.Assertion => String(setting.settingValue).should.equal(value));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => setting.remove());
+			beforeEach(async (): Promise<void> => setting.remove());
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should clear the setting name", (): Chai.Assertion => (null === setting["settingName"]).should.be.true);
-			it("should clear the setting value", (): Chai.Assertion => (null === setting.settingValue).should.be.true);
+			it("should attempt to remove the setting", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).settingsStore.remove.should.have.been.calledWith(name));
+			it("should clear the setting name", (): Chai.Assertion => (undefined === setting["settingName"]).should.be.true);
+			it("should clear the setting value", (): Chai.Assertion => (undefined === setting.settingValue).should.be.true);
 		});
-	});
 
-	afterEach((): void => appController.db.reset());
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).settingsStore.remove as SinonStub).reset());
+	});
 });

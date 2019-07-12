@@ -1,9 +1,11 @@
+import sinon, { SinonStub } from "sinon";
 import TestView from "views/test-view.html";
 import ViewController from "controllers/view-controller";
-import sinon from "sinon";
 
 export default class TestController extends ViewController {
 	public view: string = TestView;
+
+	public setup: SinonStub = sinon.stub();
 
 	public constructor(public args?: object) {
 		super();
@@ -35,6 +37,4 @@ export default class TestController extends ViewController {
 			}
 		};
 	}
-
-	public setup(): void {}
 }

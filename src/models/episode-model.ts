@@ -11,13 +11,8 @@
  * @requires uuid/v4
  */
 import {
-	CountCallback,
 	EpisodeStatus,
-	FindCallback,
-	ListCallback,
 	PersistedEpisode,
-	RemoveCallback,
-	SaveCallback,
 	SerializedEpisode
 } from "models";
 import Base from "models/base-model";
@@ -82,19 +77,17 @@ export default class Episode extends Base {
 	 * @method listBySeries
 	 * @desc Retrieves the list of episodes for a given series
 	 * @param {String} seriesId - the unique identifier of the series to retrieve
-	 * @param {Function} callback - a function to call passing the list of episodes retrieved
 	 */
-	public static listBySeries(seriesId: string, callback: ListCallback): void {
-		// Set the WHERE clause to filter by the specified series, and the ORDER BY clause to sort by episode sequence
-		const filter = `
-						WHERE			e.SeriesID = ?
-						ORDER BY	e.Sequence,
-											e.EpisodeID
-					`,
-					params: [string] = [seriesId];
+	public static async listBySeries(seriesId: string): Promise<Episode[]> {
+		let episodeList: Episode[] = [];
 
-		// Get the list of episodes
-		this.list(filter, params, callback);
+		try {
+			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramName)));
+		} catch (_e) {
+			// No op
+		}
+
+		return episodeList;
 	}
 
 	/**
@@ -102,37 +95,17 @@ export default class Episode extends Base {
 	 * @static
 	 * @method listByUnscheduled
 	 * @desc Retrieves the list of episodes that are unscheduled
-	 * @param {Function} callback - a function to call passing the list of episodes retrieved
 	 */
-	public static listByUnscheduled(callback: ListCallback): void {
-		// Set the WHERE clause to filter by unscheduled episodes, and the ORDER BY clause to sort by status date
-		const monthNumberCase = `
-						CASE SUBSTR(StatusDate, 4, 3)
-							WHEN 'Jan' THEN '01'
-							WHEN 'Feb' THEN '02'
-							WHEN 'Mar' THEN '03'
-							WHEN 'Apr' THEN '04'
-							WHEN 'May' THEN '05'
-							WHEN 'Jun' THEN '06'
-							WHEN 'Jul' THEN '07'
-							WHEN 'Aug' THEN '08'
-							WHEN 'Sep' THEN '09'
-							WHEN 'Oct' THEN '10'
-							WHEN 'Nov' THEN '11'
-							WHEN 'Dec' THEN '12'
-						END
-					`,
-					filter = `WHERE			e.Unscheduled = 'true'
-										ORDER BY	CASE
-																WHEN STRFTIME('%m%d', 'now') <= (${monthNumberCase} || SUBSTR(StatusDate, 1, 2)) THEN 0
-																ELSE 1
-															END,
-															${monthNumberCase},
-															SUBSTR(StatusDate, 1, 2)`,
-					params: string[] = [];
+	public static async listByUnscheduled(): Promise<Episode[]> {
+		let episodeList: Episode[] = [];
 
-		// Get the list of episodes
-		this.list(filter, params, callback);
+		try {
+			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramName)));
+		} catch (_e) {
+			// No op
+		}
+
+		return episodeList;
 	}
 
 	/**
@@ -141,32 +114,28 @@ export default class Episode extends Base {
 	 * @method find
 	 * @desc Retrieves a specific episode by it's unique identifier
 	 * @param {String} id - unique identifier of the episode
-	 * @param {Function} callback - a function to call passing the episode retrieved
 	 */
-	public static find(id: string, callback: FindCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the episode
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	EpisodeID,
-							Name,
-							SeriesID,
-							Status,
-							StatusDate,
-							Unverified,
-							Unscheduled,
-							Sequence
-			FROM		Episode
-			WHERE		EpisodeID = ?
-		`, [id], (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			const ep: PersistedEpisode = resultSet.rows.item(0);
+	public static async find(id: string): Promise<Episode> {
+		let	EpisodeID: string | null = null,
+				Name: string | null = null,
+				Status: EpisodeStatus = "",
+				StatusDate = "",
+				Unverified = "false",
+				Unscheduled = "false",
+				Sequence = 0,
+				SeriesID: string | null = null;
 
-			// Instantiate a new Episode object, and invoke the callback function passing the episode
-			callback(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID));
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing a null
-			callback(null);
+		try {
+			const ep: PersistedEpisode | undefined = await (await this.db).episodesStore.find(id);
 
-			return false;
-		}));
+			if (undefined !== ep) {
+				({ EpisodeID, Name, Status, StatusDate, Unverified, Unscheduled, Sequence, SeriesID } = ep);
+			}
+		} catch (_e) {
+			// No op
+		}
+
+		return new Episode(EpisodeID, Name, Status, StatusDate, "true" === Unverified, "true" === Unscheduled, Sequence, SeriesID);
 	}
 
 	/**
@@ -174,14 +143,17 @@ export default class Episode extends Base {
 	 * @static
 	 * @method totalCount
 	 * @desc Retrieves the total number of episodes in the database
-	 * @param {Function} callback - a function to call passing the episode count
 	 */
-	public static totalCount(callback: CountCallback): void {
-		const filter = "",
-					params: string[] = [];
+	public static async totalCount(): Promise<number> {
+		let count = 0;
 
-		// Get the count of episodes
-		this.count(filter, params, callback);
+		try {
+			count = await (await this.db).episodesStore.totalCount();
+		} catch (_e) {
+			// No op
+		}
+
+		return count;
 	}
 
 	/**
@@ -190,15 +162,17 @@ export default class Episode extends Base {
 	 * @method countByStatus
 	 * @desc Retrieves the total number of episodes with a given status in the database
 	 * @param {String} status - the episode status
-	 * @param {Function} callback - a function to call passing the episode count
 	 */
-	public static countByStatus(status: EpisodeStatus, callback: CountCallback): void {
-		// Set the WHERE clause to filter by the specified status
-		const filter = "WHERE Status = ?",
-					params: [EpisodeStatus] = [status];
+	public static async countByStatus(status: EpisodeStatus): Promise<number> {
+		let count = 0;
 
-		// Get the count of episodes
-		this.count(filter, params, callback);
+		try {
+			count = await (await this.db).episodesStore.countByStatus(status);
+		} catch (_e) {
+			// No op
+		}
+
+		return count;
 	}
 
 	/**
@@ -206,20 +180,17 @@ export default class Episode extends Base {
 	 * @static
 	 * @method removeAll
 	 * @desc Removes all episodes from the database
-	 * @param {Function} callback - a function to call after removing the episodes
 	 */
-	public static removeAll(callback: RemoveCallback): void {
-		// Start a new database transaction and execute the SQL to delete the episodes
-		this.db.transaction((tx: SQLTransaction): void => tx.executeSql("DELETE FROM Episode", [],
-			(): void => callback(),
-			(_: SQLTransaction, error: SQLError): boolean => {
-				// Something went wrong. Call the callback passing the error message
-				const message = `Episode.removeAll: ${error.message}`;
+	public static async removeAll(): Promise<string | undefined> {
+		let errorMessage: string | undefined;
 
-				callback(message);
+		try {
+			await (await this.db).episodesStore.removeAll();
+		} catch (error) {
+			errorMessage = `Episode.removeAll: ${error.message}`;
+		}
 
-				return false;
-			}));
+		return errorMessage;
 	}
 
 	/**
@@ -236,122 +207,35 @@ export default class Episode extends Base {
 
 	/**
 	 * @memberof Episode
-	 * @static
-	 * @method list
-	 * @desc Retrieves a list of episodes
-	 * @param {String} filter - a parameterised SQL WHERE/ORDER BY clause
-	 * @param {Array<String>} params - an array of parameter values for the filter
-	 * @param {Function} callback - a function to call passing the list of episodes retrieved
-	 */
-	private static list(filter: string, params: string[], callback: ListCallback): void {
-		const episodeList: Episode[] = [];
-
-		// Start a new readonly database transaction and execute the SQL to retrieve the list of episodes
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	e.EpisodeID,
-							e.Name,
-							e.Status,
-							e.StatusDate,
-							e.Unverified,
-							e.Unscheduled,
-							e.Sequence,
-							e.SeriesID,
-							s.Name AS SeriesName,
-							p.Name AS ProgramName
-			FROM		Episode e
-			JOIN		Series s ON e.SeriesID = s.SeriesID
-			JOIN		Program p ON s.ProgramID = p.ProgramID
-			${filter}
-		`, params, (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			// Iterate over the rows returned
-			for (let i = 0; i < resultSet.rows.length; i++) {
-				const ep: PersistedEpisode = resultSet.rows.item(i);
-
-				// Instantiate a new Episode object and add it to the array
-				episodeList.push(new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramName));
-			}
-
-			// Invoke the callback function, passing the list of episodes
-			callback(episodeList);
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing the episode list (which should be empty)
-			callback(episodeList);
-
-			return false;
-		}));
-	}
-
-	/**
-	 * @memberof Episode
-	 * @static
-	 * @method count
-	 * @desc Retrieves a count of episodes
-	 * @param {String} filter - a parameterised SQL WHERE/ORDER BY clause
-	 * @param {Array<String>} params - an array of parameter values for the filter
-	 * @param {Function} callback - a function to call passing the episode count
-	 */
-	private static count(filter: string, params: string[], callback: CountCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the count of episodes and invoke the callback function
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	COUNT(*) AS EpisodeCount
-			FROM		Episode
-			${filter}
-		`, params,
-		(_: SQLTransaction, resultSet: SQLResultSet): void => callback(resultSet.rows.item(0).EpisodeCount),
-		(): boolean => {
-			// Something went wrong. Call the callback passing zero
-			callback(0);
-
-			return false;
-		}));
-	}
-
-	/**
-	 * @memberof Episode
 	 * @this Episode
 	 * @instance
 	 * @method save
 	 * @desc Saves the episode to the database
-	 * @param {Function} callback - a function to call after the database is updated
 	 */
-	public save(callback?: SaveCallback): void {
-		// Start a new database transaction
-		this.db.transaction((tx: SQLTransaction): void => {
-			// If an id has not been set (ie. is a new episode to be added), generate a new UUID
-			if (!this.id) {
-				this.id = uuid();
-			}
+	public async save(): Promise<string | undefined> {
+		// If an id has not been set (ie. is a new episode to be added), generate a new UUID
+		if (null === this.id) {
+			this.id = uuid();
+		}
 
-			// Execute the SQL to insert/update the episode
-			tx.executeSql(`
-				REPLACE INTO Episode (EpisodeID, Name, SeriesID, Status, StatusDate, Unverified, Unscheduled, Sequence)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-			`, [this.id, this.episodeName, this.seriesId, this.status, this.statusDate, this.unverified, this.unscheduled, this.sequence], (innerTx: SQLTransaction, resultSet: SQLResultSet): void => {
-				// Regardless of whether the episode existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
-				if (!resultSet.rowsAffected) {
-					throw new Error("no rows affected");
-				}
-
-				// Execute the SQL to flag the episode as a pending local change
-				innerTx.executeSql(`
-					INSERT OR IGNORE INTO Sync (Type, ID, Action)
-					VALUES ('Episode', ?, 'modified')
-				`, [this.id], (): void => {
-					// If a callback was provided, call it now with the episode's id
-					if (callback) {
-						callback(this.id);
-					}
-				}, (_: SQLTransaction, error: SQLError): boolean => {
-					// Something went wrong
-					throw error;
-				});
+		try {
+			await (await this.db).episodesStore.save({
+				EpisodeID: this.id,
+				Name: String(this.episodeName),
+				Status: this.status,
+				StatusDate: this.statusDate,
+				Unverified: this.unverified ? "true" : "false",
+				Unscheduled: this.unscheduled ? "true" : "false",
+				Sequence: this.sequence,
+				SeriesID: String(this.seriesId)
 			});
-		}, (): void => {
-			// Something went wrong. If a callback was provided, call it now with no parameters
-			if (callback) {
-				callback();
-			}
-		});
+
+			return this.id;
+		} catch (_e) {
+			// No op
+		}
+
+		return undefined;
 	}
 
 	/**
@@ -361,24 +245,15 @@ export default class Episode extends Base {
 	 * @method remove
 	 * @desc Deletes the episode from the database
 	 */
-	public remove(): void {
-		let errorCallback: undefined;
-
+	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
-		if (this.id) {
-			// Start a new database transaction
-			this.db.transaction((tx: SQLTransaction): void => {
-				// Execute the SQL to flag the episode as a pending local change
-				tx.executeSql("REPLACE INTO Sync (Type, ID, Action) VALUES ('Episode', ?, 'deleted')", [this.id]);
+		if (null !== this.id) {
+			await (await this.db).episodesStore.remove(this.id);
 
-				// Execute the SQL to delete the episode
-				tx.executeSql("DELETE FROM Episode WHERE EpisodeID = ?", [this.id]);
-			}, errorCallback, (): void => {
-				// Clear the instance properties
-				this.id = null;
-				this.episodeName = null;
-				this.seriesId = null;
-			});
+			// Clear the instance properties
+			this.id = null;
+			this.episodeName = null;
+			this.seriesId = null;
 		}
 	}
 

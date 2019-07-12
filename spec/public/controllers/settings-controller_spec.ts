@@ -49,8 +49,7 @@ describe("SettingsController", (): void => {
 			description: "Incomplete",
 			viewArgs: {
 				reportName: "All Incomplete",
-				dataSource: SeriesMock.listByIncomplete,
-				args: null
+				dataSource: SeriesMock.listByIncomplete
 			}
 		}
 	];
@@ -72,10 +71,10 @@ describe("SettingsController", (): void => {
 	describe("setup", (): void => {
 		let leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(settingsController, "goBack" as keyof SettingsController);
 			sinon.stub(settingsController, "activate");
-			settingsController.setup();
+			await settingsController.setup();
 			leftButton = settingsController.header.leftButton as NavButton;
 		});
 
@@ -133,13 +132,13 @@ describe("SettingsController", (): void => {
 		];
 
 		scenarios.forEach((scenario: Scenario): void => {
-			it(`should attach a ${scenario.description} click event handler`, (): void => {
+			it(`should attach a ${scenario.description} click event handler`, async (): Promise<void> => {
 				const handler = sinon.stub(settingsController, scenario.handler as keyof SettingsController),
 							element: JQuery<HTMLElement> = $("<div>")
 								.attr("id", scenario.id)
 								.appendTo(document.body);
 
-				settingsController.activate();
+				await settingsController.activate();
 				element.trigger("click");
 				handler.should.have.been.called;
 				element.remove();
@@ -148,30 +147,30 @@ describe("SettingsController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			settingsController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await settingsController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
 
 	describe("viewDataSync", (): void => {
-		it("should push the data sync view", (): void => {
-			settingsController["viewDataSync"]();
+		it("should push the data sync view", async (): Promise<void> => {
+			await settingsController["viewDataSync"]();
 			appController.pushView.should.have.been.calledWith("dataSync");
 		});
 	});
 
 	describe("viewAbout", (): void => {
-		it("should push the about view", (): void => {
-			settingsController["viewAbout"]();
+		it("should push the about view", async (): Promise<void> => {
+			await settingsController["viewAbout"]();
 			appController.pushView.should.have.been.calledWith("about");
 		});
 	});
 
 	reports.forEach((report: ReportType): void => {
 		describe(`view${report.description}Report`, (): void => {
-			it(`should push the ${report.description.toLowerCase()} report view`, (): void => {
-				settingsController[`view${report.description}Report` as ReportHandler]();
+			it(`should push the ${report.description.toLowerCase()} report view`, async (): Promise<void> => {
+				await settingsController[`view${report.description}Report` as ReportHandler]();
 				appController.pushView.should.have.been.calledWith("report", sinon.match({
 					reportName: report.viewArgs.reportName,
 					dataSource: sinon.match.func,

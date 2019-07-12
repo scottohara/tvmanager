@@ -1,11 +1,8 @@
 import sinon, { SinonStub } from "sinon";
-import DatabaseMock from "mocks/database-mock";
 import { View } from "controllers";
 
 export default class ApplicationControllerMock {
 	private static singletonInstance: ApplicationControllerMock;
-
-	public db: DatabaseMock = new DatabaseMock();
 
 	public viewStack: View[] = [];
 
@@ -31,11 +28,26 @@ export default class ApplicationControllerMock {
 
 	public constructor() {
 		// App controller is a singleton, so if an instance already exists, return it
-		if (ApplicationControllerMock.singletonInstance) {
+		if (undefined !== ApplicationControllerMock.singletonInstance) {
+			ApplicationControllerMock.singletonInstance.reset();
+
 			return ApplicationControllerMock.singletonInstance;
 		}
 
 		// No existing instance, so make this instance the singleton
 		ApplicationControllerMock.singletonInstance = this;
+	}
+
+	private reset(): void {
+		this.start.reset();
+		this.pushView.reset();
+		this.popView.reset();
+		this.clearFooter.reset();
+		this.setFooter.reset();
+		this.getScrollPosition.reset();
+		this.setScrollPosition.reset();
+		this.showNotice.reset();
+		this.showScrollHelper.reset();
+		this.hideScrollHelper.reset();
 	}
 }

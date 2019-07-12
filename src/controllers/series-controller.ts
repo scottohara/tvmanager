@@ -44,11 +44,11 @@ import ViewController from "controllers/view-controller";
 export default class SeriesController extends ViewController {
 	public swtoucheventproxy: TouchEventProxy | null = null;
 
-	private listItem: SeriesListItem;
+	private readonly listItem: SeriesListItem;
 
-	private originalNowShowing: number | null = null;
+	private readonly originalNowShowing: number | null = null;
 
-	private originalProgramId: string | null = null;
+	private readonly originalProgramId: string | null = null;
 
 	private gettingNowShowing = false;
 
@@ -86,7 +86,7 @@ export default class SeriesController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Add/Edit Series",
@@ -108,6 +108,8 @@ export default class SeriesController extends ViewController {
 		// Bind events for all of the buttons/controls
 		$("#nowShowing").on("click", this.getNowShowing.bind(this));
 		$("#moveTo").on("click", this.getProgramId.bind(this));
+
+		return Promise.resolve();
 	}
 
 	/**
@@ -117,12 +119,14 @@ export default class SeriesController extends ViewController {
 	 * @method save
 	 * @desc Saves the series details to the database and returns to the previous view
 	 */
-	private save(): void {
+	private async save(): Promise<void> {
 		// Get the series details
 		this.listItem.series.seriesName = String($("#seriesName").val());
 
 		// Update the database and pop the view off the stack
-		this.listItem.series.save((): void => this.appController.popView(this.listItem));
+		await this.listItem.series.save();
+
+		return this.appController.popView(this.listItem);
 	}
 
 	/**
@@ -132,13 +136,13 @@ export default class SeriesController extends ViewController {
 	 * @method cancel
 	 * @desc Reverts any changes and returns to the previous view
 	 */
-	private cancel(): void {
+	private cancel(): Promise<void> {
 		// Revert to the original series details
 		this.listItem.series.setNowShowing(this.originalNowShowing);
 		this.listItem.series.programId = this.originalProgramId;
 
 		// Pop the view off the stack
-		this.appController.popView();
+		return this.appController.popView();
 	}
 
 	/**
@@ -155,7 +159,7 @@ export default class SeriesController extends ViewController {
 			this.gettingNowShowing = true;
 
 			// Get the current now showing status, and default to "Not Showing" if not set
-			const nowShowing: number = this.listItem.series.nowShowing || 0;
+			const nowShowing = Number(this.listItem.series.nowShowing);
 
 			// Initialise the SpinningWheel with one slot for the now showing values; and show the control
 			SpinningWheel.addSlot<number>(Series.NOW_SHOWING, "left", nowShowing);
@@ -195,14 +199,14 @@ export default class SeriesController extends ViewController {
 	 * @method getProgramId
 	 * @desc Gets the list of programs that the user can move the series to
 	 */
-	private getProgramId(): void {
+	private async getProgramId(): Promise<void> {
 		// Only proceed if the programs list is not already being retrieved
 		if (!this.gettingProgramId) {
 			// Set the getting flag
 			this.gettingProgramId = true;
 
 			// Get the list of programs
-			Program.list(this.listRetrieved.bind(this));
+			this.listRetrieved(await Program.list());
 		}
 	}
 

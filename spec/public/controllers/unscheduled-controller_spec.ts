@@ -32,11 +32,11 @@ describe("UnscheduledController", (): void => {
 	describe("setup", (): void => {
 		let leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(unscheduledController, "viewItem" as keyof UnscheduledController);
 			sinon.stub(unscheduledController, "goBack" as keyof UnscheduledController);
 			sinon.stub(unscheduledController, "activate");
-			unscheduledController.setup();
+			await unscheduledController.setup();
 			leftButton = unscheduledController.header.leftButton as NavButton;
 		});
 
@@ -59,20 +59,20 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		it("should get the list of unscheduled episodes", (): void => {
+		it("should get the list of unscheduled episodes", async (): Promise<void> => {
 			sinon.stub(unscheduledController, "listRetrieved" as keyof UnscheduledController);
-			unscheduledController.activate();
-			EpisodeMock.listByUnscheduled.should.have.been.calledWith(sinon.match.func);
+			await unscheduledController.activate();
+			EpisodeMock.listByUnscheduled.should.have.been.called;
 			unscheduledController["listRetrieved"].should.have.been.calledWith([{}]);
 		});
 	});
 
 	describe("listRetrieved", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(unscheduledController, "activate");
 			sinon.stub(unscheduledController, "viewItems" as keyof UnscheduledController);
-			unscheduledController.setup();
-			unscheduledController["listRetrieved"](items);
+			await unscheduledController.setup();
+			await unscheduledController["listRetrieved"](items);
 		});
 
 		it("should set the unscheduled list items", (): Chai.Assertion => unscheduledController["unscheduledList"].items.should.deep.equal(items));
@@ -81,18 +81,18 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			unscheduledController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await unscheduledController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
 
 	describe("viewItem", (): void => {
-		it("should push the episode view for the selected item", (): void => {
+		it("should push the episode view for the selected item", async (): Promise<void> => {
 			const index = 0;
 
 			unscheduledController["unscheduledList"] = new ListMock("", "", "", items, sinon.stub());
-			unscheduledController["viewItem"](index);
+			await unscheduledController["viewItem"](index);
 			appController.pushView.should.have.been.calledWith("episode", {
 				listIndex: index,
 				episode: items[index]
@@ -101,15 +101,15 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("viewItems", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(unscheduledController, "activate");
-			unscheduledController.setup();
-			unscheduledController["viewItems"]();
+			await unscheduledController.setup();
+			await unscheduledController["viewItems"]();
 		});
 
 		it("should set the list to view mode", (): Chai.Assertion => String((unscheduledController["unscheduledList"] as ListMock).action).should.equal("view"));
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
-		it("should set the footer label", (): Chai.Assertion => String((unscheduledController.footer as HeaderFooter).label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String((unscheduledController.footer as HeaderFooter).label).should.equal("v1"));
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 });

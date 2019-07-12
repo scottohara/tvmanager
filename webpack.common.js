@@ -4,6 +4,7 @@ const path = require("path"),
 			CleanWebpackPlugin = require("clean-webpack-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
 			{ GenerateSW } = require("workbox-webpack-plugin"),
+			WorkerPlugin = require("worker-plugin"),
 			packageJson = require("./package");
 
 const MAX_DATA_AGE_DAYS = 7,
@@ -93,6 +94,9 @@ const MAX_DATA_AGE_DAYS = 7,
 				clientsClaim: true
 			}),
 
+			// Handles web workers
+			workers = new WorkerPlugin(),
+
 			// Default config
 			config = {
 				mode: "development",
@@ -148,7 +152,7 @@ const MAX_DATA_AGE_DAYS = 7,
 			};
 
 function extractCss(hashFilename) {
-	return new MiniCssExtractPlugin({ filename: hashFilename ? "[name]-[chunkhash:6].css" : "[name].css" });
+	return new MiniCssExtractPlugin({ filename: undefined === hashFilename ? "[name].css" : "[name]-[chunkhash:6].css" });
 }
 
 function defineAppConfig({ maxDataAgeDays } = { maxDataAgeDays: MAX_DATA_AGE_DAYS }) {
@@ -168,5 +172,6 @@ module.exports = {
 	createIndexHtml,
 	defineAppConfig,
 	generateServiceWorker,
+	workers,
 	config
 };

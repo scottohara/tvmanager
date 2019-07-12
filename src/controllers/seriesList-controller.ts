@@ -17,6 +17,7 @@ import {
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
+import DatabaseService from "services/database-service";
 import List from "components/list";
 import { PublicInterface } from "global";
 import Series from "models/series-model";
@@ -76,7 +77,7 @@ export default class SeriesListController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: String(this.listItem.program.programName),
@@ -95,7 +96,7 @@ export default class SeriesListController extends ViewController {
 		this.seriesList = new List("list", SeriesListTemplate, null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
 
 		// Get the list of series for the specified program
-		Series.listByProgram(String(this.listItem.program.id), this.listRetrieved.bind(this));
+		return this.listRetrieved(await Series.listByProgram(String(this.listItem.program.id)));
 	}
 
 	/**
@@ -106,11 +107,11 @@ export default class SeriesListController extends ViewController {
 	 * @desc Activates the controller
 	 * @param {SeriesListItem} [listItem] - a list item that was just view in the Episodes view, or added/edited in the Series view
 	 */
-	public activate(listItem?: SeriesListItem): void {
+	public async activate(listItem?: SeriesListItem): Promise<void> {
 		let listResort = false;
 
 		// When returning from the Episodes or Series view, we need to update the list with the new values
-		if (listItem) {
+		if (undefined !== listItem) {
 			// If an existing series was viewed/edited, check if the series was moved or increment/decrement the status counts for the series
 			if (Number(listItem.listIndex) >= 0) {
 				// If the series has not moved to a different program, increment/decrement the status counts for the program
@@ -127,7 +128,7 @@ export default class SeriesListController extends ViewController {
 					this.listItem.program.setExpectedCount(this.listItem.program.expectedCount + (listItem.series.expectedCount - this.origExpectedCount));
 				} else {
 					// Otherwise, remove the item from the list
-					this.deleteItem(Number(listItem.listIndex), true);
+					await this.deleteItem(Number(listItem.listIndex), true);
 				}
 			} else {
 				// Otherwise, add the new series and increment the series count for the program
@@ -146,14 +147,14 @@ export default class SeriesListController extends ViewController {
 		this.seriesList.refresh();
 
 		// If necessary, scroll the list item into view
-		if (listItem && listResort) {
+		if (undefined !== listItem && listResort) {
 			const DELAY_MS = 300;
 
 			window.setTimeout((): void => this.seriesList.scrollTo(String(listItem.series.id)), DELAY_MS);
 		}
 
 		// Set to view mode
-		this.viewItems();
+		return this.viewItems();
 	}
 
 	/**
@@ -161,15 +162,15 @@ export default class SeriesListController extends ViewController {
 	 * @this SeriesListController
 	 * @instance
 	 * @method listRetrieved
-	 * @desc Callback function after the list of series is retrieved
+	 * @desc Called after the list of series is retrieved
 	 * @param {Array<Series>} seriesList - array of series objects
 	 */
-	private listRetrieved(seriesList: PublicInterface<Series>[]): void {
+	private listRetrieved(seriesList: PublicInterface<Series>[]): Promise<void> {
 		// Set the list items
 		this.seriesList.items = seriesList;
 
 		// Activate the controller
-		this.activate();
+		return this.activate();
 	}
 
 	/**
@@ -179,8 +180,8 @@ export default class SeriesListController extends ViewController {
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
-	private goBack(): void {
-		this.appController.popView(this.listItem);
+	private goBack(): Promise<void> {
+		return this.appController.popView(this.listItem);
 	}
 
 	/**
@@ -191,7 +192,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Displays the Episodes view for a series
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
-	private viewItem(listIndex: number): void {
+	private viewItem(listIndex: number): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Save the current series details
@@ -202,7 +203,7 @@ export default class SeriesListController extends ViewController {
 		this.origExpectedCount = series.expectedCount;
 
 		// Display the Episodes view
-		this.appController.pushView("episodes", { listIndex, series });
+		return this.appController.pushView("episodes", { listIndex, series });
 	}
 
 	/**
@@ -212,8 +213,8 @@ export default class SeriesListController extends ViewController {
 	 * @method addItem
 	 * @desc Displays the Series view for adding a series
 	 */
-	private addItem(): void {
-		this.appController.pushView("series", { program: this.listItem.program });
+	private addItem(): Promise<void> {
+		return this.appController.pushView("series", { program: this.listItem.program });
 	}
 
 	/**
@@ -224,7 +225,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Displays the Series view for editing a series
 	 * @param {Number} listIndex - the list index of the series to edit
 	 */
-	private editItem(listIndex: number): void {
+	private editItem(listIndex: number): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Save the current series details
@@ -235,7 +236,7 @@ export default class SeriesListController extends ViewController {
 		this.origExpectedCount = series.expectedCount;
 
 		// Display the Series view
-		this.appController.pushView("series", { listIndex, series });
+		return this.appController.pushView("series", { listIndex, series });
 	}
 
 	/**
@@ -247,7 +248,7 @@ export default class SeriesListController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to delete
 	 * @param {Boolean} [dontRemove] - if true, remove the item from the list, but not from the database (eg. when moving a series to a different program)
 	 */
-	private deleteItem(listIndex: number, dontRemove: boolean): void {
+	private async deleteItem(listIndex: number, dontRemove: boolean): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Decrement the status counts for the program
@@ -259,7 +260,7 @@ export default class SeriesListController extends ViewController {
 
 		// Unless instructed otherwise, remove the item from the database
 		if (!dontRemove) {
-			series.remove();
+			await series.remove();
 		}
 
 		// Remove the item from the list
@@ -276,7 +277,7 @@ export default class SeriesListController extends ViewController {
 	 * @method deleteItems
 	 * @desc Sets the list to delete mode
 	 */
-	private deleteItems(): void {
+	private async deleteItems(): Promise<void> {
 		// Set the list to delete mode
 		this.seriesList.setAction("delete");
 
@@ -290,7 +291,7 @@ export default class SeriesListController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			rightButton: {
 				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
@@ -309,7 +310,7 @@ export default class SeriesListController extends ViewController {
 	 * @method editItems
 	 * @desc Sets the list to edit mode
 	 */
-	private editItems(): void {
+	private async editItems(): Promise<void> {
 		// Set the list to edit mode
 		this.seriesList.setAction("edit");
 
@@ -323,7 +324,7 @@ export default class SeriesListController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
@@ -342,7 +343,7 @@ export default class SeriesListController extends ViewController {
 	 * @method viewItems
 	 * @desc Sets the list to view mode
 	 */
-	private viewItems(): void {
+	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.seriesList.setAction("view");
 
@@ -354,7 +355,7 @@ export default class SeriesListController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`,
+			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this),
 				label: "Edit"

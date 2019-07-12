@@ -13,6 +13,7 @@ const webpack = require("webpack"),
 				createIndexHtml,
 				defineAppConfig,
 				generateServiceWorker,
+				workers,
 				config
 			} = require("./webpack.common");
 
@@ -51,7 +52,8 @@ module.exports = merge(config, {
 		extractCss(true),
 		createIndexHtml,
 		defineAppConfig(),
-		generateServiceWorker
+		generateServiceWorker,
+		workers
 	],
 
 	// Fail if any chunks exceed performance budget

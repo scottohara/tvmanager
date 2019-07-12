@@ -1,0 +1,1 @@
+export default new Worker("mocks/db-store-mock", { type: "module" });

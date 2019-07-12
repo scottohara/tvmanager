@@ -12,12 +12,7 @@
  * @requires uuid/v4
  */
 import {
-	CountCallback,
-	FindCallback,
-	ListCallback,
 	PersistedProgram,
-	RemoveCallback,
-	SaveCallback,
 	SerializedProgram
 } from "models";
 import Base from "models/base-model";
@@ -62,7 +57,7 @@ export default class Program extends Base {
 
 	public expectedCount = 0;
 
-	private progressBar: ProgressBar;
+	private readonly progressBar: ProgressBar;
 
 	public constructor(public id: string | null, programName: string | null,
 						public seriesCount: number = 0, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0) {
@@ -80,45 +75,17 @@ export default class Program extends Base {
 	 * @static
 	 * @method list
 	 * @desc Retrieves a list of programs
-	 * @param {Function} callback - a function to call passing the list of programs retrieved
 	 */
-	public static list(callback: ListCallback): void {
-		const programList: Program[] = [];
+	public static async list(): Promise<Program[]> {
+		let programList: Program[] = [];
 
-		// Start a new readonly database transaction and execute the SQL to retrieve the list of programs
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT					p.ProgramID,
-											p.Name,
-											COUNT(DISTINCT s.SeriesID) AS SeriesCount,
-											COUNT(e.EpisodeID) AS EpisodeCount,
-											COUNT(e2.EpisodeID) AS WatchedCount,
-											COUNT(e3.EpisodeID) AS RecordedCount,
-											COUNT(e4.EpisodeID) AS ExpectedCount
-			FROM						Program p
-			LEFT OUTER JOIN	Series s on p.ProgramID = s.ProgramID
-			LEFT OUTER JOIN	Episode e on s.SeriesID = e.SeriesID
-			LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
-			LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
-			LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
-			GROUP BY		 		p.ProgramID
-			ORDER BY p.Name COLLATE NOCASE
-		`, [], (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			// Iterate of the rows returned
-			for (let i = 0; i < resultSet.rows.length; i++) {
-				const prog: PersistedProgram = resultSet.rows.item(i);
+		try {
+			programList = await Promise.all((await (await this.db).programsStore.list()).map((prog: PersistedProgram): Program => new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount)));
+		} catch (_e) {
+			// No op
+		}
 
-				// Instantiate a new Program object and add it to the array
-				programList.push(new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount));
-			}
-
-			// Invoke the callback function, passing the list of programs
-			callback(programList);
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing the program list (which should be empty)
-			callback(programList);
-
-			return false;
-		}));
+		return programList;
 	}
 
 	/**
@@ -127,26 +94,22 @@ export default class Program extends Base {
 	 * @method find
 	 * @desc Retrieves a specific program by it's unique identifier
 	 * @param {String} id - unique identifier of the program
-	 * @param {Function} callback - a function to call passing the program retrieved
 	 */
-	public static find(id: string, callback: FindCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the program
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	ProgramID,
-							Name
-			FROM		Program
-			WHERE		ProgramID = ?
-		`, [id], (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			const prog: PersistedProgram = resultSet.rows.item(0);
+	public static async find(id: string): Promise<Program> {
+		let ProgramID: string | null = null,
+				Name: string | null = null;
 
-			// Instantiate a new Program object, and invoke the callback function passing the program
-			callback(new Program(prog.ProgramID, prog.Name));
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing a null
-			callback(null);
+		try {
+			const prog: PersistedProgram | undefined = await (await this.db).programsStore.find(id);
 
-			return false;
-		}));
+			if (undefined !== prog) {
+				({ ProgramID, Name } = prog);
+			}
+		} catch (_e) {
+			// No op
+		}
+
+		return new Program(ProgramID, Name);
 	}
 
 	/**
@@ -154,21 +117,17 @@ export default class Program extends Base {
 	 * @static
 	 * @method count
 	 * @desc Retrieves a count of programs
-	 * @param {Function} callback - a function to call passing the program count
 	 */
-	public static count(callback: CountCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the count of programs
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	COUNT(*) AS ProgramCount
-			FROM Program
-		`, [],
-		(_: SQLTransaction, resultSet: SQLResultSet): void => callback(resultSet.rows.item(0).ProgramCount),
-		(): boolean => {
-			// Something went wrong. Call the callback passing zero
-			callback(0);
+	public static async count(): Promise<number> {
+		let count = 0;
 
-			return false;
-		}));
+		try {
+			count = await (await this.db).programsStore.count();
+		} catch (_e) {
+			// No op
+		}
+
+		return count;
 	}
 
 	/**
@@ -176,20 +135,17 @@ export default class Program extends Base {
 	 * @static
 	 * @method removeAll
 	 * @desc Removes all programs from the database
-	 * @param {Function} callback - a function to call after removing the programs
 	 */
-	public static removeAll(callback: RemoveCallback): void {
-		// Start a new database transaction and execute the SQL to delete the programs
-		this.db.transaction((tx: SQLTransaction): void => tx.executeSql("DELETE FROM Program", [],
-			(): void =>	callback(),
-			(_: SQLTransaction, error: SQLError): boolean => {
-				// Something went wrong. Call the callback passing the error message
-				const message = `Program.removeAll: ${error.message}`;
+	public static async removeAll(): Promise<string | undefined> {
+		let errorMessage: string | undefined;
 
-				callback(message);
+		try {
+			await (await this.db).programsStore.removeAll();
+		} catch (error) {
+			errorMessage = `Program.removeAll: ${error.message}`;
+		}
 
-				return false;
-			}));
+		return errorMessage;
 	}
 
 	/**
@@ -210,46 +166,25 @@ export default class Program extends Base {
 	 * @instance
 	 * @method save
 	 * @desc Saves the program to the database
-	 * @param {Function} callback - a function to call after the database is updated
 	 */
-	public save(callback?: SaveCallback): void {
-		// Start a new database transaction
-		this.db.transaction((tx: SQLTransaction): void => {
-			// If an id has not been set (ie. is a new program to be added), generate a new UUID
-			if (!this.id) {
-				this.id = uuid();
-			}
+	public async save(): Promise<string | undefined> {
+		// If an id has not been set (ie. is a new program to be added), generate a new UUID
+		if (null === this.id) {
+			this.id = uuid();
+		}
 
-			// Execute the SQL to insert/update the program
-			tx.executeSql(`
-				REPLACE INTO Program (ProgramID, Name)
-				VALUES (?, ?)
-			`, [this.id, this.programName], (innerTx: SQLTransaction, resultSet: SQLResultSet): void => {
-				// Regardless of whether the program existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
-				if (!resultSet.rowsAffected) {
-					throw new Error("no rows affected");
-				}
-
-				// Execute the SQL to flag the program as a pending local change
-				innerTx.executeSql(`
-					INSERT OR IGNORE INTO Sync (Type, ID, Action)
-					VALUES ('Program', ?, 'modified')
-				`, [this.id], (): void => {
-					// If a callback was provided, call it now with the program's id
-					if (callback) {
-						callback(this.id);
-					}
-				}, (_: SQLTransaction, error: SQLError): boolean => {
-					// Something went wrong
-					throw error;
-				});
+		try {
+			await (await this.db).programsStore.save({
+				ProgramID: this.id,
+				Name: String(this.programName)
 			});
-		}, (): void => {
-			// Something went wrong. If a callback was provided, call it now with no parameters
-			if (callback) {
-				callback();
-			}
-		});
+
+			return this.id;
+		} catch (_e) {
+			// No op
+		}
+
+		return undefined;
 	}
 
 	/**
@@ -259,35 +194,14 @@ export default class Program extends Base {
 	 * @method remove
 	 * @desc Deletes the program from the database
 	 */
-	public remove(): void {
-		let errorCallback: undefined;
-
+	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
-		if (this.id) {
-			// Start a new database transaction
-			this.db.transaction((tx: SQLTransaction): void => {
-				// Execute the SQL to flag all of the program's episodes as a pending local change
-				tx.executeSql("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = ?)", [this.id]);
+		if (null !== this.id) {
+			await (await this.db).programsStore.remove(this.id);
 
-				// Execute the SQL to delete all of the program's episodes
-				tx.executeSql("DELETE FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = ?)", [this.id]);
-
-				// Execute the SQL to flag all of the program's series as a pending local change
-				tx.executeSql("REPLACE INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'deleted' FROM Series WHERE ProgramID = ?", [this.id]);
-
-				// Execute the SQL to delete all of the program's series
-				tx.executeSql("DELETE FROM Series WHERE ProgramID = ?", [this.id]);
-
-				// Execute the SQL to flag the program as a pending local change
-				tx.executeSql("REPLACE INTO Sync (Type, ID, Action) VALUES ('Program', ?, 'deleted')", [this.id]);
-
-				// Execute the SQL to delete the program
-				tx.executeSql("DELETE FROM Program WHERE ProgramID = ?", [this.id]);
-			}, errorCallback, (): void => {
-				// Clear the instance properties
-				this.id = null;
-				this.programName = null;
-			});
+			// Clear the instance properties
+			this.id = null;
+			this.programName = null;
 		}
 	}
 
@@ -319,7 +233,7 @@ export default class Program extends Base {
 		this.programName = programName;
 
 		// Recalculate the program group based on the first letter of the program name
-		this.programGroup = programName ? programName.substring(0, 1).toUpperCase() : "";
+		this.programGroup = null === programName ? "" : programName.substring(0, 1).toUpperCase();
 	}
 
 	/**

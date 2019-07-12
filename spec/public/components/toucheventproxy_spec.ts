@@ -33,7 +33,7 @@ describe("TouchEventProxy", (): void => {
 				e.targetTouches[0].clientY.should.equal((event as MouseEvent).clientY);
 				e.targetTouches[0].identifier.should.equal(-1);
 				e.changedTouches[0].target.should.equal(event.target);
-				e.target && e.target.should.deep.equal(event.target);
+				(e.target as EventTarget).should.deep.equal(event.target);
 			});
 		});
 
@@ -216,7 +216,6 @@ describe("TouchEventProxy", (): void => {
 
 			describe("from browser", (): void => {
 				beforeEach((): void => {
-					toucheventproxy["element"].dispatchEvent(touchStartEvent as Event);
 					toucheventproxy["element"].dispatchEvent(touchStartEvent as Event);
 					toucheventproxy["element"].dispatchEvent(touchEndEvent as Event);
 					toucheventproxy["element"].dispatchEvent(touchMoveEvent as Event);

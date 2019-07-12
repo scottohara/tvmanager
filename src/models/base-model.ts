@@ -7,12 +7,9 @@
 
 /**
  * @module models/base-model
- * @requires controllers/application-controller
  */
-import ApplicationController from "controllers/application-controller";
-
-// Database to use for all data operations
-let db: Database;
+import DatabaseService from "services/database-service";
+import { TVManagerStore } from "stores";
 
 /**
  * @class Base
@@ -28,7 +25,7 @@ export default abstract class Base {
 	 * @desc Returns the database to use for all data operations
 	 * @returns {Database} the database
 	 */
-	protected get db(): Database {
+	protected get db(): Promise<TVManagerStore> {
 		// Delegate to the static property of the same name
 		return Base.db;
 	}
@@ -36,12 +33,12 @@ export default abstract class Base {
 	/**
 	 * @memberof Base
 	 * @static
-	 * @property {Database} db - the database
+	 * @property {TVManagerStore} db - the database
 	 * @desc Returns the database to use for all data operations
-	 * @returns {Database} the database
+	 * @returns {TVManagerStore} the database
 	 */
-	protected static get db(): Database {
+	protected static get db(): Promise<TVManagerStore> {
 		// If we don't yet have a db reference, get it from the application controller singleton
-		return db || (new ApplicationController()).db;
+		return DatabaseService;
 	}
 }

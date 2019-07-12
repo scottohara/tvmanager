@@ -6,14 +6,13 @@ import {
 	NavButton
 } from "controllers";
 import {
+	Model,
 	ModelType,
-	SaveCallback,
 	SerializedModel
 } from "models";
 import sinon, {
-	SinonFakeServer,
 	SinonFakeTimers,
-	SinonFakeXMLHttpRequest,
+	SinonMatcher,
 	SinonStub
 } from "sinon";
 import $ from "jquery";
@@ -46,10 +45,10 @@ describe("DataSyncController", (): void => {
 	describe("setup", (): void => {
 		let leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "goBack" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "activate");
-			dataSyncController.setup();
+			await dataSyncController.setup();
 			leftButton = dataSyncController.header.leftButton as NavButton;
 		});
 
@@ -67,15 +66,15 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		const lastSyncTime = "1 Jan 2010",
-					device = "test-device";
+		const lastSyncTime: SettingMock = new SettingMock("LastSyncTime", "1 Jan 2010"),
+					device: SettingMock = new SettingMock("Device", "test-device");
 
 		let registrationRow: JQuery<HTMLElement>,
 				importButton: JQuery<HTMLElement>,
 				exportButton: JQuery<HTMLElement>,
 				localChanges: JQuery<HTMLElement>;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "viewRegistration" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "dataImport" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "dataExport" as keyof DataSyncController);
@@ -83,8 +82,8 @@ describe("DataSyncController", (): void => {
 			sinon.stub(dataSyncController, "gotDevice" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "checkForLocalChanges" as keyof DataSyncController);
 			SettingMock.get.reset();
-			SettingMock.get.withArgs("LastSyncTime").yields(lastSyncTime);
-			SettingMock.get.withArgs("Device").yields(device);
+			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTime);
+			SettingMock.get.withArgs("Device").returns(device);
 
 			registrationRow = $("<div>")
 				.attr("id", "registrationRow")
@@ -107,7 +106,7 @@ describe("DataSyncController", (): void => {
 				.appendTo(document.body);
 
 			SyncMock.syncList = [new SyncMock(null, null)];
-			dataSyncController.activate();
+			await dataSyncController.activate();
 		});
 
 		it("should attach a registration click event handler", (): void => {
@@ -139,15 +138,15 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			dataSyncController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await dataSyncController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
 
 	describe("viewRegistration", (): void => {
-		it("should push the registration view", (): void => {
-			dataSyncController["viewRegistration"]();
+		it("should push the registration view", async (): Promise<void> => {
+			await dataSyncController["viewRegistration"]();
 			appController.pushView.should.have.been.calledWith("registration");
 		});
 	});
@@ -165,14 +164,14 @@ describe("DataSyncController", (): void => {
 			it("should display the last sync time", (): void => {
 				const settingValue = "1-Feb-2010 01:02:11";
 
-				dataSyncController["gotLastSyncTime"](new SettingMock(null, settingValue));
+				dataSyncController["gotLastSyncTime"](new SettingMock(undefined, settingValue));
 				String(lastSyncTime.val()).should.equal(settingValue);
 			});
 		});
 
 		describe("without last sync time", (): void => {
 			it("should display unknown", (): void => {
-				dataSyncController["gotLastSyncTime"](new SettingMock(null, null));
+				dataSyncController["gotLastSyncTime"](new SettingMock());
 				String(lastSyncTime.val()).should.equal("Unknown");
 			});
 		});
@@ -221,7 +220,7 @@ describe("DataSyncController", (): void => {
 			beforeEach((): Device => (device = { id: "1", name: "test-device", imported: false }));
 
 			describe("first import", (): void => {
-				beforeEach((): void => dataSyncController["gotDevice"](new SettingMock(null, JSON.stringify(device))));
+				beforeEach((): void => dataSyncController["gotDevice"](new SettingMock(undefined, JSON.stringify(device))));
 
 				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
 				it("should display the device name", (): Chai.Assertion => String(deviceName.val()).should.equal(device.name));
@@ -234,7 +233,7 @@ describe("DataSyncController", (): void => {
 			describe("subsequent import", (): void => {
 				beforeEach((): void => {
 					device.imported = true;
-					dataSyncController["gotDevice"](new SettingMock(null, JSON.stringify(device)));
+					dataSyncController["gotDevice"](new SettingMock(undefined, JSON.stringify(device)));
 				});
 
 				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
@@ -247,11 +246,9 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("without device", (): void => {
-			let undefinedDevice: undefined;
+			beforeEach((): void => dataSyncController["gotDevice"](new SettingMock()));
 
-			beforeEach((): void => dataSyncController["gotDevice"](new SettingMock(null, null)));
-
-			it("should not set the device", (): Chai.Assertion => (undefinedDevice === dataSyncController["device"]).should.be.true);
+			it("should not set the device", (): Chai.Assertion => (undefined === dataSyncController["device"]).should.be.true);
 			it("should display unregistered", (): Chai.Assertion => String(deviceName.val()).should.equal("< Unregistered >"));
 			it("should show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.not.equal("none"));
 			it("should not show the sync controls", (): Chai.Assertion => syncControls.css("display").should.equal("none"));
@@ -449,10 +446,10 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("doExport", (): void => {
-		it("should get the list of local changes to be synced", (): void => {
+		it("should get the list of local changes to be synced", async (): Promise<void> => {
 			SyncMock.syncList = [new SyncMock(null, null)];
 			sinon.stub(dataSyncController, "listRetrieved" as keyof DataSyncController);
-			dataSyncController["doExport"]();
+			await dataSyncController["doExport"]();
 			dataSyncController["listRetrieved"].should.have.been.calledWith(SyncMock.syncList);
 		});
 	});
@@ -464,7 +461,7 @@ describe("DataSyncController", (): void => {
 				sendChangeStub: SinonStub,
 				sendDeleteStub: SinonStub;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			status = $("<div>")
 				.attr("id", "status")
 				.appendTo(document.body);
@@ -486,7 +483,7 @@ describe("DataSyncController", (): void => {
 			sendDeleteStub = sinon.stub(dataSyncController, "sendDelete" as keyof DataSyncController);
 			dataSyncController["syncProcessed"] = 1;
 			dataSyncController["syncErrors"] = [$("<li>")];
-			dataSyncController["listRetrieved"](syncList);
+			await dataSyncController["listRetrieved"](syncList);
 		});
 
 		it("should reset the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(0));
@@ -514,30 +511,44 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("sendChange", (): void => {
-		let fakeServer: SinonFakeServer,
+		let fakeFetch: SinonStub,
+				fetchArgs: [string, RequestInit],
 				fakeModel: ProgramMock,
 				sync: SyncMock;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
+			fakeFetch = sinon.stub(window, "fetch");
+			fetchArgs = [
+				"/documents",
+				{
+					method: "POST",
+					headers: {
+						"Content-MD5": "test-hash",
+						"X-DEVICE-ID": "test-device"
+					},
+					body: "{}"
+				}
+			];
 			fakeModel = new ProgramMock(null, null);
 			sinon.stub(dataSyncController, "changeSent" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
-			sinon.stub(dataSyncController, "find" as keyof DataSyncController).yields(fakeModel);
+			sinon.stub(dataSyncController, "find" as keyof DataSyncController).returns(fakeModel);
 			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 			sync = new SyncMock("Program", "1");
 		});
 
 		describe("success", (): void => {
 			describe("hash match", (): void => {
-				beforeEach((): void => {
-					fakeServer.respondWith("POST", "/documents", (request: SinonFakeXMLHttpRequest): void => {
-						request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-						request.requestBody.should.equal("{}");
-						request.respond(200, { Etag: request.requestHeaders["Content-MD5"] }, "");
-					});
+				beforeEach(async (): Promise<void> => {
+					fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
+						status: 200,
+						statusText: "OK",
+						headers: {
+							Etag: "test-hash"
+						}
+					})));
 
-					dataSyncController["sendChange"](sync);
+					await dataSyncController["sendChange"](sync);
 				});
 
 				it("should remove the sync record", (): Chai.Assertion => sync.remove.should.have.been.called);
@@ -546,14 +557,16 @@ describe("DataSyncController", (): void => {
 			});
 
 			describe("hash mismatch", (): void => {
-				beforeEach((): void => {
-					fakeServer.respondWith("POST", "/documents", (request: SinonFakeXMLHttpRequest): void => {
-						request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-						request.requestBody.should.equal("{}");
-						request.respond(200, { Etag: "bad-hash" }, "");
-					});
+				beforeEach(async (): Promise<void> => {
+					fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
+						status: 200,
+						statusText: "OK",
+						headers: {
+							Etag: "bad-hash"
+						}
+					})));
 
-					dataSyncController["sendChange"](sync);
+					await dataSyncController["sendChange"](sync);
 				});
 
 				it("should not remove the sync record", (): Chai.Assertion => sync.remove.should.not.have.been.called);
@@ -563,22 +576,21 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("error", (): void => {
-			beforeEach((): void => {
-				fakeServer.respondWith("POST", "/documents", (request: SinonFakeXMLHttpRequest): void => {
-					request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-					request.requestBody.should.equal("{}");
-					request.respond(500, null, "Force failed");
-				});
+			beforeEach(async (): Promise<void> => {
+				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("Force failed", {
+					status: 500,
+					statusText: "Internal Server Error"
+				})));
 
-				dataSyncController["sendChange"](sync);
+				await dataSyncController["sendChange"](sync);
 			});
 
 			it("should not remove the sync record", (): Chai.Assertion => sync.remove.should.not.have.been.called);
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Send error", "Program", "error, 500 (Internal Server Error)", "1"));
+			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Send error", "Program", "500 (Internal Server Error)", "1"));
 			it("should mark the change as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
 		});
 
-		afterEach((): void => fakeServer.restore());
+		afterEach((): void => fakeFetch.restore());
 	});
 
 	describe("find", (): void => {
@@ -601,32 +613,40 @@ describe("DataSyncController", (): void => {
 			}
 		];
 
-		let sync: SyncMock,
-				callback: SinonStub;
+		let sync: SyncMock;
 
-		beforeEach((): void => {
-			sync = new SyncMock(null, "1");
-			callback = sinon.stub();
-		});
+		beforeEach((): SyncMock => (sync = new SyncMock(null, "1")));
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.type, (): void => {
-				beforeEach((): void => {
+				let model: Model;
+
+				beforeEach(async (): Promise<void> => {
 					sync.type = scenario.type;
-					dataSyncController["find"](sync, callback);
+					model = await dataSyncController["find"](sync);
 				});
 
-				it(`should lookup the ${scenario.type}`, (): Chai.Assertion => callback.should.have.been.calledWith(sinon.match.instanceOf(scenario.model)));
+				it(`should lookup the ${scenario.type}`, (): Chai.Assertion => model.should.be.an.instanceOf(scenario.model));
 			});
 		});
 	});
 
 	describe("sendDelete", (): void => {
-		let fakeServer: SinonFakeServer,
+		let fakeFetch: SinonStub,
+				fetchArgs: [SinonMatcher, RequestInit],
 				sync: SyncMock;
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
+			fakeFetch = sinon.stub(window, "fetch");
+			fetchArgs = [
+				sinon.match(/\/documents\/\w+/u),
+				{
+					method: "DELETE",
+					headers: {
+						"X-DEVICE-ID": "test-device"
+					}
+				}
+			];
 			sync = new SyncMock("Program", "1");
 			sinon.stub(dataSyncController, "changeSent" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
@@ -634,13 +654,13 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				fakeServer.respondWith("DELETE", "/documents/1", (request: SinonFakeXMLHttpRequest): void => {
-					request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-					request.respond(200, null, "");
-				});
+			beforeEach(async (): Promise<void> => {
+				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
+					status: 200,
+					statusText: "OK"
+				})));
 
-				dataSyncController["sendDelete"](sync);
+				await dataSyncController["sendDelete"](sync);
 			});
 
 			it("should remove the sync record", (): Chai.Assertion => sync.remove.should.have.been.called);
@@ -649,21 +669,21 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("error", (): void => {
-			beforeEach((): void => {
-				fakeServer.respondWith("DELETE", "/documents/1", (request: SinonFakeXMLHttpRequest): void => {
-					request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-					request.respond(500, null, "Force failed");
-				});
+			beforeEach(async (): Promise<void> => {
+				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("Force failed", {
+					status: 500,
+					statusText: "Internal Server Error"
+				})));
 
-				dataSyncController["sendDelete"](sync);
+				await dataSyncController["sendDelete"](sync);
 			});
 
 			it("should not remove the sync record", (): Chai.Assertion => sync.remove.should.not.have.been.called);
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Delete error", "Program", "error, 500 (Internal Server Error)", "1"));
+			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Delete error", "Program", "500 (Internal Server Error)", "1"));
 			it("should mark the delete as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
 		});
 
-		afterEach((): void => fakeServer.restore());
+		afterEach((): void => fakeFetch.restore());
 	});
 
 	describe("changeSent", (): void => {
@@ -689,12 +709,12 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("not finished", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				dataSyncController["syncList"] = [
 					new SyncMock(null, null),
 					new SyncMock(null, null)
 				];
-				dataSyncController["changeSent"]();
+				await dataSyncController["changeSent"]();
 			});
 
 			it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
@@ -712,9 +732,9 @@ describe("DataSyncController", (): void => {
 			});
 
 			describe("without errors", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					dataSyncController["syncErrors"] = [];
-					dataSyncController["changeSent"]();
+					await dataSyncController["changeSent"]();
 				});
 
 				it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
@@ -727,9 +747,9 @@ describe("DataSyncController", (): void => {
 			});
 
 			describe("with errors", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					dataSyncController["syncErrors"] = [$("<li>")];
-					dataSyncController["changeSent"]();
+					await dataSyncController["changeSent"]();
 				});
 
 				it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
@@ -751,12 +771,12 @@ describe("DataSyncController", (): void => {
 	describe("setLastSyncTime", (): void => {
 		let lastSyncTime: Date;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			const clock: SinonFakeTimers = sinon.useFakeTimers();
 
 			lastSyncTime = new Date();
 			sinon.stub(dataSyncController, "gotLastSyncTime" as keyof DataSyncController);
-			dataSyncController["setLastSyncTime"]();
+			await dataSyncController["setLastSyncTime"]();
 			clock.restore();
 		});
 
@@ -781,26 +801,16 @@ describe("DataSyncController", (): void => {
 			sinon.stub(dataSyncController, "importData" as keyof DataSyncController);
 			syncErrorStub = sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
-			dataSyncController["programsReady"] = false;
-			dataSyncController["seriesReady"] = false;
-			dataSyncController["episodesReady"] = false;
 		});
 
 		describe("fast import", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				importChangesOnly.prop("checked", true);
-				dataSyncController["doImport"]();
+				await dataSyncController["doImport"]();
 			});
 
 			it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
 			it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["importChangesOnly"].should.be.true);
-
-			it("should mark all models as ready", (): void => {
-				dataSyncController["programsReady"].should.be.true;
-				dataSyncController["seriesReady"].should.be.true;
-				dataSyncController["episodesReady"].should.be.true;
-			});
-
 			it("should start the import", (): Chai.Assertion => dataSyncController["importData"].should.have.been.calledOnce);
 			it("should not add any errors to the errors list", (): Chai.Assertion => syncErrorStub.should.not.have.been.called);
 			it("should not mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.not.have.been.called);
@@ -810,11 +820,11 @@ describe("DataSyncController", (): void => {
 			beforeEach((): JQuery<HTMLElement> => importChangesOnly.prop("checked", false));
 
 			describe("with errors", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					ProgramMock.removeAllFail();
 					SeriesMock.removeAllFail();
 					EpisodeMock.removeAllFail();
-					dataSyncController["doImport"]();
+					await dataSyncController["doImport"]();
 				});
 
 				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
@@ -822,12 +832,6 @@ describe("DataSyncController", (): void => {
 				it("should attempt to delete all existing programs", (): Chai.Assertion => ProgramMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing series", (): Chai.Assertion => SeriesMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing episodes", (): Chai.Assertion => EpisodeMock.removeAll.should.have.been.called);
-
-				it("should mark all models as ready", (): void => {
-					dataSyncController["programsReady"].should.be.true;
-					dataSyncController["seriesReady"].should.be.true;
-					dataSyncController["episodesReady"].should.be.true;
-				});
 
 				it("should add 3 errors to the errors list", (): void => {
 					syncErrorStub.callCount.should.equal(3);
@@ -836,15 +840,15 @@ describe("DataSyncController", (): void => {
 					syncErrorStub.should.have.been.calledWith("Delete error", "Episode", "Force failed");
 				});
 
-				it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.calledThrice);
+				it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
 			});
 
 			describe("without errors", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					ProgramMock.removeAllOK();
 					SeriesMock.removeAllOK();
 					EpisodeMock.removeAllOK();
-					dataSyncController["doImport"]();
+					await dataSyncController["doImport"]();
 				});
 
 				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
@@ -852,171 +856,167 @@ describe("DataSyncController", (): void => {
 				it("should attempt to delete all existing programs", (): Chai.Assertion => ProgramMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing series", (): Chai.Assertion => SeriesMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing episodes", (): Chai.Assertion => EpisodeMock.removeAll.should.have.been.called);
-
-				it("should mark all models as ready", (): void => {
-					dataSyncController["programsReady"].should.be.true;
-					dataSyncController["seriesReady"].should.be.true;
-					dataSyncController["episodesReady"].should.be.true;
-				});
-
-				it("should start the import", (): Chai.Assertion => dataSyncController["importData"].should.have.been.calledThrice);
+				it("should start the import", (): Chai.Assertion => dataSyncController["importData"].should.have.been.called);
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => importChangesOnly.remove());
+		afterEach((): void => {
+			importChangesOnly.remove();
+			ProgramMock.removeAll.reset();
+			SeriesMock.removeAll.reset();
+			EpisodeMock.removeAll.reset();
+		});
 	});
 
 	describe("importData", (): void => {
+		interface Scenario {
+			description: string;
+			importChangesOnly: boolean;
+			resource: "pending" | "all";
+		}
+		const scenarios: Scenario[] = [
+			{
+				description: "fast import",
+				importChangesOnly: true,
+				resource: "pending"
+			},
+			{
+				description: "full import",
+				importChangesOnly: false,
+				resource: "all"
+			}
+		];
+
+		let fakeFetch: SinonStub,
+				fetchArgs: RequestInit;
+
 		beforeEach((): void => {
 			dataSyncController["objectsToImport"] = 1;
 			dataSyncController["objectsImported"] = 1;
-		});
-
-		describe("models not ready", (): void => {
-			it("should do nothing", (): void => {
-				dataSyncController["programsReady"] = false;
-				dataSyncController["importData"]();
-				dataSyncController["objectsToImport"].should.equal(1);
-				dataSyncController["objectsImported"].should.equal(1);
-			});
-		});
-
-		describe("models ready", (): void => {
-			interface Scenario {
-				description: string;
-				importChangesOnly: boolean;
-				resource: "pending" | "all";
-			}
-			const scenarios: Scenario[] = [
-				{
-					description: "fast import",
-					importChangesOnly: true,
-					resource: "pending"
-				},
-				{
-					description: "full import",
-					importChangesOnly: false,
-					resource: "all"
+			fakeFetch = sinon.stub(window, "fetch");
+			fetchArgs = {
+				headers: {
+					"X-DEVICE-ID": "test-device"
 				}
-			];
+			};
+			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
+			sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
+			sinon.stub(dataSyncController, "getImportData" as keyof DataSyncController).callsFake((data: FullImport): ImportData => ({ importJson: data.data, returnedHash: data.checksum }));
+			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
+		});
 
-			let fakeServer: SinonFakeServer;
+		scenarios.forEach((scenario: Scenario): void => {
+			describe(scenario.description, (): void => {
+				beforeEach((): boolean => (dataSyncController["importChangesOnly"] = scenario.importChangesOnly));
 
-			beforeEach((): void => {
-				fakeServer = sinon.fakeServer.create({ respondImmediately: true });
-				sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
-				sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
-				sinon.stub(dataSyncController, "getImportData" as keyof DataSyncController).callsFake((data: FullImport): ImportData => ({ importJson: data.data, returnedHash: data.checksum }));
-				dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
-				dataSyncController["programsReady"] = true;
-				dataSyncController["seriesReady"] = true;
-				dataSyncController["episodesReady"] = true;
-			});
+				describe("success", (): void => {
+					describe("hash match", (): void => {
+						describe("with data", (): void => {
+							let status: JQuery<HTMLElement>,
+									progress: JQuery<HTMLElement>;
 
-			scenarios.forEach((scenario: Scenario): void => {
-				describe(scenario.description, (): void => {
-					beforeEach((): boolean => (dataSyncController["importChangesOnly"] = scenario.importChangesOnly));
+							beforeEach(async (): Promise<void> => {
+								fakeFetch.withArgs(`/documents/${scenario.resource}`, fetchArgs).returns(Promise.resolve(new Response(JSON.stringify({ data: [{}, {}], checksum: "test-hash" }), {
+									status: 200,
+									statusText: "OK",
+									headers: {
+										Etag: "test-hash"
+									}
+								})));
 
-					describe("success", (): void => {
-						describe("hash match", (): void => {
-							describe("with data", (): void => {
-								let status: JQuery<HTMLElement>,
-										progress: JQuery<HTMLElement>;
+								status = $("<div>")
+									.attr("id", "status")
+									.hide()
+									.appendTo(document.body);
 
-								beforeEach((): void => {
-									fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
-										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-										request.respond(200, null, JSON.stringify({ data: [{}, {}], checksum: "test-hash" }));
-									});
+								progress = $("<progress>")
+									.attr("id", "progress")
+									.hide()
+									.appendTo(document.body);
 
-									status = $("<div>")
-										.attr("id", "status")
-										.hide()
-										.appendTo(document.body);
-
-									progress = $("<progress>")
-										.attr("id", "progress")
-										.hide()
-										.appendTo(document.body);
-
-									sinon.stub(dataSyncController, "importObject" as keyof DataSyncController);
-									dataSyncController["importData"]();
-								});
-
-								it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-								it("should set the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(2));
-								it("should hide the status", (): Chai.Assertion => status.css("display").should.equal("none"));
-								it("should reset the progress", (): Chai.Assertion => Number(progress.val()).should.equal(0));
-								it("should set the progress total", (): Chai.Assertion => String(progress.attr("max")).should.equal("2"));
-								it("should show the progress", (): Chai.Assertion => progress.css("display").should.not.equal("none"));
-								it("should process each object to import", (): Chai.Assertion => dataSyncController["importObject"].should.have.been.calledTwice);
-
-								afterEach((): void => {
-									status.remove();
-									progress.remove();
-								});
+								sinon.stub(dataSyncController, "importObject" as keyof DataSyncController);
+								await dataSyncController["importData"]();
 							});
 
-							describe("no data", (): void => {
-								beforeEach((): void => {
-									fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
-										request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-										request.respond(200, null, JSON.stringify({ data: [], checksum: "test-hash" }));
-									});
+							it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
+							it("should set the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(2));
+							it("should hide the status", (): Chai.Assertion => status.css("display").should.equal("none"));
+							it("should reset the progress", (): Chai.Assertion => Number(progress.val()).should.equal(0));
+							it("should set the progress total", (): Chai.Assertion => String(progress.attr("max")).should.equal("2"));
+							it("should show the progress", (): Chai.Assertion => progress.css("display").should.not.equal("none"));
+							it("should process each object to import", (): Chai.Assertion => dataSyncController["importObject"].should.have.been.calledTwice);
 
-									dataSyncController["importData"]();
-								});
-
-								it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
-								it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-
-								if (scenario.importChangesOnly) {
-									it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
-								} else {
-									it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Receive error", "Sync", "No data found"));
-								}
-
-								it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+							afterEach((): void => {
+								status.remove();
+								progress.remove();
 							});
 						});
 
-						describe("hash mismatch", (): void => {
-							beforeEach((): void => {
-								fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
-									request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-									request.respond(200, null, JSON.stringify({ checksum: "bad-hash" }));
-								});
+						describe("no data", (): void => {
+							beforeEach(async (): Promise<void> => {
+								fakeFetch.withArgs(`/documents/${scenario.resource}`, fetchArgs).returns(Promise.resolve(new Response(JSON.stringify({ data: [], checksum: "test-hash" }), {
+									status: 200,
+									statusText: "OK",
+									headers: {
+										Etag: "test-hash"
+									}
+								})));
 
-								dataSyncController["importData"]();
+								await dataSyncController["importData"]();
 							});
 
 							it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
 							it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-							it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Checksum mismatch", "Sync", "Expected: test-hash, got: bad-hash"));
+
+							if (scenario.importChangesOnly) {
+								it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+							} else {
+								it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Receive error", "Sync", "No data found"));
+							}
+
 							it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
 						});
 					});
 
-					describe("error", (): void => {
-						beforeEach((): void => {
-							fakeServer.respondWith("GET", `/documents/${scenario.resource}`, (request: SinonFakeXMLHttpRequest): void => {
-								request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-								request.respond(500, null, "Force failed");
-							});
+					describe("hash mismatch", (): void => {
+						beforeEach(async (): Promise<void> => {
+							fakeFetch.withArgs(`/documents/${scenario.resource}`, fetchArgs).returns(Promise.resolve(new Response(JSON.stringify({ checksum: "bad-hash" }), {
+								status: 200,
+								statusText: "OK",
+								headers: {
+									Etag: "test-hash"
+								}
+							})));
 
-							dataSyncController["importData"]();
+							await dataSyncController["importData"]();
 						});
 
 						it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
 						it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-						it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Receive error", "Sync", "error, 500 (Internal Server Error)"));
+						it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Checksum mismatch", "Sync", "Expected: test-hash, got: bad-hash"));
 						it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
 					});
 				});
-			});
 
-			afterEach((): void => fakeServer.restore());
+				describe("error", (): void => {
+					beforeEach(async (): Promise<void> => {
+						fakeFetch.withArgs(`/documents/${scenario.resource}`, fetchArgs).returns(Promise.resolve(new Response("Force failed", {
+							status: 500,
+							statusText: "Internal Server Error"
+						})));
+
+						await dataSyncController["importData"]();
+					});
+
+					it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
+					it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
+					it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Receive error", "Sync", "500 (Internal Server Error)"));
+					it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+				});
+			});
 		});
+
+		afterEach((): void => fakeFetch.restore());
 	});
 
 	describe("getImportData", (): void => {
@@ -1024,45 +1024,25 @@ describe("DataSyncController", (): void => {
 			description: string;
 			importChangesOnly: boolean;
 			importData?: FullImport | SerializedModel[];
-			jqXHROverrides?: {responseText?: string; getResponseHeader?: SinonStub;};
+			eTag: string;
 		}
 
 		const data: SerializedModel[] = [],
 					checksum = "test-hash",
 					scenarios: Scenario[] = [
 						{
-							description: "200 OK, fast import",
+							description: "fast import",
 							importChangesOnly: true,
 							importData: data,
-							jqXHROverrides: { getResponseHeader: sinon.stub().withArgs("Etag").returns("\"test-hash") }
+							eTag: "test-hash"
 						},
 						{
-							description: "200 OK, full import",
+							description: "full import",
 							importChangesOnly: false,
-							importData: { data, checksum }
-						},
-						{
-							description: "304 Not Modified, fast import",
-							importChangesOnly: true,
-							jqXHROverrides: {
-								responseText: JSON.stringify(data),
-								getResponseHeader: sinon.stub().withArgs("Etag").returns("\"test-hash")
-							}
-						},
-						{
-							description: "304 Not Modified, full import",
-							importChangesOnly: false,
-							jqXHROverrides: { responseText: JSON.stringify({ data, checksum }) }
+							importData: { data, checksum },
+							eTag: "test-hash"
 						}
 					];
-
-		let fakeServer: SinonFakeServer,
-				jqXHR: JQuery.jqXHR;
-
-		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
-			jqXHR = $.get();
-		});
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
@@ -1070,15 +1050,13 @@ describe("DataSyncController", (): void => {
 
 				beforeEach((): void => {
 					dataSyncController["importChangesOnly"] = scenario.importChangesOnly;
-					result = dataSyncController["getImportData"](scenario.importData, { ...jqXHR, ...scenario.jqXHROverrides });
+					result = dataSyncController["getImportData"](scenario.importData, scenario.eTag);
 				});
 
 				it("should return the object JSON", (): Chai.Assertion => result.importJson.should.deep.equal(data));
 				it("should return the checksum", (): Chai.Assertion => result.returnedHash.should.equal(checksum));
 			});
 		});
-
-		afterEach((): void => fakeServer.restore());
 	});
 
 	describe("importObject", (): void => {
@@ -1092,8 +1070,10 @@ describe("DataSyncController", (): void => {
 			{
 				model: ProgramMock,
 				doc: {
-					type: "Program"
-				} as ImportObject
+					type: "Program",
+					pending: [] as string[]
+				} as ImportObject,
+				isPending: false
 			},
 			{
 				model: SeriesMock,
@@ -1113,12 +1093,9 @@ describe("DataSyncController", (): void => {
 			}
 		];
 
-		let callback: SinonStub;
-
 		beforeEach((): void => {
 			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
-			callback = sinon.stub();
-			sinon.stub(dataSyncController, "saveCallback" as keyof DataSyncController).returns(callback);
+			sinon.stub(dataSyncController, "objectSaved" as keyof DataSyncController);
 		});
 
 		scenarios.forEach((scenario: Scenario): void => {
@@ -1126,26 +1103,25 @@ describe("DataSyncController", (): void => {
 				beforeEach((): string => (scenario.doc.id = "1"));
 
 				describe("deleted", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						scenario.doc.isDeleted = true;
-						dataSyncController["importObject"]({ doc: scenario.doc });
+						await dataSyncController["importObject"]({ doc: scenario.doc });
 					});
 
 					it("should create an instance from the JSON", (): Chai.Assertion => scenario.model.fromJson.should.have.been.calledWith(scenario.doc));
 					it("should remove the object", (): Chai.Assertion => scenario.model.prototype.remove.should.have.been.called);
-					it("should get the callback", (): Chai.Assertion => dataSyncController["saveCallback"].should.have.been.calledWith(scenario.doc.type, scenario.isPending));
-					it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(scenario.doc.id));
+					it("should mark the object as saved", (): Chai.Assertion => dataSyncController["objectSaved"].should.have.been.calledWith(scenario.doc.id, scenario.doc.type, scenario.isPending));
 				});
 
 				describe("created or updated", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						scenario.doc.isDeleted = false;
-						dataSyncController["importObject"]({ doc: scenario.doc });
+						await dataSyncController["importObject"]({ doc: scenario.doc });
 					});
 
 					it("should create an instance from the JSON", (): Chai.Assertion => scenario.model.fromJson.should.have.been.calledWith(scenario.doc));
-					it("should get the callback", (): Chai.Assertion => dataSyncController["saveCallback"].should.have.been.calledWith(scenario.doc.type, scenario.isPending));
-					it("should save the object", (): Chai.Assertion => scenario.model.prototype.save.should.have.been.calledWith(callback));
+					it("should save the object", (): Chai.Assertion => scenario.model.prototype.save.should.have.been.called);
+					it("should mark the object as saved", (): Chai.Assertion => dataSyncController["objectSaved"].should.have.been.calledWith(sinon.match.string, scenario.doc.type, scenario.isPending));
 				});
 			});
 		});
@@ -1179,25 +1155,20 @@ describe("DataSyncController", (): void => {
 		});
 	});
 
-	describe("saveCallback", (): void => {
-		let callback: SaveCallback;
-
+	describe("objectSaved", (): void => {
 		beforeEach((): void => {
 			sinon.stub(dataSyncController, "dataImported" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "removePending" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 			SyncMock.reset();
-			callback = dataSyncController["saveCallback"]("Program", true);
 		});
-
-		it("should return a function", (): Chai.Assertion => callback.should.be.a("function"));
 
 		describe("id supplied", (): void => {
 			describe("pending", (): void => {
 				describe("fast import", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						dataSyncController["importChangesOnly"] = true;
-						callback("1");
+						await dataSyncController["objectSaved"]("1", "Program", true);
 					});
 
 					it("should clear any sync record for the imported object", (): Chai.Assertion => SyncMock.prototype.remove.should.have.been.called);
@@ -1207,9 +1178,9 @@ describe("DataSyncController", (): void => {
 				});
 
 				describe("full import", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						dataSyncController["importChangesOnly"] = false;
-						callback("1");
+						await dataSyncController["objectSaved"]("1", "Program", true);
 					});
 
 					it("should not clear any sync record for the imported object", (): Chai.Assertion => SyncMock.prototype.remove.should.not.have.been.called);
@@ -1220,12 +1191,10 @@ describe("DataSyncController", (): void => {
 			});
 
 			describe("not pending", (): void => {
-				beforeEach((): SaveCallback => (callback = dataSyncController["saveCallback"]("Program", false)));
-
 				describe("fast import", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						dataSyncController["importChangesOnly"] = true;
-						callback("1");
+						await dataSyncController["objectSaved"]("1", "Program", false);
 					});
 
 					it("should clear any sync record for the imported object", (): Chai.Assertion => SyncMock.prototype.remove.should.have.been.called);
@@ -1235,9 +1204,9 @@ describe("DataSyncController", (): void => {
 				});
 
 				describe("full import", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						dataSyncController["importChangesOnly"] = false;
-						callback("1");
+						await dataSyncController["objectSaved"]("1", "Program", false);
 					});
 
 					it("should not clear any sync record for the imported object", (): void => {
@@ -1253,7 +1222,7 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("no id supplied", (): void => {
-			beforeEach((): void => callback());
+			beforeEach(async (): Promise<void> => dataSyncController["objectSaved"](undefined, "Program", false));
 
 			it("should not clear any sync record for the imported object", (): void => {
 				SyncMock.syncList.should.be.empty;
@@ -1267,23 +1236,33 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("removePending", (): void => {
-		let fakeServer: SinonFakeServer;
+		let fakeFetch: SinonStub,
+				fetchArgs: [SinonMatcher, RequestInit];
 
 		beforeEach((): void => {
-			fakeServer = sinon.fakeServer.create({ respondImmediately: true });
+			fakeFetch = sinon.stub(window, "fetch");
+			fetchArgs = [
+				sinon.match(/\/documents\/\w+\/pending/u),
+				{
+					method: "DELETE",
+					headers: {
+						"X-DEVICE-ID": "test-device"
+					}
+				}
+			];
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "dataImported" as keyof DataSyncController);
 			dataSyncController["device"] = { id: "test-device", name: "Test Device", imported: false };
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				fakeServer.respondWith("DELETE", "/documents/1/pending", (request: SinonFakeXMLHttpRequest): void => {
-					request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-					request.respond(200, null, "");
-				});
+			beforeEach(async (): Promise<void> => {
+				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
+					status: 200,
+					statusText: "OK"
+				})));
 
-				dataSyncController["removePending"]("1", "Program");
+				await dataSyncController["removePending"]("1", "Program");
 			});
 
 			it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
@@ -1291,20 +1270,20 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("error", (): void => {
-			beforeEach((): void => {
-				fakeServer.respondWith("DELETE", "/documents/1/pending", (request: SinonFakeXMLHttpRequest): void => {
-					request.requestHeaders["X-DEVICE-ID"].should.equal("test-device");
-					request.respond(500, null, "Force failed");
-				});
+			beforeEach(async (): Promise<void> => {
+				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("Force failed", {
+					status: 500,
+					statusText: "Internal Server Error"
+				})));
 
-				dataSyncController["removePending"]("1", "Program");
+				await dataSyncController["removePending"]("1", "Program");
 			});
 
 			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Save error", "Program", "Error saving program"));
 			it("should continue processing", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
 		});
 
-		afterEach((): void => fakeServer.restore());
+		afterEach((): void => fakeFetch.restore());
 	});
 
 	describe("dataImported", (): void => {
@@ -1322,9 +1301,9 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("not finished", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				dataSyncController["objectsImported"] = 0;
-				dataSyncController["dataImported"]();
+				await dataSyncController["dataImported"]();
 			});
 
 			it("should increment the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(1));
@@ -1333,10 +1312,10 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("finished", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				dataSyncController["objectsImported"] = 1;
 				progress.attr("max", 3);
-				dataSyncController["dataImported"]();
+				await dataSyncController["dataImported"]();
 			});
 
 			it("should increment the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(2));
@@ -1353,76 +1332,60 @@ describe("DataSyncController", (): void => {
 			sinon.stub(dataSyncController, "importSuccessful" as keyof DataSyncController);
 		});
 
-		describe("models not ready", (): void => {
-			it("should do nothing", (): void => {
-				dataSyncController["programsReady"] = false;
-				dataSyncController["importDone"]();
-				dataSyncController["showErrors"].should.not.have.been.called;
+		describe("with errors", (): void => {
+			beforeEach(async (): Promise<void> => {
+				dataSyncController["syncErrors"] = [$("<li>")];
+				await dataSyncController["importDone"]();
 			});
+
+			it("should not mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.not.have.been.called);
+			it("should not clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.not.have.been.called);
+			it("should show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Import"));
 		});
 
-		describe("models ready", (): void => {
-			beforeEach((): void => {
-				dataSyncController["programsReady"] = true;
-				dataSyncController["seriesReady"] = true;
-				dataSyncController["episodesReady"] = true;
-			});
+		describe("without errors", (): void => {
+			beforeEach((): JQuery<HTMLElement>[] => (dataSyncController["syncErrors"] = []));
 
-			describe("with errors", (): void => {
-				beforeEach((): void => {
-					dataSyncController["syncErrors"] = [$("<li>")];
-					dataSyncController["importDone"]();
+			describe("fast import", (): void => {
+				beforeEach(async (): Promise<void> => {
+					dataSyncController["importChangesOnly"] = true;
+					await dataSyncController["importDone"]();
 				});
 
-				it("should not mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.not.have.been.called);
+				it("should mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.have.been.called);
 				it("should not clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.not.have.been.called);
-				it("should show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Import"));
+				it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
 			});
 
-			describe("without errors", (): void => {
-				beforeEach((): JQuery<HTMLElement>[] => (dataSyncController["syncErrors"] = []));
+			describe("full import", (): void => {
+				beforeEach((): boolean => (dataSyncController["importChangesOnly"] = false));
 
-				describe("fast import", (): void => {
-					beforeEach((): void => {
-						dataSyncController["importChangesOnly"] = true;
-						dataSyncController["importDone"]();
+				describe("initial import", (): void => {
+					beforeEach(async (): Promise<void> => {
+						dataSyncController["device"] = { id: "", name: "", imported: false };
+						await dataSyncController["importDone"]();
 					});
 
-					it("should mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.have.been.called);
-					it("should not clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.not.have.been.called);
+					it("should mark the device as having imported", (): void => {
+						dataSyncController["device"].imported.should.be.true;
+						SettingMock.setting.should.deep.equal({ name: "Device", value: JSON.stringify({ id: "", name: "", imported: true }) });
+						SettingMock.prototype.save.should.have.been.called;
+					});
+
+					it("should clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.have.been.called);
 					it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
 				});
 
-				describe("full import", (): void => {
-					beforeEach((): boolean => (dataSyncController["importChangesOnly"] = false));
-
-					describe("initial import", (): void => {
-						beforeEach((): void => {
-							dataSyncController["device"] = { id: "", name: "", imported: false };
-							dataSyncController["importDone"]();
-						});
-
-						it("should mark the device as having imported", (): void => {
-							dataSyncController["device"].imported.should.be.true;
-							SettingMock.setting.should.deep.equal({ name: "Device", value: JSON.stringify({ id: "", name: "", imported: true }) });
-							SettingMock.prototype.save.should.have.been.called;
-						});
-
-						it("should clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.have.been.calledWith(sinon.match.func));
-						it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
+				describe("subsequent import", (): void => {
+					beforeEach(async (): Promise<void> => {
+						SettingMock.prototype.save.reset();
+						dataSyncController["device"] = { id: "", name: "", imported: true };
+						await dataSyncController["importDone"]();
 					});
 
-					describe("subsequent import", (): void => {
-						beforeEach((): void => {
-							SettingMock.prototype.save.reset();
-							dataSyncController["device"] = { id: "", name: "", imported: true };
-							dataSyncController["importDone"]();
-						});
-
-						it("should not mark the device as having imported", (): Chai.Assertion => SettingMock.prototype.save.should.not.have.been.called);
-						it("should clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.have.been.calledWith(sinon.match.func));
-						it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
-					});
+					it("should not mark the device as having imported", (): Chai.Assertion => SettingMock.prototype.save.should.not.have.been.called);
+					it("should clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.have.been.called);
+					it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
 				});
 			});
 		});
@@ -1436,7 +1399,7 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("with error", (): void => {
-			beforeEach((): void => dataSyncController["pendingChangesCleared"]("error"));
+			beforeEach(async (): Promise<void> => dataSyncController["pendingChangesCleared"]("error"));
 
 			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Delete error", "Sync", "error"));
 			it("should show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Import"));
@@ -1444,7 +1407,7 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("without error", (): void => {
-			beforeEach((): void => dataSyncController["pendingChangesCleared"]());
+			beforeEach(async (): Promise<void> => dataSyncController["pendingChangesCleared"]());
 
 			it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
 			it("should not show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
@@ -1455,7 +1418,7 @@ describe("DataSyncController", (): void => {
 	describe("importSuccessful", (): void => {
 		let syncErrors: JQuery<HTMLElement>;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "setLastSyncTime" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "checkForLocalChanges" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncFinish" as keyof DataSyncController);
@@ -1465,7 +1428,7 @@ describe("DataSyncController", (): void => {
 				.attr("id", "syncErrors")
 				.appendTo(document.body);
 
-			dataSyncController["importSuccessful"]();
+			await dataSyncController["importSuccessful"]();
 		});
 
 		it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);

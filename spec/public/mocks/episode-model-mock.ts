@@ -1,31 +1,20 @@
 import {
 	EpisodeStatus,
-	FindCallback,
-	ListCallback,
-	RemoveCallback,
-	SaveCallback,
 	SerializedModel
 } from "models";
 import sinon, { SinonStub } from "sinon";
 
-interface Episode {
-	id: string | null;
-	episodeName: string | null;
-	status: EpisodeStatus;
-	statusWarning: "" | "warning";
-}
-
-const saveStub: SinonStub = sinon.stub().yields(999),
+const saveStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),
-			listBySeriesStub: SinonStub<[string, ListCallback], Episode[]> = sinon.stub(),
+			listBySeriesStub: SinonStub<string[], Promise<EpisodeMock[]>> = sinon.stub(),
 			listByUnscheduledStub: SinonStub = sinon.stub(),
-			findStub: SinonStub<[string, FindCallback], EpisodeMock> = sinon.stub(),
+			findStub: SinonStub<string[], Promise<EpisodeMock>> = sinon.stub(),
 			totalCountStub: SinonStub = sinon.stub(),
 			countByStatusStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub<[RemoveCallback], string> = sinon.stub(),
+			removeAllStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
 			fromJsonStub: SinonStub<[SerializedModel], EpisodeMock> = sinon.stub();
 
-let episodes: Episode[] = [],
+let episodes: EpisodeMock[] = [],
 		removeAllOK: boolean;
 
 export default class EpisodeMock {
@@ -56,31 +45,29 @@ export default class EpisodeMock {
 		removeStub.reset();
 	}
 
-	public static get listBySeries(): SinonStub<[string, ListCallback], Episode[]> {
-		return listBySeriesStub.yields(this.episodes);
+	public static get listBySeries(): SinonStub<string[], Promise<EpisodeMock[]>> {
+		return listBySeriesStub.returns(Promise.resolve(this.episodes));
 	}
 
-	public static get listByUnscheduled(): SinonStub<void[], object[]> {
-		return listByUnscheduledStub.yields([{}]);
+	public static get listByUnscheduled(): SinonStub<void[], Promise<EpisodeMock[]>> {
+		return listByUnscheduledStub.returns(Promise.resolve([{}]));
 	}
 
-	public static get find(): SinonStub<[string, FindCallback], EpisodeMock> {
-		return findStub.yields(new EpisodeMock(String(findStub.args[0]), "test-episode", "", ""));
+	public static get find(): SinonStub<string[], Promise<EpisodeMock>> {
+		return findStub.returns(Promise.resolve(new EpisodeMock(String(findStub.args[0]), "test-episode", "", "")));
 	}
 
-	public static get totalCount(): SinonStub<void[], number> {
-		return totalCountStub.yields(1);
+	public static get totalCount(): SinonStub<void[], Promise<number>> {
+		return totalCountStub.returns(Promise.resolve(1));
 	}
 
-	public static get countByStatus(): SinonStub<string[], number> {
-		return countByStatusStub.withArgs("Watched").yields(1);
+	public static get countByStatus(): SinonStub<string[], Promise<number>> {
+		return countByStatusStub.withArgs("Watched").returns(Promise.resolve(1));
 	}
 
-	public static get removeAll(): SinonStub<[RemoveCallback], string> {
-		if (removeAllOK) {
-			removeAllStub.yields();
-		} else {
-			removeAllStub.yields("Force failed");
+	public static get removeAll(): SinonStub<void[], Promise<string | undefined>> {
+		if (!removeAllOK) {
+			removeAllStub.returns(Promise.resolve("Force failed"));
 		}
 
 		return removeAllStub;
@@ -90,11 +77,11 @@ export default class EpisodeMock {
 		return fromJsonStub.returns(new EpisodeMock(null, null, "", ""));
 	}
 
-	public get save(): SinonStub<SaveCallback[], number> {
-		return saveStub;
+	public get save(): SinonStub<void[], Promise<string | undefined>> {
+		return saveStub.returns(Promise.resolve("1"));
 	}
 
-	public get remove(): SinonStub<void[], void> {
+	public get remove(): SinonStub<void[], Promise<void>> {
 		return removeStub;
 	}
 
@@ -106,11 +93,11 @@ export default class EpisodeMock {
 		removeAllOK = false;
 	}
 
-	public static get episodes(): Episode[] {
+	public static get episodes(): EpisodeMock[] {
 		return episodes;
 	}
 
-	public static set episodes(items: Episode[]) {
+	public static set episodes(items: EpisodeMock[]) {
 		episodes = items;
 	}
 }

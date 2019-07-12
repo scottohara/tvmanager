@@ -1,9 +1,8 @@
 import sinon, { SinonStub } from "sinon";
-import { SaveCallback } from "models";
 
 interface Setting {
-	name?: string | null;
-	value?: string | null;
+	name?: string;
+	value?: string;
 }
 
 const saveStub: SinonStub = sinon.stub(),
@@ -12,19 +11,19 @@ const saveStub: SinonStub = sinon.stub(),
 			setting: Setting = {};
 
 export default class SettingMock {
-	public constructor(public readonly settingName: string | null,
-						public readonly settingValue: string | null) {
+	public constructor(public readonly settingName?: string,
+						public readonly settingValue?: string) {
 		setting.name = this.settingName;
 		setting.value = this.settingValue;
 		saveStub.reset();
 		removeStub.reset();
 	}
 
-	public get save(): SinonStub<SaveCallback[], void> {
+	public get save(): SinonStub<void[], Promise<boolean>> {
 		return saveStub;
 	}
 
-	public get remove(): SinonStub<void[], void> {
+	public get remove(): SinonStub<void[], Promise<void>> {
 		return removeStub;
 	}
 
@@ -32,7 +31,7 @@ export default class SettingMock {
 		return setting;
 	}
 
-	public static get "get"(): SinonStub<string[], void> {
+	public static get "get"(): SinonStub<string[], SettingMock> {
 		return getStub;
 	}
 }

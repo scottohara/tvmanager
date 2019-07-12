@@ -11,7 +11,6 @@ import sinon, {
 } from "sinon";
 import $ from "jquery";
 import ApplicationController from "../../../src/controllers/application-controller";
-import DatabaseServiceMock from "mocks/database-service-mock";
 import SettingMock from "mocks/setting-model-mock";
 import SpinningWheelMock from "mocks/spinningwheel-mock";
 import TestController from "mocks/test-controller";
@@ -21,8 +20,7 @@ describe("ApplicationController", (): void => {
 	let contentWrapper: JQuery<HTMLElement>,
 			content: JQuery<HTMLElement>,
 			abc: JQuery<HTMLElement>,
-			applicationController: ApplicationController,
-			undefinedObject: undefined;
+			applicationController: ApplicationController;
 
 	beforeEach((): void => {
 		contentWrapper = $("<div>")
@@ -39,7 +37,7 @@ describe("ApplicationController", (): void => {
 			.appendTo(document.body);
 
 		sinon.spy(ApplicationController.prototype, "contentShown" as keyof ApplicationController);
-		ApplicationController["singletonInstance"] = undefinedObject;
+		ApplicationController["singletonInstance"] = undefined;
 		applicationController = new ApplicationController();
 	});
 
@@ -71,74 +69,29 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("start", (): void => {
-		beforeEach((): void => {
-			sinon.stub(applicationController, "showNotice");
+		const lastSyncTime: SettingMock = new SettingMock("LastSyncTime", "1 Jan 2010");
+
+		beforeEach(async (): Promise<void> => {
+			sinon.stub(applicationController, "pushView");
 			sinon.stub(applicationController, "gotLastSyncTime" as keyof ApplicationController);
 			SettingMock.get.reset();
-			SettingMock.get.withArgs("LastSyncTime").yields("1");
+			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTime);
+			await applicationController.start();
 		});
 
-		describe("error opening database", (): void => {
-			beforeEach((): void => {
-				DatabaseServiceMock.mode = "Fail";
-				applicationController.start();
-			});
-
-			it("should display an error notice", (): Chai.Assertion => applicationController.showNotice.should.have.been.calledWith({
-				label: "Error",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}));
-
-			it("should not return a database", (): Chai.Assertion => (undefinedObject === applicationController.db).should.be.true);
-			it("should not get the last sync time", (): Chai.Assertion => applicationController["gotLastSyncTime"].should.not.have.been.called);
-		});
-
-		describe("database upgraded", (): void => {
-			beforeEach((): void => {
-				DatabaseServiceMock.mode = "Upgrade";
-				applicationController.start();
-			});
-
-			it("should display a restart notice", (): Chai.Assertion => applicationController.showNotice.should.have.been.calledWith({
-				label: "Database has been successfully upgraded from version 1.0 to version 1.1. Please restart the application.",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}));
-
-			it("should return a database", (): Chai.Assertion => (undefinedObject === applicationController.db).should.be.false);
-			it("should set the database version", (): Chai.Assertion => applicationController.db.version.should.equal("1.1"));
-			it("should get the last sync time", (): Chai.Assertion => applicationController["gotLastSyncTime"].should.have.been.calledWith("1"));
-		});
-
-		describe("database opened", (): void => {
-			beforeEach((): void => {
-				sinon.stub(applicationController, "pushView");
-				DatabaseServiceMock.mode = undefinedObject;
-				applicationController.start();
-			});
-
-			it("should return a database", (): Chai.Assertion => (undefinedObject === applicationController.db).should.be.false);
-			it("should load all view controllers", (): Chai.Assertion => Object.keys(applicationController["viewControllers"]).length.should.equal(13));
-			it("should display the schedule view", (): Chai.Assertion => applicationController.pushView.should.have.been.calledWith("schedule"));
-			it("should not display a notice", (): Chai.Assertion => applicationController.showNotice.should.not.have.been.called);
-			it("should set the database version", (): Chai.Assertion => applicationController.db.version.should.equal("1.1"));
-			it("should get the last sync time", (): Chai.Assertion => applicationController["gotLastSyncTime"].should.have.been.calledWith("1"));
-		});
+		it("should load all view controllers", (): Chai.Assertion => Object.keys(applicationController["viewControllers"]).length.should.equal(13));
+		it("should display the schedule view", (): Chai.Assertion => applicationController.pushView.should.have.been.calledWith("schedule"));
+		it("should get the last sync time", (): Chai.Assertion => applicationController["gotLastSyncTime"].should.have.been.calledWith(lastSyncTime));
 	});
 
 	describe("popView", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(applicationController, "clearFooter");
 			sinon.stub(applicationController, "clearHeader" as keyof ApplicationController);
 			sinon.stub(applicationController, "viewPopped" as keyof ApplicationController);
 			sinon.stub(applicationController, "show" as keyof ApplicationController).yields({});
 			applicationController["viewStack"] = [{ controller: new TestController(), scrollPos: 0 }];
-			applicationController.popView({});
+			await applicationController.popView({});
 		});
 
 		it("should clear the footer", (): Chai.Assertion => applicationController.clearFooter.should.have.been.called);
@@ -223,7 +176,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without footer", (): void => {
 			beforeEach((): void => {
-				controller.footer = undefinedObject;
+				controller.footer = undefined;
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				applicationController.setFooter();
 			});
@@ -268,7 +221,7 @@ describe("ApplicationController", (): void => {
 
 				describe("without event handler", (): void => {
 					beforeEach((): void => {
-						(footer.leftButton as NavButton).eventHandler = undefinedObject;
+						(footer.leftButton as NavButton).eventHandler = undefined;
 						applicationController.setFooter();
 					});
 
@@ -281,7 +234,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without left button", (): void => {
 				beforeEach((): void => {
-					footer.leftButton = undefinedObject;
+					footer.leftButton = undefined;
 					applicationController.setFooter();
 				});
 
@@ -313,7 +266,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without footer label", (): void => {
 				beforeEach((): void => {
-					footer.label = undefinedObject;
+					footer.label = undefined;
 					applicationController.setFooter();
 				});
 
@@ -346,7 +299,7 @@ describe("ApplicationController", (): void => {
 
 				describe("without event handler", (): void => {
 					beforeEach((): void => {
-						(footer.rightButton as NavButton).eventHandler = undefinedObject;
+						(footer.rightButton as NavButton).eventHandler = undefined;
 						applicationController.setFooter();
 					});
 
@@ -359,7 +312,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without right button", (): void => {
 				beforeEach((): void => {
-					footer.rightButton = undefinedObject;
+					footer.rightButton = undefined;
 					applicationController.setFooter();
 				});
 
@@ -434,9 +387,9 @@ describe("ApplicationController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					applicationController.viewStack = scenario.viewStack;
-					applicationController.pushView("test", {});
+					await applicationController.pushView("test", {});
 					view = applicationController.viewStack.pop() as View;
 				});
 
@@ -490,7 +443,8 @@ describe("ApplicationController", (): void => {
 			sinon.stub(applicationController, "hideNotice" as keyof ApplicationController);
 			notice = { label: "<b>test-notice</b>" };
 			eventHandler = sinon.stub();
-			applicationController["noticeStack"] = { height: 0, notice: [] };
+			applicationController["noticeStack"].height = 0;
+			applicationController["noticeStack"].notice = [];
 			WindowMock.innerHeight = 1;
 			$.fx.off = true;
 		});
@@ -745,7 +699,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without footer", (): void => {
 			beforeEach((): void => {
-				controller.footer = undefinedObject;
+				controller.footer = undefined;
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				applicationController.clearFooter();
 			});
@@ -777,7 +731,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without left button", (): void => {
 				beforeEach((): void => {
-					(applicationController["currentView"].controller.footer as HeaderFooter).leftButton = undefinedObject;
+					(applicationController["currentView"].controller.footer as HeaderFooter).leftButton = undefined;
 					applicationController.clearFooter();
 				});
 
@@ -810,7 +764,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without right button", (): void => {
 				beforeEach((): void => {
-					(applicationController["currentView"].controller.footer as HeaderFooter).rightButton = undefinedObject;
+					(applicationController["currentView"].controller.footer as HeaderFooter).rightButton = undefined;
 					applicationController.clearFooter();
 				});
 
@@ -846,17 +800,13 @@ describe("ApplicationController", (): void => {
 	describe("viewPushed", (): void => {
 		let controller: TestController;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			controller = new TestController();
-			sinon.spy(controller, "setup");
-			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller, scrollPos: 0 });
-			applicationController["viewPushed"]();
+			await applicationController["viewPushed"]();
 		});
 
 		it("should setup the view controller", (): Chai.Assertion => controller.setup.should.have.been.called);
-		it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
-		it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 	});
 
 	describe("viewPopped", (): void => {
@@ -866,30 +816,25 @@ describe("ApplicationController", (): void => {
 		beforeEach((): void => {
 			controller = new TestController();
 			activate = sinon.stub();
-			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
 		});
 
 		describe("without activate", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
-				applicationController["viewPopped"]({});
+				await applicationController["viewPopped"]({});
 			});
 
 			it("should not activate the view controller", (): Chai.Assertion => activate.should.not.have.been.called);
-			it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
-			it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 		});
 
 		describe("with activate", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				Object.defineProperty(controller, "activate", { value: activate });
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
-				applicationController["viewPopped"]({});
+				await applicationController["viewPopped"]({});
 			});
 
 			it("should activate the view controller", (): Chai.Assertion => activate.should.have.been.calledWith({}));
-			it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
-			it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 		});
 	});
 
@@ -897,15 +842,16 @@ describe("ApplicationController", (): void => {
 		let nowLoading: JQuery<HTMLElement>,
 				callback: SinonSpy;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			nowLoading = $("<div>")
 				.attr("id", "nowLoading")
 				.appendTo(document.body);
 
 			sinon.stub(applicationController, "hideScrollHelper");
+			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
 			callback = sinon.spy();
-			applicationController["show"](callback, {});
+			await applicationController["show"](callback, {});
 		});
 
 		it("should hide the scroll helper", (): Chai.Assertion => applicationController.hideScrollHelper.should.have.been.called);
@@ -913,6 +859,7 @@ describe("ApplicationController", (): void => {
 		it("should load the view template", (): Chai.Assertion => content.html().should.equal("<div></div>"));
 		it("should slide the new view in from the right", (): Chai.Assertion => contentWrapper.hasClass("loading").should.be.true);
 		it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({}));
+		it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
 
 		afterEach((): JQuery<HTMLElement> => nowLoading.remove());
 	});
@@ -1015,7 +962,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without event handler", (): void => {
 				beforeEach((): void => {
-					(header.leftButton as NavButton).eventHandler = undefinedObject;
+					(header.leftButton as NavButton).eventHandler = undefined;
 					applicationController["setHeader"]();
 				});
 
@@ -1028,7 +975,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without left button", (): void => {
 			beforeEach((): void => {
-				header.leftButton = undefinedObject;
+				header.leftButton = undefined;
 				applicationController["setHeader"]();
 			});
 
@@ -1059,7 +1006,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without header label", (): void => {
 			beforeEach((): void => {
-				header.label = undefinedObject;
+				header.label = undefined;
 				applicationController["setHeader"]();
 			});
 
@@ -1091,7 +1038,7 @@ describe("ApplicationController", (): void => {
 
 			describe("without event handler", (): void => {
 				beforeEach((): void => {
-					(header.rightButton as NavButton).eventHandler = undefinedObject;
+					(header.rightButton as NavButton).eventHandler = undefined;
 					applicationController["setHeader"]();
 				});
 
@@ -1104,7 +1051,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without right button", (): void => {
 			beforeEach((): void => {
-				header.rightButton = undefinedObject;
+				header.rightButton = undefined;
 				applicationController["setHeader"]();
 			});
 
@@ -1185,7 +1132,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without left button", (): void => {
 			beforeEach((): void => {
-				applicationController["currentView"].controller.header.leftButton = undefinedObject;
+				applicationController["currentView"].controller.header.leftButton = undefined;
 				applicationController["clearHeader"]();
 			});
 
@@ -1216,7 +1163,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without right button", (): void => {
 			beforeEach((): void => {
-				applicationController["currentView"].controller.header.rightButton = undefinedObject;
+				applicationController["currentView"].controller.header.rightButton = undefined;
 				applicationController["clearHeader"]();
 			});
 
@@ -1264,7 +1211,8 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			sinon.stub(applicationController, "noticeHidden" as keyof ApplicationController);
-			applicationController["noticeStack"] = { height: 5, notice: [] };
+			applicationController["noticeStack"].height = 5;
+			applicationController["noticeStack"].notice = [];
 			notice = $("<div>");
 			sinon.stub(notice, "height").returns(10);
 			sinon.stub(notice, "data");
@@ -1367,7 +1315,7 @@ describe("ApplicationController", (): void => {
 
 		describe("without last sync time", (): void => {
 			it("should do nothing", (): void => {
-				applicationController["gotLastSyncTime"](new SettingMock(null, null));
+				applicationController["gotLastSyncTime"](new SettingMock());
 				applicationController.showNotice.should.not.have.been.called;
 			});
 		});
@@ -1381,7 +1329,7 @@ describe("ApplicationController", (): void => {
 			describe("younger than max data data age days", (): void => {
 				it("should do nothing", (): void => {
 					settingValue = new Date((new Date()).valueOf() - (7 * 24 * 60 * 60 * 1000));
-					applicationController["gotLastSyncTime"](new SettingMock(null, String(settingValue)));
+					applicationController["gotLastSyncTime"](new SettingMock(undefined, String(settingValue)));
 					applicationController.showNotice.should.not.have.been.called;
 				});
 			});
@@ -1389,7 +1337,7 @@ describe("ApplicationController", (): void => {
 			describe("older than max data age days", (): void => {
 				it("should display a sync notice", (): void => {
 					settingValue = new Date((new Date()).valueOf() - (9 * 24 * 60 * 60 * 1000));
-					applicationController["gotLastSyncTime"](new SettingMock(null, String(settingValue)));
+					applicationController["gotLastSyncTime"](new SettingMock(undefined, String(settingValue)));
 					applicationController.showNotice.should.have.been.calledWith({
 						label: "The last data sync was over 7 days ago",
 						leftButton: {

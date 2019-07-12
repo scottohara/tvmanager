@@ -82,9 +82,9 @@ describe("EpisodesController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					listItem.source = scenario.source;
-					episodesController.setup();
+					await episodesController.setup();
 					leftButton = episodesController.header.leftButton as NavButton;
 					rightButton = episodesController.header.rightButton as NavButton;
 				});
@@ -117,7 +117,7 @@ describe("EpisodesController", (): void => {
 				});
 
 				it("should get the list of episodes for the series", (): void => {
-					EpisodeMock.listBySeries.should.have.been.calledWith(listItem.series.id, sinon.match.func);
+					EpisodeMock.listBySeries.should.have.been.calledWith(listItem.series.id);
 					episodesController["listRetrieved"].should.have.been.calledWith(items);
 				});
 			});
@@ -133,7 +133,7 @@ describe("EpisodesController", (): void => {
 		});
 
 		describe("from series list view", (): void => {
-			beforeEach((): void => episodesController.activate());
+			beforeEach(async (): Promise<void> => episodesController.activate());
 
 			it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
 			it("should not scroll to the first unwatched episode", (): Chai.Assertion => WindowMock.setTimeout.should.not.have.been.called);
@@ -144,11 +144,11 @@ describe("EpisodesController", (): void => {
 			interface Scenario {
 				description: string;
 				status: EpisodeStatus;
-				watched?: true;
-				recorded?: true;
-				expected?: true;
+				watched: boolean;
+				recorded: boolean;
+				expected: boolean;
 				statusWarning: "" | "warning";
-				warning?: true;
+				warning: boolean;
 			}
 
 			let episodeListItem: EpisodeListItem;
@@ -157,24 +157,36 @@ describe("EpisodesController", (): void => {
 				{
 					description: "watched",
 					status: "Watched",
+					watched: true,
+					recorded: false,
+					expected: false,
 					statusWarning: "",
-					watched: true
+					warning: false
 				},
 				{
 					description: "recorded",
 					status: "Recorded",
+					watched: false,
+					recorded: true,
+					expected: false,
 					statusWarning: "",
-					recorded: true
+					warning: false
 				},
 				{
 					description: "expected",
 					status: "Expected",
+					watched: false,
+					recorded: false,
+					expected: true,
 					statusWarning: "",
-					expected: true
+					warning: false
 				},
 				{
 					description: "warning",
 					status: "",
+					watched: false,
+					recorded: false,
+					expected: false,
 					statusWarning: "warning",
 					warning: true
 				}
@@ -183,7 +195,7 @@ describe("EpisodesController", (): void => {
 			scenarios.forEach((scenario: Scenario): void => {
 				describe(scenario.description, (): void => {
 					describe("edit", (): void => {
-						beforeEach((): void => {
+						beforeEach(async (): Promise<void> => {
 							episodeListItem = {
 								listIndex: 0,
 								episode: {
@@ -198,33 +210,33 @@ describe("EpisodesController", (): void => {
 							episodesController["origExpectedCount"] = 0;
 							episodesController["origStatusWarningCount"] = 1;
 							items[0] = episodeListItem.episode as EpisodeMock;
-							episodesController["activate"](episodeListItem);
+							await episodesController["activate"](episodeListItem);
 						});
 
 						it("should update the item in the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(items));
-						it("should update the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(1 + (Number(scenario.watched) || 0)));
-						it("should update the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + (Number(scenario.recorded) || 0)));
-						it("should update the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + (Number(scenario.expected) || 0)));
-						it("should update the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(1 + (Number(scenario.warning) || 0)));
+						it("should update the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(1 + Number(scenario.watched)));
+						it("should update the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + Number(scenario.recorded)));
+						it("should update the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
+						it("should update the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(1 + Number(scenario.warning)));
 						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
 						it("should not scroll to the first unwatched episode", (): Chai.Assertion => WindowMock.setTimeout.should.not.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 					});
 
 					describe("add", (): void => {
-						beforeEach((): void => {
+						beforeEach(async (): Promise<void> => {
 							episodeListItem = { episode: new EpisodeMock(null, "new-episode", scenario.status, "") };
 							episodeListItem.episode.statusWarning = scenario.statusWarning;
 							items.push(episodeListItem.episode as EpisodeMock);
-							episodesController.activate(episodeListItem);
+							await episodesController.activate(episodeListItem);
 						});
 
 						it("should add the item to the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(items));
 						it("should increment the series episode count", (): Chai.Assertion => listItem.series.setEpisodeCount.should.have.been.calledWith(7));
-						it("should increment the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 + (Number(scenario.watched) || 0)));
-						it("should increment the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + (Number(scenario.recorded) || 0)));
-						it("should increment the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + (Number(scenario.expected) || 0)));
-						it("should increment the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 + (Number(scenario.warning) || 0)));
+						it("should increment the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 + Number(scenario.watched)));
+						it("should increment the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + Number(scenario.recorded)));
+						it("should increment the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
+						it("should increment the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 + Number(scenario.warning)));
 						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
 						it("should not scroll to the first unwatched episode", (): Chai.Assertion => WindowMock.setTimeout.should.not.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
@@ -237,20 +249,20 @@ describe("EpisodesController", (): void => {
 			beforeEach((): boolean => (episodesController["scrollToFirstUnwatched"] = true));
 
 			describe("all watched", (): void => {
-				beforeEach((): void => episodesController.activate());
+				beforeEach(async (): Promise<void> => episodesController.activate());
 
 				it("should not scroll", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.not.have.been.called);
 				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.false);
 			});
 
 			describe("none watched", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					episodesController["episodeList"].items = [
 						{ id: "1" },
 						{ id: "2" },
 						{ id: "3" }
 					];
-					episodesController.activate();
+					await episodesController.activate();
 				});
 
 				it("should scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.have.been.calledWith("1"));
@@ -258,13 +270,13 @@ describe("EpisodesController", (): void => {
 			});
 
 			describe("some watched", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					episodesController["episodeList"].items = [
 						{ id: "1", status: "Watched" },
 						{ id: "2", status: "Watched" },
 						{ id: "3" }
 					];
-					episodesController.activate();
+					await episodesController.activate();
 				});
 
 				it("should scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.have.been.calledWith("3"));
@@ -274,10 +286,10 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("listRetrieved", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "activate");
 			episodesController["episodeList"] = new ListMock("", "", "", []);
-			episodesController["listRetrieved"](items);
+			await episodesController["listRetrieved"](items);
 		});
 
 		it("should set the episode list items", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(items));
@@ -285,8 +297,8 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			episodesController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await episodesController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
@@ -295,35 +307,47 @@ describe("EpisodesController", (): void => {
 		interface Scenario {
 			description: string;
 			status: EpisodeStatus;
-			watched?: 1;
-			recorded?: 1;
-			expected?: 1;
+			watched: number;
+			recorded: number;
+			expected: number;
 			statusWarning: "" | "warning";
-			warning?: 1;
+			warning: number;
 		}
 
 		const scenarios: Scenario[] = [
 			{
 				description: "watched",
 				status: "Watched",
+				watched: 1,
+				recorded: 0,
+				expected: 0,
 				statusWarning: "",
-				watched: 1
+				warning: 0
 			},
 			{
 				description: "recorded",
 				status: "Recorded",
+				watched: 0,
+				recorded: 1,
+				expected: 0,
 				statusWarning: "",
-				recorded: 1
+				warning: 0
 			},
 			{
 				description: "expected",
 				status: "Expected",
+				watched: 0,
+				recorded: 0,
+				expected: 1,
 				statusWarning: "",
-				expected: 1
+				warning: 0
 			},
 			{
 				description: "warning",
 				status: "",
+				watched: 0,
+				recorded: 0,
+				expected: 0,
 				statusWarning: "warning",
 				warning: 1
 			}
@@ -335,18 +359,18 @@ describe("EpisodesController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					items[0].status = scenario.status;
 					items[0].statusWarning = scenario.statusWarning;
 					episodesController["episodeList"] = new ListMock("", "", "", items);
-					episodesController["viewItem"](index);
+					await episodesController["viewItem"](index);
 				});
 
 				it("should save the current episode details", (): void => {
-					episodesController["origWatchedCount"].should.equal(scenario.watched || 0);
-					episodesController["origRecordedCount"].should.equal(scenario.recorded || 0);
-					episodesController["origExpectedCount"].should.equal(scenario.expected || 0);
-					episodesController["origStatusWarningCount"].should.equal(scenario.warning || 0);
+					episodesController["origWatchedCount"].should.equal(scenario.watched);
+					episodesController["origRecordedCount"].should.equal(scenario.recorded);
+					episodesController["origExpectedCount"].should.equal(scenario.expected);
+					episodesController["origStatusWarningCount"].should.equal(scenario.warning);
 				});
 
 				it("should push the episode view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("episode", {
@@ -358,9 +382,9 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("addItem", (): void => {
-		it("should push the episode view with no selected item", (): void => {
+		it("should push the episode view with no selected item", async (): Promise<void> => {
 			episodesController["episodeList"] = new ListMock("", "", "", items);
-			episodesController["addItem"]();
+			await episodesController["addItem"]();
 			appController.pushView.should.have.been.calledWithExactly("episode", { series: listItem.series, sequence: 1 });
 		});
 	});
@@ -369,35 +393,47 @@ describe("EpisodesController", (): void => {
 		interface Scenario {
 			description: string;
 			status: EpisodeStatus;
-			watched?: 1;
-			recorded?: 1;
-			expected?: 1;
+			watched: number;
+			recorded: number;
+			expected: number;
 			statusWarning: "" | "warning";
-			warning?: 1;
+			warning: number;
 		}
 
 		const scenarios: Scenario[] = [
 			{
 				description: "watched",
 				status: "Watched",
+				watched: 1,
+				recorded: 0,
+				expected: 0,
 				statusWarning: "",
-				watched: 1
+				warning: 0
 			},
 			{
 				description: "recorded",
 				status: "Recorded",
+				watched: 0,
+				recorded: 1,
+				expected: 0,
 				statusWarning: "",
-				recorded: 1
+				warning: 0
 			},
 			{
 				description: "expected",
 				status: "Expected",
+				watched: 0,
+				recorded: 0,
+				expected: 1,
 				statusWarning: "",
-				expected: 1
+				warning: 0
 			},
 			{
 				description: "warning",
 				status: "",
+				watched: 0,
+				recorded: 0,
+				expected: 0,
 				statusWarning: "warning",
 				warning: 1
 			}
@@ -420,7 +456,7 @@ describe("EpisodesController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					item = {
 						...items[0],
 						status: scenario.status,
@@ -429,14 +465,14 @@ describe("EpisodesController", (): void => {
 						remove: sinon.stub()
 					};
 					episodesController["episodeList"] = new ListMock("", "", "", [item]);
-					episodesController["deleteItem"](index);
+					await episodesController["deleteItem"](index);
 				});
 
 				it("should decrement the series episode count", (): Chai.Assertion => listItem.series.setEpisodeCount.should.have.been.calledWith(5));
-				it("should decrement the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 - (scenario.watched || 0)));
-				it("should decrement the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 - (scenario.recorded || 0)));
-				it("should decrement the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 - (scenario.expected || 0)));
-				it("should decrement the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 - (scenario.warning || 0)));
+				it("should decrement the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 - scenario.watched));
+				it("should decrement the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 - scenario.recorded));
+				it("should decrement the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 - scenario.expected));
+				it("should decrement the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 - scenario.warning));
 				it("should remove the item from the DOM", (): Chai.Assertion => $("#list li a#1").length.should.equal(0));
 				it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
 				it("should remove the item from the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal([]));
@@ -449,11 +485,11 @@ describe("EpisodesController", (): void => {
 		let	footer: HeaderFooter,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
-			episodesController.setup();
-			episodesController["deleteItems"]();
+			await episodesController.setup();
+			await episodesController["deleteItems"]();
 			footer = episodesController.footer as HeaderFooter;
 			rightButton = footer.rightButton as NavButton;
 		});
@@ -466,7 +502,7 @@ describe("EpisodesController", (): void => {
 			episodeList.hasClass("edit").should.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as Function)();
@@ -481,7 +517,7 @@ describe("EpisodesController", (): void => {
 	describe("resequenceItems", (): void => {
 		let sortedItems: EpisodeMock[];
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			items = [
 				{ ...new EpisodeMock("1", null, "", "", false, false, 1), save: sinon.stub(), remove: sinon.stub() },
 				{ ...new EpisodeMock("2", null, "", "", false, false, 2), save: sinon.stub(), remove: sinon.stub() },
@@ -497,10 +533,8 @@ describe("EpisodesController", (): void => {
 			];
 
 			episodeList.append(sortedItems.map((item: EpisodeMock): JQuery<HTMLElement> => $("<li>").append($("<a>").attr("id", item.id))));
-
 			episodesController["episodeList"] = new ListMock("", "", "", items);
-
-			episodesController["resequenceItems"]();
+			await episodesController["resequenceItems"]();
 		});
 
 		it("should update the sequence of items that have changed position", (): void => {
@@ -518,12 +552,12 @@ describe("EpisodesController", (): void => {
 		let	footer: HeaderFooter,
 				leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
 			sinon.stub(episodesController, "resequenceItems" as keyof EpisodesController);
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
-			episodesController.setup();
-			episodesController["editItems"]();
+			await episodesController.setup();
+			await episodesController["editItems"]();
 			footer = episodesController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -536,10 +570,10 @@ describe("EpisodesController", (): void => {
 			episodeList.hasClass("edit").should.be.true;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
-		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+		it("should attach a footer left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as Function)();
 			episodesController["resequenceItems"].should.have.been.called;
 			episodesController["viewItems"].should.have.been.called;
 		});
@@ -566,12 +600,12 @@ describe("EpisodesController", (): void => {
 				leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
 			sinon.stub(episodesController, "editItems" as keyof EpisodesController);
 			sinon.stub(episodesController, "deleteItems" as keyof EpisodesController);
-			episodesController.setup();
-			episodesController["viewItems"]();
+			await episodesController.setup();
+			await episodesController["viewItems"]();
 			footer = episodesController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -585,7 +619,7 @@ describe("EpisodesController", (): void => {
 			episodeList.hasClass("edit").should.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as Function)();

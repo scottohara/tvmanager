@@ -1,9 +1,6 @@
-import sinon, { SinonStub } from "sinon";
-import ApplicationControllerMock from "mocks/application-controller-mock";
+import DatabaseServiceMock from "mocks/database-service-mock";
 import Program from "../../../src/models/program-model";
-
-// Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+import { SinonStub } from "sinon";
 
 describe("Program", (): void => {
 	let id: string,
@@ -13,8 +10,7 @@ describe("Program", (): void => {
 			watchedCount: number,
 			recordedCount: number,
 			expectedCount: number,
-			program: Program,
-			callback: SinonStub;
+			program: Program;
 
 	beforeEach((): void => {
 		id = "1";
@@ -40,56 +36,21 @@ describe("Program", (): void => {
 	});
 
 	describe("list", (): void => {
-		let sql: string;
-
-		beforeEach((): void => {
-			callback = sinon.stub();
-			sql = `
-				SELECT					p.ProgramID,
-												p.Name,
-												COUNT(DISTINCT s.SeriesID) AS SeriesCount,
-												COUNT(e.EpisodeID) AS EpisodeCount,
-												COUNT(e2.EpisodeID) AS WatchedCount,
-												COUNT(e3.EpisodeID) AS RecordedCount,
-												COUNT(e4.EpisodeID) AS ExpectedCount
-				FROM						Program p
-				LEFT OUTER JOIN	Series s on p.ProgramID = s.ProgramID
-				LEFT OUTER JOIN	Episode e on s.SeriesID = e.SeriesID
-				LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
-				LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
-				LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
-				GROUP BY		 		p.ProgramID
-				ORDER BY p.Name COLLATE NOCASE
-			`;
-		});
+		let programList: Program[];
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(sql);
-				Program.list(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.list as SinonStub).throws();
+				programList = await Program.list();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-		});
-
-		describe("no rows affected", (): void => {
-			beforeEach((): void => {
-				appController.db.noRowsAffectedAt(sql);
-				Program.list(callback);
-			});
-
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of programs", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.list.should.have.been.called);
+			it("should return an empty array", (): Chai.Assertion => programList.should.deep.equal([]));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.list as SinonStub).returns([{
 					ProgramID: id,
 					Name: programName,
 					SeriesCount: seriesCount,
@@ -98,113 +59,111 @@ describe("Program", (): void => {
 					RecordedCount: recordedCount,
 					ExpectedCount: expectedCount
 				}]);
-				Program.list(callback);
+				programList = await Program.list();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([program]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of programs", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.list.should.have.been.called);
+			it("should return the list of programs", (): Chai.Assertion => programList.should.deep.equal([program]));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).programsStore.list as SinonStub).reset());
 	});
 
 	describe("find", (): void => {
-		beforeEach((): SinonStub => (callback = sinon.stub()));
-
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`
-					SELECT	ProgramID,
-									Name
-					FROM		Program
-					WHERE		ProgramID = ${id}
-				`);
-				Program.find(id, callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.find as SinonStub).throws();
+				program = await Program.find(id);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(null));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to find the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.find.should.have.been.calledWith(id));
+			it("should return a null program id", (): Chai.Assertion => (null === program.id).should.be.true);
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
-					ProgramID: id,
-					Name: programName
-				}]);
+			describe("doesn't exist", (): void => {
+				beforeEach(async (): Promise<void> => {
+					((await DatabaseServiceMock).programsStore.find as SinonStub).returns(undefined);
+					program = await Program.find(id);
+				});
 
-				program.seriesCount = 0;
-				program.setEpisodeCount(0);
-				program.setWatchedCount(0);
-				program.setRecordedCount(0);
-				program.setExpectedCount(0);
-
-				Program.find(id, callback);
+				it("should attempt to find the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.find.should.have.been.calledWith(id));
+				it("should return a null program id", (): Chai.Assertion => (null === program.id).should.be.true);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(program));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			describe("exists", (): void => {
+				let foundProgram: Program;
+
+				beforeEach(async (): Promise<void> => {
+					((await DatabaseServiceMock).programsStore.find as SinonStub).returns({
+						ProgramID: id,
+						Name: programName
+					});
+
+					program.seriesCount = 0;
+					program.setEpisodeCount(0);
+					program.setWatchedCount(0);
+					program.setRecordedCount(0);
+					program.setExpectedCount(0);
+
+					foundProgram = await Program.find(id);
+				});
+
+				it("should attempt to find the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.find.should.have.been.calledWith(id));
+				it("should return the program", (): Chai.Assertion => foundProgram.should.deep.equal(program));
+			});
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).programsStore.find as SinonStub).reset());
 	});
 
 	describe("count", (): void => {
-		beforeEach((): SinonStub => (callback = sinon.stub()));
+		let count: number;
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`
-					SELECT	COUNT(*) AS ProgramCount
-					FROM Program
-				`);
-				Program.count(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.count as SinonStub).throws();
+				count = await Program.count();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(0));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to get the count of programs", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.count.should.have.been.called);
+			it("should return zero", (): Chai.Assertion => count.should.equal(0));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{ ProgramCount: 1 }]);
-				Program.count(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.count as SinonStub).returns(1);
+				count = await Program.count();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(1));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the count of programs", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.count.should.have.been.called);
+			it("should return the count of programs", (): Chai.Assertion => count.should.equal(1));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).programsStore.count as SinonStub).reset());
 	});
 
 	describe("removeAll", (): void => {
-		beforeEach((): SinonStub => (callback = sinon.stub()));
+		let errorMessage: string | undefined;
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt("DELETE FROM Program");
-				Program.removeAll(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.removeAll as SinonStub).throws(new Error("Force failed"));
+				errorMessage = await Program.removeAll();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(`Program.removeAll: ${appController.db.errorMessage}`));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to remove all programs", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.removeAll.should.have.been.called);
+			it("should return an error message", (): Chai.Assertion => String(errorMessage).should.equal("Program.removeAll: Force failed"));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => Program.removeAll(callback));
+			beforeEach(async (): Promise<string | undefined> => (errorMessage = await Program.removeAll()));
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to remove all programs", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.removeAll.should.have.been.called);
+			it("should not return an error message", (): Chai.Assertion => (undefined === errorMessage).should.be.true);
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).programsStore.removeAll as SinonStub).reset());
 	});
 
 	describe("fromJson", (): void => {
@@ -230,214 +189,77 @@ describe("Program", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				let programId: string,
-						sql: string;
+				let programId: string | undefined;
 
 				beforeEach((): void => {
-					if (scenario.useId) {
-						programId = id;
-					} else {
-						programId = "%";
+					if (!scenario.useId) {
 						program.id = null;
 					}
-
-					sql = `
-						REPLACE INTO Program (ProgramID, Name)
-						VALUES (${programId}, ${programName})
-					`;
 				});
 
 				describe("fail", (): void => {
-					beforeEach((): void => appController.db.failAt(sql));
-
-					describe("without callback", (): void => {
-						beforeEach((): void => program.save());
-
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
+					beforeEach(async (): Promise<void> => {
+						((await DatabaseServiceMock).programsStore.save as SinonStub).throws();
+						programId = await program.save();
 					});
 
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							program.save(callback);
-						});
+					it("should attempt to save the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.save.should.have.been.calledWith({
+						ProgramID: program.id,
+						Name: program.programName
+					}));
 
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-					});
-				});
-
-				describe("no rows affected", (): void => {
-					beforeEach((): void => appController.db.noRowsAffectedAt(sql));
-
-					describe("without callback", (): void => {
-						beforeEach((): void => program.save());
-
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("no rows affected"));
-						it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-					});
-
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							program.save(callback);
-						});
-
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("no rows affected"));
-					});
-				});
-
-				describe(`${scenario.description} Sync fail`, (): void => {
-					beforeEach((): void => appController.db.failAt(`
-						INSERT OR IGNORE INTO Sync (Type, ID, Action)
-						VALUES ('Program', ${programId}, 'modified')
-					`));
-
-					describe("without callback", (): void => {
-						beforeEach((): void => program.save());
-
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-					});
-
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							program.save(callback);
-						});
-
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-					});
+					it("should not return the program id", (): Chai.Assertion => (undefined === programId).should.be.true);
 				});
 
 				describe("success", (): void => {
-					describe("without callback", (): void => {
-						beforeEach((): void => program.save());
+					beforeEach(async (): Promise<string | undefined> => (programId = await program.save()));
 
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-						it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
-					});
+					it("should attempt to save the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.save.should.have.been.calledWith({
+						ProgramID: program.id,
+						Name: program.programName
+					}));
 
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							program.save(callback);
-						});
-
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(program.id));
-						it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
-					});
+					it("should return the program id", (): Chai.Assertion => String(programId).should.equal(program.id));
 				});
 			});
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).programsStore.save as SinonStub).reset());
 	});
 
 	describe("remove", (): void => {
 		describe("no ID", (): void => {
-			it("should execute no SQL commands", (): void => {
+			it("should do nothing", async (): Promise<void> => {
 				program.id = null;
-				program.remove();
-				appController.db.commands.length.should.equal(0);
+				await program.remove();
+				(await DatabaseServiceMock).programsStore.remove.should.not.have.been.called;
 			});
 		});
 
-		describe("insert Episode Sync fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = ${id})`);
-				program.remove();
+		describe("fail", (): void => {
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).programsStore.remove as SinonStub).throws();
+				try {
+					await program.remove();
+				} catch (_e) {
+					// No op
+				}
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(program.id).should.equal(id));
-			it("should not clear the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
-		});
-
-		describe("delete Episode fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Episode WHERE SeriesID IN (SELECT SeriesID FROM Series WHERE ProgramID = ${id})`);
-				program.remove();
-			});
-
-			it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(program.id).should.equal(id));
-			it("should not clear the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
-		});
-
-		describe("insert Series Sync fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) SELECT 'Series', SeriesID, 'deleted' FROM Series WHERE ProgramID = ${id}`);
-				program.remove();
-			});
-
-			it("should execute three SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(3));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(program.id).should.equal(id));
-			it("should not clear the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
-		});
-
-		describe("delete Series fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Series	WHERE ProgramID = ${id}`);
-				program.remove();
-			});
-
-			it("should execute four SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(4));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(program.id).should.equal(id));
-			it("should not clear the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
-		});
-
-		describe("insert Program Sync fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) VALUES ('Program', ${id}, 'deleted')`);
-				program.remove();
-			});
-
-			it("should execute five SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(5));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(program.id).should.equal(id));
-			it("should not clear the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
-		});
-
-		describe("delete Program fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Program WHERE ProgramID = ${id}`);
-				program.remove();
-			});
-
-			it("should execute six SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(6));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
+			it("should attempt to remove the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.remove.should.have.been.calledWith(id));
 			it("should not clear the id", (): Chai.Assertion => String(program.id).should.equal(id));
 			it("should not clear the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => program.remove());
+			beforeEach(async (): Promise<void> => program.remove());
 
-			it("should execute six SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(6));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should not return an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal(""));
+			it("should attempt to remove the program", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).programsStore.remove.should.have.been.calledWith(id));
 			it("should clear the id", (): Chai.Assertion => (null === program.id).should.be.true);
 			it("should clear the program name", (): Chai.Assertion => (null === program.programName).should.be.true);
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).programsStore.remove as SinonStub).reset());
 	});
 
 	describe("toJson", (): void => {
@@ -521,6 +343,4 @@ describe("Program", (): void => {
 			}));
 		});
 	});
-
-	afterEach((): void => appController.db.reset());
 });

@@ -65,7 +65,7 @@ describe("SeriesController", (): void => {
 				leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesController, "cancel" as keyof SeriesController);
 			sinon.stub(seriesController, "save" as keyof SeriesController);
 			sinon.stub(seriesController, "getNowShowing" as keyof SeriesController);
@@ -83,7 +83,7 @@ describe("SeriesController", (): void => {
 				.attr("id", "moveTo")
 				.appendTo(document.body);
 
-			seriesController.setup();
+			await seriesController.setup();
 			leftButton = seriesController.header.leftButton as NavButton;
 			rightButton = seriesController.header.rightButton as NavButton;
 		});
@@ -128,7 +128,7 @@ describe("SeriesController", (): void => {
 		let seriesName: string,
 				seriesNameInput: JQuery<HTMLElement>;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			seriesName = "test-series-2";
 
 			seriesNameInput = $("<input>")
@@ -136,7 +136,7 @@ describe("SeriesController", (): void => {
 				.val(seriesName)
 				.appendTo(document.body);
 
-			seriesController["save"]();
+			await seriesController["save"]();
 		});
 
 		it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
@@ -147,9 +147,9 @@ describe("SeriesController", (): void => {
 	});
 
 	describe("cancel", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			seriesController["listItem"].series.programId = "2";
-			seriesController["cancel"]();
+			await seriesController["cancel"]();
 		});
 
 		it("should revert any changes", (): void => {
@@ -257,9 +257,9 @@ describe("SeriesController", (): void => {
 		beforeEach((): SinonStub => sinon.stub(seriesController, "listRetrieved" as keyof SeriesController));
 
 		describe("in progress", (): void => {
-			it("should do nothing", (): void => {
+			it("should do nothing", async (): Promise<void> => {
 				seriesController["gettingProgramId"] = true;
-				seriesController["getProgramId"]();
+				await seriesController["getProgramId"]();
 				seriesController["listRetrieved"].should.not.have.been.called;
 			});
 		});
@@ -267,13 +267,13 @@ describe("SeriesController", (): void => {
 		describe("not in progress", (): void => {
 			let programs: ProgramMock[];
 
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				programs = [
 					new ProgramMock(null, "program 1"),
 					new ProgramMock(null, "program 2")
 				];
 				ProgramMock.programs = programs;
-				seriesController["getProgramId"]();
+				await seriesController["getProgramId"]();
 			});
 
 			it("should set the semaphore", (): Chai.Assertion => seriesController["gettingProgramId"].should.be.true);

@@ -12,16 +12,10 @@
  * @requires uuid/v4
  */
 import {
-	CountCallback,
 	EpisodeStatus,
-	FindCallback,
-	ListCallback,
 	NowShowingEnum,
 	PersistedSeries,
-	RemoveCallback,
-	SaveCallback,
-	SerializedSeries,
-	StandardQuery
+	SerializedSeries
 } from "models";
 import Base from "models/base-model";
 import ProgressBar from "components/progressbar";
@@ -78,7 +72,7 @@ export default class Series extends Base {
 
 	public nowShowing!: number | null;
 
-	private progressBar: ProgressBar;
+	private readonly progressBar: ProgressBar;
 
 	private missedCount = 0;
 
@@ -103,27 +97,17 @@ export default class Series extends Base {
 	 * @method listByProgram
 	 * @desc Retrieves a list of series for a given program
 	 * @param {String} programId - the unique identifier of the program to retrieve
-	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 */
-	public static listByProgram(programId: string, callback: ListCallback): void {
-		/*
-		 * Set the SELECT and FROM clauses to use the standard
-		 * Set the WHERE clause to filter by the specified program, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by series name
-		 */
-		const query = `
-						${this.standardQuery.baseData}
-						${this.standardQuery.summaryData}
-						${this.standardQuery.entityList}
-					`,
-					filter = `
-						WHERE			p.ProgramID = ?
-						GROUP BY	s.SeriesID
-						ORDER BY	s.Name COLLATE NOCASE
-					`,
-					params: [string] = [programId];
+	public static async listByProgram(programId: string): Promise<Series[]> {
+		let seriesList: Series[] = [];
 
-		// Get the list of series
-		this.list(query, filter, params, callback);
+		try {
+			seriesList = await Promise.all((await (await this.db).seriesStore.listByProgram(programId)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+		} catch (_e) {
+			// No op
+		}
+
+		return seriesList;
 	}
 
 	/**
@@ -131,63 +115,17 @@ export default class Series extends Base {
 	 * @static
 	 * @method listByNowShowing
 	 * @desc Retrieves a list of series that are currently showing, or have recorded/expected episodes
-	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 */
-	public static listByNowShowing(callback: ListCallback): void {
-		/*
-		 * Set the SELECT and FROM clauses to use the standard, plus a calculation of the number of episodes with a warning
-		 * Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by now showing or recorded/expected counts, and the ORDER BY clause to sort by now showing and program name
-		 */
-		const	monthNumberCase = `
-						CASE SUBSTR(e4.StatusDate, 4, 3)
-							WHEN 'Jan' THEN '01'
-							WHEN 'Feb' THEN '02'
-							WHEN 'Mar' THEN '03'
-							WHEN 'Apr' THEN '04'
-							WHEN 'May' THEN '05'
-							WHEN 'Jun' THEN '06'
-							WHEN 'Jul' THEN '07'
-							WHEN 'Aug' THEN '08'
-							WHEN 'Sep' THEN '09'
-							WHEN 'Oct' THEN '10'
-							WHEN 'Nov' THEN '11'
-							WHEN 'Dec' THEN '12'
-						END
-					`,
-					query = `
-						${this.standardQuery.baseData}
-						${this.standardQuery.summaryData},
-						SUM(CASE
-							WHEN e4.StatusDate IS NULL THEN 0
-							WHEN STRFTIME('%m', 'now') < '04' THEN
-								CASE
-									WHEN STRFTIME('%m%d', 'now') < (${monthNumberCase} || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (${monthNumberCase} || SUBSTR(e4.StatusDate, 1, 2)) THEN 0
-									ELSE 1
-								END
-							ELSE
-								CASE
-									WHEN STRFTIME('%m%d', 'now') < (${monthNumberCase} || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (${monthNumberCase} || SUBSTR(e4.StatusDate, 1, 2)) THEN 0
-									ELSE 1
-								END
-						END) AS StatusWarningCount
-						${this.standardQuery.entityList}
-					`,
-					filter = `
-						GROUP BY	s.SeriesID
-						HAVING		s.NowShowing IS NOT NULL OR
-											COUNT(e3.EpisodeID) > 0 OR
-											COUNT(e4.EpisodeID) > 0
-						ORDER BY	CASE
-												WHEN s.NowShowing IS NULL THEN 1
-												ELSE 0
-											END,
-											s.NowShowing,
-											p.Name COLLATE NOCASE
-					`,
-					params: string[] = [];
+	public static async listByNowShowing(): Promise<Series[]> {
+		let seriesList: Series[] = [];
 
-		// Get the list of series
-		this.list(query, filter, params, callback);
+		try {
+			seriesList = await Promise.all((await (await this.db).seriesStore.listByNowShowing()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+		} catch (_e) {
+			// No op
+		}
+
+		return seriesList;
 	}
 
 	/**
@@ -195,32 +133,18 @@ export default class Series extends Base {
 	 * @static
 	 * @method listByStatus
 	 * @desc Retrieves a list of series that have one or more episodes with a given status
-	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 * @param {String} status - the episode status
 	 */
-	public static listByStatus(callback: ListCallback, status: EpisodeStatus): void {
-		/*
-		 * Set the SELECT clause to the standard, plus a calculation of the number of episodes in the specified status
-		 * Set the WHERE clause to filter by the specified status, the GROUP BY clause to aggregate by series, and the ORDER BY clause to sort by program name and series name
-		 */
-		const query = `
-						${this.standardQuery.baseData}
-									COUNT(e.EpisodeID) AS EpisodeCount,
-									COUNT(e.EpisodeID) AS ${status}Count
-						FROM	Program p
-						JOIN	Series s ON p.ProgramID = s.ProgramID
-						JOIN	Episode e ON s.SeriesID = e.SeriesID
-					`,
-					filter = `
-						WHERE			e.Status = ?
-						GROUP BY	s.SeriesID
-						ORDER BY	p.Name COLLATE NOCASE,
-											s.Name COLLATE NOCASE
-					`,
-					params: [EpisodeStatus] = [status];
+	public static async listByStatus(status: EpisodeStatus): Promise<Series[]> {
+		let seriesList: Series[] = [];
 
-		// Get the list of series
-		this.list(query, filter, params, callback);
+		try {
+			seriesList = await Promise.all((await (await this.db).seriesStore.listByStatus(status)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+		} catch (_e) {
+			// No op
+		}
+
+		return seriesList;
 	}
 
 	/**
@@ -228,29 +152,17 @@ export default class Series extends Base {
 	 * @static
 	 * @method listByIncomplete
 	 * @desc Retrieves a list of series that have some, but not all, episodes watched
-	 * @param {Function} callback - a function to call passing the list of series retrieved
 	 */
-	public static listByIncomplete(callback: ListCallback): void {
-		/*
-		 * Set the SELECT and FROM clauses to use the standard
-		 * Set the GROUP BY clause to aggregate by series, the HAVING clause to filter by any series that have some but not all episodes watched, and the ORDER BY clause to sort by program name and series name
-		 */
-		const query = `
-						${this.standardQuery.baseData}
-						${this.standardQuery.summaryData}
-						${this.standardQuery.entityList}
-					`,
-					filter = `
-						GROUP BY	s.SeriesID
-						HAVING		COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND
-											COUNT(e2.EpisodeID) > 0
-						ORDER BY	p.Name COLLATE NOCASE,
-											s.Name COLLATE NOCASE
-					`,
-					params: string[] = [];
+	public static async listByIncomplete(): Promise<Series[]> {
+		let seriesList: Series[] = [];
 
-		// Get the list of series
-		this.list(query, filter, params, callback);
+		try {
+			seriesList = await Promise.all((await (await this.db).seriesStore.listByIncomplete()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+		} catch (_e) {
+			// No op
+		}
+
+		return seriesList;
 	}
 
 	/**
@@ -259,28 +171,24 @@ export default class Series extends Base {
 	 * @method find
 	 * @desc Retrieves a specific series by it's unique identifier
 	 * @param {String} id - unique identifier of the series
-	 * @param {Function} callback - a function to call passing the series retrieved
 	 */
-	public static find(id: string, callback: FindCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the series
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	SeriesID,
-							Name,
-							ProgramID,
-							NowShowing
-			FROM		Series
-			WHERE		SeriesID = ?
-		`, [id], (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			const series: PersistedSeries = resultSet.rows.item(0);
+	public static async find(id: string): Promise<Series> {
+		let	SeriesID: string | null = null,
+				Name: string | null = null,
+				NowShowing: number | null = null,
+				ProgramID: string | null = null;
 
-			// Instantiate a new Series object, and invoke the callback function passing the series
-			callback(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID));
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing a null
-			callback(null);
+		try {
+			const series: PersistedSeries | undefined = await (await this.db).seriesStore.find(id);
 
-			return false;
-		}));
+			if (undefined !== series) {
+				({ SeriesID, Name, NowShowing, ProgramID } = series);
+			}
+		} catch (_e) {
+			// No op
+		}
+
+		return new Series(SeriesID, Name, NowShowing, ProgramID);
 	}
 
 	/**
@@ -288,21 +196,17 @@ export default class Series extends Base {
 	 * @static
 	 * @method count
 	 * @desc Retrieves a count of series
-	 * @param {Function} callback - a function to call passing the series count
 	 */
-	public static count(callback: CountCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the count of series
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	COUNT(*) AS SeriesCount
-			FROM		Series
-		`, [],
-		(_: SQLTransaction, resultSet: SQLResultSet): void => callback(resultSet.rows.item(0).SeriesCount),
-		(): boolean => {
-			// Something went wrong. Call the callback passing zero
-			callback(0);
+	public static async count(): Promise<number> {
+		let count = 0;
 
-			return false;
-		}));
+		try {
+			count = await (await this.db).seriesStore.count();
+		} catch (_e) {
+			// No op
+		}
+
+		return count;
 	}
 
 	/**
@@ -310,20 +214,17 @@ export default class Series extends Base {
 	 * @static
 	 * @method removeAll
 	 * @desc Removes all series from the database
-	 * @param {Function} callback - a function to call after removing the series
 	 */
-	public static removeAll(callback: RemoveCallback): void {
-		// Start a new database transaction and execute the SQL to delete the series
-		this.db.transaction((tx: SQLTransaction): void => tx.executeSql("DELETE FROM Series", [],
-			(): void => callback(),
-			(_: SQLTransaction, error: SQLError): boolean => {
-				// Something went wrong. Call the callback passing the error message
-				const message = `Series.removeAll: ${error.message}`;
+	public static async removeAll(): Promise<string | undefined> {
+		let errorMessage: string | undefined;
 
-				callback(message);
+		try {
+			await (await this.db).seriesStore.removeAll();
+		} catch (error) {
+			errorMessage = `Series.removeAll: ${error.message}`;
+		}
 
-				return false;
-			}));
+		return errorMessage;
 	}
 
 	/**
@@ -360,86 +261,31 @@ export default class Series extends Base {
 
 	/**
 	 * @memberof Series
-	 * @static
-	 * @method list
-	 * @desc Retrieves a list of series
-	 * @param {String} query - a SQL SELECT/FROM clause
-	 * @param {String} filter - a parameterised SQL WHERE/GROUP BY/HAVING/ORDER BY clause
-	 * @param {Array<String>} params - an array of parameter values for the filter
-	 * @param {Function} callback - a function to call passing the list of series retrieved
-	 */
-	private static list(query: string, filter: string, params: string[], callback: ListCallback): void {
-		const seriesList: Series[] = [];
-
-		// Start a new readonly database transaction and execute the SQL to retrieve the list of series
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			${query}
-			${filter}
-		`, params, (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			// Iterate of the rows returned
-			for (let i = 0; i < resultSet.rows.length; i++) {
-				const series: PersistedSeries = resultSet.rows.item(i);
-
-				// Instantiate a new Series object and add it to the array
-				seriesList.push(new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount));
-			}
-
-			// Invoke the callback function, passing the list of series
-			callback(seriesList);
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing the series list (which should be empty)
-			callback(seriesList);
-
-			return false;
-		}));
-	}
-
-	/**
-	 * @memberof Series
 	 * @this Series
 	 * @instance
 	 * @method save
 	 * @desc Saves the series to the database
-	 * @param {Function} callback - a function to call after the database is updated
 	 */
-	public save(callback?: SaveCallback): void {
-		// Start a new database transaction
-		this.db.transaction((tx: SQLTransaction): void => {
-			// If an id has not been set (ie. is a new series to be added), generate a new UUID
-			if (!this.id) {
-				this.id = uuid();
-			}
+	public async save(): Promise<string | undefined> {
+		// If an id has not been set (ie. is a new series to be added), generate a new UUID
+		if (null === this.id) {
+			this.id = uuid();
+		}
 
-			// Execute the SQL to insert/update the program
-			tx.executeSql(`
-				REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID)
-				VALUES (?, ?, ?, ?)
-			`, [this.id, this.seriesName, this.nowShowing, this.programId], (innerTx: SQLTransaction, resultSet: SQLResultSet): void => {
-				// Regardless of whether the series existed previously or not, we expect one row to be affected; so it's an error if this isn't the case
-				if (!resultSet.rowsAffected) {
-					throw new Error("no rows affected");
-				}
-
-				// Execute the SQL to flag the series as a pending local change
-				innerTx.executeSql(`
-					INSERT OR IGNORE INTO Sync (Type, ID, Action)
-					VALUES ('Series', ?, 'modified')
-				`, [this.id], (): void => {
-					// If a callback was provided, call it now with the series' id
-					if (callback) {
-						callback(this.id);
-					}
-				}, (_: SQLTransaction, error: SQLError): boolean => {
-					// Something went wrong
-					throw error;
-				});
+		try {
+			await (await this.db).seriesStore.save({
+				SeriesID: this.id,
+				Name: String(this.seriesName),
+				NowShowing: this.nowShowing,
+				ProgramID: String(this.programId)
 			});
-		}, (): void => {
-			// Something went wrong. If a callback was provided, call it now with no parameters
-			if (callback) {
-				callback();
-			}
-		});
+
+			return this.id;
+		} catch (_e) {
+			// No op
+		}
+
+		return undefined;
 	}
 
 	/**
@@ -449,31 +295,16 @@ export default class Series extends Base {
 	 * @method remove
 	 * @desc Deletes the series from the database
 	 */
-	public remove(): void {
-		let errorCallback: undefined;
-
+	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
-		if (this.id) {
-			// Start a new database transaction
-			this.db.transaction((tx: SQLTransaction): void => {
-				// Execute the SQL to flag all of the series' episodes as a pending local change
-				tx.executeSql("REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID = ?", [this.id]);
+		if (null !== this.id) {
+			await (await this.db).seriesStore.remove(this.id);
 
-				// Execute the SQL to delete all of the series' episodes
-				tx.executeSql("DELETE FROM Episode WHERE SeriesID = ?", [this.id]);
-
-				// Execute the SQL to flag the series as a pending local change
-				tx.executeSql("REPLACE INTO Sync (Type, ID, Action) VALUES ('Series', ?, 'deleted')", [this.id]);
-
-				// Execute the SQL to delete the series
-				tx.executeSql("DELETE FROM Series WHERE SeriesID = ?", [this.id]);
-			}, errorCallback, (): void => {
-				// Clear the instance properties
-				this.id = null;
-				this.seriesName = null;
-				this.nowShowing = null;
-				this.programId = null;
-			});
+			// Clear the instance properties
+			this.id = null;
+			this.seriesName = null;
+			this.nowShowing = null;
+			this.programId = null;
 		}
 	}
 
@@ -669,37 +500,5 @@ export default class Series extends Base {
 			percent: missedPercent,
 			style: "missed"
 		});
-	}
-
-	/**
-	 * @memberof Series
-	 * @static
-	 * @inner standardQuery
-	 * @desc Defines the standard SELECT, aggregate and FROM clauses for retrieving a list of series
-	 */
-	private static get standardQuery(): StandardQuery {
-		return {
-			baseData: `
-				SELECT	p.Name AS ProgramName,
-								s.SeriesID,
-								s.Name,
-								s.NowShowing,
-								s.ProgramID,
-			`,
-			summaryData: `
-				COUNT(e.EpisodeID) AS EpisodeCount,
-				COUNT(e2.EpisodeID) AS WatchedCount,
-				COUNT(e3.EpisodeID) AS RecordedCount,
-				COUNT(e4.EpisodeID) AS ExpectedCount
-			`,
-			entityList: `
-				FROM						Program p
-				JOIN						Series s ON p.ProgramID = s.ProgramID
-				LEFT OUTER JOIN	Episode e ON s.SeriesID = e.SeriesID
-				LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
-				LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
-				LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
-			`
-		};
 	}
 }

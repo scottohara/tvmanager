@@ -24,13 +24,15 @@ describe("ProgramController", (): void => {
 	describe("object constructor", (): void => {
 		interface Scenario {
 			description: string;
-			listItem?: ProgramListItem;
-			programController?: ProgramController;
+			listItem: ProgramListItem;
+			programController: ProgramController;
 		}
 
 		const scenarios: Scenario[] = [
 			{
-				description: "update"
+				description: "update",
+				listItem,
+				programController
 			},
 			{
 				description: "add",
@@ -42,12 +44,14 @@ describe("ProgramController", (): void => {
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
 				beforeEach((): void => {
-					listItem = scenario.listItem || listItem;
-					programController = scenario.programController || programController;
+					if (undefined === scenario.listItem) {
+						scenario.listItem = listItem;
+						scenario.programController = programController;
+					}
 				});
 
 				it("should return a ProgramController instance", (): Chai.Assertion => programController.should.be.an.instanceOf(ProgramController));
-				it("should set the list item", (): Chai.Assertion => String(programController["listItem"].program.programName).should.equal(listItem.program.programName));
+				it("should set the list item", (): Chai.Assertion => String(scenario.programController["listItem"].program.programName).should.equal(scenario.listItem.program.programName));
 			});
 		});
 	});
@@ -61,7 +65,7 @@ describe("ProgramController", (): void => {
 				leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programController, "cancel" as keyof ProgramController);
 			sinon.stub(programController, "save" as keyof ProgramController);
 
@@ -69,7 +73,7 @@ describe("ProgramController", (): void => {
 				.attr("id", "programName")
 				.appendTo(document.body);
 
-			programController.setup();
+			await programController.setup();
 			leftButton = programController.header.leftButton as NavButton;
 			rightButton = programController.header.rightButton as NavButton;
 		});
@@ -100,7 +104,7 @@ describe("ProgramController", (): void => {
 		let programName: string,
 				programNameInput: JQuery<HTMLElement>;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			programName = "test-program-2";
 
 			programNameInput = $("<input>")
@@ -108,7 +112,7 @@ describe("ProgramController", (): void => {
 				.val(programName)
 				.appendTo(document.body);
 
-			programController["save"]();
+			await programController["save"]();
 		});
 
 		it("should get the program name", (): Chai.Assertion => programController["listItem"].program.setProgramName.should.have.been.calledWith(programName));
@@ -119,8 +123,8 @@ describe("ProgramController", (): void => {
 	});
 
 	describe("cancel", (): void => {
-		it("should pop the view", (): void => {
-			programController["cancel"]();
+		it("should pop the view", async (): Promise<void> => {
+			await programController["cancel"]();
 			appController.popView.should.have.been.called;
 		});
 	});

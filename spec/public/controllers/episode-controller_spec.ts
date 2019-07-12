@@ -76,7 +76,7 @@ describe("EpisodeController", (): void => {
 				leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodeController, "cancel" as keyof EpisodeController);
 			sinon.stub(episodeController, "save" as keyof EpisodeController);
 			sinon.stub(episodeController, "setStatus" as keyof EpisodeController);
@@ -115,7 +115,7 @@ describe("EpisodeController", (): void => {
 				.attr("id", "statusDate")
 				.appendTo(document.body);
 
-			episodeController.setup();
+			await episodeController.setup();
 			leftButton = episodeController.header.leftButton as NavButton;
 			rightButton = episodeController.header.rightButton as NavButton;
 		});
@@ -216,7 +216,7 @@ describe("EpisodeController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					episodeName = "test-episode-2";
 
 					episodeNameInput = $("<input>")
@@ -239,7 +239,7 @@ describe("EpisodeController", (): void => {
 						{ controller: new TestController(), scrollPos: 0 }
 					];
 					episodeController["listItem"].listIndex = scenario.listIndex;
-					episodeController["save"]();
+					await episodeController["save"]();
 				});
 
 				it("should get the episode name", (): Chai.Assertion => String(episodeController["listItem"].episode.episodeName).should.equal(episodeName));
@@ -259,10 +259,10 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("cancel", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			episodeController["listItem"].episode.status = "Recorded";
 			episodeController["listItem"].episode.statusDate = "02-Jan";
-			episodeController["cancel"]();
+			await episodeController["cancel"]();
 		});
 
 		it("should revert any changes", (): void => {
@@ -494,37 +494,51 @@ describe("EpisodeController", (): void => {
 	describe("toggleStatusDateRow", (): void => {
 		interface Scenario {
 			description: string;
-			isHidden?: true;
-			isUnscheduled?: true;
+			isHidden: boolean;
+			isUnscheduled: boolean;
 			status: EpisodeStatus;
-			noDate?: true;
+			noDate: boolean;
 		}
 
 		const scenarios: Scenario[] = [
 			{
 				description: "hidden",
 				isHidden: true,
-				status: ""
+				isUnscheduled: false,
+				status: "",
+				noDate: false
 			},
 			{
 				description: "unscheduled",
+				isHidden: false,
 				isUnscheduled: true,
-				status: ""
+				status: "",
+				noDate: false
 			},
 			{
 				description: "recorded",
-				status: "Recorded"
+				isHidden: false,
+				isUnscheduled: false,
+				status: "Recorded",
+				noDate: false
 			},
 			{
 				description: "expected",
-				status: "Expected"
+				isHidden: false,
+				isUnscheduled: false,
+				status: "Expected",
+				noDate: false
 			},
 			{
 				description: "missed",
-				status: "Missed"
+				isHidden: false,
+				isUnscheduled: false,
+				status: "Missed",
+				noDate: false
 			},
 			{
 				description: "no date specified",
+				isHidden: false,
 				isUnscheduled: true,
 				status: "",
 				noDate: true

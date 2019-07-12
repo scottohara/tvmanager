@@ -28,7 +28,7 @@ describe("AboutController", (): void => {
 		let databaseVersion: JQuery<HTMLElement>,
 				leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			databaseVersion = $("<input>").attr("id", "databaseVersion");
 
 			sinon.stub(aboutController, "goBack" as keyof AboutController);
@@ -37,7 +37,7 @@ describe("AboutController", (): void => {
 			sinon.stub(aboutController, "episodeCount" as keyof AboutController);
 
 			$(document.body).append(databaseVersion);
-			aboutController.setup();
+			await aboutController.setup();
 			leftButton = aboutController.header.leftButton as NavButton;
 		});
 
@@ -52,29 +52,29 @@ describe("AboutController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Settings"));
 
 		it("should get the total number of programs", (): void => {
-			ProgramMock.count.should.have.been.calledWith(sinon.match.func);
+			ProgramMock.count.should.have.been.called;
 			aboutController["programCount"].should.have.been.calledWith(1);
 		});
 
 		it("should get the total number of series", (): void => {
-			SeriesMock.count.should.have.been.calledWith(sinon.match.func);
+			SeriesMock.count.should.have.been.called;
 			aboutController["seriesCount"].should.have.been.calledWith(1);
 		});
 
 		it("should get the total number of episodes", (): void => {
-			EpisodeMock.totalCount.should.have.been.calledWith(sinon.match.func);
+			EpisodeMock.totalCount.should.have.been.called;
 			aboutController["episodeCount"].should.have.been.calledWith(1);
 		});
 
-		it("should set the database version", (): Chai.Assertion => String(databaseVersion.val()).should.equal("v1.0"));
+		it("should set the database version", (): Chai.Assertion => String(databaseVersion.val()).should.equal("v1"));
 		it("should set the scroll position", (): Chai.Assertion => appController.setScrollPosition.should.have.been.called);
 
 		afterEach((): JQuery<HTMLElement> => databaseVersion.remove());
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			aboutController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await aboutController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
@@ -108,15 +108,15 @@ describe("AboutController", (): void => {
 	describe("episodeCount", (): void => {
 		let count: number;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			count = 1;
 			sinon.stub(aboutController, "watchedCount" as keyof AboutController);
-			aboutController["episodeCount"](count);
+			await aboutController["episodeCount"](count);
 		});
 
 		it("should set the episode total count", (): Chai.Assertion => aboutController["episodeTotalCount"].should.equal(count));
 		it("should get the total number of watched episodes", (): void => {
-			EpisodeMock.countByStatus.should.have.been.calledWith("Watched", sinon.match.func);
+			EpisodeMock.countByStatus.should.have.been.calledWith("Watched");
 			aboutController["watchedCount"].should.have.been.calledWith(1);
 		});
 	});

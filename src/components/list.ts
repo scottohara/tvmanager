@@ -73,7 +73,7 @@ export default class List {
 			const listItem: Map<string, string> = new Map(Object.entries(item));
 
 			// If grouping is required, when the property used for the group changes, output a group header item
-			if (this.groupBy) {
+			if (null !== this.groupBy) {
 				const itemGroup = String(listItem.get(this.groupBy));
 
 				if (currentGroup !== itemGroup) {
@@ -132,7 +132,7 @@ export default class List {
 		}
 
 		// If we have somewhere to scroll, do it now
-		if (scrollPos) {
+		if (undefined !== scrollPos) {
 			this.appController.viewStack[this.appController.viewStack.length - 1].scrollPos = scrollPos;
 			this.appController.setScrollPosition();
 		}
@@ -194,13 +194,13 @@ export default class List {
 				break;
 
 			case "edit":
-				if (this.editEventHandler) {
+				if (undefined !== this.editEventHandler && null !== this.editEventHandler) {
 					this.editEventHandler(itemIndex);
 				}
 				break;
 
 			case "delete":
-				if (this.deleteEventHandler) {
+				if (undefined !== this.deleteEventHandler && null !== this.deleteEventHandler) {
 					if (window.confirm("Delete this item?")) {
 						this.deleteEventHandler(itemIndex);
 					}

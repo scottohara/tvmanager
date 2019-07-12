@@ -20,14 +20,13 @@ describe("SeriesListController", (): void => {
 	let listItem: ProgramListItem,
 			items: SeriesMock[],
 			seriesList: JQuery<HTMLElement>,
-			seriesListController: SeriesListController,
-			programName: undefined;
+			seriesListController: SeriesListController;
 
 	beforeEach((): void => {
 		listItem = { program: new ProgramMock("1", "test-program", 1, 6, 2, 2, 2) };
 		items = [
-			new SeriesMock("1", "a-test-series", null, "1", programName, 3, 1, 1, 1),
-			new SeriesMock("2", "z-test-series", null, "1", programName, 3, 1, 1, 1)
+			new SeriesMock("1", "a-test-series", null, "1", undefined, 3, 1, 1, 1),
+			new SeriesMock("2", "z-test-series", null, "1", undefined, 3, 1, 1, 1)
 		];
 
 		seriesList = $("<ul>")
@@ -50,7 +49,7 @@ describe("SeriesListController", (): void => {
 		let leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesListController, "viewItem" as keyof SeriesListController);
 			sinon.stub(seriesListController, "editItem" as keyof SeriesListController);
 			sinon.stub(seriesListController, "deleteItem" as keyof SeriesListController);
@@ -58,7 +57,7 @@ describe("SeriesListController", (): void => {
 			sinon.stub(seriesListController, "addItem" as keyof SeriesListController);
 			sinon.stub(seriesListController, "listRetrieved" as keyof SeriesListController);
 			SeriesMock.series = items;
-			seriesListController.setup();
+			await seriesListController.setup();
 			leftButton = seriesListController.header.leftButton as NavButton;
 			rightButton = seriesListController.header.rightButton as NavButton;
 		});
@@ -96,7 +95,7 @@ describe("SeriesListController", (): void => {
 		});
 
 		it("should get the list of series for the program", (): void => {
-			SeriesMock.listByProgram.should.have.been.calledWith(listItem.program.id, sinon.match.func);
+			SeriesMock.listByProgram.should.have.been.calledWith(listItem.program.id);
 			seriesListController["listRetrieved"].should.have.been.calledWith(items);
 		});
 	});
@@ -111,7 +110,7 @@ describe("SeriesListController", (): void => {
 		});
 
 		describe("from programs view", (): void => {
-			beforeEach((): void => seriesListController.activate());
+			beforeEach(async (): Promise<void> => seriesListController.activate());
 
 			it("should refresh the list", (): Chai.Assertion => seriesListController["seriesList"].refresh.should.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion => seriesListController["viewItems"].should.have.been.called);
@@ -131,9 +130,9 @@ describe("SeriesListController", (): void => {
 				});
 
 				describe("program changed", (): void => {
-					beforeEach((): void => {
+					beforeEach(async (): Promise<void> => {
 						seriesListItem.series.programId = "2";
-						seriesListController.activate(seriesListItem);
+						await seriesListController.activate(seriesListItem);
 					});
 
 					it("should not update the program episode count", (): Chai.Assertion => listItem.program.setEpisodeCount.should.not.have.been.called);
@@ -155,9 +154,9 @@ describe("SeriesListController", (): void => {
 					});
 
 					describe("series name unchanged", (): void => {
-						beforeEach((): void => {
+						beforeEach(async (): Promise<void> => {
 							seriesListController["origSeriesName"] = seriesListItem.series.seriesName;
-							seriesListController.activate(seriesListItem);
+							await seriesListController.activate(seriesListItem);
 						});
 
 						it("should update the item in the series list and resort by series name", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(items));
@@ -172,9 +171,9 @@ describe("SeriesListController", (): void => {
 					});
 
 					describe("series name changed", (): void => {
-						beforeEach((): void => {
+						beforeEach(async (): Promise<void> => {
 							seriesListController["origSeriesName"] = "original-program";
-							seriesListController.activate(seriesListItem);
+							await seriesListController.activate(seriesListItem);
 						});
 
 						it("should update the item in the series list and resort by series name", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(items));
@@ -193,14 +192,14 @@ describe("SeriesListController", (): void => {
 			describe("add", (): void => {
 				let sortedItems: SeriesMock[];
 
-				beforeEach((): void => {
-					seriesListItem = { series: new SeriesMock("3", "new-series", null, "1", programName) };
+				beforeEach(async (): Promise<void> => {
+					seriesListItem = { series: new SeriesMock("3", "new-series", null, "1", undefined) };
 					sortedItems = [
 						items[0],
 						seriesListItem.series as SeriesMock,
 						items[1]
 					];
-					seriesListController.activate(seriesListItem);
+					await seriesListController.activate(seriesListItem);
 				});
 
 				it("should add the item to the series list and resort by series name", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(sortedItems));
@@ -213,10 +212,10 @@ describe("SeriesListController", (): void => {
 	});
 
 	describe("listRetrieved", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesListController, "activate");
 			seriesListController["seriesList"] = new ListMock("", "", "", []);
-			seriesListController["listRetrieved"](items);
+			await seriesListController["listRetrieved"](items);
 		});
 
 		it("should set the series list items", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(items));
@@ -224,8 +223,8 @@ describe("SeriesListController", (): void => {
 	});
 
 	describe("goBack", (): void => {
-		it("should pop the view", (): void => {
-			seriesListController["goBack"]();
+		it("should pop the view", async (): Promise<void> => {
+			await seriesListController["goBack"]();
 			appController.popView.should.have.been.called;
 		});
 	});
@@ -233,10 +232,10 @@ describe("SeriesListController", (): void => {
 	describe("viewItem", (): void => {
 		let index: number;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			index = 0;
 			seriesListController["seriesList"] = new ListMock("", "", "", items);
-			seriesListController["viewItem"](index);
+			await seriesListController["viewItem"](index);
 		});
 
 		it("should save the current series details", (): void => {
@@ -254,8 +253,8 @@ describe("SeriesListController", (): void => {
 	});
 
 	describe("addItem", (): void => {
-		it("should push the series view with no selected item", (): void => {
-			seriesListController["addItem"]();
+		it("should push the series view with no selected item", async (): Promise<void> => {
+			await seriesListController["addItem"]();
 			appController.pushView.should.have.been.calledWithExactly("series", { program: listItem.program });
 		});
 	});
@@ -263,10 +262,10 @@ describe("SeriesListController", (): void => {
 	describe("editItem", (): void => {
 		let index: number;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			index = 0;
 			seriesListController["seriesList"] = new ListMock("", "", "", items);
-			seriesListController["editItem"](index);
+			await seriesListController["editItem"](index);
 		});
 
 		it("should save the current series details", (): void => {
@@ -311,7 +310,7 @@ describe("SeriesListController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => seriesListController["deleteItem"](index, scenario.dontRemove));
+				beforeEach(async (): Promise<void> => seriesListController["deleteItem"](index, scenario.dontRemove));
 
 				it("should decrement the program episode count", (): Chai.Assertion => listItem.program.setEpisodeCount.should.have.been.calledWith(3));
 				it("should decrement the program watched count", (): Chai.Assertion => listItem.program.setWatchedCount.should.have.been.calledWith(1));
@@ -333,11 +332,11 @@ describe("SeriesListController", (): void => {
 		let	footer: HeaderFooter,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesListController, "listRetrieved" as keyof SeriesListController);
 			sinon.stub(seriesListController, "viewItems" as keyof SeriesListController);
-			seriesListController.setup();
-			seriesListController["deleteItems"]();
+			await seriesListController.setup();
+			await seriesListController["deleteItems"]();
 			footer = seriesListController.footer as HeaderFooter;
 			rightButton = footer.rightButton as NavButton;
 		});
@@ -350,7 +349,7 @@ describe("SeriesListController", (): void => {
 			seriesList.hasClass("edit").should.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as Function)();
@@ -366,11 +365,11 @@ describe("SeriesListController", (): void => {
 		let	footer: HeaderFooter,
 				leftButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesListController, "listRetrieved" as keyof SeriesListController);
 			sinon.stub(seriesListController, "viewItems" as keyof SeriesListController);
-			seriesListController.setup();
-			seriesListController["editItems"]();
+			await seriesListController.setup();
+			await seriesListController["editItems"]();
 			footer = seriesListController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -383,7 +382,7 @@ describe("SeriesListController", (): void => {
 			seriesList.hasClass("edit").should.be.true;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as Function)();
@@ -400,12 +399,12 @@ describe("SeriesListController", (): void => {
 				leftButton: NavButton,
 				rightButton: NavButton;
 
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesListController, "listRetrieved" as keyof SeriesListController);
 			sinon.stub(seriesListController, "editItems" as keyof SeriesListController);
 			sinon.stub(seriesListController, "deleteItems" as keyof SeriesListController);
-			seriesListController.setup();
-			seriesListController["viewItems"]();
+			await seriesListController.setup();
+			await seriesListController["viewItems"]();
 			footer = seriesListController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -419,7 +418,7 @@ describe("SeriesListController", (): void => {
 			seriesList.hasClass("edit").should.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1.0"));
+		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as Function)();

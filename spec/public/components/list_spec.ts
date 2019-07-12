@@ -151,11 +151,9 @@ describe("List", (): void => {
 	});
 
 	describe("setAction", (): void => {
-		let noAction: undefined;
-
 		beforeEach((): void => {
 			appController.getScrollPosition.reset();
-			list["action"] = noAction;
+			list["action"] = undefined;
 		});
 
 		validActions.forEach((validAction: ListAction): void => {
@@ -178,21 +176,20 @@ describe("List", (): void => {
 			beforeEach((): void => list.setAction("invalid" as ListAction));
 			it("should not save the scroll position", (): Chai.Assertion => appController.getScrollPosition.should.not.have.been.called);
 			it("should show an alert", (): Chai.Assertion => WindowMock.alert.should.have.been.calledWith("invalid is not a valid action"));
-			it("should not set the action", (): Chai.Assertion => (noAction === list["action"]).should.be.true);
+			it("should not set the action", (): Chai.Assertion => (undefined === list["action"]).should.be.true);
 		});
 	});
 
 	describe("tap", (): void => {
 		let viewEventHandler: SinonStub,
 				editEventHandler: SinonStub | null | undefined,
-				deleteEventHandler: SinonStub | undefined,
-				noEventHandler: undefined;
+				deleteEventHandler: SinonStub | undefined;
 
 		beforeEach((): void => {
 			viewEventHandler = sinon.stub();
 			WindowMock.confirm.resetHistory();
-			editEventHandler = noEventHandler;
-			deleteEventHandler = noEventHandler;
+			editEventHandler = undefined;
+			deleteEventHandler = undefined;
 		});
 
 		validActions.forEach((validAction: ListAction): void => {

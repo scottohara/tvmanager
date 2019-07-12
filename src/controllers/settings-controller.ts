@@ -41,7 +41,7 @@ export default class SettingsController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Settings",
@@ -53,7 +53,7 @@ export default class SettingsController extends ViewController {
 		};
 
 		// Activate the controller
-		this.activate();
+		return this.activate();
 	}
 
 	/**
@@ -63,7 +63,7 @@ export default class SettingsController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public activate(): void {
+	public activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
 		$("#dataSyncRow").on("click", this.viewDataSync.bind(this));
 		$("#aboutRow").on("click", this.viewAbout.bind(this));
@@ -71,6 +71,8 @@ export default class SettingsController extends ViewController {
 		$("#expectedReportRow").on("click", this.viewExpectedReport.bind(this));
 		$("#missedReportRow").on("click", this.viewMissedReport.bind(this));
 		$("#incompleteReportRow").on("click", this.viewIncompleteReport.bind(this));
+
+		return Promise.resolve();
 	}
 
 	/**
@@ -80,8 +82,8 @@ export default class SettingsController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): void {
-		this.appController.popView();
+	private goBack(): Promise<void> {
+		return this.appController.popView();
 	}
 
 	/**
@@ -91,8 +93,8 @@ export default class SettingsController extends ViewController {
 	 * @method viewDataSync
 	 * @desc Display the dataSync view
 	 */
-	private viewDataSync(): void {
-		this.appController.pushView("dataSync");
+	private viewDataSync(): Promise<void> {
+		return this.appController.pushView("dataSync");
 	}
 
 	/**
@@ -102,8 +104,8 @@ export default class SettingsController extends ViewController {
 	 * @method viewAbout
 	 * @desc Display the about view
 	 */
-	private viewAbout(): void {
-		this.appController.pushView("about");
+	private viewAbout(): Promise<void> {
+		return this.appController.pushView("about");
 	}
 
 	/**
@@ -113,8 +115,8 @@ export default class SettingsController extends ViewController {
 	 * @method viewRecordedReport
 	 * @desc Display the All Recorded report view
 	 */
-	private viewRecordedReport(): void {
-		this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series), args: "Recorded" });
+	private viewRecordedReport(): Promise<void> {
+		return this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series), args: "Recorded" });
 	}
 
 	/**
@@ -124,8 +126,8 @@ export default class SettingsController extends ViewController {
 	 * @method viewExpectedReport
 	 * @desc Display the All Expected report view
 	 */
-	private viewExpectedReport(): void {
-		this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series), args: "Expected" });
+	private viewExpectedReport(): Promise<void> {
+		return this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series), args: "Expected" });
 	}
 
 	/**
@@ -135,8 +137,8 @@ export default class SettingsController extends ViewController {
 	 * @method viewMissedReport
 	 * @desc Display the All Missed report view
 	 */
-	private viewMissedReport(): void {
-		this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series), args: "Missed" });
+	private viewMissedReport(): Promise<void> {
+		return this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series), args: "Missed" });
 	}
 
 	/**
@@ -146,7 +148,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewIncompleteReport
 	 * @desc Display the All Incomplete report view
 	 */
-	private viewIncompleteReport(): void {
-		this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series), args: null });
+	private viewIncompleteReport(): Promise<void> {
+		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) });
 	}
 }

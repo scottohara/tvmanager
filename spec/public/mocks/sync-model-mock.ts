@@ -7,7 +7,7 @@ import sinon, { SinonStub } from "sinon";
 const removeStub: SinonStub = sinon.stub(),
 			listStub: SinonStub = sinon.stub(),
 			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub = sinon.stub().yields();
+			removeAllStub: SinonStub = sinon.stub();
 
 let syncList: SyncMock[] = [];
 
@@ -18,7 +18,7 @@ export default class SyncMock {
 		removeStub.reset();
 	}
 
-	public get remove(): SinonStub<void[], void> {
+	public get remove(): SinonStub<void[], Promise<void>> {
 		return removeStub;
 	}
 
@@ -27,15 +27,15 @@ export default class SyncMock {
 		removeStub.reset();
 	}
 
-	public static get list(): SinonStub<void[], SyncMock[]> {
-		return listStub.yields(syncList);
+	public static get list(): SinonStub<void[], Promise<SyncMock[]>> {
+		return listStub.returns(Promise.resolve(syncList));
 	}
 
-	public static get count(): SinonStub<void[], number> {
-		return countStub.yields(syncList.length);
+	public static get count(): SinonStub<void[], Promise<number>> {
+		return countStub.returns(Promise.resolve(syncList.length));
 	}
 
-	public static get removeAll(): SinonStub<void[], void> {
+	public static get removeAll(): SinonStub<void[], Promise<string | undefined>> {
 		return removeAllStub;
 	}
 

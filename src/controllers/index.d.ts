@@ -1,10 +1,7 @@
-import {
-	ListCallback,
-	SerializedModel
-} from "models";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
 import { PublicInterface } from "global";
+import { SerializedModel } from "models";
 import Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
@@ -169,6 +166,6 @@ export interface ProgramListItem {
  */
 export interface Report {
 	reportName: string;
-	dataSource: (callback: ListCallback, args: string | null) => void;
-	args: string | null;
+	dataSource: (args?: string) => Promise<PublicInterface<Series>[]>;
+	args?: string;
 }

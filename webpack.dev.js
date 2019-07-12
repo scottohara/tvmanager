@@ -14,6 +14,7 @@ const merge = require("webpack-merge"),
 				createIndexHtml,
 				defineAppConfig,
 				generateServiceWorker,
+				workers,
 				config
 			} = require("./webpack.common");
 
@@ -60,6 +61,7 @@ module.exports = merge(config, {
 		createIndexHtml,
 		defineAppConfig({ maxDataAgeDays: 9999 }),
 		generateServiceWorker,
+		workers,
 
 		// Live reload when in watch mode
 		new LiveReloadPlugin({

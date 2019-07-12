@@ -1,46 +1,14 @@
-import {
-	DatabaseErrorCallback,
-	DatabaseSuccessCallback
-} from "services";
-import sinon from "sinon";
+import { EpisodesStoreMock } from "mocks/episodes-store-mock";
+import { ProgramsStoreMock } from "mocks/programs-store-mock";
+import { SeriesStoreMock } from "mocks/series-store-mock";
+import { SettingsStoreMock } from "mocks/settings-store-mock";
+import { SyncsStoreMock } from "mocks/syncs-store-mock";
 
-type DBMode = "Fail" | "Upgrade" | undefined;
-
-let dbMode: DBMode;
-
-export default class DatabaseServiceMock {
-	public static connect(_: string, callback: DatabaseSuccessCallback, errorCallback: DatabaseErrorCallback): Database {
-		let db!: Database;
-
-		switch (dbMode) {
-			case "Fail":
-				errorCallback({ code: 0, message: "Error" });
-				break;
-
-			case "Upgrade":
-				db = {
-					version: "1.1",
-					transaction: sinon.stub(),
-					readTransaction: sinon.stub(),
-					changeVersion: sinon.stub()
-				};
-				callback({ initial: "1.0", current: "1.1" });
-				break;
-
-			default:
-				db = {
-					version: "1.1",
-					transaction: sinon.stub(),
-					readTransaction: sinon.stub(),
-					changeVersion: sinon.stub()
-				};
-				callback({ initial: "1.1", current: "1.1" });
-		}
-
-		return db;
-	}
-
-	public static set mode(mode: DBMode) {
-		dbMode = mode;
-	}
-}
+export default Promise.resolve({
+	programsStore: ProgramsStoreMock,
+	seriesStore: SeriesStoreMock,
+	episodesStore: EpisodesStoreMock,
+	settingsStore: SettingsStoreMock,
+	syncsStore: SyncsStoreMock,
+	version: 1
+});

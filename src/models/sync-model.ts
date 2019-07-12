@@ -10,11 +10,8 @@
  * @requires models/base-model
  */
 import {
-	CountCallback,
-	ListCallback,
 	ModelType,
 	PersistedSync,
-	RemoveCallback,
 	SyncAction
 } from "models";
 import Base from "models/base-model";
@@ -43,34 +40,17 @@ export default class Sync extends Base {
 	 * @static
 	 * @method list
 	 * @desc Retrieves a list of local changes
-	 * @param {Function} callback - a function to call passing the list of local changes retrieved
 	 */
-	public static list(callback: ListCallback): void {
-		const syncList: Sync[] = [];
+	public static async list(): Promise<Sync[]> {
+		let syncList: Sync[] = [];
 
-		// Start a new readonly database transaction and execute the SQL to retrieve the list of local changes
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql(`
-			SELECT	Type,
-							ID,
-							Action
-			FROM		Sync
-		`, [], (_: SQLTransaction, resultSet: SQLResultSet): void => {
-			// Iterate of the rows returned
-			for (let i = 0; i < resultSet.rows.length; i++) {
-				const sync: PersistedSync = resultSet.rows.item(i);
+		try {
+			syncList = await Promise.all((await (await this.db).syncsStore.list()).map((sync: PersistedSync): Sync => new Sync(sync.Type, sync.ID, sync.Action)));
+		} catch (_e) {
+			// No op
+		}
 
-				// Instantiate a new Sync object and add it to the array
-				syncList.push(new Sync(sync.Type, sync.ID, sync.Action));
-			}
-
-			// Invoke the callback function, passing the list of local changes
-			callback(syncList);
-		}, (): boolean => {
-			// Something went wrong. Call the callback passing the local changes list (which should be empty)
-			callback(syncList);
-
-			return false;
-		}));
+		return syncList;
 	}
 
 	/**
@@ -78,18 +58,17 @@ export default class Sync extends Base {
 	 * @static
 	 * @method count
 	 * @desc Retrieves a count of local changes
-	 * @param {Function} callback - a function to call passing the local changes count
 	 */
-	public static count(callback: CountCallback): void {
-		// Start a new readonly database transaction and execute the SQL to retrieve the count of local changes
-		this.db.readTransaction((tx: SQLTransaction): void => tx.executeSql("SELECT COUNT(*) AS SyncCount FROM Sync", [],
-			(_: SQLTransaction, resultSet: SQLResultSet): void => callback(resultSet.rows.item(0).SyncCount),
-			(): boolean => {
-				// Something went wrong. Call the callback passing zero
-				callback(0);
+	public static async count(): Promise<number> {
+		let count = 0;
 
-				return false;
-			}));
+		try {
+			count = await (await this.db).syncsStore.count();
+		} catch (_e) {
+			// No op
+		}
+
+		return count;
 	}
 
 	/**
@@ -97,20 +76,17 @@ export default class Sync extends Base {
 	 * @static
 	 * @method removeAll
 	 * @desc Removes all local changes from the database
-	 * @param {Function} callback - a function to call after removing the local changes
 	 */
-	public static removeAll(callback: RemoveCallback): void {
-		// Start a new database transaction and execute the SQL to delete the local change
-		this.db.transaction((tx: SQLTransaction): void => tx.executeSql("DELETE FROM Sync", [],
-			(): void => callback(),
-			(_: SQLTransaction, error: SQLError): boolean => {
-				// Something went wrong. Call the callback passing the error message
-				const message = `Sync.removeAll: ${error.message}`;
+	public static async removeAll(): Promise<string | undefined> {
+		let errorMessage: string | undefined;
 
-				callback(message);
+		try {
+			await (await this.db).syncsStore.removeAll();
+		} catch (error) {
+			errorMessage = `Sync.removeAll: ${error.message}`;
+		}
 
-				return false;
-			}));
+		return errorMessage;
 	}
 
 	/**
@@ -120,18 +96,11 @@ export default class Sync extends Base {
 	 * @method remove
 	 * @desc Deletes a local change from the database
 	 */
-	public remove(): void {
-		let errorCallback: undefined;
+	public async remove(): Promise<void> {
+		await (await this.db).syncsStore.remove(this.type as ModelType, String(this.id));
 
-		// Start a new database transaction and execute the SQL to delete the local change
-		this.db.transaction((tx: SQLTransaction): void => tx.executeSql(`
-			DELETE FROM Sync
-			WHERE	Type = ? AND
-						ID = ?
-		`, [this.type, this.id]), errorCallback, (): void => {
-			// Clear the instance properties
-			this.type = null;
-			this.id = null;
-		});
+		// Clear the instance properties
+		this.type = null;
+		this.id = null;
 	}
 }

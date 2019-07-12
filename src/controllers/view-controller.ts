@@ -30,9 +30,9 @@ export default abstract class ViewController {
 		this.appController = new ApplicationController();
 	}
 
-	public activate?(args?: object): void;
+	public activate?(args?: object): Promise<void>;
 
-	public abstract setup(): void;
+	public abstract setup(): Promise<void>;
 
 	public abstract get view(): string;
 }

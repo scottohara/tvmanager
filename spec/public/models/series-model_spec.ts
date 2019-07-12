@@ -1,10 +1,10 @@
-import sinon, { SinonStub } from "sinon";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import { EpisodeStatus } from "models";
+import {
+	EpisodeStatus,
+	PersistedSeries
+} from "models";
+import DatabaseServiceMock from "mocks/database-service-mock";
 import Series from "../../../src/models/series-model";
-
-// Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+import { SinonStub } from "sinon";
 
 describe("Series", (): void => {
 	let id: string,
@@ -18,8 +18,7 @@ describe("Series", (): void => {
 			expectedCount: number,
 			missedCount: number,
 			statusWarningCount: number,
-			series: Series,
-			callback: SinonStub;
+			series: Series;
 
 	beforeEach((): void => {
 		id = "1";
@@ -53,59 +52,21 @@ describe("Series", (): void => {
 	});
 
 	describe("listByProgram", (): void => {
-		let sql: string;
-
-		beforeEach((): void => {
-			callback = sinon.stub();
-			sql = `
-				SELECT					p.Name AS ProgramName,
-												s.SeriesID,
-												s.Name,
-												s.NowShowing,
-												s.ProgramID,
-												COUNT(e.EpisodeID) AS EpisodeCount,
-												COUNT(e2.EpisodeID) AS WatchedCount,
-												COUNT(e3.EpisodeID) AS RecordedCount,
-												COUNT(e4.EpisodeID) AS ExpectedCount
-				FROM						Program p
-				JOIN						Series s ON p.ProgramID = s.ProgramID
-				LEFT OUTER JOIN	Episode e ON s.SeriesID = e.SeriesID
-				LEFT OUTER JOIN	Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
-				LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
-				LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
-				WHERE						p.ProgramID = ${programId}
-				GROUP BY				s.SeriesID
-				ORDER BY				s.Name COLLATE NOCASE
-			`;
-		});
+		let seriesList: Series[];
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(sql);
-				Series.listByProgram(programId, callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByProgram as SinonStub).throws();
+				seriesList = await Series.listByProgram(programId);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-		});
-
-		describe("no rows affected", (): void => {
-			beforeEach((): void => {
-				appController.db.noRowsAffectedAt(sql);
-				Series.listByProgram(programId, callback);
-			});
-
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByProgram.should.have.been.calledWith(programId));
+			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByProgram as SinonStub).returns([{
 					SeriesID: id,
 					Name: seriesName,
 					NowShowing: nowShowing,
@@ -118,146 +79,32 @@ describe("Series", (): void => {
 					MissedCount: missedCount,
 					StatusWarningCount: statusWarningCount
 				}]);
-				Series.listByProgram(programId, callback);
+				seriesList = await Series.listByProgram(programId);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([series]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByProgram.should.have.been.calledWith(programId));
+			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByProgram as SinonStub).reset());
 	});
 
 	describe("listByNowShowing", (): void => {
-		let sql: string;
-
-		beforeEach((): void => {
-			callback = sinon.stub();
-			sql = `
-				SELECT					p.Name AS ProgramName,
-												s.SeriesID,
-												s.Name,
-												s.NowShowing,
-												s.ProgramID,
-												COUNT(e.EpisodeID) AS EpisodeCount,
-												COUNT(e2.EpisodeID) AS WatchedCount,
-												COUNT(e3.EpisodeID) AS RecordedCount,
-												COUNT(e4.EpisodeID) AS ExpectedCount ,
-												SUM(CASE
-													WHEN e4.StatusDate IS NULL THEN 0
-													WHEN STRFTIME('%m', 'now') < '04' THEN
-														CASE
-															WHEN STRFTIME('%m%d', 'now') < (
-																CASE SUBSTR(e4.StatusDate, 4, 3)
-																	WHEN 'Jan' THEN '01'
-																	WHEN 'Feb' THEN '02'
-																	WHEN 'Mar' THEN '03'
-																	WHEN 'Apr' THEN '04'
-																	WHEN 'May' THEN '05'
-																	WHEN 'Jun' THEN '06'
-																	WHEN 'Jul' THEN '07'
-																	WHEN 'Aug' THEN '08'
-																	WHEN 'Sep' THEN '09'
-																	WHEN 'Oct' THEN '10'
-																	WHEN 'Nov' THEN '11'
-																	WHEN 'Dec' THEN '12'
-																END || SUBSTR(e4.StatusDate, 1, 2)) AND STRFTIME('%m%d', 'now', '9 months') > (
-																	CASE SUBSTR(e4.StatusDate, 4, 3)
-																		WHEN 'Jan' THEN '01'
-																		WHEN 'Feb' THEN '02'
-																		WHEN 'Mar' THEN '03'
-																		WHEN 'Apr' THEN '04'
-																		WHEN 'May' THEN '05'
-																		WHEN 'Jun' THEN '06'
-																		WHEN 'Jul' THEN '07'
-																		WHEN 'Aug' THEN '08'
-																		WHEN 'Sep' THEN '09'
-																		WHEN 'Oct' THEN '10'
-																		WHEN 'Nov' THEN '11'
-																		WHEN 'Dec' THEN '12'
-																	END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0
-															ELSE 1
-														END
-													ELSE
-														CASE
-															WHEN STRFTIME('%m%d', 'now') < (
-																CASE SUBSTR(e4.StatusDate, 4, 3)
-																	WHEN 'Jan' THEN '01'
-																	WHEN 'Feb' THEN '02'
-																	WHEN 'Mar' THEN '03'
-																	WHEN 'Apr' THEN '04'
-																	WHEN 'May' THEN '05'
-																	WHEN 'Jun' THEN '06'
-																	WHEN 'Jul' THEN '07'
-																	WHEN 'Aug' THEN '08'
-																	WHEN 'Sep' THEN '09'
-																	WHEN 'Oct' THEN '10'
-																	WHEN 'Nov' THEN '11'
-																	WHEN 'Dec' THEN '12'
-																END || SUBSTR(e4.StatusDate, 1, 2)) OR STRFTIME('%m%d', 'now', '9 months') > (
-																	CASE SUBSTR(e4.StatusDate, 4, 3)
-																		WHEN 'Jan' THEN '01'
-																		WHEN 'Feb' THEN '02'
-																		WHEN 'Mar' THEN '03'
-																		WHEN 'Apr' THEN '04'
-																		WHEN 'May' THEN '05'
-																		WHEN 'Jun' THEN '06'
-																		WHEN 'Jul' THEN '07'
-																		WHEN 'Aug' THEN '08'
-																		WHEN 'Sep' THEN '09'
-																		WHEN 'Oct' THEN '10'
-																		WHEN 'Nov' THEN '11'
-																		WHEN 'Dec' THEN '12'
-																	END || SUBSTR(e4.StatusDate, 1, 2)) THEN 0
-															ELSE 1
-														END
-												END) AS StatusWarningCount
-				FROM						Program p
-				JOIN						Series s ON p.ProgramID = s.ProgramID
-				LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID
-				LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
-				LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
-				LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
-				GROUP BY				s.SeriesID
-				HAVING					s.NowShowing IS NOT NULL OR
-												COUNT(e3.EpisodeID) > 0 OR
-												COUNT(e4.EpisodeID) > 0
-				ORDER BY				CASE
-													WHEN s.NowShowing IS NULL THEN 1
-													ELSE 0
-												END,
-												s.NowShowing,
-												p.Name COLLATE NOCASE
-			`;
-		});
+		let seriesList: Series[];
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(sql);
-				Series.listByNowShowing(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByNowShowing as SinonStub).throws();
+				seriesList = await Series.listByNowShowing();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-		});
-
-		describe("no rows affected", (): void => {
-			beforeEach((): void => {
-				appController.db.noRowsAffectedAt(sql);
-				Series.listByNowShowing(callback);
-			});
-
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByNowShowing.should.have.been.called);
+			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByNowShowing as SinonStub).returns([{
 					SeriesID: id,
 					Name: seriesName,
 					NowShowing: nowShowing,
@@ -270,68 +117,34 @@ describe("Series", (): void => {
 					MissedCount: missedCount,
 					StatusWarningCount: statusWarningCount
 				}]);
-				Series.listByNowShowing(callback);
+				seriesList = await Series.listByNowShowing();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([series]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByNowShowing.should.have.been.called);
+			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByNowShowing as SinonStub).reset());
 	});
 
 	describe("listByStatus", (): void => {
-		let status: EpisodeStatus,
-				sql: string;
+		const status: EpisodeStatus = "Watched";
 
-		beforeEach((): void => {
-			callback = sinon.stub();
-			status = "Watched";
-			sql = `
-				SELECT		p.Name AS ProgramName,
-									s.SeriesID,
-									s.Name,
-									s.NowShowing,
-									s.ProgramID,
-									COUNT(e.EpisodeID) AS EpisodeCount,
-									COUNT(e.EpisodeID) AS ${status}Count
-				FROM			Program p
-				JOIN			Series s ON p.ProgramID = s.ProgramID
-				JOIN			Episode e ON s.SeriesID = e.SeriesID
-				WHERE			e.Status = ${status}
-				GROUP BY	s.SeriesID
-				ORDER BY	p.Name COLLATE NOCASE,
-									s.Name COLLATE NOCASE
-			`;
-		});
+		let seriesList: Series[];
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(sql);
-				Series.listByStatus(callback, status);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByStatus as SinonStub).throws();
+				seriesList = await Series.listByStatus(status);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-		});
-
-		describe("no rows affected", (): void => {
-			beforeEach((): void => {
-				appController.db.noRowsAffectedAt(sql);
-				Series.listByStatus(callback, status);
-			});
-
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByStatus.should.have.been.calledWith(status));
+			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByStatus as SinonStub).returns([{
 					SeriesID: id,
 					Name: seriesName,
 					NowShowing: nowShowing,
@@ -344,72 +157,32 @@ describe("Series", (): void => {
 					MissedCount: missedCount,
 					StatusWarningCount: statusWarningCount
 				}]);
-				Series.listByStatus(callback, status);
+				seriesList = await Series.listByStatus(status);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([series]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByStatus.should.have.been.calledWith(status));
+			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByStatus as SinonStub).reset());
 	});
 
 	describe("listByIncomplete", (): void => {
-		let sql: string;
-
-		beforeEach((): void => {
-			callback = sinon.stub();
-			sql = `
-				SELECT					p.Name AS ProgramName,
-												s.SeriesID,
-												s.Name,
-												s.NowShowing,
-												s.ProgramID,
-												COUNT(e.EpisodeID) AS EpisodeCount,
-												COUNT(e2.EpisodeID) AS WatchedCount,
-												COUNT(e3.EpisodeID) AS RecordedCount,
-												COUNT(e4.EpisodeID) AS ExpectedCount
-				FROM						Program p
-				JOIN						Series s ON p.ProgramID = s.ProgramID
-				LEFT OUTER JOIN Episode e ON s.SeriesID = e.SeriesID
-				LEFT OUTER JOIN Episode e2 ON e.EpisodeID = e2.EpisodeID AND e2.Status = 'Watched'
-				LEFT OUTER JOIN Episode e3 ON e.EpisodeID = e3.EpisodeID AND e3.Status = 'Recorded'
-				LEFT OUTER JOIN Episode e4 ON e.EpisodeID = e4.EpisodeID AND e4.Status = 'Expected'
-				GROUP BY				s.SeriesID
-				HAVING					COUNT(e.EpisodeID) > COUNT(e2.EpisodeID) AND
-												COUNT(e2.EpisodeID) > 0
-				ORDER BY				p.Name COLLATE NOCASE,
-												s.Name COLLATE NOCASE
-			`;
-		});
+		let seriesList: Series[];
 
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(sql);
-				Series.listByIncomplete(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByIncomplete as SinonStub).throws();
+				seriesList = await Series.listByIncomplete();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-		});
-
-		describe("no rows affected", (): void => {
-			beforeEach((): void => {
-				appController.db.noRowsAffectedAt(sql);
-				Series.listByIncomplete(callback);
-			});
-
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByIncomplete.should.have.been.called);
+			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.listByIncomplete as SinonStub).returns([{
 					SeriesID: id,
 					Name: seriesName,
 					NowShowing: nowShowing,
@@ -422,112 +195,115 @@ describe("Series", (): void => {
 					MissedCount: missedCount,
 					StatusWarningCount: statusWarningCount
 				}]);
-				Series.listByIncomplete(callback);
+				seriesList = await Series.listByIncomplete();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith([series]));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByIncomplete.should.have.been.called);
+			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByIncomplete as SinonStub).reset());
 	});
 
 	describe("find", (): void => {
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`
-					SELECT	SeriesID,
-									Name,
-									ProgramID,
-									NowShowing
-					FROM		Series
-					WHERE		SeriesID = ${id}
-				`);
-				Series.find(id, callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.find as SinonStub).throws();
+				series = await Series.find(id);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to find the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.find.should.have.been.calledWith(id));
+			it("should return a null series id", (): Chai.Assertion => (null === series.id).should.be.true);
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{
-					SeriesID: id,
-					Name: seriesName,
-					NowShowing: nowShowing,
-					ProgramID: programId
-				}]);
+			describe("doesn't exist", (): void => {
+				beforeEach(async (): Promise<void> => {
+					((await DatabaseServiceMock).seriesStore.find as SinonStub).returns(undefined);
+					series = await Series.find(id);
+				});
 
-				let undefinedObject: undefined;
-
-				series.programName = undefinedObject;
-				series.setEpisodeCount(0);
-				series.setWatchedCount(0);
-				series.setRecordedCount(0);
-				series.setExpectedCount(0);
-				series["setMissedCount"](0);
-				series.setStatusWarning(0);
-
-				Series.find(id, callback);
+				it("should attempt to find the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.find.should.have.been.calledWith(id));
+				it("should return a null series id", (): Chai.Assertion => (null === series.id).should.be.true);
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(series));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			describe("exists", (): void => {
+				let foundSeries: Series;
+
+				beforeEach(async (): Promise<void> => {
+					((await DatabaseServiceMock).seriesStore.find as SinonStub).returns({
+						SeriesID: id,
+						Name: seriesName,
+						NowShowing: nowShowing,
+						ProgramID: programId
+					});
+
+					series.programName = undefined;
+					series.setEpisodeCount(0);
+					series.setWatchedCount(0);
+					series.setRecordedCount(0);
+					series.setExpectedCount(0);
+					series["setMissedCount"](0);
+					series.setStatusWarning(0);
+
+					foundSeries = await Series.find(id);
+				});
+
+				it("should attempt to find the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.find.should.have.been.calledWith(id));
+				it("should return the series", (): Chai.Assertion => foundSeries.should.deep.equal(series));
+			});
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.find as SinonStub).reset());
 	});
 
 	describe("count", (): void => {
+		let count: number;
+
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt("SELECT COUNT(*) AS SeriesCount FROM Series");
-				Series.count(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.count as SinonStub).throws();
+				count = await Series.count();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(0));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to get the count of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.count.should.have.been.called);
+			it("should return zero", (): Chai.Assertion => count.should.equal(0));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => {
-				appController.db.addResultRows([{ SeriesCount: 1 }]);
-				Series.count(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.count as SinonStub).returns(1);
+				count = await Series.count();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(1));
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to get the count of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.count.should.have.been.called);
+			it("should return the count of series", (): Chai.Assertion => count.should.equal(1));
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.count as SinonStub).reset());
 	});
 
 	describe("removeAll", (): void => {
+		let errorMessage: string | undefined;
+
 		describe("fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt("DELETE FROM Series");
-				Series.removeAll(callback);
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.removeAll as SinonStub).throws(new Error("Force failed"));
+				errorMessage = await Series.removeAll();
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(`Series.removeAll: ${appController.db.errorMessage}`));
-			it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
+			it("should attempt to remove all series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.removeAll.should.have.been.called);
+			it("should return an error message", (): Chai.Assertion => String(errorMessage).should.equal("Series.removeAll: Force failed"));
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => Series.removeAll(callback));
+			beforeEach(async (): Promise<string | undefined> => (errorMessage = await Series.removeAll()));
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-			it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
+			it("should attempt to remove all series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.removeAll.should.have.been.called);
+			it("should not return an error message", (): Chai.Assertion => (undefined === errorMessage).should.be.true);
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.removeAll as SinonStub).reset());
 	});
 
 	describe("fromJson", (): void => {
@@ -553,183 +329,72 @@ describe("Series", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				let seriesId: string,
-						sql: string;
+				let seriesToSave: PersistedSeries,
+						seriesId: string | undefined;
 
 				beforeEach((): void => {
-					if (scenario.useId) {
-						seriesId = id;
-					} else {
-						seriesId = "%";
+					if (!scenario.useId) {
 						series.id = null;
 					}
 
-					sql = `
-						REPLACE INTO Series (SeriesID, Name, NowShowing, ProgramID)
-						VALUES (${seriesId}, ${seriesName}, ${nowShowing}, ${programId})
-					`;
+					seriesToSave = {
+						SeriesID: String(series.id),
+						Name: String(series.seriesName),
+						NowShowing: series.nowShowing,
+						ProgramID: String(series.programId)
+					};
 				});
 
 				describe("fail", (): void => {
-					beforeEach((): void => appController.db.failAt(sql));
-
-					describe("without callback", (): void => {
-						beforeEach((): void => series.save());
-
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
+					beforeEach(async (): Promise<void> => {
+						((await DatabaseServiceMock).seriesStore.save as SinonStub).throws();
+						seriesId = await series.save();
 					});
 
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							series.save(callback);
-						});
+					it("should attempt to save the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.save.should.have.been.calledWith({
+						...seriesToSave,
+						SeriesID: series.id
+					}));
 
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-					});
-				});
-
-				describe("no rows affected", (): void => {
-					beforeEach((): void => appController.db.noRowsAffectedAt(sql));
-
-					describe("without callback", (): void => {
-						beforeEach((): void => series.save());
-
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("no rows affected"));
-						it("should not be successful", (): Chai.Assertion => appController.db.success.should.be.false);
-					});
-
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							series.save(callback);
-						});
-
-						it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("no rows affected"));
-					});
-				});
-
-				describe(`${scenario.description} Sync fail`, (): void => {
-					beforeEach((): void => appController.db.failAt(`
-						INSERT OR IGNORE INTO Sync (Type, ID, Action)
-						VALUES ('Series', ${seriesId}, 'modified')
-					`));
-
-					describe("without callback", (): void => {
-						beforeEach((): void => series.save());
-
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-					});
-
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							series.save(callback);
-						});
-
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.called);
-						it("should set an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal("Force failed"));
-					});
+					it("should not return the series id", (): Chai.Assertion => (undefined === seriesId).should.be.true);
 				});
 
 				describe("success", (): void => {
-					describe("without callback", (): void => {
-						beforeEach((): void => series.save());
+					beforeEach(async (): Promise<string | undefined> => (seriesId = await series.save()));
 
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-						it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
-					});
+					it("should attempt to save the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.save.should.have.been.calledWith({
+						...seriesToSave,
+						SeriesID: series.id
+					}));
 
-					describe("with callback", (): void => {
-						beforeEach((): void => {
-							callback = sinon.stub();
-							series.save(callback);
-						});
-
-						it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-						it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-						it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith(series.id));
-						it("should be successful", (): Chai.Assertion => appController.db.success.should.be.true);
-					});
+					it("should return the series id", (): Chai.Assertion => String(seriesId).should.equal(series.id));
 				});
 			});
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.save as SinonStub).reset());
 	});
 
 	describe("remove", (): void => {
 		describe("no ID", (): void => {
-			it("should execute no SQL commands", (): void => {
+			it("should do nothing", async (): Promise<void> => {
 				series.id = null;
-				series.remove();
-				appController.db.commands.length.should.equal(0);
+				await series.remove();
+				(await DatabaseServiceMock).seriesStore.remove.should.not.have.been.called;
 			});
 		});
 
-		describe("insert Episode Sync fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) SELECT 'Episode', EpisodeID, 'deleted' FROM Episode WHERE SeriesID = ${id}`);
-				series.remove();
+		describe("fail", (): void => {
+			beforeEach(async (): Promise<void> => {
+				((await DatabaseServiceMock).seriesStore.remove as SinonStub).throws();
+				try {
+					await series.remove();
+				} catch (_e) {
+					// No op
+				}
 			});
 
-			it("should execute one SQL command", (): Chai.Assertion => appController.db.commands.length.should.equal(1));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(series.id).should.equal(id));
-			it("should not clear the series name", (): Chai.Assertion => String(series.seriesName).should.equal(seriesName));
-			it("should not clear the now showing", (): Chai.Assertion => Number(series.nowShowing).should.equal(nowShowing));
-			it("should not clear the program id", (): Chai.Assertion => String(series.programId).should.equal(programId));
-		});
-
-		describe("delete Episode fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Episode WHERE SeriesID = ${id}`);
-				series.remove();
-			});
-
-			it("should execute two SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(2));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(series.id).should.equal(id));
-			it("should not clear the series name", (): Chai.Assertion => String(series.seriesName).should.equal(seriesName));
-			it("should not clear the now showing", (): Chai.Assertion => Number(series.nowShowing).should.equal(nowShowing));
-			it("should not clear the program id", (): Chai.Assertion => String(series.programId).should.equal(programId));
-		});
-
-		describe("insert Series Sync fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`REPLACE INTO Sync (Type, ID, Action) VALUES ('Series', ${id}, 'deleted')`);
-				series.remove();
-			});
-
-			it("should execute three SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(3));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
-			it("should not clear the id", (): Chai.Assertion => String(series.id).should.equal(id));
-			it("should not clear the series name", (): Chai.Assertion => String(series.seriesName).should.equal(seriesName));
-			it("should not clear the now showing", (): Chai.Assertion => Number(series.nowShowing).should.equal(nowShowing));
-			it("should not clear the program id", (): Chai.Assertion => String(series.programId).should.equal(programId));
-		});
-
-		describe("delete Series fail", (): void => {
-			beforeEach((): void => {
-				appController.db.failAt(`DELETE FROM Series	WHERE SeriesID = ${id}`);
-				series.remove();
-			});
-
-			it("should execute four SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(4));
-			it("should rollback the transaction", (): Chai.Assertion => appController.db.commit.should.be.false);
+			it("should attempt to remove the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.remove.should.have.been.calledWith(id));
 			it("should not clear the id", (): Chai.Assertion => String(series.id).should.equal(id));
 			it("should not clear the series name", (): Chai.Assertion => String(series.seriesName).should.equal(seriesName));
 			it("should not clear the now showing", (): Chai.Assertion => Number(series.nowShowing).should.equal(nowShowing));
@@ -737,16 +402,16 @@ describe("Series", (): void => {
 		});
 
 		describe("success", (): void => {
-			beforeEach((): void => series.remove());
+			beforeEach(async (): Promise<void> => series.remove());
 
-			it("should execute four SQL commands", (): Chai.Assertion => appController.db.commands.length.should.equal(4));
-			it("should commit the transaction", (): Chai.Assertion => appController.db.commit.should.be.true);
-			it("should not return an error message", (): Chai.Assertion => appController.db.errorMessage.should.equal(""));
+			it("should attempt to remove the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.remove.should.have.been.calledWith(id));
 			it("should clear the id", (): Chai.Assertion => (null === series.id).should.be.true);
 			it("should clear the series name", (): Chai.Assertion => (null === series.seriesName).should.be.true);
 			it("should clear the now showing", (): Chai.Assertion => (null === series.nowShowing).should.be.true);
 			it("should clear the program id", (): Chai.Assertion => (null === series.programId).should.be.true);
 		});
+
+		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.remove as SinonStub).reset());
 	});
 
 	describe("toJson", (): void => {
@@ -857,7 +522,7 @@ describe("Series", (): void => {
 				beforeEach((): void => series.setNowShowing(scenario.nowShowing));
 
 				it("should set the now showing", (): void => {
-					if (scenario.nowShowing) {
+					if (undefined !== scenario.nowShowing && null !== scenario.nowShowing) {
 						Number(series.nowShowing).should.equal(scenario.nowShowing);
 					} else {
 						(null === series.nowShowing).should.be.true;
@@ -891,6 +556,4 @@ describe("Series", (): void => {
 			style: "missed"
 		})));
 	});
-
-	afterEach((): void => appController.db.reset());
 });

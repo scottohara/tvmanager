@@ -37,8 +37,6 @@ import $ from "jquery";
 import Abc from "framework/abc";
 import AboutController from "controllers/about-controller";
 import DataSyncController from "controllers/dataSync-controller";
-import DatabaseService from "services/database-service";
-import { DatabaseVersion } from "services";
 import EpisodeController from "controllers/episode-controller";
 import EpisodesController from "controllers/episodes-controller";
 import ProgramController from "controllers/program-controller";
@@ -66,14 +64,11 @@ declare const MAX_DATA_AGE_DAYS: number;
  * @property {NoticeStack} noticeStack - contains the array of notices displayed, and the total height of the notices
  * @property {abc} abc - scroll helper object
  * @property {TouchEventProxy} abctoucheventproxy - remaps touch events for the scroll helper
- * @property {Database} db - the database
  * @property {Number} maxDataAgeDays - the number of days since the last import/export before a warning notice is displayed
  * @property {Object} viewControllers - a hash of all view controller objects that can be pushed
  */
 export default class ApplicationController {
 	private static singletonInstance?: ApplicationController;
-
-	public db!: Database;
 
 	public viewStack: View[] = [];
 
@@ -83,7 +78,7 @@ export default class ApplicationController {
 	// Scroll helper only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
 	public readonly abctoucheventproxy: TouchEventProxy = new TouchEventProxy($("#abc").get(0));
 
-	private noticeStack: NoticeStack = {
+	private readonly noticeStack: NoticeStack = {
 		height: 0,
 		notice: []
 	};
@@ -95,7 +90,7 @@ export default class ApplicationController {
 
 	public constructor() {
 		// App controller is a singleton, so if an instance already exists, return it
-		if (ApplicationController.singletonInstance) {
+		if (undefined !== ApplicationController.singletonInstance) {
 			return ApplicationController.singletonInstance;
 		}
 
@@ -118,56 +113,29 @@ export default class ApplicationController {
 	 * @method start
 	 * @desc Start the application
 	 */
-	public start(): void {
-		// Connect to the database
-		this.db = DatabaseService.connect("TVManager", (version: DatabaseVersion): void => {
-			// If the version number changed, it means we ran a migration so we need the user to restart the application
-			if (version.initial === version.current) {
-				// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
-				this.viewControllers = {
-					about: AboutController,
-					dataSync: DataSyncController,
-					episode: EpisodeController,
-					episodes: EpisodesController,
-					program: ProgramController,
-					programs: ProgramsController,
-					registration: RegistrationController,
-					report: ReportController,
-					schedule: ScheduleController,
-					series: SeriesController,
-					seriesList: SeriesListController,
-					settings: SettingsController,
-					unscheduled: UnscheduledController
-				};
+	public async start(): Promise<void> {
+		// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
+		this.viewControllers = {
+			about: AboutController,
+			dataSync: DataSyncController,
+			episode: EpisodeController,
+			episodes: EpisodesController,
+			program: ProgramController,
+			programs: ProgramsController,
+			registration: RegistrationController,
+			report: ReportController,
+			schedule: ScheduleController,
+			series: SeriesController,
+			seriesList: SeriesListController,
+			settings: SettingsController,
+			unscheduled: UnscheduledController
+		};
 
-				// Display the schedule view
-				window.setTimeout((): void => this.pushView("schedule"), 0);
-			} else {
-				// Show a notice to the user asking them to restart
-				this.showNotice({
-					label: `Database has been successfully upgraded from version ${version.initial} to version ${version.current}. Please restart the application.`,
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				});
-			}
-		}, (error: SQLError): void => {
-			// An error occurred opening the database, so display a notice to the user
-			this.showNotice({
-				label: error.message,
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			});
-		});
+		// Display the schedule view
+		await this.pushView("schedule");
 
-		// If no errors occurred, get the application configuration settings
-		if (this.db && this.db.version) {
-			// Get the last sync time
-			Setting.get("LastSyncTime", this.gotLastSyncTime.bind(this));
-		}
+		// Get the last sync time
+		this.gotLastSyncTime(await Setting.get("LastSyncTime"));
 	}
 
 	/**
@@ -178,7 +146,7 @@ export default class ApplicationController {
 	 * @desc Pops the current view off the stack, revealing the previous view
 	 * @param {Object} [args] - arguments to pass to the previous view controller
 	 */
-	public popView(args?: object): void {
+	public popView(args?: object): Promise<void> {
 		// Clear the header/footer
 		this.clearFooter();
 		this.clearHeader();
@@ -187,7 +155,7 @@ export default class ApplicationController {
 		this.viewStack.pop();
 
 		// Display the previous view
-		this.show(this.viewPopped.bind(this), args);
+		return this.show(this.viewPopped.bind(this), args);
 	}
 
 	/**
@@ -227,11 +195,11 @@ export default class ApplicationController {
 	 */
 	public setFooter(): void {
 		// Only proceed if the view controller specified a footer
-		if (this.currentView.controller.footer) {
+		if (undefined !== this.currentView.controller.footer) {
 			// If the view controller specified a left-hand button, set it up
-			if (this.currentView.controller.footer.leftButton) {
+			if (undefined !== this.currentView.controller.footer.leftButton) {
 				// Bind the event handler for the button
-				if (this.currentView.controller.footer.leftButton.eventHandler) {
+				if (undefined !== this.currentView.controller.footer.leftButton.eventHandler) {
 					$("#footerLeftButton").on("click", this.currentView.controller.footer.leftButton.eventHandler);
 				}
 
@@ -248,7 +216,7 @@ export default class ApplicationController {
 			}
 
 			// If the view controller specified a footer label, set it up
-			if (this.currentView.controller.footer.label) {
+			if (undefined !== this.currentView.controller.footer.label) {
 				$("#footerLabel").text(this.currentView.controller.footer.label);
 			}
 
@@ -256,9 +224,9 @@ export default class ApplicationController {
 			$("#footerLabel").show();
 
 			// If the view controller specified a right-hand button, set it up
-			if (this.currentView.controller.footer.rightButton) {
+			if (undefined !== this.currentView.controller.footer.rightButton) {
 				// Bind the event handler for the button
-				if (this.currentView.controller.footer.rightButton.eventHandler) {
+				if (undefined !== this.currentView.controller.footer.rightButton.eventHandler) {
 					$("#footerRightButton").on("click", this.currentView.controller.footer.rightButton.eventHandler);
 				}
 
@@ -310,7 +278,7 @@ export default class ApplicationController {
 	 * @param {String} view - the name of the view to push
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
-	public pushView(view: string, args?: object): void {
+	public pushView(view: string, args?: object): Promise<void> {
 		// If a current view is displayed, save the current scroll position and clear the existing header/footer
 		if (this.viewStack.length > 0) {
 			this.getScrollPosition();
@@ -325,7 +293,7 @@ export default class ApplicationController {
 		});
 
 		// Display the view
-		this.show(this.viewPushed.bind(this));
+		return this.show(this.viewPushed.bind(this));
 	}
 
 	/**
@@ -348,9 +316,9 @@ export default class ApplicationController {
 					noticeRightButton: JQuery<HTMLElement> = $("<a>").appendTo(noticeContainer);
 
 		// If the notice specified a left-hand button, set it up
-		if (notice.leftButton) {
+		if (undefined !== notice.leftButton) {
 			// Bind the event handler for the button
-			if (notice.leftButton.eventHandler) {
+			if (undefined !== notice.leftButton.eventHandler) {
 				noticeLeftButton.on("click", notice.leftButton.eventHandler);
 			}
 
@@ -367,14 +335,14 @@ export default class ApplicationController {
 		}
 
 		// If the notice specified an identifier, set it
-		if (notice.id) {
+		if (undefined !== notice.id) {
 			noticeLabel.attr("id", notice.id);
 		}
 
 		// If the notice specified a right-hand button, set it up
-		if (notice.rightButton) {
+		if (undefined !== notice.rightButton) {
 			// Bind the event handler for the button
-			if (notice.rightButton.eventHandler) {
+			if (undefined !== notice.rightButton.eventHandler) {
 				noticeRightButton.on("click", notice.rightButton.eventHandler);
 			}
 
@@ -412,14 +380,14 @@ export default class ApplicationController {
 	 */
 	public clearFooter(): void {
 		// Only proceed if the view controller specified a footer
-		if (this.currentView.controller.footer) {
+		if (undefined !== this.currentView.controller.footer) {
 			// If the view controller specified a left-hand button, unbind the event handler
-			if (this.currentView.controller.footer.leftButton) {
+			if (undefined !== this.currentView.controller.footer.leftButton) {
 				$("#footerLeftButton").off("click", this.currentView.controller.footer.leftButton.eventHandler);
 			}
 
 			// If the view controller specified a right-hand button, unbind the event handler
-			if (this.currentView.controller.footer.rightButton) {
+			if (undefined !== this.currentView.controller.footer.rightButton) {
 				$("#footerRightButton").off("click", this.currentView.controller.footer.rightButton.eventHandler);
 			}
 		}
@@ -452,17 +420,9 @@ export default class ApplicationController {
 	 * @method viewPushed
 	 * @desc Sets up the view controller for the view just pushed, and sets the header
 	 */
-	private viewPushed(): void {
-		const DELAY_MS = 1000;
-
+	private async viewPushed(): Promise<void> {
 		// Call the view controller's setup method
-		this.currentView.controller.setup();
-
-		// Set the header (based on the configuration set by the view controller)
-		this.setHeader();
-
-		// Tell the application controller that we've finished loading
-		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
+		return this.currentView.controller.setup();
 	}
 
 	/**
@@ -473,19 +433,11 @@ export default class ApplicationController {
 	 * @desc Activates the view that was revealed
 	 * @param {Object} [args] - arguments to pass to the revealed view controller
 	 */
-	private viewPopped(args: object): void {
-		const DELAY_MS = 1000;
-
+	private async viewPopped(args: object): Promise<void> {
 		// Call the view controller's activate method
-		if (this.currentView.controller.activate) {
-			this.currentView.controller.activate(args);
+		if ("function" === typeof this.currentView.controller.activate) {
+			await this.currentView.controller.activate(args);
 		}
-
-		// Set the header (based on the configuration set by the view controller)
-		this.setHeader();
-
-		// Tell the application controller that we've finished loading
-		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**
@@ -497,7 +449,7 @@ export default class ApplicationController {
 	 * @param {Function} onSuccess - function to call after loading the view contents
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
-	private show(onSuccess: (args?: object) => void, args?: object): void {
+	private async show(onSuccess: (args?: object) => Promise<void>, args?: object): Promise<void> {
 		// Hide the scroll helper
 		this.hideScrollHelper();
 
@@ -511,7 +463,10 @@ export default class ApplicationController {
 		$("#contentWrapper").addClass("loading");
 
 		// Call the success function, passing through the arguments
-		onSuccess(args);
+		await onSuccess(args);
+
+		// Set the header (based on the configuration set by the view controller)
+		this.setHeader();
 	}
 
 	/**
@@ -540,9 +495,9 @@ export default class ApplicationController {
 	 */
 	private setHeader(): void {
 		// If the view controller specified a left-hand button, set it up
-		if (this.currentView.controller.header.leftButton) {
+		if (undefined !== this.currentView.controller.header.leftButton) {
 			// Bind the event handler for the button
-			if (this.currentView.controller.header.leftButton.eventHandler) {
+			if (undefined !== this.currentView.controller.header.leftButton.eventHandler) {
 				$("#headerLeftButton").on("click", this.currentView.controller.header.leftButton.eventHandler);
 			}
 
@@ -559,7 +514,7 @@ export default class ApplicationController {
 		}
 
 		// If the view controller specified a header, set up the header label
-		if (this.currentView.controller.header.label) {
+		if (undefined !== this.currentView.controller.header.label) {
 			// Set the header label
 			$("#headerLabel").text(this.currentView.controller.header.label);
 
@@ -568,9 +523,9 @@ export default class ApplicationController {
 		}
 
 		// If the view controller specified a right-hand button, set it up
-		if (this.currentView.controller.header.rightButton) {
+		if (undefined !== this.currentView.controller.header.rightButton) {
 			// Bind the event handler for the button
-			if (this.currentView.controller.header.rightButton.eventHandler) {
+			if (undefined !== this.currentView.controller.header.rightButton.eventHandler) {
 				$("#headerRightButton").on("click", this.currentView.controller.header.rightButton.eventHandler);
 			}
 
@@ -599,12 +554,12 @@ export default class ApplicationController {
 	 */
 	private clearHeader(): void {
 		// If the view controller specified a left-hand button, unbind the event handler
-		if (this.currentView.controller.header.leftButton) {
+		if (undefined !== this.currentView.controller.header.leftButton) {
 			$("#headerLeftButton").off("click", this.currentView.controller.header.leftButton.eventHandler);
 		}
 
 		// If the view controller specified a right-hand button, unbind the event handler
-		if (this.currentView.controller.header.rightButton) {
+		if (undefined !== this.currentView.controller.header.rightButton) {
 			$("#headerRightButton").off("click", this.currentView.controller.header.rightButton.eventHandler);
 		}
 
@@ -670,7 +625,7 @@ export default class ApplicationController {
 		// Iterate in reverse order over the notices in the stack
 		for (let i: number = this.noticeStack.notice.length - 1; i >= 0; i--) {
 			// Check if the notice has been acknowledged
-			if (this.noticeStack.notice[i].data("acknowledged")) {
+			if (this.noticeStack.notice[i].data("acknowledged") as boolean) {
 				// Remove the DOM element for the notice
 				this.noticeStack.notice[i].remove();
 
@@ -695,7 +650,7 @@ export default class ApplicationController {
 	 */
 	private gotLastSyncTime(lastSyncTime: PublicInterface<Setting>): void {
 		// Only proceed if we have a last sync time
-		if (lastSyncTime.settingValue) {
+		if (undefined !== lastSyncTime.settingValue) {
 			// Constants for the notification threshold, current date and last sync date
 			const HOURS_IN_ONE_DAY = 24,
 						MINUTES_IN_ONE_HOUR = 60,

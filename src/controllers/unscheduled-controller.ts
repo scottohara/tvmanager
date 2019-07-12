@@ -13,6 +13,7 @@
  * @requires controllers/view-controller
  */
 import $ from "jquery";
+import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import List from "components/list";
 import { PublicInterface } from "global";
@@ -49,7 +50,7 @@ export default class UnscheduledController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Unscheduled",
@@ -64,7 +65,7 @@ export default class UnscheduledController extends ViewController {
 		this.unscheduledList = new List("list", UnscheduledListTemplate, null, [], this.viewItem.bind(this));
 
 		// Activate the controller
-		this.activate();
+		return this.activate();
 	}
 
 	/**
@@ -74,9 +75,9 @@ export default class UnscheduledController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public activate(): void {
+	public async activate(): Promise<void> {
 		// Get the list of unscheduled episodes
-		Episode.listByUnscheduled(this.listRetrieved.bind(this));
+		return this.listRetrieved(await Episode.listByUnscheduled());
 	}
 
 	/**
@@ -84,10 +85,10 @@ export default class UnscheduledController extends ViewController {
 	 * @this UnscheduledController
 	 * @instance
 	 * @method listRetrieved
-	 * @desc Callback function after the list of episodes is retrieved
+	 * @desc Called after the list of episodes is retrieved
 	 * @param {Array<Episode>} unscheduledList - array of episode objects
 	 */
-	private listRetrieved(unscheduledList: PublicInterface<Episode>[]): void {
+	private listRetrieved(unscheduledList: PublicInterface<Episode>[]): Promise<void> {
 		// Set the list items
 		this.unscheduledList.items = unscheduledList;
 
@@ -95,7 +96,7 @@ export default class UnscheduledController extends ViewController {
 		this.unscheduledList.refresh();
 
 		// Set to view mode
-		this.viewItems();
+		return this.viewItems();
 	}
 
 	/**
@@ -105,8 +106,8 @@ export default class UnscheduledController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): void {
-		this.appController.popView();
+	private goBack(): Promise<void> {
+		return this.appController.popView();
 	}
 
 	/**
@@ -117,8 +118,8 @@ export default class UnscheduledController extends ViewController {
 	 * @desc Displays the Episode view for editing an episode
 	 * @param {Number} listIndex - the list index of the episode to edit
 	 */
-	private viewItem(listIndex: number): void {
-		this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] });
+	private viewItem(listIndex: number): Promise<void> {
+		return this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] });
 	}
 
 	/**
@@ -128,7 +129,7 @@ export default class UnscheduledController extends ViewController {
 	 * @method viewItems
 	 * @desc Sets the list to view mode
 	 */
-	private viewItems(): void {
+	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.unscheduledList.setAction("view");
 
@@ -140,7 +141,7 @@ export default class UnscheduledController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${this.appController.db.version}`
+			label: `v${(await DatabaseService).version}`
 		};
 
 		// Set the view footer

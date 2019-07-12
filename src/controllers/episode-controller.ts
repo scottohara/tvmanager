@@ -41,11 +41,11 @@ enum Months {Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
 export default class EpisodeController extends ViewController {
 	public swtoucheventproxy: TouchEventProxy | null = null;
 
-	private listItem: EpisodeListItem;
+	private readonly listItem: EpisodeListItem;
 
-	private originalStatus: EpisodeStatus = "";
+	private readonly originalStatus: EpisodeStatus = "";
 
-	private originalStatusDate = "";
+	private readonly originalStatusDate: string = "";
 
 	private settingStatus = false;
 
@@ -81,7 +81,7 @@ export default class EpisodeController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): void {
+	public setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Add/Edit Episode",
@@ -117,6 +117,8 @@ export default class EpisodeController extends ViewController {
 
 		// Set the status date
 		$("#statusDate").val(this.listItem.episode.statusDate);
+
+		return Promise.resolve();
 	}
 
 	/**
@@ -126,7 +128,7 @@ export default class EpisodeController extends ViewController {
 	 * @method save
 	 * @desc Saves the episode details to the database and returns to the previous view
 	 */
-	private save(): void {
+	private async save(): Promise<void> {
 		const PREVIOUS_VIEW_OFFSET = 2;
 
 		// Get the episode details
@@ -135,15 +137,15 @@ export default class EpisodeController extends ViewController {
 		this.listItem.episode.unscheduled = $("#unscheduled").is(":checked");
 
 		// Update the database
-		this.listItem.episode.save((): void => {
-			// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
-			if (isNaN(Number(this.listItem.listIndex)) || Number(this.listItem.listIndex) < 0) {
-				this.appController.viewStack[this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
-			}
+		await this.listItem.episode.save();
 
-			// Pop the view off the stack
-			this.appController.popView(this.listItem);
-		});
+		// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
+		if (isNaN(Number(this.listItem.listIndex)) || Number(this.listItem.listIndex) < 0) {
+			this.appController.viewStack[this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
+		}
+
+		// Pop the view off the stack
+		return this.appController.popView(this.listItem);
 	}
 
 	/**
@@ -153,13 +155,13 @@ export default class EpisodeController extends ViewController {
 	 * @method cancel
 	 * @desc Reverts any changes and returns to the previous view
 	 */
-	private cancel(): void {
+	private cancel(): Promise<void> {
 		// Revert to the original episode details
 		this.listItem.episode.status = this.originalStatus;
 		this.listItem.episode.statusDate = this.originalStatusDate;
 
 		// Pop the view off the stack
-		this.appController.popView();
+		return this.appController.popView();
 	}
 
 	/**
