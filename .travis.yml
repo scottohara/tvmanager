@@ -19,7 +19,6 @@ addons:
       - couchdb
 
 before_install:
-  - export TZ=Australia/Sydney          # Use local timezone
   - export DEVICE="iPhone X (12.4)"     # Preferred test device
   - export DEVICE_UDID=$(instruments -s devices | grep "$DEVICE" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
   - xcrun simctl shutdown all           # Make sure all other simulators are shutdown

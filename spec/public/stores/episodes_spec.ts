@@ -46,7 +46,7 @@ describe("episodes", (): void => {
 				clock: SinonFakeTimers;
 
 		beforeEach(async (): Promise<string[]> => {
-			clock = sinon.useFakeTimers(new Date(2000, 3, 14).valueOf());
+			clock = sinon.useFakeTimers(new Date(2000, 3, 13).valueOf());
 			episodesStore = create(db);
 
 			return Promise.all([
@@ -55,7 +55,7 @@ describe("episodes", (): void => {
 				db.put("series", { id: "1", name: "Series 1", programId: "1", nowShowing: null }),
 				db.put("episodes", { id: "2", name: "Episode 2", seriesId: "1", status: "Recorded", statusDate: null, unverified: 0, unscheduled: 0, sequence: 1 }),
 				db.put("episodes", { id: "1", name: "Episode 1", seriesId: "1", status: "Watched", statusDate: null, unverified: 0, unscheduled: 0, sequence: 1 }),
-				db.put("episodes", { id: "3", name: "Episode 3", seriesId: "1", status: "Expected", statusDate: new Date(2000, 2, 31), unverified: 1, unscheduled: 1, sequence: 2 }),
+				db.put("episodes", { id: "3", name: "Episode 3", seriesId: "1", status: "Expected", statusDate: new Date(2000, 3, 4), unverified: 1, unscheduled: 1, sequence: 2 }),
 
 				db.put("programs", { id: "2", name: "Program 2" }),
 
@@ -75,14 +75,14 @@ describe("episodes", (): void => {
 			it("should return a list of all episodes for a series", async (): Promise<Chai.Assertion> => (await episodesStore.listBySeries("1")).should.deep.equal([
 				{ EpisodeID: "1", Name: "Episode 1", Status: "Watched", StatusDate: "", Unverified: "false", Unscheduled: "false", Sequence: 1, SeriesID: "1", SeriesName: "Series 1", ProgramID: "1", ProgramName: "Program 1" },
 				{ EpisodeID: "2", Name: "Episode 2", Status: "Recorded", StatusDate: "", Unverified: "false", Unscheduled: "false", Sequence: 1, SeriesID: "1", SeriesName: "Series 1", ProgramID: "1", ProgramName: "Program 1" },
-				{ EpisodeID: "3", Name: "Episode 3", Status: "Expected", StatusDate: "31-Mar", Unverified: "true", Unscheduled: "true", Sequence: 2, SeriesID: "1", SeriesName: "Series 1", ProgramID: "1", ProgramName: "Program 1" }
+				{ EpisodeID: "3", Name: "Episode 3", Status: "Expected", StatusDate: "04-Apr", Unverified: "true", Unscheduled: "true", Sequence: 2, SeriesID: "1", SeriesName: "Series 1", ProgramID: "1", ProgramName: "Program 1" }
 			]));
 		});
 
 		describe("listByUnscheduled", (): void => {
 			it("should return a list of all unscheduled episodes", async (): Promise<Chai.Assertion> => (await episodesStore.listByUnscheduled()).should.deep.equal([
 				{ EpisodeID: "7", Name: "Episode 7", Status: "Watched", StatusDate: "", Unverified: "false", Unscheduled: "true", Sequence: 1, SeriesID: "3", SeriesName: "Series 3", ProgramID: "2", ProgramName: "Program 2" },
-				{ EpisodeID: "3", Name: "Episode 3", Status: "Expected", StatusDate: "31-Mar", Unverified: "true", Unscheduled: "true", Sequence: 2, SeriesID: "1", SeriesName: "Series 1", ProgramID: "1", ProgramName: "Program 1" },
+				{ EpisodeID: "3", Name: "Episode 3", Status: "Expected", StatusDate: "04-Apr", Unverified: "true", Unscheduled: "true", Sequence: 2, SeriesID: "1", SeriesName: "Series 1", ProgramID: "1", ProgramName: "Program 1" },
 				{ EpisodeID: "9", Name: "Episode 9", Status: "Expected", StatusDate: "03-Jun", Unverified: "false", Unscheduled: "true", Sequence: 3, SeriesID: "3", SeriesName: "Series 3", ProgramID: "2", ProgramName: "Program 2" },
 				{ EpisodeID: "5", Name: "Episode 5", Status: "Recorded", StatusDate: "05-Jan", Unverified: "false", Unscheduled: "true", Sequence: 2, SeriesID: "2", SeriesName: "Series 2", ProgramID: "2", ProgramName: "Program 2" }
 			]));
@@ -110,11 +110,13 @@ describe("episodes", (): void => {
 						name = "Episode 10",
 						seriesId = "1",
 						status = "Recorded",
-						statusDate = new Date(1999, 11, 1),
 						sequence = 4;
+
+			let statusDate: Date;
 
 			beforeEach(async (): Promise<void> => {
 				clock = sinon.useFakeTimers(new Date(2000, 1, 14).valueOf());
+				statusDate = new Date(1999, 11, 1);
 
 				return episodesStore.save({ EpisodeID: id, Name: name, SeriesID: seriesId, Status: status, StatusDate: "01-Dec", Unverified: "true", Unscheduled: "false", Sequence: sequence });
 			});

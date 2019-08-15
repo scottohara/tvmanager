@@ -35,14 +35,12 @@ function statusDateToDate(statusDate: string, status: EpisodeStatus): Date | nul
 		return null;
 	}
 
-	const tempStatusDate: Date = new Date(statusDate),
-				today: Date = new Date(),
+	const today: Date = new Date(),
 				currentYear: number = today.getFullYear(),
 				currentMonth: number = today.getMonth(),
+				tempStatusDate: Date = new Date(`${statusDate}-${currentYear}`),
 				THREE_MONTHS = 3,
 				NINE_MONTHS = 9;
-
-	tempStatusDate.setFullYear(currentYear);
 
 	if (tempStatusDate < today) {
 		today.setMonth(currentMonth - THREE_MONTHS);
