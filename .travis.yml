@@ -5,6 +5,8 @@ osx_image: xcode10.3
 # Cache gems
 cache:
   bundler: true
+  directories:
+    - node_modules
 
 env:
   global:
@@ -17,11 +19,12 @@ addons:
       - couchdb
 
 before_install:
-  - gem install bundler                 # Remove this once bundler 2.x is installed by default
+  - export TZ=Australia/Sydney          # Use local timezone
   - export DEVICE="iPhone X (12.4)"     # Preferred test device
   - export DEVICE_UDID=$(instruments -s devices | grep "$DEVICE" | sed -E 's/.*\[([0-9A-F-]+)\].*/\1/g')
   - xcrun simctl shutdown all           # Make sure all other simulators are shutdown
   - xcrun simctl boot $DEVICE_UDID      # Boot the preferred test device
+  - gem install bundler                 # Remove this once bundler 2.x is installed by default
   - nvm install                         # Install node version from .nvmrc
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-darwin-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
