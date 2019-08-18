@@ -425,7 +425,7 @@ export default class DataSyncController extends ViewController {
 
 			if (response.ok) {
 				// Get the Etag value returned by the server
-				const returnedHash: string = String(response.headers.get("Etag")).replace(/"/gu, "");
+				const returnedHash: string = String(response.headers.get("Etag")).replace(/^W\/|"/gu, "");
 
 				// Compare the Etag with the MD5 sum we sent
 				if (hash === returnedHash) {
@@ -704,7 +704,7 @@ export default class DataSyncController extends ViewController {
 		 */
 		if (this.importChangesOnly) {
 			importJson = data as SerializedModel[];
-			returnedHash = eTag.replace(/"/gu, "");
+			returnedHash = eTag.replace(/^W\/|"/gu, "");
 		} else {
 			returnedHash = (data as FullImport).checksum;
 			importJson = (data as FullImport).data;

@@ -539,21 +539,40 @@ describe("DataSyncController", (): void => {
 
 		describe("success", (): void => {
 			describe("hash match", (): void => {
-				beforeEach(async (): Promise<void> => {
-					fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
-						status: 200,
-						statusText: "OK",
-						headers: {
-							Etag: "test-hash"
-						}
-					})));
+				interface Scenario {
+					description: string;
+					etag: string;
+				}
+				const scenarios: Scenario[] = [
+					{
+						description: "strong eTag",
+						etag: "test-hash"
+					},
+					{
+						description: "weak eTag",
+						etag: "W/\"test-hash\""
+					}
+				];
 
-					await dataSyncController["sendChange"](sync);
+				scenarios.forEach((scenario: Scenario): void => {
+					describe(scenario.description, (): void => {
+						beforeEach(async (): Promise<void> => {
+							fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
+								status: 200,
+								statusText: "OK",
+								headers: {
+									Etag: scenario.etag
+								}
+							})));
+
+							await dataSyncController["sendChange"](sync);
+						});
+
+						it("should remove the sync record", (): Chai.Assertion => sync.remove.should.have.been.called);
+						it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+						it("should mark the change as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
+					});
 				});
-
-				it("should remove the sync record", (): Chai.Assertion => sync.remove.should.have.been.called);
-				it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
-				it("should mark the change as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
 			});
 
 			describe("hash mismatch", (): void => {
@@ -1031,10 +1050,16 @@ describe("DataSyncController", (): void => {
 					checksum = "test-hash",
 					scenarios: Scenario[] = [
 						{
-							description: "fast import",
+							description: "fast import with strong etag",
 							importChangesOnly: true,
 							importData: data,
 							eTag: "test-hash"
+						},
+						{
+							description: "fast import with weak etag",
+							importChangesOnly: true,
+							importData: data,
+							eTag: "W/\"test-hash\""
 						},
 						{
 							description: "full import",
