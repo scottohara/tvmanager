@@ -807,6 +807,7 @@ describe("ApplicationController", (): void => {
 		});
 
 		it("should setup the view controller", (): Chai.Assertion => controller.setup.should.have.been.called);
+		it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 	});
 
 	describe("viewPopped", (): void => {
@@ -825,6 +826,7 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not activate the view controller", (): Chai.Assertion => activate.should.not.have.been.called);
+			it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 		});
 
 		describe("with activate", (): void => {
@@ -835,6 +837,7 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should activate the view controller", (): Chai.Assertion => activate.should.have.been.calledWith({}));
+			it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 		});
 	});
 

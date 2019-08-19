@@ -421,8 +421,13 @@ export default class ApplicationController {
 	 * @desc Sets up the view controller for the view just pushed, and sets the header
 	 */
 	private async viewPushed(): Promise<void> {
+		const DELAY_MS = 1000;
+
 		// Call the view controller's setup method
-		return this.currentView.controller.setup();
+		await this.currentView.controller.setup();
+
+		// Tell the application controller that we've finished loading
+		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**
@@ -434,10 +439,15 @@ export default class ApplicationController {
 	 * @param {Object} [args] - arguments to pass to the revealed view controller
 	 */
 	private async viewPopped(args: object): Promise<void> {
+		const DELAY_MS = 1000;
+
 		// Call the view controller's activate method
 		if ("function" === typeof this.currentView.controller.activate) {
 			await this.currentView.controller.activate(args);
 		}
+
+		// Tell the application controller that we've finished loading
+		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**
