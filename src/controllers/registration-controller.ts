@@ -119,7 +119,7 @@ export default class RegistrationController extends ViewController {
 	private async unregister(): Promise<void> {
 		try {
 			// Send a DELETE request to the server
-			const response: Response = await fetch(`/devices/${this.device.name}`, {
+			const response: Response = await fetch(`/devices/${this.device.id}`, {
 				method: "DELETE",
 				headers: {
 					"X-DEVICE-ID": String(this.device.id)
