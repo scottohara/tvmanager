@@ -17,9 +17,9 @@ import TestController from "mocks/test-controller";
 import WindowMock from "mocks/window-mock";
 
 describe("ApplicationController", (): void => {
-	let contentWrapper: JQuery<HTMLElement>,
-			content: JQuery<HTMLElement>,
-			abc: JQuery<HTMLElement>,
+	let contentWrapper: JQuery,
+			content: JQuery,
+			abc: JQuery,
 			applicationController: ApplicationController;
 
 	beforeEach((): void => {
@@ -119,7 +119,7 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("setScrollPosition", (): void => {
-		let scrollingElement: JQuery<HTMLElement>;
+		let scrollingElement: JQuery;
 
 		beforeEach((): void => {
 			scrollingElement = $("<div>")
@@ -149,9 +149,9 @@ describe("ApplicationController", (): void => {
 
 	describe("setFooter", (): void => {
 		let controller: TestController,
-				leftButton: JQuery<HTMLElement>,
-				rightButton: JQuery<HTMLElement>,
-				label: JQuery<HTMLElement>;
+				leftButton: JQuery,
+				rightButton: JQuery,
+				label: JQuery;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -419,12 +419,12 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("showNotice", (): void => {
-		let notices: JQuery<HTMLElement>,
+		let notices: JQuery,
 				notice: Notice,
 				buttonConfig: NavButton,
 				eventHandler: SinonStub,
-				noticeContainer: JQuery<HTMLElement>,
-				button: JQuery<HTMLElement>;
+				noticeContainer: JQuery,
+				button: JQuery;
 
 		beforeEach((): void => {
 			notices = $("<div>")
@@ -470,7 +470,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should attach a custom click event handler", (): Chai.Assertion => eventHandler.should.have.been.called);
-				it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: JQuery<HTMLElement>): boolean => element[0] === noticeContainer[0])));
+				it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: JQuery): boolean => element[0] === noticeContainer[0])));
 
 				it("should style the button", (): void => {
 					button.hasClass("button").should.be.true;
@@ -490,7 +490,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not attach a custom click event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
-				it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: JQuery<HTMLElement>): boolean => element[0] === noticeContainer[0])));
+				it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: JQuery): boolean => element[0] === noticeContainer[0])));
 
 				it("should style the button", (): void => {
 					button.hasClass("button").should.be.true;
@@ -631,7 +631,7 @@ describe("ApplicationController", (): void => {
 		it("should push the notice onto the stack", (): void => {
 			applicationController.showNotice(notice);
 			noticeContainer = notices.children("div");
-			(applicationController["noticeStack"].notice.pop() as JQuery<HTMLElement>)[0].should.equal(noticeContainer[0]);
+			(applicationController["noticeStack"].notice.pop() as JQuery)[0].should.equal(noticeContainer[0]);
 		});
 
 		describe("animation", (): void => {
@@ -666,9 +666,9 @@ describe("ApplicationController", (): void => {
 				footer: HeaderFooter,
 				leftButtonEventHandler: (event: JQueryEventObject) => void,
 				rightButtonEventHandler: (event: JQueryEventObject) => void,
-				leftButton: JQuery<HTMLElement>,
-				rightButton: JQuery<HTMLElement>,
-				label: JQuery<HTMLElement>;
+				leftButton: JQuery,
+				rightButton: JQuery,
+				label: JQuery;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -842,7 +842,7 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("show", (): void => {
-		let nowLoading: JQuery<HTMLElement>,
+		let nowLoading: JQuery,
 				callback: SinonSpy;
 
 		beforeEach(async (): Promise<void> => {
@@ -864,11 +864,11 @@ describe("ApplicationController", (): void => {
 		it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({}));
 		it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
 
-		afterEach((): JQuery<HTMLElement> => nowLoading.remove());
+		afterEach((): JQuery => nowLoading.remove());
 	});
 
 	describe("contentShown", (): void => {
-		let nowLoading: JQuery<HTMLElement>;
+		let nowLoading: JQuery;
 
 		beforeEach((): void => {
 			nowLoading = $("<div>")
@@ -905,7 +905,7 @@ describe("ApplicationController", (): void => {
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => nowLoading.remove());
+		afterEach((): JQuery => nowLoading.remove());
 	});
 
 	describe("setHeader", (): void => {
@@ -913,9 +913,9 @@ describe("ApplicationController", (): void => {
 				header: HeaderFooter,
 				leftButtonEventHandler: Function,
 				rightButtonEventHandler: Function,
-				leftButton: JQuery<HTMLElement>,
-				rightButton: JQuery<HTMLElement>,
-				label: JQuery<HTMLElement>;
+				leftButton: JQuery,
+				rightButton: JQuery,
+				label: JQuery;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -1087,9 +1087,9 @@ describe("ApplicationController", (): void => {
 				header: HeaderFooter,
 				leftButtonEventHandler: (event: JQueryEventObject) => void,
 				rightButtonEventHandler: (event: JQueryEventObject) => void,
-				leftButton: JQuery<HTMLElement>,
-				rightButton: JQuery<HTMLElement>,
-				label: JQuery<HTMLElement>;
+				leftButton: JQuery,
+				rightButton: JQuery,
+				label: JQuery;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -1190,15 +1190,15 @@ describe("ApplicationController", (): void => {
 
 	describe("setContentHeight", (): void => {
 		it("should set the height of the content area minus the header and footer", (): void => {
-			const header: JQuery<HTMLElement> = $("<div>")
+			const header: JQuery = $("<div>")
 							.attr("id", "header")
 							.appendTo(document.body)
 							.outerHeight(20),
-						footer: JQuery<HTMLElement> = $("<div>")
+						footer: JQuery = $("<div>")
 							.attr("id", "footer")
 							.appendTo(document.body)
 							.outerHeight(10),
-						scrollingElement: JQuery<HTMLElement> = $("<div>")
+						scrollingElement: JQuery = $("<div>")
 							.appendTo(content);
 
 			WindowMock.innerHeight = 50;
@@ -1210,7 +1210,7 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("hideNotice", (): void => {
-		let notice: JQuery<HTMLElement>;
+		let notice: JQuery;
 
 		beforeEach((): void => {
 			sinon.stub(applicationController, "noticeHidden" as keyof ApplicationController);
@@ -1230,7 +1230,7 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("noticeHidden", (): void => {
-		let notices: JQuery<HTMLElement>;
+		let notices: JQuery;
 
 		beforeEach((done: Mocha.Done): void => {
 			notices = $("<div>")
@@ -1275,9 +1275,9 @@ describe("ApplicationController", (): void => {
 			}
 		];
 
-		let	notice: JQuery<HTMLElement>,
+		let	notice: JQuery,
 				remove: SinonStub,
-				notices: JQuery<HTMLElement>,
+				notices: JQuery,
 				acknowledged: boolean[],
 				unacknowledged: boolean[];
 
@@ -1310,7 +1310,7 @@ describe("ApplicationController", (): void => {
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => notices.remove());
+		afterEach((): JQuery => notices.remove());
 	});
 
 	describe("gotLastSyncTime", (): void => {
@@ -1327,11 +1327,11 @@ describe("ApplicationController", (): void => {
 			let clock: SinonFakeTimers,
 					settingValue: Date;
 
-			beforeEach((): SinonFakeTimers => (clock = sinon.useFakeTimers((new Date()).valueOf())));
+			beforeEach((): SinonFakeTimers => (clock = sinon.useFakeTimers(new Date().valueOf())));
 
 			describe("younger than max data data age days", (): void => {
 				it("should do nothing", (): void => {
-					settingValue = new Date((new Date()).valueOf() - (7 * 24 * 60 * 60 * 1000));
+					settingValue = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
 					applicationController["gotLastSyncTime"](new SettingMock(undefined, String(settingValue)));
 					applicationController.showNotice.should.not.have.been.called;
 				});
@@ -1339,7 +1339,7 @@ describe("ApplicationController", (): void => {
 
 			describe("older than max data age days", (): void => {
 				it("should display a sync notice", (): void => {
-					settingValue = new Date((new Date()).valueOf() - (9 * 24 * 60 * 60 * 1000));
+					settingValue = new Date(new Date().valueOf() - (9 * 24 * 60 * 60 * 1000));
 					applicationController["gotLastSyncTime"](new SettingMock(undefined, String(settingValue)));
 					applicationController.showNotice.should.have.been.calledWith({
 						label: "The last data sync was over 7 days ago",

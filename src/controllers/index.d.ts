@@ -63,7 +63,7 @@ export interface ViewControllerSet {
 
 export interface NoticeStack {
 	height: number;
-	notice: JQuery<HTMLElement>[];
+	notice: JQuery[];
 }
 
 /**

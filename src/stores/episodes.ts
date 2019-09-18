@@ -26,7 +26,7 @@ const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 
 // Converts a date to DD-MON format (e.g. 06-Jul)
 function statusDateToString(statusDate: Date | null): string {
-	return null === statusDate ? "" : (new Intl.DateTimeFormat("en-AU", { day: "2-digit", month: "short" })).format(statusDate).replace(/\s/giu, "-");
+	return null === statusDate ? "" : new Intl.DateTimeFormat("en-AU", { day: "2-digit", month: "short" }).format(statusDate).replace(/\s/giu, "-");
 }
 
 // Coverts a DD-MON string to a date, using a sliding [3 months ago] to [9 months from now] window

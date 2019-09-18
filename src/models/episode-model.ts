@@ -60,7 +60,7 @@ export default class Episode extends Base {
 
 	public constructor(public id: string | null,
 						public episodeName: string | null, status: EpisodeStatus,
-						public statusDate: string, unverified = false,
+						public statusDate: string, unverified: boolean,
 						public unscheduled: boolean = false,
 						public sequence: number = 0,
 						private seriesId: string | null,

@@ -16,7 +16,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 
 describe("ProgramsController", (): void => {
 	let items: ProgramMock[],
-			programList: JQuery<HTMLElement>,
+			programList: JQuery,
 			programsController: ProgramsController;
 
 	beforeEach((): void => {
@@ -358,5 +358,5 @@ describe("ProgramsController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery<HTMLElement> => programList.remove());
+	afterEach((): JQuery => programList.remove());
 });

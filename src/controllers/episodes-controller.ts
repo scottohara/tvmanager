@@ -111,7 +111,7 @@ export default class EpisodesController extends ViewController {
 	 * @desc Activates the controller
 	 * @param {EpisodeListItem} [listItem] - a list item that was just added/edited in the Episode view
 	 */
-	public activate(listItem?: EpisodeListItem): Promise<void> {
+	public async activate(listItem?: EpisodeListItem): Promise<void> {
 		// When returning from the Episode view, we need to update the list with the new values
 		if (undefined !== listItem) {
 			// Get the details of the added/edited episode
@@ -169,7 +169,7 @@ export default class EpisodesController extends ViewController {
 	 * @desc Called after the list of episodes is retrieved
 	 * @param {Array<Episode>} episodeList - array of episode objects
 	 */
-	private listRetrieved(episodeList: PublicInterface<Episode>[]): Promise<void> {
+	private async listRetrieved(episodeList: PublicInterface<Episode>[]): Promise<void> {
 		// Set the list items
 		this.episodeList.items = episodeList;
 
@@ -184,7 +184,7 @@ export default class EpisodesController extends ViewController {
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView(this.listItem);
 	}
 
@@ -196,7 +196,7 @@ export default class EpisodesController extends ViewController {
 	 * @desc Displays the Episode view for editing an episode
 	 * @param {Number} listIndex - the list index of the episode to edit
 	 */
-	private viewItem(listIndex: number): Promise<void> {
+	private async viewItem(listIndex: number): Promise<void> {
 		const episode = this.episodeList.items[listIndex] as Episode;
 
 		// Save the current episode details
@@ -216,7 +216,7 @@ export default class EpisodesController extends ViewController {
 	 * @method addItem
 	 * @desc Displays the Episode view for adding an episode
 	 */
-	private addItem(): Promise<void> {
+	private async addItem(): Promise<void> {
 		return this.appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
 	}
 

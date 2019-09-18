@@ -59,9 +59,9 @@ describe("SeriesController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let seriesName: JQuery<HTMLElement>,
-				nowShowing: JQuery<HTMLElement>,
-				moveTo: JQuery<HTMLElement>,
+		let seriesName: JQuery,
+				nowShowing: JQuery,
+				moveTo: JQuery,
 				leftButton: NavButton,
 				rightButton: NavButton;
 
@@ -126,7 +126,7 @@ describe("SeriesController", (): void => {
 
 	describe("save", (): void => {
 		let seriesName: string,
-				seriesNameInput: JQuery<HTMLElement>;
+				seriesNameInput: JQuery;
 
 		beforeEach(async (): Promise<void> => {
 			seriesName = "test-series-2";
@@ -143,7 +143,7 @@ describe("SeriesController", (): void => {
 		it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
 
-		afterEach((): JQuery<HTMLElement> => seriesNameInput.remove());
+		afterEach((): JQuery => seriesNameInput.remove());
 	});
 
 	describe("cancel", (): void => {
@@ -189,7 +189,7 @@ describe("SeriesController", (): void => {
 				}
 			];
 
-			let swWrapper: JQuery<HTMLElement>;
+			let swWrapper: JQuery;
 
 			beforeEach((): void => {
 				sinon.stub(seriesController, "setNowShowing" as keyof SeriesController);
@@ -222,12 +222,12 @@ describe("SeriesController", (): void => {
 				});
 			});
 
-			afterEach((): JQuery<HTMLElement> => swWrapper.remove());
+			afterEach((): JQuery => swWrapper.remove());
 		});
 	});
 
 	describe("setNowShowing", (): void => {
-		let nowShowing: JQuery<HTMLElement>;
+		let nowShowing: JQuery;
 
 		beforeEach((): void => {
 			(SpinningWheelMock.getSelectedValues as SinonStub).reset();
@@ -250,7 +250,7 @@ describe("SeriesController", (): void => {
 		it("should update the view", (): Chai.Assertion => String(nowShowing.val()).should.equal("Mondays"));
 		it("should remove the touch event proxy", (): Chai.Assertion => (null === seriesController.swtoucheventproxy).should.be.true);
 
-		afterEach((): JQuery<HTMLElement> => nowShowing.remove());
+		afterEach((): JQuery => nowShowing.remove());
 	});
 
 	describe("getProgramId", (): void => {
@@ -282,7 +282,7 @@ describe("SeriesController", (): void => {
 	});
 
 	describe("listRetrieved", (): void => {
-		let swWrapper: JQuery<HTMLElement>,
+		let swWrapper: JQuery,
 				programs: {[key: string]: string;};
 
 		beforeEach((): void => {
@@ -318,11 +318,11 @@ describe("SeriesController", (): void => {
 		it("should wrap the SpinningWheel in a touch event proxy", (): Chai.Assertion => (null !== seriesController.swtoucheventproxy).should.be.true);
 		it("should clear the semaphore", (): Chai.Assertion => seriesController["gettingProgramId"].should.be.false);
 
-		afterEach((): JQuery<HTMLElement> => swWrapper.remove());
+		afterEach((): JQuery => swWrapper.remove());
 	});
 
 	describe("setProgramId", (): void => {
-		let moveTo: JQuery<HTMLElement>;
+		let moveTo: JQuery;
 
 		beforeEach((): void => {
 			(SpinningWheelMock.getSelectedValues as SinonStub).reset();
@@ -348,6 +348,6 @@ describe("SeriesController", (): void => {
 		it("should update the view", (): Chai.Assertion => String(moveTo.val()).should.equal("program 2"));
 		it("should remove the touch event proxy", (): Chai.Assertion => (null === seriesController.swtoucheventproxy).should.be.true);
 
-		afterEach((): JQuery<HTMLElement> => moveTo.remove());
+		afterEach((): JQuery => moveTo.remove());
 	});
 });

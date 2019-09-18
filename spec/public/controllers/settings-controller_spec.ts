@@ -134,7 +134,7 @@ describe("SettingsController", (): void => {
 		scenarios.forEach((scenario: Scenario): void => {
 			it(`should attach a ${scenario.description} click event handler`, async (): Promise<void> => {
 				const handler = sinon.stub(settingsController, scenario.handler as keyof SettingsController),
-							element: JQuery<HTMLElement> = $("<div>")
+							element: JQuery = $("<div>")
 								.attr("id", scenario.id)
 								.appendTo(document.body);
 

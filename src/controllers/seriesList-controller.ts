@@ -165,7 +165,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Called after the list of series is retrieved
 	 * @param {Array<Series>} seriesList - array of series objects
 	 */
-	private listRetrieved(seriesList: PublicInterface<Series>[]): Promise<void> {
+	private async listRetrieved(seriesList: PublicInterface<Series>[]): Promise<void> {
 		// Set the list items
 		this.seriesList.items = seriesList;
 
@@ -180,7 +180,7 @@ export default class SeriesListController extends ViewController {
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView(this.listItem);
 	}
 
@@ -192,7 +192,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Displays the Episodes view for a series
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
-	private viewItem(listIndex: number): Promise<void> {
+	private async viewItem(listIndex: number): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Save the current series details
@@ -213,7 +213,7 @@ export default class SeriesListController extends ViewController {
 	 * @method addItem
 	 * @desc Displays the Series view for adding a series
 	 */
-	private addItem(): Promise<void> {
+	private async addItem(): Promise<void> {
 		return this.appController.pushView("series", { program: this.listItem.program });
 	}
 
@@ -225,7 +225,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Displays the Series view for editing a series
 	 * @param {Number} listIndex - the list index of the series to edit
 	 */
-	private editItem(listIndex: number): Promise<void> {
+	private async editItem(listIndex: number): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Save the current series details

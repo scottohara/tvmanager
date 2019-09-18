@@ -200,7 +200,7 @@ export default class RegistrationController extends ViewController {
 	 * @method cancel
 	 * @desc Pops the view off the stack
 	 */
-	private cancel(): Promise<void> {
+	private async cancel(): Promise<void> {
 		return this.appController.popView();
 	}
 }

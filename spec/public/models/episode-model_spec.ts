@@ -50,9 +50,8 @@ describe("Episode", (): void => {
 		it("should set the program name", (): Chai.Assertion => String(episode.programName).should.equal(programName));
 
 		describe("default properties", (): void => {
-			beforeEach((): Episode => (episode = new Episode(id, episodeName, status, statusDate, undefined, undefined, undefined, seriesId)));
+			beforeEach((): Episode => (episode = new Episode(id, episodeName, status, statusDate, unverified, undefined, undefined, seriesId)));
 
-			it("should clear the unverified flag if not specified", (): Chai.Assertion => episode.unverified.should.be.false);
 			it("should clear the unscheduled flag if not specified", (): Chai.Assertion => episode.unscheduled.should.be.false);
 			it("should default the sequence to zero if not specified", (): Chai.Assertion => episode.sequence.should.equal(0));
 		});
@@ -656,7 +655,7 @@ describe("Episode", (): void => {
 
 				beforeEach((): void => {
 					if (undefined !== scenario.today) {
-						const currentYear: number = (new Date()).getFullYear();
+						const currentYear: number = new Date().getFullYear();
 
 						clock = sinon.useFakeTimers(new Date(currentYear, scenario.today.month, scenario.today.day).valueOf());
 					}

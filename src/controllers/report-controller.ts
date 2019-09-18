@@ -57,7 +57,7 @@ export default class ReportController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: this.report.reportName,
@@ -95,7 +95,7 @@ export default class ReportController extends ViewController {
 	 * @desc Called after the list of report data is retrieved
 	 * @param {Array<Series>} reportList - array of series objects
 	 */
-	private listRetrieved(reportList: PublicInterface<Series>[]): Promise<void> {
+	private async listRetrieved(reportList: PublicInterface<Series>[]): Promise<void> {
 		// Set the list items
 		this.reportList.items = reportList;
 
@@ -113,7 +113,7 @@ export default class ReportController extends ViewController {
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
@@ -125,7 +125,7 @@ export default class ReportController extends ViewController {
 	 * @desc Displays the Episodes view for a series
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
-	private viewItem(listIndex: number): Promise<void> {
+	private async viewItem(listIndex: number): Promise<void> {
 		return this.appController.pushView("episodes", { source: "Report", listIndex, series: this.reportList.items[listIndex] });
 	}
 

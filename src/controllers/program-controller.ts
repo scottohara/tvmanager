@@ -59,7 +59,7 @@ export default class ProgramController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Add/Edit Program",
@@ -104,7 +104,7 @@ export default class ProgramController extends ViewController {
 	 * @method cancel
 	 * @desc Pops the view off the stack
 	 */
-	private cancel(): Promise<void> {
+	private async cancel(): Promise<void> {
 		return this.appController.popView();
 	}
 }

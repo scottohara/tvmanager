@@ -50,7 +50,7 @@ export default class UnscheduledController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Unscheduled",
@@ -88,7 +88,7 @@ export default class UnscheduledController extends ViewController {
 	 * @desc Called after the list of episodes is retrieved
 	 * @param {Array<Episode>} unscheduledList - array of episode objects
 	 */
-	private listRetrieved(unscheduledList: PublicInterface<Episode>[]): Promise<void> {
+	private async listRetrieved(unscheduledList: PublicInterface<Episode>[]): Promise<void> {
 		// Set the list items
 		this.unscheduledList.items = unscheduledList;
 
@@ -106,7 +106,7 @@ export default class UnscheduledController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
@@ -118,7 +118,7 @@ export default class UnscheduledController extends ViewController {
 	 * @desc Displays the Episode view for editing an episode
 	 * @param {Number} listIndex - the list index of the episode to edit
 	 */
-	private viewItem(listIndex: number): Promise<void> {
+	private async viewItem(listIndex: number): Promise<void> {
 		return this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] });
 	}
 

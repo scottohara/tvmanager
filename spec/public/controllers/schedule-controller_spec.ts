@@ -16,7 +16,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 
 describe("ScheduleController", (): void => {
 	let items: SeriesMock[],
-			scheduleList: JQuery<HTMLElement>,
+			scheduleList: JQuery,
 			scheduleController: ScheduleController;
 
 	beforeEach((): void => {
@@ -308,5 +308,5 @@ describe("ScheduleController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery<HTMLElement> => scheduleList.remove());
+	afterEach((): JQuery => scheduleList.remove());
 });

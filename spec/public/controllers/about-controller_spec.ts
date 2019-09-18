@@ -25,7 +25,7 @@ describe("AboutController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let databaseVersion: JQuery<HTMLElement>,
+		let databaseVersion: JQuery,
 				leftButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
@@ -69,7 +69,7 @@ describe("AboutController", (): void => {
 		it("should set the database version", (): Chai.Assertion => String(databaseVersion.val()).should.equal("v1"));
 		it("should set the scroll position", (): Chai.Assertion => appController.setScrollPosition.should.have.been.called);
 
-		afterEach((): JQuery<HTMLElement> => databaseVersion.remove());
+		afterEach((): JQuery => databaseVersion.remove());
 	});
 
 	describe("goBack", (): void => {
@@ -82,7 +82,7 @@ describe("AboutController", (): void => {
 	describe("programCount", (): void => {
 		it("should set the program count", (): void => {
 			const count = 1,
-						totalPrograms: JQuery<HTMLElement> = $("<input>")
+						totalPrograms: JQuery = $("<input>")
 							.attr("id", "totalPrograms")
 							.appendTo(document.body);
 
@@ -95,7 +95,7 @@ describe("AboutController", (): void => {
 	describe("seriesCount", (): void => {
 		it("should set the series count", (): void => {
 			const count = 1,
-						totalSeries: JQuery<HTMLElement> = $("<input>")
+						totalSeries: JQuery = $("<input>")
 							.attr("id", "totalSeries")
 							.appendTo(document.body);
 
@@ -122,7 +122,7 @@ describe("AboutController", (): void => {
 	});
 
 	describe("watchedCount", (): void => {
-		let totalEpisodes: JQuery<HTMLElement>;
+		let totalEpisodes: JQuery;
 
 		beforeEach((): void => {
 			totalEpisodes = $("<input>")
@@ -146,6 +146,6 @@ describe("AboutController", (): void => {
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => totalEpisodes.remove());
+		afterEach((): JQuery => totalEpisodes.remove());
 	});
 });

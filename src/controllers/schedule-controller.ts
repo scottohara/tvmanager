@@ -57,7 +57,7 @@ export default class ScheduleController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Schedule",
@@ -126,7 +126,7 @@ export default class ScheduleController extends ViewController {
 	 * @desc Called after the list of series is retrieved
 	 * @param {Array<Series>} scheduleList - array of series objects
 	 */
-	private listRetrieved(scheduleList: PublicInterface<Series>[]): Promise<void> {
+	private async listRetrieved(scheduleList: PublicInterface<Series>[]): Promise<void> {
 		// Set the list items
 		this.scheduleList.items = scheduleList;
 
@@ -145,7 +145,7 @@ export default class ScheduleController extends ViewController {
 	 * @desc Displays the Episodes view for a series
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
-	private viewItem(listIndex: number): Promise<void> {
+	private async viewItem(listIndex: number): Promise<void> {
 		return this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] });
 	}
 
@@ -156,7 +156,7 @@ export default class ScheduleController extends ViewController {
 	 * @method viewUnscheduled
 	 * @desc Displays the Unscheduled view
 	 */
-	private viewUnscheduled(): Promise<void> {
+	private async viewUnscheduled(): Promise<void> {
 		return this.appController.pushView("unscheduled");
 	}
 
@@ -167,7 +167,7 @@ export default class ScheduleController extends ViewController {
 	 * @method viewPrograms
 	 * @desc Displays the Programs view
 	 */
-	private viewPrograms(): Promise<void> {
+	private async viewPrograms(): Promise<void> {
 		return this.appController.pushView("programs");
 	}
 
@@ -178,7 +178,7 @@ export default class ScheduleController extends ViewController {
 	 * @method viewSettings
 	 * @desc Displays the Settings view
 	 */
-	private viewSettings(): Promise<void> {
+	private async viewSettings(): Promise<void> {
 		return this.appController.pushView("settings");
 	}
 
@@ -190,7 +190,7 @@ export default class ScheduleController extends ViewController {
 	 * @desc Displays the Series view for editing a series
 	 * @param {Number} listIndex - the list index of the series to edit
 	 */
-	private editItem(listIndex: number): Promise<void> {
+	private async editItem(listIndex: number): Promise<void> {
 		const series = this.scheduleList.items[listIndex] as Series;
 
 		// Save the current series details

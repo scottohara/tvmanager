@@ -85,7 +85,7 @@ export default class ProgramsController extends ViewController {
 	 * @desc Activates the controller
 	 * @param {ProgramListItem} [listItem] - a list item that was just added/edited in the Program view
 	 */
-	public activate(listItem?: ProgramListItem): Promise<void> {
+	public async activate(listItem?: ProgramListItem): Promise<void> {
 		let listResort = false;
 
 		// When returning from the Program view, we need to update the list with the new values
@@ -132,7 +132,7 @@ export default class ProgramsController extends ViewController {
 	 * @desc Called after the list of programs is retrieved
 	 * @param {Array<Program>} programList - array of program objects
 	 */
-	private listRetrieved(programList: PublicInterface<Program>[]): Promise<void> {
+	private async listRetrieved(programList: PublicInterface<Program>[]): Promise<void> {
 		// Set the list items
 		this.programList.items = programList;
 
@@ -147,7 +147,7 @@ export default class ProgramsController extends ViewController {
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
@@ -159,7 +159,7 @@ export default class ProgramsController extends ViewController {
 	 * @desc Displays the SeriesList view for a program
 	 * @param {Number} listIndex - the list index of the program to view
 	 */
-	private viewItem(listIndex: number): Promise<void> {
+	private async viewItem(listIndex: number): Promise<void> {
 		const program = this.programList.items[listIndex] as Program;
 
 		// Save the current program details
@@ -175,7 +175,7 @@ export default class ProgramsController extends ViewController {
 	 * @method addItem
 	 * @desc Displays the Program view for adding a program
 	 */
-	private addItem(): Promise<void> {
+	private async addItem(): Promise<void> {
 		return this.appController.pushView("program");
 	}
 
@@ -187,7 +187,7 @@ export default class ProgramsController extends ViewController {
 	 * @desc Displays the Program view for editing a program
 	 * @param {Number} listIndex - the list index of the program to edit
 	 */
-	private editItem(listIndex: number): Promise<void> {
+	private async editItem(listIndex: number): Promise<void> {
 		const program = this.programList.items[listIndex] as Program;
 
 		// Save the current program details

@@ -61,7 +61,7 @@ describe("ProgramController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let programName: JQuery<HTMLElement>,
+		let programName: JQuery,
 				leftButton: NavButton,
 				rightButton: NavButton;
 
@@ -97,12 +97,12 @@ describe("ProgramController", (): void => {
 
 		it("should set the program name", (): Chai.Assertion => String(programName.val()).should.equal(listItem.program.programName));
 
-		afterEach((): JQuery<HTMLElement> => programName.remove());
+		afterEach((): JQuery => programName.remove());
 	});
 
 	describe("save", (): void => {
 		let programName: string,
-				programNameInput: JQuery<HTMLElement>;
+				programNameInput: JQuery;
 
 		beforeEach(async (): Promise<void> => {
 			programName = "test-program-2";
@@ -119,7 +119,7 @@ describe("ProgramController", (): void => {
 		it("should save the program", (): Chai.Assertion => listItem.program.save.should.have.been.called);
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
 
-		afterEach((): JQuery<HTMLElement> => programNameInput.remove());
+		afterEach((): JQuery => programNameInput.remove());
 	});
 
 	describe("cancel", (): void => {

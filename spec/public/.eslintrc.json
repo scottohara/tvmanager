@@ -10,7 +10,10 @@
 		}],
 
 		// Typescript
-		"@typescript-eslint/no-magic-numbers": "off",			// Disable due to lots of numbers used in assertions
-		"@typescript-eslint/no-object-literal-type-assertion": "off"	// Disable to allow mocking partial types
+		"@typescript-eslint/consistent-type-assertions": ["error", {
+			"assertionStyle": "as",
+			"objectLiteralTypeAssertions": "allow"					// Required for mocking partial types
+		}],
+		"@typescript-eslint/no-magic-numbers": "off"			// Disable due to lots of numbers used in assertions
 	}
 }

@@ -52,7 +52,7 @@ enum Months {Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
  * @property {Boolean} localChanges - indicates whether there are any local changes to be synced
  * @property {Boolean} syncing - indicates whether a sync operation is currently running
  * @property {Number} syncProcessed - running total number of pending local changes exported
- * @property {JQuery<HTMLElement>[]} syncErrors - array of HTML list item elements containing error details
+ * @property {JQuery[]} syncErrors - array of HTML list item elements containing error details
  * @property {Array<Sync>} syncList - array of Sync objects
  * @property {Boolean} importChangesOnly - true = Fast Import, false = Full Import
  * @property {Number} objectsToImport - total number of objects to be imported
@@ -67,7 +67,7 @@ export default class DataSyncController extends ViewController {
 
 	private syncProcessed = 0;
 
-	private syncErrors: JQuery<HTMLElement>[] = [];
+	private syncErrors: JQuery[] = [];
 
 	private syncList: PublicInterface<Sync>[] = [];
 
@@ -95,7 +95,7 @@ export default class DataSyncController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Import/Export",
@@ -145,7 +145,7 @@ export default class DataSyncController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
@@ -156,7 +156,7 @@ export default class DataSyncController extends ViewController {
 	 * @method viewRegistration
 	 * @desc Display the registration view
 	 */
-	private viewRegistration(): Promise<void> {
+	private async viewRegistration(): Promise<void> {
 		return this.appController.pushView("registration");
 	}
 
@@ -362,7 +362,7 @@ export default class DataSyncController extends ViewController {
 	 * @desc Iterates over the list of local changes to be synced, and processes each one
 	 * @param {Array<Sync>} syncList - array of Sync objects
 	 */
-	private listRetrieved(syncList: PublicInterface<Sync>[]): Promise<void[]> {
+	private async listRetrieved(syncList: PublicInterface<Sync>[]): Promise<void[]> {
 		this.syncProcessed = 0;
 		this.syncErrors = [];
 		this.syncList = syncList;

@@ -21,7 +21,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 describe("EpisodesController", (): void => {
 	let listItem: SeriesListItem,
 			items: EpisodeMock[],
-			episodeList: JQuery<HTMLElement>,
+			episodeList: JQuery,
 			episodesController: EpisodesController;
 
 	beforeEach((): void => {
@@ -532,7 +532,7 @@ describe("EpisodesController", (): void => {
 				items[3]
 			];
 
-			episodeList.append(sortedItems.map((item: EpisodeMock): JQuery<HTMLElement> => $("<li>").append($("<a>").attr("id", item.id))));
+			episodeList.append(sortedItems.map((item: EpisodeMock): JQuery => $("<li>").append($("<a>").attr("id", item.id))));
 			episodesController["episodeList"] = new ListMock("", "", "", items);
 			await episodesController["resequenceItems"]();
 		});
@@ -585,7 +585,7 @@ describe("EpisodesController", (): void => {
 
 	describe("sortItems", (): void => {
 		it("should reposition the sort helper", (): void => {
-			const helper: JQuery<HTMLElement> = $("<div>")
+			const helper: JQuery = $("<div>")
 				.appendTo(document.body)
 				.offset({ top: 0 });
 
@@ -638,5 +638,5 @@ describe("EpisodesController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery<HTMLElement> => episodeList.remove());
+	afterEach((): JQuery => episodeList.remove());
 });

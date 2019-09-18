@@ -19,7 +19,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 describe("SeriesListController", (): void => {
 	let listItem: ProgramListItem,
 			items: SeriesMock[],
-			seriesList: JQuery<HTMLElement>,
+			seriesList: JQuery,
 			seriesListController: SeriesListController;
 
 	beforeEach((): void => {
@@ -437,5 +437,5 @@ describe("SeriesListController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery<HTMLElement> => seriesList.remove());
+	afterEach((): JQuery => seriesList.remove());
 });

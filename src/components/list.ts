@@ -60,7 +60,7 @@ export default class List {
 	 * @desc (Re)Populates and renders the HTML list
 	 */
 	public refresh(): void {
-		const containerElement: JQuery<HTMLElement> = $(`#${this.container}`);
+		const containerElement: JQuery = $(`#${this.container}`);
 
 		// Clear any existing content from the container element
 		containerElement.html("");
@@ -69,7 +69,7 @@ export default class List {
 				currentGroup = "";
 
 		// Loop through the array of JSON objects
-		containerElement.append(this.items.reduce((itemElements: JQuery<HTMLElement>[], item: object, index: number): JQuery<HTMLElement>[] => {
+		containerElement.append(this.items.reduce((itemElements: JQuery[], item: object, index: number): JQuery[] => {
 			const listItem: Map<string, string> = new Map(Object.entries(item));
 
 			// If grouping is required, when the property used for the group changes, output a group header item
@@ -100,7 +100,7 @@ export default class List {
 				.on("click", (): void => this.tap(index)));
 
 			return itemElements;
-		}, []) as JQuery<HTMLElement>[]);
+		}, []) as JQuery[]);
 
 		// Ask the application controller to set/restore the initial scroll position
 		this.appController.setScrollPosition();
@@ -115,8 +115,8 @@ export default class List {
 	 * @param {String} id - id of the item to scroll into view
 	 */
 	public scrollTo(id: string): void {
-		const item: JQuery<HTMLElement> = $(`#${id}`),
-					containerElement: JQuery<HTMLElement> = $(`#${this.container}`),
+		const item: JQuery = $(`#${id}`),
+					containerElement: JQuery = $(`#${this.container}`),
 					itemTop: number = item.get(0).offsetTop,
 					itemBottom: number = itemTop + Number(item.height()),
 					listTop = Number(containerElement.scrollTop()),

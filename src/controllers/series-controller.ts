@@ -86,7 +86,7 @@ export default class SeriesController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Add/Edit Series",
@@ -136,7 +136,7 @@ export default class SeriesController extends ViewController {
 	 * @method cancel
 	 * @desc Reverts any changes and returns to the previous view
 	 */
-	private cancel(): Promise<void> {
+	private async cancel(): Promise<void> {
 		// Revert to the original series details
 		this.listItem.series.setNowShowing(this.originalNowShowing);
 		this.listItem.series.programId = this.originalProgramId;

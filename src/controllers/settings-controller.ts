@@ -41,7 +41,7 @@ export default class SettingsController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Settings",
@@ -63,7 +63,7 @@ export default class SettingsController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public activate(): Promise<void> {
+	public async activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
 		$("#dataSyncRow").on("click", this.viewDataSync.bind(this));
 		$("#aboutRow").on("click", this.viewAbout.bind(this));
@@ -82,7 +82,7 @@ export default class SettingsController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
@@ -93,7 +93,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewDataSync
 	 * @desc Display the dataSync view
 	 */
-	private viewDataSync(): Promise<void> {
+	private async viewDataSync(): Promise<void> {
 		return this.appController.pushView("dataSync");
 	}
 
@@ -104,7 +104,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewAbout
 	 * @desc Display the about view
 	 */
-	private viewAbout(): Promise<void> {
+	private async viewAbout(): Promise<void> {
 		return this.appController.pushView("about");
 	}
 
@@ -115,7 +115,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewRecordedReport
 	 * @desc Display the All Recorded report view
 	 */
-	private viewRecordedReport(): Promise<void> {
+	private async viewRecordedReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series), args: "Recorded" });
 	}
 
@@ -126,7 +126,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewExpectedReport
 	 * @desc Display the All Expected report view
 	 */
-	private viewExpectedReport(): Promise<void> {
+	private async viewExpectedReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series), args: "Expected" });
 	}
 
@@ -137,7 +137,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewMissedReport
 	 * @desc Display the All Missed report view
 	 */
-	private viewMissedReport(): Promise<void> {
+	private async viewMissedReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series), args: "Missed" });
 	}
 
@@ -148,7 +148,7 @@ export default class SettingsController extends ViewController {
 	 * @method viewIncompleteReport
 	 * @desc Display the All Incomplete report view
 	 */
-	private viewIncompleteReport(): Promise<void> {
+	private async viewIncompleteReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) });
 	}
 }

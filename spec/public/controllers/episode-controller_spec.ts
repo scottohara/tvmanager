@@ -65,14 +65,14 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let episodeName: JQuery<HTMLElement>,
-				unverified: JQuery<HTMLElement>,
-				unscheduled: JQuery<HTMLElement>,
-				watched: JQuery<HTMLElement>,
-				recorded: JQuery<HTMLElement>,
-				expected: JQuery<HTMLElement>,
-				missed: JQuery<HTMLElement>,
-				statusDate: JQuery<HTMLElement>,
+		let episodeName: JQuery,
+				unverified: JQuery,
+				unscheduled: JQuery,
+				watched: JQuery,
+				recorded: JQuery,
+				expected: JQuery,
+				missed: JQuery,
+				statusDate: JQuery,
 				leftButton: NavButton,
 				rightButton: NavButton;
 
@@ -210,9 +210,9 @@ describe("EpisodeController", (): void => {
 		];
 
 		let episodeName: string,
-				episodeNameInput: JQuery<HTMLElement>,
-				unverified: JQuery<HTMLElement>,
-				unscheduled: JQuery<HTMLElement>;
+				episodeNameInput: JQuery,
+				unverified: JQuery,
+				unscheduled: JQuery;
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
@@ -338,11 +338,11 @@ describe("EpisodeController", (): void => {
 				}
 			];
 
-			let watched: JQuery<HTMLElement>,
-					recorded: JQuery<HTMLElement>,
-					expected: JQuery<HTMLElement>,
-					missed: JQuery<HTMLElement>,
-					unverifiedRow: JQuery<HTMLElement>;
+			let watched: JQuery,
+					recorded: JQuery,
+					expected: JQuery,
+					missed: JQuery,
+					unverifiedRow: JQuery;
 
 			beforeEach((): void => {
 				watched = $("<div>")
@@ -421,7 +421,7 @@ describe("EpisodeController", (): void => {
 			}
 		];
 
-		let swWrapper: JQuery<HTMLElement>,
+		let swWrapper: JQuery,
 				clock: SinonFakeTimers;
 
 		beforeEach((): void => {
@@ -465,7 +465,7 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("setStatusDate", (): void => {
-		let statusDate: JQuery<HTMLElement>;
+		let statusDate: JQuery;
 
 		beforeEach((): void => {
 			(SpinningWheelMock.getSelectedValues as SinonStub).reset();
@@ -488,7 +488,7 @@ describe("EpisodeController", (): void => {
 		it("should update the view", (): Chai.Assertion => String(statusDate.val()).should.equal(listItem.episode.statusDate));
 		it("should remove the touch event proxy", (): Chai.Assertion => (null === episodeController.swtoucheventproxy).should.be.true);
 
-		afterEach((): JQuery<HTMLElement> => statusDate.remove());
+		afterEach((): JQuery => statusDate.remove());
 	});
 
 	describe("toggleStatusDateRow", (): void => {
@@ -545,8 +545,8 @@ describe("EpisodeController", (): void => {
 			}
 		];
 
-		let statusDateRow: JQuery<HTMLElement>,
-				unscheduled: JQuery<HTMLElement>;
+		let statusDateRow: JQuery,
+				unscheduled: JQuery;
 
 		beforeEach((): void => {
 			sinon.stub(episodeController, "getStatusDate" as keyof EpisodeController);

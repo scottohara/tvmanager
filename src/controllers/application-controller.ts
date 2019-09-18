@@ -146,7 +146,7 @@ export default class ApplicationController {
 	 * @desc Pops the current view off the stack, revealing the previous view
 	 * @param {Object} [args] - arguments to pass to the previous view controller
 	 */
-	public popView(args?: object): Promise<void> {
+	public async popView(args?: object): Promise<void> {
 		// Clear the header/footer
 		this.clearFooter();
 		this.clearHeader();
@@ -278,7 +278,7 @@ export default class ApplicationController {
 	 * @param {String} view - the name of the view to push
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
-	public pushView(view: string, args?: object): Promise<void> {
+	public async pushView(view: string, args?: object): Promise<void> {
 		// If a current view is displayed, save the current scroll position and clear the existing header/footer
 		if (this.viewStack.length > 0) {
 			this.getScrollPosition();
@@ -306,14 +306,14 @@ export default class ApplicationController {
 	 */
 	public showNotice(notice: Notice): void {
 		// Create a div for the new notice
-		const	noticeContainer: JQuery<HTMLElement> = $("<div>")
+		const	noticeContainer: JQuery = $("<div>")
 						.addClass("notice")
 						.appendTo($("#notices")),
-					noticeLeftButton: JQuery<HTMLElement> = $("<a>").appendTo(noticeContainer),
-					noticeLabel: JQuery<HTMLElement> = $("<p>")
+					noticeLeftButton: JQuery = $("<a>").appendTo(noticeContainer),
+					noticeLabel: JQuery = $("<p>")
 						.html(notice.label as string)
 						.appendTo(noticeContainer),
-					noticeRightButton: JQuery<HTMLElement> = $("<a>").appendTo(noticeContainer);
+					noticeRightButton: JQuery = $("<a>").appendTo(noticeContainer);
 
 		// If the notice specified a left-hand button, set it up
 		if (undefined !== notice.leftButton) {
@@ -601,7 +601,7 @@ export default class ApplicationController {
 	 * @desc Marks a notice as acknowledged by the user, and hides it
 	 * @param {Object} notice - HTML DOM element of the notice
 	 */
-	private hideNotice(notice: JQuery<HTMLElement>): void {
+	private hideNotice(notice: JQuery): void {
 		// Update the height of the notices stack to reclaim the space for the notice
 		this.noticeStack.height += Number(notice.height());
 

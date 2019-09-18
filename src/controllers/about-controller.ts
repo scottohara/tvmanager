@@ -84,7 +84,7 @@ export default class AboutController extends ViewController {
 	 * @method goBack
 	 * @desc Pop the view off the stack
 	 */
-	private goBack(): Promise<void> {
+	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 

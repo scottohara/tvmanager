@@ -4,7 +4,7 @@ import { SyntheticTouchEvent } from "../../../src/components";
 import TouchEventProxy from "components/toucheventproxy";
 
 describe("TouchEventProxy", (): void => {
-	let	element: JQuery<HTMLElement>,
+	let	element: JQuery,
 			toucheventproxy: TouchEventProxy;
 
 	beforeEach((): void => {
@@ -18,7 +18,7 @@ describe("TouchEventProxy", (): void => {
 	});
 
 	describe("handleEvent", (): void => {
-		let target: JQuery<HTMLElement>,
+		let target: JQuery,
 				event: MouseEvent | TouchEvent,
 				eventHandler: SinonSpy,
 				mapsTo: "touchstart" | "touchmove" | "touchend";
@@ -236,8 +236,8 @@ describe("TouchEventProxy", (): void => {
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => target.remove());
+		afterEach((): JQuery => target.remove());
 	});
 
-	afterEach((): JQuery<HTMLElement> => element.remove());
+	afterEach((): JQuery => element.remove());
 });

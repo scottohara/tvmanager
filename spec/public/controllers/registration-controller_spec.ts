@@ -88,7 +88,7 @@ describe("RegistrationController", (): void => {
 		});
 
 		describe("registered", (): void => {
-			let deviceName: JQuery<HTMLElement>,
+			let deviceName: JQuery,
 					footer: HeaderFooter,
 					leftButton: NavButton;
 
@@ -117,7 +117,7 @@ describe("RegistrationController", (): void => {
 			it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Unregister"));
 			it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 
-			afterEach((): JQuery<HTMLElement> => deviceName.remove());
+			afterEach((): JQuery => deviceName.remove());
 		});
 	});
 
@@ -180,7 +180,7 @@ describe("RegistrationController", (): void => {
 	});
 
 	describe("save", (): void => {
-		let deviceName: JQuery<HTMLElement>,
+		let deviceName: JQuery,
 				fakeFetch: SinonStub,
 				fetchArgs: [SinonMatcher, RequestInit];
 

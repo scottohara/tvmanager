@@ -20,7 +20,7 @@ describe("List", (): void => {
 			items: object[],
 			eventHandler: SinonStub,
 			action: ListAction,
-			containerElement: JQuery<HTMLElement>,
+			containerElement: JQuery,
 			list: List;
 
 	beforeEach((): void => {
@@ -249,5 +249,5 @@ describe("List", (): void => {
 		});
 	});
 
-	afterEach((): JQuery<HTMLElement> => containerElement.remove());
+	afterEach((): JQuery => containerElement.remove());
 });

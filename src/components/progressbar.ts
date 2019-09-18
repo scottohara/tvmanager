@@ -71,7 +71,7 @@ export default class ProgressBar {
 		// Only generate the HTML if a total is set
 		if (this.total > 0) {
 			// Create the progress bar div
-			const bar: JQuery<HTMLElement> = $("<div>")
+			const bar: JQuery = $("<div>")
 				.addClass("progressBar");
 
 			// Append any sections to display
@@ -81,7 +81,7 @@ export default class ProgressBar {
 				.filter((section: Section): boolean => section.percent > 0)
 
 				// Create a div for each section
-				.map((section: Section): JQuery<HTMLElement> => $("<div>")
+				.map((section: Section): JQuery => $("<div>")
 
 					// Set the CSS class to use for the section
 					.addClass(section.style)

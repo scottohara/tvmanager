@@ -81,7 +81,7 @@ export default class EpisodeController extends ViewController {
 	 * @method setup
 	 * @desc Initialises the controller
 	 */
-	public setup(): Promise<void> {
+	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
 			label: "Add/Edit Episode",
@@ -155,7 +155,7 @@ export default class EpisodeController extends ViewController {
 	 * @method cancel
 	 * @desc Reverts any changes and returns to the previous view
 	 */
-	private cancel(): Promise<void> {
+	private async cancel(): Promise<void> {
 		// Revert to the original episode details
 		this.listItem.episode.status = this.originalStatus;
 		this.listItem.episode.statusDate = this.originalStatusDate;

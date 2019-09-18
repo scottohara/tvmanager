@@ -69,10 +69,10 @@ describe("DataSyncController", (): void => {
 		const lastSyncTime: SettingMock = new SettingMock("LastSyncTime", "1 Jan 2010"),
 					device: SettingMock = new SettingMock("Device", "test-device");
 
-		let registrationRow: JQuery<HTMLElement>,
-				importButton: JQuery<HTMLElement>,
-				exportButton: JQuery<HTMLElement>,
-				localChanges: JQuery<HTMLElement>;
+		let registrationRow: JQuery,
+				importButton: JQuery,
+				exportButton: JQuery,
+				localChanges: JQuery;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "viewRegistration" as keyof DataSyncController);
@@ -152,9 +152,9 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("gotLastSyncTime", (): void => {
-		let lastSyncTime: JQuery<HTMLElement>;
+		let lastSyncTime: JQuery;
 
-		beforeEach((): JQuery<HTMLElement> => (lastSyncTime = $("<div>")
+		beforeEach((): JQuery => (lastSyncTime = $("<div>")
 			.attr("id", "lastSyncTime")
 			.hide()
 			.appendTo(document.body)
@@ -176,15 +176,15 @@ describe("DataSyncController", (): void => {
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => lastSyncTime.remove());
+		afterEach((): JQuery => lastSyncTime.remove());
 	});
 
 	describe("gotDevice", (): void => {
-		let deviceName: JQuery<HTMLElement>,
-				syncControls: JQuery<HTMLElement>,
-				importChangesOnly: JQuery<HTMLElement>,
-				importChangesOnlyRow: JQuery<HTMLElement>,
-				registrationMessage: JQuery<HTMLElement>;
+		let deviceName: JQuery,
+				syncControls: JQuery,
+				importChangesOnly: JQuery,
+				importChangesOnlyRow: JQuery,
+				registrationMessage: JQuery;
 
 		beforeEach((): void => {
 			deviceName = $("<div>")
@@ -265,9 +265,9 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("checkForLocalChanges", (): void => {
-		let localChanges: JQuery<HTMLElement>;
+		let localChanges: JQuery;
 
-		beforeEach((): JQuery<HTMLElement> => (localChanges = $("<div>")
+		beforeEach((): JQuery => (localChanges = $("<div>")
 			.attr("id", "localChanges")
 			.hide()
 			.appendTo(document.body)
@@ -294,7 +294,7 @@ describe("DataSyncController", (): void => {
 			it("should display no pending changes", (): Chai.Assertion => String(localChanges.val()).should.equal("None pending"));
 		});
 
-		afterEach((): JQuery<HTMLElement> => localChanges.remove());
+		afterEach((): JQuery => localChanges.remove());
 	});
 
 	describe("dataExport", (): void => {
@@ -325,9 +325,9 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("syncStart", (): void => {
-		let status: JQuery<HTMLElement>;
+		let status: JQuery;
 
-		beforeEach((): JQuery<HTMLElement> => (status = $("<div>")
+		beforeEach((): JQuery => (status = $("<div>")
 			.attr("id", "status")
 			.hide()
 			.appendTo(document.body)
@@ -342,8 +342,8 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("not syncing", (): void => {
-			let progress: JQuery<HTMLElement>,
-					statusRow: JQuery<HTMLElement>,
+			let progress: JQuery,
+					statusRow: JQuery,
 					callback: SinonStub;
 
 			beforeEach((): void => {
@@ -399,13 +399,13 @@ describe("DataSyncController", (): void => {
 			});
 		});
 
-		afterEach((): JQuery<HTMLElement> => status.remove());
+		afterEach((): JQuery => status.remove());
 	});
 
 	describe("syncFinish", (): void => {
-		let statusRow: JQuery<HTMLElement>;
+		let statusRow: JQuery;
 
-		beforeEach((): JQuery<HTMLElement> => (statusRow = $("<div>")
+		beforeEach((): JQuery => (statusRow = $("<div>")
 			.attr("id", "statusRow")
 			.appendTo(document.body)
 		));
@@ -442,7 +442,7 @@ describe("DataSyncController", (): void => {
 			it("should clear the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.false);
 		});
 
-		afterEach((): JQuery<HTMLElement> => statusRow.remove());
+		afterEach((): JQuery => statusRow.remove());
 	});
 
 	describe("doExport", (): void => {
@@ -456,8 +456,8 @@ describe("DataSyncController", (): void => {
 
 	describe("listRetrieved", (): void => {
 		let syncList: SyncMock[],
-				status: JQuery<HTMLElement>,
-				progress: JQuery<HTMLElement>,
+				status: JQuery,
+				progress: JQuery,
 				sendChangeStub: SinonStub,
 				sendDeleteStub: SinonStub;
 
@@ -706,8 +706,8 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("changeSent", (): void => {
-		let progress: JQuery<HTMLElement>,
-				syncErrors: JQuery<HTMLElement>;
+		let progress: JQuery,
+				syncErrors: JQuery;
 
 		beforeEach((): void => {
 			progress = $("<progress>")
@@ -808,7 +808,7 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("doImport", (): void => {
-		let importChangesOnly: JQuery<HTMLElement>,
+		let importChangesOnly: JQuery,
 				syncErrorStub: SinonStub;
 
 		beforeEach((): void => {
@@ -836,7 +836,7 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("full import", (): void => {
-			beforeEach((): JQuery<HTMLElement> => importChangesOnly.prop("checked", false));
+			beforeEach((): JQuery => importChangesOnly.prop("checked", false));
 
 			describe("with errors", (): void => {
 				beforeEach(async (): Promise<void> => {
@@ -931,8 +931,8 @@ describe("DataSyncController", (): void => {
 				describe("success", (): void => {
 					describe("hash match", (): void => {
 						describe("with data", (): void => {
-							let status: JQuery<HTMLElement>,
-									progress: JQuery<HTMLElement>;
+							let status: JQuery,
+									progress: JQuery;
 
 							beforeEach(async (): Promise<void> => {
 								fakeFetch.withArgs(`/documents/${scenario.resource}`, fetchArgs).returns(Promise.resolve(new Response(JSON.stringify({ data: [{}, {}], checksum: "test-hash" }), {
@@ -1312,7 +1312,7 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("dataImported", (): void => {
-		let progress: JQuery<HTMLElement>;
+		let progress: JQuery;
 
 		beforeEach((): void => {
 			sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
@@ -1348,7 +1348,7 @@ describe("DataSyncController", (): void => {
 			it("should not finalise the import", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
 		});
 
-		afterEach((): JQuery<HTMLElement> => progress.remove());
+		afterEach((): JQuery => progress.remove());
 	});
 
 	describe("importDone", (): void => {
@@ -1369,7 +1369,7 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("without errors", (): void => {
-			beforeEach((): JQuery<HTMLElement>[] => (dataSyncController["syncErrors"] = []));
+			beforeEach((): JQuery[] => (dataSyncController["syncErrors"] = []));
 
 			describe("fast import", (): void => {
 				beforeEach(async (): Promise<void> => {
@@ -1441,7 +1441,7 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("importSuccessful", (): void => {
-		let syncErrors: JQuery<HTMLElement>;
+		let syncErrors: JQuery;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "setLastSyncTime" as keyof DataSyncController);
@@ -1461,16 +1461,16 @@ describe("DataSyncController", (): void => {
 		it("should hide the errors container", (): Chai.Assertion => syncErrors.css("display").should.equal("none"));
 		it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", true));
 
-		afterEach((): JQuery<HTMLElement> => syncErrors.remove());
+		afterEach((): JQuery => syncErrors.remove());
 	});
 
 	describe("syncError", (): void => {
-		beforeEach((): JQuery<HTMLElement>[] => (dataSyncController["syncErrors"] = []));
+		beforeEach((): JQuery[] => (dataSyncController["syncErrors"] = []));
 
 		describe("with id", (): void => {
 			it("should append the error to the list", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message", "id");
-				const error: JQuery<HTMLElement> = dataSyncController["syncErrors"].pop() as JQuery<HTMLElement>;
+				const error: JQuery = dataSyncController["syncErrors"].pop() as JQuery;
 
 				error.prop("tagName").should.equal("LI");
 				error.html().should.equal("Send error<br>Type: Program id<br>message");
@@ -1480,7 +1480,7 @@ describe("DataSyncController", (): void => {
 		describe("without id", (): void => {
 			it("should append the error to the list", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message");
-				const error: JQuery<HTMLElement> = dataSyncController["syncErrors"].pop() as JQuery<HTMLElement>;
+				const error: JQuery = dataSyncController["syncErrors"].pop() as JQuery;
 
 				error.prop("tagName").should.equal("LI");
 				error.html().should.equal("Send error<br>Type: Program<br>message");
@@ -1489,8 +1489,8 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("showErrors", (): void => {
-		let syncErrors: JQuery<HTMLElement>,
-				errorList: JQuery<HTMLElement>;
+		let syncErrors: JQuery,
+				errorList: JQuery;
 
 		beforeEach((): void => {
 			syncErrors = $("<div>")
@@ -1517,6 +1517,6 @@ describe("DataSyncController", (): void => {
 		it("should update the list height", (): Chai.Assertion => Number(errorList.height()).should.equal(20));
 		it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", false));
 
-		afterEach((): JQuery<HTMLElement> => syncErrors.remove());
+		afterEach((): JQuery => syncErrors.remove());
 	});
 });
