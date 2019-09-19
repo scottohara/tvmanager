@@ -1,1 +1,1 @@
-export default new Worker("stores/db", { type: "module" });
+export default new Worker("stores/db", { name: "db", type: "module" });
