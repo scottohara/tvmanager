@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-ruby '2.6.3'
+ruby '2.6.5'
 
 source 'https://rubygems.org'
 
@@ -35,6 +35,12 @@ group :development, :test do
 
 	# Code style checker
 	gem 'rubocop', require: false
+
+	# Rubocop Performance cops
+	gem 'rubocop-performance'
+
+	# Rubocop RSpec cops
+	gem 'rubocop-rspec'
 
 	# Shared Rubocop config
 	gem 'rubocop-config-oharagroup', require: false
