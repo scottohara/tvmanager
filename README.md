@@ -1,9 +1,8 @@
 | Service					| Status																																																																																										|
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Travis CI				| [![Build Status](https://travis-ci.org/scottohara/tvmanager.svg?branch=master)](https://travis-ci.org/scottohara/tvmanager)																																|
+| GitHub  				| [![Build Status](https://github.com/scottohara/tvmanager/workflows/Build/badge.svg)](https://github.com/scottohara/tvmanager/actions?workflow=Build)																																|
 | Code Climate		| [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)																														|
 | Code Climate		| [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)																					|
-| Tidelift        | [![Dependency Status](https://tidelift.com/badges/github/scottohara/tvmanager)](https://tidelift.com/repo/github/scottohara/tvmanager)																									|
 | Snyk (npm)			| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)																									|
 | Snyk (Gemfile)	| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/scottohara/tvmanager?targetFile=Gemfile.lock)	|
 

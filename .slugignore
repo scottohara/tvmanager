@@ -1,3 +1,4 @@
+.github
 bin
 build
 spec
@@ -8,7 +9,6 @@ spec
 .gitignore
 .rspec
 .rubocop.yml
-.travis.yml
 jsdoc.json
 karma.conf.js
 karma-bdd.conf.js
