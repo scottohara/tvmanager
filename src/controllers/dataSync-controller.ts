@@ -20,7 +20,7 @@ import {
 	Device,
 	FullImport,
 	ImportData,
-	ImportObject,
+	ImportDoc,
 	SyncErrorType,
 	SyncOperation
 } from "controllers";
@@ -634,7 +634,7 @@ export default class DataSyncController extends ViewController {
 
 			if (response.ok) {
 				// Extract the JSON and checksum returned, and calculate a hash of the data
-				const importObj: FullImport | SerializedModel[] = await response.json(),
+				const importObj: FullImport | ImportDoc[] = await response.json(),
 							{ importJson, returnedHash }: ImportData = this.getImportData(importObj, String(response.headers.get("Etag"))),
 							hash: string = md5(JSON.stringify(importJson));
 
@@ -651,33 +651,27 @@ export default class DataSyncController extends ViewController {
 						$("#progress").show();
 
 						// Iterate over the list of objects to be imported
-						return Promise.all(importJson.map(this.importObject.bind(this)));
+						return await Promise.all(importJson.map(async (object: ImportDoc): Promise<void> => this.importObject(object)));
 					}
 
 					// No objects to import, which is only an error for Full Imports
 					if (!this.importChangesOnly) {
 						this.syncError("Receive error", "Sync", "No data found");
 					}
-
-					// Finalise the import
-					return this.importDone();
+				} else {
+					// The has values didn't match, so that's an error
+					this.syncError("Checksum mismatch", "Sync", `Expected: ${hash}, got: ${returnedHash}`);
 				}
-
-				// The has values didn't match, so that's an error
-				this.syncError("Checksum mismatch", "Sync", `Expected: ${hash}, got: ${returnedHash}`);
-
-				// Finalise the import
-				return this.importDone();
+			} else {
+				throw new Error(`${response.status} (${response.statusText})`);
 			}
-
-			throw new Error(`${response.status} (${response.statusText})`);
 		} catch (error) {
 			// An error occurred getting the objects to import
 			this.syncError("Receive error", "Sync", error.message);
-
-			// Finalise the import
-			return this.importDone();
 		}
+
+		// Finalise the import
+		return this.importDone();
 	}
 
 	/**
@@ -689,8 +683,8 @@ export default class DataSyncController extends ViewController {
 	 * @param {Object} data - data returned from the server
 	 * @returns {Object} the object JSON and checksum
 	 */
-	private getImportData(data: FullImport | SerializedModel[] | undefined, eTag: string): ImportData {
-		let importJson: SerializedModel[],
+	private getImportData(data: FullImport | ImportDoc[] | undefined, eTag: string): ImportData {
+		let importJson: ImportDoc[],
 				returnedHash: string;
 
 		/*
@@ -703,7 +697,7 @@ export default class DataSyncController extends ViewController {
 		 * after the body content; but no browsers support HTTP Trailer headers)
 		 */
 		if (this.importChangesOnly) {
-			importJson = data as SerializedModel[];
+			importJson = data as ImportDoc[];
 			returnedHash = eTag.replace(/^W\/|"/gu, "");
 		} else {
 			returnedHash = (data as FullImport).checksum;
@@ -721,7 +715,7 @@ export default class DataSyncController extends ViewController {
 	 * @desc Processes an imported object
 	 * @param {Object} object - The object to process
 	 */
-	private async importObject(object: {doc: ImportObject;}): Promise<void> {
+	private async importObject(object: ImportDoc): Promise<void> {
 		// Create an instance of the appropriate model from the JSON representation, and check if the current device is in the pending array
 		const obj: Model = this.jsonToModel(object.doc),
 					isPending: boolean = object.doc.pending.includes(this.device.id);

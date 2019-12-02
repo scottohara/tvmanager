@@ -101,13 +101,17 @@ export type SyncOperation = "Import" | "Export";
 
 export type SyncErrorType = "Send error" | "Receive error" | "Save error" | "Delete error" | "Checksum mismatch";
 
+export interface ImportDoc {
+	doc: ImportObject;
+}
+
 export interface FullImport{
 	checksum: string;
-	data: SerializedModel[];
+	data: ImportDoc[];
 }
 
 export interface ImportData {
-	importJson: SerializedModel[];
+	importJson: ImportDoc[];
 	returnedHash: string;
 }
 

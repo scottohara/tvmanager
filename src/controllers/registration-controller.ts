@@ -139,7 +139,7 @@ export default class RegistrationController extends ViewController {
 			}
 		} catch (error) {
 			this.appController.showNotice({
-				label: `Unregister failed: ${error.message}`,
+				label: `Unregister failed: ${error.message as string}`,
 				leftButton: {
 					style: "cautionButton",
 					label: "OK"
@@ -184,7 +184,7 @@ export default class RegistrationController extends ViewController {
 			}
 		} catch (error) {
 			this.appController.showNotice({
-				label: `Registration failed: ${error.message}`,
+				label: `Registration failed: ${error.message as string}`,
 				leftButton: {
 					style: "cautionButton",
 					label: "OK"

@@ -164,7 +164,7 @@ export default class List {
 				validAction = true;
 				break;
 			default:
-				window.alert(`${action} is not a valid action`);
+				window.alert(`${action as string} is not a valid action`);
 		}
 
 		// For edit/delete modes, we want the application controller to remember the current scroll position

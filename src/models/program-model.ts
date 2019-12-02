@@ -142,7 +142,7 @@ export default class Program extends Base {
 		try {
 			await (await this.db).programsStore.removeAll();
 		} catch (error) {
-			errorMessage = `Program.removeAll: ${error.message}`;
+			errorMessage = `Program.removeAll: ${error.message as string}`;
 		}
 
 		return errorMessage;

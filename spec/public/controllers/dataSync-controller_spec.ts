@@ -2,6 +2,7 @@ import {
 	Device,
 	FullImport,
 	ImportData,
+	ImportDoc,
 	ImportObject,
 	NavButton
 } from "controllers";
@@ -1042,11 +1043,11 @@ describe("DataSyncController", (): void => {
 		interface Scenario {
 			description: string;
 			importChangesOnly: boolean;
-			importData?: FullImport | SerializedModel[];
+			importData?: FullImport | ImportDoc[];
 			eTag: string;
 		}
 
-		const data: SerializedModel[] = [],
+		const data: ImportDoc[] = [],
 					checksum = "test-hash",
 					scenarios: Scenario[] = [
 						{

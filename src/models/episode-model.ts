@@ -187,7 +187,7 @@ export default class Episode extends Base {
 		try {
 			await (await this.db).episodesStore.removeAll();
 		} catch (error) {
-			errorMessage = `Episode.removeAll: ${error.message}`;
+			errorMessage = `Episode.removeAll: ${error.message as string}`;
 		}
 
 		return errorMessage;

@@ -221,7 +221,7 @@ export default class Series extends Base {
 		try {
 			await (await this.db).seriesStore.removeAll();
 		} catch (error) {
-			errorMessage = `Series.removeAll: ${error.message}`;
+			errorMessage = `Series.removeAll: ${error.message as string}`;
 		}
 
 		return errorMessage;
