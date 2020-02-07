@@ -1,7 +1,7 @@
 const path = require("path"),
 			webpack = require("webpack"),
 			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
-			CleanWebpackPlugin = require("clean-webpack-plugin"),
+			{ CleanWebpackPlugin } = require("clean-webpack-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
 			{ GenerateSW } = require("workbox-webpack-plugin"),
 			WorkerPlugin = require("worker-plugin"),
@@ -77,7 +77,7 @@ const MAX_DATA_AGE_DAYS = 7,
 			},
 
 			// Cleans the build directory
-			cleanBuildDirectory = new CleanWebpackPlugin(["./public"]),
+			cleanBuildDirectory = new CleanWebpackPlugin(),
 
 			// Exposes a global jQuery object (for jQuery UI, Touch Punch etc. that expect this global to exist)
 			providejQuery = new webpack.ProvidePlugin({
