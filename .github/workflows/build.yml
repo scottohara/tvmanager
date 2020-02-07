@@ -38,11 +38,11 @@ jobs:
 
     - name: Install dependencies
       shell: bash --login {0}
-      run: nvm use && npm ci
+      run: nvm install && nvm use && npm ci
 
     - name: Lint and test
       env:
-        DEVELOPER_DIR: /Applications/Xcode_11.1.app/Contents/Developer
+        DEVELOPER_DIR: /Applications/Xcode_11.3.app/Contents/Developer
       shell: bash --login {0}
       run: nvm use && npm test
 
@@ -136,7 +136,7 @@ jobs:
       run: ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.backend.json coverage/backend/.resultset.json
 
     - name: Format frontend coverage
-      run: ./cc-test-reporter format-coverage --input-type lcov --output coverage/codeclimate.frontend.json --prefix /Users/runner/runners/2.159.2/work/tvmanager/tvmanager coverage/frontend/lcov.info
+      run: ./cc-test-reporter format-coverage --input-type lcov --output coverage/codeclimate.frontend.json --prefix /Users/runner/runners/2.164.0/work/tvmanager/tvmanager coverage/frontend/lcov.info
 
     - name: Merge backend and frontend coverage
       run: ./cc-test-reporter sum-coverage --parts 2 coverage/codeclimate.*.json

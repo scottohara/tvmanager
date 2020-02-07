@@ -77,7 +77,7 @@
   "config": {
     "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-X",
     "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-13-3"
-	},
+  },
   "scripts": {
     "start": "heroku local --procfile Procfile.dev",
     "start:simulator": "xcrun simctl delete tvm-simulator; xcrun simctl boot $(xcrun simctl create tvm-simulator $npm_package_config_DEVICE_TYPE_ID $npm_package_config_RUNTIME_ID)",
