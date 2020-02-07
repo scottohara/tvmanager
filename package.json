@@ -74,8 +74,13 @@
     "workbox-webpack-plugin": "5.0.0",
     "worker-plugin": "3.2.0"
   },
+  "config": {
+    "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-X",
+    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-13-3"
+	},
   "scripts": {
     "start": "heroku local --procfile Procfile.dev",
+    "start:simulator": "xcrun simctl delete tvm-simulator; xcrun simctl boot $(xcrun simctl create tvm-simulator $npm_package_config_DEVICE_TYPE_ID $npm_package_config_RUNTIME_ID)",
     "build": "webpack --progress --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.dev.js",
     "lint": "eslint 'src/**/*.{ts,js}' 'spec/public/**/*.{ts,js}' '*.{ts,js}'",
@@ -83,7 +88,7 @@
     "test:bdd": "karma start karma-bdd.conf.js",
     "test:coverage": "karma start",
     "test:coverage:chrome": "karma start --browsers ChromeHeadless",
-    "test:coverage:mobile": "karma start --browsers MobileSafari",
+    "test:coverage:mobile": "npm run start:simulator && karma start --browsers MobileSafari",
     "docs": "jsdoc --configure jsdoc.json"
   },
   "engines": {
