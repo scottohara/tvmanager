@@ -66,7 +66,7 @@ jobs:
       TVMANAGER_COUCHDB_URL: http://localhost:5984/tvm
 
     services:
-      postgres:
+      couchdb:
         image: couchdb:latest
         ports:
         - 5984:5984
