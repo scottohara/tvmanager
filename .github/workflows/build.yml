@@ -68,6 +68,9 @@ jobs:
     services:
       couchdb:
         image: couchdb:latest
+        env:
+          COUCHDB_USER: ${{ secrets.COUCHDB_USER }}
+          COUCHDB_PASSWORD: ${{ secrets.COUCHDB_PASSWORD }}
         ports:
         - 5984:5984
 
