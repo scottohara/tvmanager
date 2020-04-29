@@ -142,7 +142,6 @@ a.cautionButton {
 /* Scrolling lists & dialogs */
 ul, #dialog {
 	overflow-y: scroll;
-	-webkit-overflow-scrolling: touch;
 }
 
 /* Default scrolling lists */
