@@ -50,7 +50,7 @@ jobs:
 
     - name: Lint and test
       env:
-        DEVELOPER_DIR: /Applications/Xcode_11.4.1.app/Contents/Developer
+        DEVELOPER_DIR: /Applications/Xcode_11.3.app/Contents/Developer
       shell: bash --login {0}
       run: nvm use && npm test
 
@@ -65,7 +65,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     env:
-      TVMANAGER_COUCHDB_URL: http://localhost:5984/tvm
+      TVMANAGER_COUCHDB_URL: http://${{ secrets.COUCHDB_USER }}:${{ secrets.COUCHDB_PASSWORD }}@localhost:5984/tvm
 
     services:
       couchdb:
