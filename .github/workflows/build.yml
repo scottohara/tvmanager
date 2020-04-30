@@ -28,6 +28,8 @@ jobs:
     name: Test and lint frontend
     needs: setup
     runs-on: macOS-latest
+    outputs:
+      workspace: ${{ github.workspace }}
 
     steps:
     - name: Checkout repository
@@ -152,7 +154,7 @@ jobs:
       run: ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.backend.json coverage/backend/.resultset.json
 
     - name: Format frontend coverage
-      run: ./cc-test-reporter format-coverage --input-type lcov --output coverage/codeclimate.frontend.json --prefix /Users/runner/runners/2.164.0/work/tvmanager/tvmanager coverage/frontend/lcov.info
+      run: ./cc-test-reporter format-coverage --input-type lcov --output coverage/codeclimate.frontend.json --prefix ${{ needs.frontend.outputs.workspace }} coverage/frontend/lcov.info
 
     - name: Merge backend and frontend coverage
       run: ./cc-test-reporter sum-coverage --parts 2 coverage/codeclimate.*.json
