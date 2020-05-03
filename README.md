@@ -60,7 +60,7 @@ Requirements
 Installation (Development)
 ==========================
 1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
-2. Install the dependencies (`cd tvmanager && bundle install --path vendor/bundle && npm install`) (`--path` ensures that gems are installed locally in the project)
+2. Install the dependencies (`cd tvmanager && bundle config --local path vendor/bundle && bundle install && npm install`) (`path vendor/bundle` ensures that gems are installed locally in the project)
 3. Start the server (`npm start`)
 
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
