@@ -147,7 +147,7 @@ Frontend checks are implemented using [eslint](http://eslint.org):
 
 Backend checks are implemented using [rubocop](http://batsov.com/rubocop/):
 
-* `bundle exec rubocop`
+* `bundle exec rubocop -ESP`
 
 API Documentation
 =================
