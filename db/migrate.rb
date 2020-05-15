@@ -20,7 +20,9 @@ module TVManager
 
 					# Get the existing doc (if any) and copy the _rev property to the new doc
 					existing_doc = db.get doc['_id']
+					# :nocov:
 					doc['_rev'] = existing_doc['_rev'] unless existing_doc.nil?
+					# :nocov:
 
 					# Save the document
 					db.save_doc doc

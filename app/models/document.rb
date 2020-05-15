@@ -94,7 +94,9 @@ module TVManager
 			document['pending'].empty? && document['isDeleted'] ? document.destroy : save!
 		end
 
+		# :nocov:
 		private unless ENV['RACK_ENV'].eql? 'test'
+		# :nocov:
 
 		def document
 			# Find the matching document

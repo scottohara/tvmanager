@@ -11,6 +11,12 @@ require 'couchrest'
 
 SimpleCov.start do
 	coverage_dir 'coverage/backend'
+	enable_coverage :branch
+	add_group 'Controllers', 'app/controllers'
+	add_group 'Helpers', 'app/helpers'
+	add_group 'Models', 'app/models'
+	add_group 'Specs', 'spec'
+	minimum_coverage line: 100, branch: 100
 end
 
 require_relative '../app/helpers/database'

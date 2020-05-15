@@ -12,7 +12,9 @@ module TVManager
 				@@db ||= CouchRest.database! database_url
 			end
 
+			# :nocov:
 			private unless ENV['RACK_ENV'].eql? 'test'
+			# :nocov:
 
 			def database_url
 				# Get the database URL environment variable

@@ -66,7 +66,9 @@ module TVManager
 			document.destroy
 		end
 
+		# :nocov:
 		private unless ENV['RACK_ENV'].eql? 'test'
+		# :nocov:
 
 		def document
 			# Find the matching device document
