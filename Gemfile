@@ -46,5 +46,5 @@ group :development, :test do
 	gem 'rubocop-config-oharagroup', require: false
 
 	# Code coverage
-	gem 'simplecov'
+	gem 'simplecov', require: false
 end
