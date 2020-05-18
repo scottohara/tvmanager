@@ -1,8 +1,8 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative '../spec_helper'
-require_relative '../../app/models/document'
+require_relative '../../spec_helper'
+require_relative '../../../app/models/document'
 
 describe TVManager::Document do
 	let(:device_id) { 'test_device_id' }
@@ -126,7 +126,7 @@ describe TVManager::Document do
 		context 'with no device id specified' do
 			let(:save_device_id) { nil }
 
-			before :each do
+			before do
 				expect(TVManager::Device).not_to receive :other_devices
 			end
 
@@ -146,7 +146,7 @@ describe TVManager::Document do
 		context 'with a device id specified' do
 			let(:save_device_id) { device_id }
 
-			before :each do
+			before do
 				expect(TVManager::Device).to receive(:other_devices).with(device_id).and_return other_devices
 			end
 
@@ -262,7 +262,7 @@ describe TVManager::Document do
 	describe '#document' do
 		let(:document) { described_class.new document_id }
 
-		before :each do
+		before do
 			expect(document.db).to receive(:get).with(document_id).and_call_original.once
 		end
 

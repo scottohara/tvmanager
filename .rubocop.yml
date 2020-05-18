@@ -1,6 +1,12 @@
+require:
+  - rubocop-performance
+  - rubocop-rspec
+
 inherit_gem:
   rubocop-config-oharagroup:
     - default.yml
+    - performance.yml
+    - rspec.yml
 
 AllCops:
   Exclude:
@@ -8,26 +14,6 @@ AllCops:
     - 'node_modules/**/*'
     - 'vendor/**/*'
 
-# ------------------------------------------------------------
-# Cops that rubocop disables by default, but we want to enable
-# ------------------------------------------------------------
-
-# ------------------------------------------------------------
-# END disabled by default cops
-# ------------------------------------------------------------
-# Cops that rubocop enables by default, but we want to disable
-# ------------------------------------------------------------
-
 # Needed for @@db
 Style/ClassVars:
   Enabled: false
-
-# ------------------------------------------------------------
-# END enabled by default cops
-# ------------------------------------------------------------
-# Cops that we want to reconfigure
-# ------------------------------------------------------------
-
-# ------------------------------------------------------------
-# END reconfigured cops
-# ------------------------------------------------------------

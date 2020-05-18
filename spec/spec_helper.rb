@@ -146,7 +146,7 @@ end
 
 # Shared context for database interactions
 RSpec.shared_context 'database interaction' do
-	before :each do
+	before do
 		# Create any fixtures
 		fixtures.each do |fixture|
 			doc = RSpec.configuration.db.save_doc fixture
@@ -154,7 +154,7 @@ RSpec.shared_context 'database interaction' do
 		end
 	end
 
-	after :each do
+	after do
 		RSpec.configuration.db.all_docs { |doc| RSpec.configuration.db.delete_doc('_id' => doc['id'], '_rev' => doc['value']['rev']) unless doc['id'].start_with? '_design/' }
 	end
 end

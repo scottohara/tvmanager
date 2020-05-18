@@ -1,8 +1,8 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative '../spec_helper'
-require_relative '../../app/models/device'
+require_relative '../../spec_helper'
+require_relative '../../../app/models/device'
 
 describe TVManager::Device do
 	let(:device_id) { 'test_device_id' }
@@ -15,12 +15,12 @@ describe TVManager::Device do
 		let(:request) { MockRequest::Request.new }
 
 		it 'should raise an error when a device id is not supplied' do
-			expect { described_class.id request }.to raise_error BadRequest, 'Client device identifier was not supplied'
+			expect { described_class.id request }.to raise_error TVManager::BadRequest, 'Client device identifier was not supplied'
 		end
 
 		it 'should raise an error when a device id is blank' do
 			request.env['HTTP_X_DEVICE_ID'] = ''
-			expect { described_class.id request }.to raise_error BadRequest, 'Client device identifier was not supplied'
+			expect { described_class.id request }.to raise_error TVManager::BadRequest, 'Client device identifier was not supplied'
 		end
 
 		it 'should return nil when a device id is not required and not supplied' do
@@ -103,7 +103,7 @@ describe TVManager::Device do
 			end
 
 			it 'should raise an error' do
-				expect { device.check_access }.to raise_error Forbidden, "Client device #{device_id} is not authorised to export"
+				expect { device.check_access }.to raise_error TVManager::Forbidden, "Client device #{device_id} is not authorised to export"
 			end
 		end
 
@@ -113,7 +113,7 @@ describe TVManager::Device do
 			end
 
 			it 'should do nothing' do
-				expect { device.check_access }.to_not raise_error
+				expect { device.check_access }.not_to raise_error
 			end
 		end
 	end
@@ -172,20 +172,20 @@ describe TVManager::Device do
 			documents.each { |doc| expect(TVManager::Document).to receive(:new).with(doc['_id']).and_return document }
 			expect(document).to receive(:remove_pending!).with(device_id).thrice
 			device.delete!
-			expect { described_class.new(device_id).document }.to raise_error BadRequest, "Client device #{device_id} is not registered"
+			expect { described_class.new(device_id).document }.to raise_error TVManager::BadRequest, "Client device #{device_id} is not registered"
 		end
 	end
 
 	describe '#document' do
 		let(:device) { described_class.new device_id }
 
-		before :each do
+		before do
 			expect(device.db).to receive(:get!).with(device_id).and_call_original.once
 		end
 
 		context 'when the device id is not found' do
 			it 'should raise an error' do
-				expect { device.document }.to raise_error BadRequest, "Client device #{device_id} is not registered"
+				expect { device.document }.to raise_error TVManager::BadRequest, "Client device #{device_id} is not registered"
 			end
 		end
 

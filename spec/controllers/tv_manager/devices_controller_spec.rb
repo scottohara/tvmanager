@@ -1,8 +1,8 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative '../spec_helper'
-require_relative '../../app/controllers/devices_controller'
+require_relative '../../spec_helper'
+require_relative '../../../app/controllers/devices_controller'
 
 describe TVManager::DevicesController do
 	def app
@@ -14,7 +14,7 @@ describe TVManager::DevicesController do
 
 	shared_examples 'a route requiring a client device id' do
 		it 'should respond with a 400 Bad Request if a client device id is not specified' do
-			expect(TVManager::Device).to receive(:id).and_raise BadRequest, 'forced error'
+			expect(TVManager::Device).to receive(:id).and_raise TVManager::BadRequest, 'forced error'
 			public_send(*request)
 			expect(last_response.status).to be 400
 			expect(last_response.body).to eql 'forced error'
@@ -22,7 +22,7 @@ describe TVManager::DevicesController do
 	end
 
 	shared_context 'device id specified' do
-		before :each do
+		before do
 			expect(TVManager::Device).to receive(:id).and_return device_id
 		end
 	end
@@ -32,7 +32,7 @@ describe TVManager::DevicesController do
 			include_context 'device id specified'
 
 			it 'should respond with a 400 Bad Request if the client device is not registered' do
-				expect(TVManager::Device).to receive(:new).with(device_id).and_raise BadRequest, 'forced error'
+				expect(TVManager::Device).to receive(:new).with(device_id).and_raise TVManager::BadRequest, 'forced error'
 				public_send(*request)
 				expect(last_response.status).to be 400
 				expect(last_response.body).to eql 'forced error'
@@ -40,7 +40,7 @@ describe TVManager::DevicesController do
 
 			it 'should respond with a 403 Forbidden if the client device is readonly' do
 				expect(TVManager::Device).to receive(:new).with(device_id).and_return device
-				expect(device).to receive(:check_access).and_raise Forbidden, 'forced error'
+				expect(device).to receive(:check_access).and_raise TVManager::Forbidden, 'forced error'
 				public_send(*request)
 				expect(last_response.status).to be 403
 				expect(last_response.body).to eql 'forced error'
@@ -51,7 +51,7 @@ describe TVManager::DevicesController do
 	shared_context 'authorised device' do
 		include_context 'device id specified'
 
-		before :each do
+		before do
 			expect(TVManager::Device).to receive(:new).with(device_id).and_return device
 			expect(device).to receive(:check_access)
 		end
@@ -72,7 +72,7 @@ describe TVManager::DevicesController do
 		end
 
 		context 'register new device' do
-			before :each do
+			before do
 				expect(TVManager::Device).to receive(:id).and_return nil
 				expect(TVManager::Device).to receive(:new).with(nil).and_return device
 				expect(device).not_to receive :check_access
