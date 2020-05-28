@@ -9,7 +9,7 @@
  * @module models/series-model
  * @requires models/base-model
  * @requires components/progressbar
- * @requires uuid/v4
+ * @requires uuid
  */
 import {
 	EpisodeStatus,
@@ -19,7 +19,7 @@ import {
 } from "models";
 import Base from "models/base-model";
 import ProgressBar from "components/progressbar";
-import uuid from "uuid/v4";
+import { v4 } from "uuid";
 
 /**
  * @class Series
@@ -269,7 +269,7 @@ export default class Series extends Base {
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new series to be added), generate a new UUID
 		if (null === this.id) {
-			this.id = uuid();
+			this.id = v4();
 		}
 
 		try {

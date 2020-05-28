@@ -8,7 +8,7 @@
 /**
  * @module models/episode-model
  * @requires models/base-model
- * @requires uuid/v4
+ * @requires uuid
  */
 import {
 	EpisodeStatus,
@@ -16,7 +16,7 @@ import {
 	SerializedEpisode
 } from "models";
 import Base from "models/base-model";
-import uuid from "uuid/v4";
+import { v4 } from "uuid";
 
 /**
  * @class Episode
@@ -215,7 +215,7 @@ export default class Episode extends Base {
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new episode to be added), generate a new UUID
 		if (null === this.id) {
-			this.id = uuid();
+			this.id = v4();
 		}
 
 		try {
