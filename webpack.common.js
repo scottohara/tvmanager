@@ -70,10 +70,7 @@ const MAX_DATA_AGE_DAYS = 7,
 			htmlRule = {
 				test: /\.html$/u,
 				include: /views/u,
-				loader: "html-loader",
-				options: {
-					minimize: true
-				}
+				loader: "html-loader"
 			},
 
 			// Cleans the build directory
@@ -85,17 +82,18 @@ const MAX_DATA_AGE_DAYS = 7,
 			}),
 
 			// Creates index.html with the bundled resources
-			createIndexHtml = new HtmlWebpackPlugin({ template: "./src/index.html" }),
+			createIndexHtml = new HtmlWebpackPlugin({ scriptLoading: "defer" }),
 
 			// Generate a service worker to precache static assets
 			generateServiceWorker = new GenerateSW({
 				cacheId: packageJson.name,
 				skipWaiting: true,
-				clientsClaim: true
+				clientsClaim: true,
+				dontCacheBustURLsMatching: /.+-[a-f0-9]{6}\..+/u
 			}),
 
 			// Handles web workers
-			workers = new WorkerPlugin(),
+			workers = new WorkerPlugin({ globalObject: false }),
 
 			// Default config
 			config = {
