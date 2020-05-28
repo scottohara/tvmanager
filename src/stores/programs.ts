@@ -7,15 +7,19 @@ import {
 	TVManagerDB
 } from "stores";
 import {
+	IDBPDatabase,
+	IDBPObjectStore,
+	StoreNames
+} from "idb";
+import {
 	ModelType,
 	PersistedProgram
 } from "models";
-import { IDBPDatabase } from "idb";
 
 const	upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
 	(db: IDBPDatabase<TVManagerDB>): void => {
-		const store = db.createObjectStore("programs", { keyPath: "id" });
+		const store: IDBPObjectStore<TVManagerDB, StoreNames<TVManagerDB>[], "programs"> = db.createObjectStore("programs", { keyPath: "id" });
 
 		store.createIndex("name", "name");
 	}
@@ -115,7 +119,7 @@ function create(db: IDBPDatabase<TVManagerDB>): ProgramsStore {
 						txSyncStore = tx.objectStore("syncs"),
 
 						episodeIds: Promise<string[]>[] = [],
-						operations: Promise<[ModelType, string] | undefined>[] = [];
+						operations: Promise<[ModelType, string] | void>[] = [];
 
 			for (const seriesId of await txSeriesStore.index("programId").getAllKeys(id)) {
 				episodeIds.push(txEpisodesStore.index("seriesId").getAllKeys(seriesId));

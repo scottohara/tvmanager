@@ -10,12 +10,16 @@ import {
 	SeriesStoreObject,
 	TVManagerDB
 } from "stores";
-import { IDBPDatabase } from "idb";
+import {
+	IDBPDatabase,
+	IDBPObjectStore,
+	StoreNames
+} from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
 	(db: IDBPDatabase<TVManagerDB>): void => {
-		const store = db.createObjectStore("episodes", { keyPath: "id" });
+		const store: IDBPObjectStore<TVManagerDB, StoreNames<TVManagerDB>[], "episodes"> = db.createObjectStore("episodes", { keyPath: "id" });
 
 		store.createIndex("seriesId", "seriesId");
 		store.createIndex("status", ["status", "seriesId"]);

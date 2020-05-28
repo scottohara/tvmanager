@@ -11,12 +11,16 @@ import {
 	SeriesStoreObject,
 	TVManagerDB
 } from "stores";
-import { IDBPDatabase } from "idb";
+import {
+	IDBPDatabase,
+	IDBPObjectStore,
+	StoreNames
+} from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
 	(db: IDBPDatabase<TVManagerDB>): void => {
-		const store = db.createObjectStore("series", { keyPath: "id" });
+		const store: IDBPObjectStore<TVManagerDB, StoreNames<TVManagerDB>[], "series"> = db.createObjectStore("series", { keyPath: "id" });
 
 		store.createIndex("programId", "programId");
 		store.createIndex("nowShowing", "nowShowing");
@@ -30,7 +34,7 @@ function bySeriesName(a: PersistedSeries, b: PersistedSeries): number {
 
 // Orders series by now showing then program name
 function byNowShowingThenProgramName(a: PersistedSeries, b: PersistedSeries): number {
-	const nowShowingDiff = String(a.NowShowing).localeCompare(String(b.NowShowing), "en", { numeric: true });
+	const nowShowingDiff: number = String(a.NowShowing).localeCompare(String(b.NowShowing), "en", { numeric: true });
 
 	if (0 === nowShowingDiff) {
 		return String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
@@ -240,7 +244,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 						txSyncStore = tx.objectStore("syncs"),
-						operations: Promise<[ModelType, string] | undefined>[] = [];
+						operations: Promise<[ModelType, string] | void>[] = [];
 
 			for (const episodeId of await txEpisodesStore.index("seriesId").getAllKeys(id)) {
 				operations.push(txSyncStore.put({ type: "Episode", id: episodeId, action: "deleted" }));
