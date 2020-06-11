@@ -16,6 +16,7 @@ import $ from "jquery";
 import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import List from "components/list";
+import { NavButtonEventHandler } from "controllers";
 import { PublicInterface } from "global";
 import UnscheduledListTemplate from "views/unscheduledListTemplate.html";
 import UnscheduledView from "views/unscheduled-view.html";
@@ -55,7 +56,7 @@ export default class UnscheduledController extends ViewController {
 		this.header = {
 			label: "Unscheduled",
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: "Schedule"
 			}
@@ -119,7 +120,7 @@ export default class UnscheduledController extends ViewController {
 	 * @param {Number} listIndex - the list index of the episode to edit
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
-		return this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] });
+		return this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] as PublicInterface<Episode> });
 	}
 
 	/**

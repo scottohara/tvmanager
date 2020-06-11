@@ -61,11 +61,11 @@ export default class Episode extends Base {
 	public constructor(public id: string | null,
 						public episodeName: string | null, status: EpisodeStatus,
 						public statusDate: string, unverified: boolean,
+						private seriesId: string | null,
 						public unscheduled: boolean = false,
 						public sequence: number = 0,
-						private seriesId: string | null,
-						public readonly seriesName?: string,
-						public readonly programName?: string) {
+						public readonly seriesName: string | undefined = undefined,
+						public readonly programName: string | undefined = undefined) {
 		super();
 		this.setStatus(status);
 		this.setUnverified(unverified);
@@ -82,7 +82,7 @@ export default class Episode extends Base {
 		let episodeList: Episode[] = [];
 
 		try {
-			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramName)));
+			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, ep.SeriesID, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
 		} catch (_e) {
 			// No op
 		}
@@ -100,7 +100,7 @@ export default class Episode extends Base {
 		let episodeList: Episode[] = [];
 
 		try {
-			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesID, ep.SeriesName, ep.ProgramName)));
+			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, ep.SeriesID, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
 		} catch (_e) {
 			// No op
 		}
@@ -135,7 +135,7 @@ export default class Episode extends Base {
 			// No op
 		}
 
-		return new Episode(EpisodeID, Name, Status, StatusDate, "true" === Unverified, "true" === Unscheduled, Sequence, SeriesID);
+		return new Episode(EpisodeID, Name, Status, StatusDate, "true" === Unverified, SeriesID, "true" === Unscheduled, Sequence);
 	}
 
 	/**
@@ -187,7 +187,7 @@ export default class Episode extends Base {
 		try {
 			await (await this.db).episodesStore.removeAll();
 		} catch (error) {
-			errorMessage = `Episode.removeAll: ${error.message as string}`;
+			errorMessage = `Episode.removeAll: ${(error as Error).message}`;
 		}
 
 		return errorMessage;
@@ -202,7 +202,7 @@ export default class Episode extends Base {
 	 * @returns {Episode} the Episode object
 	 */
 	public static fromJson(episode: SerializedEpisode): Episode {
-		return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.unverified, episode.unscheduled, episode.sequence, episode.seriesId);
+		return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.unverified, episode.seriesId, episode.unscheduled, episode.sequence);
 	}
 
 	/**
@@ -333,7 +333,7 @@ export default class Episode extends Base {
 		this.statusDate = statusDate;
 
 		// Refresh the status date display based on the current status and date
-		if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && "" !== this.statusDate) {
+		if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate) {
 			this.statusDateDisplay = `(${this.statusDate})`;
 		} else {
 			this.statusDateDisplay = "";
@@ -345,7 +345,7 @@ export default class Episode extends Base {
 		 * Note: As the status date only captures day & month (no year), a date more than 3 months in the past is considered to be a future date
 		 */
 		this.statusWarning = "";
-		if ("Expected" === this.status && "" !== this.statusDate) {
+		if ("Expected" === this.status && this.statusDate) {
 			/*
 			 * TempStatusDate is the status date in "MMDD" format
 			 * endMonth is the end of the warning range (3 months ago).

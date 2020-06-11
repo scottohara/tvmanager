@@ -1,6 +1,7 @@
 import {
 	EpisodeListItem,
-	NavButton
+	NavButton,
+	NavButtonEventHandler
 } from "controllers";
 import sinon, {
 	SinonFakeTimers,
@@ -27,7 +28,7 @@ describe("EpisodeController", (): void => {
 	beforeEach((): void => {
 		listItem = {
 			listIndex: 0,
-			episode: new EpisodeMock(null, "test-episode", "Watched", "01-Jan", false, false)
+			episode: new EpisodeMock(null, "test-episode", "Watched", "01-Jan", false, undefined, false)
 		};
 
 		episodeController = new EpisodeController(listItem);
@@ -123,22 +124,22 @@ describe("EpisodeController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(episodeController.header.label).should.equal("Add/Edit Episode"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			episodeController["cancel"].should.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			episodeController["save"].should.have.been.called;
 		});
 
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
 		it("should set the episode name", (): Chai.Assertion => String(episodeName.val()).should.equal(listItem.episode.episodeName));
-		it("should set the unverified toggle", (): Chai.Assertion => unverified.prop("checked").should.equal(listItem.episode.unverified));
-		it("should set the unscheduled toggle", (): Chai.Assertion => unscheduled.prop("checked").should.equal(listItem.episode.unscheduled));
+		it("should set the unverified toggle", (): Chai.Assertion => Boolean(unverified.prop("checked")).should.equal(listItem.episode.unverified));
+		it("should set the unscheduled toggle", (): Chai.Assertion => Boolean(unscheduled.prop("checked")).should.equal(listItem.episode.unscheduled));
 
 		it("should attach a watched click event handler", (): void => {
 			watched.trigger("click");
@@ -291,7 +292,6 @@ describe("EpisodeController", (): void => {
 				previousStatus: EpisodeStatus;
 				newStatus: EpisodeStatus;
 				expectedStatus: EpisodeStatus;
-				highlight: string;
 				unverifiedRowHidden: boolean;
 			}
 
@@ -301,7 +301,6 @@ describe("EpisodeController", (): void => {
 					previousStatus: "Watched",
 					newStatus: "Watched",
 					expectedStatus: "",
-					highlight: "watched",
 					unverifiedRowHidden: true
 				},
 				{
@@ -309,7 +308,6 @@ describe("EpisodeController", (): void => {
 					previousStatus: "",
 					newStatus: "Watched",
 					expectedStatus: "Watched",
-					highlight: "watched",
 					unverifiedRowHidden: true
 				},
 				{
@@ -317,7 +315,6 @@ describe("EpisodeController", (): void => {
 					previousStatus: "Watched",
 					newStatus: "Recorded",
 					expectedStatus: "Recorded",
-					highlight: "recorded",
 					unverifiedRowHidden: false
 				},
 				{
@@ -325,7 +322,6 @@ describe("EpisodeController", (): void => {
 					previousStatus: "Watched",
 					newStatus: "Expected",
 					expectedStatus: "Expected",
-					highlight: "expected",
 					unverifiedRowHidden: false
 				},
 				{
@@ -333,8 +329,14 @@ describe("EpisodeController", (): void => {
 					previousStatus: "Watched",
 					newStatus: "Missed",
 					expectedStatus: "Missed",
-					highlight: "missed",
 					unverifiedRowHidden: false
+				},
+				{
+					description: "unknown",
+					previousStatus: "Watched",
+					newStatus: "",
+					expectedStatus: "",
+					unverifiedRowHidden: true
 				}
 			];
 

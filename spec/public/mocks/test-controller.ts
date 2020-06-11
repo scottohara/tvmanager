@@ -1,13 +1,14 @@
 import sinon, { SinonStub } from "sinon";
 import TestView from "views/test-view.html";
 import ViewController from "controllers/view-controller";
+import { ViewControllerArgs } from "controllers";
 
 export default class TestController extends ViewController {
 	public view: string = TestView;
 
 	public setup: SinonStub = sinon.stub();
 
-	public constructor(public args?: object) {
+	public constructor(public args?: ViewControllerArgs) {
 		super();
 
 		this.header = {

@@ -1,5 +1,6 @@
 import {
 	NavButton,
+	NavButtonEventHandler,
 	ProgramListItem,
 	SeriesListItem
 } from "controllers";
@@ -91,14 +92,14 @@ describe("SeriesController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(seriesController.header.label).should.equal("Add/Edit Series"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			seriesController["cancel"].should.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			seriesController["save"].should.have.been.called;
 		});
 

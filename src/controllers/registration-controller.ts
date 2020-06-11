@@ -11,9 +11,12 @@
  * @requires models/setting-model
  * @requires controllers/view-controller
  */
+import {
+	Device,
+	NavButtonEventHandler
+} from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
-import { Device } from "controllers";
 import { PublicInterface } from "global";
 import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
@@ -53,11 +56,11 @@ export default class RegistrationController extends ViewController {
 		this.header = {
 			label: "Register",
 			leftButton: {
-				eventHandler: this.cancel.bind(this),
+				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
 				label: "Cancel"
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this),
+				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Save"
 			}
@@ -98,7 +101,7 @@ export default class RegistrationController extends ViewController {
 			this.footer = {
 				label: `v${(await DatabaseService).version}`,
 				leftButton: {
-					eventHandler: this.unregister.bind(this),
+					eventHandler: this.unregister.bind(this) as NavButtonEventHandler,
 					style: "cautionButton",
 					label: "Unregister"
 				}
@@ -139,7 +142,7 @@ export default class RegistrationController extends ViewController {
 			}
 		} catch (error) {
 			this.appController.showNotice({
-				label: `Unregister failed: ${error.message as string}`,
+				label: `Unregister failed: ${(error as Error).message}`,
 				leftButton: {
 					style: "cautionButton",
 					label: "OK"
@@ -184,7 +187,7 @@ export default class RegistrationController extends ViewController {
 			}
 		} catch (error) {
 			this.appController.showNotice({
-				label: `Registration failed: ${error.message as string}`,
+				label: `Registration failed: ${(error as Error).message}`,
 				leftButton: {
 					style: "cautionButton",
 					label: "OK"

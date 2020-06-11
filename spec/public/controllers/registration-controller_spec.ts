@@ -1,7 +1,8 @@
 import {
 	Device,
 	HeaderFooter,
-	NavButton
+	NavButton,
+	NavButtonEventHandler
 } from "controllers";
 import sinon, {
 	SinonMatcher,
@@ -58,14 +59,14 @@ describe("RegistrationController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(registrationController.header.label).should.equal("Register"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			registrationController["cancel"].should.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			registrationController["save"].should.have.been.called;
 		});
 
@@ -109,7 +110,7 @@ describe("RegistrationController", (): void => {
 			it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 			it("should attach a footer left button event handler", (): void => {
-				(leftButton.eventHandler as Function)();
+				(leftButton.eventHandler as NavButtonEventHandler)();
 				registrationController["unregister"].should.have.been.called;
 			});
 

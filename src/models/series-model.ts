@@ -54,6 +54,18 @@ import { v4 } from "uuid";
  * @param {Number} statusWarningCount - the number of expected episodes past their status date for the series
  */
 export default class Series extends Base {
+	public static readonly NOW_SHOWING: NowShowingEnum = {
+		0: "Not Showing",
+		1: "Mondays",
+		2: "Tuesdays",
+		3: "Wednesdays",
+		4: "Thursdays",
+		5: "Fridays",
+		6: "Saturdays",
+		7: "Sundays",
+		8: "Daily"
+	};
+
 	public progressBarDisplay!: string;
 
 	public nowShowingDisplay = "";
@@ -221,7 +233,7 @@ export default class Series extends Base {
 		try {
 			await (await this.db).seriesStore.removeAll();
 		} catch (error) {
-			errorMessage = `Series.removeAll: ${error.message as string}`;
+			errorMessage = `Series.removeAll: ${(error as Error).message}`;
 		}
 
 		return errorMessage;
@@ -237,26 +249,6 @@ export default class Series extends Base {
 	 */
 	public static fromJson(series: SerializedSeries): Series {
 		return new Series(series.id, series.seriesName, series.nowShowing, series.programId);
-	}
-
-	/**
-	 * @memberof Series
-	 * @static
-	 * @enum NOW_SHOWING
-	 * @desc Enumerated list of Now Showing values
-	 */
-	public static get NOW_SHOWING(): NowShowingEnum {
-		return {
-			0: "Not Showing",
-			1: "Mondays",
-			2: "Tuesdays",
-			3: "Wednesdays",
-			4: "Thursdays",
-			5: "Fridays",
-			6: "Saturdays",
-			7: "Sundays",
-			8: "Daily"
-		};
 	}
 
 	/**
@@ -442,12 +434,7 @@ export default class Series extends Base {
 		const showing = Number(nowShowing);
 
 		// If the value passed (or defaulted) is "Not Showing", clear the property
-		if (0 === showing) {
-			this.nowShowing = null;
-		} else {
-			// Otherwise set it to the passed value
-			this.nowShowing = showing;
-		}
+		this.nowShowing = showing ? showing : null;
 
 		// Update the now showing display value
 		this.nowShowingDisplay = Series.NOW_SHOWING[showing];

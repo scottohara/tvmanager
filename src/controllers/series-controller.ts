@@ -15,6 +15,7 @@
  * @requires controllers/view-controller
  */
 import {
+	NavButtonEventHandler,
 	ProgramListItem,
 	SeriesListItem
 } from "controllers";
@@ -91,11 +92,11 @@ export default class SeriesController extends ViewController {
 		this.header = {
 			label: "Add/Edit Series",
 			leftButton: {
-				eventHandler: this.cancel.bind(this),
+				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
 				label: "Cancel"
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this),
+				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Save"
 			}

@@ -29,10 +29,13 @@ export interface HeaderFooter {
  */
 
 interface NavButton {
-	eventHandler?: () => void;
+	eventHandler?: NavButtonEventHandler;
 	style?: "backButton" | "cautionButton" | "confirmButton";
 	label: string;
 }
+
+export type NavButtonEventHandler = () => void;
+export type NavButtonAsyncEventHandler = () => Promise<void>;
 
 /**
  * @class View
@@ -47,7 +50,8 @@ export interface View {
 	scrollPos: number;
 }
 
-type ViewControllerConstructor = new(args?: object) => ViewController;
+type ViewControllerArgs = ProgramListItem | SeriesListItem | EpisodeListItem | Report;
+type ViewControllerConstructor = new(args?: ViewControllerArgs) => ViewController;
 
 export interface ViewControllerSet {
 	[key: string]: ViewControllerConstructor;
@@ -78,7 +82,7 @@ export interface NoticeStack {
 
 interface Notice {
 	id?: string;
-	label: string | DOMString;
+	label: string;
 	leftButton?: NavButton;
 	rightButton?: NavButton;
 }
@@ -168,8 +172,10 @@ export interface ProgramListItem {
  * @property {Function} dataSource - the function that returns data for the report
  * @property {Object} args - arguments to pass to the data source function
  */
+export type ReportDataSource = (args?: string) => Promise<PublicInterface<Series>[]>;
+
 export interface Report {
 	reportName: string;
-	dataSource: (args?: string) => Promise<PublicInterface<Series>[]>;
+	dataSource: ReportDataSource;
 	args?: string;
 }

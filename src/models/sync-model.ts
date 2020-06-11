@@ -83,7 +83,7 @@ export default class Sync extends Base {
 		try {
 			await (await this.db).syncsStore.removeAll();
 		} catch (error) {
-			errorMessage = `Sync.removeAll: ${error.message as string}`;
+			errorMessage = `Sync.removeAll: ${(error as Error).message}`;
 		}
 
 		return errorMessage;

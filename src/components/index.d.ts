@@ -1,3 +1,8 @@
+import Episode from "models/episode-model";
+import Program from "models/program-model";
+import { PublicInterface } from "global";
+import Series from "models/series-model";
+
 /**
  * @class Section
  * @classdesc Anonymous object containing the properties of a progress bar section
@@ -14,6 +19,8 @@ export interface Section {
 }
 
 export type ListAction = "view" | "edit" | "delete";
+export type ListEventHandler = (index: number) => void;
+export type ListItem = PublicInterface<Program | Series | Episode>;
 
 export interface SyntheticTouch {
 	identifier?: -1;

@@ -13,6 +13,7 @@
  * @requires controllers/view-controller
  */
 import {
+	NavButtonEventHandler,
 	ProgramListItem,
 	SeriesListItem
 } from "controllers";
@@ -82,12 +83,12 @@ export default class SeriesListController extends ViewController {
 		this.header = {
 			label: String(this.listItem.program.programName),
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: "Programs"
 			},
 			rightButton: {
-				eventHandler: this.addItem.bind(this),
+				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
 				label: "+"
 			}
 		};
@@ -248,7 +249,7 @@ export default class SeriesListController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to delete
 	 * @param {Boolean} [dontRemove] - if true, remove the item from the list, but not from the database (eg. when moving a series to a different program)
 	 */
-	private async deleteItem(listIndex: number, dontRemove: boolean): Promise<void> {
+	private async deleteItem(listIndex: number, dontRemove = false): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Decrement the status counts for the program
@@ -293,7 +294,7 @@ export default class SeriesListController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			rightButton: {
-				eventHandler: this.viewItems.bind(this),
+				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Done"
 			}
@@ -326,7 +327,7 @@ export default class SeriesListController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.viewItems.bind(this),
+				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Done"
 			}
@@ -357,11 +358,11 @@ export default class SeriesListController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.editItems.bind(this),
+				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Edit"
 			},
 			rightButton: {
-				eventHandler: this.deleteItems.bind(this),
+				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
 				style: "cautionButton",
 				label: "Delete"
 			}

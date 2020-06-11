@@ -19,11 +19,11 @@ export default class SettingMock {
 		removeStub.reset();
 	}
 
-	public get save(): SinonStub<void[], Promise<boolean>> {
+	public get save(): SinonStub<unknown[], Promise<boolean>> {
 		return saveStub;
 	}
 
-	public get remove(): SinonStub<void[], Promise<void>> {
+	public get remove(): SinonStub<unknown[], Promise<void>> {
 		return removeStub;
 	}
 

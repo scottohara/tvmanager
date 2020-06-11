@@ -33,7 +33,7 @@ describe("Episode", (): void => {
 		seriesId = "2";
 		seriesName = "test-series";
 		programName = "test-program";
-		episode = new Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId, seriesName, programName);
+		episode = new Episode(id, episodeName, status, statusDate, unverified, seriesId, unscheduled, sequence, seriesName, programName);
 	});
 
 	describe("object constructor", (): void => {
@@ -50,7 +50,7 @@ describe("Episode", (): void => {
 		it("should set the program name", (): Chai.Assertion => String(episode.programName).should.equal(programName));
 
 		describe("default properties", (): void => {
-			beforeEach((): Episode => (episode = new Episode(id, episodeName, status, statusDate, unverified, undefined, undefined, seriesId)));
+			beforeEach((): Episode => (episode = new Episode(id, episodeName, status, statusDate, unverified, seriesId, undefined, undefined)));
 
 			it("should clear the unscheduled flag if not specified", (): Chai.Assertion => episode.unscheduled.should.be.false);
 			it("should default the sequence to zero if not specified", (): Chai.Assertion => episode.sequence.should.equal(0));
@@ -168,7 +168,7 @@ describe("Episode", (): void => {
 						SeriesID: seriesId
 					});
 
-					episode = new Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId);
+					episode = new Episode(id, episodeName, status, statusDate, unverified, seriesId, unscheduled, sequence);
 
 					foundEpisode = await Episode.find(id);
 				});
@@ -257,7 +257,7 @@ describe("Episode", (): void => {
 	});
 
 	describe("fromJson", (): void => {
-		it("should construct an Episode object from the JSON", (): Chai.Assertion => Episode.fromJson({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }).should.deep.equal(new Episode(id, episodeName, status, statusDate, unverified, unscheduled, sequence, seriesId)));
+		it("should construct an Episode object from the JSON", (): Chai.Assertion => Episode.fromJson({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }).should.deep.equal(new Episode(id, episodeName, status, statusDate, unverified, seriesId, unscheduled, sequence)));
 	});
 
 	describe("save", (): void => {
@@ -668,7 +668,7 @@ describe("Episode", (): void => {
 
 				it("should set the status date", (): Chai.Assertion => episode.statusDate.should.equal(scenario.statusDate));
 				it("should set the status date display", (): Chai.Assertion => episode.statusDateDisplay.should.equal(scenario.statusDateDisplay));
-				it(`should ${"" === scenario.statusWarning ? "not " : ""}highlight the episode with a warning`, (): Chai.Assertion => episode.statusWarning.should.equal(scenario.statusWarning));
+				it(`should ${scenario.statusWarning ? "" : "not "}highlight the episode with a warning`, (): Chai.Assertion => episode.statusWarning.should.equal(scenario.statusWarning));
 
 				afterEach((): void => {
 					if (undefined !== scenario.today) {

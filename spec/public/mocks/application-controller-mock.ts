@@ -2,7 +2,7 @@ import sinon, { SinonStub } from "sinon";
 import { View } from "controllers";
 
 export default class ApplicationControllerMock {
-	private static singletonInstance: ApplicationControllerMock;
+	private static singletonInstance?: ApplicationControllerMock;
 
 	public viewStack: View[] = [];
 

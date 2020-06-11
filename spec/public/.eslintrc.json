@@ -1,8 +1,5 @@
 {
 	"rules": {
-		// Best practices
-		"dot-notation": "off"	,														// Disable to allow accessing private members using square-bracket notation
-
 		// Stylistic issues
 		"max-nested-callbacks": ["error", { 							// Required for deeply nested describes
 			"max": 11
@@ -13,6 +10,7 @@
 			"assertionStyle": "as",
 			"objectLiteralTypeAssertions": "allow"					// Required for mocking partial types
 		}],
+		"@typescript-eslint/dot-notation": "off",					// Disable to allow accessing private members using square-bracket notation
 		"@typescript-eslint/no-magic-numbers": "off",			// Disable due to lots of numbers used in assertions
 		"@typescript-eslint/no-unused-expressions": "off"	// Disable to allow Chai should syntax
 	}

@@ -119,7 +119,7 @@ function create(db: IDBPDatabase<TVManagerDB>): ProgramsStore {
 						txSyncStore = tx.objectStore("syncs"),
 
 						episodeIds: Promise<string[]>[] = [],
-						operations: Promise<[ModelType, string] | void>[] = [];
+						operations: Promise<[ModelType, string] | unknown>[] = [];
 
 			for (const seriesId of await txSeriesStore.index("programId").getAllKeys(id)) {
 				episodeIds.push(txEpisodesStore.index("seriesId").getAllKeys(seriesId));

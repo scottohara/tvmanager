@@ -21,6 +21,7 @@ import {
 	FullImport,
 	ImportData,
 	ImportDoc,
+	NavButtonEventHandler,
 	SyncErrorType,
 	SyncOperation
 } from "controllers";
@@ -41,7 +42,9 @@ import ViewController from "controllers/view-controller";
 import md5 from "md5";
 import window from "components/window";
 
-enum Months {Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
+enum Months {
+	Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+}
 
 /**
  * @class DataSyncController
@@ -59,7 +62,11 @@ enum Months {Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
  * @property {Number} objectsImported - running total number of objects imported
  */
 export default class DataSyncController extends ViewController {
-	private device!: Device;
+	private device: Device = {
+		id: "",
+		name: "",
+		imported: false
+	};
 
 	private localChanges = false;
 
@@ -100,7 +107,7 @@ export default class DataSyncController extends ViewController {
 		this.header = {
 			label: "Import/Export",
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: "Settings"
 			}
@@ -350,7 +357,7 @@ export default class DataSyncController extends ViewController {
 	 * @desc Performs the data export
 	 * @param {Array<Sync>} syncList - array of Sync objects
 	 */
-	private async doExport(): Promise<void[]> {
+	private async doExport(): Promise<unknown[]> {
 		return this.listRetrieved(await Sync.list());
 	}
 
@@ -362,7 +369,7 @@ export default class DataSyncController extends ViewController {
 	 * @desc Iterates over the list of local changes to be synced, and processes each one
 	 * @param {Array<Sync>} syncList - array of Sync objects
 	 */
-	private async listRetrieved(syncList: PublicInterface<Sync>[]): Promise<void[]> {
+	private async listRetrieved(syncList: PublicInterface<Sync>[]): Promise<unknown[]> {
 		this.syncProcessed = 0;
 		this.syncErrors = [];
 		this.syncList = syncList;
@@ -388,7 +395,7 @@ export default class DataSyncController extends ViewController {
 					changes.push(this.sendDelete(record));
 					break;
 
-				// No default
+				default:
 			}
 		}
 
@@ -439,7 +446,7 @@ export default class DataSyncController extends ViewController {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
 		} catch (error) {
-			this.syncError("Send error", sync.type as ModelType, error.message, sync.id);
+			this.syncError("Send error", sync.type as ModelType, (error as Error).message, sync.id);
 		}
 
 		return this.changeSent();
@@ -470,7 +477,7 @@ export default class DataSyncController extends ViewController {
 				model = Series.find(sync.id as string);
 				break;
 
-			// No default
+			default:
 		}
 
 		return model;
@@ -500,7 +507,7 @@ export default class DataSyncController extends ViewController {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
 		} catch (error) {
-			this.syncError("Delete error", sync.type as ModelType, error.message, sync.id);
+			this.syncError("Delete error", sync.type as ModelType, (error as Error).message, sync.id);
 		}
 
 		return this.changeSent();
@@ -529,13 +536,13 @@ export default class DataSyncController extends ViewController {
 			this.checkForLocalChanges(await Sync.count());
 
 			// Check for any sync errors
-			if (0 === this.syncErrors.length) {
+			if (this.syncErrors.length) {
+				// There were errors, so display them
+				this.showErrors("Export");
+			} else {
 				// No errors, so just hide the errors container and call the success handler
 				$("#syncErrors").hide();
 				this.syncFinish("Export", true);
-			} else {
-				// There were errors, so display them
-				this.showErrors("Export");
 			}
 		}
 	}
@@ -565,7 +572,7 @@ export default class DataSyncController extends ViewController {
 	 * @method doImport
 	 * @desc For full imports, deletes all local data before starting the import; otherwise just starts the import immediately
 	 */
-	private async doImport(): Promise<void | void[]> {
+	private async doImport(): Promise<unknown> {
 		this.syncErrors = [];
 
 		// Check if Fast Import is selected
@@ -620,7 +627,7 @@ export default class DataSyncController extends ViewController {
 	 * @method importData
 	 * @desc Retrieves data to be imported and loads it into the local database
 	 */
-	private async importData(): Promise<void | void[]> {
+	private async importData(): Promise<unknown> {
 		this.objectsToImport = 0;
 		this.objectsImported = 0;
 
@@ -634,7 +641,7 @@ export default class DataSyncController extends ViewController {
 
 			if (response.ok) {
 				// Extract the JSON and checksum returned, and calculate a hash of the data
-				const importObj: FullImport | ImportDoc[] = await response.json(),
+				const importObj: FullImport | ImportDoc[] = await response.json() as FullImport | ImportDoc[],
 							{ importJson, returnedHash }: ImportData = this.getImportData(importObj, String(response.headers.get("Etag"))),
 							hash: string = md5(JSON.stringify(importJson));
 
@@ -667,7 +674,7 @@ export default class DataSyncController extends ViewController {
 			}
 		} catch (error) {
 			// An error occurred getting the objects to import
-			this.syncError("Receive error", "Sync", error.message);
+			this.syncError("Receive error", "Sync", (error as Error).message);
 		}
 
 		// Finalise the import
@@ -854,26 +861,23 @@ export default class DataSyncController extends ViewController {
 	 */
 	private async importDone(): Promise<void> {
 		// Check for any sync errors
-		if (0 === this.syncErrors.length) {
-			// For Full Import, we need to mark the registered device as imported and manually clear any pending local changes
-			if (this.importChangesOnly) {
-				// For Fast Import, Sync records were cleared as we went, so just mark the import as successful
-				await this.importSuccessful();
-			} else {
-				// If the registered device had not previously performed a full import, mark it as having done so
-				if (!this.device.imported) {
-					this.device.imported = true;
-					const device: Setting = new Setting("Device", JSON.stringify(this.device));
-
-					await device.save();
-				}
-
-				// Clear all pending local changes
-				await this.pendingChangesCleared(await Sync.removeAll());
-			}
-		} else {
+		if (this.syncErrors.length) {
 			// There were errors, so display them
 			this.showErrors("Import");
+		} else	if (this.importChangesOnly) {
+			// For Fast Import, Sync records were cleared as we went, so just mark the import as successful
+			await this.importSuccessful();
+		} else {
+			// If the registered device had not previously performed a full import, mark it as having done so
+			if (!this.device.imported) {
+				this.device.imported = true;
+				const device: Setting = new Setting("Device", JSON.stringify(this.device));
+
+				await device.save();
+			}
+
+			// Clear all pending local changes
+			await this.pendingChangesCleared(await Sync.removeAll());
 		}
 	}
 

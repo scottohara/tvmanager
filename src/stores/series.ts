@@ -36,7 +36,7 @@ function bySeriesName(a: PersistedSeries, b: PersistedSeries): number {
 function byNowShowingThenProgramName(a: PersistedSeries, b: PersistedSeries): number {
 	const nowShowingDiff: number = String(a.NowShowing).localeCompare(String(b.NowShowing), "en", { numeric: true });
 
-	if (0 === nowShowingDiff) {
+	if (!nowShowingDiff) {
 		return String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
 	}
 
@@ -47,7 +47,7 @@ function byNowShowingThenProgramName(a: PersistedSeries, b: PersistedSeries): nu
 function byProgramNameThenSeriesName(a: PersistedSeries, b: PersistedSeries): number {
 	const programNameDiff = String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
 
-	if (0 === programNameDiff) {
+	if (!programNameDiff) {
 		return a.Name.localeCompare(b.Name, "en", { sensitivity: "base" });
 	}
 
@@ -132,7 +132,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 
-						series: Map<string, number> = new Map();
+						series: Map<string, number> = new Map<string, number>();
 
 			// Get set of series with at least one episode in the specified status
 			(await txEpisodesStore.index("status").getAll(IDBKeyRange.bound([status], [status, "~"]))).forEach((episode: EpisodesStoreObject): void => {
@@ -171,7 +171,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 
-						series: Map<string, { episodeCount: number; watchedCount: number; }> = new Map(),
+						series: Map<string, { episodeCount: number; watchedCount: number; }> = new Map<string, { episodeCount: number; watchedCount: number; }>(),
 
 						// Get the unique set of series with at least one watched episode
 						watchedSeries: Set<string> = new Set(await Promise.all((await txEpisodesStore.index("status").getAll(IDBKeyRange.bound(["Watched"], ["Watched", "~"]))).map(({ seriesId }: EpisodesStoreObject): string => seriesId)));
@@ -244,7 +244,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 						txSyncStore = tx.objectStore("syncs"),
-						operations: Promise<[ModelType, string] | void>[] = [];
+						operations: Promise<[ModelType, string] | unknown>[] = [];
 
 			for (const episodeId of await txEpisodesStore.index("seriesId").getAllKeys(id)) {
 				operations.push(txSyncStore.put({ type: "Episode", id: episodeId, action: "deleted" }));

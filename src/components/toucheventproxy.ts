@@ -96,7 +96,7 @@ export default class TouchEventProxy {
 		touchEvent.changedTouches = [{ target }];
 
 		// Dispatch the new event
-		if (null !== event.target) {
+		if (event.target) {
 			event.target.dispatchEvent(touchEvent as Event);
 		}
 	}
@@ -197,7 +197,7 @@ export default class TouchEventProxy {
 		let eventFromBrowser = true;
 
 		// If the event has target touches, and the identifier of the first one is -1, the event was from this proxy
-		if (undefined !== event.targetTouches && event.targetTouches.length > 0 && -1 === event.targetTouches[0].identifier) {
+		if (event.targetTouches.length > 0 && -1 === event.targetTouches[0].identifier) {
 			eventFromBrowser = false;
 		}
 

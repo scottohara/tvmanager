@@ -11,6 +11,10 @@
  * @requires models/series-model
  * @requires controllers/view-controller
  */
+import {
+	NavButtonEventHandler,
+	ReportDataSource
+} from "controllers";
 import $ from "jquery";
 import Series from "models/series-model";
 import SettingsView from "views/settings-view.html";
@@ -46,7 +50,7 @@ export default class SettingsController extends ViewController {
 		this.header = {
 			label: "Settings",
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: "Schedule"
 			}
@@ -116,7 +120,7 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Recorded report view
 	 */
 	private async viewRecordedReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series), args: "Recorded" });
+		return this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Recorded" });
 	}
 
 	/**
@@ -127,7 +131,7 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Expected report view
 	 */
 	private async viewExpectedReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series), args: "Expected" });
+		return this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Expected" });
 	}
 
 	/**
@@ -138,7 +142,7 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Missed report view
 	 */
 	private async viewMissedReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series), args: "Missed" });
+		return this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Missed" });
 	}
 
 	/**
@@ -149,6 +153,6 @@ export default class SettingsController extends ViewController {
 	 * @desc Display the All Incomplete report view
 	 */
 	private async viewIncompleteReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) });
+		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource });
 	}
 }

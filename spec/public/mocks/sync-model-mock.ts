@@ -18,7 +18,7 @@ export default class SyncMock {
 		removeStub.reset();
 	}
 
-	public get remove(): SinonStub<void[], Promise<void>> {
+	public get remove(): SinonStub<unknown[], Promise<void>> {
 		return removeStub;
 	}
 
@@ -27,15 +27,15 @@ export default class SyncMock {
 		removeStub.reset();
 	}
 
-	public static get list(): SinonStub<void[], Promise<SyncMock[]>> {
+	public static get list(): SinonStub<unknown[], Promise<SyncMock[]>> {
 		return listStub.returns(Promise.resolve(syncList));
 	}
 
-	public static get count(): SinonStub<void[], Promise<number>> {
+	public static get count(): SinonStub<unknown[], Promise<number>> {
 		return countStub.returns(Promise.resolve(syncList.length));
 	}
 
-	public static get removeAll(): SinonStub<void[], Promise<string | undefined>> {
+	public static get removeAll(): SinonStub<unknown[], Promise<string | undefined>> {
 		return removeAllStub;
 	}
 

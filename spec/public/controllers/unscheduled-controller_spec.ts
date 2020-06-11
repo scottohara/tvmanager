@@ -1,6 +1,7 @@
 import {
 	HeaderFooter,
-	NavButton
+	NavButton,
+	NavButtonEventHandler
 } from "controllers";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeMock from "mocks/episode-model-mock";
@@ -43,7 +44,7 @@ describe("UnscheduledController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(unscheduledController.header.label).should.equal("Unscheduled"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			unscheduledController["goBack"].should.have.been.called;
 		});
 

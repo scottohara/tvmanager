@@ -1,5 +1,6 @@
 import {
 	NavButton,
+	NavButtonEventHandler,
 	Report
 } from "controllers";
 import $ from "jquery";
@@ -81,7 +82,7 @@ describe("SettingsController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(settingsController.header.label).should.equal("Settings"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			settingsController["goBack"].should.have.been.called;
 		});
 

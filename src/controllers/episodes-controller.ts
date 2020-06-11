@@ -18,6 +18,7 @@ import "jquery-ui/ui/widgets/sortable";
 import "jquery-ui-touch-punch";
 import {
 	EpisodeListItem,
+	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
@@ -86,12 +87,12 @@ export default class EpisodesController extends ViewController {
 		this.header = {
 			label: `${this.listItem.series.programName} : ${this.listItem.series.seriesName}`,
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: undefined === this.listItem.source ? "Series" : this.listItem.source
 			},
 			rightButton: {
-				eventHandler: this.addItem.bind(this),
+				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
 				label: "+"
 			}
 		};
@@ -147,7 +148,7 @@ export default class EpisodesController extends ViewController {
 
 			window.setTimeout((): void => {
 				// Find the first unwatched episode
-				const firstUnwatched: Episode | undefined = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as Episode;
+				const firstUnwatched: PublicInterface<Episode> | undefined = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as PublicInterface<Episode> | undefined;
 
 				if (undefined !== firstUnwatched) {
 					this.episodeList.scrollTo(String(firstUnwatched.id));
@@ -203,7 +204,7 @@ export default class EpisodesController extends ViewController {
 		this.origWatchedCount = "Watched" === episode.status ? 1 : 0;
 		this.origRecordedCount = "Recorded" === episode.status ? 1 : 0;
 		this.origExpectedCount = "Expected" === episode.status ? 1 : 0;
-		this.origStatusWarningCount = "" === episode.statusWarning ? 0 : 1;
+		this.origStatusWarningCount = episode.statusWarning ? 1 : 0;
 
 		// Display the Episode view
 		return this.appController.pushView("episode", { listIndex, episode });
@@ -279,7 +280,7 @@ export default class EpisodesController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			rightButton: {
-				eventHandler: this.viewItems.bind(this),
+				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Done"
 			}
@@ -347,7 +348,7 @@ export default class EpisodesController extends ViewController {
 			.addClass("edit")
 			.sortable({
 				axis: "y",
-				sort: this.sortItems.bind(this)
+				sort: this.sortItems.bind(this) as JQueryUI.SortableEvent
 			});
 
 		// Setup the footer
@@ -407,11 +408,11 @@ export default class EpisodesController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.editItems.bind(this),
+				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Sort"
 			},
 			rightButton: {
-				eventHandler: this.deleteItems.bind(this),
+				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
 				style: "cautionButton",
 				label: "Delete"
 			}

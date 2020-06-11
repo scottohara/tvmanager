@@ -2,6 +2,8 @@ import {
 	EpisodeListItem,
 	HeaderFooter,
 	NavButton,
+	NavButtonAsyncEventHandler,
+	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
@@ -92,7 +94,7 @@ describe("EpisodesController", (): void => {
 				it("should set the header label", (): Chai.Assertion => String(episodesController.header.label).should.equal(`${listItem.series.programName} : ${listItem.series.seriesName}`));
 
 				it("should attach a header left button event handler", (): void => {
-					(leftButton.eventHandler as Function)();
+					(leftButton.eventHandler as NavButtonEventHandler)();
 					episodesController["goBack"].should.have.been.called;
 				});
 
@@ -100,7 +102,7 @@ describe("EpisodesController", (): void => {
 				it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal(scenario.leftButtonLabel));
 
 				it("should attach a header right button event handler", (): void => {
-					(rightButton.eventHandler as Function)();
+					(rightButton.eventHandler as NavButtonEventHandler)();
 					episodesController["addItem"].should.have.been.called;
 				});
 
@@ -127,7 +129,7 @@ describe("EpisodesController", (): void => {
 	describe("activate", (): void => {
 		beforeEach((): void => {
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
-			episodesController["episodeList"] = new ListMock("", "", "", [{ ...items[0] }]);
+			episodesController["episodeList"] = new ListMock("", "", "", [{ ...items[0] } as EpisodeMock]);
 			episodesController["scrollToFirstUnwatched"] = false;
 			WindowMock.setTimeout.resetHistory();
 		});
@@ -261,7 +263,7 @@ describe("EpisodesController", (): void => {
 						{ id: "1" },
 						{ id: "2" },
 						{ id: "3" }
-					];
+					] as EpisodeMock[];
 					await episodesController.activate();
 				});
 
@@ -275,7 +277,7 @@ describe("EpisodesController", (): void => {
 						{ id: "1", status: "Watched" },
 						{ id: "2", status: "Watched" },
 						{ id: "3" }
-					];
+					] as EpisodeMock[];
 					await episodesController.activate();
 				});
 
@@ -505,7 +507,7 @@ describe("EpisodesController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			episodesController["viewItems"].should.have.been.called;
 		});
 
@@ -519,10 +521,10 @@ describe("EpisodesController", (): void => {
 
 		beforeEach(async (): Promise<void> => {
 			items = [
-				{ ...new EpisodeMock("1", null, "", "", false, false, 1), save: sinon.stub(), remove: sinon.stub() },
-				{ ...new EpisodeMock("2", null, "", "", false, false, 2), save: sinon.stub(), remove: sinon.stub() },
-				{ ...new EpisodeMock("3", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub() },
-				{ ...new EpisodeMock("4", null, "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub() }
+				{ ...new EpisodeMock("1", null, "", "", false, "", false, 1), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("2", null, "", "", false, "", false, 2), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("3", null, "", "", false, "", false, 3), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("4", null, "", "", false, "", false, 3), save: sinon.stub(), remove: sinon.stub() }
 			];
 
 			sortedItems = [
@@ -573,7 +575,7 @@ describe("EpisodesController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", async (): Promise<void> => {
-			await (leftButton.eventHandler as Function)();
+			await (leftButton.eventHandler as NavButtonAsyncEventHandler)();
 			episodesController["resequenceItems"].should.have.been.called;
 			episodesController["viewItems"].should.have.been.called;
 		});
@@ -622,14 +624,14 @@ describe("EpisodesController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			episodesController["editItems"].should.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Sort"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			episodesController["deleteItems"].should.have.been.called;
 		});
 

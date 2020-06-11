@@ -12,6 +12,10 @@
  * @requires models/series-model
  * @requires controllers/view-controller
  */
+import {
+	NavButtonEventHandler,
+	SeriesListItem
+} from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
@@ -19,7 +23,6 @@ import { PublicInterface } from "global";
 import ScheduleListTemplate from "views/scheduleListTemplate.html";
 import ScheduleView from "views/schedule-view.html";
 import Series from "models/series-model";
-import { SeriesListItem } from "controllers";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -62,11 +65,11 @@ export default class ScheduleController extends ViewController {
 		this.header = {
 			label: "Schedule",
 			leftButton: {
-				eventHandler: this.viewUnscheduled.bind(this),
+				eventHandler: this.viewUnscheduled.bind(this) as NavButtonEventHandler,
 				label: "Unscheduled"
 			},
 			rightButton: {
-				eventHandler: this.viewPrograms.bind(this),
+				eventHandler: this.viewPrograms.bind(this) as NavButtonEventHandler,
 				label: "Programs"
 			}
 		};
@@ -94,7 +97,7 @@ export default class ScheduleController extends ViewController {
 		}
 
 		// If the series is now not showing or has no recorded/expected episodes, remove the item from the list
-		if (null === listItem.series.nowShowing && 0 === listItem.series.recordedCount && 0 === listItem.series.expectedCount) {
+		if (null === listItem.series.nowShowing && !listItem.series.recordedCount && !listItem.series.expectedCount) {
 			this.scheduleList.items.splice(Number(listItem.listIndex), 1);
 		} else {
 			// Update the item in the list
@@ -146,7 +149,7 @@ export default class ScheduleController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
-		return this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] });
+		return this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] as PublicInterface<Series> });
 	}
 
 	/**
@@ -224,7 +227,7 @@ export default class ScheduleController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.viewItems.bind(this),
+				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Done"
 			}
@@ -255,11 +258,11 @@ export default class ScheduleController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.editItems.bind(this),
+				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Edit"
 			},
 			rightButton: {
-				eventHandler: this.viewSettings.bind(this),
+				eventHandler: this.viewSettings.bind(this) as NavButtonEventHandler,
 				label: "Settings"
 			}
 		};

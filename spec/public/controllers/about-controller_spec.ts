@@ -1,9 +1,12 @@
+import {
+	NavButton,
+	NavButtonEventHandler
+} from "controllers";
 import $ from "jquery";
 import AboutController from "../../../src/controllers/about-controller";
 import AboutView from "views/about-view.html";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeMock from "mocks/episode-model-mock";
-import { NavButton } from "controllers";
 import ProgramMock from "mocks/program-model-mock";
 import SeriesMock from "mocks/series-model-mock";
 import sinon from "sinon";
@@ -44,7 +47,7 @@ describe("AboutController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(aboutController.header.label).should.equal("About"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			aboutController["goBack"].should.have.been.called;
 		});
 

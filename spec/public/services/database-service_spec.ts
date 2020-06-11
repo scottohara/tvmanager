@@ -11,7 +11,7 @@ describe("DatabaseService", (): void => {
 
 	beforeEach(async (): Promise<void> => {
 		wrapCall = wrap.firstCall;
-		({ connectCalledWith } = wrap(worker));
+		({ connectCalledWith } = wrap(worker) as { connectCalledWith: (version: number) => Promise<boolean>; });
 		wrap.resetHistory();
 		db = await DatabaseService;
 	});

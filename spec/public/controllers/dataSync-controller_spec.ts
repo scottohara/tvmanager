@@ -4,7 +4,8 @@ import {
 	ImportData,
 	ImportDoc,
 	ImportObject,
-	NavButton
+	NavButton,
+	NavButtonEventHandler
 } from "controllers";
 import {
 	Model,
@@ -56,7 +57,7 @@ describe("DataSyncController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(dataSyncController.header.label).should.equal("Import/Export"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			dataSyncController["goBack"].should.have.been.called;
 		});
 
@@ -226,7 +227,7 @@ describe("DataSyncController", (): void => {
 				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
 				it("should display the device name", (): Chai.Assertion => String(deviceName.val()).should.equal(device.name));
 				it("should show the sync controls", (): Chai.Assertion => syncControls.css("display").should.not.equal("none"));
-				it("should not check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.prop("checked").should.be.false);
+				it("should not check the import changes only checkbox", (): Chai.Assertion => Boolean(importChangesOnly.prop("checked")).should.be.false);
 				it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.css("display").should.equal("none"));
 				it("should not show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.equal("none"));
 			});
@@ -240,7 +241,7 @@ describe("DataSyncController", (): void => {
 				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
 				it("should display the device name", (): Chai.Assertion => String(deviceName.val()).should.equal(device.name));
 				it("should show the sync controls", (): Chai.Assertion => syncControls.css("display").should.not.equal("none"));
-				it("should check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.prop("checked").should.be.true);
+				it("should check the import changes only checkbox", (): Chai.Assertion => Boolean(importChangesOnly.prop("checked")).should.be.true);
 				it("should show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.css("display").should.not.equal("none"));
 				it("should not show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.equal("none"));
 			});
@@ -249,11 +250,11 @@ describe("DataSyncController", (): void => {
 		describe("without device", (): void => {
 			beforeEach((): void => dataSyncController["gotDevice"](new SettingMock()));
 
-			it("should not set the device", (): Chai.Assertion => (undefined === dataSyncController["device"]).should.be.true);
+			it("should not set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal({ id: "", name: "", imported: false }));
 			it("should display unregistered", (): Chai.Assertion => String(deviceName.val()).should.equal("< Unregistered >"));
 			it("should show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.not.equal("none"));
 			it("should not show the sync controls", (): Chai.Assertion => syncControls.css("display").should.equal("none"));
-			it("should not check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.prop("checked").should.be.false);
+			it("should not check the import changes only checkbox", (): Chai.Assertion => Boolean(importChangesOnly.prop("checked")).should.be.false);
 			it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.css("display").should.equal("none"));
 		});
 
@@ -477,7 +478,8 @@ describe("DataSyncController", (): void => {
 			syncList = [
 				new SyncMock(null, null, "modified"),
 				new SyncMock(null, null, "modified"),
-				new SyncMock(null, null, "deleted")
+				new SyncMock(null, null, "deleted"),
+				new SyncMock(null, null)
 			];
 
 			sendChangeStub = sinon.stub(dataSyncController, "sendChange" as keyof DataSyncController);
@@ -492,7 +494,7 @@ describe("DataSyncController", (): void => {
 		it("should set the list of changes to be sync", (): Chai.Assertion => dataSyncController["syncList"].should.equal(syncList));
 		it("should hide the status", (): Chai.Assertion => status.css("display").should.equal("none"));
 		it("should reset the progress", (): Chai.Assertion => Number(progress.val()).should.equal(0));
-		it("should set the progress total", (): Chai.Assertion => String(progress.attr("max")).should.equal("3"));
+		it("should set the progress total", (): Chai.Assertion => String(progress.attr("max")).should.equal("4"));
 		it("should show the progress", (): Chai.Assertion => progress.css("display").should.not.equal("none"));
 
 		it("should send any changes", (): void => {
@@ -615,8 +617,8 @@ describe("DataSyncController", (): void => {
 
 	describe("find", (): void => {
 		interface Scenario {
-			type: ModelType;
-			model: typeof EpisodeMock | typeof ProgramMock | typeof SeriesMock;
+			type: ModelType | null;
+			model?: typeof EpisodeMock | typeof ProgramMock | typeof SeriesMock;
 		}
 		const scenarios: Scenario[] = [
 			{
@@ -630,6 +632,9 @@ describe("DataSyncController", (): void => {
 			{
 				type: "Series",
 				model: SeriesMock
+			},
+			{
+				type: null
 			}
 		];
 
@@ -638,15 +643,19 @@ describe("DataSyncController", (): void => {
 		beforeEach((): SyncMock => (sync = new SyncMock(null, "1")));
 
 		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.type, (): void => {
-				let model: Model;
+			describe(null === scenario.type ? "invalid sync type" : scenario.type, (): void => {
+				let model: Model | undefined;
 
 				beforeEach(async (): Promise<void> => {
 					sync.type = scenario.type;
 					model = await dataSyncController["find"](sync);
 				});
 
-				it(`should lookup the ${scenario.type}`, (): Chai.Assertion => model.should.be.an.instanceOf(scenario.model));
+				if (scenario.model) {
+					it(`should lookup the ${scenario.type}`, (): Chai.Assertion => (model as Model).should.be.an.instanceOf(scenario.model));
+				} else {
+					it("should return undefined", (): Chai.Assertion => (undefined === model).should.be.true);
+				}
 			});
 		});
 	});
@@ -865,9 +874,9 @@ describe("DataSyncController", (): void => {
 
 			describe("without errors", (): void => {
 				beforeEach(async (): Promise<void> => {
-					ProgramMock.removeAllOK();
-					SeriesMock.removeAllOK();
-					EpisodeMock.removeAllOK();
+					ProgramMock.removeAllOk();
+					SeriesMock.removeAllOk();
+					EpisodeMock.removeAllOk();
 					await dataSyncController["doImport"]();
 				});
 
@@ -1473,7 +1482,7 @@ describe("DataSyncController", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message", "id");
 				const error: JQuery = dataSyncController["syncErrors"].pop() as JQuery;
 
-				error.prop("tagName").should.equal("LI");
+				String(error.prop("tagName")).should.equal("LI");
 				error.html().should.equal("Send error<br>Type: Program id<br>message");
 			});
 		});
@@ -1483,7 +1492,7 @@ describe("DataSyncController", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message");
 				const error: JQuery = dataSyncController["syncErrors"].pop() as JQuery;
 
-				error.prop("tagName").should.equal("LI");
+				String(error.prop("tagName")).should.equal("LI");
 				error.html().should.equal("Send error<br>Type: Program<br>message");
 			});
 		});

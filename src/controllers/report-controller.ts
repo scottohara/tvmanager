@@ -11,11 +11,14 @@
  * @requires components/list
  * @requires controllers/view-controller
  */
+import {
+	NavButtonEventHandler,
+	Report
+} from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
 import { PublicInterface } from "global";
-import { Report } from "controllers";
 import ReportListTemplate from "views/reportListTemplate.html";
 import ReportView from "views/report-view.html";
 import Series from "models/series-model";
@@ -62,7 +65,7 @@ export default class ReportController extends ViewController {
 		this.header = {
 			label: this.report.reportName,
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: "Settings"
 			}
@@ -126,7 +129,7 @@ export default class ReportController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
-		return this.appController.pushView("episodes", { source: "Report", listIndex, series: this.reportList.items[listIndex] });
+		return this.appController.pushView("episodes", { source: "Report", listIndex, series: this.reportList.items[listIndex] as PublicInterface<Series> });
 	}
 
 	/**

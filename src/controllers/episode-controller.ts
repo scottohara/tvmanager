@@ -13,9 +13,12 @@
  * @requires components/toucheventproxy
  * @requires controllers/view-controller
  */
+import {
+	EpisodeListItem,
+	NavButtonEventHandler
+} from "controllers";
 import $ from "jquery";
 import Episode from "models/episode-model";
-import { EpisodeListItem } from "controllers";
 import { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
 import Series from "models/series-model";
@@ -23,7 +26,9 @@ import SpinningWheel from "framework/spinningwheel";
 import TouchEventProxy from "components/toucheventproxy";
 import ViewController from "controllers/view-controller";
 
-enum Months {Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
+enum Months {
+	Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+}
 
 /**
  * @class EpisodeController
@@ -59,7 +64,7 @@ export default class EpisodeController extends ViewController {
 			this.originalStatusDate = this.listItem.episode.statusDate;
 		} else {
 			// Otherwise, we're adding a new episode
-			this.listItem = { episode: new Episode(null, "", "", "", false, false, Number(listItem.sequence), (listItem.series as Series).id) };
+			this.listItem = { episode: new Episode(null, "", "", "", false, (listItem.series as Series).id, false, Number(listItem.sequence)) };
 		}
 	}
 
@@ -86,11 +91,11 @@ export default class EpisodeController extends ViewController {
 		this.header = {
 			label: "Add/Edit Episode",
 			leftButton: {
-				eventHandler: this.cancel.bind(this),
+				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
 				label: "Cancel"
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this),
+				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Save"
 			}
@@ -211,7 +216,7 @@ export default class EpisodeController extends ViewController {
 						$("#unverifiedRow").show();
 						break;
 
-					// No default
+					default:
 				}
 			}
 
@@ -323,7 +328,7 @@ export default class EpisodeController extends ViewController {
 			$("#statusDateRow").show();
 
 			// If no date has been specified, prompt the user for a date
-			if ("" === this.listItem.episode.statusDate) {
+			if (!this.listItem.episode.statusDate) {
 				this.getStatusDate();
 			}
 		}

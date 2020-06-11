@@ -31,6 +31,7 @@ import {
 	Notice,
 	NoticeStack,
 	View,
+	ViewControllerArgs,
 	ViewControllerSet
 } from "controllers";
 import $ from "jquery";
@@ -146,7 +147,7 @@ export default class ApplicationController {
 	 * @desc Pops the current view off the stack, revealing the previous view
 	 * @param {Object} [args] - arguments to pass to the previous view controller
 	 */
-	public async popView(args?: object): Promise<void> {
+	public async popView(args?: ViewControllerArgs): Promise<void> {
 		// Clear the header/footer
 		this.clearFooter();
 		this.clearHeader();
@@ -278,7 +279,7 @@ export default class ApplicationController {
 	 * @param {String} view - the name of the view to push
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
-	public async pushView(view: string, args?: object): Promise<void> {
+	public async pushView(view: string, args?: ViewControllerArgs): Promise<void> {
 		// If a current view is displayed, save the current scroll position and clear the existing header/footer
 		if (this.viewStack.length > 0) {
 			this.getScrollPosition();
@@ -311,7 +312,7 @@ export default class ApplicationController {
 						.appendTo($("#notices")),
 					noticeLeftButton: JQuery = $("<a>").appendTo(noticeContainer),
 					noticeLabel: JQuery = $("<p>")
-						.html(notice.label as string)
+						.html(notice.label)
 						.appendTo(noticeContainer),
 					noticeRightButton: JQuery = $("<a>").appendTo(noticeContainer);
 
@@ -356,7 +357,7 @@ export default class ApplicationController {
 		}
 
 		// If there are currently no notices displayed, position the notices container just off screen (at the bottom) and make it visible
-		if (0 === this.noticeStack.notice.length) {
+		if (!this.noticeStack.notice.length) {
 			$("#notices").css("top", `${window.innerHeight}px`);
 			$("#notices").css("visibility", "visible");
 		}
@@ -438,7 +439,7 @@ export default class ApplicationController {
 	 * @desc Activates the view that was revealed
 	 * @param {Object} [args] - arguments to pass to the revealed view controller
 	 */
-	private async viewPopped(args: object): Promise<void> {
+	private async viewPopped(args: ViewControllerArgs): Promise<void> {
 		const DELAY_MS = 1000;
 
 		// Call the view controller's activate method
@@ -459,7 +460,7 @@ export default class ApplicationController {
 	 * @param {Function} onSuccess - function to call after loading the view contents
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
-	private async show(onSuccess: (args?: object) => Promise<void>, args?: object): Promise<void> {
+	private async show(onSuccess: (args?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
 		// Hide the scroll helper
 		this.hideScrollHelper();
 
@@ -645,7 +646,7 @@ export default class ApplicationController {
 		}
 
 		// If there are no more notices visible, hide the notices container
-		if (0 === this.noticeStack.notice.length) {
+		if (!this.noticeStack.notice.length) {
 			$("#notices").css("visibility", "hidden");
 		}
 	}

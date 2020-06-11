@@ -1,8 +1,10 @@
 import {
 	HeaderFooter,
 	NavButton,
+	NavButtonEventHandler,
 	Notice,
-	View
+	View,
+	ViewControllerArgs
 } from "controllers";
 import sinon, {
 	SinonFakeTimers,
@@ -91,7 +93,7 @@ describe("ApplicationController", (): void => {
 			sinon.stub(applicationController, "viewPopped" as keyof ApplicationController);
 			sinon.stub(applicationController, "show" as keyof ApplicationController).yields({});
 			applicationController["viewStack"] = [{ controller: new TestController(), scrollPos: 0 }];
-			await applicationController.popView({});
+			await applicationController.popView({} as ViewControllerArgs);
 		});
 
 		it("should clear the footer", (): Chai.Assertion => applicationController.clearFooter.should.have.been.called);
@@ -187,14 +189,14 @@ describe("ApplicationController", (): void => {
 
 		describe("with footer", (): void => {
 			let footer: HeaderFooter,
-					leftButtonEventHandler: Function,
-					rightButtonEventHandler: Function;
+					leftButtonEventHandler: NavButtonEventHandler,
+					rightButtonEventHandler: NavButtonEventHandler;
 
 			beforeEach((): void => {
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				footer = controller.footer as HeaderFooter;
-				leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as Function;
-				rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as Function;
+				leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as NavButtonEventHandler;
+				rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as NavButtonEventHandler;
 			});
 
 			describe("with left button", (): void => {
@@ -389,7 +391,7 @@ describe("ApplicationController", (): void => {
 			describe(scenario.description, (): void => {
 				beforeEach(async (): Promise<void> => {
 					applicationController.viewStack = scenario.viewStack;
-					await applicationController.pushView("test", {});
+					await applicationController.pushView("test", {} as ViewControllerArgs);
 					view = applicationController.viewStack.pop() as View;
 				});
 
@@ -408,7 +410,7 @@ describe("ApplicationController", (): void => {
 					view.scrollPos.should.equal(0);
 				});
 
-				it("should instantiate the view controller", (): Chai.Assertion => ((view.controller as TestController).args as object).should.deep.equal({}));
+				it("should instantiate the view controller", (): Chai.Assertion => ((view.controller as TestController).args as ViewControllerArgs).should.deep.equal({}));
 
 				it("should display the view", (): void => {
 					applicationController["show"].should.have.been.called;
@@ -822,7 +824,7 @@ describe("ApplicationController", (): void => {
 		describe("without activate", (): void => {
 			beforeEach(async (): Promise<void> => {
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
-				await applicationController["viewPopped"]({});
+				await applicationController["viewPopped"]({} as ViewControllerArgs);
 			});
 
 			it("should not activate the view controller", (): Chai.Assertion => activate.should.not.have.been.called);
@@ -833,7 +835,7 @@ describe("ApplicationController", (): void => {
 			beforeEach(async (): Promise<void> => {
 				Object.defineProperty(controller, "activate", { value: activate });
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
-				await applicationController["viewPopped"]({});
+				await applicationController["viewPopped"]({} as ViewControllerArgs);
 			});
 
 			it("should activate the view controller", (): Chai.Assertion => activate.should.have.been.calledWith({}));
@@ -854,7 +856,7 @@ describe("ApplicationController", (): void => {
 			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
 			callback = sinon.spy();
-			await applicationController["show"](callback, {});
+			await applicationController["show"](callback, {} as ViewControllerArgs);
 		});
 
 		it("should hide the scroll helper", (): Chai.Assertion => applicationController.hideScrollHelper.should.have.been.called);
@@ -911,8 +913,8 @@ describe("ApplicationController", (): void => {
 	describe("setHeader", (): void => {
 		let controller: TestController,
 				header: HeaderFooter,
-				leftButtonEventHandler: Function,
-				rightButtonEventHandler: Function,
+				leftButtonEventHandler: NavButtonEventHandler,
+				rightButtonEventHandler: NavButtonEventHandler,
 				leftButton: JQuery,
 				rightButton: JQuery,
 				label: JQuery;
@@ -920,8 +922,8 @@ describe("ApplicationController", (): void => {
 		beforeEach((): void => {
 			controller = new TestController();
 			({ header } = controller);
-			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as Function;
-			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as Function;
+			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as NavButtonEventHandler;
+			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as NavButtonEventHandler;
 
 			leftButton = $("<a>")
 				.attr("id", "headerLeftButton")

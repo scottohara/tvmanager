@@ -1,10 +1,12 @@
 import {
 	HeaderFooter,
 	NavButton,
+	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
+import { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
 import ScheduleController from "controllers/schedule-controller";
 import ScheduleView from "views/schedule-view.html";
@@ -60,14 +62,14 @@ describe("ScheduleController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(scheduleController.header.label).should.equal("Schedule"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			scheduleController["viewUnscheduled"].should.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Unscheduled"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			scheduleController["viewPrograms"].should.have.been.called;
 		});
 
@@ -79,7 +81,7 @@ describe("ScheduleController", (): void => {
 		});
 
 		it("should attach an edit event handler to the programs list", (): void => {
-			((scheduleController["scheduleList"] as ListMock).editEventHandler as Function)(0);
+			((scheduleController["scheduleList"] as ListMock).editEventHandler as ListEventHandler)(0);
 			scheduleController["editItem"].should.have.been.calledWith(0);
 		});
 
@@ -262,7 +264,7 @@ describe("ScheduleController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			scheduleController["viewItems"].should.have.been.called;
 		});
 
@@ -293,14 +295,14 @@ describe("ScheduleController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			scheduleController["editItems"].should.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Edit"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			scheduleController["viewSettings"].should.have.been.called;
 		});
 

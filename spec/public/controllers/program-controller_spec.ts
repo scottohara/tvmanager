@@ -1,5 +1,6 @@
 import {
 	NavButton,
+	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
 import $ from "jquery";
@@ -24,7 +25,7 @@ describe("ProgramController", (): void => {
 	describe("object constructor", (): void => {
 		interface Scenario {
 			description: string;
-			listItem: ProgramListItem;
+			listItem?: ProgramListItem;
 			programController: ProgramController;
 		}
 
@@ -51,7 +52,7 @@ describe("ProgramController", (): void => {
 				});
 
 				it("should return a ProgramController instance", (): Chai.Assertion => programController.should.be.an.instanceOf(ProgramController));
-				it("should set the list item", (): Chai.Assertion => String(scenario.programController["listItem"].program.programName).should.equal(scenario.listItem.program.programName));
+				it("should set the list item", (): Chai.Assertion => String(scenario.programController["listItem"].program.programName).should.equal((scenario.listItem as ProgramListItem).program.programName));
 			});
 		});
 	});
@@ -81,14 +82,14 @@ describe("ProgramController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(programController.header.label).should.equal("Add/Edit Program"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			programController["cancel"].should.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			programController["save"].should.have.been.called;
 		});
 

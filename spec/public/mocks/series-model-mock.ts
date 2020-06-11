@@ -4,19 +4,21 @@ import {
 } from "models";
 import sinon, { SinonStub } from "sinon";
 
-const saveStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
+const saveStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),
 			listByProgramStub: SinonStub<string[], Promise<SeriesMock[]>> = sinon.stub(),
 			listByNowShowingStub: SinonStub = sinon.stub(),
 			findStub: SinonStub<string[], Promise<SeriesMock>> = sinon.stub(),
 			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub<void[], Promise<string | undefined>> = sinon.stub(),
+			removeAllStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
 			fromJsonStub: SinonStub<[SerializedModel], SeriesMock> = sinon.stub();
 
 let series: SeriesMock[] = [],
-		removeAllOK: boolean;
+		removeAllOk: boolean;
 
 export default class SeriesMock {
+	public static readonly NOW_SHOWING: NowShowingEnum = { 1: "Mondays" };
+
 	public progressBarDisplay = "";
 
 	public nowShowingDisplay = "";
@@ -46,7 +48,7 @@ export default class SeriesMock {
 						public readonly watchedCount = 0,
 						public readonly recordedCount = 0,
 						public readonly expectedCount = 0,
-						public readonly _missedCount?: number,
+						public readonly missedCount?: number,
 						public readonly statusWarningCount = 0) {
 		this.toJson = sinon.stub().returns({});
 		saveStub.resetHistory();
@@ -57,7 +59,7 @@ export default class SeriesMock {
 		return listByProgramStub.returns(Promise.resolve(this.series));
 	}
 
-	public static get listByNowShowing(): SinonStub<void[], Promise<SeriesMock[]>> {
+	public static get listByNowShowing(): SinonStub<unknown[], Promise<SeriesMock[]>> {
 		return listByNowShowingStub.returns(Promise.resolve(this.series));
 	}
 
@@ -73,12 +75,12 @@ export default class SeriesMock {
 		return findStub.returns(Promise.resolve(new SeriesMock(String(findStub.args[0]), "test-series", null, null)));
 	}
 
-	public static get count(): SinonStub<void[], Promise<number>> {
+	public static get count(): SinonStub<unknown[], Promise<number>> {
 		return countStub.returns(Promise.resolve(1));
 	}
 
-	public static get removeAll(): SinonStub<void[], Promise<string | undefined>> {
-		if (!removeAllOK) {
+	public static get removeAll(): SinonStub<unknown[], Promise<string | undefined>> {
+		if (!removeAllOk) {
 			removeAllStub.returns(Promise.resolve("Force failed"));
 		}
 
@@ -89,24 +91,20 @@ export default class SeriesMock {
 		return fromJsonStub.returns(new SeriesMock(null, null, null, null));
 	}
 
-	public static get NOW_SHOWING(): NowShowingEnum {
-		return { 1: "Mondays" };
-	}
-
-	public get save(): SinonStub<void[], Promise<string | undefined>> {
+	public get save(): SinonStub<unknown[], Promise<string | undefined>> {
 		return saveStub.returns(Promise.resolve("1"));
 	}
 
-	public get remove(): SinonStub<void[], Promise<void>> {
+	public get remove(): SinonStub<unknown[], Promise<void>> {
 		return removeStub;
 	}
 
-	public static removeAllOK(): void {
-		removeAllOK = true;
+	public static removeAllOk(): void {
+		removeAllOk = true;
 	}
 
 	public static removeAllFail(): void {
-		removeAllOK = false;
+		removeAllOk = false;
 	}
 
 	public static get series(): SeriesMock[] {

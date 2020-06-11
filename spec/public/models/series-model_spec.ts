@@ -483,7 +483,7 @@ describe("Series", (): void => {
 				beforeEach((): void => series.setStatusWarning(scenario.statusWarningCount));
 
 				it("should set the status warning count", (): Chai.Assertion => series.statusWarningCount.should.equal(scenario.statusWarningCount));
-				it(`should ${0 === scenario.statusWarningCount ? "not " : ""}highlight the series with a warning`, (): Chai.Assertion => series.statusWarning.should.equal(scenario.statusWarning));
+				it(`should ${scenario.statusWarningCount ? "" : "not "}highlight the series with a warning`, (): Chai.Assertion => series.statusWarning.should.equal(scenario.statusWarning));
 			});
 		});
 	});

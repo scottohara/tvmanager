@@ -10,9 +10,13 @@
  * @requires jquery
  * @requires controllers/application-controller
  */
+import {
+	ListAction,
+	ListEventHandler,
+	ListItem
+} from "components";
 import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
-import { ListAction } from "components";
 import window from "components/window";
 
 /**
@@ -22,18 +26,18 @@ import window from "components/window";
  * @property {String} container - id of the parent HTML DOM element
  * @property {String} itemTemplate - HTML template to use for list items
  * @property {String} groupBy - a property of the JSON objects to group the items by (ie. shows group headers in the list)
- * @property {Array<Object>} items - array of objects to render as list items
- * @property {Function} viewEventHandler - function called to view a list item
- * @property {Function} editEventHandler - function called to edit a list item
- * @property {Function} deleteEventHandler - function called to delete a list item
+ * @property {Array<ListItem>} items - array of objects to render as list items
+ * @property {ListEventHandler} viewEventHandler - function called to view a list item
+ * @property {ListEventHandler} editEventHandler - function called to edit a list item
+ * @property {ListEventHandler} deleteEventHandler - function called to delete a list item
  * @property {String} action - the current list mode ("view", "edit" or "delete"), ie. what happens when an item is tapped
  * @param {String} container - id of the parent HTML DOM element
  * @param {String} itemTemplate - HTML template to use for list items
  * @param {String} groupBy - a property of the JSON objects to group the items by (ie. shows group headers in the list)
  * @param {Array<Object>} items - array of objects to render as list items
- * @param {Function} [viewEventHandler] - function called to view a list item
- * @param {Function} [editEventHandler] - function called to edit a list item
- * @param {Function} [deleteEventHandler] - function called to delete a list item
+ * @param {ListEventHandler} [viewEventHandler] - function called to view a list item
+ * @param {ListEventHandler} [editEventHandler] - function called to edit a list item
+ * @param {ListEventHandler} [deleteEventHandler] - function called to delete a list item
  */
 export default class List {
 	private readonly appController: ApplicationController;
@@ -43,9 +47,9 @@ export default class List {
 	public constructor(private readonly container: string,
 						private readonly itemTemplate: string,
 						private readonly groupBy: string | null,
-						public items: object[],
-						private readonly viewEventHandler: (index: number) => void,
-						private readonly editEventHandler?: ((index: number) => void) | null,
+						public items: ListItem[],
+						private readonly viewEventHandler: ListEventHandler,
+						private readonly editEventHandler?: ListEventHandler | null,
 						private readonly deleteEventHandler?: (index: number) => void) {
 		// Get a reference to the application controller singleton
 		this.appController = new ApplicationController();
@@ -65,12 +69,12 @@ export default class List {
 		// Clear any existing content from the container element
 		containerElement.html("");
 
-		let itemHTML: string,
+		let itemHtml: string,
 				currentGroup = "";
 
 		// Loop through the array of JSON objects
-		containerElement.append(this.items.reduce((itemElements: JQuery[], item: object, index: number): JQuery[] => {
-			const listItem: Map<string, string> = new Map(Object.entries(item));
+		containerElement.append(this.items.reduce((itemElements: JQuery[], item: ListItem, index: number): JQuery[] => {
+			const listItem: Map<string, unknown> = new Map<string, unknown>(Object.entries(item));
 
 			// If grouping is required, when the property used for the group changes, output a group header item
 			if (null !== this.groupBy) {
@@ -86,21 +90,21 @@ export default class List {
 			}
 
 			// Start with the HTML template
-			itemHTML = this.itemTemplate;
+			itemHtml = this.itemTemplate;
 
 			// Iterate over the properties of the JSON object
 			for (const [key, value] of listItem) {
 				// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
-				itemHTML = itemHTML.replace(`#{${key}}`, value);
+				itemHtml = itemHtml.replace(`#{${key}}`, String(value));
 			}
 
 			// Append the item to the list and bind the click event handler
 			itemElements.push($("<li>")
-				.html(itemHTML)
+				.html(itemHtml)
 				.on("click", (): void => this.tap(index)));
 
 			return itemElements;
-		}, []) as JQuery[]);
+		}, []));
 
 		// Ask the application controller to set/restore the initial scroll position
 		this.appController.setScrollPosition();
@@ -200,14 +204,14 @@ export default class List {
 				break;
 
 			case "delete":
-				if (undefined !== this.deleteEventHandler && null !== this.deleteEventHandler) {
+				if (undefined !== this.deleteEventHandler) {
 					if (window.confirm("Delete this item?")) {
 						this.deleteEventHandler(itemIndex);
 					}
 				}
 				break;
 
-			// No default
+			default:
 		}
 	}
 }

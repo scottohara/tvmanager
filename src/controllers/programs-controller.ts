@@ -12,11 +12,14 @@
  * @requires models/program-model
  * @requires controllers/view-controller
  */
+import {
+	NavButtonEventHandler,
+	ProgramListItem
+} from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
 import Program from "models/program-model";
-import { ProgramListItem } from "controllers";
 import ProgramListTemplate from "views/programListTemplate.html";
 import ProgramsView from "views/programs-view.html";
 import { PublicInterface } from "global";
@@ -60,12 +63,12 @@ export default class ProgramsController extends ViewController {
 		this.header = {
 			label: "Programs",
 			leftButton: {
-				eventHandler: this.goBack.bind(this),
+				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
 				label: "Schedule"
 			},
 			rightButton: {
-				eventHandler: this.addItem.bind(this),
+				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
 				label: "+"
 			}
 		};
@@ -239,7 +242,7 @@ export default class ProgramsController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			rightButton: {
-				eventHandler: this.viewItems.bind(this),
+				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Done"
 			}
@@ -273,7 +276,7 @@ export default class ProgramsController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.viewItems.bind(this),
+				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Done"
 			}
@@ -307,11 +310,11 @@ export default class ProgramsController extends ViewController {
 		this.footer = {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
-				eventHandler: this.editItems.bind(this),
+				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Edit"
 			},
 			rightButton: {
-				eventHandler: this.deleteItems.bind(this),
+				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
 				style: "cautionButton",
 				label: "Delete"
 			}

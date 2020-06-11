@@ -9,8 +9,11 @@
  * @module controllers/view-controller
  * @requires controllers/application-controller
  */
+import {
+	HeaderFooter,
+	ViewControllerArgs
+} from "controllers";
 import ApplicationController from "controllers/application-controller";
-import { HeaderFooter } from "controllers";
 
 /**
  * @class ViewController
@@ -30,7 +33,7 @@ export default abstract class ViewController {
 		this.appController = new ApplicationController();
 	}
 
-	public activate?(args?: object): Promise<void>;
+	public activate?(args?: ViewControllerArgs): Promise<void>;
 
 	public abstract setup(): Promise<void>;
 

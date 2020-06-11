@@ -1,6 +1,7 @@
 import {
 	HeaderFooter,
 	NavButton,
+	NavButtonEventHandler,
 	Report
 } from "controllers";
 import ApplicationControllerMock from "mocks/application-controller-mock";
@@ -57,7 +58,7 @@ describe("ReportController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(reportController.header.label).should.equal(report.reportName));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			reportController["goBack"].should.have.been.called;
 		});
 

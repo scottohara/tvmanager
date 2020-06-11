@@ -1,8 +1,11 @@
+import {
+	ListAction,
+	ListItem
+} from "components";
 import sinon, { SinonStub } from "sinon";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import List from "../../../src/components/list";
-import { ListAction } from "components";
 import ListTemplate from "views/listTemplate.html";
 import TestController from "mocks/test-controller";
 import { View } from "controllers";
@@ -17,7 +20,7 @@ describe("List", (): void => {
 	let container: string,
 			itemTemplate: string,
 			groupBy: string,
-			items: object[],
+			items: ListItem[],
 			eventHandler: SinonStub,
 			action: ListAction,
 			containerElement: JQuery,
@@ -41,7 +44,7 @@ describe("List", (): void => {
 				name: "group-two",
 				value: "item-three"
 			}
-		];
+		] as ListItem[];
 		eventHandler = sinon.stub();
 		action = "view";
 
@@ -63,8 +66,8 @@ describe("List", (): void => {
 		it("should set the group by", (): Chai.Assertion => (list["groupBy"] as string).should.equal(groupBy));
 		it("should set the list items", (): Chai.Assertion => list.items.should.deep.equal(items));
 		it("should attach a view event handler", (): Chai.Assertion => list["viewEventHandler"].should.equal(eventHandler));
-		it("should attach an edit event handler", (): Chai.Assertion => (list["editEventHandler"] as Function).should.equal(eventHandler));
-		it("should attach a delete event handler", (): Chai.Assertion => (list["deleteEventHandler"] as Function).should.equal(eventHandler));
+		it("should attach an edit event handler", (): Chai.Assertion => (list["editEventHandler"] as SinonStub).should.equal(eventHandler));
+		it("should attach a delete event handler", (): Chai.Assertion => (list["deleteEventHandler"] as SinonStub).should.equal(eventHandler));
 		it("should set the action", (): Chai.Assertion => (list["action"] as ListAction).should.equal(action));
 	});
 
@@ -246,6 +249,16 @@ describe("List", (): void => {
 					}
 				});
 			});
+		});
+
+		describe("invalid action", (): void => {
+			beforeEach((): void => {
+				list["action"] = undefined;
+				list["tap"](0);
+			});
+
+			it("should not trigger a confirm prompt", (): Chai.Assertion => WindowMock.confirm.should.not.have.been.called);
+			it("should not trigger the event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
 		});
 	});
 

@@ -1,11 +1,13 @@
 import {
 	HeaderFooter,
 	NavButton,
+	NavButtonEventHandler,
 	ProgramListItem,
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
+import { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
 import ProgramMock from "mocks/program-model-mock";
 import SeriesListController from "controllers/seriesList-controller";
@@ -65,7 +67,7 @@ describe("SeriesListController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(seriesListController.header.label).should.equal(listItem.program.programName));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			seriesListController["goBack"].should.have.been.called;
 		});
 
@@ -73,7 +75,7 @@ describe("SeriesListController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Programs"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			seriesListController["addItem"].should.have.been.called;
 		});
 
@@ -85,13 +87,13 @@ describe("SeriesListController", (): void => {
 		});
 
 		it("should attach an edit event handler to the series list", (): void => {
-			((seriesListController["seriesList"] as ListMock).editEventHandler as Function)();
-			seriesListController["editItem"].should.have.been.called;
+			((seriesListController["seriesList"] as ListMock).editEventHandler as ListEventHandler)(0);
+			seriesListController["editItem"].should.have.been.calledWith(0);
 		});
 
 		it("should attach a delete event handler to the series list", (): void => {
-			((seriesListController["seriesList"] as ListMock).deleteEventHandler as Function)();
-			seriesListController["deleteItem"].should.have.been.called;
+			(seriesListController["seriesList"] as ListMock).deleteEventHandler(0);
+			seriesListController["deleteItem"].should.have.been.calledWith(0);
 		});
 
 		it("should get the list of series for the program", (): void => {
@@ -106,7 +108,7 @@ describe("SeriesListController", (): void => {
 			seriesListController["seriesList"] = new ListMock("", "", "", [
 				{ ...items[0] },
 				{ ...items[1] }
-			], sinon.stub());
+			] as SeriesMock[], sinon.stub());
 		});
 
 		describe("from programs view", (): void => {
@@ -285,7 +287,7 @@ describe("SeriesListController", (): void => {
 	describe("deleteItem", (): void => {
 		interface Scenario {
 			description: string;
-			dontRemove: boolean;
+			dontRemove?: boolean;
 		}
 
 		const scenarios: Scenario[] = [
@@ -294,8 +296,11 @@ describe("SeriesListController", (): void => {
 				dontRemove: true
 			},
 			{
-				description: "deleting",
+				description: "deleting (explicit)",
 				dontRemove: false
+			},
+			{
+				description: "deleting (default)"
 			}
 		];
 
@@ -318,7 +323,7 @@ describe("SeriesListController", (): void => {
 				it("should decrement the program expected count", (): Chai.Assertion => listItem.program.setExpectedCount.should.have.been.calledWith(1));
 				it("should decrement the program series count", (): Chai.Assertion => listItem.program.seriesCount.should.equal(0));
 
-				if (!scenario.dontRemove) {
+				if (undefined === scenario.dontRemove || !scenario.dontRemove) {
 					it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
 				}
 
@@ -352,7 +357,7 @@ describe("SeriesListController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			seriesListController["viewItems"].should.have.been.called;
 		});
 
@@ -385,7 +390,7 @@ describe("SeriesListController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			seriesListController["viewItems"].should.have.been.called;
 		});
 
@@ -421,14 +426,14 @@ describe("SeriesListController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			seriesListController["editItems"].should.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Edit"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			seriesListController["deleteItems"].should.have.been.called;
 		});
 

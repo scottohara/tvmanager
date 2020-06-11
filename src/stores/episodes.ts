@@ -35,7 +35,7 @@ function statusDateToString(statusDate: Date | null): string {
 
 // Coverts a DD-MON string to a date, using a sliding [3 months ago] to [9 months from now] window
 function statusDateToDate(statusDate: string, status: EpisodeStatus): Date | null {
-	if ("" === statusDate || "Watched" === status) {
+	if (!statusDate || "Watched" === status) {
 		return null;
 	}
 
@@ -65,7 +65,7 @@ function statusDateToDate(statusDate: string, status: EpisodeStatus): Date | nul
 function bySequenceThenEpisodeId(a: PersistedEpisode, b: PersistedEpisode): number {
 	const sequenceDiff = a.Sequence - b.Sequence;
 
-	if (0 === sequenceDiff) {
+	if (!sequenceDiff) {
 		return a.EpisodeID.localeCompare(b.EpisodeID);
 	}
 

@@ -216,9 +216,16 @@ describe("TouchEventProxy", (): void => {
 
 			describe("from browser", (): void => {
 				beforeEach((): void => {
+					touchStartEvent.targetTouches = [];
 					toucheventproxy["element"].dispatchEvent(touchStartEvent as Event);
+
+					touchEndEvent.targetTouches = [];
 					toucheventproxy["element"].dispatchEvent(touchEndEvent as Event);
+
+					touchMoveEvent.targetTouches = [];
 					toucheventproxy["element"].dispatchEvent(touchMoveEvent as Event);
+
+					touchCancelEvent.targetTouches = [];
 					toucheventproxy["element"].dispatchEvent(touchCancelEvent as Event);
 				});
 

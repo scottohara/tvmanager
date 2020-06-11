@@ -11,9 +11,12 @@
  * @requires models/program-model
  * @requires controllers/view-controller
  */
+import {
+	NavButtonEventHandler,
+	ProgramListItem
+} from "controllers";
 import $ from "jquery";
 import Program from "models/program-model";
-import { ProgramListItem } from "controllers";
 import ProgramView from "views/program-view.html";
 import ViewController from "controllers/view-controller";
 
@@ -64,11 +67,11 @@ export default class ProgramController extends ViewController {
 		this.header = {
 			label: "Add/Edit Program",
 			leftButton: {
-				eventHandler: this.cancel.bind(this),
+				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
 				label: "Cancel"
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this),
+				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
 				label: "Save"
 			}

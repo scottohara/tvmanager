@@ -1,10 +1,12 @@
 import {
 	HeaderFooter,
 	NavButton,
+	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
+import { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
 import ProgramMock from "mocks/program-model-mock";
 import ProgramsController from "controllers/programs-controller";
@@ -60,7 +62,7 @@ describe("ProgramsController", (): void => {
 		it("should set the header label", (): Chai.Assertion => String(programsController.header.label).should.equal("Programs"));
 
 		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			programsController["goBack"].should.have.been.called;
 		});
 
@@ -68,7 +70,7 @@ describe("ProgramsController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Schedule"));
 
 		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			programsController["addItem"].should.have.been.called;
 		});
 
@@ -80,13 +82,13 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should attach an edit event handler to the programs list", (): void => {
-			((programsController["programList"] as ListMock).editEventHandler as Function)(0);
+			((programsController["programList"] as ListMock).editEventHandler as ListEventHandler)(0);
 			programsController["editItem"].should.have.been.calledWith(0);
 		});
 
 		it("should attach a delete event handler to the programs list", (): void => {
-			((programsController["programList"] as ListMock).deleteEventHandler as Function)();
-			programsController["deleteItem"].should.have.been.called;
+			(programsController["programList"] as ListMock).deleteEventHandler(0);
+			programsController["deleteItem"].should.have.been.calledWith(0);
 		});
 
 		it("should get the list of programs", (): void => {
@@ -98,7 +100,7 @@ describe("ProgramsController", (): void => {
 	describe("activate", (): void => {
 		beforeEach((): void => {
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
-			programsController["programList"] = new ListMock("", "", "", [{ ...items[0] }]);
+			programsController["programList"] = new ListMock("", "", "", [{ ...items[0] } as ProgramMock]);
 		});
 
 		describe("from schedule", (): void => {
@@ -269,7 +271,7 @@ describe("ProgramsController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			programsController["viewItems"].should.have.been.called;
 		});
 
@@ -304,7 +306,7 @@ describe("ProgramsController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			programsController["viewItems"].should.have.been.called;
 		});
 
@@ -342,14 +344,14 @@ describe("ProgramsController", (): void => {
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as Function)();
+			(leftButton.eventHandler as NavButtonEventHandler)();
 			programsController["editItems"].should.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Edit"));
 
 		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as Function)();
+			(rightButton.eventHandler as NavButtonEventHandler)();
 			programsController["deleteItems"].should.have.been.called;
 		});
 

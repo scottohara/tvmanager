@@ -1,5 +1,9 @@
+import {
+	ListAction,
+	ListEventHandler,
+	ListItem
+} from "components";
 import sinon, { SinonStub } from "sinon";
-import { ListAction } from "components";
 
 export default class ListMock {
 	public action!: ListAction;
@@ -13,10 +17,10 @@ export default class ListMock {
 	public constructor(public readonly container: string,
 						public readonly itemTemplate: string,
 						public readonly groupBy: string | null,
-						public items: object[],
-						public readonly viewEventHandler: (index: number) => void = sinon.stub(),
-						public readonly editEventHandler: ((index: number) => void) | null = sinon.stub(),
-						public readonly deleteEventHandler: (index: number) => void = sinon.stub()) {
+						public items: ListItem[],
+						public readonly viewEventHandler: ListEventHandler = sinon.stub(),
+						public readonly editEventHandler: ListEventHandler | null = sinon.stub(),
+						public readonly deleteEventHandler: ListEventHandler = sinon.stub()) {
 		this.refresh = sinon.stub();
 		this.scrollTo = sinon.stub();
 		this.tap = sinon.stub();
