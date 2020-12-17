@@ -42,6 +42,9 @@ group :development, :test do
 	# Rubocop RSpec cops
 	gem 'rubocop-rspec'
 
+	# Rubocop Rake cops
+	gem 'rubocop-rake'
+
 	# Shared Rubocop config
 	gem 'rubocop-config-oharagroup', require: false
 

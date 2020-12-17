@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-ENV['RACK_ENV'] = 'test'
+::ENV['RACK_ENV'] = 'test'
 
 require 'dotenv/load'
 require 'rack/test'
@@ -9,7 +9,7 @@ require 'rspec'
 require 'simplecov'
 require 'couchrest'
 
-SimpleCov.start do
+::SimpleCov.start do
 	coverage_dir 'coverage/backend'
 	enable_coverage :branch
 	add_group 'Controllers', 'app/controllers'
@@ -41,8 +41,8 @@ require_relative '../db/migrate'
 # users commonly want.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
-RSpec.configure do |config|
-	config.include Rack::Test::Methods
+::RSpec.configure do |config|
+	config.include ::Rack::Test::Methods
 
 	# rspec-expectations config goes here. You can use an alternate
 	# assertion/expectation library such as wrong or the stdlib/minitest
@@ -134,32 +134,34 @@ RSpec.configure do |config|
 
 	# Setup the test database
 	config.before :suite do
-		config.add_setting :db, default: CouchRest.database!(Class.new.extend(TVManager::Helpers::Database).database_url)
-		TVManager::Database.migrate!
+		config.add_setting :db, default: ::CouchRest.database!(::Class.new.extend(::TVManager::Helpers::Database).database_url)
+		::TVManager::Database.migrate!
 	end
 
 	# Cleanup the test database
 	config.after :suite do
-		RSpec.configuration.db.delete!
+		::RSpec.configuration.db.delete!
 	end
 end
 
 # Shared context for database interactions
-RSpec.shared_context 'database interaction' do
+::RSpec.shared_context 'database interaction' do
 	before do
 		# Create any fixtures
 		fixtures.each do |fixture|
-			doc = RSpec.configuration.db.save_doc fixture
+			doc = ::RSpec.configuration.db.save_doc fixture
 			fixture['_id'] = doc['id']
 		end
 	end
 
 	after do
-		RSpec.configuration.db.all_docs { |doc| RSpec.configuration.db.delete_doc('_id' => doc['id'], '_rev' => doc['value']['rev']) unless doc['id'].start_with? '_design/' }
+		::RSpec.configuration.db.all_docs { |doc| ::RSpec.configuration.db.delete_doc('_id' => doc['id'], '_rev' => doc['value']['rev']) unless doc['id'].start_with? '_design/' }
 	end
 end
 
+# Fake HTTP request module
 module MockRequest
+	# Fake HTTP request class
 	class Request
 		attr_accessor :env
 
@@ -169,6 +171,6 @@ module MockRequest
 	end
 
 	def request
-		@request ||= Request.new
+		@request ||= ::Request.new
 	end
 end

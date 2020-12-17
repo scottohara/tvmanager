@@ -5,7 +5,7 @@ require_relative '../../spec_helper'
 require_relative '../../../app/models/error'
 
 describe 'Errors' do
-	describe TVManager::HttpError do
+	describe ::TVManager::HttpError do
 		it 'should have a status attribute' do
 			expect(described_class).to respond_to :status
 		end
@@ -17,23 +17,23 @@ describe 'Errors' do
 		end
 	end
 
-	describe TVManager::BadRequest do
+	describe ::TVManager::BadRequest do
 		it_behaves_like 'a http error', 400
 	end
 
-	describe TVManager::Forbidden do
+	describe ::TVManager::Forbidden do
 		it_behaves_like 'a http error', 403
 	end
 
-	describe TVManager::NotFound do
+	describe ::TVManager::NotFound do
 		it_behaves_like 'a http error', 404
 	end
 
-	describe TVManager::Conflict do
+	describe ::TVManager::Conflict do
 		it_behaves_like 'a http error', 409
 	end
 
-	describe TVManager::InternalServerError do
+	describe ::TVManager::InternalServerError do
 		it_behaves_like 'a http error', 500
 	end
 end

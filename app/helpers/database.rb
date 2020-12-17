@@ -9,22 +9,24 @@ module TVManager
 		# Provides a database connection singleton for the application
 		module Database
 			def db
-				@@db ||= CouchRest.database! database_url
+				@@db ||= ::CouchRest.database! database_url
 			end
 
 			# :nocov:
-			private unless ENV['RACK_ENV'].eql? 'test'
+
+			private unless ::ENV['RACK_ENV'].eql? 'test'
+
 			# :nocov:
 
 			def database_url
 				# Get the database URL environment variable
-				url = ENV[:TVMANAGER_COUCHDB_URL.to_s]
+				url = ::ENV[:TVMANAGER_COUCHDB_URL.to_s]
 
 				# Raise a 500 error if the environment variable is not set
-				raise InternalServerError, 'TVMANAGER_COUCHDB_URL environment variable is not configured' if url.nil?
+				raise ::TVManager::InternalServerError, 'TVMANAGER_COUCHDB_URL environment variable is not configured' if url.nil?
 
 				# Suffix the URL with "_test" when in the :test configuration
-				url += '_test' if ENV['RACK_ENV'].eql? 'test'
+				url += '_test' if ::ENV['RACK_ENV'].eql? 'test'
 
 				# Return the URL
 				url

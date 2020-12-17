@@ -8,10 +8,10 @@ require_relative 'error'
 module TVManager
 	# Represents a data document
 	class Document
-		include TVManager::Helpers::Database
+		include ::TVManager::Helpers::Database
 
 		class << self
-			include TVManager::Helpers::Database
+			include ::TVManager::Helpers::Database
 
 			def all
 				proc do |out|
@@ -32,7 +32,7 @@ module TVManager
 					end
 
 					# Finalise the JSON with the MD5 checksum
-					out << "],\"checksum\":\"#{Digest::MD5.hexdigest docs.to_json}\"}"
+					out << "],\"checksum\":\"#{::Digest::MD5.hexdigest docs.to_json}\"}"
 				end
 			end
 
@@ -43,7 +43,7 @@ module TVManager
 		end
 
 		def initialize(document_or_id)
-			if document_or_id.is_a? Hash
+			if document_or_id.is_a? ::Hash
 				# Parameter is a JSON document
 				@id = document_or_id['id']
 				document_or_id['_id'] = @id
@@ -58,7 +58,7 @@ module TVManager
 		# Saves the document
 		def save!(device_id = nil)
 			# Set the other devices to notify of this change
-			document['pending'] = Device.other_devices device_id unless device_id.nil?
+			document['pending'] = ::TVManager::Device.other_devices device_id unless device_id.nil?
 
 			# Save the document
 			save_result = db.save_doc document
@@ -72,7 +72,7 @@ module TVManager
 		def delete!(device_id)
 			return if document.nil?
 
-			if Device.other_devices(device_id).empty?
+			if ::TVManager::Device.other_devices(device_id).empty?
 				# No other devices to notify, so document can be deleted
 				document.destroy
 			else
@@ -95,7 +95,9 @@ module TVManager
 		end
 
 		# :nocov:
-		private unless ENV['RACK_ENV'].eql? 'test'
+
+		private unless ::ENV['RACK_ENV'].eql? 'test'
+
 		# :nocov:
 
 		def document

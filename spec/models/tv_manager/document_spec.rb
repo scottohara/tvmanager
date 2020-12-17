@@ -4,7 +4,7 @@
 require_relative '../../spec_helper'
 require_relative '../../../app/models/document'
 
-describe TVManager::Document do
+describe ::TVManager::Document do
 	let(:device_id) { 'test_device_id' }
 	let(:document_id) { 'test_document_id' }
 	let(:document_doc) { {'type' => 'document', 'name' => 'test document'} }
@@ -18,7 +18,7 @@ describe TVManager::Document do
 
 	describe '::all' do
 		include_context 'database interaction' do
-			let(:documents) { [*1..3].map { |i| document_doc.merge 'id' => "document_#{i}" } }
+			let(:documents) { Array(1..3).map { |i| document_doc.merge 'id' => "document_#{i}" } }
 			let(:fixtures) { documents }
 			let(:json) do
 				fixtures.reverse.map! do |doc|
@@ -36,7 +36,7 @@ describe TVManager::Document do
 					}
 				end
 			end
-			let(:stream) { {data: json, checksum: Digest::MD5.hexdigest(json.to_json)} }
+			let(:stream) { {data: json, checksum: ::Digest::MD5.hexdigest(json.to_json)} }
 		end
 
 		it 'should return the list of all documents' do
@@ -48,7 +48,7 @@ describe TVManager::Document do
 
 	describe '::pending' do
 		include_context 'database interaction' do
-			let(:documents) { [*1..3].map { |i| document_doc.merge 'id' => "document_#{i}", pending: [device_id] } }
+			let(:documents) { Array(1..3).map { |i| document_doc.merge 'id' => "document_#{i}", pending: [device_id] } }
 			let(:fixtures) { documents }
 			let(:json) do
 				fixtures.reverse.map! do |doc|
@@ -127,7 +127,7 @@ describe TVManager::Document do
 			let(:save_device_id) { nil }
 
 			before do
-				expect(TVManager::Device).not_to receive :other_devices
+				expect(::TVManager::Device).not_to receive :other_devices
 			end
 
 			context 'new document' do
@@ -147,7 +147,7 @@ describe TVManager::Document do
 			let(:save_device_id) { device_id }
 
 			before do
-				expect(TVManager::Device).to receive(:other_devices).with(device_id).and_return other_devices
+				expect(::TVManager::Device).to receive(:other_devices).with(device_id).and_return other_devices
 			end
 
 			context 'new document' do
@@ -167,7 +167,7 @@ describe TVManager::Document do
 	describe '#delete!' do
 		context 'non-existant document' do
 			it 'should do nothing' do
-				expect(TVManager::Device).not_to receive :other_devices
+				expect(::TVManager::Device).not_to receive :other_devices
 				described_class.new(document_id).delete! device_id
 			end
 		end
@@ -179,7 +179,7 @@ describe TVManager::Document do
 
 			context 'with no other devices' do
 				it 'should delete the document' do
-					expect(TVManager::Device).to receive(:other_devices).with(device_id).and_return []
+					expect(::TVManager::Device).to receive(:other_devices).with(device_id).and_return []
 					described_class.new(document_id).delete! device_id
 					expect(described_class.new(document_id).document).to be nil
 				end
@@ -187,7 +187,7 @@ describe TVManager::Document do
 
 			context 'with other devices' do
 				it 'should mark the document as deleted and notify all other devices' do
-					expect(TVManager::Device).to receive(:other_devices).with(device_id).and_return(other_devices).twice
+					expect(::TVManager::Device).to receive(:other_devices).with(device_id).and_return(other_devices).twice
 					described_class.new(document_id).delete! device_id
 					saved_document = described_class.new(document_id).document
 					expect(saved_document['isDeleted']).to be true
@@ -278,7 +278,7 @@ describe TVManager::Document do
 			end
 
 			it 'should return the document' do
-				expect(document.document).to be_a CouchRest::Document
+				expect(document.document).to be_a ::CouchRest::Document
 				expect(document.document).to match_document fixtures.first
 			end
 		end

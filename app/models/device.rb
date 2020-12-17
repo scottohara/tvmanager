@@ -8,17 +8,17 @@ require_relative 'error'
 module TVManager
 	# Represents a client device
 	class Device
-		include TVManager::Helpers::Database
+		include ::TVManager::Helpers::Database
 
 		attr_reader :id
 
 		class << self
-			include TVManager::Helpers::Database
+			include ::TVManager::Helpers::Database
 
 			# Returns the client device id from the request
-			def id(request, required = true)
+			def id(request, required: true)
 				device_id = request.env['HTTP_X_DEVICE_ID']
-				raise BadRequest, 'Client device identifier was not supplied' if required && (device_id.nil? || device_id.empty?)
+				raise ::TVManager::BadRequest, 'Client device identifier was not supplied' if required && (device_id.nil? || device_id.empty?)
 
 				device_id
 			end
@@ -40,7 +40,7 @@ module TVManager
 		end
 
 		def check_access
-			raise Forbidden, "Client device #{@id} is not authorised to export" if document['readOnly']
+			raise ::TVManager::Forbidden, "Client device #{@id} is not authorised to export" if document['readOnly']
 		end
 
 		# Set the device name
@@ -60,21 +60,23 @@ module TVManager
 		# Deletes the device
 		def delete!
 			# Remove the device from all pending documents
-			db.view('data/pending', key: @id)['rows'].each { |doc| Document.new(doc['id']).remove_pending! @id }
+			db.view('data/pending', key: @id)['rows'].each { |doc| ::TVManager::Document.new(doc['id']).remove_pending! @id }
 
 			# Delete the device
 			document.destroy
 		end
 
 		# :nocov:
-		private unless ENV['RACK_ENV'].eql? 'test'
+
+		private unless ::ENV['RACK_ENV'].eql? 'test'
+
 		# :nocov:
 
 		def document
 			# Find the matching device document
 			@device ||= db.get! @id
-		rescue CouchRest::NotFound
-			raise BadRequest, "Client device #{@id} is not registered"
+		rescue ::CouchRest::NotFound
+			raise ::TVManager::BadRequest, "Client device #{@id} is not registered"
 		end
 	end
 end

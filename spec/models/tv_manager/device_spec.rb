@@ -4,7 +4,7 @@
 require_relative '../../spec_helper'
 require_relative '../../../app/models/device'
 
-describe TVManager::Device do
+describe ::TVManager::Device do
 	let(:device_id) { 'test_device_id' }
 	let(:device_name) { 'test device' }
 	let(:device_doc) { {'_id' => device_id, type: 'device'} }
@@ -12,19 +12,19 @@ describe TVManager::Device do
 	let(:authorised_device) { device_doc.merge 'readOnly' => false }
 
 	describe '::id' do
-		let(:request) { MockRequest::Request.new }
+		let(:request) { ::MockRequest::Request.new }
 
 		it 'should raise an error when a device id is not supplied' do
-			expect { described_class.id request }.to raise_error TVManager::BadRequest, 'Client device identifier was not supplied'
+			expect { described_class.id request }.to raise_error ::TVManager::BadRequest, 'Client device identifier was not supplied'
 		end
 
 		it 'should raise an error when a device id is blank' do
 			request.env['HTTP_X_DEVICE_ID'] = ''
-			expect { described_class.id request }.to raise_error TVManager::BadRequest, 'Client device identifier was not supplied'
+			expect { described_class.id request }.to raise_error ::TVManager::BadRequest, 'Client device identifier was not supplied'
 		end
 
 		it 'should return nil when a device id is not required and not supplied' do
-			expect(described_class.id request, false).to be nil
+			expect(described_class.id request, required: false).to be nil
 		end
 
 		it 'should return the specified device id from the request' do
@@ -47,7 +47,7 @@ describe TVManager::Device do
 		context 'other devices' do
 			include_context 'database interaction' do
 				let(:other_devices) do
-					[*1..3].map do |i|
+					Array(1..3).map do |i|
 						new_device = device_doc.clone
 						new_device['_id'] = "#{new_device['_id']}_#{i}"
 						new_device
@@ -103,7 +103,7 @@ describe TVManager::Device do
 			end
 
 			it 'should raise an error' do
-				expect { device.check_access }.to raise_error TVManager::Forbidden, "Client device #{device_id} is not authorised to export"
+				expect { device.check_access }.to raise_error ::TVManager::Forbidden, "Client device #{device_id} is not authorised to export"
 			end
 		end
 
@@ -164,15 +164,15 @@ describe TVManager::Device do
 		let(:document) { instance_double 'TVManager::Document' }
 
 		include_context 'database interaction' do
-			let(:documents) { [*1..3].map { |i| {'_id' => "document_#{i}", type: 'document', pending: [device_id]} } }
+			let(:documents) { Array(1..3).map { |i| {'_id' => "document_#{i}", type: 'document', pending: [device_id]} } }
 			let(:fixtures) { documents + [authorised_device] }
 		end
 
 		it 'should remove the device from all pending documents and delete the device' do
-			documents.each { |doc| expect(TVManager::Document).to receive(:new).with(doc['_id']).and_return document }
+			documents.each { |doc| expect(::TVManager::Document).to receive(:new).with(doc['_id']).and_return document }
 			expect(document).to receive(:remove_pending!).with(device_id).thrice
 			device.delete!
-			expect { described_class.new(device_id).document }.to raise_error TVManager::BadRequest, "Client device #{device_id} is not registered"
+			expect { described_class.new(device_id).document }.to raise_error ::TVManager::BadRequest, "Client device #{device_id} is not registered"
 		end
 	end
 
@@ -185,7 +185,7 @@ describe TVManager::Device do
 
 		context 'when the device id is not found' do
 			it 'should raise an error' do
-				expect { device.document }.to raise_error TVManager::BadRequest, "Client device #{device_id} is not registered"
+				expect { device.document }.to raise_error ::TVManager::BadRequest, "Client device #{device_id} is not registered"
 			end
 		end
 
@@ -195,7 +195,7 @@ describe TVManager::Device do
 			end
 
 			it 'should return the device document' do
-				expect(device.document).to be_a CouchRest::Document
+				expect(device.document).to be_a ::CouchRest::Document
 				expect(device.document['type']).to eql device_doc[:type]
 				expect(device.document['name']).to eql device_doc[:name]
 				expect(device.document['readOnly']).to eql device_doc[:readOnly]

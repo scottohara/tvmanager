@@ -4,7 +4,7 @@
 require_relative '../../spec_helper'
 require_relative '../../../app/controllers/documents_controller'
 
-describe TVManager::DocumentsController do
+describe ::TVManager::DocumentsController do
 	def app
 		described_class
 	end
@@ -14,11 +14,11 @@ describe TVManager::DocumentsController do
 	let(:device) { instance_double 'TVManager::Device' }
 	let(:document) { instance_double 'TVManager::Document' }
 	let(:json) { {}.to_json }
-	let(:doc) { JSON.parse json }
+	let(:doc) { ::JSON.parse json }
 
 	shared_examples 'a route requiring a client device id' do
 		it 'should respond with a 400 Bad Request if a client device id is not specified' do
-			expect(TVManager::Device).to receive(:id).and_raise TVManager::BadRequest, 'forced error'
+			expect(::TVManager::Device).to receive(:id).and_raise ::TVManager::BadRequest, 'forced error'
 			public_send(*request)
 			expect(last_response.status).to be 400
 			expect(last_response.body).to eql 'forced error'
@@ -27,7 +27,7 @@ describe TVManager::DocumentsController do
 
 	shared_context 'device id specified' do
 		before do
-			expect(TVManager::Device).to receive(:id).and_return device_id
+			expect(::TVManager::Device).to receive(:id).and_return device_id
 		end
 	end
 
@@ -38,7 +38,7 @@ describe TVManager::DocumentsController do
 			include_context 'device id specified'
 
 			it 'should not check the device access' do
-				allow(TVManager::Device).to receive(:new).with(device_id).and_return device
+				allow(::TVManager::Device).to receive(:new).with(device_id).and_return device
 				public_send(*request)
 				expect(device).not_to receive :check_access
 			end
@@ -52,15 +52,15 @@ describe TVManager::DocumentsController do
 			include_context 'device id specified'
 
 			it 'should respond with a 400 Bad Request if the client device is not registered' do
-				expect(TVManager::Device).to receive(:new).with(device_id).and_raise TVManager::BadRequest, 'forced error'
+				expect(::TVManager::Device).to receive(:new).with(device_id).and_raise ::TVManager::BadRequest, 'forced error'
 				public_send(*request)
 				expect(last_response.status).to be 400
 				expect(last_response.body).to eql 'forced error'
 			end
 
 			it 'should respond with a 403 Forbidden if the client device is readonly' do
-				expect(TVManager::Device).to receive(:new).with(device_id).and_return device
-				expect(device).to receive(:check_access).and_raise TVManager::Forbidden, 'forced error'
+				expect(::TVManager::Device).to receive(:new).with(device_id).and_return device
+				expect(device).to receive(:check_access).and_raise ::TVManager::Forbidden, 'forced error'
 				public_send(*request)
 				expect(last_response.status).to be 403
 				expect(last_response.body).to eql 'forced error'
@@ -72,10 +72,10 @@ describe TVManager::DocumentsController do
 		include_context 'device id specified'
 
 		before do
-			expect(TVManager::Device).to receive(:new).with(device_id).and_return device
+			expect(::TVManager::Device).to receive(:new).with(device_id).and_return device
 			expect(device).to receive(:check_access)
-			allow(TVManager::Document).to receive(:new).with(document_id).and_return document
-			allow(TVManager::Document).to receive(:new).with(doc).and_return document
+			allow(::TVManager::Document).to receive(:new).with(document_id).and_return document
+			allow(::TVManager::Document).to receive(:new).with(doc).and_return document
 		end
 	end
 
@@ -84,7 +84,7 @@ describe TVManager::DocumentsController do
 		let(:all_proc) { proc { |out| out << json } }
 
 		before do
-			allow(TVManager::Document).to receive(:all).and_return all_proc
+			allow(::TVManager::Document).to receive(:all).and_return all_proc
 		end
 
 		it_behaves_like 'an unauthorised route'
@@ -102,10 +102,10 @@ describe TVManager::DocumentsController do
 
 	describe 'GET /documents/pending' do
 		let(:request) { [:get, '/pending'] }
-		let(:checksum) { Digest::MD5.hexdigest json }
+		let(:checksum) { ::Digest::MD5.hexdigest json }
 
 		before do
-			allow(TVManager::Document).to receive(:pending).with(device_id).and_return doc
+			allow(::TVManager::Document).to receive(:pending).with(device_id).and_return doc
 		end
 
 		it_behaves_like 'an unauthorised route'
@@ -141,12 +141,12 @@ describe TVManager::DocumentsController do
 				it 'should respond with a 400 Bad Request' do
 					public_send(*request)
 					expect(last_response.status).to be 400
-					expect(last_response.body).to eql "Checksum mismatch on received change (#{Digest::MD5.hexdigest json} != #{checksum})"
+					expect(last_response.body).to eql "Checksum mismatch on received change (#{::Digest::MD5.hexdigest json} != #{checksum})"
 				end
 			end
 
 			context 'checksum match' do
-				let(:checksum) { Digest::MD5.hexdigest json }
+				let(:checksum) { ::Digest::MD5.hexdigest json }
 
 				before do
 					expect(document).to receive(:save!).with(device_id)

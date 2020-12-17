@@ -6,13 +6,13 @@ require_relative 'app/controllers/documents_controller'
 require_relative 'app/controllers/devices_controller'
 
 map '/documents' do
-	run TVManager::DocumentsController
+	run ::TVManager::DocumentsController
 end
 
 map '/devices' do
-	run TVManager::DevicesController
+	run ::TVManager::DevicesController
 end
 
 map '/' do
-	run TVManager::ApplicationController
+	run ::TVManager::ApplicationController
 end

@@ -13,8 +13,8 @@ module TVManager
 
 		# Register device
 		put '/:name' do
-			device_id = Device.id request, false
-			device = Device.new device_id
+			device_id = ::TVManager::Device.id request, required: false
+			device = ::TVManager::Device.new device_id
 			device.check_access unless device_id.nil?
 			device.name = params[:name]
 
@@ -25,10 +25,10 @@ module TVManager
 
 		# Unregister device
 		delete '/:id' do
-			device_id = Device.id request
-			device = Device.new device_id
+			device_id = ::TVManager::Device.id request
+			device = ::TVManager::Device.new device_id
 			device.check_access
-			raise Forbidden, 'Client device can only unregister itself' unless device_id.eql? params[:id]
+			raise ::TVManager::Forbidden, 'Client device can only unregister itself' unless device_id.eql? params[:id]
 
 			device.delete!
 		end

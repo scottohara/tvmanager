@@ -4,7 +4,7 @@
 require_relative '../../spec_helper'
 require_relative '../../../app/controllers/application_controller'
 
-describe TVManager::ApplicationController do
+describe ::TVManager::ApplicationController do
 	def app
 		described_class
 	end

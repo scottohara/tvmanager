@@ -7,7 +7,7 @@ require_relative '../models/error'
 module TVManager
 	# Common ancestor for all controllers
 	# Includes global configuration options and error handlers
-	class BaseController < Sinatra::Base
+	class BaseController < ::Sinatra::Base
 		enable :logging
 		set :show_exceptions, :after_handler
 		set :public_folder, "#{root}/../../public"
@@ -17,7 +17,7 @@ module TVManager
 		# ======
 
 		# Error Handling
-		error HttpError do
+		error ::TVManager::HttpError do
 			err = env['sinatra.error']
 			[err.class.status, err.message]
 		end
