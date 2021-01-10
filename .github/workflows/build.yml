@@ -124,8 +124,8 @@ jobs:
     - name: Upload test coverage artifact
       uses: actions/upload-artifact@v1
       with:
-        name: .resultset.json
-        path: coverage/backend/.resultset.json
+        name: coverage.json
+        path: coverage/backend/coverage.json
 
   report:
     name: Send coverage report to CodeClimate
@@ -150,11 +150,11 @@ jobs:
     - name: Download backend test coverage artifact
       uses: actions/download-artifact@v1
       with:
-        name: .resultset.json
+        name: coverage.json
         path: coverage/backend
 
     - name: Format backend coverage
-      run: ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.backend.json coverage/backend/.resultset.json
+      run: ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.backend.json coverage/backend/coverage.json
 
     - name: Format frontend coverage
       run: ./cc-test-reporter format-coverage --input-type lcov --output coverage/codeclimate.frontend.json --prefix ${{ needs.frontend.outputs.workspace }} coverage/frontend/lcov.info
