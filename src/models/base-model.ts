@@ -41,4 +41,19 @@ export default abstract class Base {
 		// If we don't yet have a db reference, get it from the application controller singleton
 		return DatabaseService;
 	}
+
+	/**
+	 * @memberof Base
+	 * @method makeEnumerable
+	 * @desc Makes a property defined on the class an enumerable property of the instance
+	 * @param {string} property - the name of the property
+	 */
+	protected makeEnumerable(property: string): void {
+		const descriptor: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), property);
+
+		if (descriptor) {
+			descriptor.enumerable = true;
+			Object.defineProperty(this, property, descriptor);
+		}
+	}
 }

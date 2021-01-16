@@ -18,26 +18,20 @@ let episodes: EpisodeMock[] = [],
 		removeAllOk: boolean;
 
 export default class EpisodeMock {
+	public toJson: SinonStub;
+
 	public statusDateDisplay = "";
 
 	public statusWarning: "warning" | "" = "";
 
 	public unverifiedDisplay: "Unverified" | "" = "";
 
-	public toJson: SinonStub;
-
-	public setStatus: SinonStub = sinon.stub();
-
-	public setUnverified: SinonStub = sinon.stub();
-
-	public setStatusDate: SinonStub = sinon.stub();
-
 	public constructor(public readonly id: string | null,
 						public episodeName: string | null,
 						public status: EpisodeStatus,
 						public statusDate: string,
-						public readonly unverified: boolean = false,
 						public readonly seriesId: string | null = null,
+						public unverified: boolean = false,
 						public unscheduled: boolean = false,
 						public sequence: number = 0,
 						public readonly seriesName: string | undefined = undefined,

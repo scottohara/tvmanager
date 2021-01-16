@@ -33,9 +33,6 @@ import { v4 } from "uuid";
  * @property {String} seriesId - unique identifier of the series that the episode belongs to
  * @property {String} seriesName - name of the series that the episode belongs to
  * @property {String} programName - name of the program that the episode belongs to
- * @property {String} statusDateDisplay - the date to display under the episode name in any episode lists
- * @property {String} statusWarning - a CSS class name to use to indicate that an expected episode has passed it's expected date
- * @property {String} unverifiedDisplay - a partial CSS class name to control the status icon displayed next to an episode in any episode lists
  * @param {String} id - unique identifier of the episode
  * @param {String} episodeName - name of the episode
  * @param {String} status - the episode status
@@ -48,27 +45,20 @@ import { v4 } from "uuid";
  * @param {String} programName - name of the program that the episode belongs to
  */
 export default class Episode extends Base {
-	public status!: EpisodeStatus;
-
-	public statusDateDisplay = "";
-
-	public statusWarning: "warning" | "" = "";
-
-	public unverifiedDisplay: "Unverified" | "" = "";
-
-	public unverified = false;
-
 	public constructor(public id: string | null,
-						public episodeName: string | null, status: EpisodeStatus,
-						public statusDate: string, unverified: boolean,
+						public episodeName: string | null,
+						public status: EpisodeStatus,
+						public statusDate: string,
 						private seriesId: string | null,
+						public unverified: boolean = false,
 						public unscheduled: boolean = false,
 						public sequence: number = 0,
 						public readonly seriesName: string | undefined = undefined,
 						public readonly programName: string | undefined = undefined) {
 		super();
-		this.setStatus(status);
-		this.setUnverified(unverified);
+
+		// Make getters enumerable
+		["statusDateDisplay", "statusWarning", "unverifiedDisplay"].forEach(this.makeEnumerable.bind(this));
 	}
 
 	/**
@@ -82,7 +72,7 @@ export default class Episode extends Base {
 		let episodeList: Episode[] = [];
 
 		try {
-			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, ep.SeriesID, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
+			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
 		} catch (_e) {
 			// No op
 		}
@@ -100,7 +90,7 @@ export default class Episode extends Base {
 		let episodeList: Episode[] = [];
 
 		try {
-			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, "true" === ep.Unverified, ep.SeriesID, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
+			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
 		} catch (_e) {
 			// No op
 		}
@@ -135,7 +125,7 @@ export default class Episode extends Base {
 			// No op
 		}
 
-		return new Episode(EpisodeID, Name, Status, StatusDate, "true" === Unverified, SeriesID, "true" === Unscheduled, Sequence);
+		return new Episode(EpisodeID, Name, Status, StatusDate, SeriesID, "true" === Unverified, "true" === Unscheduled, Sequence);
 	}
 
 	/**
@@ -202,7 +192,7 @@ export default class Episode extends Base {
 	 * @returns {Episode} the Episode object
 	 */
 	public static fromJson(episode: SerializedEpisode): Episode {
-		return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.unverified, episode.seriesId, episode.unscheduled, episode.sequence);
+		return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.seriesId, episode.unverified, episode.unscheduled, episode.sequence);
 	}
 
 	/**
@@ -283,94 +273,32 @@ export default class Episode extends Base {
 	 * @memberof Episode
 	 * @this Episode
 	 * @instance
-	 * @method setStatus
-	 * @desc Sets the status of the episode
-	 * @param {String} status - the episode status
+	 * @property {String} statusDateDisplay - the formatted status date
+	 * @desc Returns the date to display under the episode name in any episode lists
 	 */
-	public setStatus(status: EpisodeStatus): void {
-		this.status = status;
-
-		// Refresh the status date display and status warning based on the current status
-		this.setStatusDate(this.statusDate);
+	public get statusDateDisplay(): string {
+		return ("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate ? `(${new Date(this.statusDate).toDateString()})` : "";
 	}
 
 	/**
 	 * @memberof Episode
 	 * @this Episode
 	 * @instance
-	 * @method setUnverified
-	 * @desc Sets the unverified flag for the episode
-	 * @param {Boolean} unverified - indicates whether the episode is verified or not
+	 * @property {String} statusWarning - a CSS class name
+	 * @desc Returns a CSS class name to use to indicate that an expected episode has passed it's expected date
 	 */
-	public setUnverified(unverified: boolean): void {
-		this.unverified = unverified;
-
-		// Refresh the unverified display based on the current unverified flag
-		if ("Watched" !== this.status && this.unverified) {
-			this.unverifiedDisplay = "Unverified";
-		} else {
-			this.unverifiedDisplay = "";
-		}
+	public get statusWarning(): "warning" | "" {
+		return "Expected" === this.status && this.statusDate && new Date(this.statusDate) < new Date() ? "warning" : "";
 	}
 
 	/**
 	 * @memberof Episode
 	 * @this Episode
 	 * @instance
-	 * @method setStatusDate
-	 * @desc Sets the status date of the episode
-	 * @param {String} statusDate - the date of the episode status
+	 * @property {String} unverifiedDisplay - a CSS class name
+	 * @desc Returns a CSS class name to control the status icon displayed next to an episode in any episode lists
 	 */
-	public setStatusDate(statusDate: string): void {
-		// Helper function to ensure date parts are zero-padded as required
-		function leftPad(value: number | string): string {
-			const MIN_LENGTH = 2,
-						paddedValue = `0${value}`;
-
-			return paddedValue.substr(paddedValue.length - MIN_LENGTH);
-		}
-
-		this.statusDate = statusDate;
-
-		// Refresh the status date display based on the current status and date
-		if (("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate) {
-			this.statusDateDisplay = `(${this.statusDate})`;
-		} else {
-			this.statusDateDisplay = "";
-		}
-
-		/*
-		 * Recalculate the status warning based on the current status and date
-		 * The warning is used to highlight any expected episodes that are on or past their expected date
-		 * Note: As the status date only captures day & month (no year), a date more than 3 months in the past is considered to be a future date
-		 */
-		this.statusWarning = "";
-		if ("Expected" === this.status && this.statusDate) {
-			/*
-			 * TempStatusDate is the status date in "MMDD" format
-			 * endMonth is the end of the warning range (3 months ago).
-			 *  - in Jan, Feb or Mar, need to cross the year boundary (eg. Jan - 3 months = Oct; Feb - 3 month = Nov; Mar - 3 months = Dec)
-			 *  - otherwise it's just a simple subtraction of three months
-			 * start/end is the period in "MMDD" format
-			 */
-			const today: Date = new Date(),
-						months: {[month: string]: string;} = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" },
-						parts: string[] = this.statusDate.split("-"),
-						tempStatusDate: string = months[parts[1]] + parts[0],
-						APRIL = 3,
-						NINE_MONTHS = 10,
-						THREE_MONTHS = 2,
-						endMonth = String(today.getMonth() < APRIL ? NINE_MONTHS + today.getMonth() : today.getMonth() - THREE_MONTHS),
-						start: string = leftPad(today.getMonth() + 1) + leftPad(today.getDate()),
-						end: string = leftPad(endMonth) + leftPad(today.getDate());
-
-			// In Jan, Feb or Mar, it's an OR operation (less than start OR greater than end)
-			if (today.getMonth() < APRIL) {
-				this.statusWarning = tempStatusDate <= start || tempStatusDate >= end ? "warning" : "";
-			} else {
-				// Otherwise it's an AND operation (less that start AND greater than end)
-				this.statusWarning = tempStatusDate <= start && tempStatusDate >= end ? "warning" : "";
-			}
-		}
+	public get unverifiedDisplay(): "Unverified" | "" {
+		return "Watched" !== this.status && this.unverified ? "Unverified" : "";
 	}
 }

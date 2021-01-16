@@ -28,39 +28,6 @@ const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	}
 ];
 
-// Converts a date to DD-MON format (e.g. 06-Jul)
-function statusDateToString(statusDate: Date | null): string {
-	return null === statusDate ? "" : new Intl.DateTimeFormat("en-AU", { day: "2-digit", month: "short" }).format(statusDate).replace(/\s/giu, "-");
-}
-
-// Coverts a DD-MON string to a date, using a sliding [3 months ago] to [9 months from now] window
-function statusDateToDate(statusDate: string, status: EpisodeStatus): Date | null {
-	if (!statusDate || "Watched" === status) {
-		return null;
-	}
-
-	const today: Date = new Date(),
-				currentYear: number = today.getFullYear(),
-				currentMonth: number = today.getMonth(),
-				tempStatusDate: Date = new Date(`${statusDate}-${currentYear}`),
-				THREE_MONTHS = 3,
-				NINE_MONTHS = 9;
-
-	if (tempStatusDate < today) {
-		today.setMonth(currentMonth - THREE_MONTHS);
-		if (tempStatusDate < today) {
-			tempStatusDate.setFullYear(currentYear + 1);
-		}
-	} else {
-		today.setMonth(currentMonth + NINE_MONTHS);
-		if (tempStatusDate > today) {
-			tempStatusDate.setFullYear(currentYear - 1);
-		}
-	}
-
-	return tempStatusDate;
-}
-
 // Orders episodes by sequence then id
 function bySequenceThenEpisodeId(a: PersistedEpisode, b: PersistedEpisode): number {
 	const sequenceDiff = a.Sequence - b.Sequence;
@@ -89,7 +56,7 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 								EpisodeID: id,
 								Name: name,
 								Status: status,
-								StatusDate: statusDateToString(statusDate),
+								StatusDate: statusDate,
 								Unverified: Boolean(unverified).toString() as "true" | "false",
 								Unscheduled: Boolean(unscheduled).toString() as "true" | "false",
 								Sequence: sequence,
@@ -118,7 +85,7 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 								EpisodeID: id,
 								Name: name,
 								Status: status,
-								StatusDate: statusDateToString(statusDate),
+								StatusDate: statusDate,
 								Unverified: Boolean(unverified).toString() as "true" | "false",
 								Unscheduled: Boolean(unscheduled).toString() as "true" | "false",
 								Sequence: sequence,
@@ -129,7 +96,7 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 							};
 						}));
 
-			return episodes.sort((a: PersistedEpisode, b: PersistedEpisode): number => Number(statusDateToDate(a.StatusDate, a.Status)) - Number(statusDateToDate(b.StatusDate, b.Status)));
+			return episodes.sort((a: PersistedEpisode, b: PersistedEpisode): number => a.StatusDate.localeCompare(b.StatusDate));
 		},
 
 		async find(id: string): Promise<PersistedEpisode | undefined> {
@@ -139,7 +106,7 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 				EpisodeID,
 				Name,
 				Status,
-				StatusDate: statusDateToString(statusDate),
+				StatusDate: statusDate,
 				Unverified: Boolean(unverified).toString() as "true" | "false",
 				Unscheduled: Boolean(unscheduled).toString() as "true" | "false",
 				Sequence,
@@ -163,7 +130,7 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 			const tx = db.transaction(["episodes", "syncs"], "readwrite");
 
 			await Promise.all([
-				tx.objectStore("episodes").put({ id: EpisodeID, name: Name, seriesId: SeriesID, status: Status, statusDate: statusDateToDate(StatusDate, Status), unverified: Number(JSON.parse(Unverified)), unscheduled: Number(JSON.parse(Unscheduled)), sequence: Sequence }),
+				tx.objectStore("episodes").put({ id: EpisodeID, name: Name, seriesId: SeriesID, status: Status, statusDate: "Watched" === Status ? "" : StatusDate, unverified: Number(JSON.parse(Unverified)), unscheduled: Number(JSON.parse(Unscheduled)), sequence: Sequence }),
 				tx.objectStore("syncs").put({ type: "Episode", id: EpisodeID, action: "modified" })
 			]);
 

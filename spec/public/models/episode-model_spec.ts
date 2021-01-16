@@ -33,7 +33,7 @@ describe("Episode", (): void => {
 		seriesId = "2";
 		seriesName = "test-series";
 		programName = "test-program";
-		episode = new Episode(id, episodeName, status, statusDate, unverified, seriesId, unscheduled, sequence, seriesName, programName);
+		episode = new Episode(id, episodeName, status, statusDate, seriesId, unverified, unscheduled, sequence, seriesName, programName);
 	});
 
 	describe("object constructor", (): void => {
@@ -50,10 +50,15 @@ describe("Episode", (): void => {
 		it("should set the program name", (): Chai.Assertion => String(episode.programName).should.equal(programName));
 
 		describe("default properties", (): void => {
-			beforeEach((): Episode => (episode = new Episode(id, episodeName, status, statusDate, unverified, seriesId, undefined, undefined)));
+			beforeEach((): Episode => (episode = new Episode(id, episodeName, status, statusDate, seriesId, undefined, undefined, undefined)));
 
+			it("should clear the unverified flag if not specified", (): Chai.Assertion => episode.unverified.should.be.false);
 			it("should clear the unscheduled flag if not specified", (): Chai.Assertion => episode.unscheduled.should.be.false);
 			it("should default the sequence to zero if not specified", (): Chai.Assertion => episode.sequence.should.equal(0));
+		});
+
+		["statusDateDisplay", "statusWarning", "unverifiedDisplay"].forEach((property: string): void => {
+			it(`should make the ${property} property enumerable`, (): Chai.Assertion => Boolean((Object.getOwnPropertyDescriptor(episode, property) as PropertyDescriptor).enumerable).should.be.true);
 		});
 	});
 
@@ -168,7 +173,7 @@ describe("Episode", (): void => {
 						SeriesID: seriesId
 					});
 
-					episode = new Episode(id, episodeName, status, statusDate, unverified, seriesId, unscheduled, sequence);
+					episode = new Episode(id, episodeName, status, statusDate, seriesId, unverified, unscheduled, sequence);
 
 					foundEpisode = await Episode.find(id);
 				});
@@ -257,7 +262,7 @@ describe("Episode", (): void => {
 	});
 
 	describe("fromJson", (): void => {
-		it("should construct an Episode object from the JSON", (): Chai.Assertion => Episode.fromJson({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }).should.deep.equal(new Episode(id, episodeName, status, statusDate, unverified, seriesId, unscheduled, sequence)));
+		it("should construct an Episode object from the JSON", (): Chai.Assertion => Episode.fromJson({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }).should.deep.equal(new Episode(id, episodeName, status, statusDate, seriesId, unverified, unscheduled, sequence)));
 	});
 
 	describe("save", (): void => {
@@ -379,302 +384,130 @@ describe("Episode", (): void => {
 		it("should return a JSON representation of the episode", (): Chai.Assertion => episode.toJson().should.deep.equal({ id, episodeName, seriesId, status, statusDate, unverified, unscheduled, sequence, type: "Episode" }));
 	});
 
-	describe("setStatus", (): void => {
-		it("should set the status", (): void => {
-			status = "Watched";
-			episode.setStatus(status);
-			episode.status.should.equal(status);
-		});
-	});
-
-	describe("setUnverified", (): void => {
-		interface Scenario {
-			description: string;
-			status: EpisodeStatus;
-			unverified: boolean;
-			unverifiedDisplay: "" | "Unverified";
-		}
-
-		const scenarios: Scenario[] = [
-			{
-				description: "Watched & Unverified",
-				status: "Watched",
-				unverified: true,
-				unverifiedDisplay: ""
-			},
-			{
-				description: "Watched & Verified",
-				status: "Watched",
-				unverified: false,
-				unverifiedDisplay: ""
-			},
-			{
-				description: "Unwatched & Unverified",
-				status: "",
-				unverified: true,
-				unverifiedDisplay: "Unverified"
-			},
-			{
-				description: "Unwatched & Verified",
-				status: "",
-				unverified: false,
-				unverifiedDisplay: ""
-			}
+	describe("statusDateDisplay", (): void => {
+		const statuses: EpisodeStatus[] = [
+			"",
+			"Watched",
+			"Recorded",
+			"Expected",
+			"Missed"
 		];
 
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				beforeEach((): void => {
-					episode.status = scenario.status;
-					episode.setUnverified(scenario.unverified);
+		statuses.forEach((episodeStatus: EpisodeStatus): void => {
+			describe("" === episodeStatus ? "No status" : episodeStatus, (): void => {
+				beforeEach((): EpisodeStatus => (episode.status = episodeStatus));
+
+				describe("scheduled", (): void => {
+					beforeEach((): boolean => (episode.unscheduled = false));
+
+					describe("without a status date", (): void => {
+						beforeEach((): string => (episode.statusDate = ""));
+						it("should return an empty string", (): Chai.Assertion => episode.statusDateDisplay.should.equal(""));
+					});
+
+					describe("with a status date", (): void => {
+						beforeEach((): string => (episode.statusDate = "2000-12-31"));
+
+						if ("Watched" === episodeStatus || "" === episodeStatus) {
+							it("should return an empty string", (): Chai.Assertion => episode.statusDateDisplay.should.equal(""));
+						} else {
+							it("should return the status date formatted for display", (): Chai.Assertion => episode.statusDateDisplay.should.equal("(Sun Dec 31 2000)"));
+						}
+					});
 				});
 
-				it("should set the unverified flag", (): Chai.Assertion => episode.unverified.should.equal(scenario.unverified));
-				it("should set the unverified display", (): Chai.Assertion => episode.unverifiedDisplay.should.equal(scenario.unverifiedDisplay));
+				describe("unscheduled", (): void => {
+					beforeEach((): boolean => (episode.unscheduled = true));
+
+					describe("without a status date", (): void => {
+						beforeEach((): string => (episode.statusDate = ""));
+						it("should return an empty string", (): Chai.Assertion => episode.statusDateDisplay.should.equal(""));
+					});
+
+					describe("with a status date", (): void => {
+						beforeEach((): string => (episode.statusDate = "2000-12-31"));
+						it("should return the status date formatted for display", (): Chai.Assertion => episode.statusDateDisplay.should.equal("(Sun Dec 31 2000)"));
+					});
+				});
 			});
 		});
 	});
 
-	describe("setStatusDate", (): void => {
-		interface Scenario {
-			description: string;
-			status: EpisodeStatus;
-			unscheduled: boolean;
-			statusDate: string;
-			statusDateDisplay: string;
-			statusWarning: "" | "warning";
-			today?: {day: number; month: number;};
-		}
+	describe("statusWarning", (): void => {
+		let clock: SinonFakeTimers;
 
-		const scenarios: Scenario[] = [
-			{
-				description: "Recorded without date",
-				status: "Recorded",
-				unscheduled: false,
-				statusDate: "",
-				statusDateDisplay: "",
-				statusWarning: ""
-			},
-			{
-				description: "Recorded with date",
-				status: "Recorded",
-				unscheduled: false,
-				statusDate: "31-Dec",
-				statusDateDisplay: "(31-Dec)",
-				statusWarning: ""
-			},
-			{
-				description: "Expected without date",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "",
-				statusDateDisplay: "",
-				statusWarning: ""
-			},
-			{
-				description: "Expected with date at end of warning range (today = 01-Jan)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "01-Jan",
-				statusDateDisplay: "(01-Jan)",
-				statusWarning: "warning",
-				today: {
-					day: 1,
-					month: 0
-				}
-			},
-			{
-				description: "Expected with date after end of warning range (today = 01-Jan)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "02-Jan",
-				statusDateDisplay: "(02-Jan)",
-				statusWarning: "",
-				today: {
-					day: 1,
-					month: 0
-				}
-			},
-			{
-				description: "Expected with date at start of warning range (today = 01-Jan)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "01-Oct",
-				statusDateDisplay: "(01-Oct)",
-				statusWarning: "warning",
-				today: {
-					day: 1,
-					month: 0
-				}
-			},
-			{
-				description: "Expected with date before start of warning range (today = 01-Jan)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "30-Sep",
-				statusDateDisplay: "(30-Sep)",
-				statusWarning: "",
-				today: {
-					day: 1,
-					month: 0
-				}
-			},
-			{
-				description: "Expected with date at end of warning range (today = 31-Mar)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "31-Mar",
-				statusDateDisplay: "(31-Mar)",
-				statusWarning: "warning",
-				today: {
-					day: 31,
-					month: 2
-				}
-			},
-			{
-				description: "Expected with date after end of warning range (today = 31-Mar)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "01-Apr",
-				statusDateDisplay: "(01-Apr)",
-				statusWarning: "",
-				today: {
-					day: 31,
-					month: 2
-				}
-			},
-			{
-				description: "Expected with date at start of warning range (today = 31-Mar)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "31-Dec",
-				statusDateDisplay: "(31-Dec)",
-				statusWarning: "warning",
-				today: {
-					day: 31,
-					month: 2
-				}
-			},
-			{
-				description: "Expected with date before start of warning range (today = 31-Mar)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "30-Dec",
-				statusDateDisplay: "(30-Dec)",
-				statusWarning: "",
-				today: {
-					day: 31,
-					month: 2
-				}
-			},
-			{
-				description: "Expected with date at end of warning range (today = 01-Apr)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "01-Apr",
-				statusDateDisplay: "(01-Apr)",
-				statusWarning: "warning",
-				today: {
-					day: 1,
-					month: 3
-				}
-			},
-			{
-				description: "Expected with date after end of warning range (today = 01-Apr)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "02-Apr",
-				statusDateDisplay: "(02-Apr)",
-				statusWarning: "",
-				today: {
-					day: 1,
-					month: 3
-				}
-			},
-			{
-				description: "Expected with date at start of warning range (today = 01-Apr)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "01-Jan",
-				statusDateDisplay: "(01-Jan)",
-				statusWarning: "warning",
-				today: {
-					day: 1,
-					month: 3
-				}
-			},
-			{
-				description: "Expected with date before start of warning range (today = 01-Apr)",
-				status: "Expected",
-				unscheduled: false,
-				statusDate: "31-Dec",
-				statusDateDisplay: "(31-Dec)",
-				statusWarning: "",
-				today: {
-					day: 1,
-					month: 3
-				}
-			},
-			{
-				description: "Missed without date",
-				status: "Missed",
-				unscheduled: false,
-				statusDate: "",
-				statusDateDisplay: "",
-				statusWarning: ""
-			},
-			{
-				description: "Missed with date",
-				status: "Missed",
-				unscheduled: false,
-				statusDate: "31-Dec",
-				statusDateDisplay: "(31-Dec)",
-				statusWarning: ""
-			},
-			{
-				description: "Unscheduled without date",
-				status: "",
-				unscheduled: true,
-				statusDate: "",
-				statusDateDisplay: "",
-				statusWarning: ""
-			},
-			{
-				description: "Unscheduled with date",
-				status: "",
-				unscheduled: true,
-				statusDate: "31-Dec",
-				statusDateDisplay: "(31-Dec)",
-				statusWarning: ""
-			}
+		const statuses: EpisodeStatus[] = [
+			"Recorded",
+			"Expected"
 		];
 
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				let clock: SinonFakeTimers;
-
+		statuses.forEach((episodeStatus: EpisodeStatus): void => {
+			describe(`${episodeStatus} episode without a status date`, (): void => {
 				beforeEach((): void => {
-					if (undefined !== scenario.today) {
-						const currentYear: number = new Date().getFullYear();
-
-						clock = sinon.useFakeTimers(new Date(currentYear, scenario.today.month, scenario.today.day).valueOf());
-					}
-
-					episode.status = scenario.status;
-					episode.unscheduled = scenario.unscheduled;
-
-					episode.setStatusDate(scenario.statusDate);
+					episode.status = episodeStatus;
+					episode.statusDate = "";
 				});
 
-				it("should set the status date", (): Chai.Assertion => episode.statusDate.should.equal(scenario.statusDate));
-				it("should set the status date display", (): Chai.Assertion => episode.statusDateDisplay.should.equal(scenario.statusDateDisplay));
-				it(`should ${scenario.statusWarning ? "" : "not "}highlight the episode with a warning`, (): Chai.Assertion => episode.statusWarning.should.equal(scenario.statusWarning));
+				it("should return an empty string", (): Chai.Assertion => episode.statusWarning.should.equal(""));
+			});
 
-				afterEach((): void => {
-					if (undefined !== scenario.today) {
-						clock.restore();
-					}
+			describe(`${episodeStatus} episode with a status date in the future`, (): void => {
+				beforeEach((): void => {
+					episode.status = episodeStatus;
+					episode.statusDate = "2000-12-31";
+					clock = sinon.useFakeTimers(new Date("2000-12-30").valueOf());
 				});
+
+				it("should return an empty string", (): Chai.Assertion => episode.statusWarning.should.equal(""));
+
+				afterEach((): void => clock.restore());
+			});
+
+			describe(`${episodeStatus} episode with a status date in the past`, (): void => {
+				beforeEach((): void => {
+					episode.status = episodeStatus;
+					episode.statusDate = "2000-12-31";
+					clock = sinon.useFakeTimers(new Date("2001-01-01").valueOf());
+				});
+
+				if ("Expected" === episodeStatus) {
+					it("should return the CSS warning class", (): Chai.Assertion => episode.statusWarning.should.equal("warning"));
+				} else {
+					it("should return an empty string", (): Chai.Assertion => episode.statusWarning.should.equal(""));
+				}
+
+				afterEach((): void => clock.restore());
+			});
+		});
+	});
+
+	describe("unverifiedDisplay", (): void => {
+		const statuses: EpisodeStatus[] = [
+			"Watched",
+			"Recorded"
+		];
+
+		statuses.forEach((episodeStatus: EpisodeStatus): void => {
+			describe(`${episodeStatus} episode that is unverified`, (): void => {
+				beforeEach((): void => {
+					episode.status = episodeStatus;
+					episode.unverified = true;
+				});
+
+				if ("Watched" === episodeStatus) {
+					it("should return an empty string", (): Chai.Assertion => episode.unverifiedDisplay.should.equal(""));
+				} else {
+					it("should return the CSS unverified class", (): Chai.Assertion => episode.unverifiedDisplay.should.equal("Unverified"));
+				}
+			});
+
+			describe(`${episodeStatus} episode that is not unverified`, (): void => {
+				beforeEach((): void => {
+					episode.status = episodeStatus;
+					episode.unverified = false;
+				});
+
+				it("should return an empty string", (): Chai.Assertion => episode.unverifiedDisplay.should.equal(""));
 			});
 		});
 	});

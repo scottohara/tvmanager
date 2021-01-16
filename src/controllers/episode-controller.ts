@@ -9,8 +9,6 @@
  * @module controllers/episode-controller
  * @requires jquery
  * @requires models/episode-model
- * @requires framework/spinningwheel
- * @requires components/toucheventproxy
  * @requires controllers/view-controller
  */
 import {
@@ -22,13 +20,7 @@ import Episode from "models/episode-model";
 import { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
 import Series from "models/series-model";
-import SpinningWheel from "framework/spinningwheel";
-import TouchEventProxy from "components/toucheventproxy";
 import ViewController from "controllers/view-controller";
-
-enum Months {
-	Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
-}
 
 /**
  * @class EpisodeController
@@ -40,12 +32,9 @@ enum Months {
  * @property {String} originalStatusDate - the status date of the episode when the view is first loaded
  * @property {HeaderFooter} header - the view header bar
  * @property {Boolean} settingStatus - indicates that the status is currently being set
- * @property {TouchEventProxy} swtoucheventproxy - remaps touch events for the SpinningWheel
  * @param {EpisodeListItem} listItem - a list item from the Episodes or Unscheduled view
  */
 export default class EpisodeController extends ViewController {
-	public swtoucheventproxy: TouchEventProxy | null = null;
-
 	private readonly listItem: EpisodeListItem;
 
 	private readonly originalStatus: EpisodeStatus = "";
@@ -64,7 +53,7 @@ export default class EpisodeController extends ViewController {
 			this.originalStatusDate = this.listItem.episode.statusDate;
 		} else {
 			// Otherwise, we're adding a new episode
-			this.listItem = { episode: new Episode(null, "", "", "", false, (listItem.series as Series).id, false, Number(listItem.sequence)) };
+			this.listItem = { episode: new Episode(null, "", "", "", (listItem.series as Series).id, false, false, Number(listItem.sequence)) };
 		}
 	}
 
@@ -103,6 +92,7 @@ export default class EpisodeController extends ViewController {
 
 		// Set the episode details
 		$("#episodeName").val(String(this.listItem.episode.episodeName));
+		$("#statusDate").val(this.listItem.episode.statusDate);
 		$("#unverified").prop("checked", this.listItem.episode.unverified);
 		$("#unscheduled").prop("checked", this.listItem.episode.unscheduled);
 
@@ -111,17 +101,13 @@ export default class EpisodeController extends ViewController {
 		$("#recorded").on("click", (): void => this.setStatus("Recorded"));
 		$("#expected").on("click", (): void => this.setStatus("Expected"));
 		$("#missed").on("click", (): void => this.setStatus("Missed"));
-		$("#statusDate").on("click", this.getStatusDate.bind(this));
 		$("#unscheduled").on("click", this.toggleStatusDateRow.bind(this));
 
 		// Toggle the current status
 		const { status }: {status: EpisodeStatus;} = this.listItem.episode;
 
-		this.listItem.episode.setStatus("");
+		this.listItem.episode.status = "";
 		this.setStatus(status);
-
-		// Set the status date
-		$("#statusDate").val(this.listItem.episode.statusDate);
 
 		return Promise.resolve();
 	}
@@ -138,7 +124,8 @@ export default class EpisodeController extends ViewController {
 
 		// Get the episode details
 		this.listItem.episode.episodeName = String($("#episodeName").val());
-		this.listItem.episode.setUnverified($("#unverified").is(":checked"));
+		this.listItem.episode.statusDate = String($("#statusDate").val());
+		this.listItem.episode.unverified = $("#unverified").is(":checked");
 		this.listItem.episode.unscheduled = $("#unscheduled").is(":checked");
 
 		// Update the database
@@ -192,10 +179,10 @@ export default class EpisodeController extends ViewController {
 
 			// If the current status was passed, toggle (ie. reset) the episode status
 			if (this.listItem.episode.status === status) {
-				this.listItem.episode.setStatus("");
+				this.listItem.episode.status = "";
 			} else {
 				// Otherwise set the status to the passed value and update the view
-				this.listItem.episode.setStatus(status);
+				this.listItem.episode.status = status;
 				switch (status) {
 					case "Watched":
 						$("#watched").addClass("status");
@@ -232,90 +219,6 @@ export default class EpisodeController extends ViewController {
 	 * @memberof EpisodeController
 	 * @this EpisodeController
 	 * @instance
-	 * @method getStatusDate
-	 * @desc Displays a SpinningWheel control for capturing the episode status date
-	 */
-	private getStatusDate(): void {
-		// Setup a dictionary of months and split the current status date on the dashes into date and month parts
-		const parts: (number | string)[] = this.listItem.episode.statusDate.split("-"),
-					MIN_PARTS = 2;
-
-		// If we don't have enough parts (ie. no date set), default to today's date
-		if (parts.length < MIN_PARTS) {
-			const today: Date = new Date();
-
-			parts[0] = today.getDate();
-			parts[1] = Months[today.getMonth()];
-		} else {
-			// Otherwise cast the date part to a number
-			parts[0] = Number(parts[0]);
-		}
-
-		// Initialise the SpinningWheel with two slots, for date and month; and show the control
-		SpinningWheel.addSlot<number>({
-			1: "01",
-			2: "02",
-			3: "03",
-			4: "04",
-			5: "05",
-			6: "06",
-			7: "07",
-			8: "08",
-			9: "09",
-			10: "10",
-			11: "11",
-			12: "12",
-			13: "13",
-			14: "14",
-			15: "15",
-			16: "16",
-			17: "17",
-			18: "18",
-			19: "19",
-			20: "20",
-			21: "21",
-			22: "22",
-			23: "23",
-			24: "24",
-			25: "25",
-			26: "26",
-			27: "27",
-			28: "28",
-			29: "29",
-			30: "30",
-			31: "31"
-		}, "right", Number(parts[0]));
-
-		SpinningWheel.addSlot<string>({ Jan: "Jan", Feb: "Feb", Mar: "Mar", Apr: "Apr", May: "May", Jun: "Jun", Jul: "Jul", Aug: "Aug", Sep: "Sep", Oct: "Oct", Nov: "Nov", Dec: "Dec" }, null, String(parts[1]));
-		SpinningWheel.setDoneAction(this.setStatusDate.bind(this));
-		SpinningWheel.open();
-
-		// SpinningWheel only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
-		this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
-	}
-
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method setStatusDate
-	 * @desc Gets the selected value from the SpinningWheel and updates the model and view
-	 */
-	private setStatusDate(): void {
-		// Update the model with the selected values in the SpinningWheel
-		this.listItem.episode.setStatusDate(SpinningWheel.getSelectedValues<string>().values.join("-"));
-
-		// Update the view
-		$("#statusDate").val(this.listItem.episode.statusDate);
-
-		// Remove the touch event proxy
-		this.swtoucheventproxy = null;
-	}
-
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
 	 * @method toggleStatusDateRow
 	 * @desc Shows/hides the status date based on the current episode details
 	 */
@@ -326,11 +229,6 @@ export default class EpisodeController extends ViewController {
 		// Show the status date if certain criteria is met
 		if ($("#unscheduled").is(":checked") || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
 			$("#statusDateRow").show();
-
-			// If no date has been specified, prompt the user for a date
-			if (!this.listItem.episode.statusDate) {
-				this.getStatusDate();
-			}
 		}
 	}
 }

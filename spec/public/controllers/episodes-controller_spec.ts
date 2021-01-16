@@ -149,7 +149,6 @@ describe("EpisodesController", (): void => {
 				watched: boolean;
 				recorded: boolean;
 				expected: boolean;
-				statusWarning: "" | "warning";
 				warning: boolean;
 			}
 
@@ -162,7 +161,6 @@ describe("EpisodesController", (): void => {
 					watched: true,
 					recorded: false,
 					expected: false,
-					statusWarning: "",
 					warning: false
 				},
 				{
@@ -171,7 +169,6 @@ describe("EpisodesController", (): void => {
 					watched: false,
 					recorded: true,
 					expected: false,
-					statusWarning: "",
 					warning: false
 				},
 				{
@@ -180,7 +177,6 @@ describe("EpisodesController", (): void => {
 					watched: false,
 					recorded: false,
 					expected: true,
-					statusWarning: "",
 					warning: false
 				},
 				{
@@ -189,7 +185,6 @@ describe("EpisodesController", (): void => {
 					watched: false,
 					recorded: false,
 					expected: false,
-					statusWarning: "warning",
 					warning: true
 				}
 			];
@@ -204,7 +199,7 @@ describe("EpisodesController", (): void => {
 									...items[0],
 									episodeName: "edited-episode",
 									status: scenario.status,
-									statusWarning: scenario.statusWarning
+									statusWarning: scenario.warning ? "warning" : ""
 								} as EpisodeMock
 							};
 							episodesController["origWatchedCount"] = 1;
@@ -228,7 +223,7 @@ describe("EpisodesController", (): void => {
 					describe("add", (): void => {
 						beforeEach(async (): Promise<void> => {
 							episodeListItem = { episode: new EpisodeMock(null, "new-episode", scenario.status, "") };
-							episodeListItem.episode.statusWarning = scenario.statusWarning;
+							(episodeListItem.episode as EpisodeMock).statusWarning = scenario.warning ? "warning" : "";
 							items.push(episodeListItem.episode as EpisodeMock);
 							await episodesController.activate(episodeListItem);
 						});
@@ -521,10 +516,10 @@ describe("EpisodesController", (): void => {
 
 		beforeEach(async (): Promise<void> => {
 			items = [
-				{ ...new EpisodeMock("1", null, "", "", false, "", false, 1), save: sinon.stub(), remove: sinon.stub() },
-				{ ...new EpisodeMock("2", null, "", "", false, "", false, 2), save: sinon.stub(), remove: sinon.stub() },
-				{ ...new EpisodeMock("3", null, "", "", false, "", false, 3), save: sinon.stub(), remove: sinon.stub() },
-				{ ...new EpisodeMock("4", null, "", "", false, "", false, 3), save: sinon.stub(), remove: sinon.stub() }
+				{ ...new EpisodeMock("1", null, "", "", "", false, false, 1), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("2", null, "", "", "", false, false, 2), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("3", null, "", "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub() },
+				{ ...new EpisodeMock("4", null, "", "", "", false, false, 3), save: sinon.stub(), remove: sinon.stub() }
 			];
 
 			sortedItems = [

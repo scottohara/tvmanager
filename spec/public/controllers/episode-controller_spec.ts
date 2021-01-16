@@ -3,10 +3,7 @@ import {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import sinon, {
-	SinonFakeTimers,
-	SinonStub
-} from "sinon";
+import sinon, { SinonStub } from "sinon";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeController from "controllers/episode-controller";
@@ -14,9 +11,7 @@ import EpisodeMock from "mocks/episode-model-mock";
 import { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
 import SeriesMock from "mocks/series-model-mock";
-import SpinningWheelMock from "mocks/spinningwheel-mock";
 import TestController from "mocks/test-controller";
-import TouchEventProxy from "components/toucheventproxy";
 
 // Get a reference to the application controller singleton
 const appController: ApplicationControllerMock = new ApplicationControllerMock();
@@ -28,7 +23,7 @@ describe("EpisodeController", (): void => {
 	beforeEach((): void => {
 		listItem = {
 			listIndex: 0,
-			episode: new EpisodeMock(null, "test-episode", "Watched", "01-Jan", false, undefined, false)
+			episode: new EpisodeMock(null, "test-episode", "Watched", "2000-01-01", undefined, false, false)
 		};
 
 		episodeController = new EpisodeController(listItem);
@@ -81,7 +76,6 @@ describe("EpisodeController", (): void => {
 			sinon.stub(episodeController, "cancel" as keyof EpisodeController);
 			sinon.stub(episodeController, "save" as keyof EpisodeController);
 			sinon.stub(episodeController, "setStatus" as keyof EpisodeController);
-			sinon.stub(episodeController, "getStatusDate" as keyof EpisodeController);
 			sinon.stub(episodeController, "toggleStatusDateRow" as keyof EpisodeController);
 
 			episodeName = $("<input>")
@@ -138,6 +132,7 @@ describe("EpisodeController", (): void => {
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
 		it("should set the episode name", (): Chai.Assertion => String(episodeName.val()).should.equal(listItem.episode.episodeName));
+		it("should set the status date", (): Chai.Assertion => String(statusDate.val()).should.equal(listItem.episode.statusDate));
 		it("should set the unverified toggle", (): Chai.Assertion => Boolean(unverified.prop("checked")).should.equal(listItem.episode.unverified));
 		it("should set the unscheduled toggle", (): Chai.Assertion => Boolean(unscheduled.prop("checked")).should.equal(listItem.episode.unscheduled));
 
@@ -161,22 +156,12 @@ describe("EpisodeController", (): void => {
 			episodeController["setStatus"].should.have.been.calledWith("Missed");
 		});
 
-		it("should attach a status date click event handler", (): void => {
-			statusDate.trigger("click");
-			episodeController["getStatusDate"].should.have.been.called;
-		});
-
 		it("should attach an unscheduled click event handler", (): void => {
 			unscheduled.trigger("click");
 			episodeController["toggleStatusDateRow"].should.have.been.called;
 		});
 
-		it("should toggle the current status", (): void => {
-			listItem.episode.setStatus.should.have.been.calledWith("");
-			episodeController["setStatus"].should.have.been.calledWith(listItem.episode.status);
-		});
-
-		it("should set the status date", (): Chai.Assertion => String(statusDate.val()).should.equal(listItem.episode.statusDate));
+		it("should toggle the current status", (): Chai.Assertion => episodeController["setStatus"].should.have.been.calledWith("Watched"));
 
 		afterEach((): void => {
 			episodeName.remove();
@@ -212,6 +197,8 @@ describe("EpisodeController", (): void => {
 
 		let episodeName: string,
 				episodeNameInput: JQuery,
+				statusDate: string,
+				statusDateInput: JQuery,
 				unverified: JQuery,
 				unscheduled: JQuery;
 
@@ -219,10 +206,16 @@ describe("EpisodeController", (): void => {
 			describe(scenario.description, (): void => {
 				beforeEach(async (): Promise<void> => {
 					episodeName = "test-episode-2";
+					statusDate = "2000-12-31";
 
 					episodeNameInput = $("<input>")
 						.attr("id", "episodeName")
 						.val(episodeName)
+						.appendTo(document.body);
+
+					statusDateInput = $("<input>")
+						.attr("id", "statusDate")
+						.val(statusDate)
 						.appendTo(document.body);
 
 					unverified = $("<input type='checkbox'>")
@@ -244,7 +237,8 @@ describe("EpisodeController", (): void => {
 				});
 
 				it("should get the episode name", (): Chai.Assertion => String(episodeController["listItem"].episode.episodeName).should.equal(episodeName));
-				it("should get the unverified toggle", (): Chai.Assertion => episodeController["listItem"].episode.setUnverified.should.have.been.calledWith(true));
+				it("should get the status date", (): Chai.Assertion => String(episodeController["listItem"].episode.statusDate).should.equal(statusDate));
+				it("should get the unverified toggle", (): Chai.Assertion => episodeController["listItem"].episode.unverified.should.be.true);
 				it("should get the unscheduled toggle", (): Chai.Assertion => episodeController["listItem"].episode.unscheduled.should.be.true);
 				it("should save the episode", (): Chai.Assertion => listItem.episode.save.should.have.been.called);
 				it("should set the series list view scroll position", (): Chai.Assertion => appController.viewStack[0].scrollPos.should.equal(scenario.scrollPos));
@@ -252,6 +246,7 @@ describe("EpisodeController", (): void => {
 
 				afterEach((): void => {
 					episodeNameInput.remove();
+					statusDateInput.remove();
 					unverified.remove();
 					unscheduled.remove();
 				});
@@ -262,13 +257,13 @@ describe("EpisodeController", (): void => {
 	describe("cancel", (): void => {
 		beforeEach(async (): Promise<void> => {
 			episodeController["listItem"].episode.status = "Recorded";
-			episodeController["listItem"].episode.statusDate = "02-Jan";
+			episodeController["listItem"].episode.statusDate = "2000-01-02";
 			await episodeController["cancel"]();
 		});
 
 		it("should revert any changes", (): void => {
 			episodeController["listItem"].episode.status.should.equal("Watched");
-			episodeController["listItem"].episode.statusDate.should.equal("01-Jan");
+			episodeController["listItem"].episode.statusDate.should.equal("2000-01-01");
 		});
 
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
@@ -375,7 +370,7 @@ describe("EpisodeController", (): void => {
 						episodeController["setStatus"](scenario.newStatus);
 					});
 
-					it("should set the episode status", (): Chai.Assertion => listItem.episode.setStatus.should.have.been.calledWith(scenario.expectedStatus));
+					it("should set the episode status", (): Chai.Assertion => listItem.episode.status.should.equal(scenario.expectedStatus));
 
 					it("should toggle the status", (): void => {
 						watched.hasClass("status").should.equal("Watched" === scenario.expectedStatus);
@@ -398,99 +393,6 @@ describe("EpisodeController", (): void => {
 				unverifiedRow.remove();
 			});
 		});
-	});
-
-	describe("getStatusDate", (): void => {
-		interface Scenario {
-			description: string;
-			statusDate: string;
-			expectedDay: number;
-			expectedMonth: string;
-		}
-
-		const scenarios: Scenario[] = [
-			{
-				description: "without date",
-				statusDate: "",
-				expectedDay: 1,
-				expectedMonth: "Jan"
-			},
-			{
-				description: "with date",
-				statusDate: "02-Feb",
-				expectedDay: 2,
-				expectedMonth: "Feb"
-			}
-		];
-
-		let swWrapper: JQuery,
-				clock: SinonFakeTimers;
-
-		beforeEach((): void => {
-			sinon.stub(episodeController, "setStatusDate" as keyof EpisodeController);
-			clock = sinon.useFakeTimers();
-			(SpinningWheelMock.addSlot as SinonStub).reset();
-			SpinningWheelMock.setDoneAction.resetHistory();
-			SpinningWheelMock.open.reset();
-
-			swWrapper = $("<div>")
-				.attr("id", "sw-wrapper")
-				.appendTo(document.body);
-		});
-
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				beforeEach((): void => {
-					episodeController["listItem"].episode.statusDate = scenario.statusDate;
-					episodeController["getStatusDate"]();
-				});
-
-				it("should initialise the SpinningWheel", (): void => {
-					SpinningWheelMock.addSlot.should.have.been.calledWith(sinon.match.object, "right", scenario.expectedDay);
-					SpinningWheelMock.addSlot.should.have.been.calledWith(sinon.match.object, null, scenario.expectedMonth);
-				});
-
-				it("should attach a done callback to the SpinningWheel", (): void => {
-					SpinningWheelMock.setDoneAction.should.have.been.called;
-					episodeController["setStatusDate"].should.have.been.called;
-				});
-
-				it("should open the SpinningWheel", (): Chai.Assertion => SpinningWheelMock.open.should.have.been.called);
-				it("should wrap the SpinningWheel in a touch event proxy", (): Chai.Assertion => (episodeController.swtoucheventproxy as TouchEventProxy)["element"].should.deep.equal(swWrapper.get(0)));
-			});
-		});
-
-		afterEach((): void => {
-			swWrapper.remove();
-			clock.restore();
-		});
-	});
-
-	describe("setStatusDate", (): void => {
-		let statusDate: JQuery;
-
-		beforeEach((): void => {
-			(SpinningWheelMock.getSelectedValues as SinonStub).reset();
-			(SpinningWheelMock.getSelectedValues as SinonStub).returns({
-				keys: [2, "Feb"],
-				values: ["02", "Feb"]
-			});
-
-			episodeController.swtoucheventproxy = {} as TouchEventProxy;
-
-			statusDate = $("<input>")
-				.attr("id", "statusDate")
-				.appendTo(document.body);
-
-			listItem.episode.statusDate = "02-Feb";
-			episodeController["setStatusDate"]();
-		});
-
-		it("should get the selected value from the SpinningWheel", (): Chai.Assertion => listItem.episode.setStatusDate.should.have.been.calledWith(listItem.episode.statusDate));
-		it("should update the view", (): Chai.Assertion => String(statusDate.val()).should.equal(listItem.episode.statusDate));
-		it("should remove the touch event proxy", (): Chai.Assertion => (null === episodeController.swtoucheventproxy).should.be.true);
-
-		afterEach((): JQuery => statusDate.remove());
 	});
 
 	describe("toggleStatusDateRow", (): void => {
@@ -551,7 +453,6 @@ describe("EpisodeController", (): void => {
 				unscheduled: JQuery;
 
 		beforeEach((): void => {
-			sinon.stub(episodeController, "getStatusDate" as keyof EpisodeController);
 			statusDateRow = $("<div>")
 				.attr("id", "statusDateRow")
 				.appendTo(document.body);
@@ -571,10 +472,6 @@ describe("EpisodeController", (): void => {
 				});
 
 				it(`should ${scenario.isHidden ? "hide" : "show"} the status date`, (): Chai.Assertion => ("none" === statusDateRow.css("display")).should.equal(Boolean(scenario.isHidden)));
-
-				if (scenario.noDate) {
-					it("should prompt for a date", (): Chai.Assertion => episodeController["getStatusDate"].should.have.been.called);
-				}
 			});
 		});
 

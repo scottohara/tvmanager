@@ -350,6 +350,7 @@ h2 {
 	white-space: nowrap;
 	overflow: hidden;
 	transform: rotate(0);
+	display: flex;
 }
 
 /* Top border for first row in a dialog or dialog section */
@@ -395,6 +396,7 @@ input:not([type="radio"]) {
 	font-size: inherit;
 	background: transparent;
 	outline: none;
+	appearance: none;
 }
 
 /* Episode status toggles */

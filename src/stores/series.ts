@@ -93,7 +93,12 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 
-						series: Set<string> = new Set(await txSeriesStore.index("nowShowing").getAllKeys());
+						series: Set<string> = new Set(await txSeriesStore.index("nowShowing").getAllKeys()),
+
+						today = new Date(),
+						year = new Intl.DateTimeFormat("en-AU", { year: "numeric" }).format(today),
+						month = new Intl.DateTimeFormat("en-AU", { month: "2-digit" }).format(today),
+						day = new Intl.DateTimeFormat("en-AU", { day: "2-digit" }).format(today);
 
 			// Get set of series now showing, or with at least one recorded or expected episode
 			(await txEpisodesStore.index("status").getAll(IDBKeyRange.bound(["Recorded"], ["Recorded", "~"]))).forEach((episode: EpisodesStoreObject): Set<string> => series.add(episode.seriesId));
@@ -106,7 +111,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 							WatchedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", id], ["Watched", id])),
 							RecordedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
 							ExpectedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id])),
-							StatusWarningCount: number = await txEpisodesStore.index("statusWarning").count(IDBKeyRange.bound(["Expected", id], ["Expected", id, new Date()]));
+							StatusWarningCount: number = await txEpisodesStore.index("statusWarning").count(IDBKeyRange.bound(["Expected", id, ""], ["Expected", id, `${year}-${month}-${day}`], true));
 
 				return {
 					SeriesID: id,

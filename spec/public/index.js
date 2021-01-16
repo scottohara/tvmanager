@@ -16,6 +16,7 @@ import "./controllers/series-controller_spec";
 import "./controllers/seriesList-controller_spec";
 import "./controllers/settings-controller_spec";
 import "./controllers/unscheduled-controller_spec";
+import "./models/base-model_spec";
 import "./models/episode-model_spec";
 import "./models/program-model_spec";
 import "./models/series-model_spec";

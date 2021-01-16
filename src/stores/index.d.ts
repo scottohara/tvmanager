@@ -33,7 +33,7 @@ export interface SeriesStoreObject extends StoreObject {
 export interface EpisodesStoreObject extends StoreObject {
 	seriesId: string;
 	status: EpisodeStatus;
-	statusDate: Date | null;
+	statusDate: string;
 	unverified: number;
 	unscheduled: number;
 	sequence: number;

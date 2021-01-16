@@ -50,21 +50,21 @@ describe("programs", (): void => {
 				db.put("programs", { id: "1", name: "bb Program 1" }),
 
 				db.put("series", { id: "1", name: "Series 1", programId: "1", nowShowing: null }),
-				db.put("episodes", { id: "1", name: "Episode 1", seriesId: "1", status: "Watched", statusDate: null, unverified: 0, unscheduled: 0, sequence: 1 }),
-				db.put("episodes", { id: "2", name: "Episode 2", seriesId: "1", status: "Recorded", statusDate: null, unverified: 0, unscheduled: 0, sequence: 2 }),
-				db.put("episodes", { id: "3", name: "Episode 3", seriesId: "1", status: "Expected", statusDate: null, unverified: 0, unscheduled: 0, sequence: 3 }),
+				db.put("episodes", { id: "1", name: "Episode 1", seriesId: "1", status: "Watched", statusDate: "", unverified: 0, unscheduled: 0, sequence: 1 }),
+				db.put("episodes", { id: "2", name: "Episode 2", seriesId: "1", status: "Recorded", statusDate: "", unverified: 0, unscheduled: 0, sequence: 2 }),
+				db.put("episodes", { id: "3", name: "Episode 3", seriesId: "1", status: "Expected", statusDate: "", unverified: 0, unscheduled: 0, sequence: 3 }),
 
 				db.put("programs", { id: "2", name: "aa Program 2" }),
 
 				db.put("series", { id: "2", name: "Series 2", programId: "2", nowShowing: null }),
-				db.put("episodes", { id: "4", name: "Episode 4", seriesId: "2", status: "Watched", statusDate: null, unverified: 0, unscheduled: 0, sequence: 1 }),
-				db.put("episodes", { id: "5", name: "Episode 5", seriesId: "2", status: "Recorded", statusDate: null, unverified: 0, unscheduled: 0, sequence: 2 }),
-				db.put("episodes", { id: "6", name: "Episode 6", seriesId: "2", status: "Expected", statusDate: null, unverified: 0, unscheduled: 0, sequence: 3 }),
+				db.put("episodes", { id: "4", name: "Episode 4", seriesId: "2", status: "Watched", statusDate: "", unverified: 0, unscheduled: 0, sequence: 1 }),
+				db.put("episodes", { id: "5", name: "Episode 5", seriesId: "2", status: "Recorded", statusDate: "", unverified: 0, unscheduled: 0, sequence: 2 }),
+				db.put("episodes", { id: "6", name: "Episode 6", seriesId: "2", status: "Expected", statusDate: "", unverified: 0, unscheduled: 0, sequence: 3 }),
 
 				db.put("series", { id: "3", name: "Series 3", programId: "2", nowShowing: null }),
-				db.put("episodes", { id: "7", name: "Episode 7", seriesId: "3", status: "Watched", statusDate: null, unverified: 0, unscheduled: 0, sequence: 1 }),
-				db.put("episodes", { id: "8", name: "Episode 8", seriesId: "3", status: "Recorded", statusDate: null, unverified: 0, unscheduled: 0, sequence: 2 }),
-				db.put("episodes", { id: "9", name: "Episode 9", seriesId: "3", status: "Expected", statusDate: null, unverified: 0, unscheduled: 0, sequence: 3 })
+				db.put("episodes", { id: "7", name: "Episode 7", seriesId: "3", status: "Watched", statusDate: "", unverified: 0, unscheduled: 0, sequence: 1 }),
+				db.put("episodes", { id: "8", name: "Episode 8", seriesId: "3", status: "Recorded", statusDate: "", unverified: 0, unscheduled: 0, sequence: 2 }),
+				db.put("episodes", { id: "9", name: "Episode 9", seriesId: "3", status: "Expected", statusDate: "", unverified: 0, unscheduled: 0, sequence: 3 })
 			]);
 		});
 
