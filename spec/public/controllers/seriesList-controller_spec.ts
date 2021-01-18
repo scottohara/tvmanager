@@ -143,7 +143,6 @@ describe("SeriesListController", (): void => {
 					it("should not update the program expected count", (): Chai.Assertion => listItem.program.setExpectedCount.should.not.have.been.called);
 					it("should remove the item from the list", (): Chai.Assertion => seriesListController["deleteItem"].should.have.been.calledWith(seriesListItem.listIndex, true));
 					it("should refresh the list", (): Chai.Assertion => seriesListController["seriesList"].refresh.should.have.been.called);
-					it("should not scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.not.have.been.called);
 					it("should set the list to view mode", (): Chai.Assertion => seriesListController["viewItems"].should.have.been.called);
 				});
 
@@ -156,10 +155,7 @@ describe("SeriesListController", (): void => {
 					});
 
 					describe("series name unchanged", (): void => {
-						beforeEach(async (): Promise<void> => {
-							seriesListController["origSeriesName"] = seriesListItem.series.seriesName;
-							await seriesListController.activate(seriesListItem);
-						});
+						beforeEach(async (): Promise<void> => seriesListController.activate(seriesListItem));
 
 						it("should update the item in the series list and resort by series name", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(items));
 						it("should update the program episode count", (): Chai.Assertion => listItem.program.setEpisodeCount.should.have.been.calledWith(7));
@@ -168,15 +164,11 @@ describe("SeriesListController", (): void => {
 						it("should update the program expected count", (): Chai.Assertion => listItem.program.setExpectedCount.should.have.been.calledWith(1));
 						it("should not remove the item from the list", (): Chai.Assertion => seriesListController["deleteItem"].should.not.have.been.called);
 						it("should refresh the list", (): Chai.Assertion => seriesListController["seriesList"].refresh.should.have.been.called);
-						it("should not scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.not.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => seriesListController["viewItems"].should.have.been.called);
 					});
 
 					describe("series name changed", (): void => {
-						beforeEach(async (): Promise<void> => {
-							seriesListController["origSeriesName"] = "original-program";
-							await seriesListController.activate(seriesListItem);
-						});
+						beforeEach(async (): Promise<void> => seriesListController.activate(seriesListItem));
 
 						it("should update the item in the series list and resort by series name", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(items));
 						it("should update the program episode count", (): Chai.Assertion => listItem.program.setEpisodeCount.should.have.been.calledWith(7));
@@ -185,7 +177,6 @@ describe("SeriesListController", (): void => {
 						it("should update the program expected count", (): Chai.Assertion => listItem.program.setExpectedCount.should.have.been.calledWith(1));
 						it("should not remove the item from the list", (): Chai.Assertion => seriesListController["deleteItem"].should.not.have.been.called);
 						it("should refresh the list", (): Chai.Assertion => seriesListController["seriesList"].refresh.should.have.been.called);
-						it("should scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.have.been.calledWith("1"));
 						it("should set the list to view mode", (): Chai.Assertion => seriesListController["viewItems"].should.have.been.called);
 					});
 				});
@@ -201,15 +192,37 @@ describe("SeriesListController", (): void => {
 						seriesListItem.series as SeriesMock,
 						items[1]
 					];
-					await seriesListController.activate(seriesListItem);
+
+					return seriesListController.activate(seriesListItem);
 				});
 
 				it("should add the item to the series list and resort by series name", (): Chai.Assertion => seriesListController["seriesList"].items.should.deep.equal(sortedItems));
 				it("should increment the program series count", (): Chai.Assertion => listItem.program.seriesCount.should.equal(2));
 				it("should refresh the list", (): Chai.Assertion => seriesListController["seriesList"].refresh.should.have.been.called);
-				it("should scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.have.been.calledWith("3"));
 				it("should set the list to view mode", (): Chai.Assertion => seriesListController["viewItems"].should.have.been.called);
 			});
+		});
+	});
+
+	describe("contentShown", (): void => {
+		beforeEach((): ListMock => (seriesListController["seriesList"] = new ListMock("", "", "", [])));
+
+		describe("with active list item", (): void => {
+			beforeEach((): void => {
+				seriesListController["activeListItem"] = new SeriesMock("1", "", null, "1");
+				seriesListController.contentShown();
+			});
+
+			it("should scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.have.been.calledWith("1"));
+		});
+
+		describe("without active list item", (): void => {
+			beforeEach((): void => {
+				seriesListController["activeListItem"] = null;
+				seriesListController.contentShown();
+			});
+
+			it("should not scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.not.have.been.called);
 		});
 	});
 
@@ -241,7 +254,7 @@ describe("SeriesListController", (): void => {
 		});
 
 		it("should save the current series details", (): void => {
-			String(seriesListController["origSeriesName"]).should.equal(items[0].seriesName);
+			(seriesListController["activeListItem"] as SeriesMock).should.equal(items[0]);
 			seriesListController["origEpisodeCount"].should.equal(3);
 			seriesListController["origWatchedCount"].should.equal(1);
 			seriesListController["origRecordedCount"].should.equal(1);
@@ -256,8 +269,9 @@ describe("SeriesListController", (): void => {
 
 	describe("addItem", (): void => {
 		it("should push the series view with no selected item", async (): Promise<void> => {
+			seriesListController["seriesList"] = new ListMock("", "", "", items);
 			await seriesListController["addItem"]();
-			appController.pushView.should.have.been.calledWithExactly("series", { program: listItem.program });
+			appController.pushView.should.have.been.calledWithExactly("series", { program: listItem.program, sequence: 2 });
 		});
 	});
 
@@ -271,7 +285,7 @@ describe("SeriesListController", (): void => {
 		});
 
 		it("should save the current series details", (): void => {
-			String(seriesListController["origSeriesName"]).should.equal(items[0].seriesName);
+			(seriesListController["activeListItem"] as SeriesMock).should.equal(items[0]);
 			seriesListController["origEpisodeCount"].should.equal(3);
 			seriesListController["origWatchedCount"].should.equal(1);
 			seriesListController["origRecordedCount"].should.equal(1);

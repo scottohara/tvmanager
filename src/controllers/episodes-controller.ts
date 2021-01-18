@@ -29,7 +29,6 @@ import EpisodesView from "views/episodes-view.html";
 import List from "components/list";
 import { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
-import window from "components/window";
 
 /**
  * @class EpisodesController
@@ -142,24 +141,29 @@ export default class EpisodesController extends ViewController {
 		// Refresh the list
 		this.episodeList.refresh();
 
-		// If necessary, scroll to the first unwatched episode
-		if (this.scrollToFirstUnwatched) {
-			const DELAY_MS = 300;
-
-			window.setTimeout((): void => {
-				// Find the first unwatched episode
-				const firstUnwatched: PublicInterface<Episode> | undefined = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as PublicInterface<Episode> | undefined;
-
-				if (undefined !== firstUnwatched) {
-					this.episodeList.scrollTo(String(firstUnwatched.id));
-				}
-
-				this.scrollToFirstUnwatched = false;
-			}, DELAY_MS);
-		}
-
 		// Set to view mode
 		return this.viewItems();
+	}
+
+	/**
+	 * @memberof EpisodesController
+	 * @this EpisodesController
+	 * @instance
+	 * @method contentShown
+	 * @desc Called after the controller content is visible
+	 */
+	public contentShown(): void {
+		// If necessary, scroll to the first unwatched episode
+		if (this.scrollToFirstUnwatched) {
+			// Find the first unwatched episode
+			const firstUnwatched: PublicInterface<Episode> | undefined = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as PublicInterface<Episode> | undefined;
+
+			if (undefined !== firstUnwatched) {
+				this.episodeList.scrollTo(String(firstUnwatched.id));
+			}
+
+			this.scrollToFirstUnwatched = false;
+		}
 	}
 
 	/**

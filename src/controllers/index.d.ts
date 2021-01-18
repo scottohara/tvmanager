@@ -144,12 +144,14 @@ export interface EpisodeListItem {
  * @property {Number} [listIndex] - the list index of a series being edited
  * @property {Series} [series] - a series being edited
  * @property {String} [source] - the name of the view that we came from
+ * @property {Number} [sequence] - the initial sequence to use for a new series being added
  */
 export interface SeriesListItem {
 	listIndex?: number;
 	series: PublicInterface<Series>;
 	source?: string;
-	program?: Program;
+	program?: PublicInterface<Program>;
+	sequence?: number;
 }
 
 /**

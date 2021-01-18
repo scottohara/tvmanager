@@ -53,7 +53,7 @@ export default class EpisodeController extends ViewController {
 			this.originalStatusDate = this.listItem.episode.statusDate;
 		} else {
 			// Otherwise, we're adding a new episode
-			this.listItem = { episode: new Episode(null, "", "", "", (listItem.series as Series).id, false, false, Number(listItem.sequence)) };
+			this.listItem = { episode: new Episode(null, `Episode ${Number(listItem.sequence) + 1}`, "", "", (listItem.series as Series).id, false, false, Number(listItem.sequence)) };
 		}
 	}
 
@@ -110,6 +110,20 @@ export default class EpisodeController extends ViewController {
 		this.setStatus(status);
 
 		return Promise.resolve();
+	}
+
+	/**
+	 * @memberof EpisodeController
+	 * @this EpisodeController
+	 * @instance
+	 * @method contentShown
+	 * @desc Called after the controller content is visible
+	 */
+	public contentShown(): void {
+		// If we're adding a new episode, focus and select the episode name
+		if (undefined === this.listItem.listIndex) {
+			$("#episodeName").select();
+		}
 	}
 
 	/**

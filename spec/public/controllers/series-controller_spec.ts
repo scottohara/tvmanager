@@ -1,7 +1,6 @@
 import {
 	NavButton,
 	NavButtonEventHandler,
-	ProgramListItem,
 	SeriesListItem
 } from "controllers";
 import sinon, { SinonStub } from "sinon";
@@ -39,18 +38,23 @@ describe("SeriesController", (): void => {
 		});
 
 		describe("add", (): void => {
-			let programListItem: ProgramListItem;
+			let seriesListItem: SeriesListItem;
 
 			beforeEach((): void => {
-				programListItem = { program: new ProgramMock("1", "test-program") };
-				seriesController = new SeriesController(programListItem);
+				seriesListItem = {
+					series: new SeriesMock(null, null, null, null),
+					sequence: 1,
+					program: new ProgramMock("1", "test-program")
+				};
+				seriesController = new SeriesController(seriesListItem);
 			});
 
 			it("should return a SeriesController instance", (): Chai.Assertion => seriesController.should.be.an.instanceOf(SeriesController));
 
 			it("should create a list item", (): void => {
-				String(seriesController["listItem"].series.programId).should.equal(programListItem.program.id);
-				String(seriesController["listItem"].series.programName).should.equal(programListItem.program.programName);
+				String(seriesController["listItem"].series.seriesName).should.equal(`Series ${Number(seriesListItem.sequence) + 1}`);
+				String(seriesController["listItem"].series.programId).should.equal((seriesListItem.program as ProgramMock).id);
+				String(seriesController["listItem"].series.programName).should.equal((seriesListItem.program as ProgramMock).programName);
 			});
 		});
 	});
@@ -122,6 +126,38 @@ describe("SeriesController", (): void => {
 			seriesName.remove();
 			nowShowing.remove();
 			moveTo.remove();
+		});
+	});
+
+	describe("contentShown", (): void => {
+		let seriesName: JQuery,
+				select: SinonStub;
+
+		beforeEach((): void => {
+			seriesName = $("<input>")
+				.attr("id", "seriesName")
+				.appendTo(document.body);
+
+			select = sinon.stub($.fn, "select");
+		});
+
+		describe("adding series", (): void => {
+			beforeEach((): void => {
+				seriesController["listItem"].listIndex = undefined;
+				seriesController.contentShown();
+			});
+
+			it("should select the series name text", (): Chai.Assertion => select.should.have.been.called);
+		});
+
+		describe("not adding series", (): void => {
+			beforeEach((): void => seriesController.contentShown());
+			it("should not select the series name text", (): Chai.Assertion => select.should.not.have.been.called);
+		});
+
+		afterEach((): void => {
+			seriesName.remove();
+			select.restore();
 		});
 	});
 

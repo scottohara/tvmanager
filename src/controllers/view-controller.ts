@@ -35,6 +35,8 @@ export default abstract class ViewController {
 
 	public activate?(args?: ViewControllerArgs): Promise<void>;
 
+	public contentShown?(): void;
+
 	public abstract setup(): Promise<void>;
 
 	public abstract get view(): string;

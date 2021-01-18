@@ -891,10 +891,34 @@ describe("ApplicationController", (): void => {
 		});
 
 		describe("loaded", (): void => {
-			it("should unmark the content wrapper as loaded", (): void => {
+			let controller: TestController,
+					contentShown: SinonStub;
+
+			beforeEach((): void => {
+				controller = new TestController();
+				contentShown = sinon.stub();
 				contentWrapper.addClass("loaded");
-				applicationController["contentShown"]();
-				contentWrapper.hasClass("loaded").should.be.false;
+			});
+
+			describe("without content shown", (): void => {
+				beforeEach((): void => {
+					applicationController.viewStack.push({ controller, scrollPos: 0 });
+					applicationController["contentShown"]();
+				});
+
+				it("should unmark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.hasClass("loaded").should.be.false);
+				it("should not call contentShown on the view controller", (): Chai.Assertion => contentShown.should.not.have.been.called);
+			});
+
+			describe("with content shown", (): void => {
+				beforeEach((): void => {
+					Object.defineProperty(controller, "contentShown", { value: contentShown });
+					applicationController.viewStack.push({ controller, scrollPos: 0 });
+					applicationController["contentShown"]();
+				});
+
+				it("should unmark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.hasClass("loaded").should.be.false);
+				it("should call contentShown on the view controller", (): Chai.Assertion => contentShown.should.have.been.called);
 			});
 		});
 

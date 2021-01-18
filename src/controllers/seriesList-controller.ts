@@ -25,7 +25,6 @@ import Series from "models/series-model";
 import SeriesListTemplate from "views/seriesListTemplate.html";
 import SeriesListView from "views/seriesList-view.html";
 import ViewController from "controllers/view-controller";
-import window from "components/window";
 
 /**
  * @class SeriesListController
@@ -35,7 +34,7 @@ import window from "components/window";
  * @property {ProgramListItem} listItem - a list item from the Programs view
  * @property {HeaderFooter} header - the view header bar
  * @property {List} seriesList - the list of series to display
- * @property {String} origSeriesName - the series name before editing
+ * @property {Series} activeListItem - active list item being added or edited
  * @property {Number} origEpisodeCount - the total number of episodes in a series before viewing/editing
  * @property {Number} origWatchedCount - the number of watched episodes in a series before viewing/editing
  * @property {Number} origRecordedCount - the number of recorded episodes in a series before viewing/editing
@@ -46,7 +45,7 @@ import window from "components/window";
 export default class SeriesListController extends ViewController {
 	private seriesList!: PublicInterface<List>;
 
-	private origSeriesName: string | null = null;
+	private activeListItem: PublicInterface<Series> | null = null;
 
 	private origEpisodeCount = 0;
 
@@ -109,19 +108,12 @@ export default class SeriesListController extends ViewController {
 	 * @param {SeriesListItem} [listItem] - a list item that was just view in the Episodes view, or added/edited in the Series view
 	 */
 	public async activate(listItem?: SeriesListItem): Promise<void> {
-		let listResort = false;
-
 		// When returning from the Episodes or Series view, we need to update the list with the new values
 		if (undefined !== listItem) {
 			// If an existing series was viewed/edited, check if the series was moved or increment/decrement the status counts for the series
 			if (Number(listItem.listIndex) >= 0) {
 				// If the series has not moved to a different program, increment/decrement the status counts for the program
 				if (listItem.series.programId === this.listItem.program.id) {
-					// If the series name has changed, we will need to resort the list and scroll to the new position
-					if (listItem.series.seriesName !== this.origSeriesName) {
-						listResort = true;
-					}
-
 					this.seriesList.items[Number(listItem.listIndex)] = listItem.series;
 					this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount + (listItem.series.episodeCount - this.origEpisodeCount));
 					this.listItem.program.setWatchedCount(this.listItem.program.watchedCount + (listItem.series.watchedCount - this.origWatchedCount));
@@ -135,27 +127,31 @@ export default class SeriesListController extends ViewController {
 				// Otherwise, add the new series and increment the series count for the program
 				this.seriesList.items.push(listItem.series);
 				this.listItem.program.seriesCount++;
-				listResort = true;
 			}
 
-			// If necessary, resort the list
-			if (listResort) {
-				this.seriesList.items = this.seriesList.items.sort((a: Series, b: Series): number => String(a.seriesName).localeCompare(String(b.seriesName)));
-			}
+			// In case of any changes, resort the list
+			this.seriesList.items = this.seriesList.items.sort((a: Series, b: Series): number => String(a.seriesName).localeCompare(String(b.seriesName)));
 		}
 
 		// Refresh the list
 		this.seriesList.refresh();
 
-		// If necessary, scroll the list item into view
-		if (undefined !== listItem && listResort) {
-			const DELAY_MS = 300;
-
-			window.setTimeout((): void => this.seriesList.scrollTo(String(listItem.series.id)), DELAY_MS);
-		}
-
 		// Set to view mode
 		return this.viewItems();
+	}
+
+	/**
+	 * @memberof SeriesListController
+	 * @this SeriesListController
+	 * @instance
+	 * @method contentShown
+	 * @desc Called after the controller content is visible
+	 */
+	public contentShown(): void {
+		// If there is an active list item, scroll it into view
+		if (null !== this.activeListItem) {
+			this.seriesList.scrollTo(String(this.activeListItem.id));
+		}
 	}
 
 	/**
@@ -194,17 +190,16 @@ export default class SeriesListController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to view
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
-		const series = this.seriesList.items[listIndex] as Series;
+		this.activeListItem = this.seriesList.items[listIndex] as Series;
 
 		// Save the current series details
-		this.origSeriesName = series.seriesName;
-		this.origEpisodeCount = series.episodeCount;
-		this.origWatchedCount = series.watchedCount;
-		this.origRecordedCount = series.recordedCount;
-		this.origExpectedCount = series.expectedCount;
+		this.origEpisodeCount = this.activeListItem.episodeCount;
+		this.origWatchedCount = this.activeListItem.watchedCount;
+		this.origRecordedCount = this.activeListItem.recordedCount;
+		this.origExpectedCount = this.activeListItem.expectedCount;
 
 		// Display the Episodes view
-		return this.appController.pushView("episodes", { listIndex, series });
+		return this.appController.pushView("episodes", { listIndex, series: this.activeListItem });
 	}
 
 	/**
@@ -215,7 +210,7 @@ export default class SeriesListController extends ViewController {
 	 * @desc Displays the Series view for adding a series
 	 */
 	private async addItem(): Promise<void> {
-		return this.appController.pushView("series", { program: this.listItem.program });
+		return this.appController.pushView("series", { program: this.listItem.program, sequence: this.seriesList.items.length });
 	}
 
 	/**
@@ -227,17 +222,16 @@ export default class SeriesListController extends ViewController {
 	 * @param {Number} listIndex - the list index of the series to edit
 	 */
 	private async editItem(listIndex: number): Promise<void> {
-		const series = this.seriesList.items[listIndex] as Series;
+		this.activeListItem = this.seriesList.items[listIndex] as Series;
 
 		// Save the current series details
-		this.origSeriesName = series.seriesName;
-		this.origEpisodeCount = series.episodeCount;
-		this.origWatchedCount = series.watchedCount;
-		this.origRecordedCount = series.recordedCount;
-		this.origExpectedCount = series.expectedCount;
+		this.origEpisodeCount = this.activeListItem.episodeCount;
+		this.origWatchedCount = this.activeListItem.watchedCount;
+		this.origRecordedCount = this.activeListItem.recordedCount;
+		this.origExpectedCount = this.activeListItem.expectedCount;
 
 		// Display the Series view
-		return this.appController.pushView("series", { listIndex, series });
+		return this.appController.pushView("series", { listIndex, series: this.activeListItem });
 	}
 
 	/**

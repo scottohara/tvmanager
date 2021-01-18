@@ -494,6 +494,11 @@ export default class ApplicationController {
 			$("#nowLoading").removeClass("loading");
 		} else if ($("#contentWrapper").hasClass("loaded")) {
 			$("#contentWrapper").removeClass("loaded");
+
+			// Call the view controller's contentShown method
+			if ("function" === typeof this.currentView.controller.contentShown) {
+				this.currentView.controller.contentShown();
+			}
 		}
 	}
 

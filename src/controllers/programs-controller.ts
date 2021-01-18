@@ -24,7 +24,6 @@ import ProgramListTemplate from "views/programListTemplate.html";
 import ProgramsView from "views/programs-view.html";
 import { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
-import window from "components/window";
 
 /**
  * @class ProgramsController
@@ -32,13 +31,13 @@ import window from "components/window";
  * @extends ViewController
  * @property {HeaderFooter} header - the view header bar
  * @property {List} programList - the list of programs to display
- * @property {String} origProgramName - the program name before editing
+ * @property {Program} activeListItem - active list item being added or edited
  * @property {HeaderFooter} footer - the view footer bar
  */
 export default class ProgramsController extends ViewController {
 	private programList!: PublicInterface<List>;
 
-	private origProgramName: string | null = null;
+	private activeListItem: PublicInterface<Program> | null = null;
 
 	/**
 	 * @memberof ProgramsController
@@ -89,42 +88,39 @@ export default class ProgramsController extends ViewController {
 	 * @param {ProgramListItem} [listItem] - a list item that was just added/edited in the Program view
 	 */
 	public async activate(listItem?: ProgramListItem): Promise<void> {
-		let listResort = false;
-
 		// When returning from the Program view, we need to update the list with the new values
 		if (undefined !== listItem) {
 			// If an existing program was edited, update the program details
 			if (Number(listItem.listIndex) >= 0) {
-				// If the program name has changed, we will need to resort the list and scroll to the new position
-				if (listItem.program.programName !== this.origProgramName) {
-					listResort = true;
-				}
-
 				this.programList.items[Number(listItem.listIndex)] = listItem.program;
 			} else {
 				// Otherwise add the new program to the list
 				this.programList.items.push(listItem.program);
-				listResort = true;
 			}
 
-			// If necessary, resort the list
-			if (listResort) {
-				this.programList.items = this.programList.items.sort((a: Program, b: Program): number => String(a.programName).localeCompare(String(b.programName)));
-			}
+			// In case of any changes, resort the list
+			this.programList.items = this.programList.items.sort((a: Program, b: Program): number => String(a.programName).localeCompare(String(b.programName)));
 		}
 
 		// Refresh the list
 		this.programList.refresh();
 
-		// If necessary, scroll the list item into view
-		if (undefined !== listItem && listResort) {
-			const DELAY_MS = 300;
-
-			window.setTimeout((): void => this.programList.scrollTo(String(listItem.program.id)), DELAY_MS);
-		}
-
 		// Set to view mode
 		return this.viewItems();
+	}
+
+	/**
+	 * @memberof ProgramsController
+	 * @this ProgramsController
+	 * @instance
+	 * @method contentShown
+	 * @desc "Called after the controller content is visible"
+	 */
+	public contentShown(): void {
+		// If there is an active list item, scroll it into view
+		if (null !== this.activeListItem) {
+			this.programList.scrollTo(String(this.activeListItem.id));
+		}
 	}
 
 	/**
@@ -163,12 +159,9 @@ export default class ProgramsController extends ViewController {
 	 * @param {Number} listIndex - the list index of the program to view
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
-		const program = this.programList.items[listIndex] as Program;
+		this.activeListItem = this.programList.items[listIndex] as Program;
 
-		// Save the current program details
-		this.origProgramName = program.programName;
-
-		return this.appController.pushView("seriesList", { listIndex, program });
+		return this.appController.pushView("seriesList", { listIndex, program: this.activeListItem });
 	}
 
 	/**
@@ -191,12 +184,9 @@ export default class ProgramsController extends ViewController {
 	 * @param {Number} listIndex - the list index of the program to edit
 	 */
 	private async editItem(listIndex: number): Promise<void> {
-		const program = this.programList.items[listIndex] as Program;
+		this.activeListItem = this.programList.items[listIndex] as Program;
 
-		// Save the current program details
-		this.origProgramName = program.programName;
-
-		return this.appController.pushView("program", { listIndex, program });
+		return this.appController.pushView("program", { listIndex, program: this.activeListItem });
 	}
 
 	/**

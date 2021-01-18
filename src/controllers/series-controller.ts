@@ -16,7 +16,6 @@
  */
 import {
 	NavButtonEventHandler,
-	ProgramListItem,
 	SeriesListItem
 } from "controllers";
 import $ from "jquery";
@@ -55,17 +54,17 @@ export default class SeriesController extends ViewController {
 
 	private gettingProgramId = false;
 
-	public constructor(listItem: SeriesListItem | ProgramListItem) {
+	public constructor(listItem: SeriesListItem) {
 		super();
 
 		// If the passed item has an index, we're editing an existing series
 		if (Number(listItem.listIndex) >= 0) {
-			this.listItem = listItem as SeriesListItem;
+			this.listItem = listItem;
 			this.originalNowShowing = this.listItem.series.nowShowing;
 			this.originalProgramId = this.listItem.series.programId;
 		} else {
 			// Otherwise, we're adding a new series
-			this.listItem = { series: new Series(null, "", null, (listItem as ProgramListItem).program.id, String((listItem as ProgramListItem).program.programName), 0, 0, 0, 0, 0, 0) };
+			this.listItem = { series: new Series(null, `Series ${Number(listItem.sequence) + 1}`, null, (listItem.program as Program).id, String((listItem.program as Program).programName), 0, 0, 0, 0, 0, 0) };
 		}
 	}
 
@@ -111,6 +110,20 @@ export default class SeriesController extends ViewController {
 		$("#moveTo").on("click", this.getProgramId.bind(this));
 
 		return Promise.resolve();
+	}
+
+	/**
+	 * @memberof SeriesController
+	 * @this SeriesController
+	 * @instance
+	 * @method contentShown
+	 * @desc Called after the controller content is visible
+	 */
+	public contentShown(): void {
+		// If we're adding a new series, focus and select the episode name
+		if (undefined === this.listItem.listIndex) {
+			$("#seriesName").select();
+		}
 	}
 
 	/**

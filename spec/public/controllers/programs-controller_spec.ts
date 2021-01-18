@@ -117,7 +117,7 @@ describe("ProgramsController", (): void => {
 			beforeEach((): ProgramMock[] => (programsController["programList"].items = items));
 
 			describe("edit", (): void => {
-				beforeEach((): void => {
+				beforeEach(async (): Promise<void> => {
 					listItem = {
 						listIndex: 0,
 						program: new ProgramMock("1", "edited-program")
@@ -127,31 +127,13 @@ describe("ProgramsController", (): void => {
 						listItem.program as ProgramMock,
 						items[1]
 					];
+
+					return programsController.activate(listItem);
 				});
 
-				describe("program name unchanged", (): void => {
-					beforeEach(async (): Promise<void> => {
-						programsController["origProgramName"] = listItem.program.programName;
-						await programsController.activate(listItem);
-					});
-
-					it("should update the item in the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
-					it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-					it("should not scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.not.have.been.called);
-					it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
-				});
-
-				describe("program name changed", (): void => {
-					beforeEach(async (): Promise<void> => {
-						programsController["origProgramName"] = "original-program";
-						await programsController.activate(listItem);
-					});
-
-					it("should update the item in the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
-					it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-					it("should scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.have.been.calledWith("1"));
-					it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
-				});
+				it("should update the item in the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
+				it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
+				it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
 			});
 
 			describe("add", (): void => {
@@ -163,14 +145,36 @@ describe("ProgramsController", (): void => {
 						listItem.program as ProgramMock,
 						items[1]
 					];
-					await programsController.activate(listItem);
+
+					return programsController.activate(listItem);
 				});
 
 				it("should add the item to the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
 				it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-				it("should scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.have.been.calledWith("3"));
 				it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
 			});
+		});
+	});
+
+	describe("contentShown", (): void => {
+		beforeEach((): ListMock => (programsController["programList"] = new ListMock("", "", "", [])));
+
+		describe("with active list item", (): void => {
+			beforeEach((): void => {
+				programsController["activeListItem"] = new ProgramMock("1", "");
+				programsController.contentShown();
+			});
+
+			it("should scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.have.been.calledWith("1"));
+		});
+
+		describe("without active list item", (): void => {
+			beforeEach((): void => {
+				programsController["activeListItem"] = null;
+				programsController.contentShown();
+			});
+
+			it("should not scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.not.have.been.called);
 		});
 	});
 
@@ -200,7 +204,7 @@ describe("ProgramsController", (): void => {
 			await programsController["viewItem"](index);
 		});
 
-		it("should save the current program details", (): Chai.Assertion => String(programsController["origProgramName"]).should.equal(items[0].programName));
+		it("should save the active list item", (): Chai.Assertion => (programsController["activeListItem"] as ProgramMock).should.equal(items[0]));
 		it("should push the series list view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("seriesList", {
 			listIndex: index,
 			program: items[index]
@@ -222,7 +226,7 @@ describe("ProgramsController", (): void => {
 			await programsController["editItem"](index);
 		});
 
-		it("should save the current program details", (): Chai.Assertion => String(programsController["origProgramName"]).should.equal(items[0].programName));
+		it("should save the active list item", (): Chai.Assertion => (programsController["activeListItem"] as ProgramMock).should.equal(items[0]));
 		it("should push the program view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("program", {
 			listIndex: index,
 			program: items[index]

@@ -50,6 +50,7 @@ describe("EpisodeController", (): void => {
 			it("should return a EpisodeController instance", (): Chai.Assertion => episodeController.should.be.an.instanceOf(EpisodeController));
 
 			it("should create a list item", (): void => {
+				String(episodeController["listItem"].episode.episodeName).should.equal(`Episode ${Number(listItem.sequence) + 1}`);
 				episodeController["listItem"].episode.sequence.should.equal(listItem.sequence);
 				String((episodeController["listItem"].episode as EpisodeMock).seriesId).should.equal((listItem.series as SeriesMock).id);
 			});
@@ -172,6 +173,38 @@ describe("EpisodeController", (): void => {
 			expected.remove();
 			missed.remove();
 			statusDate.remove();
+		});
+	});
+
+	describe("contentShown", (): void => {
+		let episodeName: JQuery,
+				select: SinonStub;
+
+		beforeEach((): void => {
+			episodeName = $("<input>")
+				.attr("id", "episodeName")
+				.appendTo(document.body);
+
+			select = sinon.stub($.fn, "select");
+		});
+
+		describe("adding episode", (): void => {
+			beforeEach((): void => {
+				episodeController["listItem"].listIndex = undefined;
+				episodeController.contentShown();
+			});
+
+			it("should select the episode name text", (): Chai.Assertion => select.should.have.been.called);
+		});
+
+		describe("not adding episode", (): void => {
+			beforeEach((): void => episodeController.contentShown());
+			it("should not select the episode name text", (): Chai.Assertion => select.should.not.have.been.called);
+		});
+
+		afterEach((): void => {
+			episodeName.remove();
+			select.restore();
 		});
 	});
 

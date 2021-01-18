@@ -14,7 +14,6 @@ import EpisodesController from "controllers/episodes-controller";
 import EpisodesView from "views/episodes-view.html";
 import ListMock from "mocks/list-mock";
 import SeriesMock from "mocks/series-model-mock";
-import WindowMock from "mocks/window-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
@@ -130,15 +129,12 @@ describe("EpisodesController", (): void => {
 		beforeEach((): void => {
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
 			episodesController["episodeList"] = new ListMock("", "", "", [{ ...items[0] } as EpisodeMock]);
-			episodesController["scrollToFirstUnwatched"] = false;
-			WindowMock.setTimeout.resetHistory();
 		});
 
 		describe("from series list view", (): void => {
 			beforeEach(async (): Promise<void> => episodesController.activate());
 
 			it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-			it("should not scroll to the first unwatched episode", (): Chai.Assertion => WindowMock.setTimeout.should.not.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 		});
 
@@ -216,7 +212,6 @@ describe("EpisodesController", (): void => {
 						it("should update the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
 						it("should update the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(1 + Number(scenario.warning)));
 						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-						it("should not scroll to the first unwatched episode", (): Chai.Assertion => WindowMock.setTimeout.should.not.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 					});
 
@@ -235,31 +230,43 @@ describe("EpisodesController", (): void => {
 						it("should increment the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
 						it("should increment the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 + Number(scenario.warning)));
 						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-						it("should not scroll to the first unwatched episode", (): Chai.Assertion => WindowMock.setTimeout.should.not.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 					});
 				});
 			});
+		});
+	});
+
+	describe("contentShown", (): void => {
+		beforeEach((): ListMock => (episodesController["episodeList"] = new ListMock("", "", "", [{ ...items[0] } as EpisodeMock])));
+
+		describe("don't scroll to first unwatched", (): void => {
+			beforeEach((): void => {
+				episodesController["scrollToFirstUnwatched"] = false;
+				episodesController.contentShown();
+			});
+
+			it("should not scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.not.have.been.called);
 		});
 
 		describe("scroll to first unwatched", (): void => {
 			beforeEach((): boolean => (episodesController["scrollToFirstUnwatched"] = true));
 
 			describe("all watched", (): void => {
-				beforeEach(async (): Promise<void> => episodesController.activate());
+				beforeEach((): void => episodesController.contentShown());
 
 				it("should not scroll", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.not.have.been.called);
 				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.false);
 			});
 
 			describe("none watched", (): void => {
-				beforeEach(async (): Promise<void> => {
+				beforeEach((): void => {
 					episodesController["episodeList"].items = [
 						{ id: "1" },
 						{ id: "2" },
 						{ id: "3" }
 					] as EpisodeMock[];
-					await episodesController.activate();
+					episodesController.contentShown();
 				});
 
 				it("should scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.have.been.calledWith("1"));
@@ -267,13 +274,13 @@ describe("EpisodesController", (): void => {
 			});
 
 			describe("some watched", (): void => {
-				beforeEach(async (): Promise<void> => {
+				beforeEach((): void => {
 					episodesController["episodeList"].items = [
 						{ id: "1", status: "Watched" },
 						{ id: "2", status: "Watched" },
 						{ id: "3" }
 					] as EpisodeMock[];
-					await episodesController.activate();
+					episodesController.contentShown();
 				});
 
 				it("should scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.have.been.calledWith("3"));
