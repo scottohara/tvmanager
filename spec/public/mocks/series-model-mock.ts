@@ -1,8 +1,5 @@
-import {
-	NowShowingEnum,
-	SerializedModel
-} from "models";
 import sinon, { SinonStub } from "sinon";
+import { SerializedModel } from "models";
 
 const saveStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),
@@ -17,8 +14,6 @@ let series: SeriesMock[] = [],
 		removeAllOk: boolean;
 
 export default class SeriesMock {
-	public static readonly NOW_SHOWING: NowShowingEnum = { 1: "Mondays" };
-
 	public progressBarDisplay = "";
 
 	public nowShowingDisplay = "";
@@ -36,8 +31,6 @@ export default class SeriesMock {
 	public setExpectedCount: SinonStub = sinon.stub();
 
 	public setStatusWarning: SinonStub = sinon.stub();
-
-	public setNowShowing: SinonStub = sinon.stub();
 
 	public constructor(public readonly id: string | null,
 						public seriesName: string | null,

@@ -50,8 +50,6 @@ export default class SeriesController extends ViewController {
 
 	private readonly originalProgramId: string | null = null;
 
-	private gettingNowShowing = false;
-
 	private gettingProgramId = false;
 
 	public constructor(listItem: SeriesListItem) {
@@ -64,7 +62,7 @@ export default class SeriesController extends ViewController {
 			this.originalProgramId = this.listItem.series.programId;
 		} else {
 			// Otherwise, we're adding a new series
-			this.listItem = { series: new Series(null, `Series ${Number(listItem.sequence) + 1}`, null, (listItem.program as Program).id, String((listItem.program as Program).programName), 0, 0, 0, 0, 0, 0) };
+			this.listItem = { series: new Series(null, `Series ${Number(listItem.sequence) + 1}`, null, (listItem.program as Program).id, String((listItem.program as Program).programName)) };
 		}
 	}
 
@@ -103,10 +101,9 @@ export default class SeriesController extends ViewController {
 
 		// Set the series details
 		$("#seriesName").val(String(this.listItem.series.seriesName));
-		$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
+		$("#nowShowing").val(null === this.listItem.series.nowShowing ? "" : String(this.listItem.series.nowShowing));
 
 		// Bind events for all of the buttons/controls
-		$("#nowShowing").on("click", this.getNowShowing.bind(this));
 		$("#moveTo").on("click", this.getProgramId.bind(this));
 
 		return Promise.resolve();
@@ -136,6 +133,7 @@ export default class SeriesController extends ViewController {
 	private async save(): Promise<void> {
 		// Get the series details
 		this.listItem.series.seriesName = String($("#seriesName").val());
+		this.listItem.series.nowShowing = Number($("#nowShowing").val()) || null;
 
 		// Update the database and pop the view off the stack
 		await this.listItem.series.save();
@@ -152,58 +150,11 @@ export default class SeriesController extends ViewController {
 	 */
 	private async cancel(): Promise<void> {
 		// Revert to the original series details
-		this.listItem.series.setNowShowing(this.originalNowShowing);
+		this.listItem.series.nowShowing = this.originalNowShowing;
 		this.listItem.series.programId = this.originalProgramId;
 
 		// Pop the view off the stack
 		return this.appController.popView();
-	}
-
-	/**
-	 * @memberof SeriesController
-	 * @this SeriesController
-	 * @instance
-	 * @method getNowShowing
-	 * @desc Displays a SpinningWheel control for capturing the now showing status
-	 */
-	private getNowShowing(): void {
-		// Only proceed if the now showing status is not already being set
-		if (!this.gettingNowShowing) {
-			// Set the getting flag
-			this.gettingNowShowing = true;
-
-			// Get the current now showing status, and default to "Not Showing" if not set
-			const nowShowing = Number(this.listItem.series.nowShowing);
-
-			// Initialise the SpinningWheel with one slot for the now showing values; and show the control
-			SpinningWheel.addSlot<number>(Series.NOW_SHOWING, "left", nowShowing);
-			SpinningWheel.setDoneAction(this.setNowShowing.bind(this));
-			SpinningWheel.open();
-
-			// SpinningWheel only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
-			this.swtoucheventproxy = new TouchEventProxy($("#sw-wrapper").get(0));
-
-			// Clear the getting flag
-			this.gettingNowShowing = false;
-		}
-	}
-
-	/**
-	 * @memberof SeriesController
-	 * @this SeriesController
-	 * @instance
-	 * @method setNowShowing
-	 * @desc Gets the selected value from the SpinningWheel and updates the model and view
-	 */
-	private setNowShowing(): void {
-		// Update the model with the selected values in the SpinningWheel
-		this.listItem.series.setNowShowing(SpinningWheel.getSelectedValues<number>().keys[0]);
-
-		// Update the view
-		$("#nowShowing").val(this.listItem.series.nowShowingDisplay);
-
-		// Remove the touch event proxy
-		this.swtoucheventproxy = null;
 	}
 
 	/**

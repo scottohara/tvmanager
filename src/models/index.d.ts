@@ -10,10 +10,6 @@ export type ModelType = "Episode" | "Program" | "Series";
 
 export type Model = Program | Series | Episode;
 
-export interface NowShowingEnum {
-	[key: number]: string;
-}
-
 // Interfaces for persisting to local storage (IndexedDb)
 
 export interface PersistedProgram {

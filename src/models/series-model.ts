@@ -13,7 +13,6 @@
  */
 import {
 	EpisodeStatus,
-	NowShowingEnum,
 	PersistedSeries,
 	SerializedSeries
 } from "models";
@@ -30,7 +29,7 @@ import { v4 } from "uuid";
  * @property {String} seriesName - name of the series
  * @property {Number} nowShowing - the now showing status
  * @property {String} programId - unique identifier of the program that the series belongs to
- * @property {String} programName - name of the program that the series belongs to
+ * @property {String} programName- name of the program that the series belongs to
  * @property {Number} episodeCount - the number of episodes for the series
  * @property {Number} watchedCount - the number of watched episodes for the series
  * @property {Number} recordedCount - the number of recorded episodes for the series
@@ -38,14 +37,13 @@ import { v4 } from "uuid";
  * @property {Number} missedCount - the number of missed episodes for the series
  * @property {Number} statusWarningCount - the number of expected episodes past their status date for the series
  * @property {ProgressBar} progressBar - progress bar component to generate the progress bar HTML
- * @property {String} nowShowingDisplay - the display value of the now showing status, use for grouping in the schedule view
  * @property {String} progressBarDisplay - HTML of the progress bar to display under the series name in any series lists
  * @property {String} statusWarning - a CSS class name to use to indicate that one or more expected episodes for the series have passed their expected date
  * @param {String} id - unique identifier of the series
  * @param {String} seriesName - name of the series
- * @param {Number} nowShowing - the now showing status
  * @param {String} programId - unique identifier of the program that the series belongs to
  * @param {String} programName - name of the program that the series belongs to
+ * @param {Number} nowShowing - the now showing status
  * @param {Number} episodeCount - the number of episodes for the series
  * @param {Number} watchedCount - the number of watched episodes for the series
  * @param {Number} recordedCount - the number of recorded episodes for the series
@@ -54,21 +52,7 @@ import { v4 } from "uuid";
  * @param {Number} statusWarningCount - the number of expected episodes past their status date for the series
  */
 export default class Series extends Base {
-	public static readonly NOW_SHOWING: NowShowingEnum = {
-		0: "Not Showing",
-		1: "Mondays",
-		2: "Tuesdays",
-		3: "Wednesdays",
-		4: "Thursdays",
-		5: "Fridays",
-		6: "Saturdays",
-		7: "Sundays",
-		8: "Daily"
-	};
-
 	public progressBarDisplay!: string;
-
-	public nowShowingDisplay = "";
 
 	public statusWarning: "warning" | "" = "";
 
@@ -82,18 +66,16 @@ export default class Series extends Base {
 
 	public statusWarningCount = 0;
 
-	public nowShowing!: number | null;
-
 	private readonly progressBar: ProgressBar;
 
 	private missedCount = 0;
 
 	public constructor(public id: string | null,
-						public seriesName: string | null, nowShowing: number | null,
+						public seriesName: string | null,
+						public nowShowing: number | null,
 						public programId: string | null,
 						public programName?: string, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0, missedCount = 0, statusWarningCount = 0) {
 		super();
-		this.setNowShowing(nowShowing);
 		this.progressBar = new ProgressBar(episodeCount, []);
 		this.setEpisodeCount(episodeCount);
 		this.setWatchedCount(watchedCount);
@@ -101,6 +83,9 @@ export default class Series extends Base {
 		this.setExpectedCount(expectedCount);
 		this.setMissedCount(missedCount);
 		this.setStatusWarning(statusWarningCount);
+
+		// Make getters enumerable
+		["nowShowingDisplay"].forEach(this.makeEnumerable.bind(this));
 	}
 
 	/**
@@ -426,18 +411,22 @@ export default class Series extends Base {
 	 * @memberof Series
 	 * @this Series
 	 * @instance
-	 * @method setNowShowing
-	 * @desc Sets the now showing status of the series
-	 * @param {Number} nowShowing - the now showing status of the series
+	 * @property nowShowingDisplay
+	 * @desc ReSets the now showing status of the series
 	 */
-	public setNowShowing(nowShowing: number | null = 0): void {
-		const showing = Number(nowShowing);
+	public get nowShowingDisplay(): string {
+		const NOW_SHOWING: { [nowShowing: number]: string; } = {
+			1: "Mondays",
+			2: "Tuesdays",
+			3: "Wednesdays",
+			4: "Thursdays",
+			5: "Fridays",
+			6: "Saturdays",
+			7: "Sundays",
+			8: "Daily"
+		};
 
-		// If the value passed (or defaulted) is "Not Showing", clear the property
-		this.nowShowing = showing ? showing : null;
-
-		// Update the now showing display value
-		this.nowShowingDisplay = Series.NOW_SHOWING[showing];
+		return Number(this.nowShowing) > 0 ? NOW_SHOWING[Number(this.nowShowing)] : "Not Showing";
 	}
 
 	/**

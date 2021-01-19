@@ -73,16 +73,22 @@ describe("SeriesController", (): void => {
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesController, "cancel" as keyof SeriesController);
 			sinon.stub(seriesController, "save" as keyof SeriesController);
-			sinon.stub(seriesController, "getNowShowing" as keyof SeriesController);
 			sinon.stub(seriesController, "getProgramId" as keyof SeriesController);
 
 			seriesName = $("<input>")
 				.attr("id", "seriesName")
 				.appendTo(document.body);
 
-			nowShowing = $("<input>")
+			nowShowing = $("<select>")
 				.attr("id", "nowShowing")
 				.appendTo(document.body);
+
+			$("<option>")
+				.appendTo(nowShowing);
+
+			$("<option>")
+				.val(String(listItem.series.nowShowing))
+				.appendTo(nowShowing);
 
 			moveTo = $("<input>")
 				.attr("id", "moveTo")
@@ -110,16 +116,20 @@ describe("SeriesController", (): void => {
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
 		it("should set the series name", (): Chai.Assertion => String(seriesName.val()).should.equal(listItem.series.seriesName));
-		it("should set the now showing", (): Chai.Assertion => String(nowShowing.val()).should.equal(listItem.series.nowShowingDisplay));
-
-		it("should attach a now showing click event handler", (): void => {
-			nowShowing.trigger("click");
-			seriesController["getNowShowing"].should.have.been.called;
-		});
+		it("should set the now showing", (): Chai.Assertion => Number(nowShowing.val()).should.equal(listItem.series.nowShowing));
 
 		it("should attach a move to click event handler", (): void => {
 			moveTo.trigger("click");
 			seriesController["getProgramId"].should.have.been.called;
+		});
+
+		describe("not showing", (): void => {
+			beforeEach(async (): Promise<void> => {
+				seriesController["listItem"].series.nowShowing = null;
+				await seriesController.setup();
+			});
+
+			it("should not set the now showing", (): Chai.Assertion => String(nowShowing.val()).should.equal(""));
 		});
 
 		afterEach((): void => {
@@ -163,131 +173,69 @@ describe("SeriesController", (): void => {
 
 	describe("save", (): void => {
 		let seriesName: string,
-				seriesNameInput: JQuery;
+				nowShowing: number,
+				seriesNameInput: JQuery,
+				nowShowingSelect: JQuery;
 
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			seriesName = "test-series-2";
+			nowShowing = 2;
 
 			seriesNameInput = $("<input>")
 				.attr("id", "seriesName")
 				.val(seriesName)
 				.appendTo(document.body);
 
-			await seriesController["save"]();
+			nowShowingSelect = $("<select>")
+				.attr("id", "nowShowing")
+				.val(String(nowShowing))
+				.appendTo(document.body);
+
+			$("<option>")
+				.val(String(nowShowing))
+				.appendTo(nowShowingSelect);
 		});
 
-		it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
-		it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
-		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+		describe("now showing", (): void => {
+			beforeEach(async (): Promise<void> => seriesController["save"]());
 
-		afterEach((): JQuery => seriesNameInput.remove());
+			it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
+			it("should get the now showing", (): Chai.Assertion => Number(seriesController["listItem"].series.nowShowing).should.equal(nowShowing));
+			it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
+			it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+		});
+
+		describe("not showing", (): void => {
+			beforeEach(async (): Promise<void> => {
+				nowShowingSelect.val("");
+				await seriesController["save"]();
+			});
+
+			it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
+			it("should get the now showing", (): Chai.Assertion => (null === seriesController["listItem"].series.nowShowing).should.be.true);
+			it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
+			it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+		});
+
+		afterEach((): void => {
+			seriesNameInput.remove();
+			nowShowingSelect.remove();
+		});
 	});
 
 	describe("cancel", (): void => {
 		beforeEach(async (): Promise<void> => {
+			seriesController["listItem"].series.nowShowing = 2;
 			seriesController["listItem"].series.programId = "2";
 			await seriesController["cancel"]();
 		});
 
 		it("should revert any changes", (): void => {
-			seriesController["listItem"].series.setNowShowing.should.have.been.calledWith(1);
+			Number(seriesController["listItem"].series.nowShowing).should.equal(1);
 			String(seriesController["listItem"].series.programId).should.equal("1");
 		});
 
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
-	});
-
-	describe("getNowShowing", (): void => {
-		describe("in progress", (): void => {
-			it("should do nothing", (): void => {
-				seriesController["gettingNowShowing"] = true;
-				seriesController["getNowShowing"]();
-				seriesController["gettingNowShowing"].should.be.true;
-			});
-		});
-
-		describe("not in progress", (): void => {
-			interface Scenario {
-				description: string;
-				nowShowing: number | null;
-				expected: number;
-			}
-
-			const scenarios: Scenario[] = [
-				{
-					description: "showing",
-					nowShowing: 1,
-					expected: 1
-				},
-				{
-					description: "not showing",
-					nowShowing: null,
-					expected: 0
-				}
-			];
-
-			let swWrapper: JQuery;
-
-			beforeEach((): void => {
-				sinon.stub(seriesController, "setNowShowing" as keyof SeriesController);
-				(SpinningWheelMock.addSlot as SinonStub).reset();
-				SpinningWheelMock.setDoneAction.resetHistory();
-				SpinningWheelMock.open.reset();
-
-				swWrapper = $("<div>")
-					.attr("id", "sw-wrapper")
-					.appendTo(document.body);
-			});
-
-			scenarios.forEach((scenario: Scenario): void => {
-				describe(scenario.description, (): void => {
-					beforeEach((): void => {
-						seriesController["listItem"].series.nowShowing = scenario.nowShowing;
-						seriesController["getNowShowing"]();
-					});
-
-					it("should initialise the SpinningWheel", (): Chai.Assertion => SpinningWheelMock.addSlot.should.have.been.calledWith(SeriesMock.NOW_SHOWING, "left", scenario.expected));
-
-					it("should attach a done callback to the SpinningWheel", (): void => {
-						SpinningWheelMock.setDoneAction.should.have.been.called;
-						seriesController["setNowShowing"].should.have.been.called;
-					});
-
-					it("should open the SpinningWheel", (): Chai.Assertion => SpinningWheelMock.open.should.have.been.called);
-					it("should wrap the SpinningWheel in a touch event proxy", (): Chai.Assertion => (seriesController.swtoucheventproxy as TouchEventProxy)["element"].should.deep.equal(swWrapper.get(0)));
-					it("should clear the semaphore", (): Chai.Assertion => seriesController["gettingNowShowing"].should.be.false);
-				});
-			});
-
-			afterEach((): JQuery => swWrapper.remove());
-		});
-	});
-
-	describe("setNowShowing", (): void => {
-		let nowShowing: JQuery;
-
-		beforeEach((): void => {
-			(SpinningWheelMock.getSelectedValues as SinonStub).reset();
-			(SpinningWheelMock.getSelectedValues as SinonStub).returns({
-				keys: [1],
-				values: ["Mondays"]
-			});
-
-			seriesController.swtoucheventproxy = {} as TouchEventProxy;
-			seriesController["listItem"].series.nowShowingDisplay = "Mondays";
-
-			nowShowing = $("<input>")
-				.attr("id", "nowShowing")
-				.appendTo(document.body);
-
-			seriesController["setNowShowing"]();
-		});
-
-		it("should get the selected value from the SpinningWheel", (): Chai.Assertion => listItem.series.setNowShowing.should.have.been.calledWith(1));
-		it("should update the view", (): Chai.Assertion => String(nowShowing.val()).should.equal("Mondays"));
-		it("should remove the touch event proxy", (): Chai.Assertion => (null === seriesController.swtoucheventproxy).should.be.true);
-
-		afterEach((): JQuery => nowShowing.remove());
 	});
 
 	describe("getProgramId", (): void => {

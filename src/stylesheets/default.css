@@ -387,7 +387,7 @@ p {
 }
 
 /* Dialog fields */
-input:not([type="radio"]) {
+input:not([type="radio"]), select {
 	border: none;
 	height: 40px;
 	width: 100%;

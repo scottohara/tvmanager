@@ -49,6 +49,10 @@ describe("Series", (): void => {
 		it("should set the expected count", (): Chai.Assertion => series.expectedCount.should.equal(expectedCount));
 		it("should set the missed count", (): Chai.Assertion => series["missedCount"].should.equal(missedCount));
 		it("should set the status warning count", (): Chai.Assertion => series.statusWarningCount.should.equal(statusWarningCount));
+
+		["nowShowingDisplay"].forEach((property: string): void => {
+			it(`should make the ${property} property enumerable`, (): Chai.Assertion => Boolean((Object.getOwnPropertyDescriptor(series, property) as PropertyDescriptor).enumerable).should.be.true);
+		});
 	});
 
 	describe("listByProgram", (): void => {
@@ -488,18 +492,14 @@ describe("Series", (): void => {
 		});
 	});
 
-	describe("setNowShowing", (): void => {
+	describe("nowShowingDisplay", (): void => {
 		interface Scenario {
 			description: string;
-			nowShowing?: number | null;
+			nowShowing: number | null;
 			nowShowingDisplay: string;
 		}
 
 		const scenarios: Scenario[] = [
-			{
-				description: "undefined",
-				nowShowingDisplay: "Not Showing"
-			},
 			{
 				description: "null",
 				nowShowing: null,
@@ -519,16 +519,7 @@ describe("Series", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => series.setNowShowing(scenario.nowShowing));
-
-				it("should set the now showing", (): void => {
-					if (undefined !== scenario.nowShowing && null !== scenario.nowShowing) {
-						Number(series.nowShowing).should.equal(scenario.nowShowing);
-					} else {
-						(null === series.nowShowing).should.be.true;
-					}
-				});
-
+				beforeEach((): number | null => (series.nowShowing = scenario.nowShowing));
 				it("should update the now showing display", (): Chai.Assertion => series.nowShowingDisplay.should.equal(scenario.nowShowingDisplay));
 			});
 		});
