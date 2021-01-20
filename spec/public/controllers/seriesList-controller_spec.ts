@@ -208,12 +208,29 @@ describe("SeriesListController", (): void => {
 		beforeEach((): ListMock => (seriesListController["seriesList"] = new ListMock("", "", "", [])));
 
 		describe("with active list item", (): void => {
+			let item: JQuery;
+
+			beforeEach((): void => {
+				seriesListController["activeListItem"] = new SeriesMock("1", "", null, "1");
+				item = $("<li>")
+					.attr("id", "1")
+					.appendTo(document.body);
+
+				seriesListController.contentShown();
+			});
+
+			it("should scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.have.been.calledWith("1"));
+
+			afterEach((): JQuery => item.remove());
+		});
+
+		describe("with active list item that no longer exists", (): void => {
 			beforeEach((): void => {
 				seriesListController["activeListItem"] = new SeriesMock("1", "", null, "1");
 				seriesListController.contentShown();
 			});
 
-			it("should scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.have.been.calledWith("1"));
+			it("should not scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.not.have.been.called);
 		});
 
 		describe("without active list item", (): void => {

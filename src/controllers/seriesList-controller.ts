@@ -149,7 +149,7 @@ export default class SeriesListController extends ViewController {
 	 */
 	public contentShown(): void {
 		// If there is an active list item, scroll it into view
-		if (null !== this.activeListItem) {
+		if (null !== this.activeListItem && $(`#${this.activeListItem.id}`).length) {
 			this.seriesList.scrollTo(String(this.activeListItem.id));
 		}
 	}

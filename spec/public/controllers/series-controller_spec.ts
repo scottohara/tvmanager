@@ -10,8 +10,6 @@ import ProgramMock from "mocks/program-model-mock";
 import SeriesController from "controllers/series-controller";
 import SeriesMock from "mocks/series-model-mock";
 import SeriesView from "views/series-view.html";
-import SpinningWheelMock from "mocks/spinningwheel-mock";
-import TouchEventProxy from "components/toucheventproxy";
 
 // Get a reference to the application controller singleton
 const appController: ApplicationControllerMock = new ApplicationControllerMock();
@@ -54,7 +52,6 @@ describe("SeriesController", (): void => {
 			it("should create a list item", (): void => {
 				String(seriesController["listItem"].series.seriesName).should.equal(`Series ${Number(seriesListItem.sequence) + 1}`);
 				String(seriesController["listItem"].series.programId).should.equal((seriesListItem.program as ProgramMock).id);
-				String(seriesController["listItem"].series.programName).should.equal((seriesListItem.program as ProgramMock).programName);
 			});
 		});
 	});
@@ -68,12 +65,13 @@ describe("SeriesController", (): void => {
 				nowShowing: JQuery,
 				moveTo: JQuery,
 				leftButton: NavButton,
-				rightButton: NavButton;
+				rightButton: NavButton,
+				programs: [string, string][],
+				programList: ProgramMock[];
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(seriesController, "cancel" as keyof SeriesController);
 			sinon.stub(seriesController, "save" as keyof SeriesController);
-			sinon.stub(seriesController, "getProgramId" as keyof SeriesController);
 
 			seriesName = $("<input>")
 				.attr("id", "seriesName")
@@ -90,9 +88,17 @@ describe("SeriesController", (): void => {
 				.val(String(listItem.series.nowShowing))
 				.appendTo(nowShowing);
 
-			moveTo = $("<input>")
+			moveTo = $("<select>")
 				.attr("id", "moveTo")
 				.appendTo(document.body);
+
+			programs = [
+				["1", "program 1"],
+				["2", "program 2"]
+			];
+
+			programList = programs.map(([id, name]: [string, string]): ProgramMock => new ProgramMock(id, name));
+			ProgramMock.programs = programList;
 
 			await seriesController.setup();
 			leftButton = seriesController.header.leftButton as NavButton;
@@ -115,13 +121,15 @@ describe("SeriesController", (): void => {
 
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
+
+		it("should populate the move to select with a list of programs", (): JQuery => moveTo.children("option").each((index: number, option: HTMLOptionElement): void => {
+			String($(option).val()).should.equal(programs[index][0]);
+			$(option).text().should.equal(programs[index][1]);
+		}));
+
 		it("should set the series name", (): Chai.Assertion => String(seriesName.val()).should.equal(listItem.series.seriesName));
 		it("should set the now showing", (): Chai.Assertion => Number(nowShowing.val()).should.equal(listItem.series.nowShowing));
-
-		it("should attach a move to click event handler", (): void => {
-			moveTo.trigger("click");
-			seriesController["getProgramId"].should.have.been.called;
-		});
+		it("should set the current program", (): Chai.Assertion => String(moveTo.val()).should.equal(listItem.series.programId));
 
 		describe("not showing", (): void => {
 			beforeEach(async (): Promise<void> => {
@@ -174,12 +182,15 @@ describe("SeriesController", (): void => {
 	describe("save", (): void => {
 		let seriesName: string,
 				nowShowing: number,
+				programId: string,
 				seriesNameInput: JQuery,
-				nowShowingSelect: JQuery;
+				nowShowingSelect: JQuery,
+				moveToSelect: JQuery;
 
 		beforeEach((): void => {
 			seriesName = "test-series-2";
 			nowShowing = 2;
+			programId = "2";
 
 			seriesNameInput = $("<input>")
 				.attr("id", "seriesName")
@@ -188,12 +199,26 @@ describe("SeriesController", (): void => {
 
 			nowShowingSelect = $("<select>")
 				.attr("id", "nowShowing")
-				.val(String(nowShowing))
 				.appendTo(document.body);
 
 			$("<option>")
 				.val(String(nowShowing))
 				.appendTo(nowShowingSelect);
+
+			nowShowingSelect.val(String(nowShowing));
+
+			moveToSelect = $("<select>")
+				.attr("id", "moveTo")
+				.appendTo(document.body);
+
+			$("<option>")
+				.val("1")
+				.appendTo(moveToSelect);
+			$("<option>")
+				.val("2")
+				.appendTo(moveToSelect);
+
+			moveToSelect.val(programId);
 		});
 
 		describe("now showing", (): void => {
@@ -201,6 +226,7 @@ describe("SeriesController", (): void => {
 
 			it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
 			it("should get the now showing", (): Chai.Assertion => Number(seriesController["listItem"].series.nowShowing).should.equal(nowShowing));
+			it("should get the current program", (): Chai.Assertion => String(seriesController["listItem"].series.programId).should.equal(programId));
 			it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
 			it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
 		});
@@ -213,6 +239,7 @@ describe("SeriesController", (): void => {
 
 			it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
 			it("should get the now showing", (): Chai.Assertion => (null === seriesController["listItem"].series.nowShowing).should.be.true);
+			it("should get the current program", (): Chai.Assertion => String(seriesController["listItem"].series.programId).should.equal(programId));
 			it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
 			it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
 		});
@@ -220,6 +247,7 @@ describe("SeriesController", (): void => {
 		afterEach((): void => {
 			seriesNameInput.remove();
 			nowShowingSelect.remove();
+			moveToSelect.remove();
 		});
 	});
 
@@ -236,103 +264,5 @@ describe("SeriesController", (): void => {
 		});
 
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
-	});
-
-	describe("getProgramId", (): void => {
-		beforeEach((): SinonStub => sinon.stub(seriesController, "listRetrieved" as keyof SeriesController));
-
-		describe("in progress", (): void => {
-			it("should do nothing", async (): Promise<void> => {
-				seriesController["gettingProgramId"] = true;
-				await seriesController["getProgramId"]();
-				seriesController["listRetrieved"].should.not.have.been.called;
-			});
-		});
-
-		describe("not in progress", (): void => {
-			let programs: ProgramMock[];
-
-			beforeEach(async (): Promise<void> => {
-				programs = [
-					new ProgramMock(null, "program 1"),
-					new ProgramMock(null, "program 2")
-				];
-				ProgramMock.programs = programs;
-				await seriesController["getProgramId"]();
-			});
-
-			it("should set the semaphore", (): Chai.Assertion => seriesController["gettingProgramId"].should.be.true);
-			it("should get the list of programs", (): Chai.Assertion => seriesController["listRetrieved"].should.have.been.calledWith(programs));
-		});
-	});
-
-	describe("listRetrieved", (): void => {
-		let swWrapper: JQuery,
-				programs: {[key: string]: string;};
-
-		beforeEach((): void => {
-			sinon.stub(seriesController, "setProgramId" as keyof SeriesController);
-			(SpinningWheelMock.addSlot as SinonStub).reset();
-			SpinningWheelMock.setDoneAction.resetHistory();
-			SpinningWheelMock.open.reset();
-
-			swWrapper = $("<div>")
-				.attr("id", "sw-wrapper")
-				.appendTo(document.body);
-
-			programs = {
-				1: "program 1",
-				2: "program 2"
-			};
-
-			seriesController["gettingProgramId"] = true;
-			seriesController["listRetrieved"]([
-				new ProgramMock("1", "program 1"),
-				new ProgramMock("2", "program 2")
-			]);
-		});
-
-		it("should initialise the SpinningWheel", (): Chai.Assertion => SpinningWheelMock.addSlot.should.have.been.calledWith(programs, "left", listItem.series.programId));
-
-		it("should attach a done callback to the SpinningWheel", (): void => {
-			SpinningWheelMock.setDoneAction.should.have.been.called;
-			seriesController["setProgramId"].should.have.been.called;
-		});
-
-		it("should open the SpinningWheel", (): Chai.Assertion => SpinningWheelMock.open.should.have.been.called);
-		it("should wrap the SpinningWheel in a touch event proxy", (): Chai.Assertion => (null !== seriesController.swtoucheventproxy).should.be.true);
-		it("should clear the semaphore", (): Chai.Assertion => seriesController["gettingProgramId"].should.be.false);
-
-		afterEach((): JQuery => swWrapper.remove());
-	});
-
-	describe("setProgramId", (): void => {
-		let moveTo: JQuery;
-
-		beforeEach((): void => {
-			(SpinningWheelMock.getSelectedValues as SinonStub).reset();
-			(SpinningWheelMock.getSelectedValues as SinonStub).returns({
-				keys: [2],
-				values: ["program 2"]
-			});
-
-			seriesController.swtoucheventproxy = {} as TouchEventProxy;
-
-			moveTo = $("<input>")
-				.attr("id", "moveTo")
-				.appendTo(document.body);
-
-			seriesController["setProgramId"]();
-		});
-
-		it("should get the selected value from the SpinningWheel", (): void => {
-			String(listItem.series.programId).should.equal("2");
-			String(listItem.series.programName).should.equal("program 2");
-		});
-
-		it("should update the view", (): Chai.Assertion => String(moveTo.val()).should.equal("program 2"));
-		it("should remove the touch event proxy", (): Chai.Assertion => (null === seriesController.swtoucheventproxy).should.be.true);
-
-		afterEach((): JQuery => moveTo.remove());
 	});
 });

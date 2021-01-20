@@ -23,7 +23,6 @@
  * @requires controllers/seriesList-controller
  * @requires models/setting-model
  * @requires controllers/settings-controller
- * @requires framework/spinningwheel
  * @requires components/toucheventproxy
  * @requires controllers/unscheduled-controller
  */
@@ -50,7 +49,6 @@ import SeriesController from "controllers/series-controller";
 import SeriesListController from "controllers/seriesList-controller";
 import Setting from "models/setting-model";
 import SettingsController from "controllers/settings-controller";
-import SpinningWheel from "framework/spinningwheel";
 import TouchEventProxy from "components/toucheventproxy";
 import UnscheduledController from "controllers/unscheduled-controller";
 import window from "components/window";
@@ -100,9 +98,6 @@ export default class ApplicationController {
 
 		// Bind a handler for transition end events
 		$("#contentWrapper").on("transitionend", this.contentShown.bind(this));
-
-		// Increase the default cell height of the SpinningWheel (44px default is incorrect)
-		SpinningWheel.cellHeight = 45;
 
 		return this;
 	}

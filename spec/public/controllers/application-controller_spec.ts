@@ -14,7 +14,6 @@ import sinon, {
 import $ from "jquery";
 import ApplicationController from "../../../src/controllers/application-controller";
 import SettingMock from "mocks/setting-model-mock";
-import SpinningWheelMock from "mocks/spinningwheel-mock";
 import TestController from "mocks/test-controller";
 import WindowMock from "mocks/window-mock";
 
@@ -55,7 +54,6 @@ describe("ApplicationController", (): void => {
 			applicationController["contentShown"].should.have.been.called;
 		});
 
-		it("should set the SpinningWheel cell height", (): Chai.Assertion => SpinningWheelMock.cellHeight.should.equal(45));
 		it("should create a scroll helper", (): Chai.Assertion => applicationController.abc["element"].should.deep.equal(abc.get(0)));
 		it("should associate the scroll helper with the content", (): Chai.Assertion => applicationController.abc["scrollElement"].should.deep.equal($("#content")));
 		it("should wrap the scroll helper in a touch event proxy", (): Chai.Assertion => applicationController.abctoucheventproxy["element"].should.deep.equal(abc.get(0)));

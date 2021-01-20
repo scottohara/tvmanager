@@ -38,7 +38,6 @@ module.exports = merge(config, {
 			"stores/settings": "mocks/settings-store-mock",
 			"stores/syncs": "mocks/syncs-store-mock",
 			"stores/worker": "mocks/worker-store-mock",
-			"framework/spinningwheel": "mocks/spinningwheel-mock",
 			comlink: "mocks/comlink-mock",
 			md5: "mocks/md5-mock",
 			"uuid/v4": "mocks/uuid-mock"
