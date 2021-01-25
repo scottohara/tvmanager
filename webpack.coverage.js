@@ -8,8 +8,7 @@ config.module.rules.push({
 		esModules: true
 	},
 	exclude: [
-		/node_modules/u,
-		/src\/framework/u
+		/node_modules/u
 	],
 	enforce: "post"
 });

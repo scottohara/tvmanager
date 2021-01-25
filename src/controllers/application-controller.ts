@@ -8,7 +8,6 @@
 /**
  * @module controllers/application-controller
  * @requires jquery
- * @requires framework/abc
  * @requires controllers/about-controller
  * @requires controllers/dataSync-controller
  * @requires controllers/database-controller
@@ -23,7 +22,6 @@
  * @requires controllers/seriesList-controller
  * @requires models/setting-model
  * @requires controllers/settings-controller
- * @requires components/toucheventproxy
  * @requires controllers/unscheduled-controller
  */
 import {
@@ -34,7 +32,6 @@ import {
 	ViewControllerSet
 } from "controllers";
 import $ from "jquery";
-import Abc from "framework/abc";
 import AboutController from "controllers/about-controller";
 import DataSyncController from "controllers/dataSync-controller";
 import EpisodeController from "controllers/episode-controller";
@@ -49,7 +46,6 @@ import SeriesController from "controllers/series-controller";
 import SeriesListController from "controllers/seriesList-controller";
 import Setting from "models/setting-model";
 import SettingsController from "controllers/settings-controller";
-import TouchEventProxy from "components/toucheventproxy";
 import UnscheduledController from "controllers/unscheduled-controller";
 import window from "components/window";
 
@@ -61,8 +57,6 @@ declare const MAX_DATA_AGE_DAYS: number;
  * @this ApplicationController
  * @property {Array<View>} viewStack - an array of views currently loaded. Last item on the array is the view currently visible.
  * @property {NoticeStack} noticeStack - contains the array of notices displayed, and the total height of the notices
- * @property {abc} abc - scroll helper object
- * @property {TouchEventProxy} abctoucheventproxy - remaps touch events for the scroll helper
  * @property {Number} maxDataAgeDays - the number of days since the last import/export before a warning notice is displayed
  * @property {Object} viewControllers - a hash of all view controller objects that can be pushed
  */
@@ -70,12 +64,6 @@ export default class ApplicationController {
 	private static singletonInstance?: ApplicationController;
 
 	public viewStack: View[] = [];
-
-	// Create a scroll helper and associate it with the content
-	public readonly abc: Abc = new Abc($("#abc").get(0), $("#content"));
-
-	// Scroll helper only listens for touch events, so to make it work in desktop browsers we need to remap the mouse events
-	public readonly abctoucheventproxy: TouchEventProxy = new TouchEventProxy($("#abc").get(0));
 
 	private readonly noticeStack: NoticeStack = {
 		height: 0,
@@ -241,28 +229,6 @@ export default class ApplicationController {
 			// Update the content height to accommodate the footer
 			this.setContentHeight();
 		}
-	}
-
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method showScrollHelper
-	 * @desc Displays the scroll helper
-	 */
-	public showScrollHelper(): void {
-		$("#abc").show();
-	}
-
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method hideScrollHelper
-	 * @desc Hides the scroll helper
-	 */
-	public hideScrollHelper(): void {
-		$("#abc").hide();
 	}
 
 	/**
@@ -456,9 +422,6 @@ export default class ApplicationController {
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
 	private async show(onSuccess: (args?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
-		// Hide the scroll helper
-		this.hideScrollHelper();
-
 		// Show the now loading indicator
 		$("#nowLoading").addClass("loading");
 

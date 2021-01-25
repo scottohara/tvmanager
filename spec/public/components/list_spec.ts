@@ -77,7 +77,7 @@ describe("List", (): void => {
 
 		describe("without grouping", (): void => {
 			beforeEach((): void => {
-				renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li>";
+				renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li><ul id=\"index\"></ul>";
 				list = new List(container, itemTemplate, null, items, eventHandler, eventHandler, eventHandler);
 				tap = sinon.stub(list, "tap" as keyof List);
 				list.refresh();
@@ -96,7 +96,7 @@ describe("List", (): void => {
 
 		describe("with grouping", (): void => {
 			beforeEach((): void => {
-				renderHtml = "<li id=\"group-one\" class=\"group\">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id=\"group-two\" class=\"group\">group-two</li><li><a>group-two:item-three</a></li>";
+				renderHtml = "<li id=\"group-one\" class=\"group\">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id=\"group-two\" class=\"group\">group-two</li><li><a>group-two:item-three</a></li><ul id=\"index\"><li>group-one</li><li>group-two</li></ul>";
 				tap = sinon.stub(list, "tap" as keyof List);
 				list.refresh();
 			});
@@ -104,13 +104,110 @@ describe("List", (): void => {
 			it("should render the list", (): Chai.Assertion => containerElement.html().should.equal(renderHtml));
 
 			it("should attach a click handler to each item", (): void => {
-				$(`#${container} li:not([id])`).each((index: number, element: HTMLElement): void => {
+				$(`#${container} > li:not([id])`).each((index: number, element: HTMLElement): void => {
 					$(element).trigger("click");
 					tap.should.have.been.calledWith(index);
 				});
 				tap.callCount.should.equal(3);
 			});
 		});
+
+		describe("index", (): void => {
+			let index: JQuery,
+					event: JQuery.Event,
+					scrollIntoView: SinonStub;
+
+			beforeEach((): void => {
+				list.refresh();
+				index = $("#index");
+				scrollIntoView = sinon.stub($("#group-one").get(0), "scrollIntoView");
+				event = new $.Event("pointermove");
+			});
+
+			describe("without active button state", (): void => {
+				beforeEach((): JQuery => index.trigger(event));
+				it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
+			});
+
+			describe("with active button state", (): void => {
+				let elementFromPoint: SinonStub,
+						element: JQuery;
+
+				beforeEach((): void => {
+					event.buttons = 1;
+					elementFromPoint = sinon.stub(document, "elementFromPoint");
+					element = $("<li>").text("group-one");
+				});
+
+				describe("no element at point", (): void => {
+					beforeEach((): void => {
+						elementFromPoint.returns(null);
+						index.trigger(event);
+					});
+
+					it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
+				});
+
+				describe("element not within index", (): void => {
+					beforeEach((): void => {
+						element.appendTo(document.body);
+						elementFromPoint.returns(element.get(0));
+						index.trigger(event);
+					});
+
+					it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
+				});
+
+				describe("element within index", (): void => {
+					beforeEach((): void => {
+						element.appendTo(index);
+						elementFromPoint.returns(element.get(0));
+						index.trigger(event);
+					});
+
+					it("should scroll the corresponding group into view", (): Chai.Assertion => scrollIntoView.should.have.been.calledWith(true));
+				});
+
+				afterEach((): void => {
+					elementFromPoint.restore();
+					element.remove();
+				});
+			});
+		});
+	});
+
+	describe("showIndex", (): void => {
+		let index: JQuery;
+
+		beforeEach((): void => {
+			index = $("<ul>")
+				.attr("id", "index")
+				.css("display", "none")
+				.appendTo(document.body);
+
+			list.showIndex();
+		});
+
+		it("should show the index", (): Chai.Assertion => index.css("display").should.equal("block"));
+
+		afterEach((): JQuery => index.remove());
+	});
+
+	describe("hideIndex", (): void => {
+		let index: JQuery;
+
+		beforeEach((): void => {
+			index = $("<ul>")
+				.attr("id", "index")
+				.css("display", "block")
+				.appendTo(document.body);
+
+			list.hideIndex();
+		});
+
+		it("should hide the index", (): Chai.Assertion => index.css("display").should.equal("none"));
+
+		afterEach((): JQuery => index.remove());
 	});
 
 	describe("scrollTo", (): void => {

@@ -10,6 +10,10 @@ export default class ListMock {
 
 	public refresh: SinonStub;
 
+	public showIndex: SinonStub;
+
+	public hideIndex: SinonStub;
+
 	public scrollTo: SinonStub;
 
 	public tap: SinonStub;
@@ -21,6 +25,8 @@ export default class ListMock {
 						public readonly viewEventHandler: ListEventHandler = sinon.stub(),
 						public readonly editEventHandler: ListEventHandler | null = sinon.stub(),
 						public readonly deleteEventHandler: ListEventHandler = sinon.stub()) {
+		this.showIndex = sinon.stub();
+		this.hideIndex = sinon.stub();
 		this.refresh = sinon.stub();
 		this.scrollTo = sinon.stub();
 		this.tap = sinon.stub();

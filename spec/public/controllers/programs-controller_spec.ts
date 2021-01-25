@@ -263,7 +263,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should set the list to delete mode", (): Chai.Assertion => (programsController["programList"] as ListMock).action.should.equal("delete"));
-		it("should hide the scroll helper", (): Chai.Assertion => appController.hideScrollHelper.should.have.been.called);
+		it("should hide the list index", (): Chai.Assertion => programsController["programList"].hideIndex.should.have.been.called);
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
@@ -298,7 +298,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should set the list to edit mode", (): Chai.Assertion => (programsController["programList"] as ListMock).action.should.equal("edit"));
-		it("should hide the scroll helper", (): Chai.Assertion => appController.hideScrollHelper.should.have.been.called);
+		it("should hide the list index", (): Chai.Assertion => programsController["programList"].hideIndex.should.have.been.called);
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
@@ -336,7 +336,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should set the list to view mode", (): Chai.Assertion => (programsController["programList"] as ListMock).action.should.equal("view"));
-		it("should show the scroll helper", (): Chai.Assertion => appController.showScrollHelper.should.have.been.called);
+		it("should show the list index", (): Chai.Assertion => programsController["programList"].showIndex.should.have.been.called);
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {

@@ -219,8 +219,8 @@ export default class ProgramsController extends ViewController {
 		// Set the list to delete mode
 		this.programList.setAction("delete");
 
-		// Hide the scroll helper and clear the view footer
-		this.appController.hideScrollHelper();
+		// Hide the list index and clear the view footer
+		this.programList.hideIndex();
 		this.appController.clearFooter();
 
 		// Show the delete icons next to each list item
@@ -253,8 +253,8 @@ export default class ProgramsController extends ViewController {
 		// Set the list to edit mode
 		this.programList.setAction("edit");
 
-		// Hide the scroll helper and clear the view footer
-		this.appController.hideScrollHelper();
+		// Hide the list index and clear the view footer
+		this.programList.hideIndex();
 		this.appController.clearFooter();
 
 		// Show the edit icons next to each list item
@@ -287,8 +287,8 @@ export default class ProgramsController extends ViewController {
 		// Set the list to view mode
 		this.programList.setAction("view");
 
-		// Show the scroll helper and clear the view footer
-		this.appController.showScrollHelper();
+		// Show the list index and clear the view footer
+		this.programList.showIndex();
 		this.appController.clearFooter();
 
 		// Hide the icons next to each list item, in lieu of the scroll helper

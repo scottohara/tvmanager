@@ -130,11 +130,6 @@ const MAX_DATA_AGE_DAYS = 7,
 								name: "app",
 								priority: 10
 							},
-							cubiq: {
-								name: "cubiq",
-								test: /[\\/]src[\\/]framework[\\/]/u,
-								priority: 20
-							},
 							vendor: {
 								name: "vendor",
 								test: /[\\/]node_modules[\\/]/u,

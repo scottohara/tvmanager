@@ -8,7 +8,6 @@
 	},
 	"source": {
 		"include": "./src",
-		"includePattern": ".+\\.(t|j)s$",
-		"excludePattern": "\\/framework\\/"
+		"includePattern": ".+\\.(t|j)s$"
 	}
 }

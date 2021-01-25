@@ -64,7 +64,8 @@ export default class List {
 	 * @desc (Re)Populates and renders the HTML list
 	 */
 	public refresh(): void {
-		const containerElement: JQuery = $(`#${this.container}`);
+		const containerElement: JQuery = $(`#${this.container}`),
+					groupNames: JQuery[] = [];
 
 		// Clear any existing content from the container element
 		containerElement.html("");
@@ -85,6 +86,8 @@ export default class List {
 						.attr("id", itemGroup)
 						.addClass("group")
 						.text(itemGroup));
+
+					groupNames.push($("<li>").text(itemGroup));
 					currentGroup = itemGroup;
 				}
 			}
@@ -106,8 +109,49 @@ export default class List {
 			return itemElements;
 		}, []));
 
+		$("<ul>")
+			.attr("id", "index")
+			.append(groupNames)
+			.on("pointermove", ({ buttons, currentTarget, clientY }: JQueryEventObject & PointerEvent): void => {
+				// Only proceed if we're dragging
+				if (1 === buttons) {
+					const target: JQuery<Element> = $(currentTarget),
+								{ left } = target.offset() as JQuery.Coordinates,
+								groupItem: Element | null = document.elementFromPoint(left, clientY);
+
+					// If the element under the pointer is within the index
+					if (groupItem && $.contains(currentTarget, groupItem)) {
+						// Find an element with an ID that matches the text and scroll it into view
+						$(`#${$(groupItem).text()}`).get(0).scrollIntoView(true);
+					}
+				}
+			})
+			.appendTo(containerElement);
+
 		// Ask the application controller to set/restore the initial scroll position
 		this.appController.setScrollPosition();
+	}
+
+	/**
+	 * @memberof List
+	 * @this List
+	 * @instance
+	 * @method showIndex
+	 * @description Displays the index
+	 */
+	public showIndex(): void {
+		$("#index").show();
+	}
+
+	/**
+	 * @memberof List
+	 * @this List
+	 * @instance
+	 * @method hideIndex
+	 * @description Hides the index
+	 */
+	public hideIndex(): void {
+		$("#index").hide();
 	}
 
 	/**

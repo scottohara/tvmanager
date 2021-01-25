@@ -1,7 +1,6 @@
 // Specs
 import "./components/list_spec";
 import "./components/progressbar_spec";
-import "./components/toucheventproxy_spec";
 import "./controllers/about-controller_spec";
 import "./controllers/application-controller_spec";
 import "./controllers/dataSync-controller_spec";

@@ -553,3 +553,30 @@ div.notice p {
 	margin: 0;
 	color: rgb(248, 248, 248);
 }
+
+/* List index */
+#index {
+	display: none;
+	position: absolute;
+	top: 14px;
+	right: 0px;
+	width: 27px;
+	font-size: 11px;
+	font-weight: 500;
+	text-align: center;
+	color: rgb(0, 122, 255);
+	background-color: transparent;
+	z-index: 100;
+	touch-action: none;
+}
+
+#index li {
+	padding: 2px 0 0 0;
+	border: 0;
+	height: 11px;
+	margin: 0;
+}
+
+#index li:first-child {
+	padding-top:6px;
+}

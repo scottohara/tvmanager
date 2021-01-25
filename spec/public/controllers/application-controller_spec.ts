@@ -20,7 +20,6 @@ import WindowMock from "mocks/window-mock";
 describe("ApplicationController", (): void => {
 	let contentWrapper: JQuery,
 			content: JQuery,
-			abc: JQuery,
 			applicationController: ApplicationController;
 
 	beforeEach((): void => {
@@ -31,11 +30,6 @@ describe("ApplicationController", (): void => {
 		content = $("<div>")
 			.attr("id", "content")
 			.appendTo(contentWrapper);
-
-		abc = $("<ul>")
-			.attr("id", "abc")
-			.hide()
-			.appendTo(document.body);
 
 		sinon.spy(ApplicationController.prototype, "contentShown" as keyof ApplicationController);
 		ApplicationController["singletonInstance"] = undefined;
@@ -53,10 +47,6 @@ describe("ApplicationController", (): void => {
 			contentWrapper.trigger("transitionend");
 			applicationController["contentShown"].should.have.been.called;
 		});
-
-		it("should create a scroll helper", (): Chai.Assertion => applicationController.abc["element"].should.deep.equal(abc.get(0)));
-		it("should associate the scroll helper with the content", (): Chai.Assertion => applicationController.abc["scrollElement"].should.deep.equal($("#content")));
-		it("should wrap the scroll helper in a touch event proxy", (): Chai.Assertion => applicationController.abctoucheventproxy["element"].should.deep.equal(abc.get(0)));
 
 		describe("instance already exists", (): void => {
 			let anotherApplicationController: ApplicationController;
@@ -339,21 +329,6 @@ describe("ApplicationController", (): void => {
 			leftButton.remove();
 			rightButton.remove();
 			label.remove();
-		});
-	});
-
-	describe("showScrollHelper", (): void => {
-		it("should show the scroll helper", (): void => {
-			applicationController.showScrollHelper();
-			abc.css("display").should.not.equal("none");
-		});
-	});
-
-	describe("hideScrollHelper", (): void => {
-		it("should hide the scroll helper", (): void => {
-			abc.css("display", "block");
-			applicationController.hideScrollHelper();
-			abc.css("display").should.equal("none");
 		});
 	});
 
@@ -850,14 +825,12 @@ describe("ApplicationController", (): void => {
 				.attr("id", "nowLoading")
 				.appendTo(document.body);
 
-			sinon.stub(applicationController, "hideScrollHelper");
 			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
 			callback = sinon.spy();
 			await applicationController["show"](callback, {} as ViewControllerArgs);
 		});
 
-		it("should hide the scroll helper", (): Chai.Assertion => applicationController.hideScrollHelper.should.have.been.called);
 		it("should show the now loading indicator", (): Chai.Assertion => nowLoading.hasClass("loading").should.be.true);
 		it("should load the view template", (): Chai.Assertion => content.html().should.equal("<div></div>"));
 		it("should slide the new view in from the right", (): Chai.Assertion => contentWrapper.hasClass("loading").should.be.true);
@@ -1381,7 +1354,6 @@ describe("ApplicationController", (): void => {
 
 	afterEach((): void => {
 		contentWrapper.remove();
-		abc.remove();
 		(ApplicationController.prototype["contentShown"] as SinonSpy).restore();
 	});
 });
