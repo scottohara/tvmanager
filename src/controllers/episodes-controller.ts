@@ -126,7 +126,7 @@ export default class EpisodesController extends ViewController {
 				this.listItem.series.setWatchedCount(this.listItem.series.watchedCount + (newWatchedCount - this.origWatchedCount));
 				this.listItem.series.setRecordedCount(this.listItem.series.recordedCount + (newRecordedCount - this.origRecordedCount));
 				this.listItem.series.setExpectedCount(this.listItem.series.expectedCount + (newExpectedCount - this.origExpectedCount));
-				this.listItem.series.setStatusWarning(this.listItem.series.statusWarningCount + (newStatusWarningCount - this.origStatusWarningCount));
+				this.listItem.series.statusWarningCount += newStatusWarningCount - this.origStatusWarningCount;
 			} else {
 				// Otherwise add the new episode to the list and increment the status counts for the series
 				this.episodeList.items.push(listItem.episode);
@@ -134,7 +134,7 @@ export default class EpisodesController extends ViewController {
 				this.listItem.series.setWatchedCount(this.listItem.series.watchedCount + newWatchedCount);
 				this.listItem.series.setRecordedCount(this.listItem.series.recordedCount + newRecordedCount);
 				this.listItem.series.setExpectedCount(this.listItem.series.expectedCount + newExpectedCount);
-				this.listItem.series.setStatusWarning(this.listItem.series.statusWarningCount + newStatusWarningCount);
+				this.listItem.series.statusWarningCount += newStatusWarningCount;
 			}
 		}
 
@@ -246,7 +246,7 @@ export default class EpisodesController extends ViewController {
 		this.listItem.series.setWatchedCount(this.listItem.series.watchedCount - newWatchedCount);
 		this.listItem.series.setRecordedCount(this.listItem.series.recordedCount - newRecordedCount);
 		this.listItem.series.setExpectedCount(this.listItem.series.expectedCount - newExpectedCount);
-		this.listItem.series.setStatusWarning(this.listItem.series.statusWarningCount - newStatusWarningCount);
+		this.listItem.series.statusWarningCount -= newStatusWarningCount;
 
 		// Remove the item from the DOM
 		$(`#list li a#${episode.id}`).remove();

@@ -50,7 +50,7 @@ describe("Series", (): void => {
 		it("should set the missed count", (): Chai.Assertion => series["missedCount"].should.equal(missedCount));
 		it("should set the status warning count", (): Chai.Assertion => series.statusWarningCount.should.equal(statusWarningCount));
 
-		["nowShowingDisplay"].forEach((property: string): void => {
+		["statusWarning", "nowShowingDisplay"].forEach((property: string): void => {
 			it(`should make the ${property} property enumerable`, (): Chai.Assertion => Boolean((Object.getOwnPropertyDescriptor(series, property) as PropertyDescriptor).enumerable).should.be.true);
 		});
 	});
@@ -248,7 +248,7 @@ describe("Series", (): void => {
 					series.setRecordedCount(0);
 					series.setExpectedCount(0);
 					series["setMissedCount"](0);
-					series.setStatusWarning(0);
+					series.statusWarningCount = 0;
 
 					foundSeries = await Series.find(id);
 				});
@@ -462,7 +462,7 @@ describe("Series", (): void => {
 		})));
 	});
 
-	describe("setStatusWarning", (): void => {
+	describe("statusWarning", (): void => {
 		interface Scenario {
 			description: string;
 			statusWarningCount: number;
@@ -484,9 +484,7 @@ describe("Series", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): void => series.setStatusWarning(scenario.statusWarningCount));
-
-				it("should set the status warning count", (): Chai.Assertion => series.statusWarningCount.should.equal(scenario.statusWarningCount));
+				beforeEach((): number => (series.statusWarningCount = scenario.statusWarningCount));
 				it(`should ${scenario.statusWarningCount ? "" : "not "}highlight the series with a warning`, (): Chai.Assertion => series.statusWarning.should.equal(scenario.statusWarning));
 			});
 		});

@@ -30,8 +30,6 @@ export default class SeriesMock {
 
 	public setExpectedCount: SinonStub = sinon.stub();
 
-	public setStatusWarning: SinonStub = sinon.stub();
-
 	public constructor(public readonly id: string | null,
 						public seriesName: string | null,
 						public nowShowing: number | null,
@@ -42,7 +40,7 @@ export default class SeriesMock {
 						public readonly recordedCount = 0,
 						public readonly expectedCount = 0,
 						public readonly missedCount?: number,
-						public readonly statusWarningCount = 0) {
+						public statusWarningCount = 0) {
 		this.toJson = sinon.stub().returns({});
 		saveStub.resetHistory();
 		removeStub.reset();

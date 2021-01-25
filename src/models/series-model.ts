@@ -38,7 +38,6 @@ import { v4 } from "uuid";
  * @property {Number} statusWarningCount - the number of expected episodes past their status date for the series
  * @property {ProgressBar} progressBar - progress bar component to generate the progress bar HTML
  * @property {String} progressBarDisplay - HTML of the progress bar to display under the series name in any series lists
- * @property {String} statusWarning - a CSS class name to use to indicate that one or more expected episodes for the series have passed their expected date
  * @param {String} id - unique identifier of the series
  * @param {String} seriesName - name of the series
  * @param {String} programId - unique identifier of the program that the series belongs to
@@ -54,8 +53,6 @@ import { v4 } from "uuid";
 export default class Series extends Base {
 	public progressBarDisplay!: string;
 
-	public statusWarning: "warning" | "" = "";
-
 	public episodeCount = 0;
 
 	public watchedCount = 0;
@@ -63,8 +60,6 @@ export default class Series extends Base {
 	public recordedCount = 0;
 
 	public expectedCount = 0;
-
-	public statusWarningCount = 0;
 
 	private readonly progressBar: ProgressBar;
 
@@ -74,7 +69,8 @@ export default class Series extends Base {
 						public seriesName: string | null,
 						public nowShowing: number | null,
 						public programId: string | null,
-						public programName?: string, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0, missedCount = 0, statusWarningCount = 0) {
+						public programName?: string, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0, missedCount = 0,
+						public statusWarningCount = 0) {
 		super();
 		this.progressBar = new ProgressBar(episodeCount, []);
 		this.setEpisodeCount(episodeCount);
@@ -82,10 +78,9 @@ export default class Series extends Base {
 		this.setRecordedCount(recordedCount);
 		this.setExpectedCount(expectedCount);
 		this.setMissedCount(missedCount);
-		this.setStatusWarning(statusWarningCount);
 
 		// Make getters enumerable
-		["nowShowingDisplay"].forEach(this.makeEnumerable.bind(this));
+		["statusWarning", "nowShowingDisplay"].forEach(this.makeEnumerable.bind(this));
 	}
 
 	/**
@@ -392,19 +387,11 @@ export default class Series extends Base {
 	 * @memberof Series
 	 * @this Series
 	 * @instance
-	 * @method setStatusWarning
-	 * @desc Sets the number of expected episodes past their status date for the series
-	 * @param {Number} count - the number of expected episodes past their status date for the series
+	 * @property {String} statusWarning - a CSS class name
+	 * @desc Returns a CSS class name to use to indicate that one or more expected episode for the series have passed their expected date
 	 */
-	public setStatusWarning(count: number): void {
-		this.statusWarningCount = count;
-
-		// If there are one or more episodes with a warning, highlight the series with a warning also
-		if (this.statusWarningCount > 0) {
-			this.statusWarning = "warning";
-		}	else {
-			this.statusWarning = "";
-		}
+	public get statusWarning(): "warning" | "" {
+		return this.statusWarningCount > 0 ? "warning" : "";
 	}
 
 	/**

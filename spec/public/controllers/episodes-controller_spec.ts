@@ -210,7 +210,7 @@ describe("EpisodesController", (): void => {
 						it("should update the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(1 + Number(scenario.watched)));
 						it("should update the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + Number(scenario.recorded)));
 						it("should update the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
-						it("should update the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(1 + Number(scenario.warning)));
+						it("should update the series status warning count", (): Chai.Assertion => listItem.series.statusWarningCount.should.equal(1 + Number(scenario.warning)));
 						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 					});
@@ -228,7 +228,7 @@ describe("EpisodesController", (): void => {
 						it("should increment the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 + Number(scenario.watched)));
 						it("should increment the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + Number(scenario.recorded)));
 						it("should increment the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
-						it("should increment the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 + Number(scenario.warning)));
+						it("should increment the series status warning count", (): Chai.Assertion => listItem.series.statusWarningCount.should.equal(2 + Number(scenario.warning)));
 						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
 						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 					});
@@ -476,7 +476,7 @@ describe("EpisodesController", (): void => {
 				it("should decrement the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 - scenario.watched));
 				it("should decrement the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 - scenario.recorded));
 				it("should decrement the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 - scenario.expected));
-				it("should decrement the series status warning count", (): Chai.Assertion => listItem.series.setStatusWarning.should.have.been.calledWith(2 - scenario.warning));
+				it("should decrement the series status warning count", (): Chai.Assertion => listItem.series.statusWarningCount.should.equal(2 - scenario.warning));
 				it("should remove the item from the DOM", (): Chai.Assertion => $("#list li a#1").length.should.equal(0));
 				it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
 				it("should remove the item from the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal([]));
