@@ -30,7 +30,7 @@ export default class ProgramMock {
 	public setExpectedCount: SinonStub = sinon.stub();
 
 	public constructor(public readonly id: string | null,
-						public readonly programName: string | null,
+						public programName: string | null,
 						public seriesCount: number = 0,
 						public readonly episodeCount: number = 0,
 						public readonly watchedCount: number = 0,

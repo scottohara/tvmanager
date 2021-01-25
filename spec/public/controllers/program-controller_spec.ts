@@ -116,7 +116,7 @@ describe("ProgramController", (): void => {
 			await programController["save"]();
 		});
 
-		it("should get the program name", (): Chai.Assertion => programController["listItem"].program.setProgramName.should.have.been.calledWith(programName));
+		it("should get the program name", (): Chai.Assertion => String(programController["listItem"].program.programName).should.equal(programName));
 		it("should save the program", (): Chai.Assertion => listItem.program.save.should.have.been.called);
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
 

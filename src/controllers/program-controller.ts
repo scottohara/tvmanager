@@ -92,7 +92,7 @@ export default class ProgramController extends ViewController {
 	 */
 	private async save(): Promise<void> {
 		// Get the program details
-		this.listItem.program.setProgramName(String($("#programName").val()));
+		this.listItem.program.programName = String($("#programName").val());
 
 		// Update the database and pop the view off the stack
 		await this.listItem.program.save();

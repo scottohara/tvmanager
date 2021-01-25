@@ -32,7 +32,6 @@ import { v4 } from "uuid";
  * @property {Number} recordedCount - the number of recorded episodes for the program
  * @property {Number} expectedCount - the number of expected episodes for the program
  * @property {ProgressBar} progressBar - progress bar component to generate the progress bar HTML
- * @property {String} programGroup - the first letter of the program name
  * @property {String} progressBarDisplay - HTML of the progress bar to display under the program name in any program lists
  * @param {String} id - unique identifier of the program
  * @param {String} programName - name of the program
@@ -43,11 +42,7 @@ import { v4 } from "uuid";
  * @param {Number} expectedCount - the number of expected episodes for the program
  */
 export default class Program extends Base {
-	public programName: string | null = null;
-
 	public progressBarDisplay!: string;
-
-	public programGroup = "";
 
 	public episodeCount = 0;
 
@@ -59,15 +54,18 @@ export default class Program extends Base {
 
 	private readonly progressBar: ProgressBar;
 
-	public constructor(public id: string | null, programName: string | null,
+	public constructor(public id: string | null,
+						public programName: string | null,
 						public seriesCount: number = 0, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0) {
 		super();
-		this.setProgramName(programName);
 		this.progressBar = new ProgressBar(episodeCount, []);
 		this.setEpisodeCount(episodeCount);
 		this.setWatchedCount(watchedCount);
 		this.setRecordedCount(recordedCount);
 		this.setExpectedCount(expectedCount);
+
+		// Make getters enumerable
+		["programGroup"].forEach(this.makeEnumerable.bind(this));
 	}
 
 	/**
@@ -225,15 +223,11 @@ export default class Program extends Base {
 	 * @memberof Program
 	 * @this Program
 	 * @instance
-	 * @method setProgramName
-	 * @desc Sets the name of the program
-	 * @param {String} programName - name of the program
+	 * @property {String} programGroup - the first letter of the program name
+	 * @desc Returns the group that the program belongs to
 	 */
-	public setProgramName(programName: string | null): void {
-		this.programName = programName;
-
-		// Recalculate the program group based on the first letter of the program name
-		this.programGroup = null === programName ? "" : programName.substring(0, 1).toUpperCase();
+	public get programGroup(): string {
+		return null === this.programName ? "" : this.programName.substring(0, 1).toUpperCase();
 	}
 
 	/**

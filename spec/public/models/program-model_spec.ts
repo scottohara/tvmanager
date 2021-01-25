@@ -33,6 +33,10 @@ describe("Program", (): void => {
 		it("should set the watched count", (): Chai.Assertion => program.watchedCount.should.equal(watchedCount));
 		it("should set the recorded count", (): Chai.Assertion => program.recordedCount.should.equal(recordedCount));
 		it("should set the expected count", (): Chai.Assertion => program.expectedCount.should.equal(expectedCount));
+
+		["programGroup"].forEach((property: string): void => {
+			it(`should make the ${property} property enumerable`, (): Chai.Assertion => Boolean((Object.getOwnPropertyDescriptor(program, property) as PropertyDescriptor).enumerable).should.be.true);
+		});
 	});
 
 	describe("list", (): void => {
@@ -266,29 +270,31 @@ describe("Program", (): void => {
 		it("should return a JSON representation of the program", (): Chai.Assertion => program.toJson().should.deep.equal({ id, programName, type: "Program" }));
 	});
 
-	describe("setProgramName", (): void => {
-		let programGroup: string;
+	describe("programGroup", (): void => {
+		interface Scenario {
+			description: string;
+			programName: string | null;
+			programGroup: string;
+		}
 
-		describe("with name", (): void => {
-			beforeEach((): void => {
-				programName = "another-test-program";
-				programGroup = "A";
-				program.setProgramName(programName);
+		const scenarios: Scenario[] = [
+			{
+				description: "without name",
+				programName: null,
+				programGroup: ""
+			},
+			{
+				description: "with name",
+				programName: "another-test-program",
+				programGroup: "A"
+			}
+		];
+
+		scenarios.forEach((scenario: Scenario): void => {
+			describe(scenario.description, (): void => {
+				beforeEach((): string | null => (program.programName = scenario.programName));
+				it("should return the program group", (): Chai.Assertion => program.programGroup.should.equal(scenario.programGroup));
 			});
-
-			it("should set the program name", (): Chai.Assertion => String(program.programName).should.equal(programName));
-			it("should set the program group", (): Chai.Assertion => program.programGroup.should.equal(programGroup));
-		});
-
-		describe("without name", (): void => {
-			beforeEach((): void => {
-				programName = null;
-				programGroup = "A";
-				program.setProgramName(programName);
-			});
-
-			it("should set the program name", (): Chai.Assertion => (null === program.programName).should.be.true);
-			it("should set the program group", (): Chai.Assertion => program.programGroup.should.equal(""));
 		});
 	});
 
