@@ -411,7 +411,7 @@ describe("Episode", (): void => {
 						if ("Watched" === episodeStatus || "" === episodeStatus) {
 							it("should return an empty string", (): Chai.Assertion => episode.statusDateDisplay.should.equal(""));
 						} else {
-							it("should return the status date formatted for display", (): Chai.Assertion => episode.statusDateDisplay.should.equal("(Sun Dec 31 2000)"));
+							it("should return the status date formatted for display", (): Chai.Assertion => episode.statusDateDisplay.should.equal("Sun Dec 31 2000"));
 						}
 					});
 				});
@@ -426,7 +426,7 @@ describe("Episode", (): void => {
 
 					describe("with a status date", (): void => {
 						beforeEach((): string => (episode.statusDate = "2000-12-31"));
-						it("should return the status date formatted for display", (): Chai.Assertion => episode.statusDateDisplay.should.equal("(Sun Dec 31 2000)"));
+						it("should return the status date formatted for display", (): Chai.Assertion => episode.statusDateDisplay.should.equal("Sun Dec 31 2000"));
 					});
 				});
 			});

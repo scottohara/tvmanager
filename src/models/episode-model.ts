@@ -277,7 +277,7 @@ export default class Episode extends Base {
 	 * @desc Returns the date to display under the episode name in any episode lists
 	 */
 	public get statusDateDisplay(): string {
-		return ("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate ? `(${new Date(this.statusDate).toDateString()})` : "";
+		return ("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate ? new Date(this.statusDate).toDateString() : "";
 	}
 
 	/**
