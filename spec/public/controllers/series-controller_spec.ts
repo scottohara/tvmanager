@@ -52,6 +52,7 @@ describe("SeriesController", (): void => {
 			it("should create a list item", (): void => {
 				String(seriesController["listItem"].series.seriesName).should.equal(`Series ${Number(seriesListItem.sequence) + 1}`);
 				String(seriesController["listItem"].series.programId).should.equal((seriesListItem.program as ProgramMock).id);
+				String(seriesController["listItem"].series.programName).should.equal((seriesListItem.program as ProgramMock).programName);
 			});
 		});
 	});

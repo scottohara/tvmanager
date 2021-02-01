@@ -50,7 +50,7 @@ export default class SeriesController extends ViewController {
 			this.originalProgramId = this.listItem.series.programId;
 		} else {
 			// Otherwise, we're adding a new series
-			this.listItem = { series: new Series(null, `Series ${Number(listItem.sequence) + 1}`, null, (listItem.program as Program).id) };
+			this.listItem = { series: new Series(null, `Series ${Number(listItem.sequence) + 1}`, null, (listItem.program as Program).id, String((listItem.program as Program).programName)) };
 		}
 	}
 
