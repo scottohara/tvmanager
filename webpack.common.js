@@ -30,13 +30,7 @@ const MAX_DATA_AGE_DAYS = 7,
 				test: /\.css$/u,
 				use: [
 					MiniCssExtractPlugin.loader,
-					{
-						loader: "css-loader",
-						options: {
-							// Generate sourcemaps
-							sourceMap: true
-						}
-					}
+					"css-loader"
 				]
 			},
 
@@ -88,8 +82,7 @@ const MAX_DATA_AGE_DAYS = 7,
 			generateServiceWorker = new GenerateSW({
 				cacheId: packageJson.name,
 				skipWaiting: true,
-				clientsClaim: true,
-				dontCacheBustURLsMatching: /.+-[a-f0-9]{6}\..+/u
+				clientsClaim: true
 			}),
 
 			// Handles web workers
