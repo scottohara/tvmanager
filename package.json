@@ -75,7 +75,7 @@
   },
   "config": {
     "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-X",
-    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-14-3"
+    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-14-4"
   },
   "scripts": {
     "start": "heroku local --procfile Procfile.dev",
