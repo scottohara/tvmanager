@@ -41,6 +41,7 @@
     "chai": "4.2.0",
     "clean-webpack-plugin": "3.0.0",
     "css-loader": "5.0.2",
+    "cypress": "6.8.0",
     "eslint": "7.2.0",
     "eslint-config-oharagroup": "3.7.0",
     "file-loader": "6.2.0",
@@ -89,6 +90,7 @@
     "test:coverage": "karma start",
     "test:coverage:chrome": "karma start --browsers ChromeHeadless",
     "test:coverage:mobile": "ENV_CMD='sleep 600' npm run start:simulator && karma start --browsers MobileSafari",
+    "test:e2e": "npm run build && heroku local --procfile Procfile.test",
     "docs": "jsdoc --configure jsdoc.json"
   },
   "engines": {

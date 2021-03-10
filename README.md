@@ -138,6 +138,11 @@ Backend specs are implemented using [RSpec](http://rspec.info/):
 1. Ensure the database server is running (e.g. `couchdb`)
 2. Run the RSpec rake task (`bundle exec rake spec`). To run specific specs, use RSpec filtering (`fdescribe`, `fit`, `xdescribe`, `xit`)
 
+Integration tests are implemented using [Cypress](http://cypress.io/):
+
+1. Start the database server and app server in test mode, and launch Cypress (`npm run test:e2e`)
+2. Optionally run Cypress in headless mode (`cypress run --browser chrome`)
+
 Code Quality
 ============
 Frontend checks are implemented using [eslint](http://eslint.org):

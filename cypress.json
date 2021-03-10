@@ -1,0 +1,9 @@
+{
+	"baseUrl": "http://localhost:3001",
+	"nodeVersion": "system",
+	"viewportHeight": 812,
+	"viewportWidth": 375,
+	"chromeWebSecurity": false,
+	"pluginsFile": false,
+	"fixturesFolder": false
+}

@@ -27,6 +27,7 @@
 		"tsBuildInfoFile": ".tsbuildinfo"
 	},
 	"exclude": [
+		"cypress",
 		"node_modules"
 	]
 }

@@ -1,0 +1,13 @@
+export const deviceName = "#deviceName[readonly]";
+export const registerDeviceName = "#deviceName:not([readonly])";
+export const registrationMessage = "#registrationMessage";
+export const syncControls = "#syncControls";
+export const lastSyncTime = "#lastSyncTime";
+export const localChanges = "#localChanges";
+export const importChangesOnly = "#importChangesOnly";
+export const importChangesOnlyLabel = "#importChangesOnlyRow > label[for=importChangesOnly]";
+export const importButton = "#import";
+export const exportButton = "#export";
+export const progress = "#progress";
+export const status = "#status";
+export const errorList = "#errorList";

@@ -13,6 +13,10 @@ npm-debug.log
 # Ignore coverage results
 /coverage
 
+# Ignore cypress screenshots and videos
+/cypress/screenshots
+/cypress/videos
+
 # Ignore generated docs
 /docs
 

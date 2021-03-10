@@ -1,6 +1,7 @@
 .github
 bin
 build
+cypress
 spec
 .codeclimate.yml
 .editorconfig

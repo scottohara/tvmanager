@@ -1,0 +1,18 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"paths": {
+			"*": [
+				"cypress/support/*",
+				"src/*"
+			]
+		},
+		"types": [
+			"cypress",
+			"node"
+		]
+	},
+	"exclude": [
+		"node_modules"
+	]
+}

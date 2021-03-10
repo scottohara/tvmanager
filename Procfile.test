@@ -1,0 +1,3 @@
+web: RACK_ENV=test bundle exec puma
+db: couchdb
+cypress: cypress open
