@@ -33,14 +33,20 @@ function bySeriesName(a: PersistedSeries, b: PersistedSeries): number {
 }
 
 // Orders series by now showing then program name
-function byNowShowingThenProgramName(a: PersistedSeries, b: PersistedSeries): number {
-	const nowShowingDiff: number = String(a.NowShowing).localeCompare(String(b.NowShowing), "en", { numeric: true });
+function byNowShowingThenProgramNameThenSeriesName(a: PersistedSeries, b: PersistedSeries): number {
+	let diff: number;
 
-	if (!nowShowingDiff) {
-		return String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
+	diff = String(a.NowShowing).localeCompare(String(b.NowShowing), "en", { numeric: true });
+
+	if (!diff) {
+		diff = String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
 	}
 
-	return nowShowingDiff;
+	if (!diff) {
+		diff = String(a.Name).localeCompare(String(b.Name), "en", { sensitivity: "base" });
+	}
+
+	return diff;
 }
 
 // Orders series by program name then series name
@@ -127,7 +133,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 				};
 			}));
 
-			return list.sort(byNowShowingThenProgramName);
+			return list.sort(byNowShowingThenProgramNameThenSeriesName);
 		},
 
 		async listByStatus(status: EpisodeStatus): Promise<PersistedSeries[]> {

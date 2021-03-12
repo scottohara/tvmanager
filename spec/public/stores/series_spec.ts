@@ -94,8 +94,8 @@ describe("series", (): void => {
 				{ SeriesID: "6", Name: "Series 6", ProgramID: "2", ProgramName: "bb Program 2", NowShowing: 1, EpisodeCount: 2, WatchedCount: 2, RecordedCount: 0, ExpectedCount: 0, StatusWarningCount: 0 },
 				{ SeriesID: "4", Name: "Series 4", ProgramID: "2", ProgramName: "bb Program 2", NowShowing: null, EpisodeCount: 2, WatchedCount: 1, RecordedCount: 1, ExpectedCount: 0, StatusWarningCount: 0 },
 				{ SeriesID: "5", Name: "Series 5", ProgramID: "2", ProgramName: "bb Program 2", NowShowing: null, EpisodeCount: 1, WatchedCount: 0, RecordedCount: 0, ExpectedCount: 1, StatusWarningCount: 0 },
-				{ SeriesID: "1", Name: "bb Series 1", ProgramID: "1", ProgramName: "cc Program 1", NowShowing: null, EpisodeCount: 3, WatchedCount: 1, RecordedCount: 1, ExpectedCount: 1, StatusWarningCount: 1 },
-				{ SeriesID: "2", Name: "aa Series 2", ProgramID: "1", ProgramName: "cc Program 1", NowShowing: null, EpisodeCount: 2, WatchedCount: 1, RecordedCount: 1, ExpectedCount: 0, StatusWarningCount: 0 }
+				{ SeriesID: "2", Name: "aa Series 2", ProgramID: "1", ProgramName: "cc Program 1", NowShowing: null, EpisodeCount: 2, WatchedCount: 1, RecordedCount: 1, ExpectedCount: 0, StatusWarningCount: 0 },
+				{ SeriesID: "1", Name: "bb Series 1", ProgramID: "1", ProgramName: "cc Program 1", NowShowing: null, EpisodeCount: 3, WatchedCount: 1, RecordedCount: 1, ExpectedCount: 1, StatusWarningCount: 1 }
 			]));
 		});
 
