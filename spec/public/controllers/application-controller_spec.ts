@@ -782,7 +782,6 @@ describe("ApplicationController", (): void => {
 		});
 
 		it("should setup the view controller", (): Chai.Assertion => controller.setup.should.have.been.called);
-		it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 	});
 
 	describe("viewPopped", (): void => {
@@ -801,7 +800,6 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not activate the view controller", (): Chai.Assertion => activate.should.not.have.been.called);
-			it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 		});
 
 		describe("with activate", (): void => {
@@ -812,7 +810,6 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should activate the view controller", (): Chai.Assertion => activate.should.have.been.calledWith({}));
-			it("should indicate that the view has loaded after 1s", (): Chai.Assertion => applicationController["contentShown"].should.have.been.called);
 		});
 	});
 
@@ -833,8 +830,8 @@ describe("ApplicationController", (): void => {
 
 		it("should show the now loading indicator", (): Chai.Assertion => nowLoading.hasClass("loading").should.be.true);
 		it("should load the view template", (): Chai.Assertion => content.html().should.equal("<div></div>"));
-		it("should slide the new view in from the right", (): Chai.Assertion => contentWrapper.hasClass("loading").should.be.true);
 		it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({}));
+		it("should slide the new view in from the right", (): Chai.Assertion => contentWrapper.hasClass("loading").should.be.true);
 		it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
 
 		afterEach((): JQuery => nowLoading.remove());

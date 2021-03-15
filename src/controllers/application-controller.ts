@@ -383,13 +383,8 @@ export default class ApplicationController {
 	 * @desc Sets up the view controller for the view just pushed, and sets the header
 	 */
 	private async viewPushed(): Promise<void> {
-		const DELAY_MS = 1000;
-
 		// Call the view controller's setup method
 		await this.currentView.controller.setup();
-
-		// Tell the application controller that we've finished loading
-		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**
@@ -401,15 +396,10 @@ export default class ApplicationController {
 	 * @param {Object} [args] - arguments to pass to the revealed view controller
 	 */
 	private async viewPopped(args: ViewControllerArgs): Promise<void> {
-		const DELAY_MS = 1000;
-
 		// Call the view controller's activate method
 		if ("function" === typeof this.currentView.controller.activate) {
 			await this.currentView.controller.activate(args);
 		}
-
-		// Tell the application controller that we've finished loading
-		window.setTimeout(this.contentShown.bind(this), DELAY_MS);
 	}
 
 	/**
@@ -428,11 +418,11 @@ export default class ApplicationController {
 		// Load the view template
 		$("#content").html(this.currentView.controller.view);
 
-		// Slide in the new view from the right
-		$("#contentWrapper").addClass("loading");
-
 		// Call the success function, passing through the arguments
 		await onSuccess(args);
+
+		// Slide in the new view from the right
+		$("#contentWrapper").addClass("loading");
 
 		// Set the header (based on the configuration set by the view controller)
 		this.setHeader();
