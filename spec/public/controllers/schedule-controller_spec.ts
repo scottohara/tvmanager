@@ -1,8 +1,7 @@
 import {
 	HeaderFooter,
 	NavButton,
-	NavButtonEventHandler,
-	SeriesListItem
+	NavButtonEventHandler
 } from "controllers";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
@@ -89,106 +88,18 @@ describe("ScheduleController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		describe("from launch", (): void => {
-			beforeEach(async (): Promise<void> => {
-				sinon.stub(scheduleController, "listRetrieved" as keyof ScheduleController);
-				SeriesMock.series = items;
-				await scheduleController.activate();
-			});
-
-			it("should get the list of scheduled series", (): void => {
-				SeriesMock.listByNowShowing.should.have.been.called;
-				scheduleController["listRetrieved"].should.have.been.calledWith(items);
-			});
-		});
-
-		describe("from episodes view", (): void => {
-			let listItem: SeriesListItem;
-
-			beforeEach((): void => {
-				sinon.stub(scheduleController, "viewItems" as keyof ScheduleController);
-
-				scheduleController["scheduleList"] = new ListMock("", "", "", items.slice(0));
-			});
-
-			describe("not scheduled", (): void => {
-				beforeEach(async (): Promise<void> => {
-					listItem = {
-						listIndex: 0,
-						series: new SeriesMock("", "", null, null)
-					};
-					await scheduleController.activate(listItem);
-				});
-
-				it("should remove the item from the schedule list", (): Chai.Assertion => scheduleController["scheduleList"].items.should.deep.equal(items.slice(1)));
-				it("should refresh the list", (): Chai.Assertion => scheduleController["scheduleList"].refresh.should.have.been.called);
-				it("should set the list to view mode", (): Chai.Assertion => scheduleController["viewItems"].should.have.been.called);
-			});
-
-			describe("scheduled", (): void => {
-				interface Scenario {
-					description: string;
-					programId?: string;
-					programName?: string;
-					nowShowing?: number;
-					recordedCount?: number;
-					newIndex: number;
-				}
-
-				const scenarios: Scenario[] = [
-					{
-						description: "program edited",
-						programId: "4",
-						programName: "test-program-4",
-						newIndex: 1
-					},
-					{
-						description: "now showing edited",
-						nowShowing: 2,
-						newIndex: 1
-					},
-					{
-						description: "recorded count edited",
-						recordedCount: 1,
-						newIndex: 0
-					}
-				];
-
-				scenarios.forEach((scenario: Scenario): void => {
-					describe(scenario.description, (): void => {
-						beforeEach(async (): Promise<void> => {
-							const [{ seriesName, nowShowing, programId, programName, recordedCount, expectedCount }] = items,
-										item = { ...{ seriesName, nowShowing, programId, programName, recordedCount, expectedCount }, ...scenario };
-
-							listItem = {
-								listIndex: 0,
-								series: new SeriesMock(null, item.seriesName, item.nowShowing, item.programId, item.programName, 0, 0, item.recordedCount, item.expectedCount)
-							};
-
-							items = items.slice(1);
-							items.splice(scenario.newIndex, 0, listItem.series as SeriesMock);
-							scheduleController["origProgramId"] = items[0].programId;
-							scheduleController["origNowShowing"] = items[0].nowShowing;
-							await scheduleController.activate(listItem);
-						});
-
-						it("should update the schedule list", (): Chai.Assertion => scheduleController["scheduleList"].items.should.deep.equal(items));
-						it("should refresh the list", (): Chai.Assertion => scheduleController["scheduleList"].refresh.should.have.been.called);
-						it("should set the list to view mode", (): Chai.Assertion => scheduleController["viewItems"].should.have.been.called);
-					});
-				});
-			});
-		});
-	});
-
-	describe("listRetrieved", (): void => {
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(scheduleController, "viewItems" as keyof ScheduleController);
 			scheduleController["scheduleList"] = new ListMock("", "", "", []);
-			await scheduleController["listRetrieved"](items);
+			SeriesMock.series = items;
+			await scheduleController.activate();
 		});
 
-		it("should set the schedule list items", (): Chai.Assertion => scheduleController["scheduleList"].items.should.deep.equal(items));
+		it("should get the list of scheduled series", (): void => {
+			SeriesMock.listByNowShowing.should.have.been.called;
+			scheduleController["scheduleList"].items.should.deep.equal(items);
+		});
+
 		it("should refresh the list", (): Chai.Assertion => scheduleController["scheduleList"].refresh.should.have.been.called);
 		it("should set the list to view mode", (): Chai.Assertion => scheduleController["viewItems"].should.have.been.called);
 	});
@@ -237,8 +148,6 @@ describe("ScheduleController", (): void => {
 			await scheduleController["editItem"](index);
 		});
 
-		it("should save the original program id", (): Chai.Assertion => String(scheduleController["origProgramId"]).should.equal(items[index].programId));
-		it("should save the original now showing", (): Chai.Assertion => Number(scheduleController["origNowShowing"]).should.equal(items[index].nowShowing));
 		it("should push the series view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("series", {
 			listIndex: index,
 			series: items[index]

@@ -17,7 +17,6 @@
 import "jquery-ui/ui/widgets/sortable";
 import "jquery-ui-touch-punch";
 import {
-	EpisodeListItem,
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
@@ -39,10 +38,6 @@ import ViewController from "controllers/view-controller";
  * @property {Boolean} scrollToFirstUnwatched - indicates whether to automatically scroll the list to reveal the first unwatched episode
  * @property {HeaderFooter} header - the view header bar
  * @property {List} episodeList - the list of episodes to display
- * @property {Number} origWatchedCount - the watched status of an episode before editing
- * @property {Number} origRecordedCount - the recorded status of an episode before editing
- * @property {Number} origExpectedCount - the expected status of an episode before editing
- * @property {Number} origStatusWarningCount - the warning status of and episode before editing
  * @property {HeaderFooter} footer - the view footer bar
  * @param {SeriesListItem} listItem - a list item from the Series, Schedule or Report view
  */
@@ -50,14 +45,6 @@ export default class EpisodesController extends ViewController {
 	private scrollToFirstUnwatched = true;
 
 	private episodeList!: PublicInterface<List>;
-
-	private origWatchedCount = 0;
-
-	private origRecordedCount = 0;
-
-	private origExpectedCount = 0;
-
-	private origStatusWarningCount = 0;
 
 	public constructor(private readonly listItem: SeriesListItem) {
 		super();
@@ -99,8 +86,8 @@ export default class EpisodesController extends ViewController {
 		// Instantiate a List object
 		this.episodeList = new List("list", EpisodeListTemplate, null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
 
-		// Get the list of episodes for the specified series
-		return this.listRetrieved(await Episode.listBySeries(String(this.listItem.series.id)));
+		// Activate the controller
+		return this.activate();
 	}
 
 	/**
@@ -109,34 +96,10 @@ export default class EpisodesController extends ViewController {
 	 * @instance
 	 * @method activate
 	 * @desc Activates the controller
-	 * @param {EpisodeListItem} [listItem] - a list item that was just added/edited in the Episode view
 	 */
-	public async activate(listItem?: EpisodeListItem): Promise<void> {
-		// When returning from the Episode view, we need to update the list with the new values
-		if (undefined !== listItem) {
-			// Get the details of the added/edited episode
-			const newWatchedCount: number = "Watched" === listItem.episode.status ? 1 : 0,
-						newRecordedCount: number = "Recorded" === listItem.episode.status ? 1 : 0,
-						newExpectedCount: number = "Expected" === listItem.episode.status ? 1 : 0,
-						newStatusWarningCount: number = "warning" === listItem.episode.statusWarning ? 1 : 0;
-
-			// If an existing episode was edited, increment/decrement the status counts for the series
-			if (Number(listItem.listIndex) >= 0) {
-				this.episodeList.items[Number(listItem.listIndex)] = listItem.episode;
-				this.listItem.series.setWatchedCount(this.listItem.series.watchedCount + (newWatchedCount - this.origWatchedCount));
-				this.listItem.series.setRecordedCount(this.listItem.series.recordedCount + (newRecordedCount - this.origRecordedCount));
-				this.listItem.series.setExpectedCount(this.listItem.series.expectedCount + (newExpectedCount - this.origExpectedCount));
-				this.listItem.series.statusWarningCount += newStatusWarningCount - this.origStatusWarningCount;
-			} else {
-				// Otherwise add the new episode to the list and increment the status counts for the series
-				this.episodeList.items.push(listItem.episode);
-				this.listItem.series.setEpisodeCount(this.listItem.series.episodeCount + 1);
-				this.listItem.series.setWatchedCount(this.listItem.series.watchedCount + newWatchedCount);
-				this.listItem.series.setRecordedCount(this.listItem.series.recordedCount + newRecordedCount);
-				this.listItem.series.setExpectedCount(this.listItem.series.expectedCount + newExpectedCount);
-				this.listItem.series.statusWarningCount += newStatusWarningCount;
-			}
-		}
+	public async activate(): Promise<void> {
+		// Get the list of episodes for the specified series
+		this.episodeList.items = await Episode.listBySeries(String(this.listItem.series.id));
 
 		// Refresh the list
 		this.episodeList.refresh();
@@ -170,22 +133,6 @@ export default class EpisodesController extends ViewController {
 	 * @memberof EpisodesController
 	 * @this EpisodesController
 	 * @instance
-	 * @method listRetrieved
-	 * @desc Called after the list of episodes is retrieved
-	 * @param {Array<Episode>} episodeList - array of episode objects
-	 */
-	private async listRetrieved(episodeList: PublicInterface<Episode>[]): Promise<void> {
-		// Set the list items
-		this.episodeList.items = episodeList;
-
-		// Activate the controller
-		return this.activate();
-	}
-
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
@@ -203,12 +150,6 @@ export default class EpisodesController extends ViewController {
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
 		const episode = this.episodeList.items[listIndex] as Episode;
-
-		// Save the current episode details
-		this.origWatchedCount = "Watched" === episode.status ? 1 : 0;
-		this.origRecordedCount = "Recorded" === episode.status ? 1 : 0;
-		this.origExpectedCount = "Expected" === episode.status ? 1 : 0;
-		this.origStatusWarningCount = episode.statusWarning ? 1 : 0;
 
 		// Display the Episode view
 		return this.appController.pushView("episode", { listIndex, episode });
@@ -234,19 +175,8 @@ export default class EpisodesController extends ViewController {
 	 * @param {Number} listIndex - the list index of the episode to delete
 	 */
 	private async deleteItem(listIndex: number): Promise<void> {
-		// Get the details of the deleted episode
-		const episode = this.episodeList.items[listIndex] as Episode,
-					newWatchedCount = "Watched" === episode.status ? 1 : 0,
-					newRecordedCount = "Recorded" === episode.status ? 1 : 0,
-					newExpectedCount = "Expected" === episode.status ? 1 : 0,
-					newStatusWarningCount = "warning" === episode.statusWarning ? 1 : 0;
-
-		// Decrement the status counts for the series
-		this.listItem.series.setEpisodeCount(this.listItem.series.episodeCount - 1);
-		this.listItem.series.setWatchedCount(this.listItem.series.watchedCount - newWatchedCount);
-		this.listItem.series.setRecordedCount(this.listItem.series.recordedCount - newRecordedCount);
-		this.listItem.series.setExpectedCount(this.listItem.series.expectedCount - newExpectedCount);
-		this.listItem.series.statusWarningCount -= newStatusWarningCount;
+		// Get the deleted episode
+		const episode = this.episodeList.items[listIndex] as Episode;
 
 		// Remove the item from the DOM
 		$(`#list li a#${episode.id}`).remove();

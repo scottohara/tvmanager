@@ -1,5 +1,4 @@
 import {
-	EpisodeListItem,
 	HeaderFooter,
 	NavButton,
 	NavButtonAsyncEventHandler,
@@ -77,8 +76,7 @@ describe("EpisodesController", (): void => {
 			sinon.stub(episodesController, "deleteItem" as keyof EpisodesController);
 			sinon.stub(episodesController, "goBack" as keyof EpisodesController);
 			sinon.stub(episodesController, "addItem" as keyof EpisodesController);
-			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
-			EpisodeMock.episodes = items;
+			sinon.stub(episodesController, "activate");
 		});
 
 		scenarios.forEach((scenario: Scenario): void => {
@@ -117,124 +115,26 @@ describe("EpisodesController", (): void => {
 					episodesController["deleteItem"].should.have.been.calledWith(0);
 				});
 
-				it("should get the list of episodes for the series", (): void => {
-					EpisodeMock.listBySeries.should.have.been.calledWith(listItem.series.id);
-					episodesController["listRetrieved"].should.have.been.calledWith(items);
-				});
+				it("should activate the controller", (): Chai.Assertion => episodesController.activate.should.have.been.called);
 			});
 		});
 	});
 
 	describe("activate", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
-			episodesController["episodeList"] = new ListMock("", "", "", [{ ...items[0] } as EpisodeMock]);
+			episodesController["episodeList"] = new ListMock("", "", "", []);
+			EpisodeMock.episodes = items;
+			await episodesController.activate();
 		});
 
-		describe("from series list view", (): void => {
-			beforeEach(async (): Promise<void> => episodesController.activate());
-
-			it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-			it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
+		it("should get the list of episodes for the series", (): void => {
+			EpisodeMock.listBySeries.should.have.been.calledWith(listItem.series.id);
+			episodesController["episodeList"].items.should.deep.equal(items);
 		});
 
-		describe("from episode view", (): void => {
-			interface Scenario {
-				description: string;
-				status: EpisodeStatus;
-				watched: boolean;
-				recorded: boolean;
-				expected: boolean;
-				warning: boolean;
-			}
-
-			let episodeListItem: EpisodeListItem;
-
-			const scenarios: Scenario[] = [
-				{
-					description: "watched",
-					status: "Watched",
-					watched: true,
-					recorded: false,
-					expected: false,
-					warning: false
-				},
-				{
-					description: "recorded",
-					status: "Recorded",
-					watched: false,
-					recorded: true,
-					expected: false,
-					warning: false
-				},
-				{
-					description: "expected",
-					status: "Expected",
-					watched: false,
-					recorded: false,
-					expected: true,
-					warning: false
-				},
-				{
-					description: "warning",
-					status: "",
-					watched: false,
-					recorded: false,
-					expected: false,
-					warning: true
-				}
-			];
-
-			scenarios.forEach((scenario: Scenario): void => {
-				describe(scenario.description, (): void => {
-					describe("edit", (): void => {
-						beforeEach(async (): Promise<void> => {
-							episodeListItem = {
-								listIndex: 0,
-								episode: {
-									...items[0],
-									episodeName: "edited-episode",
-									status: scenario.status,
-									statusWarning: scenario.warning ? "warning" : ""
-								} as EpisodeMock
-							};
-							episodesController["origWatchedCount"] = 1;
-							episodesController["origRecordedCount"] = 0;
-							episodesController["origExpectedCount"] = 0;
-							episodesController["origStatusWarningCount"] = 1;
-							items[0] = episodeListItem.episode as EpisodeMock;
-							await episodesController["activate"](episodeListItem);
-						});
-
-						it("should update the item in the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(items));
-						it("should update the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(1 + Number(scenario.watched)));
-						it("should update the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + Number(scenario.recorded)));
-						it("should update the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
-						it("should update the series status warning count", (): Chai.Assertion => listItem.series.statusWarningCount.should.equal(1 + Number(scenario.warning)));
-						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
-					});
-
-					describe("add", (): void => {
-						beforeEach(async (): Promise<void> => {
-							episodeListItem = { episode: new EpisodeMock(null, "new-episode", scenario.status, "") };
-							(episodeListItem.episode as EpisodeMock).statusWarning = scenario.warning ? "warning" : "";
-							items.push(episodeListItem.episode as EpisodeMock);
-							await episodesController.activate(episodeListItem);
-						});
-
-						it("should add the item to the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(items));
-						it("should increment the series episode count", (): Chai.Assertion => listItem.series.setEpisodeCount.should.have.been.calledWith(7));
-						it("should increment the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 + Number(scenario.watched)));
-						it("should increment the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 + Number(scenario.recorded)));
-						it("should increment the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 + Number(scenario.expected)));
-						it("should increment the series status warning count", (): Chai.Assertion => listItem.series.statusWarningCount.should.equal(2 + Number(scenario.warning)));
-						it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-						it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
-					});
-				});
-			});
-		});
+		it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
 	});
 
 	describe("contentShown", (): void => {
@@ -287,17 +187,6 @@ describe("EpisodesController", (): void => {
 				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.false);
 			});
 		});
-	});
-
-	describe("listRetrieved", (): void => {
-		beforeEach(async (): Promise<void> => {
-			sinon.stub(episodesController, "activate");
-			episodesController["episodeList"] = new ListMock("", "", "", []);
-			await episodesController["listRetrieved"](items);
-		});
-
-		it("should set the episode list items", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(items));
-		it("should activate the controller", (): Chai.Assertion => episodesController.activate.should.have.been.called);
 	});
 
 	describe("goBack", (): void => {
@@ -368,13 +257,6 @@ describe("EpisodesController", (): void => {
 					items[0].statusWarning = scenario.statusWarning;
 					episodesController["episodeList"] = new ListMock("", "", "", items);
 					await episodesController["viewItem"](index);
-				});
-
-				it("should save the current episode details", (): void => {
-					episodesController["origWatchedCount"].should.equal(scenario.watched);
-					episodesController["origRecordedCount"].should.equal(scenario.recorded);
-					episodesController["origExpectedCount"].should.equal(scenario.expected);
-					episodesController["origStatusWarningCount"].should.equal(scenario.warning);
 				});
 
 				it("should push the episode view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("episode", {
@@ -472,11 +354,6 @@ describe("EpisodesController", (): void => {
 					await episodesController["deleteItem"](index);
 				});
 
-				it("should decrement the series episode count", (): Chai.Assertion => listItem.series.setEpisodeCount.should.have.been.calledWith(5));
-				it("should decrement the series watched count", (): Chai.Assertion => listItem.series.setWatchedCount.should.have.been.calledWith(2 - scenario.watched));
-				it("should decrement the series recorded count", (): Chai.Assertion => listItem.series.setRecordedCount.should.have.been.calledWith(2 - scenario.recorded));
-				it("should decrement the series expected count", (): Chai.Assertion => listItem.series.setExpectedCount.should.have.been.calledWith(2 - scenario.expected));
-				it("should decrement the series status warning count", (): Chai.Assertion => listItem.series.statusWarningCount.should.equal(2 - scenario.warning));
 				it("should remove the item from the DOM", (): Chai.Assertion => $("#list li a#1").length.should.equal(0));
 				it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
 				it("should remove the item from the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal([]));
@@ -490,7 +367,7 @@ describe("EpisodesController", (): void => {
 				rightButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
+			sinon.stub(episodesController, "activate");
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
 			await episodesController.setup();
 			await episodesController["deleteItems"]();
@@ -557,7 +434,7 @@ describe("EpisodesController", (): void => {
 				leftButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
+			sinon.stub(episodesController, "activate");
 			sinon.stub(episodesController, "resequenceItems" as keyof EpisodesController);
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
 			await episodesController.setup();
@@ -605,7 +482,7 @@ describe("EpisodesController", (): void => {
 				rightButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(episodesController, "listRetrieved" as keyof EpisodesController);
+			sinon.stub(episodesController, "activate");
 			sinon.stub(episodesController, "editItems" as keyof EpisodesController);
 			sinon.stub(episodesController, "deleteItems" as keyof EpisodesController);
 			await episodesController.setup();

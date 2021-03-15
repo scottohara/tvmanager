@@ -78,20 +78,7 @@ export default class UnscheduledController extends ViewController {
 	 */
 	public async activate(): Promise<void> {
 		// Get the list of unscheduled episodes
-		return this.listRetrieved(await Episode.listByUnscheduled());
-	}
-
-	/**
-	 * @memberof UnscheduledController
-	 * @this UnscheduledController
-	 * @instance
-	 * @method listRetrieved
-	 * @desc Called after the list of episodes is retrieved
-	 * @param {Array<Episode>} unscheduledList - array of episode objects
-	 */
-	private async listRetrieved(unscheduledList: PublicInterface<Episode>[]): Promise<void> {
-		// Set the list items
-		this.unscheduledList.items = unscheduledList;
+		this.unscheduledList.items = await Episode.listByUnscheduled();
 
 		// Refresh the list
 		this.unscheduledList.refresh();

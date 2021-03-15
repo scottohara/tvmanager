@@ -12,13 +12,10 @@
  * @requires models/series-model
  * @requires controllers/view-controller
  */
-import {
-	NavButtonEventHandler,
-	SeriesListItem
-} from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
+import { NavButtonEventHandler } from "controllers";
 import { PublicInterface } from "global";
 import ScheduleListTemplate from "views/scheduleListTemplate.html";
 import ScheduleView from "views/schedule-view.html";
@@ -31,16 +28,10 @@ import ViewController from "controllers/view-controller";
  * @extends ViewController
  * @property {HeaderFooter} header - the view header bar
  * @property {List} scheduleList - the list of series to display
- * @property {String} origProgramId - the program id of a series before editing
- * @property {Number} origNowShowing - the now showing status of a series before editing
  * @property {HeaderFooter} footer - the view footer bar
  */
 export default class ScheduleController extends ViewController {
 	private scheduleList!: PublicInterface<List>;
-
-	private origProgramId: string | null = null;
-
-	private origNowShowing: number | null = null;
 
 	/**
 	 * @memberof ScheduleController
@@ -87,51 +78,10 @@ export default class ScheduleController extends ViewController {
 	 * @instance
 	 * @method activate
 	 * @desc Activates the controller
-	 * @param {SeriesListItem} [listItem] - a list item that was just view/added/edited
 	 */
-	public async activate(listItem?: SeriesListItem): Promise<void> {
-		// When returning from the Episodes view, we need to update the list with the new values
-		if (undefined === listItem) {
-			// Get the list of scheduled series
-			return this.listRetrieved(await Series.listByNowShowing());
-		}
-
-		// If the series is now not showing or has no recorded/expected episodes, remove the item from the list
-		if (null === listItem.series.nowShowing && !listItem.series.recordedCount && !listItem.series.expectedCount) {
-			this.scheduleList.items.splice(Number(listItem.listIndex), 1);
-		} else {
-			// Update the item in the list
-			this.scheduleList.items[Number(listItem.listIndex)] = listItem.series;
-
-			// If the program or now showing was edited, resort the list
-			if (listItem.series.programId !== this.origProgramId || listItem.series.nowShowing !== this.origNowShowing) {
-				this.scheduleList.items = this.scheduleList.items.sort((a: Series, b: Series): number => {
-					const x = `${null === a.nowShowing ? "Z" : a.nowShowing}-${a.programName}`,
-								y = `${null === b.nowShowing ? "Z" : b.nowShowing}-${b.programName}`;
-
-					return x.localeCompare(y);
-				});
-			}
-		}
-
-		// Refresh the list
-		this.scheduleList.refresh();
-
-		// Set to view mode
-		return this.viewItems();
-	}
-
-	/**
-	 * @memberof ScheduleController
-	 * @this ScheduleController
-	 * @instance
-	 * @method listRetrieved
-	 * @desc Called after the list of series is retrieved
-	 * @param {Array<Series>} scheduleList - array of series objects
-	 */
-	private async listRetrieved(scheduleList: PublicInterface<Series>[]): Promise<void> {
-		// Set the list items
-		this.scheduleList.items = scheduleList;
+	public async activate(): Promise<void> {
+		// Get the list of scheduled series
+		this.scheduleList.items = await Series.listByNowShowing();
 
 		// Refresh the list
 		this.scheduleList.refresh();
@@ -195,10 +145,6 @@ export default class ScheduleController extends ViewController {
 	 */
 	private async editItem(listIndex: number): Promise<void> {
 		const series = this.scheduleList.items[listIndex] as Series;
-
-		// Save the current series details
-		this.origProgramId = series.programId;
-		this.origNowShowing = series.nowShowing;
 
 		// Display the Series view
 		return this.appController.pushView("series", { listIndex, series });

@@ -14,8 +14,7 @@
  */
 import {
 	NavButtonEventHandler,
-	ProgramListItem,
-	SeriesListItem
+	ProgramListItem
 } from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
@@ -35,10 +34,6 @@ import ViewController from "controllers/view-controller";
  * @property {HeaderFooter} header - the view header bar
  * @property {List} seriesList - the list of series to display
  * @property {Series} activeListItem - active list item being added or edited
- * @property {Number} origEpisodeCount - the total number of episodes in a series before viewing/editing
- * @property {Number} origWatchedCount - the number of watched episodes in a series before viewing/editing
- * @property {Number} origRecordedCount - the number of recorded episodes in a series before viewing/editing
- * @property {Number} origExpectedCount - the number of expected episodes in a series before viewing/editing
  * @property {HeaderFooter} footer - the view footer bar
  * @param {ProgramListItem} listItem - a list item from the Programs view
  */
@@ -46,14 +41,6 @@ export default class SeriesListController extends ViewController {
 	private seriesList!: PublicInterface<List>;
 
 	private activeListItem: PublicInterface<Series> | null = null;
-
-	private origEpisodeCount = 0;
-
-	private origWatchedCount = 0;
-
-	private origRecordedCount = 0;
-
-	private origExpectedCount = 0;
 
 	public constructor(private readonly listItem: ProgramListItem) {
 		super();
@@ -95,8 +82,8 @@ export default class SeriesListController extends ViewController {
 		// Instantiate a List object
 		this.seriesList = new List("list", SeriesListTemplate, null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
 
-		// Get the list of series for the specified program
-		return this.listRetrieved(await Series.listByProgram(String(this.listItem.program.id)));
+		// Activate the controller
+		return this.activate();
 	}
 
 	/**
@@ -105,33 +92,10 @@ export default class SeriesListController extends ViewController {
 	 * @instance
 	 * @method activate
 	 * @desc Activates the controller
-	 * @param {SeriesListItem} [listItem] - a list item that was just view in the Episodes view, or added/edited in the Series view
 	 */
-	public async activate(listItem?: SeriesListItem): Promise<void> {
-		// When returning from the Episodes or Series view, we need to update the list with the new values
-		if (undefined !== listItem) {
-			// If an existing series was viewed/edited, check if the series was moved or increment/decrement the status counts for the series
-			if (Number(listItem.listIndex) >= 0) {
-				// If the series has not moved to a different program, increment/decrement the status counts for the program
-				if (listItem.series.programId === this.listItem.program.id) {
-					this.seriesList.items[Number(listItem.listIndex)] = listItem.series;
-					this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount + (listItem.series.episodeCount - this.origEpisodeCount));
-					this.listItem.program.setWatchedCount(this.listItem.program.watchedCount + (listItem.series.watchedCount - this.origWatchedCount));
-					this.listItem.program.setRecordedCount(this.listItem.program.recordedCount + (listItem.series.recordedCount - this.origRecordedCount));
-					this.listItem.program.setExpectedCount(this.listItem.program.expectedCount + (listItem.series.expectedCount - this.origExpectedCount));
-				} else {
-					// Otherwise, remove the item from the list
-					await this.deleteItem(Number(listItem.listIndex), true);
-				}
-			} else {
-				// Otherwise, add the new series and increment the series count for the program
-				this.seriesList.items.push(listItem.series);
-				this.listItem.program.seriesCount++;
-			}
-
-			// In case of any changes, resort the list
-			this.seriesList.items = this.seriesList.items.sort((a: Series, b: Series): number => String(a.seriesName).localeCompare(String(b.seriesName)));
-		}
+	public async activate(): Promise<void> {
+		// Get the list of series for the specified program
+		this.seriesList.items = await Series.listByProgram(String(this.listItem.program.id));
 
 		// Refresh the list
 		this.seriesList.refresh();
@@ -158,22 +122,6 @@ export default class SeriesListController extends ViewController {
 	 * @memberof SeriesListController
 	 * @this SeriesListController
 	 * @instance
-	 * @method listRetrieved
-	 * @desc Called after the list of series is retrieved
-	 * @param {Array<Series>} seriesList - array of series objects
-	 */
-	private async listRetrieved(seriesList: PublicInterface<Series>[]): Promise<void> {
-		// Set the list items
-		this.seriesList.items = seriesList;
-
-		// Activate the controller
-		return this.activate();
-	}
-
-	/**
-	 * @memberof SeriesListController
-	 * @this SeriesListController
-	 * @instance
 	 * @method goBack
 	 * @desc Pops the view off the stack
 	 */
@@ -191,12 +139,6 @@ export default class SeriesListController extends ViewController {
 	 */
 	private async viewItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.seriesList.items[listIndex] as Series;
-
-		// Save the current series details
-		this.origEpisodeCount = this.activeListItem.episodeCount;
-		this.origWatchedCount = this.activeListItem.watchedCount;
-		this.origRecordedCount = this.activeListItem.recordedCount;
-		this.origExpectedCount = this.activeListItem.expectedCount;
 
 		// Display the Episodes view
 		return this.appController.pushView("episodes", { listIndex, series: this.activeListItem });
@@ -224,12 +166,6 @@ export default class SeriesListController extends ViewController {
 	private async editItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.seriesList.items[listIndex] as Series;
 
-		// Save the current series details
-		this.origEpisodeCount = this.activeListItem.episodeCount;
-		this.origWatchedCount = this.activeListItem.watchedCount;
-		this.origRecordedCount = this.activeListItem.recordedCount;
-		this.origExpectedCount = this.activeListItem.expectedCount;
-
 		// Display the Series view
 		return this.appController.pushView("series", { listIndex, series: this.activeListItem });
 	}
@@ -245,13 +181,6 @@ export default class SeriesListController extends ViewController {
 	 */
 	private async deleteItem(listIndex: number, dontRemove = false): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
-
-		// Decrement the status counts for the program
-		this.listItem.program.setEpisodeCount(this.listItem.program.episodeCount - series.episodeCount);
-		this.listItem.program.setWatchedCount(this.listItem.program.watchedCount - series.watchedCount);
-		this.listItem.program.setRecordedCount(this.listItem.program.recordedCount - series.recordedCount);
-		this.listItem.program.setExpectedCount(this.listItem.program.expectedCount - series.expectedCount);
-		this.listItem.program.seriesCount--;
 
 		// Unless instructed otherwise, remove the item from the database
 		if (!dontRemove) {

@@ -60,23 +60,17 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		it("should get the list of unscheduled episodes", async (): Promise<void> => {
-			sinon.stub(unscheduledController, "listRetrieved" as keyof UnscheduledController);
-			await unscheduledController.activate();
-			EpisodeMock.listByUnscheduled.should.have.been.called;
-			unscheduledController["listRetrieved"].should.have.been.calledWith([{}]);
-		});
-	});
-
-	describe("listRetrieved", (): void => {
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(unscheduledController, "activate");
 			sinon.stub(unscheduledController, "viewItems" as keyof UnscheduledController);
-			await unscheduledController.setup();
-			await unscheduledController["listRetrieved"](items);
+			unscheduledController["unscheduledList"] = new ListMock("", "", "", []);
+			await unscheduledController.activate();
 		});
 
-		it("should set the unscheduled list items", (): Chai.Assertion => unscheduledController["unscheduledList"].items.should.deep.equal(items));
+		it("should get the list of unscheduled episodes", (): void => {
+			EpisodeMock.listByUnscheduled.should.have.been.called;
+			unscheduledController["unscheduledList"].items.should.deep.equal(items);
+		});
+
 		it("should refresh the list", (): Chai.Assertion => unscheduledController["unscheduledList"].refresh.should.have.been.called);
 		it("should set the list to view mode", (): Chai.Assertion => unscheduledController["viewItems"].should.have.been.called);
 	});
@@ -92,7 +86,7 @@ describe("UnscheduledController", (): void => {
 		it("should push the episode view for the selected item", async (): Promise<void> => {
 			const index = 0;
 
-			unscheduledController["unscheduledList"] = new ListMock("", "", "", items, sinon.stub());
+			unscheduledController["unscheduledList"] = new ListMock("", "", "", items);
 			await unscheduledController["viewItem"](index);
 			appController.pushView.should.have.been.calledWith("episode", {
 				listIndex: index,

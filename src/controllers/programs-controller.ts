@@ -12,13 +12,10 @@
  * @requires models/program-model
  * @requires controllers/view-controller
  */
-import {
-	NavButtonEventHandler,
-	ProgramListItem
-} from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
+import { NavButtonEventHandler } from "controllers";
 import Program from "models/program-model";
 import ProgramListTemplate from "views/programListTemplate.html";
 import ProgramsView from "views/programs-view.html";
@@ -75,8 +72,8 @@ export default class ProgramsController extends ViewController {
 		// Instantiate a List object
 		this.programList = new List("list", ProgramListTemplate, "programGroup", [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
 
-		// Get the list of programs
-		return this.listRetrieved(await Program.list());
+		// Activate the controller
+		return this.activate();
 	}
 
 	/**
@@ -85,22 +82,10 @@ export default class ProgramsController extends ViewController {
 	 * @instance
 	 * @method activate
 	 * @desc Activates the controller
-	 * @param {ProgramListItem} [listItem] - a list item that was just added/edited in the Program view
 	 */
-	public async activate(listItem?: ProgramListItem): Promise<void> {
-		// When returning from the Program view, we need to update the list with the new values
-		if (undefined !== listItem) {
-			// If an existing program was edited, update the program details
-			if (Number(listItem.listIndex) >= 0) {
-				this.programList.items[Number(listItem.listIndex)] = listItem.program;
-			} else {
-				// Otherwise add the new program to the list
-				this.programList.items.push(listItem.program);
-			}
-
-			// In case of any changes, resort the list
-			this.programList.items = this.programList.items.sort((a: Program, b: Program): number => String(a.programName).localeCompare(String(b.programName)));
-		}
+	public async activate(): Promise<void> {
+		// Get the list of programs
+		this.programList.items = await Program.list();
 
 		// Refresh the list
 		this.programList.refresh();
@@ -121,22 +106,6 @@ export default class ProgramsController extends ViewController {
 		if (null !== this.activeListItem) {
 			this.programList.scrollTo(String(this.activeListItem.id));
 		}
-	}
-
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method listRetrieved
-	 * @desc Called after the list of programs is retrieved
-	 * @param {Array<Program>} programList - array of program objects
-	 */
-	private async listRetrieved(programList: PublicInterface<Program>[]): Promise<void> {
-		// Set the list items
-		this.programList.items = programList;
-
-		// Activate the controller
-		return this.activate();
 	}
 
 	/**

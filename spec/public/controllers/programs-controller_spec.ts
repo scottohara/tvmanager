@@ -1,8 +1,7 @@
 import {
 	HeaderFooter,
 	NavButton,
-	NavButtonEventHandler,
-	ProgramListItem
+	NavButtonEventHandler
 } from "controllers";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
@@ -52,8 +51,7 @@ describe("ProgramsController", (): void => {
 			sinon.stub(programsController, "deleteItem" as keyof ProgramsController);
 			sinon.stub(programsController, "goBack" as keyof ProgramsController);
 			sinon.stub(programsController, "addItem" as keyof ProgramsController);
-			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
-			ProgramMock.programs = items;
+			sinon.stub(programsController, "activate");
 			await programsController.setup();
 			leftButton = programsController.header.leftButton as NavButton;
 			rightButton = programsController.header.rightButton as NavButton;
@@ -91,69 +89,24 @@ describe("ProgramsController", (): void => {
 			programsController["deleteItem"].should.have.been.calledWith(0);
 		});
 
-		it("should get the list of programs", (): void => {
-			ProgramMock.list.should.have.been.called;
-			programsController["listRetrieved"].should.have.been.calledWith(items);
-		});
+		it("should activate the controller", (): Chai.Assertion => programsController.activate.should.have.been.called);
 	});
 
 	describe("activate", (): void => {
-		beforeEach((): void => {
+		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
-			programsController["programList"] = new ListMock("", "", "", [{ ...items[0] } as ProgramMock]);
+			programsController["programList"] = new ListMock("", "", "", []);
+			ProgramMock.programs = items;
+			await programsController.activate();
 		});
 
-		describe("from schedule", (): void => {
-			beforeEach(async (): Promise<void> => programsController.activate());
-
-			it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-			it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
+		it("should get the list of programs", (): void => {
+			ProgramMock.list.should.have.been.called;
+			programsController["programList"].items.should.deep.equal(items);
 		});
 
-		describe("from program view", (): void => {
-			let listItem: ProgramListItem,
-					sortedItems: ProgramMock[];
-
-			beforeEach((): ProgramMock[] => (programsController["programList"].items = items));
-
-			describe("edit", (): void => {
-				beforeEach(async (): Promise<void> => {
-					listItem = {
-						listIndex: 0,
-						program: new ProgramMock("1", "edited-program")
-					};
-
-					sortedItems = [
-						listItem.program as ProgramMock,
-						items[1]
-					];
-
-					return programsController.activate(listItem);
-				});
-
-				it("should update the item in the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
-				it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-				it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
-			});
-
-			describe("add", (): void => {
-				beforeEach(async (): Promise<void> => {
-					listItem = { program: new ProgramMock("3", "added-program") };
-
-					sortedItems = [
-						items[0],
-						listItem.program as ProgramMock,
-						items[1]
-					];
-
-					return programsController.activate(listItem);
-				});
-
-				it("should add the item to the program list and resort by program name", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(sortedItems));
-				it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-				it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
-			});
-		});
+		it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
 	});
 
 	describe("contentShown", (): void => {
@@ -176,17 +129,6 @@ describe("ProgramsController", (): void => {
 
 			it("should not scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.not.have.been.called);
 		});
-	});
-
-	describe("listRetrieved", (): void => {
-		beforeEach(async (): Promise<void> => {
-			sinon.stub(programsController, "activate" as keyof ProgramsController);
-			programsController["programList"] = new ListMock("", "", "", []);
-			await programsController["listRetrieved"](items);
-		});
-
-		it("should set the program list items", (): Chai.Assertion => programsController["programList"].items.should.deep.equal(items));
-		it("should activate the controller", (): Chai.Assertion => programsController.activate.should.have.been.called);
 	});
 
 	describe("goBack", (): void => {
@@ -254,7 +196,7 @@ describe("ProgramsController", (): void => {
 				rightButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
+			sinon.stub(programsController, "activate");
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
 			await programsController.setup();
 			await programsController["deleteItems"]();
@@ -289,7 +231,7 @@ describe("ProgramsController", (): void => {
 				leftButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
+			sinon.stub(programsController, "activate");
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
 			await programsController.setup();
 			await programsController["editItems"]();
@@ -325,7 +267,7 @@ describe("ProgramsController", (): void => {
 				rightButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(programsController, "listRetrieved" as keyof ProgramsController);
+			sinon.stub(programsController, "activate");
 			sinon.stub(programsController, "editItems" as keyof ProgramsController);
 			sinon.stub(programsController, "deleteItems" as keyof ProgramsController);
 			await programsController.setup();

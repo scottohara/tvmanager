@@ -74,23 +74,17 @@ describe("ReportController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		it("should get the list of unscheduled episodes", async (): Promise<void> => {
-			sinon.stub(reportController, "listRetrieved" as keyof ReportController);
-			await reportController.activate();
-			report.dataSource.should.have.been.calledWith(report.args);
-			reportController["listRetrieved"].should.have.been.calledWith(items);
-		});
-	});
-
-	describe("listRetrieved", (): void => {
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(reportController, "activate");
 			sinon.stub(reportController, "viewItems" as keyof ReportController);
-			await reportController.setup();
-			await reportController["listRetrieved"](items);
+			reportController["reportList"] = new ListMock("", "", "", []);
+			await reportController.activate();
 		});
 
-		it("should set the report list items", (): Chai.Assertion => reportController["reportList"].items.should.deep.equal(items));
+		it("should get the list for the report", (): void => {
+			report.dataSource.should.have.been.calledWith(report.args);
+			reportController["reportList"].items.should.deep.equal(items);
+		});
+
 		it("should refresh the list", (): Chai.Assertion => reportController["reportList"].refresh.should.have.been.called);
 		it("should set the list to view mode", (): Chai.Assertion => reportController["viewItems"].should.have.been.called);
 	});

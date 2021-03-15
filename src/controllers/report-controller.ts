@@ -87,20 +87,7 @@ export default class ReportController extends ViewController {
 	 */
 	public async activate(): Promise<void> {
 		// Get the data for the report
-		return this.listRetrieved(await this.report.dataSource(this.report.args));
-	}
-
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @method listRetrieved
-	 * @desc Called after the list of report data is retrieved
-	 * @param {Array<Series>} reportList - array of series objects
-	 */
-	private async listRetrieved(reportList: PublicInterface<Series>[]): Promise<void> {
-		// Set the list items
-		this.reportList.items = reportList;
+		this.reportList.items = await this.report.dataSource(this.report.args);
 
 		// Refresh the list
 		this.reportList.refresh();
