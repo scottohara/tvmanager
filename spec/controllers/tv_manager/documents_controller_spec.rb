@@ -96,6 +96,7 @@ describe ::TVManager::DocumentsController do
 				public_send(*request)
 				expect(last_response.status).to be 200
 				expect(last_response.body).to eql json
+				expect(last_response.headers['Content-Type']).to eql 'application/json'
 			end
 		end
 	end
@@ -118,6 +119,7 @@ describe ::TVManager::DocumentsController do
 				expect(last_response.status).to be 200
 				expect(last_response.body).to eql json
 				expect(last_response.headers['Etag']).to eql "\"#{checksum}\""
+				expect(last_response.headers['Content-Type']).to eql 'application/json'
 			end
 		end
 	end

@@ -29,6 +29,7 @@ module TVManager
 
 		# Get all documents
 		get '/all' do
+			content_type 'application/json'
 			stream(&::TVManager::Document.all)
 		end
 
@@ -39,6 +40,7 @@ module TVManager
 			# Return a hash of the documents as the etag, and the documents themselves as the response body
 			etag ::Digest::MD5.hexdigest docs.to_json
 
+			content_type 'application/json'
 			docs.to_json
 		end
 
