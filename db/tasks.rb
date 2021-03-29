@@ -9,6 +9,16 @@ module TVManager
 	class Database
 		class << self
 			include ::TVManager::Helpers::Database
+			def recreate!
+				# Abort if we're not in the test environment
+				# :nocov:
+				raise unless ::ENV['RACK_ENV'].eql? 'test'
+
+				# :nocov:
+
+				# Delete and recreate the database
+				db.recreate!
+			end
 
 			def migrate!
 				# Update each of the design documents in /db/design/*.json
@@ -30,6 +40,31 @@ module TVManager
 					puts 'done'
 				end
 			end
+
+			# :nocov:
+			def authorise_devices!
+				# Authorise all existing devices
+				db.view('devices/all', include_docs: true)['rows'].each do |doc|
+					device = doc['doc']
+					device['readOnly'] = false
+					db.save_doc device
+				end
+			end
+
+			def make_pending!(id)
+				# Get the specified document
+				pending_doc = db.get! id
+
+				# Make the document pending for all existing devices
+				db.view('devices/all', include_docs: true)['rows'].each do |doc|
+					device = doc['doc']
+					pending_doc['pending'] << device['_id']
+				end
+
+				# Save the document
+				db.save_doc pending_doc
+			end
+			# :nocov:
 		end
 	end
 end
