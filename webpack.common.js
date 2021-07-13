@@ -49,7 +49,7 @@ const MAX_DATA_AGE_DAYS = 7,
 
 			// Rule for image processing
 			imageRule = {
-				test: /(?:\.gif|startup-.*\.png)$/u,
+				test: /(?:\.svg|startup-.*\.png)$/u,
 				loader: "url-loader",
 				options: {
 					// Use file-loader for anything bigger than 1 byte

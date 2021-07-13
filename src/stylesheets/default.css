@@ -1,7 +1,89 @@
+@media (prefers-color-scheme: light) {
+	:root {
+		--default-background-color: rgb(242, 242, 247);
+		--default-alternate-background-color: rgb(255, 255, 255);
+
+		--default-text-color: rgb(0, 0, 0);
+		--default-alternate-text-color: rgb(255, 255, 255);
+		--default-secondary-text-color: rgb(138, 138, 142);
+
+		--default-action-color: rgb(0, 122, 255);
+		--default-caution-color: rgb(255, 59, 48);
+		--default-warning-color: rgb(255, 255, 222);
+		--default-separator-color: rgb(227, 227, 227);
+
+		--header-footer-background-color: rgb(247, 247, 247);
+		--header-footer-separator-color: rgb(194, 194, 194);
+
+		--list-background-color: rgb(255, 255, 255);
+		--list-icon-color: rgb(196, 196, 199);
+
+		--watched-color: rgb(26, 199, 89);
+		--watched-text-color: var(--default-text-color);
+		--recorded-color: rgb(255, 59, 48);
+		--recorded-text-color: var(--default-alternate-text-color);
+		--expected-color: rgb(255, 204, 0);
+		--expected-text-color: var(--default-text-color);
+		--missed-color: rgb(142, 142, 147);
+		--missed-text-color: var(--default-alternate-text-color);
+
+		--toggle-switch-track-color: rgb(233, 233, 235);
+		--toggle-switch-thumb-color: rgb(255, 255, 255);
+		--toggle-switch-shadow-color: rgba(0, 0, 0, .2);
+		--toggle-switch-checked-color: rgb(52, 199, 89);
+
+		--notices-background-color: rgb(0, 0, 0);
+		--notices-text-color: var(--default-alternate-text-color);
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--default-background-color: rgb(0, 0, 0);
+		--default-alternate-background-color: rgb(28, 28, 30);
+
+		--default-text-color: rgb(255, 255, 255);
+		--default-alternate-text-color: rgb(0, 0, 0);
+		--default-secondary-text-color: rgb(152, 152, 159);
+
+		--default-action-color: rgb(11, 132, 255);
+		--default-caution-color: rgb(255, 69, 58);
+		--default-warning-color: rgba(191, 143, 255, 0.4);
+		--default-separator-color: rgb(45, 45, 47);
+
+		--header-footer-background-color: rgb(18, 18, 18);
+		--header-footer-separator-color: rgb(66, 66, 66);
+
+		--list-background-color: rgb(0, 0, 0);
+		--list-icon-color: rgb(90, 90, 95);
+
+		--watched-color: rgb(48, 209, 91);
+		--watched-text-color: var(--default-alternate-text-color);
+		--recorded-color: rgb(255, 69, 58);
+		--recorded-text-color: var(--default-text-color);
+		--expected-color: rgb(255, 214, 11);
+		--expected-text-color: var(--default-alternate-text-color);
+		--missed-color: rgb(142, 142, 147);
+		--missed-text-color: var(--default-text-color);
+
+		--toggle-switch-track-color: rgb(68, 68, 72);
+		--toggle-switch-thumb-color: rgb(255, 255, 255);
+		--toggle-switch-shadow-color: rgba(0, 0, 0, .2);
+		--toggle-switch-checked-color: rgb(48, 209, 88);
+
+		--notices-background-color: rgb(90, 90, 95);
+		--notices-text-color: var(--default-text-color);
+	}
+}
+
+:root {
+	color-scheme: light dark;
+}
+
 /* Default application styles */
 body {
-	background-color: rgb(240, 240, 240);
-	color: #000;
+	background-color: var(--default-background-color);
+	color: var(--default-text-color);
 	font-family: Helvetica Neue;
 	font-size: 17px;
 	font-weight: 300;
@@ -20,8 +102,8 @@ body {
 /* Header title */
 h1 {
 	margin: 0;
-	background-color: rgb(248, 248, 248);
-	border-bottom: 1px solid rgb(200, 199, 204);
+	background-color: var(--header-footer-background-color);
+	border-bottom: 1px solid var(--header-footer-separator-color);
 	display: block;
 	font-size: inherit;
 	font-weight: 500;
@@ -32,8 +114,8 @@ h1 {
 /* Footer title */
 footer {
 	height:33px;
-	background-color: rgb(248, 248, 248);
-	border-top: 1px solid rgb(200, 199, 204);
+	background-color: var(--header-footer-background-color);
+	border-top: 1px solid var(--header-footer-separator-color);
 	display: block;
 	font-weight: 500;
 	padding: 10px 0 15px 0;
@@ -62,13 +144,14 @@ footer {
 /* Now loading indicator */
 #nowLoading {
 	margin: 20px auto;
-	background: url(../images/loading.gif) no-repeat;
-	height: 40px;
-	padding-left: 40px;
-	width: 200px;
+	background: url(../images/loading.svg) no-repeat;
+	height: 20px;
+	padding-left: 25px;
+	width: 165px;
 	position: relative;
 	display: none;
-	font-weight: 500;
+	font-weight: 400;
+	color: var(--default-secondary-text-color);
 }
 
 /* Show the now loading indicator while content is being loaded */
@@ -82,7 +165,7 @@ a.button {
 	overflow: hidden;
 	padding: 0 3px;
 	line-height: 30px;
-	color: rgb(0, 122, 255);
+	color: var(--default-action-color);
 	text-overflow: ellipsis;
 	text-decoration: none;
 	white-space: nowrap;
@@ -124,7 +207,7 @@ a.backButton:before {
 	top: 8px;
 	left: 5px;
 	border-style: solid;
-	border-color: rgb(0, 122, 255);
+	border-color: var(--default-action-color);
 	border-width: 0 0 3px 3px;
 	transform: rotate(45deg);
 }
@@ -136,7 +219,7 @@ a.confirmButton {
 
 /* Caution action buttons */
 a.cautionButton {
-	color: rgb(255, 59, 48);
+	color: var(--default-caution-color);
 }
 
 /* Scrolling lists & dialogs */
@@ -146,7 +229,7 @@ ul, #dialog {
 
 /* Default scrolling lists */
 ul {
-	background-color: #FFF;
+	background-color: var(--list-background-color);
 	padding:0;
 	margin: 0;
 }
@@ -154,7 +237,7 @@ ul {
 /* List items */
 ul li {
 	margin: 0 0 0 15px;
-	border-top: 1px solid #E0E0E0;
+	border-top: 1px solid var(--default-separator-color);
 	padding: 2px 0;
 	list-style: none;
 }
@@ -163,7 +246,7 @@ ul li {
 ul li.group {
 	padding: 1px 15px;
 	font-weight: 500;
-	background-color: rgb(240, 240, 240);
+	background-color: var(--default-background-color);
 	border: 0;
 	margin-left: 0;
 }
@@ -190,7 +273,7 @@ ul li a:before, .toView:before {
 	height: 7px;
 	right: 0;
 	border-style: solid;
-	border-color: rgb(200, 199, 204);
+	border-color: var(--list-icon-color);
 	border-width: 3px 3px 0 0;
 	transform-origin: 100% 100%;
 	transform: rotate(45deg) translate(0%, 240%);
@@ -198,7 +281,7 @@ ul li a:before, .toView:before {
 
 /* Highlighted list items */
 ul li a.warning {
-	background-color: rgb(255, 255, 222);
+	background-color: var(--default-warning-color);
 }
 
 /* Hide the chevron images for lists that use a helper */
@@ -225,10 +308,10 @@ ul.edit li a:before {
 	top: 12px;
 	right: 5px;
 	border-radius: 14px;
-	border: 1px solid rgb(200, 199, 204);
+	border: 1px solid var(--list-icon-color);
 	text-align: center;
 	font-family: serif;
-	color: rgb(200, 199, 204);
+	color: var(--list-icon-color);
 	line-height: 20px;
 	transform-origin: 100% 100%;
 	transform: rotate(0);
@@ -242,11 +325,11 @@ ul.delete li a:before {
 	height: 20px;
 	top: 12px;
 	right: 6px;
-	background-color: rgb(255, 45, 85);
+	background-color: var(--default-caution-color);
 	border-radius: 14px;
 	border: 0;
 	text-align: center;
-	color: #FFF;
+	color: var(--default-alternate-text-color);
 	line-height: 16px;
 	transform-origin: 100% 100%;
 	transform: rotate(0);
@@ -265,33 +348,33 @@ ul li a.status.Unverified {
 
 /* Watched status indicators for episode list */
 ul li a.Watched {
-	border-left-color: rgb(76, 217, 100);
+	border-left-color: var(--watched-color);
 }
 
 /* Recorded status indicators for episode list */
 ul li a.Recorded {
-	border-left-color: rgb(255, 45, 85);
+	border-left-color: var(--recorded-color);
 }
 
 /* Expected status indicators for episode list */
 ul li a.Expected {
-	border-left-color: rgb(255, 204, 0);
+	border-left-color: var(--expected-color);
 }
 
 /* Missed status indicators for episode list */
 ul li a.Missed {
-	border-left-color: rgb(142, 142, 147);
+	border-left-color: var(--missed-color);
 }
 
 /* List item content subtext */
 ul li a div.subText {
 	font-size: 12px;
-	color: rgb(111, 111, 116);
+	color: var(--default-secondary-text-color);
 }
 
 /* Progress bars */
 div.progressBar {
-	background-color: rgb(142, 142, 147);
+	background-color: var(--missed-color);
 	height: 14px;
 	font-size: 12px;
 	overflow: hidden;
@@ -308,23 +391,25 @@ div.progressBar div {
 div.progressBar div.total {
 	float: right !important;
 	padding-right: 2px;
-	color: #FFF;
+	color: var(--missed-text-color);
 }
 
 /* Watched section in progress bars */
 div.progressBar div.watched {
-	background-color: rgb(76, 217, 100);
+	background-color: var(--watched-color);
+	color: var(--watched-text-color);
 }
 
 /* Recorded section in progress bars */
 div.progressBar div.recorded {
-	background-color: rgb(255, 45, 85);
-	color: #FFF;
+	background-color: var(--recorded-color);
+	color: var(--recorded-text-color);
 }
 
 /* Expected section in progress bars */
 div.progressBar div.expected {
-	background-color: rgb(255, 204, 0);
+	background-color: var(--expected-color);
+	color: var(--expected-text-color);
 }
 
 /* Dialog sections */
@@ -337,16 +422,16 @@ h2 {
 	margin: 10px 0 6px 15px;
 	font-size: 14px;
 	font-weight: 300;
-	color: rgb(111, 111, 116);
+	color: var(--default-secondary-text-color);
 	text-transform: uppercase;
 }
 
 /* Dialog rows */
 .row  {
-	background: #FFF;
+	background: var(--default-alternate-background-color);
 	min-height: 42px;
 	padding-left: 15px;
-	border-bottom: 1px solid #E0E0E0;
+	border-bottom: 1px solid var(--default-separator-color);
 	white-space: nowrap;
 	overflow: hidden;
 	transform: rotate(0);
@@ -355,7 +440,7 @@ h2 {
 
 /* Top border for first row in a dialog or dialog section */
 h2 + .row, .row:first-child {
-	border-top: 1px solid #E0E0E0;
+	border-top: 1px solid var(--default-separator-color);
 }
 
 /* First row in a dialog with no preceding header */
@@ -383,7 +468,7 @@ label {
 /* Dialog text content */
 p {
 	margin: 8px 15px;
-	color: rgb(111, 111, 116);
+	color: var(--default-secondary-text-color);
 }
 
 /* Dialog fields */
@@ -415,42 +500,42 @@ input:not([type="radio"]), select {
 
 /* Watched episode status toggle (unselected) */
 .row #watched {
-	border-color: rgb(76, 217, 100);
+	border-color: var(--watched-color);
 }
 
 /* Watched episode status toggle (selected) */
 .row #watched.status {
-	background-color: rgb(76, 217, 100);
+	background-color: var(--watched-color);
 }
 
 /* Recorded episode status toggle (unselected) */
 .row #recorded {
-	border-color: rgb(255, 45, 85);
+	border-color: var(--recorded-color);
 }
 
 /* Recorded episode status toggle (selected) */
 .row #recorded.status {
-	background-color: rgb(255, 45, 85);
+	background-color: var(--recorded-color);
 }
 
 /* Expected episode status toggle (unselected) */
 .row #expected {
-	border-color: rgb(255, 204, 0);
+	border-color: var(--expected-color);
 }
 
 /* Expected episode status toggle (selected) */
 .row #expected.status {
-	background-color: rgb(255, 204, 0);
+	background-color: var(--expected-color);
 }
 
 /* Missed episode status toggle (unselected) */
 .row #missed {
-	border-color: rgb(111, 111, 116);
+	border-color: var(--missed-color);
 }
 
 /* Missed episode status toggle (selected) */
 .row #missed.status {
-	background-color: rgb(111, 111, 116);
+	background-color: var(--missed-color);
 }
 
 /* Buttons in dialog rows */
@@ -470,7 +555,7 @@ input[type="checkbox"] {
 input[type="checkbox"] + label {
 	display: inline-block;
 	position: relative;
-	box-shadow: inset 0 0 0px 1px #d5d5d5;
+	background-color: var(--toggle-switch-track-color);
 	height: 30px;
 	width: 50px;
 	border-radius: 15px;
@@ -500,21 +585,21 @@ input[type="checkbox"] + label:after {
 	width: 30px;
 	left: 0px;
 	border-radius: 15px;
-	background: white;
-	box-shadow: inset 0 0 0 1px rgba(0,0,0,.2), 0 2px 4px rgba(0,0,0,.2);
+	background-color: var(--toggle-switch-thumb-color);
+	box-shadow: inset 0 0 0 1px var(--toggle-switch-shadow-color);
 	transition: .25s ease-in-out;
 }
 
 /* Left side of checkbox slider (checked) */
 input[type="checkbox"]:checked + label:before {
 	width: 50px;
-	background: rgba(19,191,17,1);
+	background: var(--toggle-switch-checked-color);
 }
 
 /* Right side of checkbox slider (checked) */
 input[type="checkbox"]:checked + label:after {
 	left: 20px;
-	box-shadow: inset 0 0 0 1px rgba(19,191,17,1), 0 2px 4px rgba(0,0,0,.2);
+	box-shadow: inset 0 0 0 1px var(--toggle-switch-checked-color);
 }
 
 /* Hide registration message, sync controls, progress bar, status row, sync error & import changes only rows by default */
@@ -533,13 +618,13 @@ input[type="checkbox"]:checked + label:after {
 	visibility: hidden;
 	z-index: 1000;
 	width: 100%;
-	background: rgba(0, 0, 0, 0.7);
+	background: var(--notices-background-color);
 }
 
 /* Notices */
 div.notice {
 	min-height: 60px;
-	border-top: 1px solid rgb(240, 240, 240);
+	border-top: 1px solid var(--default-background-color);
 }
 
 /* Notice buttons */
@@ -551,7 +636,7 @@ div.notice a.button {
 div.notice p {
 	padding: 10px 5px 10px 50px;
 	margin: 0;
-	color: rgb(248, 248, 248);
+	color: var(--notices-text-color);
 }
 
 /* List index */
@@ -564,7 +649,7 @@ div.notice p {
 	font-size: 11px;
 	font-weight: 500;
 	text-align: center;
-	color: rgb(0, 122, 255);
+	color: var(--default-action-color);
 	background-color: transparent;
 	z-index: 100;
 	touch-action: none;
