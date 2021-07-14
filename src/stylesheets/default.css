@@ -484,6 +484,8 @@ input:not([type="radio"]), select {
 	background: transparent;
 	outline: none;
 	appearance: none;
+	-webkit-appearance: none;
+	-webkit-text-fill-color: var(--default-text-color);
 }
 
 /* Episode status toggles */
