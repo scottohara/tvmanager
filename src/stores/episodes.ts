@@ -1,8 +1,8 @@
-import {
+import type {
 	EpisodeStatus,
 	PersistedEpisode
 } from "models";
-import {
+import type {
 	EpisodesStore,
 	EpisodesStoreObject,
 	IDBStoreUpgrade,
@@ -10,16 +10,12 @@ import {
 	SeriesStoreObject,
 	TVManagerDB
 } from "stores";
-import {
-	IDBPDatabase,
-	IDBPObjectStore,
-	StoreNames
-} from "idb";
+import type { IDBPDatabase } from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
 	(db: IDBPDatabase<TVManagerDB>): void => {
-		const store: IDBPObjectStore<TVManagerDB, StoreNames<TVManagerDB>[], "episodes"> = db.createObjectStore("episodes", { keyPath: "id" });
+		const store = db.createObjectStore("episodes", { keyPath: "id" });
 
 		store.createIndex("seriesId", "seriesId");
 		store.createIndex("status", ["status", "seriesId"]);
@@ -57,8 +53,8 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 								Name: name,
 								Status: status,
 								StatusDate: statusDate,
-								Unverified: Boolean(unverified).toString() as "true" | "false",
-								Unscheduled: Boolean(unscheduled).toString() as "true" | "false",
+								Unverified: Boolean(unverified).toString() as "false" | "true",
+								Unscheduled: Boolean(unscheduled).toString() as "false" | "true",
 								Sequence: sequence,
 								SeriesID: seriesId,
 								SeriesName: seriesName,
@@ -86,8 +82,8 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 								Name: name,
 								Status: status,
 								StatusDate: statusDate,
-								Unverified: Boolean(unverified).toString() as "true" | "false",
-								Unscheduled: Boolean(unscheduled).toString() as "true" | "false",
+								Unverified: Boolean(unverified).toString() as "false" | "true",
+								Unscheduled: Boolean(unscheduled).toString() as "false" | "true",
 								Sequence: sequence,
 								SeriesID: seriesId,
 								SeriesName: seriesName,
@@ -107,8 +103,8 @@ function create(db: IDBPDatabase<TVManagerDB>): EpisodesStore {
 				Name,
 				Status,
 				StatusDate: statusDate,
-				Unverified: Boolean(unverified).toString() as "true" | "false",
-				Unscheduled: Boolean(unscheduled).toString() as "true" | "false",
+				Unverified: Boolean(unverified).toString() as "false" | "true",
+				Unscheduled: Boolean(unscheduled).toString() as "false" | "true",
 				Sequence,
 				SeriesID
 			};

@@ -1,4 +1,4 @@
-import {
+import type {
 	Device,
 	FullImport,
 	ImportData,
@@ -7,12 +7,12 @@ import {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import {
+import type {
 	Model,
 	ModelType,
 	SerializedModel
 } from "models";
-import sinon, {
+import type {
 	SinonFakeTimers,
 	SinonMatcher,
 	SinonStub
@@ -27,6 +27,7 @@ import SeriesMock from "mocks/series-model-mock";
 import SettingMock from "mocks/setting-model-mock";
 import SyncMock from "mocks/sync-model-mock";
 import WindowMock from "mocks/window-mock";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController: ApplicationControllerMock = new ApplicationControllerMock();
@@ -901,7 +902,7 @@ describe("DataSyncController", (): void => {
 		interface Scenario {
 			description: string;
 			importChangesOnly: boolean;
-			resource: "pending" | "all";
+			resource: "all" | "pending";
 		}
 		const scenarios: Scenario[] = [
 			{
@@ -1096,7 +1097,7 @@ describe("DataSyncController", (): void => {
 
 	describe("importObject", (): void => {
 		interface Scenario {
-			model: typeof ProgramMock | typeof SeriesMock | typeof EpisodeMock;
+			model: typeof EpisodeMock | typeof ProgramMock | typeof SeriesMock;
 			doc: ImportObject;
 			isPending?: boolean;
 		}

@@ -1,4 +1,4 @@
-import {
+import type {
 	ListItem,
 	Progress,
 	TestData
@@ -22,7 +22,7 @@ import {
 	listItem,
 	listItems
 } from "../support";
-import { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "models";
 import { watched } from "episode";
 
 const reports: { status: EpisodeStatus | "Incomplete"; selector: string; }[] = [

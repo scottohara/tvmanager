@@ -1,9 +1,10 @@
-import {
+import type {
 	ListAction,
 	ListEventHandler,
 	ListItem
 } from "components";
-import sinon, { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
+import sinon from "sinon";
 
 export default class ListMock {
 	public action!: ListAction;

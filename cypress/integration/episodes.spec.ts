@@ -1,4 +1,4 @@
-import {
+import type {
 	EpisodeListItem,
 	TestData
 } from "types";
@@ -30,7 +30,7 @@ import {
 	secondListItem,
 	thirdListItem
 } from "../support";
-import { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "models";
 
 describe("Episodes", (): void => {
 	let expectedItems: EpisodeListItem[];

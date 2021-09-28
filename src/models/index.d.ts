@@ -1,14 +1,14 @@
-import Episode from "models/episode-model";
-import Program from "models/program-model";
-import Series from "models/series-model";
+import type Episode from "models/episode-model";
+import type Program from "models/program-model";
+import type Series from "models/series-model";
 
-export type EpisodeStatus = "Watched" | "Recorded" | "Expected" | "Missed" | "";
+export type EpisodeStatus = "" | "Expected" | "Missed" | "Recorded" | "Watched";
 
-export type SyncAction = "modified" | "deleted";
+export type SyncAction = "deleted" | "modified";
 
 export type ModelType = "Episode" | "Program" | "Series";
 
-export type Model = Program | Series | Episode;
+export type Model = Episode | Program | Series;
 
 // Interfaces for persisting to local storage (IndexedDb)
 
@@ -44,8 +44,8 @@ export interface PersistedEpisode {
 	Name: string;
 	Status: EpisodeStatus;
 	StatusDate: string;
-	Unverified: "true" | "false";
-	Unscheduled: "true" | "false";
+	Unverified: "false" | "true";
+	Unscheduled: "false" | "true";
 	Sequence: number;
 	SeriesID: string;
 	SeriesName?: string;
@@ -65,8 +65,6 @@ interface PersistedSetting {
 }
 
 // Interfaces for import/exporting to remote storage (CouchDb)
-
-export type SerializedModel = SerializedProgram | SerializedSeries | SerializedEpisode;
 
 export interface SerializedProgram {
 	id: string | null;
@@ -93,3 +91,5 @@ export interface SerializedEpisode {
 	sequence: number;
 	type: "Episode";
 }
+
+export type SerializedModel = SerializedEpisode | SerializedProgram | SerializedSeries;

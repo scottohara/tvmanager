@@ -1,7 +1,7 @@
-import Episode from "models/episode-model";
-import Program from "models/program-model";
-import { PublicInterface } from "global";
-import Series from "models/series-model";
+import type Episode from "models/episode-model";
+import type Program from "models/program-model";
+import type { PublicInterface } from "global";
+import type Series from "models/series-model";
 
 /**
  * @class Section
@@ -13,14 +13,14 @@ import Series from "models/series-model";
  */
 
 export interface Section {
-	label: string | number;
+	label: number | string;
 	percent: number;
 	style: string;
 }
 
-export type ListAction = "view" | "edit" | "delete";
+export type ListAction = "delete" | "edit" | "view";
 export type ListEventHandler = (index: number) => void;
-export type ListItem = PublicInterface<Program | Series | Episode>;
+export type ListItem = PublicInterface<Episode | Program | Series>;
 
 export interface SyntheticTouch {
 	identifier?: -1;

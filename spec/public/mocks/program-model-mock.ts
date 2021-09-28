@@ -1,5 +1,6 @@
-import sinon, { SinonStub } from "sinon";
-import { SerializedModel } from "models";
+import type { SerializedModel } from "models";
+import type { SinonStub } from "sinon";
+import sinon from "sinon";
 
 const saveStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),

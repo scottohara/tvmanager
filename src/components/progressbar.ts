@@ -10,7 +10,7 @@
  * @requires jquery
  */
 import $ from "jquery";
-import { Section } from "components";
+import type { Section } from "components";
 
 /**
  * @class ProgressBar

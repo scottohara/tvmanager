@@ -1,4 +1,4 @@
-import {
+import type {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";

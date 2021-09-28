@@ -10,7 +10,7 @@
  * @requires models/base-model
  */
 import Base from "models/base-model";
-import { PersistedSetting } from "models";
+import type { PersistedSetting } from "models";
 
 /**
  * @class Setting
@@ -44,7 +44,7 @@ export default class Setting extends Base {
 			if (undefined !== persistedSetting) {
 				({ name, value } = persistedSetting);
 			}
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -63,7 +63,7 @@ export default class Setting extends Base {
 			await (await this.db).settingsStore.save(String(this.settingName), String(this.settingValue));
 
 			return true;
-		} catch (_e) {
+		} catch (_e: unknown) {
 			return false;
 		}
 	}

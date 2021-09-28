@@ -9,7 +9,7 @@
  * @module controllers/view-controller
  * @requires controllers/application-controller
  */
-import {
+import type {
 	HeaderFooter,
 	ViewControllerArgs
 } from "controllers";

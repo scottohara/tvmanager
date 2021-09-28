@@ -1,4 +1,4 @@
-import {
+import type {
 	ListItem,
 	TestData
 } from "types";
@@ -23,7 +23,7 @@ import {
 import { programName } from "program";
 
 describe("Programs", (): void => {
-	let expectedItems: (string | ListItem)[];
+	let expectedItems: (ListItem | string)[];
 
 	before((): void => {
 		const data: TestData = {

@@ -1,11 +1,12 @@
-import sinon, { SinonStub } from "sinon";
 import { EpisodesStoreMock } from "mocks/episodes-store-mock";
 import { ProgramsStoreMock } from "mocks/programs-store-mock";
 import { SeriesStoreMock } from "mocks/series-store-mock";
 import { SettingsStoreMock } from "mocks/settings-store-mock";
+import type { SinonStub } from "sinon";
 import { SyncsStoreMock } from "mocks/syncs-store-mock";
-import { TVManagerStoreProxy } from "stores";
+import type { TVManagerStoreProxy } from "stores";
 import { expose } from "mocks/comlink-mock";
+import sinon from "sinon";
 
 const connect: SinonStub = sinon.stub(),
 			storeProxy: TVManagerStoreProxy = {

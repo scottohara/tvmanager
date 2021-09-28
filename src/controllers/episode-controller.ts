@@ -11,15 +11,15 @@
  * @requires models/episode-model
  * @requires controllers/view-controller
  */
-import {
+import type {
 	EpisodeListItem,
 	NavButtonEventHandler
 } from "controllers";
 import $ from "jquery";
 import Episode from "models/episode-model";
-import { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
-import Series from "models/series-model";
+import type Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -104,7 +104,7 @@ export default class EpisodeController extends ViewController {
 		$("#unscheduled").on("click", this.toggleStatusDateRow.bind(this));
 
 		// Toggle the current status
-		const { status }: {status: EpisodeStatus;} = this.listItem.episode;
+		const { status }: { status: EpisodeStatus; } = this.listItem.episode;
 
 		this.listItem.episode.status = "";
 		this.setStatus(status);
@@ -119,7 +119,7 @@ export default class EpisodeController extends ViewController {
 	 * @method contentShown
 	 * @desc Called after the controller content is visible
 	 */
-	public contentShown(): void {
+	public override contentShown(): void {
 		// If we're adding a new episode, focus and select the episode name
 		if (undefined === this.listItem.listIndex) {
 			$("#episodeName").select();

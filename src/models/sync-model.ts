@@ -9,7 +9,7 @@
  * @module models/sync-model
  * @requires models/base-model
  */
-import {
+import type {
 	ModelType,
 	PersistedSync,
 	SyncAction
@@ -46,7 +46,7 @@ export default class Sync extends Base {
 
 		try {
 			syncList = await Promise.all((await (await this.db).syncsStore.list()).map((sync: PersistedSync): Sync => new Sync(sync.Type, sync.ID, sync.Action)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -64,7 +64,7 @@ export default class Sync extends Base {
 
 		try {
 			count = await (await this.db).syncsStore.count();
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -82,7 +82,7 @@ export default class Sync extends Base {
 
 		try {
 			await (await this.db).syncsStore.removeAll();
-		} catch (error) {
+		} catch (error: unknown) {
 			errorMessage = `Sync.removeAll: ${(error as Error).message}`;
 		}
 

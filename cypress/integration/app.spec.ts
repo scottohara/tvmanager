@@ -2,7 +2,7 @@ import {
 	dismissNoticeButton,
 	notices
 } from "../support";
-import { TestData } from "types";
+import type { TestData } from "types";
 
 describe("App", (): void => {
 	it("should show a notice when the last data sync was over 7 days ago", (): void => {

@@ -1,14 +1,14 @@
-import {
+import type {
 	IDBStoreUpgrade,
 	SyncsStore,
 	SyncsStoreObject,
 	TVManagerDB
 } from "stores";
-import {
+import type {
 	ModelType,
 	PersistedSync
 } from "models";
-import { IDBPDatabase } from "idb";
+import type { IDBPDatabase } from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1

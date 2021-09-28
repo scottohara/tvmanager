@@ -1,8 +1,9 @@
-import {
+import type {
 	EpisodeStatus,
 	SerializedModel
 } from "models";
-import sinon, { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
+import sinon from "sinon";
 
 const saveStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
 			removeStub: SinonStub = sinon.stub(),
@@ -22,9 +23,9 @@ export default class EpisodeMock {
 
 	public statusDateDisplay = "";
 
-	public statusWarning: "warning" | "" = "";
+	public statusWarning: "" | "warning" = "";
 
-	public unverifiedDisplay: "Unverified" | "" = "";
+	public unverifiedDisplay: "" | "Unverified" = "";
 
 	public constructor(public readonly id: string | null,
 						public episodeName: string | null,

@@ -1,4 +1,4 @@
-import {
+import type {
 	HeaderFooter,
 	NavButton,
 	NavButtonEventHandler,
@@ -6,7 +6,7 @@ import {
 	View,
 	ViewControllerArgs
 } from "controllers";
-import sinon, {
+import type {
 	SinonFakeTimers,
 	SinonSpy,
 	SinonStub
@@ -16,6 +16,7 @@ import ApplicationController from "../../../src/controllers/application-controll
 import SettingMock from "mocks/setting-model-mock";
 import TestController from "mocks/test-controller";
 import WindowMock from "mocks/window-mock";
+import sinon from "sinon";
 
 describe("ApplicationController", (): void => {
 	let contentWrapper: JQuery,

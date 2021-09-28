@@ -16,7 +16,7 @@
  */
 import "jquery-ui/ui/widgets/sortable";
 import "jquery-ui-touch-punch";
-import {
+import type {
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
@@ -26,7 +26,7 @@ import Episode from "models/episode-model";
 import EpisodeListTemplate from "views/episodeListTemplate.html";
 import EpisodesView from "views/episodes-view.html";
 import List from "components/list";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -97,7 +97,7 @@ export default class EpisodesController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Get the list of episodes for the specified series
 		this.episodeList.items = await Episode.listBySeries(String(this.listItem.series.id));
 
@@ -115,7 +115,7 @@ export default class EpisodesController extends ViewController {
 	 * @method contentShown
 	 * @desc Called after the controller content is visible
 	 */
-	public contentShown(): void {
+	public override contentShown(): void {
 		// If necessary, scroll to the first unwatched episode
 		if (this.scrollToFirstUnwatched) {
 			// Find the first unwatched episode

@@ -15,11 +15,11 @@
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
-import { NavButtonEventHandler } from "controllers";
+import type { NavButtonEventHandler } from "controllers";
 import Program from "models/program-model";
 import ProgramListTemplate from "views/programListTemplate.html";
 import ProgramsView from "views/programs-view.html";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -83,7 +83,7 @@ export default class ProgramsController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Get the list of programs
 		this.programList.items = await Program.list();
 
@@ -101,7 +101,7 @@ export default class ProgramsController extends ViewController {
 	 * @method contentShown
 	 * @desc "Called after the controller content is visible"
 	 */
-	public contentShown(): void {
+	public override contentShown(): void {
 		// If there is an active list item, scroll it into view
 		if (null !== this.activeListItem) {
 			this.programList.scrollTo(String(this.activeListItem.id));

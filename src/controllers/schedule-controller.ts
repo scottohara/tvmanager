@@ -15,8 +15,8 @@
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
-import { NavButtonEventHandler } from "controllers";
-import { PublicInterface } from "global";
+import type { NavButtonEventHandler } from "controllers";
+import type { PublicInterface } from "global";
 import ScheduleListTemplate from "views/scheduleListTemplate.html";
 import ScheduleView from "views/schedule-view.html";
 import Series from "models/series-model";
@@ -79,7 +79,7 @@ export default class ScheduleController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Get the list of scheduled series
 		this.scheduleList.items = await Series.listByNowShowing();
 

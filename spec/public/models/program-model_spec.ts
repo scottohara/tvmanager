@@ -1,6 +1,6 @@
 import DatabaseServiceMock from "mocks/database-service-mock";
 import Program from "../../../src/models/program-model";
-import { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
 
 describe("Program", (): void => {
 	let id: string,
@@ -245,7 +245,7 @@ describe("Program", (): void => {
 				((await DatabaseServiceMock).programsStore.remove as SinonStub).throws();
 				try {
 					await program.remove();
-				} catch (_e) {
+				} catch (_e: unknown) {
 					// No op
 				}
 			});

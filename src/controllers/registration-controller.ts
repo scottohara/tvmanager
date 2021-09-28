@@ -11,13 +11,13 @@
  * @requires models/setting-model
  * @requires controllers/view-controller
  */
-import {
+import type {
 	Device,
 	NavButtonEventHandler
 } from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
 import ViewController from "controllers/view-controller";
@@ -140,7 +140,7 @@ export default class RegistrationController extends ViewController {
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			this.appController.showNotice({
 				label: `Unregister failed: ${(error as Error).message}`,
 				leftButton: {
@@ -185,7 +185,7 @@ export default class RegistrationController extends ViewController {
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			this.appController.showNotice({
 				label: `Registration failed: ${(error as Error).message}`,
 				leftButton: {

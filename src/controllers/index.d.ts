@@ -1,9 +1,9 @@
-import Episode from "models/episode-model";
-import Program from "models/program-model";
-import { PublicInterface } from "global";
-import { SerializedModel } from "models";
-import Series from "models/series-model";
-import ViewController from "controllers/view-controller";
+import type Episode from "models/episode-model";
+import type Program from "models/program-model";
+import type { PublicInterface } from "global";
+import type { SerializedModel } from "models";
+import type Series from "models/series-model";
+import type ViewController from "controllers/view-controller";
 
 /**
  * @class HeaderFooter
@@ -14,12 +14,6 @@ import ViewController from "controllers/view-controller";
  * @property {NavButton} [rightButton] - the button to display on the right-hand side
  */
 
-export interface HeaderFooter {
-	label?: string;
-	leftButton?: NavButton;
-	rightButton?: NavButton;
-}
-
 /**
  * @class NavButton
  * @classdesc Anonymous object containing the properties of a navigation button
@@ -28,14 +22,20 @@ export interface HeaderFooter {
  * @property {String} label - the button label
  */
 
+export type NavButtonEventHandler = () => void;
+export type NavButtonAsyncEventHandler = () => Promise<void>;
+
 interface NavButton {
 	eventHandler?: NavButtonEventHandler;
 	style?: "backButton" | "cautionButton" | "confirmButton";
 	label: string;
 }
 
-export type NavButtonEventHandler = () => void;
-export type NavButtonAsyncEventHandler = () => Promise<void>;
+export interface HeaderFooter {
+	label?: string;
+	leftButton?: NavButton;
+	rightButton?: NavButton;
+}
 
 /**
  * @class View
@@ -48,13 +48,6 @@ export type NavButtonAsyncEventHandler = () => Promise<void>;
 export interface View {
 	controller: ViewController;
 	scrollPos: number;
-}
-
-type ViewControllerArgs = ProgramListItem | SeriesListItem | EpisodeListItem | Report;
-type ViewControllerConstructor = new(args?: ViewControllerArgs) => ViewController;
-
-export interface ViewControllerSet {
-	[key: string]: ViewControllerConstructor;
 }
 
 /**
@@ -101,9 +94,11 @@ export interface Device {
 	imported: boolean;
 }
 
-export type SyncOperation = "Import" | "Export";
+export type SyncOperation = "Export" | "Import";
 
-export type SyncErrorType = "Send error" | "Receive error" | "Save error" | "Delete error" | "Checksum mismatch";
+export type SyncErrorType = "Checksum mismatch" | "Delete error" | "Receive error" | "Save error" | "Send error";
+
+export type ImportObject = SerializedModel & { pending: string[]; isDeleted: boolean; };
 
 export interface ImportDoc {
 	doc: ImportObject;
@@ -118,8 +113,6 @@ export interface ImportData {
 	importJson: ImportDoc[];
 	returnedHash: string;
 }
-
-export type ImportObject = SerializedModel & {pending: string[]; isDeleted: boolean;};
 
 /**
  * @class EpisodeListItem
@@ -181,3 +174,7 @@ export interface Report {
 	dataSource: ReportDataSource;
 	args?: string;
 }
+
+type ViewControllerArgs = EpisodeListItem | ProgramListItem | Report | SeriesListItem;
+type ViewControllerConstructor = new(args?: ViewControllerArgs) => ViewController;
+export type ViewControllerSet = Record<string, ViewControllerConstructor>;

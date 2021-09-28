@@ -1,6 +1,7 @@
-import sinon, {	SinonSpyCall } from "sinon";
 import DatabaseService from "../../../src/services/database-service";
-import { TVManagerStore } from "stores";
+import type {	SinonSpyCall } from "sinon";
+import type { TVManagerStore } from "stores";
+import sinon from "sinon";
 import worker from "mocks/worker-store-mock";
 import { wrap } from "mocks/comlink-mock";
 

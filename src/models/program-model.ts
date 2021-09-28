@@ -11,7 +11,7 @@
  * @requires components/progressbar
  * @requires uuid
  */
-import {
+import type {
 	PersistedProgram,
 	SerializedProgram
 } from "models";
@@ -79,7 +79,7 @@ export default class Program extends Base {
 
 		try {
 			programList = await Promise.all((await (await this.db).programsStore.list()).map((prog: PersistedProgram): Program => new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -103,7 +103,7 @@ export default class Program extends Base {
 			if (undefined !== prog) {
 				({ ProgramID, Name } = prog);
 			}
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -121,7 +121,7 @@ export default class Program extends Base {
 
 		try {
 			count = await (await this.db).programsStore.count();
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -139,7 +139,7 @@ export default class Program extends Base {
 
 		try {
 			await (await this.db).programsStore.removeAll();
-		} catch (error) {
+		} catch (error: unknown) {
 			errorMessage = `Program.removeAll: ${(error as Error).message}`;
 		}
 
@@ -178,7 +178,7 @@ export default class Program extends Base {
 			});
 
 			return this.id;
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 

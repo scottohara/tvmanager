@@ -1,4 +1,5 @@
-import sinon, { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
+import sinon from "sinon";
 
 interface Setting {
 	name?: string;

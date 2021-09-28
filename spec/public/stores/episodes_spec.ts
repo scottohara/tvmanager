@@ -1,4 +1,4 @@
-import {
+import type {
 	EpisodesStore,
 	EpisodesStoreObject,
 	IDBStoreUpgrade,
@@ -6,15 +6,15 @@ import {
 	TVManagerDB
 } from "stores";
 import {
-	IDBPDatabase,
-	deleteDB,
-	openDB
-} from "idb";
-import {
 	create,
 	upgradeTo
 } from "../../../src/stores/episodes";
-import { PersistedEpisode } from "models";
+import {
+	deleteDB,
+	openDB
+} from "idb";
+import type {	IDBPDatabase } from "idb";
+import type { PersistedEpisode } from "models";
 import { upgradeTo as programsUpgradeTo } from "../../../src/stores/programs";
 import { upgradeTo as seriesUpgradeTo } from "../../../src/stores/series";
 import { upgradeTo as syncsUpgradeTo } from "../../../src/stores/syncs";

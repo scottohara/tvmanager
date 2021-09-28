@@ -1,5 +1,6 @@
-import sinon, { SinonStub } from "sinon";
-import { SettingsStore } from "stores";
+import type { SettingsStore } from "stores";
+import type { SinonStub } from "sinon";
+import sinon from "sinon";
 
 const migration = sinon.stub(),
 			SettingsStoreMock: SettingsStore = {

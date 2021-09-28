@@ -3,7 +3,7 @@ import * as ProgramsStoreFactory from "stores/programs";
 import * as SeriesStoreFactory from "stores/series";
 import * as SettingsStoreFactory from "stores/settings";
 import * as SyncsStoreFactory from "stores/syncs";
-import {
+import type {
 	EpisodesStore,
 	ProgramsStore,
 	SeriesStore,
@@ -13,12 +13,13 @@ import {
 	TVManagerDB,
 	TVManagerStoreProxy
 } from "stores";
-import {
+import type {
 	IDBPDatabase,
 	IDBPTransaction,
-	openDB
+	StoreNames
 } from "idb";
 import { expose } from "comlink";
+import { openDB } from "idb";
 
 let	db!: IDBPDatabase<TVManagerDB>,
 		programsStore: Store | undefined,
@@ -29,7 +30,7 @@ let	db!: IDBPDatabase<TVManagerDB>,
 
 async function connect(expectedVersion: number): Promise<void> {
 	db = await openDB<TVManagerDB>("tvmanager", expectedVersion, {
-		upgrade(database: IDBPDatabase<TVManagerDB>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<TVManagerDB>): void {
+		upgrade(database: IDBPDatabase<TVManagerDB>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<TVManagerDB, StoreNames<TVManagerDB>[], "versionchange">): void {
 			for (let version: number = oldVersion; version < Number(newVersion); version++) {
 				ProgramsStoreFactory.upgradeTo[version](database, transaction);
 				SeriesStoreFactory.upgradeTo[version](database, transaction);

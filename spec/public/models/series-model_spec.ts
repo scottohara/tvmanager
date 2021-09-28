@@ -1,10 +1,10 @@
-import {
+import type {
 	EpisodeStatus,
 	PersistedSeries
 } from "models";
 import DatabaseServiceMock from "mocks/database-service-mock";
 import Series from "../../../src/models/series-model";
-import { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
 
 describe("Series", (): void => {
 	let id: string,
@@ -393,7 +393,7 @@ describe("Series", (): void => {
 				((await DatabaseServiceMock).seriesStore.remove as SinonStub).throws();
 				try {
 					await series.remove();
-				} catch (_e) {
+				} catch (_e: unknown) {
 					// No op
 				}
 			});

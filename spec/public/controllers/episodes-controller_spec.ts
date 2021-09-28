@@ -1,4 +1,4 @@
-import {
+import type {
 	HeaderFooter,
 	NavButton,
 	NavButtonAsyncEventHandler,
@@ -8,7 +8,7 @@ import {
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeMock from "mocks/episode-model-mock";
-import { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "models";
 import EpisodesController from "controllers/episodes-controller";
 import EpisodesView from "views/episodes-view.html";
 import ListMock from "mocks/list-mock";

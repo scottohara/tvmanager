@@ -11,7 +11,7 @@
  * @requires models/series-model
  * @requires controllers/view-controller
  */
-import {
+import type {
 	NavButtonEventHandler,
 	ReportDataSource
 } from "controllers";
@@ -67,7 +67,7 @@ export default class SettingsController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
 		$("#dataSyncRow").on("click", this.viewDataSync.bind(this));
 		$("#aboutRow").on("click", this.viewAbout.bind(this));

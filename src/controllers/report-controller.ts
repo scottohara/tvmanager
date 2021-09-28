@@ -11,17 +11,17 @@
  * @requires components/list
  * @requires controllers/view-controller
  */
-import {
+import type {
 	NavButtonEventHandler,
 	Report
 } from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import ReportListTemplate from "views/reportListTemplate.html";
 import ReportView from "views/report-view.html";
-import Series from "models/series-model";
+import type Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -85,7 +85,7 @@ export default class ReportController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Get the data for the report
 		this.reportList.items = await this.report.dataSource(this.report.args);
 

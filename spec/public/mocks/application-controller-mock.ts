@@ -1,5 +1,6 @@
-import sinon, { SinonStub } from "sinon";
-import { View } from "controllers";
+import type { SinonStub } from "sinon";
+import type { View } from "controllers";
+import sinon from "sinon";
 
 export default class ApplicationControllerMock {
 	private static singletonInstance?: ApplicationControllerMock;

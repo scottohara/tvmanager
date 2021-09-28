@@ -1,4 +1,4 @@
-import {
+import type {
 	HeaderFooter,
 	NavButton,
 	NavButtonEventHandler,
@@ -6,7 +6,7 @@ import {
 } from "controllers";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
-import { ListEventHandler } from "components";
+import type { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
 import ProgramMock from "mocks/program-model-mock";
 import SeriesListController from "controllers/seriesList-controller";

@@ -1,4 +1,4 @@
-import {
+import type {
 	ListItem,
 	TestData
 } from "types";

@@ -1,10 +1,10 @@
-import {
+import type {
 	Device,
 	HeaderFooter,
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import sinon, {
+import type {
 	SinonMatcher,
 	SinonStub
 } from "sinon";
@@ -13,6 +13,7 @@ import ApplicationControllerMock from "mocks/application-controller-mock";
 import RegistrationController from "controllers/registration-controller";
 import RegistrationView from "views/registration-view.html";
 import SettingMock from "mocks/setting-model-mock";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController: ApplicationControllerMock = new ApplicationControllerMock();

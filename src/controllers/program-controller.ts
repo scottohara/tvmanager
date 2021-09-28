@@ -11,7 +11,7 @@
  * @requires models/program-model
  * @requires controllers/view-controller
  */
-import {
+import type {
 	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";

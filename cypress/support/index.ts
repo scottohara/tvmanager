@@ -3,16 +3,17 @@ import * as ProgramsStoreFactory from "stores/programs";
 import * as SeriesStoreFactory from "stores/series";
 import * as SettingsStoreFactory from "stores/settings";
 import * as SyncsStoreFactory from "stores/syncs";
-import {
+import type {
 	IDBPDatabase,
 	IDBPTransaction,
-	openDB
+	StoreNames
 } from "idb";
-import {
+import type {
 	Progress,
 	TestData
 } from "types";
-import { TVManagerDB } from "stores";
+import type { TVManagerDB } from "stores";
+import { openDB } from "idb";
 
 export const headerLabel = "#headerLabel";
 export const headerLeftButton = "#headerLeftButton";
@@ -89,7 +90,7 @@ export function checkProgress({ watched = 0, recorded = 0, expected = 0, missed 
 Cypress.Commands.add("createTestData", ({ programs = [], settings = [] }: TestData): void => {
 	cy.window().then(async (): Promise<void> => {
 		const db = await openDB<TVManagerDB>("tvmanager", 1, {
-						upgrade(database: IDBPDatabase<TVManagerDB>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<TVManagerDB>): void {
+						upgrade(database: IDBPDatabase<TVManagerDB>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<TVManagerDB, StoreNames<TVManagerDB>[], "versionchange">): void {
 							for (let version: number = oldVersion; version < Number(newVersion); version++) {
 								ProgramsStoreFactory.upgradeTo[version](database, transaction);
 								SeriesStoreFactory.upgradeTo[version](database, transaction);

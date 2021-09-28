@@ -12,14 +12,14 @@
  * @requires models/series-model
  * @requires controllers/view-controller
  */
-import {
+import type {
 	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import Series from "models/series-model";
 import SeriesListTemplate from "views/seriesListTemplate.html";
 import SeriesListView from "views/seriesList-view.html";
@@ -93,7 +93,7 @@ export default class SeriesListController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Get the list of series for the specified program
 		this.seriesList.items = await Series.listByProgram(String(this.listItem.program.id));
 
@@ -111,7 +111,7 @@ export default class SeriesListController extends ViewController {
 	 * @method contentShown
 	 * @desc Called after the controller content is visible
 	 */
-	public contentShown(): void {
+	public override contentShown(): void {
 		// If there is an active list item, scroll it into view
 		if (null !== this.activeListItem && $(`#${this.activeListItem.id}`).length) {
 			this.seriesList.scrollTo(String(this.activeListItem.id));

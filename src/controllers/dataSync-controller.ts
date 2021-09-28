@@ -16,7 +16,7 @@
  * @requires controllers/view-controller
  * @requires md5
  */
-import {
+import type {
 	Device,
 	FullImport,
 	ImportData,
@@ -25,7 +25,7 @@ import {
 	SyncErrorType,
 	SyncOperation
 } from "controllers";
-import {
+import type {
 	Model,
 	ModelType,
 	SerializedModel
@@ -34,7 +34,7 @@ import $ from "jquery";
 import DataSyncView from "views/dataSync-view.html";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import Series from "models/series-model";
 import Setting from "models/setting-model";
 import Sync from "models/sync-model";
@@ -43,7 +43,18 @@ import md5 from "md5";
 import window from "components/window";
 
 enum Months {
-	Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+	Jan = 0,
+	Feb = 1,
+	Mar = 2,
+	Apr = 3,
+	May = 4,
+	Jun = 5,
+	Jul = 6,
+	Aug = 7,
+	Sep = 8,
+	Oct = 9,
+	Nov = 10,
+	Dec = 11
 }
 
 /**
@@ -124,7 +135,7 @@ export default class DataSyncController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Bind an event handler to access the registration view
 		$("#registrationRow").on("click", this.viewRegistration.bind(this));
 
@@ -445,7 +456,7 @@ export default class DataSyncController extends ViewController {
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			this.syncError("Send error", sync.type as ModelType, (error as Error).message, sync.id);
 		}
 
@@ -506,7 +517,7 @@ export default class DataSyncController extends ViewController {
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			this.syncError("Delete error", sync.type as ModelType, (error as Error).message, sync.id);
 		}
 
@@ -672,7 +683,7 @@ export default class DataSyncController extends ViewController {
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			// An error occurred getting the objects to import
 			this.syncError("Receive error", "Sync", (error as Error).message);
 		}
@@ -824,7 +835,7 @@ export default class DataSyncController extends ViewController {
 			if (!response.ok) {
 				this.syncError("Save error", type, `Error saving ${type.toLowerCase()}`);
 			}
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 

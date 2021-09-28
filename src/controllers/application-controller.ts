@@ -24,7 +24,7 @@
  * @requires controllers/settings-controller
  * @requires controllers/unscheduled-controller
  */
-import {
+import type {
 	Notice,
 	NoticeStack,
 	View,
@@ -38,7 +38,7 @@ import EpisodeController from "controllers/episode-controller";
 import EpisodesController from "controllers/episodes-controller";
 import ProgramController from "controllers/program-controller";
 import ProgramsController from "controllers/programs-controller";
-import { PublicInterface } from "global";
+import type { PublicInterface } from "global";
 import RegistrationController from "controllers/registration-controller";
 import ReportController from "controllers/report-controller";
 import ScheduleController from "controllers/schedule-controller";
@@ -411,7 +411,7 @@ export default class ApplicationController {
 	 * @param {Function} onSuccess - function to call after loading the view contents
 	 * @param {Object} [args] - arguments to pass to the view controller
 	 */
-	private async show(onSuccess: (args?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
+	private async show(onSuccess: (_?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
 		// Show the now loading indicator
 		$("#nowLoading").addClass("loading");
 

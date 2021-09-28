@@ -1,9 +1,9 @@
-import {
+import type {
 	ModelType,
 	SyncAction
 } from "models";
 import DatabaseServiceMock from "mocks/database-service-mock";
-import { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
 import Sync from "../../../src/models/sync-model";
 
 describe("Sync", (): void => {
@@ -111,7 +111,7 @@ describe("Sync", (): void => {
 				((await DatabaseServiceMock).syncsStore.remove as SinonStub).throws();
 				try {
 					await sync.remove();
-				} catch (_e) {
+				} catch (_e: unknown) {
 					// No op
 				}
 			});

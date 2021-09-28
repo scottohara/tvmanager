@@ -8,7 +8,7 @@
 /**
  * @module services/database-service
  */
-import {
+import type {
 	EpisodesStore,
 	ProgramsStore,
 	SeriesStore,
@@ -17,11 +17,9 @@ import {
 	TVManagerStore,
 	TVManagerStoreProxy
 } from "stores";
-import {
-	Remote,
-	wrap
-} from "comlink";
+import type { Remote } from "comlink";
 import worker from "stores/worker";
+import { wrap } from "comlink";
 
 const	version = 1,
 			{ connect, programsStore, seriesStore, episodesStore, settingsStore, syncsStore }: Remote<TVManagerStoreProxy> = wrap(worker);

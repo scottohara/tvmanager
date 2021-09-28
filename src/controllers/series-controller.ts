@@ -12,7 +12,7 @@
  * @requires models/series-model
  * @requires controllers/view-controller
  */
-import {
+import type {
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
@@ -106,7 +106,7 @@ export default class SeriesController extends ViewController {
 	 * @method contentShown
 	 * @desc Called after the controller content is visible
 	 */
-	public contentShown(): void {
+	public override contentShown(): void {
 		// If we're adding a new series, focus and select the episode name
 		if (undefined === this.listItem.listIndex) {
 			$("#seriesName").select();

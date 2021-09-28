@@ -1,6 +1,6 @@
 import DatabaseServiceMock from "mocks/database-service-mock";
 import Setting from "../../../src/models/setting-model";
-import { SinonStub } from "sinon";
+import type { SinonStub } from "sinon";
 
 describe("Setting", (): void => {
 	let name: string,
@@ -84,7 +84,7 @@ describe("Setting", (): void => {
 				((await DatabaseServiceMock).settingsStore.remove as SinonStub).throws();
 				try {
 					await setting.remove();
-				} catch (_e) {
+				} catch (_e: unknown) {
 					// No op
 				}
 			});

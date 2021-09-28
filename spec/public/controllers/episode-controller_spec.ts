@@ -1,17 +1,18 @@
-import {
+import type {
 	EpisodeListItem,
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import sinon, { SinonStub } from "sinon";
 import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeController from "controllers/episode-controller";
 import EpisodeMock from "mocks/episode-model-mock";
-import { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
 import SeriesMock from "mocks/series-model-mock";
+import type { SinonStub } from "sinon";
 import TestController from "mocks/test-controller";
+import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController: ApplicationControllerMock = new ApplicationControllerMock();

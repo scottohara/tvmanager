@@ -16,8 +16,8 @@ import $ from "jquery";
 import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import List from "components/list";
-import { NavButtonEventHandler } from "controllers";
-import { PublicInterface } from "global";
+import type { NavButtonEventHandler } from "controllers";
+import type { PublicInterface } from "global";
 import UnscheduledListTemplate from "views/unscheduledListTemplate.html";
 import UnscheduledView from "views/unscheduled-view.html";
 import ViewController from "controllers/view-controller";
@@ -76,7 +76,7 @@ export default class UnscheduledController extends ViewController {
 	 * @method activate
 	 * @desc Activates the controller
 	 */
-	public async activate(): Promise<void> {
+	public override async activate(): Promise<void> {
 		// Get the list of unscheduled episodes
 		this.unscheduledList.items = await Episode.listByUnscheduled();
 

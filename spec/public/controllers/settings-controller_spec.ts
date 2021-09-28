@@ -1,4 +1,4 @@
-import {
+import type {
 	NavButton,
 	NavButtonEventHandler,
 	Report
@@ -19,7 +19,7 @@ describe("SettingsController", (): void => {
 		viewArgs: Report;
 	}
 
-	type ReportHandler = "viewRecordedReport" | "viewExpectedReport" | "viewMissedReport" | "viewIncompleteReport";
+	type ReportHandler = "viewExpectedReport" | "viewIncompleteReport" | "viewMissedReport" | "viewRecordedReport";
 
 	const reports: ReportType[] = [
 		{

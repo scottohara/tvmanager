@@ -1,9 +1,4 @@
-import {
-	IDBPDatabase,
-	deleteDB,
-	openDB
-} from "idb";
-import {
+import type {
 	IDBStoreUpgrade,
 	SyncsStore,
 	TVManagerDB
@@ -12,7 +7,12 @@ import {
 	create,
 	upgradeTo
 } from "../../../src/stores/syncs";
-import { ModelType } from "models";
+import {
+	deleteDB,
+	openDB
+} from "idb";
+import type {	IDBPDatabase } from "idb";
+import type { ModelType } from "models";
 
 describe("syncs", (): void => {
 	let db: IDBPDatabase<TVManagerDB>;

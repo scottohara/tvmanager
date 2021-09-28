@@ -9,7 +9,7 @@
  * @module models/base-model
  */
 import DatabaseService from "services/database-service";
-import { TVManagerStore } from "stores";
+import type { TVManagerStore } from "stores";
 
 /**
  * @class Base

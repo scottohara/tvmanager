@@ -1,4 +1,4 @@
-import { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "models";
 
 export interface Progress {
 	watched?: number;
@@ -29,8 +29,8 @@ interface TestEpisode {
 	episodeName?: string;
 	status?: EpisodeStatus;
 	statusDate?: string;
-	unverified?: "true" | "false";
-	unscheduled?: "true" | "false";
+	unverified?: "false" | "true";
+	unscheduled?: "false" | "true";
 }
 
 interface TestSeries {

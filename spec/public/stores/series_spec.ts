@@ -1,9 +1,4 @@
-import {
-	IDBPDatabase,
-	deleteDB,
-	openDB
-} from "idb";
-import {
+import type {
 	IDBStoreUpgrade,
 	SeriesStore,
 	SeriesStoreObject,
@@ -14,7 +9,12 @@ import {
 	create,
 	upgradeTo
 } from "../../../src/stores/series";
-import { PersistedSeries } from "models";
+import {
+	deleteDB,
+	openDB
+} from "idb";
+import type {	IDBPDatabase } from "idb";
+import type { PersistedSeries } from "models";
 import { upgradeTo as episodesUpgradeTo } from "../../../src/stores/episodes";
 import { upgradeTo as programsUpgradeTo } from "../../../src/stores/programs";
 import { upgradeTo as syncsUpgradeTo } from "../../../src/stores/syncs";

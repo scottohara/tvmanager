@@ -1,9 +1,4 @@
-import {
-	IDBPDatabase,
-	deleteDB,
-	openDB
-} from "idb";
-import {
+import type {
 	IDBStoreUpgrade,
 	SettingsStore,
 	TVManagerDB
@@ -12,7 +7,12 @@ import {
 	create,
 	upgradeTo
 } from "../../../src/stores/settings";
-import { PersistedSetting } from "models";
+import {
+	deleteDB,
+	openDB
+} from "idb";
+import type {	IDBPDatabase } from "idb";
+import type { PersistedSetting } from "models";
 
 describe("settings", (): void => {
 	let db: IDBPDatabase<TVManagerDB>;

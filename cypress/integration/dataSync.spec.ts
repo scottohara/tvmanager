@@ -29,7 +29,7 @@ import {
 	totalPrograms,
 	totalSeries
 } from "about";
-import { TestData } from "types";
+import type { TestData } from "types";
 
 describe("Import/Export", (): void => {
 	before((): void => {

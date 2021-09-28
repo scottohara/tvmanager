@@ -10,7 +10,7 @@
  * @requires models/base-model
  * @requires uuid
  */
-import {
+import type {
 	EpisodeStatus,
 	PersistedEpisode,
 	SerializedEpisode
@@ -73,7 +73,7 @@ export default class Episode extends Base {
 
 		try {
 			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -91,7 +91,7 @@ export default class Episode extends Base {
 
 		try {
 			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -121,7 +121,7 @@ export default class Episode extends Base {
 			if (undefined !== ep) {
 				({ EpisodeID, Name, Status, StatusDate, Unverified, Unscheduled, Sequence, SeriesID } = ep);
 			}
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -139,7 +139,7 @@ export default class Episode extends Base {
 
 		try {
 			count = await (await this.db).episodesStore.totalCount();
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -158,7 +158,7 @@ export default class Episode extends Base {
 
 		try {
 			count = await (await this.db).episodesStore.countByStatus(status);
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -176,7 +176,7 @@ export default class Episode extends Base {
 
 		try {
 			await (await this.db).episodesStore.removeAll();
-		} catch (error) {
+		} catch (error: unknown) {
 			errorMessage = `Episode.removeAll: ${(error as Error).message}`;
 		}
 
@@ -221,7 +221,7 @@ export default class Episode extends Base {
 			});
 
 			return this.id;
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -287,7 +287,7 @@ export default class Episode extends Base {
 	 * @property {String} statusWarning - a CSS class name
 	 * @desc Returns a CSS class name to use to indicate that an expected episode has passed it's expected date
 	 */
-	public get statusWarning(): "warning" | "" {
+	public get statusWarning(): "" | "warning" {
 		return "Expected" === this.status && this.statusDate && new Date(this.statusDate) < new Date() ? "warning" : "";
 	}
 
@@ -298,7 +298,7 @@ export default class Episode extends Base {
 	 * @property {String} unverifiedDisplay - a CSS class name
 	 * @desc Returns a CSS class name to control the status icon displayed next to an episode in any episode lists
 	 */
-	public get unverifiedDisplay(): "Unverified" | "" {
+	public get unverifiedDisplay(): "" | "Unverified" {
 		return "Watched" !== this.status && this.unverified ? "Unverified" : "";
 	}
 }

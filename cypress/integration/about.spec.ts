@@ -9,7 +9,7 @@ import {
 	headerLabel,
 	headerLeftButton
 } from "../support";
-import { TestData } from "types";
+import type { TestData } from "types";
 import { aboutRow } from "settings";
 
 describe("About", (): void => {

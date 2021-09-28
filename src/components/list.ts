@@ -10,7 +10,7 @@
  * @requires jquery
  * @requires controllers/application-controller
  */
-import {
+import type {
 	ListAction,
 	ListEventHandler,
 	ListItem

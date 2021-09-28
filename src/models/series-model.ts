@@ -11,7 +11,7 @@
  * @requires components/progressbar
  * @requires uuid
  */
-import {
+import type {
 	EpisodeStatus,
 	PersistedSeries,
 	SerializedSeries
@@ -95,7 +95,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByProgram(programId)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -113,7 +113,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByNowShowing()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -132,7 +132,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByStatus(status)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -150,7 +150,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByIncomplete()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -176,7 +176,7 @@ export default class Series extends Base {
 			if (undefined !== series) {
 				({ SeriesID, Name, NowShowing, ProgramID } = series);
 			}
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -194,7 +194,7 @@ export default class Series extends Base {
 
 		try {
 			count = await (await this.db).seriesStore.count();
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -212,7 +212,7 @@ export default class Series extends Base {
 
 		try {
 			await (await this.db).seriesStore.removeAll();
-		} catch (error) {
+		} catch (error: unknown) {
 			errorMessage = `Series.removeAll: ${(error as Error).message}`;
 		}
 
@@ -253,7 +253,7 @@ export default class Series extends Base {
 			});
 
 			return this.id;
-		} catch (_e) {
+		} catch (_e: unknown) {
 			// No op
 		}
 
@@ -390,7 +390,7 @@ export default class Series extends Base {
 	 * @property {String} statusWarning - a CSS class name
 	 * @desc Returns a CSS class name to use to indicate that one or more expected episode for the series have passed their expected date
 	 */
-	public get statusWarning(): "warning" | "" {
+	public get statusWarning(): "" | "warning" {
 		return this.statusWarningCount > 0 ? "warning" : "";
 	}
 
@@ -402,7 +402,7 @@ export default class Series extends Base {
 	 * @desc ReSets the now showing status of the series
 	 */
 	public get nowShowingDisplay(): string {
-		const NOW_SHOWING: { [nowShowing: number]: string; } = {
+		const NOW_SHOWING: Record<number, string> = {
 			1: "Mondays",
 			2: "Tuesdays",
 			3: "Wednesdays",

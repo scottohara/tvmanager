@@ -1,4 +1,4 @@
-import {
+import type {
 	ListItem,
 	TestData
 } from "types";
@@ -24,7 +24,7 @@ import {
 } from "series";
 
 describe("Schedule", (): void => {
-	let expectedItems: (string | ListItem)[];
+	let expectedItems: (ListItem | string)[];
 
 	before((): void => {
 		const data: TestData = {

@@ -1,4 +1,4 @@
-import {
+import type {
 	EpisodeListItem,
 	TestData
 } from "types";
