@@ -478,6 +478,7 @@ input:not([type="radio"]), select {
 	border: none;
 	height: 40px;
 	width: 100%;
+	margin: 0;
 	font-family: inherit;
 	font-weight: inherit;
 	font-size: inherit;
@@ -545,6 +546,11 @@ input:not([type="radio"]), select {
 /* Buttons in dialog rows */
 .row a.button {
 	line-height: 40px;
+}
+
+/* Prevent date fields on iOS from being centred */
+input[type="date"] {
+	width: auto;
 }
 
 /* Hide browser default checkbox style */
