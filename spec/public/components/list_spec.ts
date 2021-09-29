@@ -125,6 +125,13 @@ describe("List", (): void => {
 				event = new $.Event("pointermove");
 			});
 
+			it("should prevent the default touchstart behavour", (): void => {
+				event = new $.Event("touchstart");
+				sinon.spy(event, "preventDefault");
+				index.trigger(event);
+				event.preventDefault.should.have.been.called;
+			});
+
 			describe("without active button state", (): void => {
 				beforeEach((): JQuery => index.trigger(event));
 				it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);

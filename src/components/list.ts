@@ -112,6 +112,7 @@ export default class List {
 		$("<ul>")
 			.attr("id", "index")
 			.append(groupNames)
+			.on("touchstart", (e: JQueryEventObject): unknown => e.preventDefault() as unknown)
 			.on("pointermove", ({ buttons, currentTarget, clientY }: JQueryEventObject & PointerEvent): void => {
 				// Only proceed if we're dragging
 				if (1 === buttons) {
