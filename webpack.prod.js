@@ -1,4 +1,5 @@
 const webpack = require("webpack"),
+			{ CleanWebpackPlugin } = require("clean-webpack-plugin"),
 			{ merge } = require("webpack-merge"),
 			{
 				entry,
@@ -7,7 +8,6 @@ const webpack = require("webpack"),
 				iconRule,
 				imageRule,
 				htmlRule,
-				cleanBuildDirectory,
 				providejQuery,
 				extractCss,
 				createIndexHtml,
@@ -48,7 +48,10 @@ module.exports = merge(config, {
 		new webpack.HashedModuleIdsPlugin(),
 
 		providejQuery,
-		cleanBuildDirectory,
+
+		// Cleans the build directory
+		new CleanWebpackPlugin(),
+
 		extractCss(true),
 		createIndexHtml,
 		defineAppConfig(),

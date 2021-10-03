@@ -6,7 +6,6 @@ const { merge } = require("webpack-merge"),
 				iconRule,
 				imageRule,
 				htmlRule,
-				cleanBuildDirectory,
 				providejQuery,
 				extractCss,
 				createIndexHtml,
@@ -65,7 +64,6 @@ module.exports = merge(config, {
 
 	plugins: [
 		providejQuery,
-		cleanBuildDirectory,
 		extractCss(),
 		createIndexHtml,
 		defineAppConfig({ maxDataAgeDays: 9999 }),
