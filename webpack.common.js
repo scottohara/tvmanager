@@ -111,6 +111,8 @@ const MAX_DATA_AGE_DAYS = 7,
 				},
 
 				optimization: {
+					// Remove in webpack 5
+					moduleIds: "hashed",
 					splitChunks: {
 						chunks: "all",
 						minSize: 0,
