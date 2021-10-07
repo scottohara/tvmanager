@@ -9,6 +9,6 @@
 			"checksConditionals": true,
 			"checksVoidReturn": false										// Allows for async callbacks that return Promise<void>
 		}],
-		"@typescript-eslint/no-type-alias": "off"			// disabled to allow for PublicInterface, ViewControllerSet & SlotData
+		"@typescript-eslint/no-type-alias": "off"			// disabled to allow for PublicInterface & StoreObject
 	}
 }

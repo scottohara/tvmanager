@@ -52,11 +52,8 @@ module.exports = merge(config, {
 	devtool: "eval-source-map",
 
 	devServer: {
-		disableHostCheck: true,
-		host: "0.0.0.0",
+		allowedHosts: "all",
 		open: true,
-		overlay: true,
-		public: "localhost:8080",
 		proxy: {
 			"/": "http://localhost:3001"
 		}
