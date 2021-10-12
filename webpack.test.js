@@ -1,11 +1,11 @@
-const { merge } = require("webpack-merge"),
+const webpack = require("webpack"),
+			{ merge } = require("webpack-merge"),
 			path = require("path"),
 			{
 				htmlRule,
 				providejQuery,
 				defineAppConfig,
-				config,
-				workers
+				config
 			} = require("./webpack.common");
 
 module.exports = merge(config, {
@@ -50,8 +50,11 @@ module.exports = merge(config, {
 	},
 	devtool: "inline-source-map",
 	plugins: [
+		new webpack.ProvidePlugin({
+			process: "process/browser"
+		}),
+
 		providejQuery,
-		defineAppConfig(),
-		workers
+		defineAppConfig()
 	]
 });

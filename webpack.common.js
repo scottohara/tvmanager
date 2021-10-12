@@ -3,19 +3,15 @@ const path = require("path"),
 			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
 			HtmlWebpackPlugin = require("html-webpack-plugin"),
 			{ GenerateSW } = require("workbox-webpack-plugin"),
-			WorkerPlugin = require("worker-plugin"),
 			packageJson = require("./package");
 
 const MAX_DATA_AGE_DAYS = 7,
 
-			// Default entry
-			entry = {
-				app: "index"
-			},
-
 			// Default output
 			output = {
-				path: path.resolve(__dirname, "public")
+				path: path.resolve(__dirname, "public"),
+				assetModuleFilename: "[name][ext]",
+				clean: true
 			},
 
 			// Rule for *.ts processing
@@ -36,26 +32,15 @@ const MAX_DATA_AGE_DAYS = 7,
 			// Rule for icon processing
 			iconRule = {
 				test: /tv-icon-.*\.png$/u,
-				loader: "url-loader",
-				options: {
-					// Use file-loader for anything bigger than 1 byte
-					limit: 1,
-
-					// Include a hash in the file name
-					name: "[name]-[hash:6].[ext]"
-				}
+				type: "asset/resource"
 			},
 
 			// Rule for image processing
 			imageRule = {
 				test: /(?:\.svg|startup-.*\.png)$/u,
-				loader: "url-loader",
-				options: {
-					// Use file-loader for anything bigger than 1 byte
-					limit: 1,
-
-					// Include a hash in the file name
-					name: "images/[name]-[hash:6].[ext]"
+				type: "asset/resource",
+				generator: {
+					filename: "images/[name][ext]"
 				}
 			},
 
@@ -72,7 +57,7 @@ const MAX_DATA_AGE_DAYS = 7,
 			}),
 
 			// Creates index.html with the bundled resources
-			createIndexHtml = new HtmlWebpackPlugin({ scriptLoading: "defer" }),
+			createIndexHtml = new HtmlWebpackPlugin(),
 
 			// Generate a service worker to precache static assets
 			generateServiceWorker = new GenerateSW({
@@ -80,9 +65,6 @@ const MAX_DATA_AGE_DAYS = 7,
 				skipWaiting: true,
 				clientsClaim: true
 			}),
-
-			// Handles web workers
-			workers = new WorkerPlugin({ globalObject: false }),
 
 			// Default config
 			config = {
@@ -102,7 +84,7 @@ const MAX_DATA_AGE_DAYS = 7,
 				resolve: {
 					extensions: [
 						".ts",
-						".js"
+						"..."
 					],
 					modules: [
 						path.resolve(__dirname, "src"),
@@ -111,20 +93,13 @@ const MAX_DATA_AGE_DAYS = 7,
 				},
 
 				optimization: {
-					// Remove in webpack 5
-					moduleIds: "hashed",
 					splitChunks: {
 						chunks: "all",
 						minSize: 0,
 						cacheGroups: {
-							app: {
-								name: "app",
-								priority: 10
-							},
-							vendor: {
+							defaultVendors: {
 								name: "vendor",
-								test: /[\\/]node_modules[\\/]/u,
-								priority: 30
+								test: /[\\/]node_modules[\\/]/u
 							}
 						}
 					},
@@ -135,8 +110,8 @@ const MAX_DATA_AGE_DAYS = 7,
 				bail: true
 			};
 
-function extractCss(hashFilename) {
-	return new MiniCssExtractPlugin({ filename: undefined === hashFilename ? "[name].css" : "[name]-[chunkhash:6].css" });
+function extractCss(options = undefined) {
+	return new MiniCssExtractPlugin(options);
 }
 
 function defineAppConfig({ maxDataAgeDays } = { maxDataAgeDays: MAX_DATA_AGE_DAYS }) {
@@ -144,7 +119,6 @@ function defineAppConfig({ maxDataAgeDays } = { maxDataAgeDays: MAX_DATA_AGE_DAY
 }
 
 module.exports = {
-	entry,
 	output,
 	cssRule,
 	iconRule,
@@ -155,6 +129,5 @@ module.exports = {
 	createIndexHtml,
 	defineAppConfig,
 	generateServiceWorker,
-	workers,
 	config
 };

@@ -1,7 +1,5 @@
-const { CleanWebpackPlugin } = require("clean-webpack-plugin"),
-			{ merge } = require("webpack-merge"),
+const { merge } = require("webpack-merge"),
 			{
-				entry,
 				output,
 				cssRule,
 				iconRule,
@@ -12,26 +10,29 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin"),
 				createIndexHtml,
 				defineAppConfig,
 				generateServiceWorker,
-				workers,
 				config
 			} = require("./webpack.common");
 
 module.exports = merge(config, {
 	mode: "production",
 
-	// Use default entry
-	entry,
-
 	// Use default output with chunk hash in file names
 	output: merge(output, {
-		filename: "[name]-[chunkhash:6].js"
+		hashDigestLength: 6,
+		filename: "[name]-[chunkhash].js",
+		assetModuleFilename: "[name]-[contenthash][ext]"
 	}),
 
 	module: {
 		rules: [
 			cssRule,
 			iconRule,
-			imageRule,
+			merge(imageRule, {
+				generator: {
+					// Include hash in file names
+					filename: "images/[name]-[contenthash][ext]"
+				}
+			}),
 			htmlRule
 		]
 	},
@@ -41,15 +42,10 @@ module.exports = merge(config, {
 
 	plugins: [
 		providejQuery,
-
-		// Cleans the build directory
-		new CleanWebpackPlugin(),
-
-		extractCss(true),
+		extractCss({ filename: "[name]-[chunkhash].css" }),
 		createIndexHtml,
 		defineAppConfig(),
-		generateServiceWorker,
-		workers
+		generateServiceWorker
 	],
 
 	// Fail if any chunks exceed performance budget

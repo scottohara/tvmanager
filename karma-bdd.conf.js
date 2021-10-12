@@ -11,8 +11,14 @@ module.exports = config => {
 			"spec/public/index.js": ["webpack", "sourcemap"]
 		},
 
-		// Webpack configuration
-		webpack,
+		/*
+		 * Webpack configuration
+		 * Needs output, see https://github.com/ryanclark/karma-webpack/issues/498
+		 */
+		webpack: {
+			...common.webpack,
+			...webpack
+		},
 
 		/*
 		 * Test results reporter to use

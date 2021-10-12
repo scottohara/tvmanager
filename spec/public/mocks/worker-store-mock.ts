@@ -1,1 +1,1 @@
-export default new Worker("mocks/db-store-mock", { type: "module" });
+export default new Worker(new URL("mocks/db-store-mock", import.meta.url));

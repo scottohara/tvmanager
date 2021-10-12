@@ -1,6 +1,5 @@
 const { merge } = require("webpack-merge"),
 			{
-				entry,
 				output,
 				cssRule,
 				iconRule,
@@ -11,40 +10,19 @@ const { merge } = require("webpack-merge"),
 				createIndexHtml,
 				defineAppConfig,
 				generateServiceWorker,
-				workers,
 				config
 			} = require("./webpack.common");
 
 module.exports = merge(config, {
-	// Use default entry
-	entry,
-
 	// Use default output, with no hash in file names
-	output: merge(output, {
-		filename: "[name].js"
-	}),
+	output,
 
 	module: {
 		rules: [
 			cssRule,
-			merge(iconRule, {
-				options: {
-					// No hash in file names
-					name: "[name].[ext]"
-				}
-			}),
-			merge(imageRule, {
-				options: {
-					// No hash in file names
-					name: "images/[name].[ext]"
-				}
-			}),
-			merge(htmlRule, {
-				options: {
-					// Don't minify
-					minimize: false
-				}
-			})
+			iconRule,
+			imageRule,
+			htmlRule
 		]
 	},
 
@@ -64,7 +42,6 @@ module.exports = merge(config, {
 		extractCss(),
 		createIndexHtml,
 		defineAppConfig({ maxDataAgeDays: 9999 }),
-		generateServiceWorker,
-		workers
+		generateServiceWorker
 	]
 });
