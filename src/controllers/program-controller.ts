@@ -35,13 +35,8 @@ export default class ProgramController extends ViewController {
 	public constructor(listItem?: ProgramListItem) {
 		super();
 
-		// If a list item was not passed, we're adding a new program
-		if (undefined === listItem) {
-			this.listItem = { program: new Program(null, "", 0, 0, 0, 0, 0) };
-		} else {
-			// Otherwise we're editing an existing program
-			this.listItem = listItem;
-		}
+		// If a list item was passed, we're editing an existing program, otherwise we're adding a new program
+		this.listItem = listItem ?? { program: new Program(null, "", 0, 0, 0, 0, 0) };
 	}
 
 	/**

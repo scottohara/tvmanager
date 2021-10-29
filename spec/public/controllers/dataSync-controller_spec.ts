@@ -644,7 +644,7 @@ describe("DataSyncController", (): void => {
 		beforeEach((): SyncMock => (sync = new SyncMock(null, "1")));
 
 		scenarios.forEach((scenario: Scenario): void => {
-			describe(null === scenario.type ? "invalid sync type" : scenario.type, (): void => {
+			describe(scenario.type ?? "invalid sync type", (): void => {
 				let model: Model | undefined;
 
 				beforeEach(async (): Promise<void> => {

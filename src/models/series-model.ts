@@ -95,7 +95,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByProgram(programId)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -113,7 +113,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByNowShowing()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -132,7 +132,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByStatus(status)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -150,7 +150,7 @@ export default class Series extends Base {
 
 		try {
 			seriesList = await Promise.all((await (await this.db).seriesStore.listByIncomplete()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -176,7 +176,7 @@ export default class Series extends Base {
 			if (undefined !== series) {
 				({ SeriesID, Name, NowShowing, ProgramID } = series);
 			}
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -194,7 +194,7 @@ export default class Series extends Base {
 
 		try {
 			count = await (await this.db).seriesStore.count();
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -240,9 +240,7 @@ export default class Series extends Base {
 	 */
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new series to be added), generate a new UUID
-		if (null === this.id) {
-			this.id = v4();
-		}
+		this.id ??= v4();
 
 		try {
 			await (await this.db).seriesStore.save({
@@ -253,7 +251,7 @@ export default class Series extends Base {
 			});
 
 			return this.id;
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 

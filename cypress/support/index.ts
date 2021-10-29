@@ -115,7 +115,7 @@ Cypress.Commands.add("createTestData", ({ programs = [], settings = [] }: TestDa
 
 			await programsStore.save({
 				ProgramID: programId,
-				Name: undefined === programName ? `Program ${programIndex}` : programName
+				Name: programName ?? `Program ${programIndex}`
 			});
 
 			series.forEach(async ({ seriesName, nowShowing, episodes }, seriesIndex): Promise<void> => {
@@ -123,15 +123,15 @@ Cypress.Commands.add("createTestData", ({ programs = [], settings = [] }: TestDa
 
 				await seriesStore.save({
 					SeriesID: seriesId,
-					Name: undefined === seriesName ? `Series ${seriesIndex}` : seriesName,
-					NowShowing: undefined === nowShowing ? null : nowShowing,
+					Name: seriesName ?? `Series ${seriesIndex}`,
+					NowShowing: nowShowing ?? null,
 					ProgramID: programId
 				});
 
 				episodes.forEach(async ({ episodeName, status = "", statusDate = "", unverified = "false", unscheduled = "false" }, episodeIndex): Promise<void> => {
 					await episodesStore.save({
 						EpisodeID: `${seriesId}-${episodeIndex}`,
-						Name: undefined === episodeName ? `Episode ${episodeIndex}` : episodeName,
+						Name: episodeName ?? `Episode ${episodeIndex}`,
 						SeriesID: seriesId,
 						Status: status,
 						StatusDate: statusDate,

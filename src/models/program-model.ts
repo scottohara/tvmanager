@@ -79,7 +79,7 @@ export default class Program extends Base {
 
 		try {
 			programList = await Promise.all((await (await this.db).programsStore.list()).map((prog: PersistedProgram): Program => new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -103,7 +103,7 @@ export default class Program extends Base {
 			if (undefined !== prog) {
 				({ ProgramID, Name } = prog);
 			}
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -121,7 +121,7 @@ export default class Program extends Base {
 
 		try {
 			count = await (await this.db).programsStore.count();
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -167,9 +167,7 @@ export default class Program extends Base {
 	 */
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new program to be added), generate a new UUID
-		if (null === this.id) {
-			this.id = v4();
-		}
+		this.id ??= v4();
 
 		try {
 			await (await this.db).programsStore.save({
@@ -178,7 +176,7 @@ export default class Program extends Base {
 			});
 
 			return this.id;
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -227,7 +225,7 @@ export default class Program extends Base {
 	 * @desc Returns the group that the program belongs to
 	 */
 	public get programGroup(): string {
-		return null === this.programName ? "" : this.programName.substring(0, 1).toUpperCase();
+		return this.programName?.substring(0, 1).toUpperCase() ?? "";
 	}
 
 	/**

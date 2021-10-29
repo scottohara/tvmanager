@@ -73,7 +73,7 @@ export default class Episode extends Base {
 
 		try {
 			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -91,7 +91,7 @@ export default class Episode extends Base {
 
 		try {
 			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -121,7 +121,7 @@ export default class Episode extends Base {
 			if (undefined !== ep) {
 				({ EpisodeID, Name, Status, StatusDate, Unverified, Unscheduled, Sequence, SeriesID } = ep);
 			}
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -139,7 +139,7 @@ export default class Episode extends Base {
 
 		try {
 			count = await (await this.db).episodesStore.totalCount();
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -158,7 +158,7 @@ export default class Episode extends Base {
 
 		try {
 			count = await (await this.db).episodesStore.countByStatus(status);
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -204,9 +204,7 @@ export default class Episode extends Base {
 	 */
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new episode to be added), generate a new UUID
-		if (null === this.id) {
-			this.id = v4();
-		}
+		this.id ??= v4();
 
 		try {
 			await (await this.db).episodesStore.save({
@@ -221,7 +219,7 @@ export default class Episode extends Base {
 			});
 
 			return this.id;
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 

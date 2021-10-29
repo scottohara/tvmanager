@@ -143,11 +143,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 
 			// Get set of series with at least one episode in the specified status
 			(await txEpisodesStore.index("status").getAll(IDBKeyRange.bound([status], [status, "~"]))).forEach((episode: EpisodesStoreObject): void => {
-				let count: number | undefined = series.get(episode.seriesId);
-
-				if (undefined === count) {
-					count = 0;
-				}
+				const count: number = series.get(episode.seriesId) ?? 0;
 
 				series.set(episode.seriesId, count + 1);
 			});

@@ -835,7 +835,7 @@ export default class DataSyncController extends ViewController {
 			if (!response.ok) {
 				this.syncError("Save error", type, `Error saving ${type.toLowerCase()}`);
 			}
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 

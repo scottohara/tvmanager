@@ -95,7 +95,7 @@ export default class SeriesController extends ViewController {
 
 		// Set the series details
 		$("#seriesName").val(String(this.listItem.series.seriesName));
-		$("#nowShowing").val(null === this.listItem.series.nowShowing ? "" : String(this.listItem.series.nowShowing));
+		$("#nowShowing").val(this.listItem.series.nowShowing ?? "");
 		$("#moveTo").val(String(this.listItem.series.programId));
 	}
 

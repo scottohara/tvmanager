@@ -44,7 +44,7 @@ export default class Setting extends Base {
 			if (undefined !== persistedSetting) {
 				({ name, value } = persistedSetting);
 			}
-		} catch (_e: unknown) {
+		} catch {
 			// No op
 		}
 
@@ -63,7 +63,7 @@ export default class Setting extends Base {
 			await (await this.db).settingsStore.save(String(this.settingName), String(this.settingValue));
 
 			return true;
-		} catch (_e: unknown) {
+		} catch {
 			return false;
 		}
 	}

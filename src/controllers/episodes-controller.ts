@@ -75,7 +75,7 @@ export default class EpisodesController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: undefined === this.listItem.source ? "Series" : this.listItem.source
+				label: this.listItem.source ?? "Series"
 			},
 			rightButton: {
 				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
