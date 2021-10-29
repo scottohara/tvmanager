@@ -243,9 +243,7 @@ export default class List {
 				break;
 
 			case "edit":
-				if (undefined !== this.editEventHandler && null !== this.editEventHandler) {
-					this.editEventHandler(itemIndex);
-				}
+				this.editEventHandler?.(itemIndex);
 				break;
 
 			case "delete":
