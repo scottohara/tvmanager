@@ -1,9 +1,7 @@
 const path = require("path"),
 			webpack = require("webpack"),
 			MiniCssExtractPlugin = require("mini-css-extract-plugin"),
-			HtmlWebpackPlugin = require("html-webpack-plugin"),
-			{ GenerateSW } = require("workbox-webpack-plugin"),
-			packageJson = require("./package");
+			HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const MAX_DATA_AGE_DAYS = 7,
 
@@ -58,13 +56,6 @@ const MAX_DATA_AGE_DAYS = 7,
 
 			// Creates index.html with the bundled resources
 			createIndexHtml = new HtmlWebpackPlugin(),
-
-			// Generate a service worker to precache static assets
-			generateServiceWorker = new GenerateSW({
-				cacheId: packageJson.name,
-				skipWaiting: true,
-				clientsClaim: true
-			}),
 
 			// Default config
 			config = {
@@ -128,6 +119,5 @@ module.exports = {
 	extractCss,
 	createIndexHtml,
 	defineAppConfig,
-	generateServiceWorker,
 	config
 };

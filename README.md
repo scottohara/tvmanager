@@ -64,7 +64,6 @@ Installation (Development)
 3. Start the server (`npm start`)
 
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
-(Tip: In Chrome DevTools > Application > Service Workers, enable the "Update on reload" option so that all changes appear immediately on reload)
 
 Import/Export
 =============

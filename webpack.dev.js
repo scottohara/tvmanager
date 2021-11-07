@@ -9,7 +9,6 @@ const { merge } = require("webpack-merge"),
 				extractCss,
 				createIndexHtml,
 				defineAppConfig,
-				generateServiceWorker,
 				config
 			} = require("./webpack.common");
 
@@ -41,7 +40,6 @@ module.exports = merge(config, {
 		providejQuery,
 		extractCss(),
 		createIndexHtml,
-		defineAppConfig({ maxDataAgeDays: 9999 }),
-		generateServiceWorker
+		defineAppConfig({ maxDataAgeDays: 9999 })
 	]
 });
