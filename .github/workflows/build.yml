@@ -90,7 +90,7 @@ jobs:
       run: bundle exec rake db:migrate
 
     - name: Lint
-      run: bundle exec rubocop --parallel
+      run: bundle exec rubocop
 
     - name: Test
       run: bundle exec rake spec
