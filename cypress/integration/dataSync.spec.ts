@@ -136,11 +136,13 @@ describe("Import/Export", (): void => {
 				cy.get(lastSyncTime).should("have.value", "1-Jan-2000 09:30:20");
 				cy.get(localChanges).should("have.value", "3 changes pending");
 				cy.on("window:confirm", (): boolean => false);
+				cy.get(exportButton).should("not.have.class", "disabled");
 				cy.get(exportButton).click();
 				cy.get(notices).should("be.visible");
 				cy.get(notices).should("contain.text", "Export failed.");
 				cy.get(lastSyncTime).should("have.value", "1-Jan-2000 09:30:20");
 				cy.get(localChanges).should("have.value", "3 changes pending");
+				cy.get(exportButton).should("not.have.class", "disabled");
 				cy.get(status).should("have.value", "Export aborted");
 			});
 
@@ -148,11 +150,13 @@ describe("Import/Export", (): void => {
 				cy.get(lastSyncTime).should("have.value", "1-Jan-2000 09:30:20");
 				cy.get(localChanges).should("have.value", "3 changes pending");
 				cy.clock(new Date("2000-01-02T10:20:04"));
+				cy.get(exportButton).should("not.have.class", "disabled");
 				cy.get(exportButton).click();
 				cy.get(notices).should("be.visible");
 				cy.get(notices).should("contain.text", "Database has been successfully exported");
 				cy.get(lastSyncTime).should("contain.value", "2-Jan-2000 10:20:04");
 				cy.get(localChanges).should("have.value", "None pending");
+				cy.get(exportButton).should("have.class", "disabled");
 			});
 		});
 

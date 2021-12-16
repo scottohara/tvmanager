@@ -256,9 +256,11 @@ export default class DataSyncController extends ViewController {
 		// If there are any local changes, display the number of changes to be synced
 		if (this.localChanges) {
 			$("#localChanges").val(`${count} change${count > 1 ? "s" : ""} pending`);
+			$("#export").removeClass("disabled");
 		} else {
 			// No local changes
 			$("#localChanges").val("None pending");
+			$("#export").addClass("disabled");
 		}
 	}
 
@@ -270,7 +272,9 @@ export default class DataSyncController extends ViewController {
 	 * @desc Initiates a data export
 	 */
 	private dataExport(): void {
-		this.syncStart("Export", "Are you sure you want to export?", this.doExport.bind(this));
+		if (this.localChanges) {
+			this.syncStart("Export", "Are you sure you want to export?", this.doExport.bind(this));
+		}
 	}
 
 	/**

@@ -5,8 +5,8 @@ import {
 import type { TestData } from "types";
 
 describe("App", (): void => {
-	it("should show a notice when the last data sync was over 7 days ago", (): void => {
-		const data: TestData = { settings: [{ name: "LastSyncTime", value: "2000-01-01" }] };
+	it("should show a notice when the last data sync was over 7 days ago and there are changes to sync", (): void => {
+		const data: TestData = { programs: [{ series: [{ episodes: [{}] }] }], settings: [{ name: "LastSyncTime", value: "2000-01-01" }] };
 
 		cy.createTestData(data);
 		cy.visit("/");
@@ -15,15 +15,23 @@ describe("App", (): void => {
 	});
 
 	it("should not show a notice when the last data sync was under 7 days ago", (): void => {
-		const data: TestData = { settings: [{ name: "LastSyncTime", value: String(new Date()) }] };
+		const data: TestData = { programs: [{ series: [{ episodes: [{}] }] }], settings: [{ name: "LastSyncTime", value: String(new Date()) }] };
 
 		cy.createTestData(data);
 		cy.visit("/");
 		cy.get(notices).should("not.be.visible");
 	});
 
-	it("should dismiss then notification", (): void => {
+	it("should not show a notice when there are no changes to sync", (): void => {
 		const data: TestData = { settings: [{ name: "LastSyncTime", value: "2000-01-01" }] };
+
+		cy.createTestData(data);
+		cy.visit("/");
+		cy.get(notices).should("not.be.visible");
+	});
+
+	it("should dismiss the notification", (): void => {
+		const data: TestData = { programs: [{ series: [{ episodes: [{}] }] }], settings: [{ name: "LastSyncTime", value: "2000-01-01" }] };
 
 		cy.createTestData(data);
 		cy.visit("/");

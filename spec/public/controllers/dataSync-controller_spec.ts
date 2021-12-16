@@ -268,19 +268,27 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("checkForLocalChanges", (): void => {
-		let localChanges: JQuery;
+		let localChanges: JQuery,
+				exportButton: JQuery;
 
-		beforeEach((): JQuery => (localChanges = $("<div>")
-			.attr("id", "localChanges")
-			.hide()
-			.appendTo(document.body)
-		));
+		beforeEach((): void => {
+			localChanges = $("<div>")
+				.attr("id", "localChanges")
+				.hide()
+				.appendTo(document.body);
+
+			exportButton = $("<div>")
+				.attr("id", "export")
+				.hide()
+				.appendTo(document.body);
+		});
 
 		describe("one change", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](1));
 
 			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["localChanges"].should.be.true);
 			it("should display the number of changes", (): Chai.Assertion => String(localChanges.val()).should.equal("1 change pending"));
+			it("should enable the export button", (): Chai.Assertion => exportButton.hasClass("disabled").should.be.false);
 		});
 
 		describe("multiple changes", (): void => {
@@ -288,6 +296,7 @@ describe("DataSyncController", (): void => {
 
 			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["localChanges"].should.be.true);
 			it("should display the number of changes", (): Chai.Assertion => String(localChanges.val()).should.equal("2 changes pending"));
+			it("should enable the export button", (): Chai.Assertion => exportButton.hasClass("disabled").should.be.false);
 		});
 
 		describe("no changes", (): void => {
@@ -295,16 +304,32 @@ describe("DataSyncController", (): void => {
 
 			it("should not set the local changes flag", (): Chai.Assertion => dataSyncController["localChanges"].should.be.false);
 			it("should display no pending changes", (): Chai.Assertion => String(localChanges.val()).should.equal("None pending"));
+			it("should disable the export button", (): Chai.Assertion => exportButton.hasClass("disabled").should.be.true);
 		});
 
-		afterEach((): JQuery => localChanges.remove());
+		afterEach((): void => {
+			exportButton.remove();
+			localChanges.remove();
+		});
 	});
 
 	describe("dataExport", (): void => {
-		it("should start an export", (): void => {
-			sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
-			dataSyncController["dataExport"]();
-			dataSyncController["syncStart"].should.have.been.calledWith("Export", "Are you sure you want to export?", sinon.match.func);
+		describe("with changes", (): void => {
+			it("should start an export", (): void => {
+				dataSyncController["localChanges"] = true;
+				sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
+				dataSyncController["dataExport"]();
+				dataSyncController["syncStart"].should.have.been.calledWith("Export", "Are you sure you want to export?", sinon.match.func);
+			});
+		});
+
+		describe("no changes", (): void => {
+			it("should not start an export", (): void => {
+				dataSyncController["localChanges"] = false;
+				sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
+				dataSyncController["dataExport"]();
+				dataSyncController["syncStart"].should.not.have.been.called;
+			});
 		});
 	});
 

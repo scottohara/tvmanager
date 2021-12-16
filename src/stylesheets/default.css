@@ -11,6 +11,7 @@
 		--default-caution-color: rgb(255, 59, 48);
 		--default-warning-color: rgb(255, 255, 222);
 		--default-separator-color: rgb(227, 227, 227);
+		--default-disabled-color: rgb(192, 192, 192);
 
 		--header-footer-background-color: rgb(247, 247, 247);
 		--header-footer-separator-color: rgb(194, 194, 194);
@@ -51,6 +52,7 @@
 		--default-caution-color: rgb(255, 69, 58);
 		--default-warning-color: rgba(191, 143, 255, 0.4);
 		--default-separator-color: rgb(45, 45, 47);
+		--default-disabled-color: rgb(77, 77, 77);
 
 		--header-footer-background-color: rgb(18, 18, 18);
 		--header-footer-separator-color: rgb(66, 66, 66);
@@ -222,6 +224,11 @@ a.confirmButton {
 /* Caution action buttons */
 a.cautionButton {
 	color: var(--default-caution-color);
+}
+
+/* Disabled action buttons */
+a.disabled {
+	color: var(--default-disabled-color);
 }
 
 /* Scrolling lists & dialogs */

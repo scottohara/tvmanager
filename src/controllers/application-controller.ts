@@ -46,6 +46,7 @@ import SeriesController from "controllers/series-controller";
 import SeriesListController from "controllers/seriesList-controller";
 import Setting from "models/setting-model";
 import SettingsController from "controllers/settings-controller";
+import Sync from "models/sync-model";
 import UnscheduledController from "controllers/unscheduled-controller";
 import window from "components/window";
 
@@ -118,8 +119,13 @@ export default class ApplicationController {
 		// Display the schedule view
 		await this.pushView("schedule");
 
-		// Get the last sync time
-		this.gotLastSyncTime(await Setting.get("LastSyncTime"));
+		// Get the last sync time and number of local changes to sync
+		const [lastSyncTime, localChanges] = await Promise.all([
+			Setting.get("LastSyncTime"),
+			Sync.count()
+		]);
+
+		this.showSyncNotice(lastSyncTime, localChanges);
 	}
 
 	/**
@@ -608,13 +614,14 @@ export default class ApplicationController {
 	 * @memberof ApplicationController
 	 * @this ApplicationController
 	 * @instance
-	 * @method gotLastSyncTime
+	 * @method showSyncNotice
 	 * @desc Calculates the time since the last import/export, and displays a notice if it was more than 7 days ago
 	 * @param {Setting} lastSyncTime - a Setting object containing the last time an import/export was run
+	 * @param {number} localChanges - the number of local changes pending synchronisation
 	 */
-	private gotLastSyncTime(lastSyncTime: PublicInterface<Setting>): void {
+	private showSyncNotice(lastSyncTime: PublicInterface<Setting>, localChanges: number): void {
 		// Only proceed if we have a last sync time
-		if (undefined !== lastSyncTime.settingValue) {
+		if (undefined !== lastSyncTime.settingValue && localChanges > 0) {
 			// Constants for the notification threshold, current date and last sync date
 			const HOURS_IN_ONE_DAY = 24,
 						MINUTES_IN_ONE_HOUR = 60,

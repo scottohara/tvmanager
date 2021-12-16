@@ -14,6 +14,7 @@ import type {
 import $ from "jquery";
 import ApplicationController from "../../../src/controllers/application-controller";
 import SettingMock from "mocks/setting-model-mock";
+import SyncMock from "mocks/sync-model-mock";
 import TestController from "mocks/test-controller";
 import WindowMock from "mocks/window-mock";
 import sinon from "sinon";
@@ -64,15 +65,16 @@ describe("ApplicationController", (): void => {
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(applicationController, "pushView");
-			sinon.stub(applicationController, "gotLastSyncTime" as keyof ApplicationController);
+			sinon.stub(applicationController, "showSyncNotice" as keyof ApplicationController);
 			SettingMock.get.reset();
 			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTime);
+			SyncMock.syncList = [new SyncMock(null, null)];
 			await applicationController.start();
 		});
 
 		it("should load all view controllers", (): Chai.Assertion => Object.keys(applicationController["viewControllers"]).length.should.equal(13));
 		it("should display the schedule view", (): Chai.Assertion => applicationController.pushView.should.have.been.calledWith("schedule"));
-		it("should get the last sync time", (): Chai.Assertion => applicationController["gotLastSyncTime"].should.have.been.calledWith(lastSyncTime));
+		it("should get the last sync time", (): Chai.Assertion => applicationController["showSyncNotice"].should.have.been.calledWith(lastSyncTime, 1));
 	});
 
 	describe("popView", (): void => {
@@ -1308,17 +1310,29 @@ describe("ApplicationController", (): void => {
 		afterEach((): JQuery => notices.remove());
 	});
 
-	describe("gotLastSyncTime", (): void => {
+	describe("showSyncNotice", (): void => {
 		beforeEach((): SinonStub => sinon.stub(applicationController, "showNotice" as keyof ApplicationController));
+
+		describe("without local changes to sync", (): void => {
+			it("should do nothing", (): void => {
+				const clock: SinonFakeTimers = sinon.useFakeTimers(new Date().valueOf()),
+							settingValue: Date = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
+
+				applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 0);
+				applicationController["showSyncNotice"](new SettingMock(), 0);
+				applicationController.showNotice.should.not.have.been.called;
+				clock.restore();
+			});
+		});
 
 		describe("without last sync time", (): void => {
 			it("should do nothing", (): void => {
-				applicationController["gotLastSyncTime"](new SettingMock());
+				applicationController["showSyncNotice"](new SettingMock(), 1);
 				applicationController.showNotice.should.not.have.been.called;
 			});
 		});
 
-		describe("with last sync time", (): void => {
+		describe("with last sync time & local changes to sync", (): void => {
 			let clock: SinonFakeTimers,
 					settingValue: Date;
 
@@ -1327,7 +1341,7 @@ describe("ApplicationController", (): void => {
 			describe("younger than max data data age days", (): void => {
 				it("should do nothing", (): void => {
 					settingValue = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
-					applicationController["gotLastSyncTime"](new SettingMock(undefined, String(settingValue)));
+					applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 1);
 					applicationController.showNotice.should.not.have.been.called;
 				});
 			});
@@ -1335,7 +1349,7 @@ describe("ApplicationController", (): void => {
 			describe("older than max data age days", (): void => {
 				it("should display a sync notice", (): void => {
 					settingValue = new Date(new Date().valueOf() - (9 * 24 * 60 * 60 * 1000));
-					applicationController["gotLastSyncTime"](new SettingMock(undefined, String(settingValue)));
+					applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 1);
 					applicationController.showNotice.should.have.been.calledWith({
 						label: "The last data sync was over 7 days ago",
 						leftButton: {
