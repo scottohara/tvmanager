@@ -3,5 +3,6 @@
 	"viewportHeight": 812,
 	"viewportWidth": 375,
 	"pluginsFile": false,
-	"fixturesFolder": false
+	"fixturesFolder": false,
+	"chromeWebSecurity": false
 }
