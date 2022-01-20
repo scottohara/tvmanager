@@ -7,7 +7,6 @@ const { merge } = require("webpack-merge"),
 				iconRule,
 				imageRule,
 				htmlRule,
-				providejQuery,
 				extractCss,
 				createIndexHtml,
 				defineAppConfig,
@@ -42,7 +41,6 @@ module.exports = merge(config, {
 	devtool: "source-map",
 
 	plugins: [
-		providejQuery,
 		extractCss({ filename: "[name]-[chunkhash].css" }),
 		createIndexHtml,
 		defineAppConfig(),

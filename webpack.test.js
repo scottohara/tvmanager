@@ -3,7 +3,6 @@ const webpack = require("webpack"),
 			path = require("path"),
 			{
 				htmlRule,
-				providejQuery,
 				defineAppConfig,
 				config
 			} = require("./webpack.common");
@@ -54,7 +53,6 @@ module.exports = merge(config, {
 			process: "process/browser"
 		}),
 
-		providejQuery,
 		defineAppConfig()
 	]
 });

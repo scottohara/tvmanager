@@ -279,12 +279,7 @@ describe("Episodes", (): void => {
 	describe("sort episode", (): void => {
 		beforeEach((): void => {
 			cy.get(footerLeftButton).click();
-
-			cy.get(list)
-				.trigger("mousedown", 50, 20, { which: 1 })
-				.trigger("mousemove", 50, 80, { which: 1 })
-				.trigger("mouseup");
-
+			cy.get(firstListItem).drag(secondListItem);
 			cy.get(footerLeftButton).click();
 		});
 

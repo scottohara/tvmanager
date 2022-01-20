@@ -7,15 +7,11 @@
 
 /**
  * @module controllers/episodes-controller
- * @requires jquery-ui/ui/widgets/sortable
- * @requires jquery-ui-touch-punch
  * @requires jquery
  * @requires models/episode-model
  * @requires components/list
  * @requires controllers/view-controller
  */
-import "jquery-ui/ui/widgets/sortable";
-import "jquery-ui-touch-punch";
 import type {
 	NavButtonEventHandler,
 	SeriesListItem
@@ -27,6 +23,7 @@ import EpisodeListTemplate from "views/episodeListTemplate.html";
 import EpisodesView from "views/episodes-view.html";
 import List from "components/list";
 import type { PublicInterface } from "global";
+import Sortable from "sortablejs";
 import ViewController from "controllers/view-controller";
 
 /**
@@ -45,6 +42,8 @@ export default class EpisodesController extends ViewController {
 	private scrollToFirstUnwatched = true;
 
 	private episodeList!: PublicInterface<List>;
+
+	private sortable!: Sortable;
 
 	public constructor(private readonly listItem: SeriesListItem) {
 		super();
@@ -85,6 +84,12 @@ export default class EpisodesController extends ViewController {
 
 		// Instantiate a List object
 		this.episodeList = new List("list", EpisodeListTemplate, null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
+
+		// Prepare the list for sorting
+		this.sortable = Sortable.create($("#list").get(0), {
+			disabled: true,
+			animation: 150
+		});
 
 		// Activate the controller
 		return this.activate();
@@ -276,14 +281,13 @@ export default class EpisodesController extends ViewController {
 		// Clear the view footer
 		this.appController.clearFooter();
 
-		// Show the edit icons next to each list item, and make the list sortable
+		// Show the edit icons next to each list item
 		$("#list")
 			.removeClass()
-			.addClass("edit")
-			.sortable({
-				axis: "y",
-				sort: this.sortItems.bind(this) as JQueryUI.SortableEvent
-			});
+			.addClass("edit");
+
+		// Enable sorting
+		this.sortable.option("disabled", false);
 
 		// Setup the footer
 		this.footer = {
@@ -307,19 +311,6 @@ export default class EpisodesController extends ViewController {
 	 * @memberof EpisodesController
 	 * @this EpisodesController
 	 * @instance
-	 * @method sortItems
-	 * @desc Repositions the sort helper when sorting the list items
-	 */
-	private sortItems(e: JQueryEventObject, ui: JQueryUI.SortableUIParams): void {
-		const PADDING_PX = 20;
-
-		$(ui.helper).offset({ top: e.clientY - PADDING_PX });
-	}
-
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
 	 * @method viewItems
 	 * @desc Sets the list to view mode
 	 */
@@ -330,10 +321,8 @@ export default class EpisodesController extends ViewController {
 		// Clear the view footer
 		this.appController.clearFooter();
 
-		// Make the list unsortable
-		$("#list.ui-sortable")
-			.removeClass()
-			.sortable("destroy");
+		// Disable sorting
+		this.sortable.option("disabled", true);
 
 		// Show the view icons next to each list item
 		$("#list").removeClass();

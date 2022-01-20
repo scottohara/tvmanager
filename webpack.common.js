@@ -49,11 +49,6 @@ const MAX_DATA_AGE_DAYS = 7,
 				loader: "html-loader"
 			},
 
-			// Exposes a global jQuery object (for jQuery UI, Touch Punch etc. that expect this global to exist)
-			providejQuery = new webpack.ProvidePlugin({
-				jQuery: "jquery"
-			}),
-
 			// Creates index.html with the bundled resources
 			createIndexHtml = new HtmlWebpackPlugin(),
 
@@ -115,7 +110,6 @@ module.exports = {
 	iconRule,
 	imageRule,
 	htmlRule,
-	providejQuery,
 	extractCss,
 	createIndexHtml,
 	defineAppConfig,

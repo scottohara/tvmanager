@@ -1,3 +1,4 @@
+import "@4tw/cypress-drag-drop";
 import * as EpisodesStoreFactory from "stores/episodes";
 import * as ProgramsStoreFactory from "stores/programs";
 import * as SeriesStoreFactory from "stores/series";

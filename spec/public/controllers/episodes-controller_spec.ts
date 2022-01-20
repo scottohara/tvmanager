@@ -13,6 +13,7 @@ import EpisodesController from "controllers/episodes-controller";
 import EpisodesView from "views/episodes-view.html";
 import ListMock from "mocks/list-mock";
 import SeriesMock from "mocks/series-model-mock";
+import Sortable from "sortablejs";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
@@ -113,6 +114,11 @@ describe("EpisodesController", (): void => {
 				it("should attach a delete event handler to the episodes list", (): void => {
 					(episodesController["episodeList"] as ListMock).deleteEventHandler(0);
 					episodesController["deleteItem"].should.have.been.calledWith(0);
+				});
+
+				it("should prepare the list for sorting", (): void => {
+					episodesController["sortable"].should.equal(Sortable.get(episodeList.get(0)));
+					Boolean(episodesController["sortable"].option("disabled")).should.be.true;
 				});
 
 				it("should activate the controller", (): Chai.Assertion => episodesController.activate.should.have.been.called);
@@ -451,6 +457,8 @@ describe("EpisodesController", (): void => {
 			episodeList.hasClass("edit").should.be.true;
 		});
 
+		it("should enable sorting", (): Chai.Assertion => Boolean(episodesController["sortable"].option("disabled")).should.be.false);
+
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", async (): Promise<void> => {
@@ -462,18 +470,6 @@ describe("EpisodesController", (): void => {
 		it("should set the footer left button style", (): Chai.Assertion => String(leftButton.style).should.equal("confirmButton"));
 		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Done"));
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
-	});
-
-	describe("sortItems", (): void => {
-		it("should reposition the sort helper", (): void => {
-			const helper: JQuery = $("<div>")
-				.appendTo(document.body)
-				.offset({ top: 0 });
-
-			episodesController["sortItems"]({ clientY: 100 } as JQueryEventObject, { helper } as JQueryUI.SortableUIParams);
-			(helper.offset() as JQuery.Coordinates).top.should.equal(80);
-			helper.remove();
-		});
 	});
 
 	describe("viewItems", (): void => {
@@ -499,6 +495,8 @@ describe("EpisodesController", (): void => {
 			episodeList.hasClass("delete").should.be.false;
 			episodeList.hasClass("edit").should.be.false;
 		});
+
+		it("should disable sorting", (): Chai.Assertion => Boolean(episodesController["sortable"].option("disabled")).should.be.true);
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 

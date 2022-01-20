@@ -381,6 +381,16 @@ ul li a div.subText {
 	color: var(--default-secondary-text-color);
 }
 
+/* Drag to sort */
+ul li.sortable-ghost {
+	visibility: hidden;
+}
+
+ul li.sortable-drag {
+	background-color: var(--default-alternate-background-color);
+	opacity: 0.95;
+}
+
 /* Progress bars */
 div.progressBar {
 	background-color: var(--missed-color);
