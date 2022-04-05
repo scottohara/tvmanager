@@ -1,3 +1,3 @@
-web: RACK_ENV=test bundle exec puma
+web: RACK_ENV=test bundle exec puma --bind tcp://localhost:3001
 db: couchdb
 cypress: cypress open
