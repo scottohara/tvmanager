@@ -49,6 +49,13 @@ const MAX_DATA_AGE_DAYS = 7,
 				loader: "html-loader"
 			},
 
+			// Rule for *.webmanifest processing
+			webmanifestRule = {
+				test: /\.webmanifest$/u,
+				loader: "webpack-webmanifest-loader",
+				type: "asset/resource"
+			},
+
 			// Creates index.html with the bundled resources
 			createIndexHtml = new HtmlWebpackPlugin(),
 
@@ -110,6 +117,7 @@ module.exports = {
 	iconRule,
 	imageRule,
 	htmlRule,
+	webmanifestRule,
 	extractCss,
 	createIndexHtml,
 	defineAppConfig,

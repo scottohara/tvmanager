@@ -1,21 +1,18 @@
 Application icon
 ================
-The app icon (as referenced by the `apple-touch-icon` links in index.html) is generated from `tv-icon.svg`.
+The app icon (as referenced by the `icons` property in app.webmanifest) is generated from `tv-icon.svg`.
 
 To create a new icon size:
 1. Edit `tv-icon.svg` and set the width and height attributes of the `<svg>` element to the desired size.
 2. Use an [SVG to PNG converter](http://www.fileformat.info/convert/image/svg2raster.htm) to generate a PNG file of the same dimensions
 3. Save the generated PNG file as `src/images/tv-icon-{height}x{width}.png`
-4. Add the appropriate `<link rel="apple-touch-icon" href="${require('images/tv-icon-{height}x{width}.png')}" sizes="{height}x{width}"/>` tag to `src/index.html`
+4. Add an entry to the `icons` array in `src/app.webmanifest`
 
-Sizes:
-* iPhone non-retina <= iOS6 : 57x57
-* iPhone retina <= iOS6 : 114x114
-* iPhone retina iOS7+ : 144x144
-* iPad non-retina <= iOS6 : 72x72
-* iPad non-retina iOS7+ : 76x76
-* iPad retina <= iOS6 : 120x120
-* iPad retina iOS7+ : 152x152
+Sizes ([reference](https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/)):
+* iPhone (3x scale factor) : 180x180
+* iPhone (2x scale factor) : 120x120
+* iPad Pro : 167x167
+* iPad, iPad mini : 152x152
 
 Application startup image
 =========================

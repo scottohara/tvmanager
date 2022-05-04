@@ -5,6 +5,7 @@ const { merge } = require("webpack-merge"),
 				iconRule,
 				imageRule,
 				htmlRule,
+				webmanifestRule,
 				extractCss,
 				createIndexHtml,
 				defineAppConfig,
@@ -20,7 +21,8 @@ module.exports = merge(config, {
 			cssRule,
 			iconRule,
 			imageRule,
-			htmlRule
+			htmlRule,
+			webmanifestRule
 		]
 	},
 

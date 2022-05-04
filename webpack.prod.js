@@ -7,6 +7,7 @@ const { merge } = require("webpack-merge"),
 				iconRule,
 				imageRule,
 				htmlRule,
+				webmanifestRule,
 				extractCss,
 				createIndexHtml,
 				defineAppConfig,
@@ -33,7 +34,8 @@ module.exports = merge(config, {
 					filename: "images/[name]-[contenthash][ext]"
 				}
 			}),
-			htmlRule
+			htmlRule,
+			webmanifestRule
 		]
 	},
 

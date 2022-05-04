@@ -4,21 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>TV Manager</title>
-		<!-- Icons -->
-		<!-- iPhone non-retina <= iOS6 -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-57x57.png')%>" sizes="57x57"/>
-		<!-- iPhone retina <= iOS6 -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-114x114.png')%>" sizes="114x114"/>
-		<!-- iPhone retina iOS7+ -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-144x144.png')%>" sizes="144x144"/>
-		<!-- iPad non-retina <= iOS6 -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-72x72.png')%>" sizes="72x72"/>
-		<!-- iPad non-retina iOS7+ -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-76x76.png')%>" sizes="76x76"/>
-		<!-- iPad retina <= iOS6 -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-120x120.png')%>" sizes="120x120"/>
-		<!-- iPad retina iOS7+ -->
-		<link rel="apple-touch-icon" href="<%=require('images/tv-icon-152x152.png')%>" sizes="152x152"/>
+		<link rel="manifest" href="<%=require('app.webmanifest')%>"/>
 
 		<!-- Startup images -->
 		<!-- iPhone 3.5" non-retina (1, 3g, 3gs) -->
@@ -54,7 +40,6 @@
 
 		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0"/>
 		<meta name="apple-mobile-web-app-capable" content="yes"/>
-		<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 	</head>
 	<body id="mainBody">
 		<div id="header">

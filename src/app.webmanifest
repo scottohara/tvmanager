@@ -1,0 +1,30 @@
+{
+	"name": "TV Manager",
+	"short_name": "TV Manager",
+	"description": "Tracks recorded, watched & upcoming TV shows",
+	"start_url": "./index.html",
+	"display": "standalone",
+	"theme_color": "#000",
+	"icons": [
+		{
+			"src": "images/tv-icon-120x120.png",
+			"sizes": "120x120",
+			"type": "image/png"
+		},
+		{
+			"src": "images/tv-icon-152x152.png",
+			"sizes": "152x152",
+			"type": "image/png"
+		},
+		{
+			"src": "images/tv-icon-167x167.png",
+			"sizes": "167x167",
+			"type": "image/png"
+		},
+		{
+			"src": "images/tv-icon-180x180.png",
+			"sizes": "180x180",
+			"type": "image/png"
+		}
+	]
+}
