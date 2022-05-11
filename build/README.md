@@ -16,19 +16,19 @@ Sizes ([reference](https://developer.apple.com/design/human-interface-guidelines
 
 Application startup image
 =========================
-The startup image (as referenced by the `apple-touch-startup-image` links in index.html) is generated from `tv-splash.html`
+The startup images (as referenced by the `apple-touch-startup-image` links in index.html) are generated using `pwa-asset-generator` from `tv-splash.svg`.
 
-To create a new startup image:
-1. Open `build/tv-splash.html` in a browser
-2. Move your mouse pointer to the top right-hand corner of the page to show the hidden editing controls
-3. The `Show Guides` checkbox enables alignment guides that show the center point (turn these off before saving the image though)
-4. Choose the device type/size/orientation from the dropdown list
-5. Open DevTools, and with the `#container` element selected, press CMD+Shift+P and type `screenshot`.
-6. Choose `Capture node screenshot`
-7. Save the PNG file as `src/images/startup-{width}x{height}.png`
-8. Add the appropriate `<link rel="apple-touch-startup-image" href="${require('images/startup-{width}x{height}.png')}" media="{media query}"/>` tag to `src/index.html`
+To create new startup images:
+1. Run `npm run generate:splash`
+2. From the output, copy the `<link rel="apple-touch-startup-image" .../>` links
+3. Paste the links into `src/index.ejs`, replacing the existing ones
+4. For each link, append `')%>` to the `href` to correct the template
 
-To add a new device option to the devices dropdown list:
-1. Add a new CSS selector to the stylesheet, using the following convention: `#container.{device type}.{orientation}.{screen height}[.{pixel density}]`
-2. Configure the dimensions & background position for the new CSS selector
-3. Add an option to the `#device` dropdown, with it's value being the list of CSS classes that match the above CSS selector (eg. `<option value="{device type} {orientation} {screen height}">`)
+The text in the source `tv-splash.svg` image uses a webfont, which has to be embedded into the SVG using base64 encoding. To reduce the size, the font has been subsetted to only include the characters ("TV manager").
+
+To regenerate the base64 encoding for the font:
+1. Browse to https://fonts.googleapis.com/css2?family=Chau+Philomene+One:ital@1&text=TV%20manager (replace the `&text=` query if necessary)
+2. Browse to the location in `src: url()` (https://fonts.gstatic.com/1/font?kit=...)
+3. Save the file as `build/chauphilomeneone.woff2`
+4. Use a [Font to Base64 converter](https://hellogreg.github.io/woff2base) to generate the base64 encoding
+5. Copy the base64 from the `src: url()` and paste into the `@font-face` declaration in `tv-splash.svg`

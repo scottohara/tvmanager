@@ -35,7 +35,7 @@ const MAX_DATA_AGE_DAYS = 7,
 
 			// Rule for image processing
 			imageRule = {
-				test: /(?:\.svg|startup-.*\.png)$/u,
+				test: /(?:\.svg|apple-splash-.*\.png)$/u,
 				type: "asset/resource",
 				generator: {
 					filename: "images/[name][ext]"

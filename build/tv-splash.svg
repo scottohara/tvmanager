@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+	<style>
+		@font-face {
+			font-family: 'Chau Philomene One';
+			font-style: italic;
+			font-weight: 400;
+			src: url(data:application/font-woff2;base64,d09GMgABAAAAAAUQAA4AAAAACXAAAAS8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbgRQcGAZgAGwRCAqHFIVDCxYAATYCJAMoBCAFhHwHIBuWB8jEh8dNez9IIWkdKpqqpaZKxaAm22DnyZ1P1Tlxz/9/77R5/FNA73iAESfy/65uY01cNidoIGknkLGGeeAWqKcA3tpllwkCwBScgwKhQWmvB2i4IghkoG1sCApIC9m/hLNfM5JWIxaCFBTDV4BtrdPkKEcu4hGPMPiAQA4KEiYhgxxKIl0q/gy5+CvDf2J/FxIkifsgEfex8HkeDr6M9PmXNJfmI7GFLa2NpshL5FXIAOoUxUP9optC3gOHvxfkVMilgl6ih9KX1+S3WYbSuvIKELAe1lLl/wcQkSpJ8XoIzkD9CBcLSQTgKlUMEGBS1DqtYTnnC8CiEtVogwbdGMKIKLYqSQsGt4ofiXvE3eJGcZ24VlwhLh2jkpZOQEQRFoSQVqqIOAMQJ1hIW8U2KU9Okzm1vwdRqV1oV6WHWayXQ78APV1dWbtsEc27tdBbVhADMylAr+pZtonmXZvXMMJxh6aWlVureG6NocZoZBj1UuEwahepFvFbttgusXPcpjr2zrlH6/SMUNNAV/HpewyeRqPwGHq/XfQjvXo5I+QIS9WL7dd5Hao30Pwx+0rhZNVjYatbzTWe22NwMxqNDCNkqRsfPaL56iVLDE4bGQPzzqpVekaoaaB51bbKXww0X6l3rl2kWsT7XLFrWGmg+craRapFvM8Vu4alglrPuBgZIdzICMHb9XU6dEe7bmwytcEoHFer923jT/C5LBzJ/7nw3w/RTk1JWljfiFkS966zJrOqfZ5uoWVlEErEVEe5D3PxWTO/Zu/mS5GF7qxvouqCQ+cZvGqRv/K+VpGuXqzpnQr7wy37mknWHzKrmpAy69ZP1N9/bIwI3xvkcDTbS+GV6ukfGIYPLPqV3Oi0enVT97XstJaUlx6cM8kIlmU5GxJJm8dUY4bNWa/RFMbjEyu6KItD5Fydsm9vlbI1ZMUmNDVazYtZ0BhWkcwl/VqcpKhoz5+ILbEY9re0GjMHeSEmw9JbwaV6+gcmO757w24rWrpjlR65Pr5p/qEyq5qYtk32IZVJwUqvVM/I2cSdmT+4dWsp8rg+xr+2RZMSlH/btL7ev2qffyjGRHkoi+z9Qp+LbX0uPrpaExM9Ov28tsWpymM+p5VZ1USH/1rqrS+hriVpjn/q3NYn81ssEn9TKCVfZgVvLl1T5o57zFmai1/8f0D6kfQz8CpAtWAe4uAbxS/FSulnT8RBE5omzdOfQEOlYgE5CFdyBSnkczhRXyGYfPnj6ZjPwlcJk7lU1JwKdD1ng1TJen4lHiEi8ML/iIIpfkYSZGIPkoLDHJLBEe1IjhBEKs2ZV4AejGEMOsQjFKEYRQdG0AsdxoCFYPSzAYRAixF0IxQlyEYhMtCDNoyjFD1l0loMQoMhaEj7kmDkYQxtGEAvOlANDUZ6OaTFEFiEIwRhCAPHdGOhYVlZtqTdt0xAKepQjgokzKUsrHv09AxoocP0nkD3Xt3Cwg8d8AcLDmEIRxiCfReHoG+V3L10LSoxDV0vDj/okK9FJ8bRgY590ITMAgZ2B1K/YU3bbkMH6WIxqZO16P7EY2wp+I+GAweO7B6wKIcGo31lT0CDTrDIHoecsasYbSvrnYXHqslbRmnyxMPgAAAA);
+		}
+		text { font-family: 'Chau Philomene One'; }
+	</style>
+	<defs>
+		<linearGradient id="whitegradient" gradientTransform="rotate(90)">
+			<stop offset="25%" stop-color="transparent"/>
+			<stop offset="100%" stop-color="white"/>
+		</linearGradient>
+		<linearGradient id="orangegradient" gradientTransform="rotate(90)">
+			<stop offset="0%" stop-color="transparent"/>
+			<stop offset="100%" stop-color="orange"/>
+		</linearGradient>
+	</defs>
+	<rect width="100%" height="100%"/>
+	<svg width="45%" viewBox="-100 -25 150 150">
+		<svg height="50" width="50">
+			<rect fill="black" width="100%" height="100%"/>
+			<rect fill="white" width="76%" height="40%" x="12%" y="27%"/>
+			<rect fill="black" width="70%" height="34%" x="15%" y="30%"/>
+			<rect fill="white" width="64%" height="28%" x="18%" y="33%"/>
+			<rect fill="white" width="40%" height="3%" x="30%" y="69%"/>
+		</svg>
+	</svg>
+	<svg width="55%" x="45%" viewBox="0 -55 150 150">
+		<text fill="white"><tspan fill="orange">TV</tspan>manager</text>
+		<text transform="translate(1, 10) scale(1,-1)" fill="url(#whitegradient)"><tspan fill="url(#orangegradient)">TV</tspan>manager</text>
+	</svg>
+</svg>

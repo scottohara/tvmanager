@@ -61,6 +61,7 @@
     "mini-css-extract-plugin": "2.4.2",
     "mocha": "8.0.1",
     "process": "0.11.10",
+    "pwa-asset-generator": "6.0.8",
     "sinon": "9.0.2",
     "sinon-chai": "3.5.0",
     "ts-loader": "9.2.6",
@@ -89,7 +90,8 @@
     "test:coverage:chrome": "karma start --browsers ChromeHeadless",
     "test:coverage:mobile": "ENV_CMD='sleep 600' npm run start:simulator && karma start --browsers MobileSafari",
     "test:e2e": "npm run build && heroku local --procfile Procfile.test",
-    "docs": "jsdoc --configure jsdoc.json"
+    "docs": "jsdoc --configure jsdoc.json",
+    "generate:splash": "rm src/images/apple-splash-*; pwa-asset-generator build/tv-splash.svg src/images --splash-only --background black --padding 0 --type png --xhtml --path-override \"<%=require('images\""
   },
   "engines": {
     "node": "17.8.0",
