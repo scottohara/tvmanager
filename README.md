@@ -43,18 +43,18 @@ Screenshots
 
 Architecture
 ============
-The PWA uses a service worker, application manifest and a local WebSQL database. When installed to the homescreen of a device, it functions like an app including when offline/disconnected or in airplane mode.
+The PWA uses a service worker, application manifest and a local IndexedDB database. When installed to the homescreen of a device, it functions like an app including when offline/disconnected or in airplane mode.
 
 The code is developed in an MVC-style architecture, with a custom "view stack" for navigating through the screens (ie. opening a view 'pushes' it onto the top of the stack; closing the view 'pops' it off the stack, revealing the previous view underneath).
 
-On the server side it's a Ruby Sinatra app, however as all of the static resources (HTML, JS, CSS) are cached on the client by the service worker, there isn't much happening on the server. It provides import/export services that allows the client-side WebSQL database to be backed up/restored (BYO CouchDB database).
+On the server side it's a Ruby Sinatra app, however as all of the static resources (HTML, JS, CSS) are cached on the client by the service worker, there isn't much happening on the server. It provides import/export services that allows the client-side IndexedDB database to be backed up/restored (BYO CouchDB database).
 
 Database schema changes are managed via an upgrade routine on startup (similar to Rails-style migrations).
 
 Requirements
 ============
-* Browser with support for ECMAScript 2017, Service Workers, App Manifest & WebSQL
-* For development: npm/nvm/Ruby/RubyGems/Bundler (recommend [RVM](http://beginrescueend.com/))
+* Browser with support for ECMAScript 2017, Service Workers, App Manifest, Web Workers & IndexedDB
+* For development: Node.JS/npm, Ruby/RubyGems/Bundler (recommend [asdf](http://asdf-vm.com/))
 * For production/staging: somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
 
 Installation (Development)
@@ -67,7 +67,7 @@ Installation (Development)
 
 Import/Export
 =============
-The app includes a backup/restore facility. A log of all changes made to the local WebSQL database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
+The app includes a backup/restore facility. A log of all changes made to the local IndexedDB database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
 
 Restoring the database does the reverse, pulling JSON objects from CouchDB (via the server) and loading them into the local database.
 
@@ -152,15 +152,6 @@ Backend checks are implemented using [rubocop](http://batsov.com/rubocop/):
 
 * `bundle exec rubocop`
 
-API Documentation
-=================
-The JavaScript source is fully annotated with [JSDoc3](http://usejsdoc.org) tags, allowing HTML documentation of the API to be automatically generated.
-
-To generate documentation:
-
-* `npm run docs`
-* browse to file://path_to_project/docs/tvmanager/1.0.0/index.html
-
 Deployment (Staging/Production)
 ===============================
 Before deploying, you should first create an annotated tag (e.g. `git tag -am "Version 1.00" v1.00`).
@@ -171,4 +162,9 @@ The `Procfile` includes a `release` phase that automatically runs `db:migrate` b
 
 If you use heroku pipelines, the recommendation is that your `heroku` git remote maps to a `staging` app in the pipeline. This allows you to verify the release before promoting it to a `production` app in the pipeline.
 
-(Note: You must configure your heroku app to use the multi buildpack, e.g. `heroku buildpack:set https://github.com/heroku/heroku-buildpack-multi`)
+Note: You must configure your heroku app to use both the `heroku/nodejs` and `heroku/ruby` buildpacks (ruby must be last), e.g.
+
+```
+heroku buildpacks:add --index 1 heroku/nodejs
+heroku buildpacks:add --index 2 heroku/ruby
+```

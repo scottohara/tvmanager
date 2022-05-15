@@ -1,21 +1,3 @@
-/**
- * @file (Controllers) DataSyncController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/dataSync-controller
- * @requires jquery
- * @requires models/episode-model
- * @requires models/program-model
- * @requires models/series-model
- * @requires models/setting-model
- * @requires models/sync-model
- * @requires controllers/view-controller
- * @requires md5
- */
 import type {
 	Device,
 	FullImport,
@@ -57,21 +39,6 @@ enum Months {
 	Dec = 11
 }
 
-/**
- * @class DataSyncController
- * @classdesc Controller for the dataSync view
- * @extends ViewController
- * @property {HeaderFooter} header - the view header bar
- * @property {Device} device - the registered device
- * @property {Boolean} localChanges - indicates whether there are any local changes to be synced
- * @property {Boolean} syncing - indicates whether a sync operation is currently running
- * @property {Number} syncProcessed - running total number of pending local changes exported
- * @property {JQuery[]} syncErrors - array of HTML list item elements containing error details
- * @property {Array<Sync>} syncList - array of Sync objects
- * @property {Boolean} importChangesOnly - true = Fast Import, false = Full Import
- * @property {Number} objectsToImport - total number of objects to be imported
- * @property {Number} objectsImported - running total number of objects imported
- */
 export default class DataSyncController extends ViewController {
 	private device: Device = {
 		id: "",
@@ -95,24 +62,10 @@ export default class DataSyncController extends ViewController {
 
 	private objectsImported = 0;
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return DataSyncView;
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -128,13 +81,6 @@ export default class DataSyncController extends ViewController {
 		return this.activate();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method activate
-	 * @desc Activates the controller
-	 */
 	public override async activate(): Promise<void> {
 		// Bind an event handler to access the registration view
 		$("#registrationRow").on("click", this.viewRegistration.bind(this));
@@ -156,36 +102,14 @@ export default class DataSyncController extends ViewController {
 		this.checkForLocalChanges(await Sync.count());
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method goBack
-	 * @desc Pop the view off the stack
-	 */
 	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method viewRegistration
-	 * @desc Display the registration view
-	 */
 	private async viewRegistration(): Promise<void> {
 		return this.appController.pushView("registration");
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method gotLastSyncTime
-	 * @desc Display the last sync time
-	 * @param {Setting} lastSyncTime - a Setting object containing the last time an import/export was run
-	 */
 	private gotLastSyncTime(lastSyncTime: PublicInterface<Setting>): void {
 		// Helper function to ensure date parts are zero-padded as required
 		function leftPad(value: number): string {
@@ -209,14 +133,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method gotDevice
-	 * @desc Parses the registered device and determines what sync options are available
-	 * @param {Setting} device - a Setting object containing the registered device
-	 */
 	private gotDevice(device: PublicInterface<Setting>): void {
 		// Only proceed if we have a device
 		if (undefined === device.settingValue) {
@@ -241,14 +157,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method checkForLocalChanges
-	 * @desc Displays the number of local changes to be synced
-	 * @param {Number} count - the number of local changes to be synced
-	 */
 	private checkForLocalChanges(count: number): void {
 		// If there are any local changes, set the indicator
 		this.localChanges = count > 0;
@@ -264,26 +172,12 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method dataExport
-	 * @desc Initiates a data export
-	 */
 	private dataExport(): void {
 		if (this.localChanges) {
 			this.syncStart("Export", "Are you sure you want to export?", this.doExport.bind(this));
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method dataImport
-	 * @desc Initiates a data import
-	 */
 	private dataImport(): void {
 		// If there are any local changes, warn the user
 		let prompt = "";
@@ -295,16 +189,6 @@ export default class DataSyncController extends ViewController {
 		this.syncStart("Import", `${prompt}Are you sure you want to import?`, this.doImport.bind(this));
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method syncStart
-	 * @desc Initiates a data sync operation
-	 * @param {SyncOperation} operation - import or export
-	 * @param {String} prompt - confirmation prompt
-	 * @param {Function} callback - the syncing function to perform
-	 */
 	private syncStart(operation: SyncOperation, prompt: string, callback: () => void): void {
 		// Make sure a sync operation is not already running
 		if (this.syncing) {
@@ -332,15 +216,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method syncFinish
-	 * @desc Finalises a data sync operation
-	 * @param {SyncOperation} operation - import or export
-	 * @param {Boolean} success - whether the sync was successful
-	 */
 	private syncFinish(operation: SyncOperation, successful: boolean): void {
 		let label = `Database has been successfully ${operation.toLowerCase()}ed.`;
 
@@ -364,26 +239,10 @@ export default class DataSyncController extends ViewController {
 		this.syncing = false;
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method doExport
-	 * @desc Performs the data export
-	 * @param {Array<Sync>} syncList - array of Sync objects
-	 */
 	private async doExport(): Promise<unknown[]> {
 		return this.listRetrieved(await Sync.list());
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method listRetrieved
-	 * @desc Iterates over the list of local changes to be synced, and processes each one
-	 * @param {Array<Sync>} syncList - array of Sync objects
-	 */
 	private async listRetrieved(syncList: PublicInterface<Sync>[]): Promise<unknown[]> {
 		this.syncProcessed = 0;
 		this.syncErrors = [];
@@ -417,14 +276,6 @@ export default class DataSyncController extends ViewController {
 		return Promise.all(changes);
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method sendChange
-	 * @desc Exports a new/changed record
-	 * @param {Sync} sync - Sync object containing the id/type of the record that was added/changed
-	 */
 	private async sendChange(sync: PublicInterface<Sync>): Promise<void> {
 		// Call the find method of the appropriate model object to get the item to export
 		const instance: Model = await this.find(sync),
@@ -467,14 +318,6 @@ export default class DataSyncController extends ViewController {
 		return this.changeSent();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method find
-	 * @desc Finds an item to export
-	 * @param {Sync} sync - Sync object containing the id/type of the record that was added/changed
-	 */
 	private async find(sync: PublicInterface<Sync>): Promise<Model> {
 		let model!: Promise<Model>;
 
@@ -498,14 +341,6 @@ export default class DataSyncController extends ViewController {
 		return model;
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method sendDelete
-	 * @desc Exports a deleted record
-	 * @param {Sync} sync - Sync object containing the id/type of the record that was deleted
-	 */
 	private async sendDelete(sync: PublicInterface<Sync>): Promise<void> {
 		try {
 			// Send a DELETE request to the server, including the device ID in the request headers
@@ -528,13 +363,6 @@ export default class DataSyncController extends ViewController {
 		return this.changeSent();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method changeSent
-	 * @desc Updates the export progress message, and finalises the export if all records have been processed
-	 */
 	private async changeSent(): Promise<void> {
 		// Increment the number of records processed
 		this.syncProcessed++;
@@ -562,13 +390,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method setLastSyncTime
-	 * @desc Updates the last sync time
-	 */
 	private async setLastSyncTime(): Promise<void> {
 		// Instantiate a new Setting object with the current date/time
 		const lastSyncTime: Setting = new Setting("LastSyncTime", String(new Date()));
@@ -580,13 +401,6 @@ export default class DataSyncController extends ViewController {
 		this.gotLastSyncTime(lastSyncTime);
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method doImport
-	 * @desc For full imports, deletes all local data before starting the import; otherwise just starts the import immediately
-	 */
 	private async doImport(): Promise<unknown> {
 		this.syncErrors = [];
 
@@ -635,13 +449,6 @@ export default class DataSyncController extends ViewController {
 		return this.importData();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method importData
-	 * @desc Retrieves data to be imported and loads it into the local database
-	 */
 	private async importData(): Promise<unknown> {
 		this.objectsToImport = 0;
 		this.objectsImported = 0;
@@ -696,15 +503,6 @@ export default class DataSyncController extends ViewController {
 		return this.importDone();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method getImportData
-	 * @desc Returns the import data JSON and checksum
-	 * @param {Object} data - data returned from the server
-	 * @returns {Object} the object JSON and checksum
-	 */
 	private getImportData(data: FullImport | ImportDoc[] | undefined, eTag: string): ImportData {
 		let importJson: ImportDoc[],
 				returnedHash: string;
@@ -729,14 +527,6 @@ export default class DataSyncController extends ViewController {
 		return { importJson, returnedHash };
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method importObject
-	 * @desc Processes an imported object
-	 * @param {Object} object - The object to process
-	 */
 	private async importObject(object: ImportDoc): Promise<void> {
 		// Create an instance of the appropriate model from the JSON representation, and check if the current device is in the pending array
 		const obj: Model = this.jsonToModel(object.doc),
@@ -754,15 +544,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method jsonToModel
-	 * @desc Creates an instance of the appropriate model from a JSON representation
-	 * @param {SerializedModel} json - The JSON representation
-	 * @returns {Model} An instance of the appropriate model
-	 */
 	private jsonToModel(json: SerializedModel): Model {
 		let model!: Model;
 
@@ -785,15 +566,6 @@ export default class DataSyncController extends ViewController {
 		return model;
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method objectSaved
-	 * @desc Called when an imported object is saved
-	 * @param {String} type - The type of imported object
-	 * @param {Boolean} isPending - True if the object was pending for the current device
-	 */
 	private async objectSaved(id: string | null | undefined, type: ModelType, isPending: boolean): Promise<void> {
 		if (null === id || undefined === id) {
 			// No id supplied, so that's an error
@@ -817,15 +589,6 @@ export default class DataSyncController extends ViewController {
 		await this.dataImported();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method removePending
-	 * @desc Clears the pending status for a given object and device
-	 * @param {String} id - Unique identifier of the pending object
-	 * @param {String} type - The type of pending object
-	 */
 	private async removePending(id: string, type: ModelType): Promise<void> {
 		try {
 			// Send a DELETE request to the server, including the device ID in the request headers
@@ -846,13 +609,6 @@ export default class DataSyncController extends ViewController {
 		return this.dataImported();
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method dataImported
-	 * @desc Updates the import progress message and checks if all objects have been imported
-	 */
 	private async dataImported(): Promise<void> {
 		// Increment the running total number of objects imported
 		this.objectsImported++;
@@ -867,13 +623,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method importDone
-	 * @desc Finalises the data import
-	 */
 	private async importDone(): Promise<void> {
 		// Check for any sync errors
 		if (this.syncErrors.length) {
@@ -896,13 +645,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method pendingChangesCleared
-	 * @desc Called after all pending local changes have been removed
-	 */
 	private async pendingChangesCleared(errorMessage?: string): Promise<void> {
 		if (undefined === errorMessage) {
 			// Mark the import as successful
@@ -914,13 +656,6 @@ export default class DataSyncController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method importSuccessful
-	 * @desc Updates the last sync time and the number of local changes to be synced, and finishes the import
-	 */
 	private async importSuccessful(): Promise<void> {
 		// Update the last sync time
 		await this.setLastSyncTime();
@@ -935,30 +670,11 @@ export default class DataSyncController extends ViewController {
 		this.syncFinish("Import", true);
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method syncError
-	 * @desc Adds an error to the list of sync errors
-	 * @param {String} error - the type of error
-	 * @param {String} type - the type of object that the error relates to
-	 * @param {String} message - the error message
-	 * @param {String} id - the unique identifier of the object that the error relates to
-	 */
 	private syncError(error: SyncErrorType, type: ModelType | "Sync", message: string, id?: string | null): void {
 		// Append the error to the list
 		this.syncErrors.push($("<li>").html(`${error}<br/>Type: ${type}${null === id || undefined === id ? "" : ` ${id}`}<br/>${message}`));
 	}
 
-	/**
-	 * @memberof DataSyncController
-	 * @this DataSyncController
-	 * @instance
-	 * @method showErrors
-	 * @desc Displays the errors container
-	 * @param {String} operation - import or export
-	 */
 	private showErrors(operation: SyncOperation): void {
 		// Clear any existing errors and replace with the current errors list
 		const PADDING_PX = 10,

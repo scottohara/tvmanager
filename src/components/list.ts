@@ -1,15 +1,3 @@
-/**
- * @file (Components) List
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module components/list
- * @requires jquery
- * @requires controllers/application-controller
- */
 import type {
 	ListAction,
 	ListEventHandler,
@@ -19,26 +7,6 @@ import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import window from "components/window";
 
-/**
- * @class List
- * @classdesc Generic scrolling list view. Takes an array of JSON objects and a HTML template path, and renders a HTML list.
- * @this List
- * @property {String} container - id of the parent HTML DOM element
- * @property {String} itemTemplate - HTML template to use for list items
- * @property {String} groupBy - a property of the JSON objects to group the items by (ie. shows group headers in the list)
- * @property {Array<ListItem>} items - array of objects to render as list items
- * @property {ListEventHandler} viewEventHandler - function called to view a list item
- * @property {ListEventHandler} editEventHandler - function called to edit a list item
- * @property {ListEventHandler} deleteEventHandler - function called to delete a list item
- * @property {String} action - the current list mode ("view", "edit" or "delete"), ie. what happens when an item is tapped
- * @param {String} container - id of the parent HTML DOM element
- * @param {String} itemTemplate - HTML template to use for list items
- * @param {String} groupBy - a property of the JSON objects to group the items by (ie. shows group headers in the list)
- * @param {Array<Object>} items - array of objects to render as list items
- * @param {ListEventHandler} [viewEventHandler] - function called to view a list item
- * @param {ListEventHandler} [editEventHandler] - function called to edit a list item
- * @param {ListEventHandler} [deleteEventHandler] - function called to delete a list item
- */
 export default class List {
 	private readonly appController: ApplicationController;
 
@@ -56,13 +24,6 @@ export default class List {
 		this.setAction("view");
 	}
 
-	/**
-	 * @memberof List
-	 * @this List
-	 * @instance
-	 * @method refresh
-	 * @desc (Re)Populates and renders the HTML list
-	 */
 	public refresh(): void {
 		const containerElement: JQuery = $(`#${this.container}`),
 					groupNames: JQuery[] = [];
@@ -133,36 +94,14 @@ export default class List {
 		this.appController.setScrollPosition();
 	}
 
-	/**
-	 * @memberof List
-	 * @this List
-	 * @instance
-	 * @method showIndex
-	 * @description Displays the index
-	 */
 	public showIndex(): void {
 		$("#index").show();
 	}
 
-	/**
-	 * @memberof List
-	 * @this List
-	 * @instance
-	 * @method hideIndex
-	 * @description Hides the index
-	 */
 	public hideIndex(): void {
 		$("#index").hide();
 	}
 
-	/**
-	 * @memberof List
-	 * @this List
-	 * @instance
-	 * @method scrollTo
-	 * @description Scrolls a list item into view
-	 * @param {String} id - id of the item to scroll into view
-	 */
 	public scrollTo(id: string): void {
 		const item: JQuery = $(`#${id}`),
 					containerElement: JQuery = $(`#${this.container}`),
@@ -187,14 +126,6 @@ export default class List {
 		}
 	}
 
-	/**
-	 * @memberof List
-	 * @this List
-	 * @instance
-	 * @method setAction
-	 * @desc Switches the list to either view, edit or delete mode
-	 * @param {ListAction} action - "view", "edit" or "delete"
-	 */
 	public setAction(action: ListAction): void {
 		let	validAction = false,
 				savePosition = false;
@@ -227,14 +158,6 @@ export default class List {
 		}
 	}
 
-	/**
-	 * @memberof List
-	 * @this List
-	 * @instance
-	 * @method tap
-	 * @desc Item clicked event handler. What happens depends on the current list mode.
-	 * @param {Number} itemIndex - index of the item that was tapped
-	 */
 	private tap(itemIndex: number): void {
 		// Call the appropriate function depending on the current list mode, and whether or not a handler for that mode was specified
 		switch (this.action) {

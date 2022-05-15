@@ -1,16 +1,3 @@
-/**
- * @file (Models) Series
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module models/series-model
- * @requires models/base-model
- * @requires components/progressbar
- * @requires uuid
- */
 import type {
 	EpisodeStatus,
 	PersistedSeries,
@@ -20,36 +7,6 @@ import Base from "models/base-model";
 import ProgressBar from "components/progressbar";
 import { v4 } from "uuid";
 
-/**
- * @class Series
- * @classdesc Model for series
- * @extends Base
- * @this Series
- * @property {String} id - unique identifier of the series
- * @property {String} seriesName - name of the series
- * @property {Number} nowShowing - the now showing status
- * @property {String} programId - unique identifier of the program that the series belongs to
- * @property {String} programName- name of the program that the series belongs to
- * @property {Number} episodeCount - the number of episodes for the series
- * @property {Number} watchedCount - the number of watched episodes for the series
- * @property {Number} recordedCount - the number of recorded episodes for the series
- * @property {Number} expectedCount - the number of expected episodes for the series
- * @property {Number} missedCount - the number of missed episodes for the series
- * @property {Number} statusWarningCount - the number of expected episodes past their status date for the series
- * @property {ProgressBar} progressBar - progress bar component to generate the progress bar HTML
- * @property {String} progressBarDisplay - HTML of the progress bar to display under the series name in any series lists
- * @param {String} id - unique identifier of the series
- * @param {String} seriesName - name of the series
- * @param {String} programId - unique identifier of the program that the series belongs to
- * @param {String} programName - name of the program that the series belongs to
- * @param {Number} nowShowing - the now showing status
- * @param {Number} episodeCount - the number of episodes for the series
- * @param {Number} watchedCount - the number of watched episodes for the series
- * @param {Number} recordedCount - the number of recorded episodes for the series
- * @param {Number} expectedCount - the number of expected episodes for the series
- * @param {Number} missedCount - the number of missed episodes for the series
- * @param {Number} statusWarningCount - the number of expected episodes past their status date for the series
- */
 export default class Series extends Base {
 	public progressBarDisplay!: string;
 
@@ -83,13 +40,6 @@ export default class Series extends Base {
 		["statusWarning", "nowShowingDisplay"].forEach(this.makeEnumerable.bind(this));
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method listByProgram
-	 * @desc Retrieves a list of series for a given program
-	 * @param {String} programId - the unique identifier of the program to retrieve
-	 */
 	public static async listByProgram(programId: string): Promise<Series[]> {
 		let seriesList: Series[] = [];
 
@@ -102,12 +52,6 @@ export default class Series extends Base {
 		return seriesList;
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method listByNowShowing
-	 * @desc Retrieves a list of series that are currently showing, or have recorded/expected episodes
-	 */
 	public static async listByNowShowing(): Promise<Series[]> {
 		let seriesList: Series[] = [];
 
@@ -120,13 +64,6 @@ export default class Series extends Base {
 		return seriesList;
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method listByStatus
-	 * @desc Retrieves a list of series that have one or more episodes with a given status
-	 * @param {String} status - the episode status
-	 */
 	public static async listByStatus(status: EpisodeStatus): Promise<Series[]> {
 		let seriesList: Series[] = [];
 
@@ -139,12 +76,6 @@ export default class Series extends Base {
 		return seriesList;
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method listByIncomplete
-	 * @desc Retrieves a list of series that have some, but not all, episodes watched
-	 */
 	public static async listByIncomplete(): Promise<Series[]> {
 		let seriesList: Series[] = [];
 
@@ -157,13 +88,6 @@ export default class Series extends Base {
 		return seriesList;
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method find
-	 * @desc Retrieves a specific series by it's unique identifier
-	 * @param {String} id - unique identifier of the series
-	 */
 	public static async find(id: string): Promise<Series> {
 		let	SeriesID: string | null = null,
 				Name: string | null = null,
@@ -183,12 +107,6 @@ export default class Series extends Base {
 		return new Series(SeriesID, Name, NowShowing, ProgramID);
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method count
-	 * @desc Retrieves a count of series
-	 */
 	public static async count(): Promise<number> {
 		let count = 0;
 
@@ -201,12 +119,6 @@ export default class Series extends Base {
 		return count;
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method removeAll
-	 * @desc Removes all series from the database
-	 */
 	public static async removeAll(): Promise<string | undefined> {
 		let errorMessage: string | undefined;
 
@@ -219,25 +131,10 @@ export default class Series extends Base {
 		return errorMessage;
 	}
 
-	/**
-	 * @memberof Series
-	 * @static
-	 * @method fromJson
-	 * @desc Returns a new Series object populated from a JSON representation
-	 * @param {Object} series - a JSON representation of a series
-	 * @returns {Series} the Series object
-	 */
 	public static fromJson(series: SerializedSeries): Series {
 		return new Series(series.id, series.seriesName, series.nowShowing, series.programId);
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method save
-	 * @desc Saves the series to the database
-	 */
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new series to be added), generate a new UUID
 		this.id ??= v4();
@@ -258,13 +155,6 @@ export default class Series extends Base {
 		return undefined;
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method remove
-	 * @desc Deletes the series from the database
-	 */
 	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
 		if (null !== this.id) {
@@ -278,14 +168,6 @@ export default class Series extends Base {
 		}
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method toJson
-	 * @desc Returns a JSON representation of the series
-	 * @returns {Object} the JSON representation of the series
-	 */
 	public toJson(): SerializedSeries {
 		return {
 			id: this.id,
@@ -296,14 +178,6 @@ export default class Series extends Base {
 		};
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method setEpisodeCount
-	 * @desc Sets the number of episodes for the series
-	 * @param {Number} count - the number of episodes for the series
-	 */
 	public setEpisodeCount(count: number): void {
 		this.episodeCount = count;
 
@@ -314,14 +188,6 @@ export default class Series extends Base {
 		this.setWatchedProgress();
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method setWatchedCount
-	 * @desc Sets the number of watched episodes for the series
-	 * @param {Number} count - the number of watched episodes for the series
-	 */
 	public setWatchedCount(count: number): void {
 		this.watchedCount = count;
 
@@ -329,14 +195,6 @@ export default class Series extends Base {
 		this.setWatchedProgress();
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method setRecordedCount
-	 * @desc Sets the number of recorded episodes for the series
-	 * @param {Number} count - the number of recorded episodes for the series
-	 */
 	public setRecordedCount(count: number): void {
 		const PERCENT = 100,
 					RECORDED = 1;
@@ -355,14 +213,6 @@ export default class Series extends Base {
 		});
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method setExpectedCount
-	 * @desc Sets the number of expected episodes for the series
-	 * @param {Number} count - the number of expected episodes for the series
-	 */
 	public setExpectedCount(count: number): void {
 		const	PERCENT = 100,
 					EXPECTED = 2;
@@ -381,24 +231,10 @@ export default class Series extends Base {
 		});
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @property {String} statusWarning - a CSS class name
-	 * @desc Returns a CSS class name to use to indicate that one or more expected episode for the series have passed their expected date
-	 */
 	public get statusWarning(): "" | "warning" {
 		return this.statusWarningCount > 0 ? "warning" : "";
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @property nowShowingDisplay
-	 * @desc ReSets the now showing status of the series
-	 */
 	public get nowShowingDisplay(): string {
 		const NOW_SHOWING: Record<number, string> = {
 			1: "Mondays",
@@ -414,13 +250,6 @@ export default class Series extends Base {
 		return Number(this.nowShowing) > 0 ? NOW_SHOWING[Number(this.nowShowing)] : "Not Showing";
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method setWatchedProgress
-	 * @desc Regenerates the progress bar HTML after setting the episode or watched count
-	 */
 	private setWatchedProgress(): void {
 		const PERCENT = 100,
 					WATCHED = 0;
@@ -437,14 +266,6 @@ export default class Series extends Base {
 		});
 	}
 
-	/**
-	 * @memberof Series
-	 * @this Series
-	 * @instance
-	 * @method setMissedCount
-	 * @desc Sets the number of missed episodes for the series
-	 * @param {Number} count - the number of missed episodes for the series
-	 */
 	private setMissedCount(count: number): void {
 		const PERCENT = 100,
 					MISSED = 3;

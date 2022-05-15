@@ -1,17 +1,3 @@
-/**
- * @file (Controllers) EpisodesController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/episodes-controller
- * @requires jquery
- * @requires models/episode-model
- * @requires components/list
- * @requires controllers/view-controller
- */
 import type {
 	NavButtonEventHandler,
 	SeriesListItem
@@ -26,18 +12,6 @@ import type { PublicInterface } from "global";
 import Sortable from "sortablejs";
 import ViewController from "controllers/view-controller";
 
-/**
- * @class EpisodesController
- * @classdesc Controller for the episodes view
- * @extends ViewController
- * @this EpisodesController
- * @property {SeriesListItem} listItem - a list item from the SeriesList, Schedule or Report view
- * @property {Boolean} scrollToFirstUnwatched - indicates whether to automatically scroll the list to reveal the first unwatched episode
- * @property {HeaderFooter} header - the view header bar
- * @property {List} episodeList - the list of episodes to display
- * @property {HeaderFooter} footer - the view footer bar
- * @param {SeriesListItem} listItem - a list item from the Series, Schedule or Report view
- */
 export default class EpisodesController extends ViewController {
 	private scrollToFirstUnwatched = true;
 
@@ -49,24 +23,10 @@ export default class EpisodesController extends ViewController {
 		super();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return EpisodesView;
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -95,13 +55,6 @@ export default class EpisodesController extends ViewController {
 		return this.activate();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method activate
-	 * @desc Activates the controller
-	 */
 	public override async activate(): Promise<void> {
 		// Get the list of episodes for the specified series
 		this.episodeList.items = await Episode.listBySeries(String(this.listItem.series.id));
@@ -113,13 +66,6 @@ export default class EpisodesController extends ViewController {
 		return this.viewItems();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method contentShown
-	 * @desc Called after the controller content is visible
-	 */
 	public override contentShown(): void {
 		// If necessary, scroll to the first unwatched episode
 		if (this.scrollToFirstUnwatched) {
@@ -134,25 +80,10 @@ export default class EpisodesController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method goBack
-	 * @desc Pops the view off the stack
-	 */
 	private async goBack(): Promise<void> {
 		return this.appController.popView(this.listItem);
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method viewItem
-	 * @desc Displays the Episode view for editing an episode
-	 * @param {Number} listIndex - the list index of the episode to edit
-	 */
 	private async viewItem(listIndex: number): Promise<void> {
 		const episode = this.episodeList.items[listIndex] as Episode;
 
@@ -160,25 +91,10 @@ export default class EpisodesController extends ViewController {
 		return this.appController.pushView("episode", { listIndex, episode });
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method addItem
-	 * @desc Displays the Episode view for adding an episode
-	 */
 	private async addItem(): Promise<void> {
 		return this.appController.pushView("episode", { series: this.listItem.series, sequence: this.episodeList.items.length });
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method deleteItem
-	 * @desc Deletes an episode from the list
-	 * @param {Number} listIndex - the list index of the episode to delete
-	 */
 	private async deleteItem(listIndex: number): Promise<void> {
 		// Get the deleted episode
 		const episode = this.episodeList.items[listIndex] as Episode;
@@ -196,13 +112,6 @@ export default class EpisodesController extends ViewController {
 		return this.resequenceItems();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method deleteItems
-	 * @desc Sets the list to delete mode
-	 */
 	private async deleteItems(): Promise<void> {
 		// Set the list to delete mode
 		this.episodeList.setAction("delete");
@@ -229,13 +138,6 @@ export default class EpisodesController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method resequenceItems
-	 * @desc Updates the sequence number of list items based on their current position in the list
-	 */
 	private async resequenceItems(): Promise<void> {
 		const self: this = this,
 					episodes: Promise<string | undefined>[] = [];
@@ -267,13 +169,6 @@ export default class EpisodesController extends ViewController {
 		this.episodeList.refresh();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method editItems
-	 * @desc Sets the list to edit mode
-	 */
 	private async editItems(): Promise<void> {
 		// Set the list to edit mode
 		this.episodeList.setAction("edit");
@@ -307,13 +202,6 @@ export default class EpisodesController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	/**
-	 * @memberof EpisodesController
-	 * @this EpisodesController
-	 * @instance
-	 * @method viewItems
-	 * @desc Sets the list to view mode
-	 */
 	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.episodeList.setAction("view");

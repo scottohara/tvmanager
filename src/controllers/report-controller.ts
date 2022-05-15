@@ -1,16 +1,3 @@
-/**
- * @file (Controllers) ReportController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/report-controller
- * @requires jquery
- * @requires components/list
- * @requires controllers/view-controller
- */
 import type {
 	NavButtonEventHandler,
 	Report
@@ -24,17 +11,6 @@ import ReportView from "views/report-view.html";
 import type Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
-/**
- * @class ReportController
- * @classdesc Controller for the report view
- * @extends ViewController
- * @this ReportController
- * @property {HeaderFooter} header - the view header bar
- * @property {Report} report - the report to display
- * @property {List} reportList - the list of series to display
- * @property {HeaderFooter} footer - the view footer bar
- * @param {Report} report - the report to display
- */
 export default class ReportController extends ViewController {
 	private reportList!: PublicInterface<List>;
 
@@ -42,24 +18,10 @@ export default class ReportController extends ViewController {
 		super();
 	}
 
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return ReportView;
 	}
 
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -78,13 +40,6 @@ export default class ReportController extends ViewController {
 		return this.activate();
 	}
 
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @method activate
-	 * @desc Activates the controller
-	 */
 	public override async activate(): Promise<void> {
 		// Get the data for the report
 		this.reportList.items = await this.report.dataSource(this.report.args);
@@ -96,36 +51,14 @@ export default class ReportController extends ViewController {
 		return this.viewItems();
 	}
 
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @method goBack
-	 * @desc Pops the view off the stack
-	 */
 	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @method viewItem
-	 * @desc Displays the Episodes view for a series
-	 * @param {Number} listIndex - the list index of the series to view
-	 */
 	private async viewItem(listIndex: number): Promise<void> {
 		return this.appController.pushView("episodes", { source: "Report", listIndex, series: this.reportList.items[listIndex] as PublicInterface<Series> });
 	}
 
-	/**
-	 * @memberof ReportController
-	 * @this ReportController
-	 * @instance
-	 * @method viewItems
-	 * @desc Sets the list to view mode
-	 */
 	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.reportList.setAction("view");

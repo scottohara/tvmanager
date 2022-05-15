@@ -1,29 +1,3 @@
-/**
- * @file (Controllers) ApplicationController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/application-controller
- * @requires jquery
- * @requires controllers/about-controller
- * @requires controllers/dataSync-controller
- * @requires controllers/database-controller
- * @requires controllers/episode-controller
- * @requires controllers/episodes-controller
- * @requires controllers/program-controller
- * @requires controllers/programs-controller
- * @requires controllers/registration-controller
- * @requires controllers/report-controller
- * @requires controllers/schedule-controller
- * @requires controllers/series-controller
- * @requires controllers/seriesList-controller
- * @requires models/setting-model
- * @requires controllers/settings-controller
- * @requires controllers/unscheduled-controller
- */
 import type {
 	Notice,
 	NoticeStack,
@@ -52,15 +26,6 @@ import window from "components/window";
 
 declare const MAX_DATA_AGE_DAYS: number;
 
-/**
- * @class ApplicationController
- * @classdesc Main application controller. Manages the view stack, headers/footers, scroll positions, notices etc.
- * @this ApplicationController
- * @property {Array<View>} viewStack - an array of views currently loaded. Last item on the array is the view currently visible.
- * @property {NoticeStack} noticeStack - contains the array of notices displayed, and the total height of the notices
- * @property {Number} maxDataAgeDays - the number of days since the last import/export before a warning notice is displayed
- * @property {Object} viewControllers - a hash of all view controller objects that can be pushed
- */
 export default class ApplicationController {
 	private static singletonInstance?: ApplicationController;
 
@@ -91,13 +56,6 @@ export default class ApplicationController {
 		return this;
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method start
-	 * @desc Start the application
-	 */
 	public async start(): Promise<void> {
 		// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
 		this.viewControllers = {
@@ -128,14 +86,6 @@ export default class ApplicationController {
 		this.showSyncNotice(lastSyncTime, localChanges);
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method popView
-	 * @desc Pops the current view off the stack, revealing the previous view
-	 * @param {Object} [args] - arguments to pass to the previous view controller
-	 */
 	public async popView(args?: ViewControllerArgs): Promise<void> {
 		// Clear the header/footer
 		this.clearFooter();
@@ -148,24 +98,10 @@ export default class ApplicationController {
 		return this.show(this.viewPopped.bind(this), args);
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method getScrollPosition
-	 * @desc Saves the current scroll position of the active view
-	 */
 	public getScrollPosition(): void {
 		this.currentView.scrollPos = Number($("#content").children(":first").scrollTop());
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method setScrollPosition
-	 * @desc Restores the saved scroll position of the active view
-	 */
 	public setScrollPosition(): void {
 		// If the scroll position is -1, set it to the bottom element
 		if (-1 === this.currentView.scrollPos) {
@@ -176,13 +112,6 @@ export default class ApplicationController {
 		$("#content").children(":first").scrollTop(this.currentView.scrollPos);
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method setFooter
-	 * @desc Displays the view footer (contents of the footer are set by the view controller)
-	 */
 	public setFooter(): void {
 		// Only proceed if the view controller specified a footer
 		if (undefined !== this.currentView.controller.footer) {
@@ -237,15 +166,6 @@ export default class ApplicationController {
 		}
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method pushView
-	 * @desc Saves the current scroll position of the current view (if any), then pushes a new view onto the view stack and displays it
-	 * @param {String} view - the name of the view to push
-	 * @param {Object} [args] - arguments to pass to the view controller
-	 */
 	public async pushView(view: string, args?: ViewControllerArgs): Promise<void> {
 		// If a current view is displayed, save the current scroll position and clear the existing header/footer
 		if (this.viewStack.length > 0) {
@@ -264,14 +184,6 @@ export default class ApplicationController {
 		return this.show(this.viewPushed.bind(this));
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method showNotice
-	 * @desc Pushes a notice onto the notice stack and displays it
-	 * @param {Notice} notice - the notice to display
-	 */
 	public showNotice(notice: Notice): void {
 		// Create a div for the new notice
 		const	noticeContainer: JQuery = $("<div>")
@@ -339,13 +251,6 @@ export default class ApplicationController {
 		$("#notices").animate({ top: Number($(window).height()) + this.noticeStack.height }, this.noticesMoved.bind(this));
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method clearFooter
-	 * @desc Clears and hides the view footer
-	 */
 	public clearFooter(): void {
 		// Only proceed if the view controller specified a footer
 		if (undefined !== this.currentView.controller.footer) {
@@ -370,37 +275,15 @@ export default class ApplicationController {
 		this.setContentHeight();
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method currentView
-	 * @returns {View} the current view on the top of the stack
-	 */
 	private get currentView(): View {
 		return this.viewStack[this.viewStack.length - 1];
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method viewPushed
-	 * @desc Sets up the view controller for the view just pushed, and sets the header
-	 */
 	private async viewPushed(): Promise<void> {
 		// Call the view controller's setup method
 		await this.currentView.controller.setup();
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method viewPopped
-	 * @desc Activates the view that was revealed
-	 * @param {Object} [args] - arguments to pass to the revealed view controller
-	 */
 	private async viewPopped(args: ViewControllerArgs): Promise<void> {
 		// Call the view controller's activate method
 		if ("function" === typeof this.currentView.controller.activate) {
@@ -408,15 +291,6 @@ export default class ApplicationController {
 		}
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method show
-	 * @desc Loads the content for the current view
-	 * @param {Function} onSuccess - function to call after loading the view contents
-	 * @param {Object} [args] - arguments to pass to the view controller
-	 */
 	private async show(onSuccess: (_?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
 		// Show the now loading indicator
 		$("#nowLoading").addClass("loading");
@@ -434,13 +308,6 @@ export default class ApplicationController {
 		this.setHeader();
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method contentShown
-	 * @desc Toggles the now loading indicator
-	 */
 	private contentShown(): void {
 		if ($("#contentWrapper").hasClass("loading")) {
 			$("#contentWrapper").removeClass("loading");
@@ -456,13 +323,6 @@ export default class ApplicationController {
 		}
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method setHeader
-	 * @desc Displays the view header (contents of the header are set by the view controller)
-	 */
 	private setHeader(): void {
 		// If the view controller specified a left-hand button, set it up
 		if (undefined !== this.currentView.controller.header.leftButton) {
@@ -515,13 +375,6 @@ export default class ApplicationController {
 		this.setContentHeight();
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method clearHeader
-	 * @desc Clears and hides the view header
-	 */
 	private clearHeader(): void {
 		// If the view controller specified a left-hand button, unbind the event handler
 		if (undefined !== this.currentView.controller.header.leftButton) {
@@ -542,25 +395,10 @@ export default class ApplicationController {
 		this.setContentHeight();
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method setContentHeight
-	 * @desc Sets the height of the content area to the available height less any space required by the header/footer
-	 */
 	private setContentHeight(): void {
 		$("#content").children(":first").outerHeight(window.innerHeight - Number($("#header").outerHeight()) - Number($("#footer").outerHeight()));
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method hideNotice
-	 * @desc Marks a notice as acknowledged by the user, and hides it
-	 * @param {Object} notice - HTML DOM element of the notice
-	 */
 	private hideNotice(notice: JQuery): void {
 		// Update the height of the notices stack to reclaim the space for the notice
 		this.noticeStack.height += Number(notice.height());
@@ -572,25 +410,11 @@ export default class ApplicationController {
 		notice.animate({ height: 0 }, this.noticeHidden.bind(this));
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method noticeHidden
-	 * @desc Repositions the notices container after a notice is hidden
-	 */
 	private noticeHidden(): void {
 		// Slide down the notices container to the height of the notices stack
 		$("#notices").animate({ top: `-=${this.noticeStack.height}` }, this.noticesMoved.bind(this));
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method noticesMoved
-	 * @desc Removes any acknowledged notices from the stack, and hides the notices container after the last notice is removed
-	 */
 	private noticesMoved(): void {
 		// Iterate in reverse order over the notices in the stack
 		for (let i: number = this.noticeStack.notice.length - 1; i >= 0; i--) {
@@ -610,15 +434,6 @@ export default class ApplicationController {
 		}
 	}
 
-	/**
-	 * @memberof ApplicationController
-	 * @this ApplicationController
-	 * @instance
-	 * @method showSyncNotice
-	 * @desc Calculates the time since the last import/export, and displays a notice if it was more than 7 days ago
-	 * @param {Setting} lastSyncTime - a Setting object containing the last time an import/export was run
-	 * @param {number} localChanges - the number of local changes pending synchronisation
-	 */
 	private showSyncNotice(lastSyncTime: PublicInterface<Setting>, localChanges: number): void {
 		// Only proceed if we have a last sync time
 		if (undefined !== lastSyncTime.settingValue && localChanges > 0) {

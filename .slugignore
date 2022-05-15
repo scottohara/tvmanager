@@ -10,7 +10,6 @@ spec
 .gitignore
 .rspec
 .rubocop.yml
-jsdoc.json
 karma.conf.js
 karma-bdd.conf.js
 LICENCE
@@ -18,4 +17,4 @@ Procfile.dev
 README.md
 webpack.coverage.js
 webpack.dev.js
-webpack.test.j
+webpack.test.js

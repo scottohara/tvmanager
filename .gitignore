@@ -17,9 +17,6 @@ npm-debug.log
 /cypress/screenshots
 /cypress/videos
 
-# Ignore generated docs
-/docs
-
 # Ignore node_modules
 /node_modules
 

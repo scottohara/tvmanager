@@ -1,10 +1,3 @@
-/**
- * @file service-worker
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
 // No-op service worker used for development
 declare const self: ServiceWorkerGlobalScope;
 

@@ -1,17 +1,3 @@
-/**
- * @file (Controllers) ProgramsController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/programs-controller
- * @requires jquery
- * @requires components/list
- * @requires models/program-model
- * @requires controllers/view-controller
- */
 import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
@@ -22,38 +8,15 @@ import ProgramsView from "views/programs-view.html";
 import type { PublicInterface } from "global";
 import ViewController from "controllers/view-controller";
 
-/**
- * @class ProgramsController
- * @classdesc Controller for the programs view
- * @extends ViewController
- * @property {HeaderFooter} header - the view header bar
- * @property {List} programList - the list of programs to display
- * @property {Program} activeListItem - active list item being added or edited
- * @property {HeaderFooter} footer - the view footer bar
- */
 export default class ProgramsController extends ViewController {
 	private programList!: PublicInterface<List>;
 
 	private activeListItem: PublicInterface<Program> | null = null;
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return ProgramsView;
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -76,13 +39,6 @@ export default class ProgramsController extends ViewController {
 		return this.activate();
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method activate
-	 * @desc Activates the controller
-	 */
 	public override async activate(): Promise<void> {
 		// Get the list of programs
 		this.programList.items = await Program.list();
@@ -94,13 +50,6 @@ export default class ProgramsController extends ViewController {
 		return this.viewItems();
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method contentShown
-	 * @desc "Called after the controller content is visible"
-	 */
 	public override contentShown(): void {
 		// If there is an active list item, scroll it into view
 		if (null !== this.activeListItem) {
@@ -108,64 +57,26 @@ export default class ProgramsController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method goBack
-	 * @desc Pops the view off the stack
-	 */
 	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method viewItem
-	 * @desc Displays the SeriesList view for a program
-	 * @param {Number} listIndex - the list index of the program to view
-	 */
 	private async viewItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.programList.items[listIndex] as Program;
 
 		return this.appController.pushView("seriesList", { listIndex, program: this.activeListItem });
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method addItem
-	 * @desc Displays the Program view for adding a program
-	 */
 	private async addItem(): Promise<void> {
 		return this.appController.pushView("program");
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method editItem
-	 * @desc Displays the Program view for editing a program
-	 * @param {Number} listIndex - the list index of the program to edit
-	 */
 	private async editItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.programList.items[listIndex] as Program;
 
 		return this.appController.pushView("program", { listIndex, program: this.activeListItem });
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method deleteItem
-	 * @desc Deletes a program from the list
-	 * @param {Number} listIndex - the list index of the program to delete
-	 */
 	private async deleteItem(listIndex: number): Promise<void> {
 		// Remove the item from the database
 		await (this.programList.items[listIndex] as Program).remove();
@@ -177,13 +88,6 @@ export default class ProgramsController extends ViewController {
 		this.programList.refresh();
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method deleteItems
-	 * @desc Sets the list to delete mode
-	 */
 	private async deleteItems(): Promise<void> {
 		// Set the list to delete mode
 		this.programList.setAction("delete");
@@ -211,13 +115,6 @@ export default class ProgramsController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method editItems
-	 * @desc Sets the list to edit mode
-	 */
 	private async editItems(): Promise<void> {
 		// Set the list to edit mode
 		this.programList.setAction("edit");
@@ -245,13 +142,6 @@ export default class ProgramsController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	/**
-	 * @memberof ProgramsController
-	 * @this ProgramsController
-	 * @instance
-	 * @method viewItems
-	 * @desc Sets the list to view mode
-	 */
 	private async viewItems(): Promise<void> {
 		// Set the list to view mode
 		this.programList.setAction("view");

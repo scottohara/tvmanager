@@ -1,16 +1,3 @@
-/**
- * @file (Controllers) EpisodeController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/episode-controller
- * @requires jquery
- * @requires models/episode-model
- * @requires controllers/view-controller
- */
 import type {
 	EpisodeListItem,
 	NavButtonEventHandler
@@ -22,18 +9,6 @@ import EpisodeView from "views/episode-view.html";
 import type Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
-/**
- * @class EpisodeController
- * @classdesc Controller for the episode view
- * @extends ViewController
- * @this EpisodeController
- * @property {EpisodeListItem} listItem - a list item from the Episodes or Unscheduled view
- * @property {String} originalStatus - the status of the episode when the view is first loaded
- * @property {String} originalStatusDate - the status date of the episode when the view is first loaded
- * @property {HeaderFooter} header - the view header bar
- * @property {Boolean} settingStatus - indicates that the status is currently being set
- * @param {EpisodeListItem} listItem - a list item from the Episodes or Unscheduled view
- */
 export default class EpisodeController extends ViewController {
 	private readonly listItem: EpisodeListItem;
 
@@ -57,24 +32,10 @@ export default class EpisodeController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return EpisodeView;
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -112,13 +73,6 @@ export default class EpisodeController extends ViewController {
 		return Promise.resolve();
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method contentShown
-	 * @desc Called after the controller content is visible
-	 */
 	public override contentShown(): void {
 		// If we're adding a new episode, focus and select the episode name
 		if (undefined === this.listItem.listIndex) {
@@ -126,13 +80,6 @@ export default class EpisodeController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method save
-	 * @desc Saves the episode details to the database and returns to the previous view
-	 */
 	private async save(): Promise<void> {
 		const PREVIOUS_VIEW_OFFSET = 2;
 
@@ -154,13 +101,6 @@ export default class EpisodeController extends ViewController {
 		return this.appController.popView(this.listItem);
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method cancel
-	 * @desc Reverts any changes and returns to the previous view
-	 */
 	private async cancel(): Promise<void> {
 		// Revert to the original episode details
 		this.listItem.episode.status = this.originalStatus;
@@ -170,14 +110,6 @@ export default class EpisodeController extends ViewController {
 		return this.appController.popView();
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method setStatus
-	 * @desc Toggles the episode status
-	 * @param {String} status - the episode status
-	 */
 	private setStatus(status: EpisodeStatus): void {
 		// Only proceed if the status is not already being set
 		if (!this.settingStatus) {
@@ -229,13 +161,6 @@ export default class EpisodeController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof EpisodeController
-	 * @this EpisodeController
-	 * @instance
-	 * @method toggleStatusDateRow
-	 * @desc Shows/hides the status date based on the current episode details
-	 */
 	private toggleStatusDateRow(): void {
 		// Hide the status date
 		$("#statusDateRow").hide();

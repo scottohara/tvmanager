@@ -1,16 +1,3 @@
-/**
- * @file (Controllers) RegistrationController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/registration-controller
- * @requires jquery
- * @requires models/setting-model
- * @requires controllers/view-controller
- */
 import type {
 	Device,
 	NavButtonEventHandler
@@ -22,35 +9,13 @@ import RegistrationView from "views/registration-view.html";
 import Setting from "models/setting-model";
 import ViewController from "controllers/view-controller";
 
-/**
- * @class RegistrationController
- * @classdesc Controller for the registration view
- * @extends ViewController
- * @property {HeaderFooter} header - the view header bar
- * @property {Device} device - the registered device
- * @property {HeaderFooter} footer - the view footer bar
- */
 export default class RegistrationController extends ViewController {
 	private device!: Device;
 
-	/**
-	 * @memberof RegistrationController
-	 * @this RegistrationController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return RegistrationView;
 	}
 
-	/**
-	 * @memberof RegistrationController
-	 * @this RegistrationController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -70,14 +35,6 @@ export default class RegistrationController extends ViewController {
 		return this.gotDevice(await Setting.get("Device"));
 	}
 
-	/**
-	 * @memberof RegistrationController
-	 * @this RegistrationController
-	 * @instance
-	 * @method gotDevice
-	 * @desc Parses the registered device and displays it
-	 * @param {Setting} device - a Setting object containing the registered device
-	 */
 	private async gotDevice(device: PublicInterface<Setting>): Promise<void> {
 		// Check if we have a registered device
 		if (undefined === device.settingValue) {
@@ -112,13 +69,6 @@ export default class RegistrationController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof RegistrationController
-	 * @this RegistrationController
-	 * @instance
-	 * @method unregister
-	 * @desc Unregisters the current device
-	 */
 	private async unregister(): Promise<void> {
 		try {
 			// Send a DELETE request to the server
@@ -151,13 +101,6 @@ export default class RegistrationController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof RegistrationController
-	 * @this RegistrationController
-	 * @instance
-	 * @method save
-	 * @desc Registers or updates the current device
-	 */
 	private async save(): Promise<void> {
 		// Get the device details
 		this.device.name = String($("#deviceName").val());
@@ -196,13 +139,6 @@ export default class RegistrationController extends ViewController {
 		}
 	}
 
-	/**
-	 * @memberof RegistrationController
-	 * @this RegistrationController
-	 * @instance
-	 * @method cancel
-	 * @desc Pops the view off the stack
-	 */
 	private async cancel(): Promise<void> {
 		return this.appController.popView();
 	}

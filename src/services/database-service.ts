@@ -1,13 +1,3 @@
-/**
- * @file (Services) DatabaseService
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module services/database-service
- */
 import type {
 	EpisodesStore,
 	ProgramsStore,

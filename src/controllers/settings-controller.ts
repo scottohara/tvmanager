@@ -1,16 +1,3 @@
-/**
- * @file (Controllers) SettingsController
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module controllers/settings-controller
- * @requires jquery
- * @requires models/series-model
- * @requires controllers/view-controller
- */
 import type {
 	NavButtonEventHandler,
 	ReportDataSource
@@ -20,31 +7,11 @@ import Series from "models/series-model";
 import SettingsView from "views/settings-view.html";
 import ViewController from "controllers/view-controller";
 
-/**
- * @class SettingsController
- * @classdesc Controller for the settings view
- * @extends ViewController
- * @property {HeaderFooter} header - the view header bar
- */
 export default class SettingsController extends ViewController {
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @property {String} view - the view template HTML
-	 * @desc Returns the HTML for the controller's view
-	 */
 	public get view(): string {
 		return SettingsView;
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method setup
-	 * @desc Initialises the controller
-	 */
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -60,13 +27,6 @@ export default class SettingsController extends ViewController {
 		return this.activate();
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method activate
-	 * @desc Activates the controller
-	 */
 	public override async activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
 		$("#dataSyncRow").on("click", this.viewDataSync.bind(this));
@@ -79,79 +39,30 @@ export default class SettingsController extends ViewController {
 		return Promise.resolve();
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method goBack
-	 * @desc Pop the view off the stack
-	 */
 	private async goBack(): Promise<void> {
 		return this.appController.popView();
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method viewDataSync
-	 * @desc Display the dataSync view
-	 */
 	private async viewDataSync(): Promise<void> {
 		return this.appController.pushView("dataSync");
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method viewAbout
-	 * @desc Display the about view
-	 */
 	private async viewAbout(): Promise<void> {
 		return this.appController.pushView("about");
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method viewRecordedReport
-	 * @desc Display the All Recorded report view
-	 */
 	private async viewRecordedReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Recorded" });
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method viewExpectedReport
-	 * @desc Display the All Expected report view
-	 */
 	private async viewExpectedReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Expected" });
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method viewMissedReport
-	 * @desc Display the All Missed report view
-	 */
 	private async viewMissedReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Missed" });
 	}
 
-	/**
-	 * @memberof SettingsController
-	 * @this SettingsController
-	 * @instance
-	 * @method viewIncompleteReport
-	 * @desc Display the All Incomplete report view
-	 */
 	private async viewIncompleteReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource });
 	}

@@ -1,26 +1,6 @@
-/**
- * @file (Components) ProgressBar
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module components/progressbar
- * @requires jquery
- */
 import $ from "jquery";
 import type { Section } from "components";
 
-/**
- * @class ProgressBar
- * @classdesc Generic progress bar view. Multiple sections may be specified, creating a 'stacked' bar
- * @this ProgressBar
- * @property {Number} total - the number that represents 100% complete
- * @property {Array<Section>} sections - array of section objects
- * @param {Number} total - the number that represents 100% complete
- * @param {Array} sections - array of section objects
- */
 export default class ProgressBar {
 	private total = 0;
 
@@ -28,45 +8,18 @@ export default class ProgressBar {
 		this.setTotal(total);
 	}
 
-	/**
-	 * @memberof ProgressBar
-	 * @this ProgressBar
-	 * @instance
-	 * @method setSection
-	 * @desc (Re)Sets a section and regenerates the HTML for the progress bar
-	 * @param {Number} index - the section number (zero-based)
-	 * @param {Section} section - a section object
-	 * @returns {String} the HTML of the progress bar
-	 */
 	public setSection(index: number, section: Section): string {
 		this.sections[index] = section;
 
 		return this.render();
 	}
 
-	/**
-	 * @memberof ProgressBar
-	 * @this ProgressBar
-	 * @instance
-	 * @method setTotal
-	 * @desc Sets the total and regenerates the HTML for the progress bar
-	 * @param {Number} total - the number that represents 100% complete
-	 * @returns {String} the HTML of the progress bar
-	 */
 	public setTotal(total: number): string {
 		this.total = total;
 
 		return this.render();
 	}
 
-	/**
-	 * @memberof ProgressBar
-	 * @this ProgressBar
-	 * @instance
-	 * @method render
-	 * @desc Generates the HTML for the progress bar
-	 * @returns {String} the HTML of the progress bar
-	 */
 	private render(): string {
 		// Only generate the HTML if a total is set
 		if (this.total > 0) {

@@ -1,16 +1,3 @@
-/**
- * @file (Models) Program
- * @author Scott O'Hara
- * @copyright 2010 Scott O'Hara, oharagroup.net
- * @license MIT
- */
-
-/**
- * @module models/program-model
- * @requires models/base-model
- * @requires components/progressbar
- * @requires uuid
- */
 import type {
 	PersistedProgram,
 	SerializedProgram
@@ -19,28 +6,6 @@ import Base from "models/base-model";
 import ProgressBar from "components/progressbar";
 import { v4 } from "uuid";
 
-/**
- * @class Program
- * @classdesc Model for programs
- * @extends Base
- * @this Program
- * @property {String} id - unique identifier of the program
- * @property {String} programName - name of the program
- * @property {Number} seriesCount - the number of series for the program
- * @property {Number} episodeCount - the number of episodes for the program
- * @property {Number} watchedCount - the number of watched episodes for the program
- * @property {Number} recordedCount - the number of recorded episodes for the program
- * @property {Number} expectedCount - the number of expected episodes for the program
- * @property {ProgressBar} progressBar - progress bar component to generate the progress bar HTML
- * @property {String} progressBarDisplay - HTML of the progress bar to display under the program name in any program lists
- * @param {String} id - unique identifier of the program
- * @param {String} programName - name of the program
- * @param {Number} seriesCount - the number of series for the program
- * @param {Number} episodeCount - the number of episodes for the program
- * @param {Number} watchedCount - the number of watched episodes for the program
- * @param {Number} recordedCount - the number of recorded episodes for the program
- * @param {Number} expectedCount - the number of expected episodes for the program
- */
 export default class Program extends Base {
 	public progressBarDisplay!: string;
 
@@ -68,12 +33,6 @@ export default class Program extends Base {
 		["programGroup"].forEach(this.makeEnumerable.bind(this));
 	}
 
-	/**
-	 * @memberof Program
-	 * @static
-	 * @method list
-	 * @desc Retrieves a list of programs
-	 */
 	public static async list(): Promise<Program[]> {
 		let programList: Program[] = [];
 
@@ -86,13 +45,6 @@ export default class Program extends Base {
 		return programList;
 	}
 
-	/**
-	 * @memberof Program
-	 * @static
-	 * @method find
-	 * @desc Retrieves a specific program by it's unique identifier
-	 * @param {String} id - unique identifier of the program
-	 */
 	public static async find(id: string): Promise<Program> {
 		let ProgramID: string | null = null,
 				Name: string | null = null;
@@ -110,12 +62,6 @@ export default class Program extends Base {
 		return new Program(ProgramID, Name);
 	}
 
-	/**
-	 * @memberof Program
-	 * @static
-	 * @method count
-	 * @desc Retrieves a count of programs
-	 */
 	public static async count(): Promise<number> {
 		let count = 0;
 
@@ -128,12 +74,6 @@ export default class Program extends Base {
 		return count;
 	}
 
-	/**
-	 * @memberof Program
-	 * @static
-	 * @method removeAll
-	 * @desc Removes all programs from the database
-	 */
 	public static async removeAll(): Promise<string | undefined> {
 		let errorMessage: string | undefined;
 
@@ -146,25 +86,10 @@ export default class Program extends Base {
 		return errorMessage;
 	}
 
-	/**
-	 * @memberof Program
-	 * @static
-	 * @method fromJson
-	 * @desc Returns a new Program object populated from a JSON representation
-	 * @param {Object} program - a JSON representation of a program
-	 * @returns {Program} the Program object
-	 */
 	public static fromJson(program: SerializedProgram): Program {
 		return new Program(program.id, program.programName);
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method save
-	 * @desc Saves the program to the database
-	 */
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new program to be added), generate a new UUID
 		this.id ??= v4();
@@ -183,13 +108,6 @@ export default class Program extends Base {
 		return undefined;
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method remove
-	 * @desc Deletes the program from the database
-	 */
 	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
 		if (null !== this.id) {
@@ -201,14 +119,6 @@ export default class Program extends Base {
 		}
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method toJson
-	 * @desc Returns a JSON representation of the program
-	 * @returns {Object} the JSON representation of the program
-	 */
 	public toJson(): SerializedProgram {
 		return {
 			id: this.id,
@@ -217,25 +127,10 @@ export default class Program extends Base {
 		};
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @property {String} programGroup - the first letter of the program name
-	 * @desc Returns the group that the program belongs to
-	 */
 	public get programGroup(): string {
 		return this.programName?.substring(0, 1).toUpperCase() ?? "";
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method setEpisodeCount
-	 * @desc Sets the number of episodes for the program
-	 * @param {Number} count - the number of episodes for the program
-	 */
 	public setEpisodeCount(count: number): void {
 		this.episodeCount = count;
 
@@ -246,14 +141,6 @@ export default class Program extends Base {
 		this.setWatchedProgress();
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method setWatchedCount
-	 * @desc Sets the number of watched episodes for the program
-	 * @param {Number} count - the number of watched episodes for the program
-	 */
 	public setWatchedCount(count: number): void {
 		this.watchedCount = count;
 
@@ -261,14 +148,6 @@ export default class Program extends Base {
 		this.setWatchedProgress();
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method setRecordedCount
-	 * @desc Sets the number of recorded episodes for the program
-	 * @param {Number} count - the number of recorded episodes for the program
-	 */
 	public setRecordedCount(count: number): void {
 		const PERCENT = 100,
 					RECORDED = 1;
@@ -287,14 +166,6 @@ export default class Program extends Base {
 		});
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method setExpectedCount
-	 * @desc Sets the number of expected episodes for the program
-	 * @param {Number} count - the number of expected episodes for the program
-	 */
 	public setExpectedCount(count: number): void {
 		const PERCENT = 100,
 					EXPECTED = 2;
@@ -313,13 +184,6 @@ export default class Program extends Base {
 		});
 	}
 
-	/**
-	 * @memberof Program
-	 * @this Program
-	 * @instance
-	 * @method setWatchedProgress
-	 * @desc Regenerates the progress bar HTML after setting the episode or watched count
-	 */
 	private setWatchedProgress(): void {
 		const PERCENT = 100,
 					WATCHED = 0;
