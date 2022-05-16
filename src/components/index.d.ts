@@ -12,15 +12,3 @@ export interface Section {
 export type ListAction = "delete" | "edit" | "view";
 export type ListEventHandler = (index: number) => void;
 export type ListItem = PublicInterface<Episode | Program | Series>;
-
-export interface SyntheticTouch {
-	identifier?: -1;
-	clientX?: number;
-	clientY?: number;
-	target?: EventTarget | null;
-}
-
-export interface SyntheticTouchEvent {
-	targetTouches?: SyntheticTouch[];
-	changedTouches?: SyntheticTouch[];
-}

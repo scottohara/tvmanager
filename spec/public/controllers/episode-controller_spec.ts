@@ -3,7 +3,6 @@ import type {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeController from "controllers/episode-controller";
 import EpisodeMock from "mocks/episode-model-mock";
@@ -63,14 +62,14 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let episodeName: JQuery,
-				unverified: JQuery,
-				unscheduled: JQuery,
-				watched: JQuery,
-				recorded: JQuery,
-				expected: JQuery,
-				missed: JQuery,
-				statusDate: JQuery,
+		let episodeName: HTMLInputElement,
+				unverified: HTMLInputElement,
+				unscheduled: HTMLInputElement,
+				watched: HTMLDivElement,
+				recorded: HTMLDivElement,
+				expected: HTMLDivElement,
+				missed: HTMLDivElement,
+				statusDate: HTMLInputElement,
 				leftButton: NavButton,
 				rightButton: NavButton;
 
@@ -80,37 +79,33 @@ describe("EpisodeController", (): void => {
 			sinon.stub(episodeController, "setStatus" as keyof EpisodeController);
 			sinon.stub(episodeController, "toggleStatusDateRow" as keyof EpisodeController);
 
-			episodeName = $("<input>")
-				.attr("id", "episodeName")
-				.appendTo(document.body);
+			episodeName = document.createElement("input");
+			episodeName.id = "episodeName";
 
-			unverified = $("<input type='checkbox'>")
-				.attr("id", "unverified")
-				.appendTo(document.body);
+			unverified = document.createElement("input");
+			unverified.type = "checkbox";
+			unverified.id = "unverified";
 
-			unscheduled = $("<input type='checkbox'>")
-				.attr("id", "unscheduled")
-				.appendTo(document.body);
+			unscheduled = document.createElement("input");
+			unscheduled.type = "checkbox";
+			unscheduled.id = "unscheduled";
 
-			watched = $("<div>")
-				.attr("id", "watched")
-				.appendTo(document.body);
+			watched = document.createElement("div");
+			watched.id = "watched";
 
-			recorded = $("<div>")
-				.attr("id", "recorded")
-				.appendTo(document.body);
+			recorded = document.createElement("div");
+			recorded.id = "recorded";
 
-			expected = $("<div>")
-				.attr("id", "expected")
-				.appendTo(document.body);
+			expected = document.createElement("div");
+			expected.id = "expected";
 
-			missed = $("<div>")
-				.attr("id", "missed")
-				.appendTo(document.body);
+			missed = document.createElement("div");
+			missed.id = "missed";
 
-			statusDate = $("<input>")
-				.attr("id", "statusDate")
-				.appendTo(document.body);
+			statusDate = document.createElement("input");
+			statusDate.id = "statusDate";
+
+			document.body.append(episodeName, unverified, unscheduled, watched, recorded, expected, missed, statusDate);
 
 			await episodeController.setup();
 			leftButton = episodeController.header.leftButton as NavButton;
@@ -133,33 +128,33 @@ describe("EpisodeController", (): void => {
 
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
-		it("should set the episode name", (): Chai.Assertion => String(episodeName.val()).should.equal(listItem.episode.episodeName));
-		it("should set the status date", (): Chai.Assertion => String(statusDate.val()).should.equal(listItem.episode.statusDate));
-		it("should set the unverified toggle", (): Chai.Assertion => Boolean(unverified.prop("checked")).should.equal(listItem.episode.unverified));
-		it("should set the unscheduled toggle", (): Chai.Assertion => Boolean(unscheduled.prop("checked")).should.equal(listItem.episode.unscheduled));
+		it("should set the episode name", (): Chai.Assertion => episodeName.value.should.equal(listItem.episode.episodeName));
+		it("should set the status date", (): Chai.Assertion => statusDate.value.should.equal(listItem.episode.statusDate));
+		it("should set the unverified toggle", (): Chai.Assertion => unverified.checked.should.equal(listItem.episode.unverified));
+		it("should set the unscheduled toggle", (): Chai.Assertion => unscheduled.checked.should.equal(listItem.episode.unscheduled));
 
 		it("should attach a watched click event handler", (): void => {
-			watched.trigger("click");
+			watched.dispatchEvent(new MouseEvent("click"));
 			episodeController["setStatus"].should.have.been.calledWith("Watched");
 		});
 
 		it("should attach a recorded click event handler", (): void => {
-			recorded.trigger("click");
+			recorded.dispatchEvent(new MouseEvent("click"));
 			episodeController["setStatus"].should.have.been.calledWith("Recorded");
 		});
 
 		it("should attach an expected click event handler", (): void => {
-			expected.trigger("click");
+			expected.dispatchEvent(new MouseEvent("click"));
 			episodeController["setStatus"].should.have.been.calledWith("Expected");
 		});
 
 		it("should attach a missed click event handler", (): void => {
-			missed.trigger("click");
+			missed.dispatchEvent(new MouseEvent("click"));
 			episodeController["setStatus"].should.have.been.calledWith("Missed");
 		});
 
 		it("should attach an unscheduled click event handler", (): void => {
-			unscheduled.trigger("click");
+			unscheduled.dispatchEvent(new MouseEvent("click"));
 			episodeController["toggleStatusDateRow"].should.have.been.called;
 		});
 
@@ -178,15 +173,15 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("contentShown", (): void => {
-		let episodeName: JQuery,
+		let episodeName: HTMLInputElement,
 				select: SinonStub;
 
 		beforeEach((): void => {
-			episodeName = $("<input>")
-				.attr("id", "episodeName")
-				.appendTo(document.body);
+			episodeName = document.createElement("input");
+			episodeName.id = "episodeName";
+			document.body.append(episodeName);
 
-			select = sinon.stub($.fn, "select");
+			select = sinon.stub(episodeName, "select");
 		});
 
 		describe("adding episode", (): void => {
@@ -230,11 +225,11 @@ describe("EpisodeController", (): void => {
 		];
 
 		let episodeName: string,
-				episodeNameInput: JQuery,
+				episodeNameInput: HTMLInputElement,
 				statusDate: string,
-				statusDateInput: JQuery,
-				unverified: JQuery,
-				unscheduled: JQuery;
+				statusDateInput: HTMLInputElement,
+				unverified: HTMLInputElement,
+				unscheduled: HTMLInputElement;
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
@@ -242,25 +237,25 @@ describe("EpisodeController", (): void => {
 					episodeName = "test-episode-2";
 					statusDate = "2000-12-31";
 
-					episodeNameInput = $("<input>")
-						.attr("id", "episodeName")
-						.val(episodeName)
-						.appendTo(document.body);
+					episodeNameInput = document.createElement("input");
+					episodeNameInput.id = "episodeName";
+					episodeNameInput.value = episodeName;
 
-					statusDateInput = $("<input>")
-						.attr("id", "statusDate")
-						.val(statusDate)
-						.appendTo(document.body);
+					statusDateInput = document.createElement("input");
+					statusDateInput.id = "statusDate";
+					statusDateInput.value = statusDate;
 
-					unverified = $("<input type='checkbox'>")
-						.attr("id", "unverified")
-						.prop("checked", true)
-						.appendTo(document.body);
+					unverified = document.createElement("input");
+					unverified.type = "checkbox";
+					unverified.id = "unverified";
+					unverified.checked = true;
 
-					unscheduled = $("<input type='checkbox'>")
-						.attr("id", "unscheduled")
-						.prop("checked", true)
-						.appendTo(document.body);
+					unscheduled = document.createElement("input");
+					unscheduled.type = "checkbox";
+					unscheduled.id = "unscheduled";
+					unscheduled.checked = true;
+
+					document.body.append(episodeNameInput, statusDateInput, unverified, unscheduled);
 
 					appController.viewStack = [
 						{ controller: new TestController(), scrollPos: 0 },
@@ -369,32 +364,33 @@ describe("EpisodeController", (): void => {
 				}
 			];
 
-			let watched: JQuery,
-					recorded: JQuery,
-					expected: JQuery,
-					missed: JQuery,
-					unverifiedRow: JQuery;
+			let watched: HTMLDivElement,
+					recorded: HTMLDivElement,
+					expected: HTMLDivElement,
+					missed: HTMLDivElement,
+					unverifiedRow: HTMLDivElement;
 
 			beforeEach((): void => {
-				watched = $("<div>")
-					.attr("id", "watched")
-					.appendTo(document.body);
+				watched = document.createElement("div");
+				watched.id = "watched";
+				watched.classList.add("status");
 
-				recorded = $("<div>")
-					.attr("id", "recorded")
-					.appendTo(document.body);
+				recorded = document.createElement("div");
+				recorded.id = "recorded";
+				recorded.classList.add("status");
 
-				expected = $("<div>")
-					.attr("id", "expected")
-					.appendTo(document.body);
+				expected = document.createElement("div");
+				expected.id = "expected";
+				expected.classList.add("status");
 
-				missed = $("<div>")
-					.attr("id", "missed")
-					.appendTo(document.body);
+				missed = document.createElement("div");
+				missed.id = "missed";
+				missed.classList.add("status");
 
-				unverifiedRow = $("<div>")
-					.attr("id", "unverifiedRow")
-					.appendTo(document.body);
+				unverifiedRow = document.createElement("div");
+				unverifiedRow.id = "unverifiedRow";
+
+				document.body.append(watched, recorded, expected, missed, unverifiedRow);
 			});
 
 			scenarios.forEach((scenario: Scenario): void => {
@@ -407,13 +403,13 @@ describe("EpisodeController", (): void => {
 					it("should set the episode status", (): Chai.Assertion => listItem.episode.status.should.equal(scenario.expectedStatus));
 
 					it("should toggle the status", (): void => {
-						watched.hasClass("status").should.equal("Watched" === scenario.expectedStatus);
-						recorded.hasClass("status").should.equal("Recorded" === scenario.expectedStatus);
-						expected.hasClass("status").should.equal("Expected" === scenario.expectedStatus);
-						missed.hasClass("status").should.equal("Missed" === scenario.expectedStatus);
+						watched.classList.contains("status").should.equal("Watched" === scenario.expectedStatus);
+						recorded.classList.contains("status").should.equal("Recorded" === scenario.expectedStatus);
+						expected.classList.contains("status").should.equal("Expected" === scenario.expectedStatus);
+						missed.classList.contains("status").should.equal("Missed" === scenario.expectedStatus);
 					});
 
-					it("should toggle the unverified row", (): Chai.Assertion => ("none" === unverifiedRow.css("display")).should.equal(scenario.unverifiedRowHidden));
+					it("should toggle the unverified row", (): Chai.Assertion => ("none" === unverifiedRow.style.display).should.equal(scenario.unverifiedRowHidden));
 					it("should toggle the status date row", (): Chai.Assertion => episodeController["toggleStatusDateRow"].should.have.been.called);
 					it("should clear the semaphore", (): Chai.Assertion => episodeController["settingStatus"].should.be.false);
 				});
@@ -483,29 +479,30 @@ describe("EpisodeController", (): void => {
 			}
 		];
 
-		let statusDateRow: JQuery,
-				unscheduled: JQuery;
+		let statusDateRow: HTMLDivElement,
+				unscheduled: HTMLInputElement;
 
 		beforeEach((): void => {
-			statusDateRow = $("<div>")
-				.attr("id", "statusDateRow")
-				.appendTo(document.body);
+			statusDateRow = document.createElement("div");
+			statusDateRow.id = "statusDateRow";
 
-			unscheduled = $("<input type='checkbox'>")
-				.attr("id", "unscheduled")
-				.appendTo(document.body);
+			unscheduled = document.createElement("input");
+			unscheduled.type = "checkbox";
+			unscheduled.id = "unscheduled";
+
+			document.body.append(statusDateRow, unscheduled);
 		});
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
 				beforeEach((): void => {
-					unscheduled.prop("checked", scenario.isUnscheduled);
+					unscheduled.checked = scenario.isUnscheduled;
 					listItem.episode.status = scenario.status;
 					listItem.episode.statusDate = scenario.noDate ? "" : listItem.episode.statusDate;
 					episodeController["toggleStatusDateRow"]();
 				});
 
-				it(`should ${scenario.isHidden ? "hide" : "show"} the status date`, (): Chai.Assertion => ("none" === statusDateRow.css("display")).should.equal(Boolean(scenario.isHidden)));
+				it(`should ${scenario.isHidden ? "hide" : "show"} the status date`, (): Chai.Assertion => ("none" === statusDateRow.style.display).should.equal(Boolean(scenario.isHidden)));
 			});
 		});
 

@@ -2,7 +2,6 @@ import type {
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
-import $ from "jquery";
 import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import EpisodeListTemplate from "views/episodeListTemplate.html";
@@ -46,7 +45,7 @@ export default class EpisodesController extends ViewController {
 		this.episodeList = new List("list", EpisodeListTemplate, null, [], this.viewItem.bind(this), null, this.deleteItem.bind(this));
 
 		// Prepare the list for sorting
-		this.sortable = Sortable.create($("#list").get(0), {
+		this.sortable = Sortable.create(this.list, {
 			disabled: true,
 			animation: 150
 		});
@@ -100,7 +99,7 @@ export default class EpisodesController extends ViewController {
 		const episode = this.episodeList.items[listIndex] as Episode;
 
 		// Remove the item from the DOM
-		$(`#list li a#${episode.id}`).remove();
+		(this.list.querySelector(`li a#item-${episode.id}`) as HTMLAnchorElement).remove();
 
 		// Remove the item from the database
 		await episode.remove();
@@ -120,9 +119,8 @@ export default class EpisodesController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the delete icons next to each list item
-		$("#list")
-			.removeClass()
-			.addClass("delete");
+		this.list.className = "";
+		this.list.classList.add("delete");
 
 		// Setup the footer
 		this.footer = {
@@ -143,13 +141,13 @@ export default class EpisodesController extends ViewController {
 					episodes: Promise<string | undefined>[] = [];
 
 		// Iterate over the HTML DOM elements in the list
-		$("#list li a").each((index: number, item: HTMLElement): void => {
+		this.list.querySelectorAll("li a").forEach((item: HTMLElement, index: number): void => {
 			// Only update items that have changed position
-			if ($(item).attr("id") !== (self.episodeList.items[index] as Episode).id) {
+			if (item.id !== `item-${(self.episodeList.items[index] as Episode).id}`) {
 				// Iterate over the list items array
 				for (const episode of (self.episodeList.items as Episode[])) {
 					// If the array item at this position is not the same as the HTML DOM element at the same position, update the item's sequence in the database
-					if (episode.id === $(item).attr("id")) {
+					if (`item-${episode.id}` === item.id) {
 						episode.sequence = index;
 						episodes.push(episode.save());
 
@@ -177,9 +175,8 @@ export default class EpisodesController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the edit icons next to each list item
-		$("#list")
-			.removeClass()
-			.addClass("edit");
+		this.list.className = "";
+		this.list.classList.add("edit");
 
 		// Enable sorting
 		this.sortable.option("disabled", false);
@@ -213,7 +210,7 @@ export default class EpisodesController extends ViewController {
 		this.sortable.option("disabled", true);
 
 		// Show the view icons next to each list item
-		$("#list").removeClass();
+		this.list.className = "";
 
 		// Setup the footer
 		this.footer = {
@@ -231,5 +228,10 @@ export default class EpisodesController extends ViewController {
 
 		// Set the view footer
 		this.appController.setFooter();
+	}
+
+	// DOM selectors
+	private get list(): HTMLUListElement {
+		return document.querySelector("#list") as HTMLUListElement;
 	}
 }

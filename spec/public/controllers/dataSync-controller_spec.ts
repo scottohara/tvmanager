@@ -17,7 +17,6 @@ import type {
 	SinonMatcher,
 	SinonStub
 } from "sinon";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import DataSyncController from "controllers/dataSync-controller";
 import DataSyncView from "views/dataSync-view.html";
@@ -69,66 +68,63 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		const lastSyncTime: SettingMock = new SettingMock("LastSyncTime", "1 Jan 2010"),
-					device: SettingMock = new SettingMock("Device", "test-device");
+		const lastSyncTimeSetting = new SettingMock("LastSyncTime", "1 Jan 2010"),
+					device = new SettingMock("Device", "test-device");
 
-		let registrationRow: JQuery,
-				importButton: JQuery,
-				exportButton: JQuery,
-				localChanges: JQuery;
+		let registrationRow: HTMLDivElement,
+				importButton: HTMLAnchorElement,
+				exportButton: HTMLAnchorElement,
+				localChanges: HTMLInputElement,
+				lastSyncTime: HTMLInputElement;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "viewRegistration" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "dataImport" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "dataExport" as keyof DataSyncController);
-			sinon.stub(dataSyncController, "gotLastSyncTime" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "gotDevice" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "checkForLocalChanges" as keyof DataSyncController);
 			SettingMock.get.reset();
-			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTime);
+			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTimeSetting);
 			SettingMock.get.withArgs("Device").returns(device);
 
-			registrationRow = $("<div>")
-				.attr("id", "registrationRow")
-				.hide()
-				.appendTo(document.body);
+			registrationRow = document.createElement("div");
+			registrationRow.id = "registrationRow";
 
-			importButton = $("<div>")
-				.attr("id", "import")
-				.hide()
-				.appendTo(document.body);
+			importButton = document.createElement("a");
+			importButton.id = "import";
 
-			exportButton = $("<div>")
-				.attr("id", "export")
-				.hide()
-				.appendTo(document.body);
+			exportButton = document.createElement("a");
+			exportButton.id = "export";
 
-			localChanges = $("<div>")
-				.attr("id", "localChanges")
-				.hide()
-				.appendTo(document.body);
+			localChanges = document.createElement("input");
+			localChanges.id = "localChanges";
+
+			lastSyncTime = document.createElement("input");
+			lastSyncTime.id = "lastSyncTime";
+
+			document.body.append(registrationRow, importButton, exportButton, localChanges, lastSyncTime);
 
 			SyncMock.syncList = [new SyncMock(null, null)];
 			await dataSyncController.activate();
 		});
 
 		it("should attach a registration click event handler", (): void => {
-			registrationRow.trigger("click");
+			registrationRow.dispatchEvent(new MouseEvent("click"));
 			dataSyncController["viewRegistration"].should.have.been.called;
 		});
 
 		it("should attach an import click event handler", (): void => {
-			importButton.trigger("click");
+			importButton.dispatchEvent(new MouseEvent("click"));
 			dataSyncController["dataImport"].should.have.been.called;
 		});
 
 		it("should attach an export click event handler", (): void => {
-			exportButton.trigger("click");
+			exportButton.dispatchEvent(new MouseEvent("click"));
 			dataSyncController["dataExport"].should.have.been.called;
 		});
 
-		it("should set the initial status message", (): Chai.Assertion => String(localChanges.val()).should.equal("Checking..."));
-		it("should get the last sync time", (): Chai.Assertion => dataSyncController["gotLastSyncTime"].should.have.been.calledWith(lastSyncTime));
+		it("should set the initial status message", (): Chai.Assertion => localChanges.value.should.equal("Checking..."));
+		it("should set the last sync time", (): Chai.Assertion => lastSyncTime.value.should.equal("1-Jan-2010 00:00:00"));
 		it("should get the registered device", (): Chai.Assertion => dataSyncController["gotDevice"].should.have.been.calledWith(device));
 		it("should count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
 
@@ -137,6 +133,7 @@ describe("DataSyncController", (): void => {
 			importButton.remove();
 			exportButton.remove();
 			localChanges.remove();
+			lastSyncTime.remove();
 		});
 	});
 
@@ -154,67 +151,52 @@ describe("DataSyncController", (): void => {
 		});
 	});
 
-	describe("gotLastSyncTime", (): void => {
-		let lastSyncTime: JQuery;
-
-		beforeEach((): JQuery => (lastSyncTime = $("<div>")
-			.attr("id", "lastSyncTime")
-			.hide()
-			.appendTo(document.body)
-		));
-
+	describe("formatLastSyncTime", (): void => {
 		describe("with last sync time", (): void => {
 			it("should display the last sync time", (): void => {
 				const settingValue = "1-Feb-2010 01:02:11";
 
-				dataSyncController["gotLastSyncTime"](new SettingMock(undefined, settingValue));
-				String(lastSyncTime.val()).should.equal(settingValue);
+				dataSyncController["formatLastSyncTime"](new SettingMock(undefined, settingValue)).should.equal(settingValue);
 			});
 		});
 
 		describe("without last sync time", (): void => {
 			it("should display unknown", (): void => {
-				dataSyncController["gotLastSyncTime"](new SettingMock());
-				String(lastSyncTime.val()).should.equal("Unknown");
+				dataSyncController["formatLastSyncTime"](new SettingMock()).should.equal("Unknown");
 			});
 		});
-
-		afterEach((): JQuery => lastSyncTime.remove());
 	});
 
 	describe("gotDevice", (): void => {
-		let deviceName: JQuery,
-				syncControls: JQuery,
-				importChangesOnly: JQuery,
-				importChangesOnlyRow: JQuery,
-				registrationMessage: JQuery;
+		let deviceName: HTMLInputElement,
+				syncControls: HTMLElement,
+				importChangesOnly: HTMLInputElement,
+				importChangesOnlyRow: HTMLDivElement,
+				registrationMessage: HTMLDivElement;
 
 		beforeEach((): void => {
-			deviceName = $("<div>")
-				.attr("id", "deviceName")
-				.hide()
-				.appendTo(document.body);
+			deviceName = document.createElement("input");
+			deviceName.id = "deviceName";
 
-			syncControls = $("<div>")
-				.attr("id", "syncControls")
-				.hide()
-				.appendTo(document.body);
+			syncControls = document.createElement("div");
+			syncControls.id = "syncControls";
+			syncControls.style.display = "none";
 
-			importChangesOnlyRow = $("<div>")
-				.attr("id", "importChangesOnlyRow")
-				.hide()
-				.appendTo(document.body);
+			importChangesOnly = document.createElement("input");
+			importChangesOnly.type = "checkbox";
+			importChangesOnly.id = "importChangesOnly";
+			importChangesOnly.checked = false;
 
-			importChangesOnly = $("<import type='checkbox'>")
-				.attr("id", "importChangesOnly")
-				.prop("checked", false)
-				.hide()
-				.appendTo(importChangesOnlyRow);
+			importChangesOnlyRow = document.createElement("div");
+			importChangesOnlyRow.id = "importChangesOnlyRow";
+			importChangesOnlyRow.style.display = "none";
+			importChangesOnlyRow.append(importChangesOnly);
 
-			registrationMessage = $("<div>")
-				.attr("id", "registrationMessage")
-				.hide()
-				.appendTo(document.body);
+			registrationMessage = document.createElement("div");
+			registrationMessage.id = "registrationMessage";
+			registrationMessage.style.display = "none";
+
+			document.body.append(deviceName, syncControls, importChangesOnlyRow, registrationMessage);
 		});
 
 		describe("with device", (): void => {
@@ -226,11 +208,11 @@ describe("DataSyncController", (): void => {
 				beforeEach((): void => dataSyncController["gotDevice"](new SettingMock(undefined, JSON.stringify(device))));
 
 				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
-				it("should display the device name", (): Chai.Assertion => String(deviceName.val()).should.equal(device.name));
-				it("should show the sync controls", (): Chai.Assertion => syncControls.css("display").should.not.equal("none"));
-				it("should not check the import changes only checkbox", (): Chai.Assertion => Boolean(importChangesOnly.prop("checked")).should.be.false);
-				it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.css("display").should.equal("none"));
-				it("should not show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.equal("none"));
+				it("should display the device name", (): Chai.Assertion => deviceName.value.should.equal(device.name));
+				it("should show the sync controls", (): Chai.Assertion => syncControls.style.display.should.not.equal("none"));
+				it("should not check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.checked.should.be.false);
+				it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.style.display.should.equal("none"));
+				it("should not show the registration message", (): Chai.Assertion => registrationMessage.style.display.should.equal("none"));
 			});
 
 			describe("subsequent import", (): void => {
@@ -240,11 +222,11 @@ describe("DataSyncController", (): void => {
 				});
 
 				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
-				it("should display the device name", (): Chai.Assertion => String(deviceName.val()).should.equal(device.name));
-				it("should show the sync controls", (): Chai.Assertion => syncControls.css("display").should.not.equal("none"));
-				it("should check the import changes only checkbox", (): Chai.Assertion => Boolean(importChangesOnly.prop("checked")).should.be.true);
-				it("should show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.css("display").should.not.equal("none"));
-				it("should not show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.equal("none"));
+				it("should display the device name", (): Chai.Assertion => deviceName.value.should.equal(device.name));
+				it("should show the sync controls", (): Chai.Assertion => syncControls.style.display.should.not.equal("none"));
+				it("should check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.checked.should.be.true);
+				it("should show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.style.display.should.not.equal("none"));
+				it("should not show the registration message", (): Chai.Assertion => registrationMessage.style.display.should.equal("none"));
 			});
 		});
 
@@ -252,11 +234,11 @@ describe("DataSyncController", (): void => {
 			beforeEach((): void => dataSyncController["gotDevice"](new SettingMock()));
 
 			it("should not set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal({ id: "", name: "", imported: false }));
-			it("should display unregistered", (): Chai.Assertion => String(deviceName.val()).should.equal("< Unregistered >"));
-			it("should show the registration message", (): Chai.Assertion => registrationMessage.css("display").should.not.equal("none"));
-			it("should not show the sync controls", (): Chai.Assertion => syncControls.css("display").should.equal("none"));
-			it("should not check the import changes only checkbox", (): Chai.Assertion => Boolean(importChangesOnly.prop("checked")).should.be.false);
-			it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.css("display").should.equal("none"));
+			it("should display unregistered", (): Chai.Assertion => deviceName.value.should.equal("< Unregistered >"));
+			it("should show the registration message", (): Chai.Assertion => registrationMessage.style.display.should.not.equal("none"));
+			it("should not show the sync controls", (): Chai.Assertion => syncControls.style.display.should.equal("none"));
+			it("should not check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.checked.should.be.false);
+			it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.style.display.should.equal("none"));
 		});
 
 		afterEach((): void => {
@@ -268,43 +250,41 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("checkForLocalChanges", (): void => {
-		let localChanges: JQuery,
-				exportButton: JQuery;
+		let localChanges: HTMLInputElement,
+				exportButton: HTMLAnchorElement;
 
 		beforeEach((): void => {
-			localChanges = $("<div>")
-				.attr("id", "localChanges")
-				.hide()
-				.appendTo(document.body);
+			localChanges = document.createElement("input");
+			localChanges.id = "localChanges";
 
-			exportButton = $("<div>")
-				.attr("id", "export")
-				.hide()
-				.appendTo(document.body);
+			exportButton = document.createElement("a");
+			exportButton.id = "export";
+
+			document.body.append(localChanges, exportButton);
 		});
 
 		describe("one change", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](1));
 
-			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["localChanges"].should.be.true);
-			it("should display the number of changes", (): Chai.Assertion => String(localChanges.val()).should.equal("1 change pending"));
-			it("should enable the export button", (): Chai.Assertion => exportButton.hasClass("disabled").should.be.false);
+			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["isLocalChanges"].should.be.true);
+			it("should display the number of changes", (): Chai.Assertion => localChanges.value.should.equal("1 change pending"));
+			it("should enable the export button", (): Chai.Assertion => exportButton.classList.contains("disabled").should.be.false);
 		});
 
 		describe("multiple changes", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](2));
 
-			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["localChanges"].should.be.true);
-			it("should display the number of changes", (): Chai.Assertion => String(localChanges.val()).should.equal("2 changes pending"));
-			it("should enable the export button", (): Chai.Assertion => exportButton.hasClass("disabled").should.be.false);
+			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["isLocalChanges"].should.be.true);
+			it("should display the number of changes", (): Chai.Assertion => localChanges.value.should.equal("2 changes pending"));
+			it("should enable the export button", (): Chai.Assertion => exportButton.classList.contains("disabled").should.be.false);
 		});
 
 		describe("no changes", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](0));
 
-			it("should not set the local changes flag", (): Chai.Assertion => dataSyncController["localChanges"].should.be.false);
-			it("should display no pending changes", (): Chai.Assertion => String(localChanges.val()).should.equal("None pending"));
-			it("should disable the export button", (): Chai.Assertion => exportButton.hasClass("disabled").should.be.true);
+			it("should not set the local changes flag", (): Chai.Assertion => dataSyncController["isLocalChanges"].should.be.false);
+			it("should display no pending changes", (): Chai.Assertion => localChanges.value.should.equal("None pending"));
+			it("should disable the export button", (): Chai.Assertion => exportButton.classList.contains("disabled").should.be.true);
 		});
 
 		afterEach((): void => {
@@ -316,7 +296,7 @@ describe("DataSyncController", (): void => {
 	describe("dataExport", (): void => {
 		describe("with changes", (): void => {
 			it("should start an export", (): void => {
-				dataSyncController["localChanges"] = true;
+				dataSyncController["isLocalChanges"] = true;
 				sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
 				dataSyncController["dataExport"]();
 				dataSyncController["syncStart"].should.have.been.calledWith("Export", "Are you sure you want to export?", sinon.match.func);
@@ -325,7 +305,7 @@ describe("DataSyncController", (): void => {
 
 		describe("no changes", (): void => {
 			it("should not start an export", (): void => {
-				dataSyncController["localChanges"] = false;
+				dataSyncController["isLocalChanges"] = false;
 				sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
 				dataSyncController["dataExport"]();
 				dataSyncController["syncStart"].should.not.have.been.called;
@@ -338,7 +318,7 @@ describe("DataSyncController", (): void => {
 
 		describe("with local changes", (): void => {
 			it("should start an import", (): void => {
-				dataSyncController["localChanges"] = true;
+				dataSyncController["isLocalChanges"] = true;
 				dataSyncController["dataImport"]();
 				dataSyncController["syncStart"].should.have.been.calledWith("Import", "Warning: Local changes have been made. Are you sure you want to import?", sinon.match.func);
 			});
@@ -353,38 +333,39 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("syncStart", (): void => {
-		let status: JQuery;
+		let status: HTMLInputElement;
 
-		beforeEach((): JQuery => (status = $("<div>")
-			.attr("id", "status")
-			.hide()
-			.appendTo(document.body)
-		));
+		beforeEach((): void => {
+			status = document.createElement("input");
+			status.id = "status";
+			document.body.append(status);
+		});
 
 		describe("syncing", (): void => {
 			it("should do nothing", (): void => {
 				dataSyncController["syncing"] = true;
 				dataSyncController["syncStart"]("Import", "", sinon.stub());
-				String(status.val()).should.equal("An import is already running");
+				status.value.should.equal("An import is already running");
 			});
 		});
 
 		describe("not syncing", (): void => {
-			let progress: JQuery,
-					statusRow: JQuery,
+			let progress: HTMLProgressElement,
+					statusRow: HTMLDivElement,
 					callback: SinonStub;
 
 			beforeEach((): void => {
 				sinon.stub(dataSyncController, "syncFinish" as keyof DataSyncController);
 
-				progress = $("<div>")
-					.attr("id", "progress")
-					.appendTo(document.body);
+				progress = document.createElement("progress");
+				progress.id = "progress";
+				progress.style.display = "none";
 
-				statusRow = $("<div>")
-					.attr("id", "statusRow")
-					.hide()
-					.appendTo(document.body);
+				statusRow = document.createElement("div");
+				statusRow.id = "statusRow";
+				statusRow.style.display = "none";
+
+				document.body.append(progress, statusRow);
 
 				callback = sinon.stub();
 			});
@@ -396,10 +377,10 @@ describe("DataSyncController", (): void => {
 				});
 
 				it("should set the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.true);
-				it("should hide the progress", (): Chai.Assertion => progress.css("display").should.equal("none"));
-				it("should set the status", (): Chai.Assertion => String(status.val()).should.equal("Starting import"));
-				it("should show the status", (): Chai.Assertion => status.css("display").should.not.equal("none"));
-				it("should show the status row", (): Chai.Assertion => statusRow.css("display").should.not.equal("none"));
+				it("should hide the progress", (): Chai.Assertion => progress.style.display.should.equal("none"));
+				it("should set the status", (): Chai.Assertion => status.value.should.equal("Starting import"));
+				it("should show the status", (): Chai.Assertion => status.style.display.should.not.equal("none"));
+				it("should show the status row", (): Chai.Assertion => statusRow.style.display.should.not.equal("none"));
 				it("should prompt the user to confirm the operation", (): Chai.Assertion => WindowMock.confirm.should.have.been.calledWith("prompt"));
 				it("should invoke the sync callback", (): Chai.Assertion => callback.should.have.been.called);
 				it("should not finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.not.have.been.called);
@@ -412,12 +393,12 @@ describe("DataSyncController", (): void => {
 				});
 
 				it("should set the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.true);
-				it("should hide the progress", (): Chai.Assertion => progress.css("display").should.equal("none"));
-				it("should show the status", (): Chai.Assertion => status.css("display").should.not.equal("none"));
-				it("should show the status row", (): Chai.Assertion => statusRow.css("display").should.not.equal("none"));
+				it("should hide the progress", (): Chai.Assertion => progress.style.display.should.equal("none"));
+				it("should show the status", (): Chai.Assertion => status.style.display.should.not.equal("none"));
+				it("should show the status row", (): Chai.Assertion => statusRow.style.display.should.not.equal("none"));
 				it("should prompt the user to confirm the operation", (): Chai.Assertion => WindowMock.confirm.should.have.been.calledWith("prompt"));
 				it("should not invoke the sync callback", (): Chai.Assertion => callback.should.not.have.been.called);
-				it("should set the status", (): Chai.Assertion => String(status.val()).should.equal("Import aborted"));
+				it("should set the status", (): Chai.Assertion => status.value.should.equal("Import aborted"));
 				it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", false));
 			});
 
@@ -427,29 +408,24 @@ describe("DataSyncController", (): void => {
 			});
 		});
 
-		afterEach((): JQuery => status.remove());
+		afterEach((): void => status.remove());
 	});
 
 	describe("syncFinish", (): void => {
-		let statusRow: JQuery;
+		let statusRow: HTMLDivElement;
 
-		beforeEach((): JQuery => (statusRow = $("<div>")
-			.attr("id", "statusRow")
-			.appendTo(document.body)
-		));
+		beforeEach((): void => {
+			statusRow = document.createElement("div");
+			statusRow.id = "statusRow";
+			document.body.append(statusRow);
+		});
 
 		describe("successful", (): void => {
 			beforeEach((): void => dataSyncController["syncFinish"]("Import", true));
 
-			it("should hide the status row", (): Chai.Assertion => statusRow.css("display").should.equal("none"));
+			it("should hide the status row", (): Chai.Assertion => statusRow.style.display.should.equal("none"));
 
-			it("should display a notice to the user", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({
-				label: "Database has been successfully imported.",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}));
+			it("should display a notice to the user", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({ label: "Database has been successfully imported." }));
 
 			it("should clear the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.false);
 		});
@@ -457,20 +433,14 @@ describe("DataSyncController", (): void => {
 		describe("not successful", (): void => {
 			beforeEach((): void => dataSyncController["syncFinish"]("Import", false));
 
-			it("should not hide the status row", (): Chai.Assertion => statusRow.css("display").should.not.equal("none"));
+			it("should not hide the status row", (): Chai.Assertion => statusRow.style.display.should.not.equal("none"));
 
-			it("should display a notice to the user", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({
-				label: "Import failed.",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}));
+			it("should display a notice to the user", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({ label: "Import failed." }));
 
 			it("should clear the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.false);
 		});
 
-		afterEach((): JQuery => statusRow.remove());
+		afterEach((): void => statusRow.remove());
 	});
 
 	describe("doExport", (): void => {
@@ -484,22 +454,22 @@ describe("DataSyncController", (): void => {
 
 	describe("listRetrieved", (): void => {
 		let syncList: SyncMock[],
-				status: JQuery,
-				progress: JQuery,
+				status: HTMLInputElement,
+				progress: HTMLProgressElement,
 				sendChangeStub: SinonStub,
 				sendDeleteStub: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			status = $("<div>")
-				.attr("id", "status")
-				.appendTo(document.body);
+			status = document.createElement("input");
+			status.id = "status";
 
-			progress = $("<progress>")
-				.attr("id", "progress")
-				.attr("max", 10)
-				.val(5)
-				.hide()
-				.appendTo(document.body);
+			progress = document.createElement("progress");
+			progress.id = "progress";
+			progress.max = 10;
+			progress.value = 5;
+			progress.style.display = "none";
+
+			document.body.append(status, progress);
 
 			syncList = [
 				new SyncMock(null, null, "modified"),
@@ -511,17 +481,17 @@ describe("DataSyncController", (): void => {
 			sendChangeStub = sinon.stub(dataSyncController, "sendChange" as keyof DataSyncController);
 			sendDeleteStub = sinon.stub(dataSyncController, "sendDelete" as keyof DataSyncController);
 			dataSyncController["syncProcessed"] = 1;
-			dataSyncController["syncErrors"] = [$("<li>")];
+			dataSyncController["errors"] = [document.createElement("li")];
 			await dataSyncController["listRetrieved"](syncList);
 		});
 
 		it("should reset the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(0));
-		it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
+		it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
 		it("should set the list of changes to be sync", (): Chai.Assertion => dataSyncController["syncList"].should.equal(syncList));
-		it("should hide the status", (): Chai.Assertion => status.css("display").should.equal("none"));
-		it("should reset the progress", (): Chai.Assertion => Number(progress.val()).should.equal(0));
-		it("should set the progress total", (): Chai.Assertion => String(progress.attr("max")).should.equal("4"));
-		it("should show the progress", (): Chai.Assertion => progress.css("display").should.not.equal("none"));
+		it("should hide the status", (): Chai.Assertion => status.style.display.should.equal("none"));
+		it("should reset the progress", (): Chai.Assertion => progress.value.should.equal(0));
+		it("should set the progress total", (): Chai.Assertion => progress.max.should.equal(4));
+		it("should show the progress", (): Chai.Assertion => progress.style.display.should.not.equal("none"));
 
 		it("should send any changes", (): void => {
 			sendChangeStub.callCount.should.equal(2);
@@ -742,19 +712,18 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("changeSent", (): void => {
-		let progress: JQuery,
-				syncErrors: JQuery;
+		let progress: HTMLProgressElement,
+				syncErrors: HTMLElement;
 
 		beforeEach((): void => {
-			progress = $("<progress>")
-				.attr("id", "progress")
-				.attr("max", 3)
-				.hide()
-				.appendTo(document.body);
+			progress = document.createElement("progress");
+			progress.id = "progress";
+			progress.max = 3;
 
-			syncErrors = $("<div>")
-				.attr("id", "syncErrors")
-				.appendTo(document.body);
+			syncErrors = document.createElement("section");
+			syncErrors.id = "syncErrors";
+
+			document.body.append(progress, syncErrors);
 
 			sinon.stub(dataSyncController, "setLastSyncTime" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "checkForLocalChanges" as keyof DataSyncController);
@@ -773,7 +742,7 @@ describe("DataSyncController", (): void => {
 			});
 
 			it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
-			it("should update the progress", (): Chai.Assertion => Number(progress.val()).should.equal(1));
+			it("should update the progress", (): Chai.Assertion => progress.value.should.equal(1));
 			it("should not update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.not.have.been.called);
 			it("should not count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.not.have.been.called);
 			it("should not finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.not.have.been.called);
@@ -788,30 +757,30 @@ describe("DataSyncController", (): void => {
 
 			describe("without errors", (): void => {
 				beforeEach(async (): Promise<void> => {
-					dataSyncController["syncErrors"] = [];
+					dataSyncController["errors"] = [];
 					await dataSyncController["changeSent"]();
 				});
 
 				it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
-				it("should update the progress", (): Chai.Assertion => Number(progress.val()).should.equal(1));
+				it("should update the progress", (): Chai.Assertion => progress.value.should.equal(1));
 				it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);
 				it("should count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
-				it("should hide the sync errors", (): Chai.Assertion => syncErrors.css("display").should.equal("none"));
+				it("should hide the sync errors", (): Chai.Assertion => syncErrors.style.display.should.equal("none"));
 				it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Export", true));
 				it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
 			});
 
 			describe("with errors", (): void => {
 				beforeEach(async (): Promise<void> => {
-					dataSyncController["syncErrors"] = [$("<li>")];
+					dataSyncController["errors"] = [document.createElement("li")];
 					await dataSyncController["changeSent"]();
 				});
 
 				it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
-				it("should update the progress", (): Chai.Assertion => Number(progress.val()).should.equal(1));
+				it("should update the progress", (): Chai.Assertion => progress.value.should.equal(1));
 				it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);
 				it("should count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
-				it("should not hide the sync errors", (): Chai.Assertion => syncErrors.css("display").should.not.equal("none"));
+				it("should not hide the sync errors", (): Chai.Assertion => syncErrors.style.display.should.not.equal("none"));
 				it("should not finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.not.have.been.called);
 				it("should show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Export"));
 			});
@@ -824,34 +793,37 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("setLastSyncTime", (): void => {
-		let lastSyncTime: Date;
+		let lastSyncTime: HTMLInputElement;
 
 		beforeEach(async (): Promise<void> => {
 			const clock: SinonFakeTimers = sinon.useFakeTimers();
 
-			lastSyncTime = new Date();
-			sinon.stub(dataSyncController, "gotLastSyncTime" as keyof DataSyncController);
+			lastSyncTime = document.createElement("input");
+			lastSyncTime.id = "lastSyncTime";
+
+			document.body.append(lastSyncTime);
+
+			clock.setSystemTime(new Date("2 Jan 2010"));
 			await dataSyncController["setLastSyncTime"]();
 			clock.restore();
 		});
 
 		it("should save the last sync time", (): Chai.Assertion => SettingMock.prototype.save.should.have.been.called);
 
-		it("should display the last sync time", (): Chai.Assertion => dataSyncController["gotLastSyncTime"].should.have.been.calledWith(sinon.match({
-			settingName: "LastSyncTime",
-			settingValue: String(lastSyncTime)
-		})));
+		it("should format the last sync time", (): Chai.Assertion => lastSyncTime.value.should.equal("2-Jan-2010 00:00:00"));
+
+		afterEach((): void => lastSyncTime.remove());
 	});
 
 	describe("doImport", (): void => {
-		let importChangesOnly: JQuery,
+		let importChangesOnly: HTMLInputElement,
 				syncErrorStub: SinonStub;
 
 		beforeEach((): void => {
-			importChangesOnly = $("<input type='checkbox'>")
-				.attr("id", "importChangesOnly")
-				.hide()
-				.appendTo(document.body);
+			importChangesOnly = document.createElement("input");
+			importChangesOnly.type = "checkbox";
+			importChangesOnly.id = "importChangesOnly";
+			document.body.append(importChangesOnly);
 
 			sinon.stub(dataSyncController, "importData" as keyof DataSyncController);
 			syncErrorStub = sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
@@ -860,19 +832,19 @@ describe("DataSyncController", (): void => {
 
 		describe("fast import", (): void => {
 			beforeEach(async (): Promise<void> => {
-				importChangesOnly.prop("checked", true);
+				importChangesOnly.checked = true;
 				await dataSyncController["doImport"]();
 			});
 
-			it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
-			it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["importChangesOnly"].should.be.true);
+			it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
+			it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["onlyImportChanges"].should.be.true);
 			it("should start the import", (): Chai.Assertion => dataSyncController["importData"].should.have.been.calledOnce);
 			it("should not add any errors to the errors list", (): Chai.Assertion => syncErrorStub.should.not.have.been.called);
 			it("should not mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.not.have.been.called);
 		});
 
 		describe("full import", (): void => {
-			beforeEach((): JQuery => importChangesOnly.prop("checked", false));
+			beforeEach((): boolean => (importChangesOnly.checked = false));
 
 			describe("with errors", (): void => {
 				beforeEach(async (): Promise<void> => {
@@ -882,8 +854,8 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["doImport"]();
 				});
 
-				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
-				it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["importChangesOnly"].should.be.false);
+				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
+				it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["onlyImportChanges"].should.be.false);
 				it("should attempt to delete all existing programs", (): Chai.Assertion => ProgramMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing series", (): Chai.Assertion => SeriesMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing episodes", (): Chai.Assertion => EpisodeMock.removeAll.should.have.been.called);
@@ -906,8 +878,8 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["doImport"]();
 				});
 
-				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["syncErrors"].should.be.empty);
-				it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["importChangesOnly"].should.be.false);
+				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
+				it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["onlyImportChanges"].should.be.false);
 				it("should attempt to delete all existing programs", (): Chai.Assertion => ProgramMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing series", (): Chai.Assertion => SeriesMock.removeAll.should.have.been.called);
 				it("should attempt to delete all existing episodes", (): Chai.Assertion => EpisodeMock.removeAll.should.have.been.called);
@@ -942,10 +914,16 @@ describe("DataSyncController", (): void => {
 			}
 		];
 
-		let fakeFetch: SinonStub,
+		let importChangesOnly: HTMLInputElement,
+				fakeFetch: SinonStub,
 				fetchArgs: RequestInit;
 
 		beforeEach((): void => {
+			importChangesOnly = document.createElement("input");
+			importChangesOnly.type = "checkbox";
+			importChangesOnly.id = "importChangesOnly";
+			document.body.append(importChangesOnly);
+
 			dataSyncController["objectsToImport"] = 1;
 			dataSyncController["objectsImported"] = 1;
 			fakeFetch = sinon.stub(window, "fetch");
@@ -962,13 +940,13 @@ describe("DataSyncController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach((): boolean => (dataSyncController["importChangesOnly"] = scenario.importChangesOnly));
+				beforeEach((): boolean => (importChangesOnly.checked = scenario.importChangesOnly));
 
 				describe("success", (): void => {
 					describe("hash match", (): void => {
 						describe("with data", (): void => {
-							let status: JQuery,
-									progress: JQuery;
+							let status: HTMLInputElement,
+									progress: HTMLProgressElement;
 
 							beforeEach(async (): Promise<void> => {
 								fakeFetch.withArgs(`/documents/${scenario.resource}`, fetchArgs).returns(Promise.resolve(new Response(JSON.stringify({ data: [{}, {}], checksum: "test-hash" }), {
@@ -979,15 +957,14 @@ describe("DataSyncController", (): void => {
 									}
 								})));
 
-								status = $("<div>")
-									.attr("id", "status")
-									.hide()
-									.appendTo(document.body);
+								status = document.createElement("input");
+								status.id = "status";
 
-								progress = $("<progress>")
-									.attr("id", "progress")
-									.hide()
-									.appendTo(document.body);
+								progress = document.createElement("progress");
+								progress.id = "progress";
+								progress.style.display = "none";
+
+								document.body.append(status, progress);
 
 								sinon.stub(dataSyncController, "importObject" as keyof DataSyncController);
 								await dataSyncController["importData"]();
@@ -995,10 +972,10 @@ describe("DataSyncController", (): void => {
 
 							it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
 							it("should set the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(2));
-							it("should hide the status", (): Chai.Assertion => status.css("display").should.equal("none"));
-							it("should reset the progress", (): Chai.Assertion => Number(progress.val()).should.equal(0));
-							it("should set the progress total", (): Chai.Assertion => String(progress.attr("max")).should.equal("2"));
-							it("should show the progress", (): Chai.Assertion => progress.css("display").should.not.equal("none"));
+							it("should hide the status", (): Chai.Assertion => status.style.display.should.equal("none"));
+							it("should reset the progress", (): Chai.Assertion => progress.value.should.equal(0));
+							it("should set the progress total", (): Chai.Assertion => progress.max.should.equal(2));
+							it("should show the progress", (): Chai.Assertion => progress.style.display.should.not.equal("none"));
 							it("should process each object to import", (): Chai.Assertion => dataSyncController["importObject"].should.have.been.calledTwice);
 
 							afterEach((): void => {
@@ -1071,7 +1048,10 @@ describe("DataSyncController", (): void => {
 			});
 		});
 
-		afterEach((): void => fakeFetch.restore());
+		afterEach((): void => {
+			importChangesOnly.remove();
+			fakeFetch.restore();
+		});
 	});
 
 	describe("getImportData", (): void => {
@@ -1107,15 +1087,23 @@ describe("DataSyncController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				let result: ImportData;
+				let result: ImportData,
+						importChangesOnly: HTMLInputElement;
 
 				beforeEach((): void => {
-					dataSyncController["importChangesOnly"] = scenario.importChangesOnly;
+					importChangesOnly = document.createElement("input");
+					importChangesOnly.type = "checkbox";
+					importChangesOnly.id = "importChangesOnly";
+					document.body.append(importChangesOnly);
+
+					importChangesOnly.checked = scenario.importChangesOnly;
 					result = dataSyncController["getImportData"](scenario.importData, scenario.eTag);
 				});
 
 				it("should return the object JSON", (): Chai.Assertion => result.importJson.should.deep.equal(data));
 				it("should return the checksum", (): Chai.Assertion => result.returnedHash.should.equal(checksum));
+
+				afterEach((): void => importChangesOnly.remove());
 			});
 		});
 	});
@@ -1217,7 +1205,14 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("objectSaved", (): void => {
+		let importChangesOnly: HTMLInputElement;
+
 		beforeEach((): void => {
+			importChangesOnly = document.createElement("input");
+			importChangesOnly.type = "checkbox";
+			importChangesOnly.id = "importChangesOnly";
+			document.body.append(importChangesOnly);
+
 			sinon.stub(dataSyncController, "dataImported" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "removePending" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
@@ -1228,7 +1223,7 @@ describe("DataSyncController", (): void => {
 			describe("pending", (): void => {
 				describe("fast import", (): void => {
 					beforeEach(async (): Promise<void> => {
-						dataSyncController["importChangesOnly"] = true;
+						importChangesOnly.checked = true;
 						await dataSyncController["objectSaved"]("1", "Program", true);
 					});
 
@@ -1240,7 +1235,7 @@ describe("DataSyncController", (): void => {
 
 				describe("full import", (): void => {
 					beforeEach(async (): Promise<void> => {
-						dataSyncController["importChangesOnly"] = false;
+						importChangesOnly.checked = false;
 						await dataSyncController["objectSaved"]("1", "Program", true);
 					});
 
@@ -1254,7 +1249,7 @@ describe("DataSyncController", (): void => {
 			describe("not pending", (): void => {
 				describe("fast import", (): void => {
 					beforeEach(async (): Promise<void> => {
-						dataSyncController["importChangesOnly"] = true;
+						importChangesOnly.checked = true;
 						await dataSyncController["objectSaved"]("1", "Program", false);
 					});
 
@@ -1266,7 +1261,7 @@ describe("DataSyncController", (): void => {
 
 				describe("full import", (): void => {
 					beforeEach(async (): Promise<void> => {
-						dataSyncController["importChangesOnly"] = false;
+						importChangesOnly.checked = false;
 						await dataSyncController["objectSaved"]("1", "Program", false);
 					});
 
@@ -1294,6 +1289,8 @@ describe("DataSyncController", (): void => {
 			it("should not return early", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
 			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Save error", "Program", "Error saving program"));
 		});
+
+		afterEach((): void => importChangesOnly.remove());
 	});
 
 	describe("removePending", (): void => {
@@ -1348,15 +1345,14 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("dataImported", (): void => {
-		let progress: JQuery;
+		let progress: HTMLProgressElement;
 
 		beforeEach((): void => {
 			sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
 
-			progress = $("<progress>")
-				.attr("id", "progress")
-				.hide()
-				.appendTo(document.body);
+			progress = document.createElement("progress");
+			progress.id = "progress";
+			document.body.append(progress);
 
 			dataSyncController["objectsToImport"] = 2;
 		});
@@ -1368,23 +1364,23 @@ describe("DataSyncController", (): void => {
 			});
 
 			it("should increment the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(1));
-			it("should update the import progress", (): Chai.Assertion => Number(progress.val()).should.equal(1));
+			it("should update the import progress", (): Chai.Assertion => progress.value.should.equal(1));
 			it("should not finalise the import", (): Chai.Assertion => dataSyncController["importDone"].should.not.have.been.called);
 		});
 
 		describe("finished", (): void => {
 			beforeEach(async (): Promise<void> => {
 				dataSyncController["objectsImported"] = 1;
-				progress.attr("max", 3);
+				progress.max = 3;
 				await dataSyncController["dataImported"]();
 			});
 
 			it("should increment the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(2));
-			it("should update the import progress", (): Chai.Assertion => Number(progress.val()).should.equal(2));
+			it("should update the import progress", (): Chai.Assertion => progress.value.should.equal(2));
 			it("should not finalise the import", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
 		});
 
-		afterEach((): JQuery => progress.remove());
+		afterEach((): void => progress.remove());
 	});
 
 	describe("importDone", (): void => {
@@ -1395,7 +1391,7 @@ describe("DataSyncController", (): void => {
 
 		describe("with errors", (): void => {
 			beforeEach(async (): Promise<void> => {
-				dataSyncController["syncErrors"] = [$("<li>")];
+				dataSyncController["errors"] = [document.createElement("li")];
 				await dataSyncController["importDone"]();
 			});
 
@@ -1405,11 +1401,20 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("without errors", (): void => {
-			beforeEach((): JQuery[] => (dataSyncController["syncErrors"] = []));
+			let importChangesOnly: HTMLInputElement;
+
+			beforeEach((): void => {
+				importChangesOnly = document.createElement("input");
+				importChangesOnly.type = "checkbox";
+				importChangesOnly.id = "importChangesOnly";
+				document.body.append(importChangesOnly);
+
+				dataSyncController["errors"] = [];
+			});
 
 			describe("fast import", (): void => {
 				beforeEach(async (): Promise<void> => {
-					dataSyncController["importChangesOnly"] = true;
+					importChangesOnly.checked = true;
 					await dataSyncController["importDone"]();
 				});
 
@@ -1419,7 +1424,7 @@ describe("DataSyncController", (): void => {
 			});
 
 			describe("full import", (): void => {
-				beforeEach((): boolean => (dataSyncController["importChangesOnly"] = false));
+				beforeEach((): boolean => (importChangesOnly.checked = false));
 
 				describe("initial import", (): void => {
 					beforeEach(async (): Promise<void> => {
@@ -1449,6 +1454,8 @@ describe("DataSyncController", (): void => {
 					it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
 				});
 			});
+
+			afterEach((): void => importChangesOnly.remove());
 		});
 	});
 
@@ -1477,7 +1484,7 @@ describe("DataSyncController", (): void => {
 	});
 
 	describe("importSuccessful", (): void => {
-		let syncErrors: JQuery;
+		let syncErrors: HTMLElement;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(dataSyncController, "setLastSyncTime" as keyof DataSyncController);
@@ -1485,74 +1492,82 @@ describe("DataSyncController", (): void => {
 			sinon.stub(dataSyncController, "syncFinish" as keyof DataSyncController);
 			SyncMock.syncList = [new SyncMock(null, null)];
 
-			syncErrors = $("<div>")
-				.attr("id", "syncErrors")
-				.appendTo(document.body);
+			syncErrors = document.createElement("section");
+			syncErrors.id = "syncErrors";
+			document.body.append(syncErrors);
 
 			await dataSyncController["importSuccessful"]();
 		});
 
 		it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);
 		it("should update the number of local changes to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
-		it("should hide the errors container", (): Chai.Assertion => syncErrors.css("display").should.equal("none"));
+		it("should hide the errors container", (): Chai.Assertion => syncErrors.style.display.should.equal("none"));
 		it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", true));
 
-		afterEach((): JQuery => syncErrors.remove());
+		afterEach((): void => syncErrors.remove());
 	});
 
 	describe("syncError", (): void => {
-		beforeEach((): JQuery[] => (dataSyncController["syncErrors"] = []));
+		beforeEach((): HTMLLIElement[] => (dataSyncController["errors"] = []));
 
 		describe("with id", (): void => {
 			it("should append the error to the list", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message", "id");
-				const error: JQuery = dataSyncController["syncErrors"].pop() as JQuery;
+				const error = dataSyncController["errors"].pop() as HTMLLIElement;
 
-				String(error.prop("tagName")).should.equal("LI");
-				error.html().should.equal("Send error<br>Type: Program id<br>message");
+				error.tagName.should.equal("LI");
+				error.innerHTML.should.equal("Send error<br>Type: Program id<br>message");
 			});
 		});
 
 		describe("without id", (): void => {
 			it("should append the error to the list", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message");
-				const error: JQuery = dataSyncController["syncErrors"].pop() as JQuery;
+				const error = dataSyncController["errors"].pop() as HTMLLIElement;
 
-				String(error.prop("tagName")).should.equal("LI");
-				error.html().should.equal("Send error<br>Type: Program<br>message");
+				error.tagName.should.equal("LI");
+				error.innerHTML.should.equal("Send error<br>Type: Program<br>message");
 			});
 		});
 	});
 
 	describe("showErrors", (): void => {
-		let syncErrors: JQuery,
-				errorList: JQuery;
+		let syncErrors: HTMLElement,
+				errorList: HTMLUListElement;
 
 		beforeEach((): void => {
-			syncErrors = $("<div>")
-				.attr("id", "syncErrors")
-				.hide()
-				.appendTo(document.body);
+			const oldError = document.createElement("li"),
+						newError = document.createElement("li");
 
-			errorList = $("<div>")
-				.attr("id", "errorList")
-				.append($("<div>").attr("id", "oldError"))
-				.css("position", "absolute")
-				.offset({ top: 20 })
-				.appendTo(syncErrors);
+			oldError.id = "oldError";
+			newError.id = "newError";
+
+			errorList = document.createElement("ul");
+			errorList.id = "errorList";
+			errorList.append(oldError);
+			errorList.style.position = "absolute";
+			errorList.style.margin = "0px";
+			errorList.style.top = "20px";
+
+			syncErrors = document.createElement("section");
+			syncErrors.id = "syncErrors";
+			syncErrors.style.display = "none";
+			syncErrors.append(errorList);
+
+			document.body.append(syncErrors);
 
 			sinon.stub(dataSyncController, "syncFinish" as keyof DataSyncController);
-			dataSyncController["syncErrors"] = [$("<li>").attr("id", "newError")];
+			dataSyncController["errors"] = [newError];
 			WindowMock.innerHeight = 50;
 			dataSyncController["showErrors"]("Import");
 		});
 
-		it("should clear any old errors", (): Chai.Assertion => errorList.children("#oldError").length.should.equal(0));
-		it("should add any new errors", (): Chai.Assertion => errorList.children("#newError").length.should.equal(1));
-		it("should display the errors container", (): Chai.Assertion => syncErrors.css("display").should.not.equal("none"));
-		it("should update the list height", (): Chai.Assertion => Number(errorList.height()).should.equal(20));
+		it("should clear any old errors", (): Chai.Assertion => (null === errorList.querySelector("#oldError")).should.be.true);
+		it("should add any new errors", (): Chai.Assertion => (null === errorList.querySelector("#newError")).should.be.false);
+		it("should display the errors container", (): Chai.Assertion => syncErrors.style.display.should.not.equal("none"));
+		it("should update the list height", (): Chai.Assertion => errorList.offsetHeight.should.equal(20));
 		it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", false));
 
-		afterEach((): JQuery => syncErrors.remove());
+		afterEach((): void => syncErrors.remove());
 	});
 });

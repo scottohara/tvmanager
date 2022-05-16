@@ -4,7 +4,6 @@ import type {
 	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import type { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
@@ -20,7 +19,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 describe("SeriesListController", (): void => {
 	let listItem: ProgramListItem,
 			items: SeriesMock[],
-			seriesList: JQuery,
+			seriesList: HTMLUListElement,
 			seriesListController: SeriesListController;
 
 	beforeEach((): void => {
@@ -30,9 +29,9 @@ describe("SeriesListController", (): void => {
 			new SeriesMock("2", "z-test-series", null, "1", undefined, 3, 1, 1, 1)
 		];
 
-		seriesList = $("<ul>")
-			.attr("id", "list")
-			.appendTo(document.body);
+		seriesList = document.createElement("ul");
+		seriesList.id = "list";
+		document.body.append(seriesList);
 
 		seriesListController = new SeriesListController(listItem);
 	});
@@ -118,20 +117,20 @@ describe("SeriesListController", (): void => {
 		beforeEach((): ListMock => (seriesListController["seriesList"] = new ListMock("", "", "", [])));
 
 		describe("with active list item", (): void => {
-			let item: JQuery;
+			let item: HTMLLIElement;
 
 			beforeEach((): void => {
 				seriesListController["activeListItem"] = new SeriesMock("1", "", null, "1");
-				item = $("<li>")
-					.attr("id", "1")
-					.appendTo(document.body);
+				item = document.createElement("li");
+				item.id = "item-1";
+				seriesList.append(item);
 
 				seriesListController.contentShown();
 			});
 
 			it("should scroll the list", (): Chai.Assertion => seriesListController["seriesList"].scrollTo.should.have.been.calledWith("1"));
 
-			afterEach((): JQuery => item.remove());
+			afterEach((): void => item.remove());
 		});
 
 		describe("with active list item that no longer exists", (): void => {
@@ -262,8 +261,8 @@ describe("SeriesListController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			seriesList.hasClass("delete").should.be.true;
-			seriesList.hasClass("edit").should.be.false;
+			seriesList.classList.contains("delete").should.be.true;
+			seriesList.classList.contains("edit").should.be.false;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -295,8 +294,8 @@ describe("SeriesListController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			seriesList.hasClass("delete").should.be.false;
-			seriesList.hasClass("edit").should.be.true;
+			seriesList.classList.contains("delete").should.be.false;
+			seriesList.classList.contains("edit").should.be.true;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -331,8 +330,8 @@ describe("SeriesListController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			seriesList.hasClass("delete").should.be.false;
-			seriesList.hasClass("edit").should.be.false;
+			seriesList.classList.contains("delete").should.be.false;
+			seriesList.classList.contains("edit").should.be.false;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -354,5 +353,5 @@ describe("SeriesListController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery => seriesList.remove());
+	afterEach((): void => seriesList.remove());
 });

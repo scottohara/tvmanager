@@ -1,5 +1,4 @@
 import "stylesheets/default.css";
-import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import window from "components/window";
 
@@ -11,4 +10,4 @@ if ("serviceWorker" in window.navigator) {
 const appController: ApplicationController = new ApplicationController();
 
 // Start the application
-appController.start().catch((error: Error): JQuery => $("#content").text(error.message));
+appController.start().catch((error: Error): string => ((document.querySelector("#content") as HTMLDivElement).textContent = error.message));

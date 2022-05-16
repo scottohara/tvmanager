@@ -3,7 +3,6 @@ import type {
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import ProgramMock from "mocks/program-model-mock";
 import SeriesController from "controllers/series-controller";
@@ -63,9 +62,9 @@ describe("SeriesController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let seriesName: JQuery,
-				nowShowing: JQuery,
-				moveTo: JQuery,
+		let seriesName: HTMLInputElement,
+				nowShowing: HTMLSelectElement,
+				moveTo: HTMLSelectElement,
 				leftButton: NavButton,
 				rightButton: NavButton,
 				programs: [string, string][],
@@ -75,24 +74,21 @@ describe("SeriesController", (): void => {
 			sinon.stub(seriesController, "cancel" as keyof SeriesController);
 			sinon.stub(seriesController, "save" as keyof SeriesController);
 
-			seriesName = $("<input>")
-				.attr("id", "seriesName")
-				.appendTo(document.body);
+			seriesName = document.createElement("input");
+			seriesName.id = "seriesName";
 
-			nowShowing = $("<select>")
-				.attr("id", "nowShowing")
-				.appendTo(document.body);
+			nowShowing = document.createElement("select");
+			nowShowing.id = "nowShowing";
 
-			$("<option>")
-				.appendTo(nowShowing);
+			const option = document.createElement("option");
 
-			$("<option>")
-				.val(String(listItem.series.nowShowing))
-				.appendTo(nowShowing);
+			option.value = String(listItem.series.nowShowing);
+			nowShowing.append(document.createElement("option"), option);
 
-			moveTo = $("<select>")
-				.attr("id", "moveTo")
-				.appendTo(document.body);
+			moveTo = document.createElement("select");
+			moveTo.id = "moveTo";
+
+			document.body.append(seriesName, nowShowing, moveTo);
 
 			programs = [
 				["1", "program 1"],
@@ -124,14 +120,14 @@ describe("SeriesController", (): void => {
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
 
-		it("should populate the move to select with a list of programs", (): JQuery => moveTo.children("option").each((index: number, option: HTMLOptionElement): void => {
-			String($(option).val()).should.equal(programs[index][0]);
-			$(option).text().should.equal(programs[index][1]);
+		it("should populate the move to select with a list of programs", (): void => moveTo.querySelectorAll("option").forEach((option: HTMLOptionElement, index: number): void => {
+			option.value.should.equal(programs[index][0]);
+			String(option.textContent).should.equal(programs[index][1]);
 		}));
 
-		it("should set the series name", (): Chai.Assertion => String(seriesName.val()).should.equal(listItem.series.seriesName));
-		it("should set the now showing", (): Chai.Assertion => Number(nowShowing.val()).should.equal(listItem.series.nowShowing));
-		it("should set the current program", (): Chai.Assertion => String(moveTo.val()).should.equal(listItem.series.programId));
+		it("should set the series name", (): Chai.Assertion => seriesName.value.should.equal(listItem.series.seriesName));
+		it("should set the now showing", (): Chai.Assertion => Number(nowShowing.value).should.equal(listItem.series.nowShowing));
+		it("should set the current program", (): Chai.Assertion => moveTo.value.should.equal(listItem.series.programId));
 
 		describe("not showing", (): void => {
 			beforeEach(async (): Promise<void> => {
@@ -139,7 +135,7 @@ describe("SeriesController", (): void => {
 				await seriesController.setup();
 			});
 
-			it("should not set the now showing", (): Chai.Assertion => String(nowShowing.val()).should.equal(""));
+			it("should not set the now showing", (): Chai.Assertion => nowShowing.value.should.equal(""));
 		});
 
 		afterEach((): void => {
@@ -150,15 +146,15 @@ describe("SeriesController", (): void => {
 	});
 
 	describe("contentShown", (): void => {
-		let seriesName: JQuery,
+		let seriesName: HTMLInputElement,
 				select: SinonStub;
 
 		beforeEach((): void => {
-			seriesName = $("<input>")
-				.attr("id", "seriesName")
-				.appendTo(document.body);
+			seriesName = document.createElement("input");
+			seriesName.id = "seriesName";
+			document.body.append(seriesName);
 
-			select = sinon.stub($.fn, "select");
+			select = sinon.stub(seriesName, "select");
 		});
 
 		describe("adding series", (): void => {
@@ -185,42 +181,37 @@ describe("SeriesController", (): void => {
 		let seriesName: string,
 				nowShowing: number,
 				programId: string,
-				seriesNameInput: JQuery,
-				nowShowingSelect: JQuery,
-				moveToSelect: JQuery;
+				seriesNameInput: HTMLInputElement,
+				nowShowingSelect: HTMLSelectElement,
+				moveToSelect: HTMLSelectElement;
 
 		beforeEach((): void => {
 			seriesName = "test-series-2";
 			nowShowing = 2;
 			programId = "2";
 
-			seriesNameInput = $("<input>")
-				.attr("id", "seriesName")
-				.val(seriesName)
-				.appendTo(document.body);
+			seriesNameInput = document.createElement("input");
+			seriesNameInput.id = "seriesName";
+			seriesNameInput.value = seriesName;
 
-			nowShowingSelect = $("<select>")
-				.attr("id", "nowShowing")
-				.appendTo(document.body);
+			const nowShowingOption = document.createElement("option"),
+						moveToOption1 = document.createElement("option"),
+						moveToOption2 = document.createElement("option");
 
-			$("<option>")
-				.val(String(nowShowing))
-				.appendTo(nowShowingSelect);
+			nowShowingSelect = document.createElement("select");
+			nowShowingSelect.id = "nowShowing";
+			nowShowingOption.value = String(nowShowing);
+			nowShowingSelect.append(nowShowingOption);
+			nowShowingSelect.value = String(nowShowing);
 
-			nowShowingSelect.val(String(nowShowing));
+			moveToSelect = document.createElement("select");
+			moveToSelect.id = "moveTo";
+			moveToOption1.value = "1";
+			moveToOption2.value = "2";
+			moveToSelect.append(moveToOption1, moveToOption2);
+			moveToSelect.value = programId;
 
-			moveToSelect = $("<select>")
-				.attr("id", "moveTo")
-				.appendTo(document.body);
-
-			$("<option>")
-				.val("1")
-				.appendTo(moveToSelect);
-			$("<option>")
-				.val("2")
-				.appendTo(moveToSelect);
-
-			moveToSelect.val(programId);
+			document.body.append(seriesNameInput, nowShowingSelect, moveToSelect);
 		});
 
 		describe("now showing", (): void => {
@@ -235,7 +226,7 @@ describe("SeriesController", (): void => {
 
 		describe("not showing", (): void => {
 			beforeEach(async (): Promise<void> => {
-				nowShowingSelect.val("");
+				nowShowingSelect.value = "";
 				await seriesController["save"]();
 			});
 

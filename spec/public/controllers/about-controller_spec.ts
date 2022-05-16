@@ -2,7 +2,6 @@ import type {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import $ from "jquery";
 import AboutController from "../../../src/controllers/about-controller";
 import AboutView from "views/about-view.html";
 import ApplicationControllerMock from "mocks/application-controller-mock";
@@ -12,7 +11,7 @@ import SeriesMock from "mocks/series-model-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("AboutController", (): void => {
 	let aboutController: AboutController;
@@ -28,18 +27,25 @@ describe("AboutController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let databaseVersion: JQuery,
+		let databaseVersion: HTMLInputElement,
+				totalPrograms: HTMLInputElement,
+				totalSeries: HTMLInputElement,
+				totalEpisodes: HTMLInputElement,
 				leftButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			databaseVersion = $("<input>").attr("id", "databaseVersion");
+			databaseVersion = document.createElement("input");
+			databaseVersion.id = "databaseVersion";
+			totalPrograms = document.createElement("input");
+			totalPrograms.id = "totalPrograms";
+			totalSeries = document.createElement("input");
+			totalSeries.id = "totalSeries";
+			totalEpisodes = document.createElement("input");
+			totalEpisodes.id = "totalEpisodes";
 
 			sinon.stub(aboutController, "goBack" as keyof AboutController);
-			sinon.stub(aboutController, "programCount" as keyof AboutController);
-			sinon.stub(aboutController, "seriesCount" as keyof AboutController);
-			sinon.stub(aboutController, "episodeCount" as keyof AboutController);
 
-			$(document.body).append(databaseVersion);
+			document.body.append(databaseVersion, totalPrograms, totalSeries, totalEpisodes);
 			await aboutController.setup();
 			leftButton = aboutController.header.leftButton as NavButton;
 		});
@@ -54,25 +60,31 @@ describe("AboutController", (): void => {
 		it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
 		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Settings"));
 
-		it("should get the total number of programs", (): void => {
+		it("should set the total number of programs", (): void => {
 			ProgramMock.count.should.have.been.called;
-			aboutController["programCount"].should.have.been.calledWith(1);
+			totalPrograms.value.should.equal("1");
 		});
 
 		it("should get the total number of series", (): void => {
 			SeriesMock.count.should.have.been.called;
-			aboutController["seriesCount"].should.have.been.calledWith(1);
+			totalSeries.value.should.equal("1");
 		});
 
 		it("should get the total number of episodes", (): void => {
 			EpisodeMock.totalCount.should.have.been.called;
-			aboutController["episodeCount"].should.have.been.calledWith(1);
+			EpisodeMock.countByStatus.should.have.been.calledWith("Watched");
+			totalEpisodes.value.should.equal("1 (100.00% watched)");
 		});
 
-		it("should set the database version", (): Chai.Assertion => String(databaseVersion.val()).should.equal("v1"));
+		it("should set the database version", (): Chai.Assertion => databaseVersion.value.should.equal("v1"));
 		it("should set the scroll position", (): Chai.Assertion => appController.setScrollPosition.should.have.been.called);
 
-		afterEach((): JQuery => databaseVersion.remove());
+		afterEach((): void => {
+			databaseVersion.remove();
+			totalPrograms.remove();
+			totalSeries.remove();
+			totalEpisodes.remove();
+		});
 	});
 
 	describe("goBack", (): void => {
@@ -82,73 +94,13 @@ describe("AboutController", (): void => {
 		});
 	});
 
-	describe("programCount", (): void => {
-		it("should set the program count", (): void => {
-			const count = 1,
-						totalPrograms: JQuery = $("<input>")
-							.attr("id", "totalPrograms")
-							.appendTo(document.body);
-
-			aboutController["programCount"](count);
-			String(totalPrograms.val()).should.equal(count.toString());
-			totalPrograms.remove();
-		});
-	});
-
-	describe("seriesCount", (): void => {
-		it("should set the series count", (): void => {
-			const count = 1,
-						totalSeries: JQuery = $("<input>")
-							.attr("id", "totalSeries")
-							.appendTo(document.body);
-
-			aboutController["seriesCount"](count);
-			String(totalSeries.val()).should.equal(count.toString());
-			totalSeries.remove();
-		});
-	});
-
-	describe("episodeCount", (): void => {
-		let count: number;
-
-		beforeEach(async (): Promise<void> => {
-			count = 1;
-			sinon.stub(aboutController, "watchedCount" as keyof AboutController);
-			await aboutController["episodeCount"](count);
-		});
-
-		it("should set the episode total count", (): Chai.Assertion => aboutController["episodeTotalCount"].should.equal(count));
-		it("should get the total number of watched episodes", (): void => {
-			EpisodeMock.countByStatus.should.have.been.calledWith("Watched");
-			aboutController["watchedCount"].should.have.been.calledWith(1);
-		});
-	});
-
-	describe("watchedCount", (): void => {
-		let totalEpisodes: JQuery;
-
-		beforeEach((): void => {
-			totalEpisodes = $("<input>")
-				.attr("id", "totalEpisodes")
-				.appendTo(document.body);
-		});
-
+	describe("watchedPercent", (): void => {
 		describe("no episodes", (): void => {
-			it("should set the watched percent to zero", (): void => {
-				aboutController["episodeTotalCount"] = 0;
-				aboutController["watchedCount"](1);
-				String(totalEpisodes.val()).should.equal("0 (0% watched)");
-			});
+			it("should return the watched percent as zero", (): Chai.Assertion => aboutController["watchedPercent"](0, 1).should.equal("0 (0% watched)"));
 		});
 
 		describe("with episodes", (): void => {
-			it("should set the watched percent", (): void => {
-				aboutController["episodeTotalCount"] = 1;
-				aboutController["watchedCount"](1);
-				String(totalEpisodes.val()).should.equal("1 (100.00% watched)");
-			});
+			it("should return the watched percent as non-zero", (): Chai.Assertion => aboutController["watchedPercent"](2, 1).should.equal("2 (50.00% watched)"));
 		});
-
-		afterEach((): JQuery => totalEpisodes.remove());
 	});
 });

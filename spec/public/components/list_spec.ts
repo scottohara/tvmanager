@@ -2,7 +2,6 @@ import type {
 	ListAction,
 	ListItem
 } from "components";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import List from "../../../src/components/list";
 import ListTemplate from "views/listTemplate.html";
@@ -13,7 +12,7 @@ import WindowMock from "mocks/window-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("List", (): void => {
 	const validActions: ListAction[] = ["view", "edit", "delete"];
@@ -24,7 +23,7 @@ describe("List", (): void => {
 			items: ListItem[],
 			eventHandler: SinonStub,
 			action: ListAction,
-			containerElement: JQuery,
+			containerElement: HTMLUListElement,
 			list: List;
 
 	beforeEach((): void => {
@@ -34,14 +33,17 @@ describe("List", (): void => {
 		items = [
 			// Object create is used to set a prototype, so we can test that the template correctly ignores inherited properties
 			Object.create({ inheritedProperty: "ignore me" }, {
+				id: { enumerable: true, value: "1" },
 				name: { enumerable: true, value: "group-one" },
 				value: { enumerable: true, value: "item-one" }
 			}),
 			{
+				id: "2",
 				name: "group-one",
 				value: "item-two"
 			},
 			{
+				id: "3",
 				name: "group-two",
 				value: "item-three"
 			}
@@ -49,13 +51,13 @@ describe("List", (): void => {
 		eventHandler = sinon.stub();
 		action = "view";
 
-		containerElement = $("<ul>")
-			.attr("id", container)
-			.height(100)
-			.css("overflow-y", "scroll")
-			.css("margin", 0)
-			.hide()
-			.appendTo(document.body);
+		containerElement = document.createElement("ul");
+		containerElement.id = container;
+		containerElement.style.height = "100px";
+		containerElement.style.overflowY = "scroll";
+		containerElement.style.margin = "0px";
+		containerElement.style.display = "none";
+		document.body.append(containerElement);
 
 		list = new List(container, itemTemplate, groupBy, items, eventHandler, eventHandler, eventHandler);
 	});
@@ -78,17 +80,17 @@ describe("List", (): void => {
 
 		describe("without grouping", (): void => {
 			beforeEach((): void => {
-				renderHtml = "<li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li><a>group-two:item-three</a></li><ul id=\"index\"></ul>";
+				renderHtml = "<li><a id=\"item-1\">group-one:item-one</a></li><li><a id=\"item-2\">group-one:item-two</a></li><li><a id=\"item-3\">group-two:item-three</a></li><ul id=\"index\"></ul>";
 				list = new List(container, itemTemplate, null, items, eventHandler, eventHandler, eventHandler);
 				tap = sinon.stub(list, "tap" as keyof List);
 				list.refresh();
 			});
 
-			it("should render the list", (): Chai.Assertion => containerElement.html().should.equal(renderHtml));
+			it("should render the list", (): Chai.Assertion => containerElement.innerHTML.should.equal(renderHtml));
 
 			it("should attach a click handler to each item", (): void => {
-				$(`#${container} li:not([id])`).each((index: number, element: HTMLElement): void => {
-					$(element).trigger("click");
+				document.querySelectorAll(`#${container} li:not([id])`).forEach((element: HTMLLIElement, index: number): void => {
+					element.dispatchEvent(new MouseEvent("click"));
 					tap.should.have.been.calledWith(index);
 				});
 				tap.callCount.should.equal(3);
@@ -97,16 +99,16 @@ describe("List", (): void => {
 
 		describe("with grouping", (): void => {
 			beforeEach((): void => {
-				renderHtml = "<li id=\"group-one\" class=\"group\">group-one</li><li><a>group-one:item-one</a></li><li><a>group-one:item-two</a></li><li id=\"group-two\" class=\"group\">group-two</li><li><a>group-two:item-three</a></li><ul id=\"index\"><li>group-one</li><li>group-two</li></ul>";
+				renderHtml = "<li id=\"group-group-one\" class=\"group\">group-one</li><li><a id=\"item-1\">group-one:item-one</a></li><li><a id=\"item-2\">group-one:item-two</a></li><li id=\"group-group-two\" class=\"group\">group-two</li><li><a id=\"item-3\">group-two:item-three</a></li><ul id=\"index\"><li>group-one</li><li>group-two</li></ul>";
 				tap = sinon.stub(list, "tap" as keyof List);
 				list.refresh();
 			});
 
-			it("should render the list", (): Chai.Assertion => containerElement.html().should.equal(renderHtml));
+			it("should render the list", (): Chai.Assertion => containerElement.innerHTML.should.equal(renderHtml));
 
 			it("should attach a click handler to each item", (): void => {
-				$(`#${container} > li:not([id])`).each((index: number, element: HTMLElement): void => {
-					$(element).trigger("click");
+				document.querySelectorAll(`#${container} > li:not([id])`).forEach((element: HTMLLIElement, index: number): void => {
+					element.dispatchEvent(new MouseEvent("click"));
 					tap.should.have.been.calledWith(index);
 				});
 				tap.callCount.should.equal(3);
@@ -114,43 +116,45 @@ describe("List", (): void => {
 		});
 
 		describe("index", (): void => {
-			let index: JQuery,
-					event: JQuery.Event,
+			let event: MouseEvent,
 					scrollIntoView: SinonStub;
 
 			beforeEach((): void => {
 				list.refresh();
-				index = $("#index");
-				scrollIntoView = sinon.stub($("#group-one").get(0), "scrollIntoView");
-				event = new $.Event("pointermove");
+				scrollIntoView = sinon.stub(document.querySelector("#group-group-one") as HTMLLIElement, "scrollIntoView");
 			});
 
 			it("should prevent the default touchstart behavour", (): void => {
-				event = new $.Event("touchstart");
+				event = new MouseEvent("touchstart");
 				sinon.spy(event, "preventDefault");
-				index.trigger(event);
+				list["index"].dispatchEvent(event);
 				event.preventDefault.should.have.been.called;
 			});
 
 			describe("without active button state", (): void => {
-				beforeEach((): JQuery => index.trigger(event));
+				beforeEach((): void => {
+					event = new PointerEvent("pointermove");
+					list["index"].dispatchEvent(event);
+				});
+
 				it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
 			});
 
 			describe("with active button state", (): void => {
 				let elementFromPoint: SinonStub,
-						element: JQuery;
+						element: HTMLLIElement;
 
 				beforeEach((): void => {
-					event.buttons = 1;
+					event = new PointerEvent("pointermove", { buttons: 1 });
 					elementFromPoint = sinon.stub(document, "elementFromPoint");
-					element = $("<li>").text("group-one");
+					element = document.createElement("li");
+					element.textContent = "group-one";
 				});
 
 				describe("no element at point", (): void => {
 					beforeEach((): void => {
 						elementFromPoint.returns(null);
-						index.trigger(event);
+						list["index"].dispatchEvent(event);
 					});
 
 					it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
@@ -158,9 +162,9 @@ describe("List", (): void => {
 
 				describe("element not within index", (): void => {
 					beforeEach((): void => {
-						element.appendTo(document.body);
-						elementFromPoint.returns(element.get(0));
-						index.trigger(event);
+						document.body.append(element);
+						elementFromPoint.returns(element);
+						list["index"].dispatchEvent(event);
 					});
 
 					it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
@@ -168,9 +172,9 @@ describe("List", (): void => {
 
 				describe("element within index", (): void => {
 					beforeEach((): void => {
-						element.appendTo(index);
-						elementFromPoint.returns(element.get(0));
-						index.trigger(event);
+						list["index"].append(element);
+						elementFromPoint.returns(element);
+						list["index"].dispatchEvent(event);
 					});
 
 					it("should scroll the corresponding group into view", (): Chai.Assertion => scrollIntoView.should.have.been.calledWith(true));
@@ -185,37 +189,35 @@ describe("List", (): void => {
 	});
 
 	describe("showIndex", (): void => {
-		let index: JQuery;
+		let index: HTMLUListElement;
 
 		beforeEach((): void => {
-			index = $("<ul>")
-				.attr("id", "index")
-				.css("display", "none")
-				.appendTo(document.body);
-
+			index = document.createElement("ul");
+			index.id = "index";
+			index.style.display = "none";
+			document.body.append(index);
 			list.showIndex();
 		});
 
-		it("should show the index", (): Chai.Assertion => index.css("display").should.equal("block"));
+		it("should show the index", (): Chai.Assertion => index.style.display.should.equal("block"));
 
-		afterEach((): JQuery => index.remove());
+		afterEach((): void => index.remove());
 	});
 
 	describe("hideIndex", (): void => {
-		let index: JQuery;
+		let index: HTMLUListElement;
 
 		beforeEach((): void => {
-			index = $("<ul>")
-				.attr("id", "index")
-				.css("display", "block")
-				.appendTo(document.body);
-
+			index = document.createElement("ul");
+			index.id = "index";
+			index.style.display = "block";
+			document.body.append(index);
 			list.hideIndex();
 		});
 
-		it("should hide the index", (): Chai.Assertion => index.css("display").should.equal("none"));
+		it("should hide the index", (): Chai.Assertion => index.style.display.should.equal("none"));
 
-		afterEach((): JQuery => index.remove());
+		afterEach((): void => index.remove());
 	});
 
 	describe("scrollTo", (): void => {
@@ -223,14 +225,15 @@ describe("List", (): void => {
 
 		beforeEach((): void => {
 			for (let i = 0; i < 10; i++) {
-				$("<li>")
-					.attr("id", i)
-					.height(20)
-					.appendTo(containerElement);
+				const item = document.createElement("li");
+
+				item.id = `item-${i}`;
+				item.style.height = "20px";
+				containerElement.append(item);
 			}
 
-			containerElement.show();
-			containerElement.scrollTop(40);
+			containerElement.style.display = "block";
+			containerElement.scrollTop = 40;
 
 			appController.viewStack = [{ controller: new TestController(), scrollPos: 40 }];
 			appController.setScrollPosition.reset();
@@ -367,5 +370,5 @@ describe("List", (): void => {
 		});
 	});
 
-	afterEach((): JQuery => containerElement.remove());
+	afterEach((): void => containerElement.remove());
 });

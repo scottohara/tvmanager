@@ -61,7 +61,6 @@ describe("Import/Export", (): void => {
 			cy.get(headerLeftButton).should("have.text", "Cancel");
 			cy.get(headerLabel).should("have.text", "Register");
 			cy.get(headerRightButton).should("have.text", "Save");
-			cy.get(footerLabel).should("have.text", "v1");
 		});
 
 		describe("when unregistered", (): void => {
@@ -109,6 +108,16 @@ describe("Import/Export", (): void => {
 			it("should show the name of the device", (): Cypress.Chainable<JQuery> => cy.get(deviceName).should("have.value", "Test device"));
 			it("should show the last sync time", (): Cypress.Chainable<JQuery> => cy.get(lastSyncTime).should("have.value", "1-Jan-2000 09:30:20"));
 			it("should show the number of pending changes when there are pending changes", (): Cypress.Chainable<JQuery> => cy.get(localChanges).should("have.value", "1 change pending"));
+
+			it("should show the database version as the label", (): void => {
+				cy.get(deviceName).click();
+				cy.get(footerLabel).should("have.text", "v1");
+			});
+
+			it("should show an unregister button", (): void => {
+				cy.get(deviceName).click();
+				cy.get(footerLeftButton).should("have.text", "Unregister");
+			});
 
 			it("should not update the registered device if the changes are cancelled", (): void => {
 				cy.get(deviceName).click();

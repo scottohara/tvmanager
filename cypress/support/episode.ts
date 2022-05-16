@@ -7,4 +7,4 @@ export const statusDate = "#statusDate";
 export const unverified = "#unverified";
 export const unverifiedLabel = "#unverifiedRow > label[for=unverified]";
 export const unscheduled = "#unscheduled";
-export const unscheduledLabel = "#unscheduledRow > label[for=unscheduled]";
+export const unscheduledLabel = "label[for=unscheduled]";

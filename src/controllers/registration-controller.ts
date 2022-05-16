@@ -2,7 +2,6 @@ import type {
 	Device,
 	NavButtonEventHandler
 } from "controllers";
-import $ from "jquery";
 import DatabaseService from "services/database-service";
 import type { PublicInterface } from "global";
 import RegistrationView from "views/registration-view.html";
@@ -52,7 +51,7 @@ export default class RegistrationController extends ViewController {
 			this.device = JSON.parse(device.settingValue) as Device;
 
 			// Display the device name
-			$("#deviceName").val(this.device.name);
+			this.deviceName.value = this.device.name;
 
 			// Setup the footer
 			this.footer = {
@@ -91,19 +90,13 @@ export default class RegistrationController extends ViewController {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
 		} catch (error: unknown) {
-			this.appController.showNotice({
-				label: `Unregister failed: ${(error as Error).message}`,
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			});
+			this.appController.showNotice({ label: `Unregister failed: ${(error as Error).message}` });
 		}
 	}
 
 	private async save(): Promise<void> {
 		// Get the device details
-		this.device.name = String($("#deviceName").val());
+		this.device.name = this.deviceName.value;
 
 		// Send a PUT request to the server, including the device ID in the request headers
 		try {
@@ -129,17 +122,16 @@ export default class RegistrationController extends ViewController {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
 		} catch (error: unknown) {
-			this.appController.showNotice({
-				label: `Registration failed: ${(error as Error).message}`,
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			});
+			this.appController.showNotice({ label: `Registration failed: ${(error as Error).message}` });
 		}
 	}
 
 	private async cancel(): Promise<void> {
 		return this.appController.popView();
+	}
+
+	// DOM selectors
+	private get deviceName(): HTMLInputElement {
+		return document.querySelector("#deviceName") as HTMLInputElement;
 	}
 }

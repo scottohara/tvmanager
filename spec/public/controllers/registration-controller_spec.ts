@@ -8,7 +8,6 @@ import type {
 	SinonMatcher,
 	SinonStub
 } from "sinon";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import RegistrationController from "controllers/registration-controller";
 import RegistrationView from "views/registration-view.html";
@@ -90,16 +89,16 @@ describe("RegistrationController", (): void => {
 		});
 
 		describe("registered", (): void => {
-			let deviceName: JQuery,
+			let deviceName: HTMLInputElement,
 					footer: HeaderFooter,
 					leftButton: NavButton;
 
 			beforeEach(async (): Promise<void> => {
 				sinon.stub(registrationController, "unregister" as keyof RegistrationController);
 
-				deviceName = $("<input>")
-					.attr("id", "deviceName")
-					.appendTo(document.body);
+				deviceName = document.createElement("input");
+				deviceName.id = "deviceName";
+				document.body.append(deviceName);
 
 				await registrationController["gotDevice"](new SettingMock(undefined, JSON.stringify(device)));
 				footer = registrationController.footer as HeaderFooter;
@@ -107,7 +106,7 @@ describe("RegistrationController", (): void => {
 			});
 
 			it("should set the device", (): Chai.Assertion => registrationController["device"].should.deep.equal(device));
-			it("should display the device name", (): Chai.Assertion => String(deviceName.val()).should.equal(device.name));
+			it("should display the device name", (): Chai.Assertion => deviceName.value.should.equal(device.name));
 			it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 			it("should attach a footer left button event handler", (): void => {
@@ -119,7 +118,7 @@ describe("RegistrationController", (): void => {
 			it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Unregister"));
 			it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 
-			afterEach((): JQuery => deviceName.remove());
+			afterEach((): void => deviceName.remove());
 		});
 	});
 
@@ -149,13 +148,7 @@ describe("RegistrationController", (): void => {
 				})));
 
 				await registrationController["unregister"]();
-				appController.showNotice.should.have.been.calledWith({
-					label: "Unregister failed: 404 (Not Found)",
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				});
+				appController.showNotice.should.have.been.calledWith({ label: "Unregister failed: 404 (Not Found)" });
 			});
 		});
 
@@ -182,7 +175,7 @@ describe("RegistrationController", (): void => {
 	});
 
 	describe("save", (): void => {
-		let deviceName: JQuery,
+		let deviceName: HTMLInputElement,
 				fakeFetch: SinonStub,
 				fetchArgs: [SinonMatcher, RequestInit];
 
@@ -198,10 +191,10 @@ describe("RegistrationController", (): void => {
 				}
 			];
 			registrationController["device"] = device;
-			deviceName = $("<input>")
-				.attr("id", "deviceName")
-				.val("new-device")
-				.appendTo(document.body);
+			deviceName = document.createElement("input");
+			deviceName.id = "deviceName";
+			deviceName.value = "new-device";
+			document.body.append(deviceName);
 		});
 
 		describe("fail", (): void => {
@@ -215,13 +208,7 @@ describe("RegistrationController", (): void => {
 			});
 
 			it("should get the device name", (): Chai.Assertion => registrationController["device"].name.should.equal("new-device"));
-			it("should display a notice", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({
-				label: "Registration failed: 404 (Not Found)",
-				leftButton: {
-					style: "cautionButton",
-					label: "OK"
-				}
-			}));
+			it("should display a notice", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({ label: "Registration failed: 404 (Not Found)" }));
 		});
 
 		describe("success", (): void => {

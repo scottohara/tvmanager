@@ -3,7 +3,6 @@ import type {
 	NavButtonEventHandler,
 	Report
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import SeriesMock from "mocks/series-model-mock";
 import SettingsController from "controllers/settings-controller";
@@ -93,57 +92,81 @@ describe("SettingsController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		interface Scenario {
-			description: string;
-			id: string;
-			handler: string;
-		}
+		let dataSyncRow: HTMLDivElement,
+				aboutRow: HTMLDivElement,
+				recordedReportRow: HTMLDivElement,
+				expectedReportRow: HTMLDivElement,
+				missedReportRow: HTMLDivElement,
+				incompleteReportRow: HTMLDivElement;
 
-		const scenarios: Scenario[] = [
-			{
-				description: "data sync",
-				id: "dataSyncRow",
-				handler: "viewDataSync"
-			},
-			{
-				description: "about",
-				id: "aboutRow",
-				handler: "viewAbout"
-			},
-			{
-				description: "recorded report",
-				id: "recordedReportRow",
-				handler: "viewRecordedReport"
-			},
-			{
-				description: "expected report",
-				id: "expectedReportRow",
-				handler: "viewExpectedReport"
-			},
-			{
-				description: "missed report",
-				id: "missedReportRow",
-				handler: "viewMissedReport"
-			},
-			{
-				description: "incomplete report",
-				id: "incompleteReportRow",
-				handler: "viewIncompleteReport"
-			}
-		];
+		beforeEach(async (): Promise<void> => {
+			dataSyncRow = document.createElement("div");
+			dataSyncRow.id = "dataSyncRow";
 
-		scenarios.forEach((scenario: Scenario): void => {
-			it(`should attach a ${scenario.description} click event handler`, async (): Promise<void> => {
-				const handler = sinon.stub(settingsController, scenario.handler as keyof SettingsController),
-							element: JQuery = $("<div>")
-								.attr("id", scenario.id)
-								.appendTo(document.body);
+			aboutRow = document.createElement("div");
+			aboutRow.id = "aboutRow";
 
-				await settingsController.activate();
-				element.trigger("click");
-				handler.should.have.been.called;
-				element.remove();
-			});
+			recordedReportRow = document.createElement("div");
+			recordedReportRow.id = "recordedReportRow";
+
+			expectedReportRow = document.createElement("div");
+			expectedReportRow.id = "expectedReportRow";
+
+			missedReportRow = document.createElement("div");
+			missedReportRow.id = "missedReportRow";
+
+			incompleteReportRow = document.createElement("div");
+			incompleteReportRow.id = "incompleteReportRow";
+
+			document.body.append(dataSyncRow, aboutRow, recordedReportRow, expectedReportRow, missedReportRow, incompleteReportRow);
+
+			sinon.stub(settingsController, "viewDataSync" as keyof SettingsController);
+			sinon.stub(settingsController, "viewAbout" as keyof SettingsController);
+			sinon.stub(settingsController, "viewRecordedReport" as keyof SettingsController);
+			sinon.stub(settingsController, "viewExpectedReport" as keyof SettingsController);
+			sinon.stub(settingsController, "viewMissedReport" as keyof SettingsController);
+			sinon.stub(settingsController, "viewIncompleteReport" as keyof SettingsController);
+
+			await settingsController.activate();
+		});
+
+		it("should attach a data sync click event handler", (): void => {
+			dataSyncRow.dispatchEvent(new MouseEvent("click"));
+			settingsController["viewDataSync"].should.have.been.called;
+		});
+
+		it("should attach an about click event handler", (): void => {
+			aboutRow.dispatchEvent(new MouseEvent("click"));
+			settingsController["viewAbout"].should.have.been.called;
+		});
+
+		it("should attach a recorded report click event handler", (): void => {
+			recordedReportRow.dispatchEvent(new MouseEvent("click"));
+			settingsController["viewRecordedReport"].should.have.been.called;
+		});
+
+		it("should attach an expected report click event handler", (): void => {
+			expectedReportRow.dispatchEvent(new MouseEvent("click"));
+			settingsController["viewExpectedReport"].should.have.been.called;
+		});
+
+		it("should attach a missed report click event handler", (): void => {
+			missedReportRow.dispatchEvent(new MouseEvent("click"));
+			settingsController["viewMissedReport"].should.have.been.called;
+		});
+
+		it("should attach an incomplete report click event handler", (): void => {
+			incompleteReportRow.dispatchEvent(new MouseEvent("click"));
+			settingsController["viewIncompleteReport"].should.have.been.called;
+		});
+
+		afterEach((): void => {
+			dataSyncRow.remove();
+			aboutRow.remove();
+			recordedReportRow.remove();
+			expectedReportRow.remove();
+			missedReportRow.remove();
+			incompleteReportRow.remove();
 		});
 	});
 

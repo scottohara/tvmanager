@@ -2,7 +2,6 @@ import type {
 	NavButtonEventHandler,
 	Report
 } from "controllers";
-import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
 import type { PublicInterface } from "global";
@@ -65,9 +64,6 @@ export default class ReportController extends ViewController {
 
 		// Clear the view footer
 		this.appController.clearFooter();
-
-		// Show the view icons next to each list item
-		$("#list").removeClass();
 
 		// Setup the footer
 		this.footer = {

@@ -12,7 +12,6 @@ import type {
 	ModelType,
 	SerializedModel
 } from "models";
-import $ from "jquery";
 import DataSyncView from "views/dataSync-view.html";
 import Episode from "models/episode-model";
 import Program from "models/program-model";
@@ -46,17 +45,15 @@ export default class DataSyncController extends ViewController {
 		imported: false
 	};
 
-	private localChanges = false;
+	private isLocalChanges = false;
 
 	private syncing = false;
 
 	private syncProcessed = 0;
 
-	private syncErrors: JQuery[] = [];
+	private errors: HTMLLIElement[] = [];
 
 	private syncList: PublicInterface<Sync>[] = [];
-
-	private importChangesOnly = false;
 
 	private objectsToImport = 0;
 
@@ -83,17 +80,17 @@ export default class DataSyncController extends ViewController {
 
 	public override async activate(): Promise<void> {
 		// Bind an event handler to access the registration view
-		$("#registrationRow").on("click", this.viewRegistration.bind(this));
+		this.registrationRow.addEventListener("click", this.viewRegistration.bind(this));
 
 		// Bind event handlers for the import/export buttons
-		$("#import").on("click", this.dataImport.bind(this));
-		$("#export").on("click", this.dataExport.bind(this));
+		this.import.addEventListener("click", this.dataImport.bind(this));
+		this.export.addEventListener("click", this.dataExport.bind(this));
 
 		// Set the initial status message
-		$("#localChanges").val("Checking...");
+		this.localChanges.value = "Checking...";
 
 		// Get the last sync time
-		this.gotLastSyncTime(await Setting.get("LastSyncTime"));
+		this.lastSyncTime.value = this.formatLastSyncTime(await Setting.get("LastSyncTime"));
 
 		// Get the registered device
 		this.gotDevice(await Setting.get("Device"));
@@ -110,7 +107,7 @@ export default class DataSyncController extends ViewController {
 		return this.appController.pushView("registration");
 	}
 
-	private gotLastSyncTime(lastSyncTime: PublicInterface<Setting>): void {
+	private formatLastSyncTime(lastSyncTime: PublicInterface<Setting>): string {
 		// Helper function to ensure date parts are zero-padded as required
 		function leftPad(value: number): string {
 			const MIN_LENGTH = 2,
@@ -121,59 +118,56 @@ export default class DataSyncController extends ViewController {
 
 		// Only proceed if we have a last sync time
 		if (undefined === lastSyncTime.settingValue) {
-			// Unable to determine last sync time
-			$("#lastSyncTime").val("Unknown");
-		} else {
-			// Format the value as dd-mon-yyyy hh:mm:ss
-			const lastSync: Date = new Date(lastSyncTime.settingValue),
-						lastSyncDisplay = `${lastSync.getDate()}-${Months[lastSync.getMonth()]}-${lastSync.getFullYear()} ${leftPad(lastSync.getHours())}:${leftPad(lastSync.getMinutes())}:${leftPad(lastSync.getSeconds())}`;
-
-			// Display the formatted value
-			$("#lastSyncTime").val(lastSyncDisplay);
+			return "Unknown";
 		}
+
+		// Format the value as dd-mon-yyyy hh:mm:ss
+		const lastSync = new Date(lastSyncTime.settingValue);
+
+		return `${lastSync.getDate()}-${Months[lastSync.getMonth()]}-${lastSync.getFullYear()} ${leftPad(lastSync.getHours())}:${leftPad(lastSync.getMinutes())}:${leftPad(lastSync.getSeconds())}`;
 	}
 
 	private gotDevice(device: PublicInterface<Setting>): void {
 		// Only proceed if we have a device
 		if (undefined === device.settingValue) {
 			// No registered device, so display a registration message in place of the sync controls
-			$("#deviceName").val("< Unregistered >");
-			$("#registrationMessage").show();
+			this.deviceName.value = "< Unregistered >";
+			this.registrationMessage.style.display = "block";
 		} else {
 			// Parse the JSON
 			this.device = JSON.parse(device.settingValue) as Device;
 
 			// Display the device name
-			$("#deviceName").val(this.device.name);
+			this.deviceName.value = this.device.name;
 
 			// Show the sync controls
-			$("#syncControls").show();
+			this.syncControls.style.display = "block";
 
 			// If the device has previously performed a full import, allow the Fast Import option
 			if (this.device.imported) {
-				$("#importChangesOnly").prop("checked", true);
-				$("#importChangesOnlyRow").show();
+				this.importChangesOnly.checked = true;
+				this.importChangesOnlyRow.style.display = "block";
 			}
 		}
 	}
 
 	private checkForLocalChanges(count: number): void {
 		// If there are any local changes, set the indicator
-		this.localChanges = count > 0;
+		this.isLocalChanges = count > 0;
 
 		// If there are any local changes, display the number of changes to be synced
-		if (this.localChanges) {
-			$("#localChanges").val(`${count} change${count > 1 ? "s" : ""} pending`);
-			$("#export").removeClass("disabled");
+		if (this.isLocalChanges) {
+			this.localChanges.value = `${count} change${count > 1 ? "s" : ""} pending`;
+			this.export.classList.remove("disabled");
 		} else {
 			// No local changes
-			$("#localChanges").val("None pending");
-			$("#export").addClass("disabled");
+			this.localChanges.value = "None pending";
+			this.export.classList.add("disabled");
 		}
 	}
 
 	private dataExport(): void {
-		if (this.localChanges) {
+		if (this.isLocalChanges) {
 			this.syncStart("Export", "Are you sure you want to export?", this.doExport.bind(this));
 		}
 	}
@@ -182,7 +176,7 @@ export default class DataSyncController extends ViewController {
 		// If there are any local changes, warn the user
 		let prompt = "";
 
-		if (this.localChanges) {
+		if (this.isLocalChanges) {
 			prompt = "Warning: Local changes have been made. ";
 		}
 
@@ -193,16 +187,16 @@ export default class DataSyncController extends ViewController {
 		// Make sure a sync operation is not already running
 		if (this.syncing) {
 			// Do nothing, an operation is already in progress
-			$("#status").val(`An ${operation.toLowerCase()} is already running`);
+			this.status.value = `An ${operation.toLowerCase()} is already running`;
 		} else {
 			// Set the syncing flag
 			this.syncing = true;
 
 			// Show the status row
-			$("#progress").hide();
-			$("#status").val(`Starting ${operation.toLowerCase()}`);
-			$("#status").show();
-			$("#statusRow").show();
+			this.progress.style.display = "none";
+			this.status.value = `Starting ${operation.toLowerCase()}`;
+			this.status.style.display = "inline";
+			this.statusRow.style.display = "block";
 
 			// Ask the user to confirm their action
 			if (window.confirm(prompt)) {
@@ -210,7 +204,7 @@ export default class DataSyncController extends ViewController {
 				callback();
 			} else {
 				// User cancelled
-				$("#status").val(`${operation} aborted`);
+				this.status.value = `${operation} aborted`;
 				this.syncFinish(operation, false);
 			}
 		}
@@ -221,19 +215,13 @@ export default class DataSyncController extends ViewController {
 
 		// If the operation was successful, hide the status row
 		if (successful) {
-			$("#statusRow").hide();
+			this.statusRow.style.display = "none";
 		} else {
 			label = `${operation} failed.`;
 		}
 
 		// Display a notice indicating that the operation has finished
-		this.appController.showNotice({
-			label,
-			leftButton: {
-				style: "cautionButton",
-				label: "OK"
-			}
-		});
+		this.appController.showNotice({ label });
 
 		// Clear the syncing flag
 		this.syncing = false;
@@ -245,14 +233,14 @@ export default class DataSyncController extends ViewController {
 
 	private async listRetrieved(syncList: PublicInterface<Sync>[]): Promise<unknown[]> {
 		this.syncProcessed = 0;
-		this.syncErrors = [];
+		this.errors = [];
 		this.syncList = syncList;
 
 		// Show the export progress
-		$("#status").hide();
-		$("#progress").val(this.syncProcessed);
-		$("#progress").attr("max", this.syncList.length);
-		$("#progress").show();
+		this.status.style.display = "none";
+		this.progress.value = this.syncProcessed;
+		this.progress.max = this.syncList.length;
+		this.progress.style.display = "inline";
 
 		// Iterate over the list
 		const changes: Promise<void>[] = [];
@@ -278,16 +266,16 @@ export default class DataSyncController extends ViewController {
 
 	private async sendChange(sync: PublicInterface<Sync>): Promise<void> {
 		// Call the find method of the appropriate model object to get the item to export
-		const instance: Model = await this.find(sync),
+		const instance = await this.find(sync),
 
 					// Get the JSON respresentation of the object, serialise to a string and calculate the MD5 sum of the content
-					instanceJson: SerializedModel = instance.toJson(),
-					json: string = JSON.stringify(instanceJson),
-					hash: string = md5(json);
+					instanceJson = instance.toJson(),
+					json = JSON.stringify(instanceJson),
+					hash = md5(json);
 
 		try {
 			// Post to the export route, including the MD5 sum and device ID in the request headers
-			const response: Response = await fetch("/documents", {
+			const response = await fetch("/documents", {
 				method: "POST",
 				headers: {
 					"Content-MD5": hash,
@@ -298,7 +286,7 @@ export default class DataSyncController extends ViewController {
 
 			if (response.ok) {
 				// Get the Etag value returned by the server
-				const returnedHash: string = String(response.headers.get("Etag")).replace(/^W\/|"/gu, "");
+				const returnedHash = String(response.headers.get("Etag")).replace(/^W\/|"/gu, "");
 
 				// Compare the Etag with the MD5 sum we sent
 				if (hash === returnedHash) {
@@ -344,7 +332,7 @@ export default class DataSyncController extends ViewController {
 	private async sendDelete(sync: PublicInterface<Sync>): Promise<void> {
 		try {
 			// Send a DELETE request to the server, including the device ID in the request headers
-			const response: Response = await fetch(`/documents/${sync.id}`, {
+			const response = await fetch(`/documents/${sync.id}`, {
 				method: "DELETE",
 				headers: {
 					"X-DEVICE-ID": this.device.id
@@ -368,7 +356,7 @@ export default class DataSyncController extends ViewController {
 		this.syncProcessed++;
 
 		// Update the export progress
-		$("#progress").val(this.syncProcessed);
+		this.progress.value = this.syncProcessed;
 
 		// Check if we're done
 		if (this.syncProcessed === this.syncList.length) {
@@ -379,12 +367,12 @@ export default class DataSyncController extends ViewController {
 			this.checkForLocalChanges(await Sync.count());
 
 			// Check for any sync errors
-			if (this.syncErrors.length) {
+			if (this.errors.length) {
 				// There were errors, so display them
 				this.showErrors("Export");
 			} else {
 				// No errors, so just hide the errors container and call the success handler
-				$("#syncErrors").hide();
+				this.syncErrors.style.display = "none";
 				this.syncFinish("Export", true);
 			}
 		}
@@ -392,23 +380,20 @@ export default class DataSyncController extends ViewController {
 
 	private async setLastSyncTime(): Promise<void> {
 		// Instantiate a new Setting object with the current date/time
-		const lastSyncTime: Setting = new Setting("LastSyncTime", String(new Date()));
+		const lastSyncTime = new Setting("LastSyncTime", String(new Date()));
 
 		// Save to the database
 		await lastSyncTime.save();
 
 		// Display the updated last sync time
-		this.gotLastSyncTime(lastSyncTime);
+		this.lastSyncTime.value = this.formatLastSyncTime(lastSyncTime);
 	}
 
 	private async doImport(): Promise<unknown> {
-		this.syncErrors = [];
-
-		// Check if Fast Import is selected
-		this.importChangesOnly = $("#importChangesOnly").is(":checked");
+		this.errors = [];
 
 		// For full imports, delete all local data first
-		if (this.importChangesOnly) {
+		if (this.onlyImportChanges) {
 			// For Fast Import, just start the import immediately
 			return this.importData();
 		}
@@ -455,7 +440,7 @@ export default class DataSyncController extends ViewController {
 
 		try {
 			// Get the list of objects to import from the server, including the device ID in the request headers
-			const response: Response = await fetch(`/documents/${this.importChangesOnly ? "pending" : "all"}`, {
+			const response = await fetch(`/documents/${this.onlyImportChanges ? "pending" : "all"}`, {
 				headers: {
 					"X-DEVICE-ID": this.device.id
 				}
@@ -463,9 +448,9 @@ export default class DataSyncController extends ViewController {
 
 			if (response.ok) {
 				// Extract the JSON and checksum returned, and calculate a hash of the data
-				const importObj: FullImport | ImportDoc[] = await response.json() as FullImport | ImportDoc[],
-							{ importJson, returnedHash }: ImportData = this.getImportData(importObj, String(response.headers.get("Etag"))),
-							hash: string = md5(JSON.stringify(importJson));
+				const importObj = await response.json() as FullImport | ImportDoc[],
+							{ importJson, returnedHash } = this.getImportData(importObj, String(response.headers.get("Etag"))),
+							hash = md5(JSON.stringify(importJson));
 
 				// Compare the Etag with the MD5 sum we calculated
 				if (hash === returnedHash) {
@@ -474,17 +459,17 @@ export default class DataSyncController extends ViewController {
 						this.objectsToImport = importJson.length;
 
 						// Show the import progress
-						$("#status").hide();
-						$("#progress").val(this.objectsImported);
-						$("#progress").attr("max", this.objectsToImport);
-						$("#progress").show();
+						this.status.style.display = "none";
+						this.progress.value = this.objectsImported;
+						this.progress.max = this.objectsToImport;
+						this.progress.style.display = "inline";
 
 						// Iterate over the list of objects to be imported
 						return await Promise.all(importJson.map(async (object: ImportDoc): Promise<void> => this.importObject(object)));
 					}
 
 					// No objects to import, which is only an error for Full Imports
-					if (!this.importChangesOnly) {
+					if (!this.onlyImportChanges) {
 						this.syncError("Receive error", "Sync", "No data found");
 					}
 				} else {
@@ -516,7 +501,7 @@ export default class DataSyncController extends ViewController {
 		 * Ideally, we would be able to use a HTTP Trailer header to provide this information
 		 * after the body content; but no browsers support HTTP Trailer headers)
 		 */
-		if (this.importChangesOnly) {
+		if (this.onlyImportChanges) {
 			importJson = data as ImportDoc[];
 			returnedHash = eTag.replace(/^W\/|"/gu, "");
 		} else {
@@ -529,8 +514,8 @@ export default class DataSyncController extends ViewController {
 
 	private async importObject(object: ImportDoc): Promise<void> {
 		// Create an instance of the appropriate model from the JSON representation, and check if the current device is in the pending array
-		const obj: Model = this.jsonToModel(object.doc),
-					isPending: boolean = object.doc.pending.includes(this.device.id);
+		const obj = this.jsonToModel(object.doc),
+					isPending = object.doc.pending.includes(this.device.id);
 
 		// If the object is flagged as deleted on the server, delete it from the local database
 		if (object.doc.isDeleted) {
@@ -572,8 +557,8 @@ export default class DataSyncController extends ViewController {
 			this.syncError("Save error", type, `Error saving ${type.toLowerCase()}`);
 		} else {
 			// For Fast Import, clear any Sync record for the object just imported
-			if (this.importChangesOnly) {
-				const sync: Sync = new Sync(type, String(id));
+			if (this.onlyImportChanges) {
+				const sync = new Sync(type, String(id));
 
 				await sync.remove();
 			}
@@ -592,7 +577,7 @@ export default class DataSyncController extends ViewController {
 	private async removePending(id: string, type: ModelType): Promise<void> {
 		try {
 			// Send a DELETE request to the server, including the device ID in the request headers
-			const response: Response = await fetch(`/documents/${id}/pending`, {
+			const response = await fetch(`/documents/${id}/pending`, {
 				method: "DELETE",
 				headers: {
 					"X-DEVICE-ID": this.device.id
@@ -614,7 +599,7 @@ export default class DataSyncController extends ViewController {
 		this.objectsImported++;
 
 		// Update the import progress
-		$("#progress").val(this.objectsImported);
+		this.progress.value = this.objectsImported;
 
 		// Check if all objects have been imported
 		if (this.objectsImported === this.objectsToImport) {
@@ -625,17 +610,17 @@ export default class DataSyncController extends ViewController {
 
 	private async importDone(): Promise<void> {
 		// Check for any sync errors
-		if (this.syncErrors.length) {
+		if (this.errors.length) {
 			// There were errors, so display them
 			this.showErrors("Import");
-		} else	if (this.importChangesOnly) {
+		} else	if (this.onlyImportChanges) {
 			// For Fast Import, Sync records were cleared as we went, so just mark the import as successful
 			await this.importSuccessful();
 		} else {
 			// If the registered device had not previously performed a full import, mark it as having done so
 			if (!this.device.imported) {
 				this.device.imported = true;
-				const device: Setting = new Setting("Device", JSON.stringify(this.device));
+				const device = new Setting("Device", JSON.stringify(this.device));
 
 				await device.save();
 			}
@@ -664,34 +649,98 @@ export default class DataSyncController extends ViewController {
 		this.checkForLocalChanges(await Sync.count());
 
 		// Hide the errors container
-		$("#syncErrors").hide();
+		this.syncErrors.style.display = "none";
 
 		// Finish the import
 		this.syncFinish("Import", true);
 	}
 
 	private syncError(error: SyncErrorType, type: ModelType | "Sync", message: string, id?: string | null): void {
-		// Append the error to the list
-		this.syncErrors.push($("<li>").html(`${error}<br/>Type: ${type}${null === id || undefined === id ? "" : ` ${id}`}<br/>${message}`));
+		const item = document.createElement("li");
+
+		item.innerHTML = `${error}<br/>Type: ${type}${null === id || undefined === id ? "" : ` ${id}`}<br/>${message}`;
+		this.errors.push(item);
 	}
 
 	private showErrors(operation: SyncOperation): void {
 		// Clear any existing errors and replace with the current errors list
-		const PADDING_PX = 10,
-					errorList = $("#errorList")
-						.empty()
-						.append(this.syncErrors);
+		const PADDING_PX = 10;
+
+		this.errorList.innerHTML = "";
+		this.errorList.append(...this.errors);
 
 		// Display the errors container
-		$("#syncErrors").show();
+		this.syncErrors.style.display = "block";
 
 		// Update the height so that the errors list is scrollable inside the container
-		let offsetTop = 0;
-
-		offsetTop = (errorList.offset() as JQuery.Coordinates).top;
-		errorList.height(window.innerHeight - offsetTop - PADDING_PX);
+		this.errorList.style.height = `${window.innerHeight - this.errorList.offsetTop - PADDING_PX}px`;
 
 		// Finish the sync operation
 		this.syncFinish(operation, false);
+	}
+
+	private get onlyImportChanges(): boolean {
+		return this.importChangesOnly.checked;
+	}
+
+	// DOM selectors
+	private get registrationRow(): HTMLDivElement {
+		return document.querySelector("#registrationRow") as HTMLDivElement;
+	}
+
+	private get deviceName(): HTMLInputElement {
+		return document.querySelector("#deviceName") as HTMLInputElement;
+	}
+
+	private get registrationMessage(): HTMLDivElement {
+		return document.querySelector("#registrationMessage") as HTMLDivElement;
+	}
+
+	private get syncControls(): HTMLElement {
+		return document.querySelector("#syncControls") as HTMLElement;
+	}
+
+	private get lastSyncTime(): HTMLInputElement {
+		return document.querySelector("#lastSyncTime") as HTMLInputElement;
+	}
+
+	private get localChanges(): HTMLInputElement {
+		return document.querySelector("#localChanges") as HTMLInputElement;
+	}
+
+	private get importChangesOnlyRow(): HTMLDivElement {
+		return document.querySelector("#importChangesOnlyRow") as HTMLDivElement;
+	}
+
+	private get importChangesOnly(): HTMLInputElement {
+		return document.querySelector("#importChangesOnly") as HTMLInputElement;
+	}
+
+	private get import(): HTMLAnchorElement {
+		return document.querySelector("#import") as HTMLAnchorElement;
+	}
+
+	private get export(): HTMLAnchorElement {
+		return document.querySelector("#export") as HTMLAnchorElement;
+	}
+
+	private get statusRow(): HTMLDivElement {
+		return document.querySelector("#statusRow") as HTMLDivElement;
+	}
+
+	private get progress(): HTMLProgressElement {
+		return document.querySelector("#progress") as HTMLProgressElement;
+	}
+
+	private get status(): HTMLInputElement {
+		return document.querySelector("#status") as HTMLInputElement;
+	}
+
+	private get syncErrors(): HTMLElement {
+		return document.querySelector("#syncErrors") as HTMLElement;
+	}
+
+	private get errorList(): HTMLUListElement {
+		return document.querySelector("#errorList") as HTMLUListElement;
 	}
 }

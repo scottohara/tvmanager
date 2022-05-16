@@ -1,4 +1,3 @@
-import $ from "jquery";
 import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
 import List from "components/list";
@@ -58,9 +57,6 @@ export default class UnscheduledController extends ViewController {
 
 		// Clear the view footer
 		this.appController.clearFooter();
-
-		// Show the view icons next to each list item
-		$("#list").removeClass();
 
 		// Setup the footer
 		this.footer = {

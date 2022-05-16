@@ -3,7 +3,6 @@ import type {
 	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import ProgramController from "controllers/program-controller";
 import ProgramMock from "mocks/program-model-mock";
@@ -62,7 +61,7 @@ describe("ProgramController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let programName: JQuery,
+		let programName: HTMLInputElement,
 				leftButton: NavButton,
 				rightButton: NavButton;
 
@@ -70,9 +69,9 @@ describe("ProgramController", (): void => {
 			sinon.stub(programController, "cancel" as keyof ProgramController);
 			sinon.stub(programController, "save" as keyof ProgramController);
 
-			programName = $("<input>")
-				.attr("id", "programName")
-				.appendTo(document.body);
+			programName = document.createElement("input");
+			programName.id = "programName";
+			document.body.append(programName);
 
 			await programController.setup();
 			leftButton = programController.header.leftButton as NavButton;
@@ -96,22 +95,22 @@ describe("ProgramController", (): void => {
 		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
 		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
 
-		it("should set the program name", (): Chai.Assertion => String(programName.val()).should.equal(listItem.program.programName));
+		it("should set the program name", (): Chai.Assertion => programName.value.should.equal(listItem.program.programName));
 
-		afterEach((): JQuery => programName.remove());
+		afterEach((): void => programName.remove());
 	});
 
 	describe("save", (): void => {
 		let programName: string,
-				programNameInput: JQuery;
+				programNameInput: HTMLInputElement;
 
 		beforeEach(async (): Promise<void> => {
 			programName = "test-program-2";
 
-			programNameInput = $("<input>")
-				.attr("id", "programName")
-				.val(programName)
-				.appendTo(document.body);
+			programNameInput = document.createElement("input");
+			programNameInput.id = "programName";
+			programNameInput.value = programName;
+			document.body.append(programNameInput);
 
 			await programController["save"]();
 		});
@@ -120,7 +119,7 @@ describe("ProgramController", (): void => {
 		it("should save the program", (): Chai.Assertion => listItem.program.save.should.have.been.called);
 		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
 
-		afterEach((): JQuery => programNameInput.remove());
+		afterEach((): void => programNameInput.remove());
 	});
 
 	describe("cancel", (): void => {

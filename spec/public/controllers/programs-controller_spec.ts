@@ -3,7 +3,6 @@ import type {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import type { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
@@ -17,7 +16,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 
 describe("ProgramsController", (): void => {
 	let items: ProgramMock[],
-			programList: JQuery,
+			programList: HTMLUListElement,
 			programsController: ProgramsController;
 
 	beforeEach((): void => {
@@ -26,9 +25,9 @@ describe("ProgramsController", (): void => {
 			new ProgramMock("2", "z-test-program")
 		];
 
-		programList = $("<ul>")
-			.attr("id", "list")
-			.appendTo(document.body);
+		programList = document.createElement("ul");
+		programList.id = "list";
+		document.body.append(programList);
 
 		programsController = new ProgramsController();
 	});
@@ -209,9 +208,9 @@ describe("ProgramsController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			programList.hasClass("delete").should.be.true;
-			programList.hasClass("edit").should.be.false;
-			programList.hasClass("withHelper").should.be.false;
+			programList.classList.contains("delete").should.be.true;
+			programList.classList.contains("edit").should.be.false;
+			programList.classList.contains("withHelper").should.be.false;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -244,9 +243,9 @@ describe("ProgramsController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			programList.hasClass("delete").should.be.false;
-			programList.hasClass("edit").should.be.true;
-			programList.hasClass("withHelper").should.be.false;
+			programList.classList.contains("delete").should.be.false;
+			programList.classList.contains("edit").should.be.true;
+			programList.classList.contains("withHelper").should.be.false;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -282,9 +281,9 @@ describe("ProgramsController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			programList.hasClass("delete").should.be.false;
-			programList.hasClass("edit").should.be.false;
-			programList.hasClass("withHelper").should.be.true;
+			programList.classList.contains("delete").should.be.false;
+			programList.classList.contains("edit").should.be.false;
+			programList.classList.contains("withHelper").should.be.true;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -306,5 +305,5 @@ describe("ProgramsController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery => programList.remove());
+	afterEach((): void => programList.remove());
 });

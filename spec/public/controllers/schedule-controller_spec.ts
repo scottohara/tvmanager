@@ -3,7 +3,6 @@ import type {
 	NavButton,
 	NavButtonEventHandler
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import type { ListEventHandler } from "components";
 import ListMock from "mocks/list-mock";
@@ -17,7 +16,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 
 describe("ScheduleController", (): void => {
 	let items: SeriesMock[],
-			scheduleList: JQuery,
+			scheduleList: HTMLUListElement,
 			scheduleController: ScheduleController;
 
 	beforeEach((): void => {
@@ -28,9 +27,9 @@ describe("ScheduleController", (): void => {
 			new SeriesMock(null, "test-series", null, "1", "test-program-1")
 		];
 
-		scheduleList = $("<ul>")
-			.attr("id", "list")
-			.appendTo(document.body);
+		scheduleList = document.createElement("ul");
+		scheduleList.id = "list";
+		document.body.append(scheduleList);
 
 		scheduleController = new ScheduleController();
 	});
@@ -169,7 +168,7 @@ describe("ScheduleController", (): void => {
 
 		it("should set the list to edit mode", (): Chai.Assertion => (scheduleController["scheduleList"] as ListMock).action.should.equal("edit"));
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
-		it("should set the list item icons", (): Chai.Assertion => scheduleList.hasClass("edit").should.be.true);
+		it("should set the list item icons", (): Chai.Assertion => scheduleList.classList.contains("edit").should.be.true);
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
@@ -200,7 +199,7 @@ describe("ScheduleController", (): void => {
 
 		it("should set the list to view mode", (): Chai.Assertion => (scheduleController["scheduleList"] as ListMock).action.should.equal("view"));
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
-		it("should set the list item icons", (): Chai.Assertion => scheduleList.hasClass("edit").should.be.false);
+		it("should set the list item icons", (): Chai.Assertion => scheduleList.classList.contains("edit").should.be.false);
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
@@ -219,5 +218,5 @@ describe("ScheduleController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery => scheduleList.remove());
+	afterEach((): void => scheduleList.remove());
 });

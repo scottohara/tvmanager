@@ -117,12 +117,11 @@ h1 {
 
 /* Footer title */
 footer {
-	height:33px;
 	background-color: var(--header-footer-background-color);
 	border-top: 1px solid var(--header-footer-separator-color);
 	display: block;
 	font-weight: 500;
-	padding: 10px 0 15px 0;
+	padding: 11px 0 11px 0;
 	text-align: center;
 }
 
@@ -183,7 +182,7 @@ a.header {
 
 /* Position of buttons in footer */
 a.footer {
-	bottom: 22px;
+	bottom: 20px;
 }
 
 /* Position of left buttons */
@@ -239,7 +238,7 @@ ul, #dialog {
 /* Default scrolling lists */
 ul {
 	background-color: var(--list-background-color);
-	padding:0;
+	padding: 0;
 	margin: 0;
 }
 
@@ -649,12 +648,12 @@ input[type="checkbox"]:checked + label:after {
 	visibility: hidden;
 	z-index: 1000;
 	width: 100%;
-	background: var(--notices-background-color);
+	background: var(--default-background-color);
 }
 
 /* Notices */
 div.notice {
-	min-height: 60px;
+	background: var(--notices-background-color);
 	border-top: 1px solid var(--default-background-color);
 }
 
@@ -665,7 +664,7 @@ div.notice a.button {
 
 /* Notice content */
 div.notice p {
-	padding: 10px 5px 10px 50px;
+	padding: 11px 5px 11px 50px;
 	margin: 0;
 	color: var(--notices-text-color);
 }

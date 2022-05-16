@@ -1,4 +1,3 @@
-import $ from "jquery";
 import type { Section } from "components";
 
 export default class ProgressBar {
@@ -24,35 +23,41 @@ export default class ProgressBar {
 		// Only generate the HTML if a total is set
 		if (this.total > 0) {
 			// Create the progress bar div
-			const bar: JQuery = $("<div>")
-				.addClass("progressBar");
+			const bar = document.createElement("div");
+
+			bar.classList.add("progressBar");
 
 			// Append any sections to display
-			bar.append(this.sections
+			bar.append(...this.sections
 
 				// Only output the section if it has a percentage set
 				.filter((section: Section): boolean => section.percent > 0)
 
 				// Create a div for each section
-				.map((section: Section): JQuery => $("<div>")
+				.map((section: Section): HTMLDivElement => {
+					const div = document.createElement("div");
 
 					// Set the CSS class to use for the section
-					.addClass(section.style)
+					div.classList.add(section.style);
 
 					// Set the width of the section to the percentage of the total
-					.width(`${section.percent}%`)
+					div.style.width = `${section.percent}%`;
 
 					// Set the label of the section
-					.text(section.label)));
+					div.textContent = String(section.label);
+
+					return div;
+				}));
 
 			// Create a div for the total
-			$("<div>")
-				.addClass("total")
-				.text(this.total)
-				.appendTo(bar);
+			const total = document.createElement("div");
+
+			total.classList.add("total");
+			total.textContent = String(this.total);
+			bar.append(total);
 
 			// Return the generated HTML
-			return bar.get(0).outerHTML;
+			return bar.outerHTML;
 		}
 
 		// No total specified, just return an empty string

@@ -3,7 +3,6 @@ import type {
 	ListEventHandler,
 	ListItem
 } from "components";
-import $ from "jquery";
 import ApplicationController from "controllers/application-controller";
 import window from "components/window";
 
@@ -25,30 +24,33 @@ export default class List {
 	}
 
 	public refresh(): void {
-		const containerElement: JQuery = $(`#${this.container}`),
-					groupNames: JQuery[] = [];
+		const groupNames: HTMLLIElement[] = [];
 
 		// Clear any existing content from the container element
-		containerElement.html("");
+		this.containerElement.innerHTML = "";
 
 		let itemHtml: string,
 				currentGroup = "";
 
 		// Loop through the array of JSON objects
-		containerElement.append(this.items.reduce((itemElements: JQuery[], item: ListItem, index: number): JQuery[] => {
-			const listItem: Map<string, unknown> = new Map<string, unknown>(Object.entries(item));
+		this.containerElement.append(...this.items.reduce((itemElements: HTMLLIElement[], item: ListItem, itemIndex: number): HTMLLIElement[] => {
+			const listItemProperties = new Map<string, unknown>(Object.entries(item));
 
 			// If grouping is required, when the property used for the group changes, output a group header item
 			if (null !== this.groupBy) {
-				const itemGroup = String(listItem.get(this.groupBy));
+				const itemGroup = String(listItemProperties.get(this.groupBy));
 
 				if (currentGroup !== itemGroup) {
-					itemElements.push($("<li>")
-						.attr("id", itemGroup)
-						.addClass("group")
-						.text(itemGroup));
+					const group = document.createElement("li"),
+								groupName = document.createElement("li");
 
-					groupNames.push($("<li>").text(itemGroup));
+					group.id = `group-${itemGroup}`;
+					group.classList.add("group");
+					group.textContent = itemGroup;
+					itemElements.push(group);
+
+					groupName.textContent = itemGroup;
+					groupNames.push(groupName);
 					currentGroup = itemGroup;
 				}
 			}
@@ -57,58 +59,61 @@ export default class List {
 			itemHtml = this.itemTemplate;
 
 			// Iterate over the properties of the JSON object
-			for (const [key, value] of listItem) {
+			for (const [key, value] of listItemProperties) {
+				const prefix = "id" === key ? "item-" : "";
+
 				// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
-				itemHtml = itemHtml.replace(`#{${key}}`, String(value));
+				itemHtml = itemHtml.replace(`#{${key}}`, `${prefix}${String(value)}`);
 			}
 
 			// Append the item to the list and bind the click event handler
-			itemElements.push($("<li>")
-				.html(itemHtml)
-				.on("click", (): void => this.tap(index)));
+			const listItem = document.createElement("li");
+
+			listItem.innerHTML = itemHtml;
+			listItem.addEventListener("click", (): void => this.tap(itemIndex));
+			itemElements.push(listItem);
 
 			return itemElements;
 		}, []));
 
-		$("<ul>")
-			.attr("id", "index")
-			.append(groupNames)
-			.on("touchstart", (e: JQueryEventObject): unknown => e.preventDefault() as unknown)
-			.on("pointermove", ({ buttons, currentTarget, clientY }: JQueryEventObject & PointerEvent): void => {
-				// Only proceed if we're dragging
-				if (1 === buttons) {
-					const target: JQuery<Element> = $(currentTarget),
-								{ left } = target.offset() as JQuery.Coordinates,
-								groupItem: Element | null = document.elementFromPoint(left, clientY);
+		const index = document.createElement("ul");
 
-					// If the element under the pointer is within the index
-					if (groupItem && $.contains(currentTarget, groupItem)) {
-						// Find an element with an ID that matches the text and scroll it into view
-						$(`#${$(groupItem).text()}`).get(0).scrollIntoView(true);
-					}
+		index.id = "index";
+		index.append(...groupNames);
+		index.addEventListener("touchstart", (e: Event): void => e.preventDefault(), { passive: false });
+		index.addEventListener("pointermove", ({ buttons, clientY }: PointerEvent): void => {
+			// Only proceed if we're dragging
+			if (1 === buttons) {
+				const groupItem = document.elementFromPoint(index.offsetLeft, clientY);
+
+				// If the element under the pointer is within the index
+				if (groupItem && index.contains(groupItem)) {
+					// Find an element with an ID that matches the text and scroll it into view
+					document.querySelector(`#group-${groupItem.textContent}`)?.scrollIntoView(true);
 				}
-			})
-			.appendTo(containerElement);
+			}
+		});
+
+		this.containerElement.append(index);
 
 		// Ask the application controller to set/restore the initial scroll position
 		this.appController.setScrollPosition();
 	}
 
 	public showIndex(): void {
-		$("#index").show();
+		this.index.style.display = "block";
 	}
 
 	public hideIndex(): void {
-		$("#index").hide();
+		this.index.style.display = "none";
 	}
 
 	public scrollTo(id: string): void {
-		const item: JQuery = $(`#${id}`),
-					containerElement: JQuery = $(`#${this.container}`),
-					itemTop: number = item.get(0).offsetTop,
-					itemBottom: number = itemTop + Number(item.height()),
-					listTop = Number(containerElement.scrollTop()),
-					listBottom: number = listTop + Number(containerElement.outerHeight());
+		const item = document.querySelector(`#item-${id}`) as HTMLLIElement,
+					itemTop = item.offsetTop,
+					itemBottom = itemTop + item.offsetHeight,
+					listTop = this.containerElement.scrollTop,
+					listBottom = listTop + this.containerElement.offsetHeight;
 
 		let scrollPos: number | undefined;
 
@@ -116,7 +121,7 @@ export default class List {
 		if (itemTop < listTop) {
 			scrollPos = itemTop;
 		} else if (itemBottom > listBottom) {
-			scrollPos = itemBottom - Number(containerElement.outerHeight());
+			scrollPos = itemBottom - this.containerElement.offsetHeight;
 		}
 
 		// If we have somewhere to scroll, do it now
@@ -179,5 +184,14 @@ export default class List {
 
 			default:
 		}
+	}
+
+	// DOM selectors
+	private get containerElement(): HTMLUListElement {
+		return document.querySelector(`#${this.container}`) as HTMLUListElement;
+	}
+
+	private get index(): HTMLUListElement {
+		return document.querySelector("#index") as HTMLUListElement;
 	}
 }

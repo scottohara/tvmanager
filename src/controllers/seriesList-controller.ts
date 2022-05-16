@@ -2,7 +2,6 @@ import type {
 	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
-import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
 import type { PublicInterface } from "global";
@@ -59,7 +58,7 @@ export default class SeriesListController extends ViewController {
 
 	public override contentShown(): void {
 		// If there is an active list item, scroll it into view
-		if (null !== this.activeListItem && $(`#${this.activeListItem.id}`).length) {
+		if (null !== this.activeListItem && this.list.querySelector(`#item-${this.activeListItem.id}`)) {
 			this.seriesList.scrollTo(String(this.activeListItem.id));
 		}
 	}
@@ -109,9 +108,8 @@ export default class SeriesListController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the delete icons next to each list item
-		$("#list")
-			.removeClass()
-			.addClass("delete");
+		this.list.className = "";
+		this.list.classList.add("delete");
 
 		// Setup the footer
 		this.footer = {
@@ -135,9 +133,8 @@ export default class SeriesListController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the edit icons next to each list item
-		$("#list")
-			.removeClass()
-			.addClass("edit");
+		this.list.className = "";
+		this.list.classList.add("edit");
 
 		// Setup the footer
 		this.footer = {
@@ -161,7 +158,7 @@ export default class SeriesListController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the view icons next to each list item
-		$("#list").removeClass();
+		this.list.className = "";
 
 		// Setup the footer
 		this.footer = {
@@ -179,5 +176,10 @@ export default class SeriesListController extends ViewController {
 
 		// Set the view footer
 		this.appController.setFooter();
+	}
+
+	// DOM selectors
+	private get list(): HTMLUListElement {
+		return document.querySelector("#list") as HTMLUListElement;
 	}
 }

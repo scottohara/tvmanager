@@ -11,7 +11,6 @@ import type {
 	SinonSpy,
 	SinonStub
 } from "sinon";
-import $ from "jquery";
 import ApplicationController from "../../../src/controllers/application-controller";
 import SettingMock from "mocks/setting-model-mock";
 import SyncMock from "mocks/sync-model-mock";
@@ -20,18 +19,18 @@ import WindowMock from "mocks/window-mock";
 import sinon from "sinon";
 
 describe("ApplicationController", (): void => {
-	let contentWrapper: JQuery,
-			content: JQuery,
+	let contentWrapper: HTMLDivElement,
+			content: HTMLDivElement,
 			applicationController: ApplicationController;
 
 	beforeEach((): void => {
-		contentWrapper = $("<div>")
-			.attr("id", "contentWrapper")
-			.appendTo(document.body);
+		contentWrapper = document.createElement("div");
+		contentWrapper.id = "contentWrapper";
+		document.body.append(contentWrapper);
 
-		content = $("<div>")
-			.attr("id", "content")
-			.appendTo(contentWrapper);
+		content = document.createElement("div");
+		content.id = "content";
+		contentWrapper.append(content);
 
 		sinon.spy(ApplicationController.prototype, "contentShown" as keyof ApplicationController);
 		ApplicationController["singletonInstance"] = undefined;
@@ -42,11 +41,11 @@ describe("ApplicationController", (): void => {
 		it("should return an ApplicationController instance", (): Chai.Assertion => applicationController.should.be.an.instanceOf(ApplicationController));
 		it("should make the instance a singleton", (): Chai.Assertion => applicationController.should.equal(ApplicationController["singletonInstance"]));
 		it("should initialise the view stack", (): Chai.Assertion => applicationController.viewStack.should.deep.equal([]));
-		it("should initialise the notice stack", (): Chai.Assertion => applicationController["noticeStack"].should.deep.equal({ height: 0, notice: [] }));
+		it("should initialise the notice stack", (): Chai.Assertion => applicationController["noticeStack"].should.deep.equal({ height: -20, notice: [] }));
 		it("should set the max data age days", (): Chai.Assertion => applicationController["maxDataAgeDays"].should.equal(7));
 
 		it("should attach a transition end event handler", (): void => {
-			contentWrapper.trigger("transitionend");
+			contentWrapper.dispatchEvent(new Event("transitionend"));
 			applicationController["contentShown"].should.have.been.called;
 		});
 
@@ -98,12 +97,16 @@ describe("ApplicationController", (): void => {
 
 	describe("getScrollPosition", (): void => {
 		it("should save the current scroll position of the active view", (): void => {
-			$("<div>")
-				.height(50)
-				.css("overflow-y", "scroll")
-				.append($("<div>").height(100))
-				.appendTo(content)
-				.scrollTop(10);
+			const scrollingElement = document.createElement("div"),
+						item = document.createElement("div");
+
+			item.style.height = "100px";
+			scrollingElement.style.height = "50px";
+			scrollingElement.style.overflowY = "scroll";
+			scrollingElement.append(item);
+
+			content.append(scrollingElement);
+			scrollingElement.scrollTop = 10;
 
 			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
 			applicationController.getScrollPosition();
@@ -112,22 +115,28 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("setScrollPosition", (): void => {
-		let scrollingElement: JQuery;
+		let scrollingElement: HTMLDivElement;
 
 		beforeEach((): void => {
-			scrollingElement = $("<div>")
-				.height(50)
-				.css("overflow-y", "scroll")
-				.append($("<div>").height(100))
-				.append($("<div>").height(100))
-				.appendTo(content);
+			const item1 = document.createElement("div"),
+						item2 = document.createElement("div");
+
+			item1.style.height = "100px";
+			item2.style.height = "100px";
+
+			scrollingElement = document.createElement("div");
+			scrollingElement.style.height = "50px";
+			scrollingElement.style.overflowY = "scroll";
+			scrollingElement.append(item1, item2);
+
+			content.append(scrollingElement);
 		});
 
 		describe("scroll position is -1", (): void => {
 			it("should scroll to the bottom", (): void => {
 				applicationController.viewStack.push({ controller: new TestController(), scrollPos: -1 });
 				applicationController.setScrollPosition();
-				Number(scrollingElement.scrollTop()).should.equal(100 + scrollingElement.position().top);
+				scrollingElement.scrollTop.should.equal(100 + scrollingElement.offsetTop);
 			});
 		});
 
@@ -135,34 +144,33 @@ describe("ApplicationController", (): void => {
 			it("should restore the saved scroll position of the active view", (): void => {
 				applicationController.viewStack.push({ controller: new TestController(), scrollPos: 20 });
 				applicationController.setScrollPosition();
-				Number(scrollingElement.scrollTop()).should.equal(20);
+				scrollingElement.scrollTop.should.equal(20);
 			});
 		});
 	});
 
 	describe("setFooter", (): void => {
 		let controller: TestController,
-				leftButton: JQuery,
-				rightButton: JQuery,
-				label: JQuery;
+				leftButton: HTMLAnchorElement,
+				rightButton: HTMLAnchorElement,
+				label: HTMLElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
 
-			leftButton = $("<a>")
-				.attr("id", "footerLeftButton")
-				.hide()
-				.appendTo(document.body);
+			leftButton = document.createElement("a");
+			leftButton.id = "footerLeftButton";
+			leftButton.style.display = "none";
 
-			rightButton = $("<a>")
-				.attr("id", "footerRightButton")
-				.hide()
-				.appendTo(document.body);
+			rightButton = document.createElement("a");
+			rightButton.id = "footerRightButton";
+			rightButton.style.display = "none";
 
-			label = $("<h1>")
-				.attr("id", "footerLabel")
-				.hide()
-				.appendTo(document.body);
+			label = document.createElement("footer");
+			label.id = "footerLabel";
+			label.style.display = "none";
+
+			document.body.append(leftButton, label, rightButton);
 
 			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
 		});
@@ -174,7 +182,7 @@ describe("ApplicationController", (): void => {
 				applicationController.setFooter();
 			});
 
-			it("should not show the footer label", (): Chai.Assertion => label.css("display").should.equal("none"));
+			it("should not show the footer label", (): Chai.Assertion => label.style.display.should.equal("none"));
 			it("should not update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.not.have.been.called);
 		});
 
@@ -195,32 +203,37 @@ describe("ApplicationController", (): void => {
 					beforeEach((): void => applicationController.setFooter());
 
 					it("should attach a click event handler", (): void => {
-						leftButton.trigger("click");
+						leftButton.dispatchEvent(new MouseEvent("click"));
 						leftButtonEventHandler.should.have.been.called;
 					});
 
 					it("should style the button", (): void => {
-						leftButton.hasClass("button").should.be.true;
-						leftButton.hasClass("footer").should.be.true;
-						leftButton.hasClass("left").should.be.true;
-						leftButton.hasClass("backButton").should.be.true;
+						leftButton.classList.contains("button").should.be.true;
+						leftButton.classList.contains("footer").should.be.true;
+						leftButton.classList.contains("left").should.be.true;
+						leftButton.classList.contains("backButton").should.be.true;
 					});
 
-					it("should set the button label", (): Chai.Assertion => leftButton.text().should.equal("left-button"));
-					it("should show the button", (): Chai.Assertion => leftButton.css("display").should.not.equal("none"));
-					it("should show the footer label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+					it("should set the button label", (): Chai.Assertion => String(leftButton.textContent).should.equal("left-button"));
+					it("should show the button", (): Chai.Assertion => leftButton.style.display.should.not.equal("none"));
+					it("should show the footer label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 					it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 				});
 
 				describe("without event handler", (): void => {
-					beforeEach((): void => {
+					it("should not attach a click event handler", (): void => {
 						(footer.leftButton as NavButton).eventHandler = undefined;
 						applicationController.setFooter();
-					});
-
-					it("should not attach a click event handler", (): void => {
-						leftButton.trigger("click");
+						leftButton.dispatchEvent(new MouseEvent("click"));
 						leftButtonEventHandler.should.not.have.been.called;
+					});
+				});
+
+				describe("without button style", (): void => {
+					it("should not style the button", (): void => {
+						(footer.leftButton as NavButton).style = undefined;
+						applicationController.setFooter();
+						leftButton.classList.contains("backButton").should.be.false;
 					});
 				});
 			});
@@ -232,28 +245,28 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not attach a click event handler", (): void => {
-					leftButton.trigger("click");
+					leftButton.dispatchEvent(new MouseEvent("click"));
 					leftButtonEventHandler.should.not.have.been.called;
 				});
 
 				it("should not style the button", (): void => {
-					leftButton.hasClass("button").should.be.false;
-					leftButton.hasClass("footer").should.be.false;
-					leftButton.hasClass("left").should.be.false;
-					leftButton.hasClass("backButton").should.be.false;
+					leftButton.classList.contains("button").should.be.false;
+					leftButton.classList.contains("footer").should.be.false;
+					leftButton.classList.contains("left").should.be.false;
+					leftButton.classList.contains("backButton").should.be.false;
 				});
 
-				it("should not set the button label", (): Chai.Assertion => leftButton.text().should.equal(""));
-				it("should not show the button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-				it("should show the footer label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+				it("should not set the button label", (): Chai.Assertion => String(leftButton.textContent).should.equal(""));
+				it("should not show the button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+				it("should show the footer label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
 			describe("with footer label", (): void => {
 				beforeEach((): void => applicationController.setFooter());
 
-				it("should set the footer label", (): Chai.Assertion => label.text().should.equal("test-footer"));
-				it("should show the footer label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+				it("should set the footer label", (): Chai.Assertion => String(label.textContent).should.equal("test-footer"));
+				it("should show the footer label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -263,8 +276,8 @@ describe("ApplicationController", (): void => {
 					applicationController.setFooter();
 				});
 
-				it("should not set the footer label", (): Chai.Assertion => label.text().should.equal(""));
-				it("should show the footer label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+				it("should not set the footer label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+				it("should show the footer label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -273,32 +286,37 @@ describe("ApplicationController", (): void => {
 					beforeEach((): void => applicationController.setFooter());
 
 					it("should attach a click event handler", (): void => {
-						rightButton.trigger("click");
+						rightButton.dispatchEvent(new MouseEvent("click"));
 						rightButtonEventHandler.should.have.been.called;
 					});
 
 					it("should style the button", (): void => {
-						rightButton.hasClass("button").should.be.true;
-						rightButton.hasClass("footer").should.be.true;
-						rightButton.hasClass("right").should.be.true;
-						rightButton.hasClass("confirmButton").should.be.true;
+						rightButton.classList.contains("button").should.be.true;
+						rightButton.classList.contains("footer").should.be.true;
+						rightButton.classList.contains("right").should.be.true;
+						rightButton.classList.contains("confirmButton").should.be.true;
 					});
 
-					it("should set the button label", (): Chai.Assertion => rightButton.text().should.equal("right-button"));
-					it("should show the button", (): Chai.Assertion => rightButton.css("display").should.not.equal("none"));
-					it("should show the footer label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+					it("should set the button label", (): Chai.Assertion => String(rightButton.textContent).should.equal("right-button"));
+					it("should show the button", (): Chai.Assertion => rightButton.style.display.should.not.equal("none"));
+					it("should show the footer label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 					it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 				});
 
 				describe("without event handler", (): void => {
-					beforeEach((): void => {
+					it("should not attach a click event handler", (): void => {
 						(footer.rightButton as NavButton).eventHandler = undefined;
 						applicationController.setFooter();
-					});
-
-					it("should not attach a click event handler", (): void => {
-						rightButton.trigger("click");
+						rightButton.dispatchEvent(new MouseEvent("click"));
 						rightButtonEventHandler.should.not.have.been.called;
+					});
+				});
+
+				describe("without button style", (): void => {
+					it("should not style the button", (): void => {
+						(footer.rightButton as NavButton).style = undefined;
+						applicationController.setFooter();
+						rightButton.classList.contains("confirmButton").should.be.false;
 					});
 				});
 			});
@@ -310,20 +328,20 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not attach a click event handler", (): void => {
-					rightButton.trigger("click");
+					rightButton.dispatchEvent(new MouseEvent("click"));
 					rightButtonEventHandler.should.not.have.been.called;
 				});
 
 				it("should not style the button", (): void => {
-					rightButton.hasClass("button").should.be.false;
-					rightButton.hasClass("footer").should.be.false;
-					rightButton.hasClass("right").should.be.false;
-					rightButton.hasClass("confirmButton").should.be.false;
+					rightButton.classList.contains("button").should.be.false;
+					rightButton.classList.contains("footer").should.be.false;
+					rightButton.classList.contains("right").should.be.false;
+					rightButton.classList.contains("confirmButton").should.be.false;
 				});
 
-				it("should not set the button label", (): Chai.Assertion => rightButton.text().should.equal(""));
-				it("should not show the button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
-				it("should show the footer label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+				it("should not set the button label", (): Chai.Assertion => String(rightButton.textContent).should.equal(""));
+				it("should not show the button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
+				it("should show the footer label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 		});
@@ -397,280 +415,140 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("showNotice", (): void => {
-		let notices: JQuery,
+		let notices: HTMLDivElement,
 				notice: Notice,
-				buttonConfig: NavButton,
-				eventHandler: SinonStub,
-				noticeContainer: JQuery,
-				button: JQuery;
+				noticeContainer: HTMLDivElement,
+				button: HTMLAnchorElement;
 
 		beforeEach((): void => {
-			notices = $("<div>")
-				.attr("id", "notices")
-				.css("position", "absolute")
-				.css("visibility", "hidden")
-				.css("top", "0px")
-				.appendTo(document.body);
-
-			buttonConfig = {
-				style: "confirmButton",
-				label: "Test button"
-			};
+			notices = document.createElement("div");
+			notices.id = "notices";
+			notices.style.position = "absolute";
+			notices.style.visibility = "hidden";
+			notices.style.top = "0px";
+			document.body.append(notices);
 
 			sinon.stub(applicationController, "noticesMoved" as keyof ApplicationController);
 			sinon.stub(applicationController, "hideNotice" as keyof ApplicationController);
 			notice = { label: "<b>test-notice</b>" };
-			eventHandler = sinon.stub();
 			applicationController["noticeStack"].height = 0;
 			applicationController["noticeStack"].notice = [];
-			WindowMock.innerHeight = 1;
-			$.fx.off = true;
+			WindowMock.innerHeight = 50;
 		});
 
-		it("should create a new notice", (): void => {
-			applicationController.showNotice(notice);
-			noticeContainer = notices.children("div");
-
-			noticeContainer.length.should.equal(1);
-			noticeContainer.html().should.equal("<a></a><p><b>test-notice</b></p><a></a>");
-		});
-
-		describe("with left button", (): void => {
-			beforeEach((): NavButton => (notice.leftButton = buttonConfig));
-
-			describe("with custom event handler", (): void => {
-				beforeEach((): void => {
-					buttonConfig.eventHandler = eventHandler;
-					applicationController.showNotice(notice);
-					noticeContainer = notices.children("div");
-					button = noticeContainer.children("a:first");
-					button.trigger("click");
-				});
-
-				it("should attach a custom click event handler", (): Chai.Assertion => eventHandler.should.have.been.called);
-				it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: JQuery): boolean => element[0] === noticeContainer[0])));
-
-				it("should style the button", (): void => {
-					button.hasClass("button").should.be.true;
-					button.hasClass("left").should.be.true;
-					button.hasClass("confirmButton").should.be.true;
-				});
-
-				it("should set the button label", (): Chai.Assertion => button.text().should.equal("Test button"));
-			});
-
-			describe("without custom event handler", (): void => {
-				beforeEach((): void => {
-					applicationController.showNotice(notice);
-					noticeContainer = notices.children("div");
-					button = noticeContainer.children("a:first");
-					button.trigger("click");
-				});
-
-				it("should not attach a custom click event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
-				it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: JQuery): boolean => element[0] === noticeContainer[0])));
-
-				it("should style the button", (): void => {
-					button.hasClass("button").should.be.true;
-					button.hasClass("left").should.be.true;
-					button.hasClass("confirmButton").should.be.true;
-				});
-
-				it("should set the button label", (): Chai.Assertion => button.text().should.equal("Test button"));
-			});
-		});
-
-		describe("without left button", (): void => {
+		describe("notice", (): void => {
 			beforeEach((): void => {
 				applicationController.showNotice(notice);
-				noticeContainer = notices.children("div");
-				button = noticeContainer.children("a:first");
-				button.trigger("click");
+				noticeContainer = notices.querySelector("div") as HTMLDivElement;
+				button = noticeContainer.querySelector("a") as HTMLAnchorElement;
+				button.dispatchEvent(new MouseEvent("click"));
 			});
 
-			it("should not attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.not.have.been.called);
-
-			it("should not style the button", (): void => {
-				button.hasClass("button").should.be.false;
-				button.hasClass("left").should.be.false;
-				button.hasClass("confirmButton").should.be.false;
+			it("should create a new notice", (): void => {
+				noticeContainer.innerHTML.should.equal("<a class=\"button left cautionButton\">OK</a><p><b>test-notice</b></p>");
 			});
 
-			it("should not set the button label", (): Chai.Assertion => button.text().should.equal(""));
+			it("should attach a hide click event handler", (): Chai.Assertion => applicationController["hideNotice"].should.have.been.calledWith(sinon.match((element: HTMLDivElement): boolean => element === noticeContainer)));
 		});
 
 		describe("with notice id", (): void => {
 			it("should set the notice id", (): void => {
 				notice.id = "test-notice";
 				applicationController.showNotice(notice);
-				notices.find("div p#test-notice").length.should.equal(1);
+				(null === notices.querySelector("div p#test-notice")).should.be.false;
 			});
 		});
 
 		describe("without notice id", (): void => {
 			it("should not set the notice id", (): void => {
 				applicationController.showNotice(notice);
-				notices.find("div p#test-notice").length.should.equal(0);
+				(null === notices.querySelector("div p#test-notice")).should.be.true;
 			});
-		});
-
-		describe("with right button", (): void => {
-			beforeEach((): NavButton => (notice.rightButton = buttonConfig));
-
-			describe("with custom event handler", (): void => {
-				beforeEach((): void => {
-					buttonConfig.eventHandler = eventHandler;
-					applicationController.showNotice(notice);
-					noticeContainer = notices.children("div");
-					button = noticeContainer.children("a:last");
-					button.trigger("click");
-				});
-
-				it("should attach a custom click event handler", (): Chai.Assertion => eventHandler.should.have.been.called);
-
-				it("should style the button", (): void => {
-					button.hasClass("button").should.be.true;
-					button.hasClass("right").should.be.true;
-					button.hasClass("confirmButton").should.be.true;
-				});
-
-				it("should set the button label", (): Chai.Assertion => button.text().should.equal("Test button"));
-			});
-
-			describe("without custom event handler", (): void => {
-				beforeEach((): void => {
-					applicationController.showNotice(notice);
-					noticeContainer = notices.children("div");
-					button = noticeContainer.children("a:last");
-					button.trigger("click");
-				});
-
-				it("should not attach a custom click event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
-
-				it("should style the button", (): void => {
-					button.hasClass("button").should.be.true;
-					button.hasClass("right").should.be.true;
-					button.hasClass("confirmButton").should.be.true;
-				});
-
-				it("should set the button label", (): Chai.Assertion => button.text().should.equal("Test button"));
-			});
-		});
-
-		describe("without right button", (): void => {
-			beforeEach((): void => {
-				applicationController.showNotice(notice);
-				noticeContainer = notices.children("div");
-				button = noticeContainer.children("a:last");
-				button.trigger("click");
-			});
-
-			it("should not style the button", (): void => {
-				button.hasClass("button").should.be.false;
-				button.hasClass("right").should.be.false;
-				button.hasClass("confirmButton").should.be.false;
-			});
-
-			it("should not set the button label", (): Chai.Assertion => button.text().should.equal(""));
 		});
 
 		describe("initial notice", (): void => {
-			beforeEach((): void => {
-				sinon.stub($.fn, "animate");
-				applicationController.showNotice(notice);
-			});
+			beforeEach((): void => applicationController.showNotice(notice));
 
-			it("should position the notice stack off screen", (): Chai.Assertion => notices.css("top").should.equal("1px"));
-			it("should make the notice stack visible", (): Chai.Assertion => notices.css("visibility").should.equal("visible"));
-
-			afterEach((): void => ($.fn.animate as SinonStub).restore());
+			it("should position the notice stack off screen", (): Chai.Assertion => notices.style.top.should.equal("50px"));
+			it("should make the notice stack visible", (): Chai.Assertion => notices.style.visibility.should.equal("visible"));
 		});
 
 		describe("subsequent notice", (): void => {
 			beforeEach((): void => {
-				sinon.stub($.fn, "animate");
-				applicationController["noticeStack"].notice.push($("<div>"));
+				applicationController["noticeStack"].notice.push(document.createElement("div"));
 				applicationController.showNotice(notice);
 			});
 
-			it("should not position the notice stack off screen", (): Chai.Assertion => notices.css("top").should.equal("0px"));
-			it("should make the notice stack visible", (): Chai.Assertion => notices.css("visibility").should.equal("hidden"));
-
-			afterEach((): void => ($.fn.animate as SinonStub).restore());
+			it("should not position the notice stack off screen", (): Chai.Assertion => notices.style.top.should.equal("0px"));
+			it("should make the notice stack visible", (): Chai.Assertion => notices.style.visibility.should.equal("hidden"));
 		});
 
 		it("should update the height of the notice stack to accomodate the new notice", (): void => {
 			applicationController["noticeStack"].height = 0;
 			applicationController.showNotice(notice);
-			noticeContainer = notices.children("div");
-			applicationController["noticeStack"].height.should.equal(-Number(noticeContainer.height()));
+			noticeContainer = notices.querySelector("div") as HTMLDivElement;
+			applicationController["noticeStack"].height.should.equal(-noticeContainer.offsetHeight);
 		});
 
 		it("should push the notice onto the stack", (): void => {
 			applicationController.showNotice(notice);
-			noticeContainer = notices.children("div");
-			(applicationController["noticeStack"].notice.pop() as JQuery)[0].should.equal(noticeContainer[0]);
+			noticeContainer = notices.querySelector("div") as HTMLDivElement;
+			(applicationController["noticeStack"].notice.pop() as HTMLDivElement).should.equal(noticeContainer);
 		});
 
 		describe("animation", (): void => {
-			let windowHeight: number;
-
 			beforeEach((done: Mocha.Done): void => {
 				(applicationController["noticesMoved"] as SinonStub).callsFake((): void => done());
-				sinon.spy($.fn, "animate");
+				sinon.spy(notices, "animate");
 				applicationController["noticeStack"].height = 0;
-				windowHeight = Number($(window).height());
 				applicationController.showNotice(notice);
+				notices.getAnimations().forEach((animation: Animation): void => animation.finish());
 			});
 
 			it("should slide up the notices container to reveal the notice", (): void => {
-				noticeContainer = notices.children("div");
-				$.fn.animate.should.have.been.calledWith({ top: windowHeight - Number(noticeContainer.height()) });
+				noticeContainer = notices.querySelector("div") as HTMLDivElement;
+				notices.animate.should.have.been.calledWith({ transform: `translateY(-${noticeContainer.offsetHeight}px)` });
 			});
 
 			it("should invoke the completed callback", (): Chai.Assertion => applicationController["noticesMoved"].should.have.been.called);
 
-			afterEach((): void => ($.fn.animate as SinonSpy).restore());
+			afterEach((): void => (notices.animate as SinonSpy).restore());
 		});
 
-		afterEach((): void => {
-			notices.remove();
-			$.fx.off = false;
-		});
+		afterEach((): void => notices.remove());
 	});
 
 	describe("clearFooter", (): void => {
 		let controller: TestController,
 				footer: HeaderFooter,
-				leftButtonEventHandler: (event: JQueryEventObject) => void,
-				rightButtonEventHandler: (event: JQueryEventObject) => void,
-				leftButton: JQuery,
-				rightButton: JQuery,
-				label: JQuery;
+				leftButtonEventHandler: NavButtonEventHandler,
+				rightButtonEventHandler: NavButtonEventHandler,
+				leftButton: HTMLAnchorElement,
+				rightButton: HTMLAnchorElement,
+				label: HTMLElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
 			footer = controller.footer as HeaderFooter;
-			leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
-			rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
+			leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as NavButtonEventHandler;
+			rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as NavButtonEventHandler;
 
-			leftButton = $("<a>")
-				.attr("id", "footerLeftButton")
-				.on("click", leftButtonEventHandler)
-				.show()
-				.appendTo(document.body);
+			leftButton = document.createElement("a");
+			leftButton.id = "footerLeftButton";
+			leftButton.addEventListener("click", leftButtonEventHandler);
+			leftButton.style.display = "inline";
 
-			rightButton = $("<a>")
-				.attr("id", "footerRightButton")
-				.on("click", rightButtonEventHandler)
-				.show()
-				.appendTo(document.body);
+			rightButton = document.createElement("a");
+			rightButton.id = "footerRightButton";
+			rightButton.addEventListener("click", rightButtonEventHandler);
+			rightButton.style.display = "inline";
 
-			label = $("<h1>")
-				.attr("id", "footerLabel")
-				.show()
-				.val("Test footer")
-				.appendTo(document.body);
+			label = document.createElement("h1");
+			label.id = "footerLabel";
+			label.style.display = "block";
+			label.textContent = "Test footer";
+
+			document.body.append(leftButton, label, rightButton);
 
 			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
 		});
@@ -682,10 +560,10 @@ describe("ApplicationController", (): void => {
 				applicationController.clearFooter();
 			});
 
-			it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-			it("should clear the footer label", (): Chai.Assertion => String(label.val()).should.equal(""));
-			it("should hide the footer label", (): Chai.Assertion => label.css("display").should.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+			it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+			it("should clear the footer label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+			it("should hide the footer label", (): Chai.Assertion => label.style.display.should.equal("none"));
+			it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -696,14 +574,14 @@ describe("ApplicationController", (): void => {
 				beforeEach((): void => applicationController.clearFooter());
 
 				it("should detach the click event handler", (): void => {
-					leftButton.trigger("click");
+					leftButton.dispatchEvent(new MouseEvent("click"));
 					leftButtonEventHandler.should.not.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => String(label.val()).should.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => label.css("display").should.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+				it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+				it("should hide the footer label", (): Chai.Assertion => label.style.display.should.equal("none"));
+				it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -714,14 +592,14 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not detach the click event handler", (): void => {
-					leftButton.trigger("click");
+					leftButton.dispatchEvent(new MouseEvent("click"));
 					leftButtonEventHandler.should.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => String(label.val()).should.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => label.css("display").should.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+				it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+				it("should hide the footer label", (): Chai.Assertion => label.style.display.should.equal("none"));
+				it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -729,14 +607,14 @@ describe("ApplicationController", (): void => {
 				beforeEach((): void => applicationController.clearFooter());
 
 				it("should detach the click event handler", (): void => {
-					rightButton.trigger("click");
+					rightButton.dispatchEvent(new MouseEvent("click"));
 					rightButtonEventHandler.should.not.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => String(label.val()).should.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => label.css("display").should.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+				it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+				it("should hide the footer label", (): Chai.Assertion => label.style.display.should.equal("none"));
+				it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -747,14 +625,14 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not detach the click event handler", (): void => {
-					rightButton.trigger("click");
+					rightButton.dispatchEvent(new MouseEvent("click"));
 					rightButtonEventHandler.should.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => String(label.val()).should.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => label.css("display").should.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+				it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+				it("should hide the footer label", (): Chai.Assertion => label.style.display.should.equal("none"));
+				it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 		});
@@ -817,13 +695,13 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("show", (): void => {
-		let nowLoading: JQuery,
+		let nowLoading: HTMLDivElement,
 				callback: SinonSpy;
 
 		beforeEach(async (): Promise<void> => {
-			nowLoading = $("<div>")
-				.attr("id", "nowLoading")
-				.appendTo(document.body);
+			nowLoading = document.createElement("div");
+			nowLoading.id = "nowLoading";
+			document.body.append(nowLoading);
 
 			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
@@ -831,34 +709,34 @@ describe("ApplicationController", (): void => {
 			await applicationController["show"](callback, {} as ViewControllerArgs);
 		});
 
-		it("should show the now loading indicator", (): Chai.Assertion => nowLoading.hasClass("loading").should.be.true);
-		it("should load the view template", (): Chai.Assertion => content.html().should.equal("<div></div>"));
+		it("should show the now loading indicator", (): Chai.Assertion => nowLoading.classList.contains("loading").should.be.true);
+		it("should load the view template", (): Chai.Assertion => content.innerHTML.should.equal("<div></div>"));
 		it("should invoke the callback", (): Chai.Assertion => callback.should.have.been.calledWith({}));
-		it("should slide the new view in from the right", (): Chai.Assertion => contentWrapper.hasClass("loading").should.be.true);
+		it("should slide the new view in from the right", (): Chai.Assertion => contentWrapper.classList.contains("loading").should.be.true);
 		it("should set the header", (): Chai.Assertion => applicationController["setHeader"].should.have.been.called);
 
-		afterEach((): JQuery => nowLoading.remove());
+		afterEach((): void => nowLoading.remove());
 	});
 
 	describe("contentShown", (): void => {
-		let nowLoading: JQuery;
+		let nowLoading: HTMLDivElement;
 
 		beforeEach((): void => {
-			nowLoading = $("<div>")
-				.attr("id", "nowLoading")
-				.addClass("loading")
-				.appendTo(document.body);
+			nowLoading = document.createElement("div");
+			nowLoading.id = "nowLoading";
+			nowLoading.classList.add("loading");
+			document.body.append(nowLoading);
 		});
 
 		describe("loading", (): void => {
 			beforeEach((): void => {
-				contentWrapper.addClass("loading");
+				contentWrapper.classList.add("loading");
 				applicationController["contentShown"]();
 			});
 
-			it("should unmark the content wrapper as loading", (): Chai.Assertion => contentWrapper.hasClass("loading").should.be.false);
-			it("should mark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.hasClass("loaded").should.be.true);
-			it("should hide the now loading indicator", (): Chai.Assertion => nowLoading.hasClass("loading").should.be.false);
+			it("should unmark the content wrapper as loading", (): Chai.Assertion => contentWrapper.classList.contains("loading").should.be.false);
+			it("should mark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.classList.contains("loaded").should.be.true);
+			it("should hide the now loading indicator", (): Chai.Assertion => nowLoading.classList.contains("loading").should.be.false);
 		});
 
 		describe("loaded", (): void => {
@@ -868,7 +746,7 @@ describe("ApplicationController", (): void => {
 			beforeEach((): void => {
 				controller = new TestController();
 				contentShown = sinon.stub();
-				contentWrapper.addClass("loaded");
+				contentWrapper.classList.add("loaded");
 			});
 
 			describe("without content shown", (): void => {
@@ -877,7 +755,7 @@ describe("ApplicationController", (): void => {
 					applicationController["contentShown"]();
 				});
 
-				it("should unmark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.hasClass("loaded").should.be.false);
+				it("should unmark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.classList.contains("loaded").should.be.false);
 				it("should not call contentShown on the view controller", (): Chai.Assertion => contentShown.should.not.have.been.called);
 			});
 
@@ -888,7 +766,7 @@ describe("ApplicationController", (): void => {
 					applicationController["contentShown"]();
 				});
 
-				it("should unmark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.hasClass("loaded").should.be.false);
+				it("should unmark the content wrapper as loaded", (): Chai.Assertion => contentWrapper.classList.contains("loaded").should.be.false);
 				it("should call contentShown on the view controller", (): Chai.Assertion => contentShown.should.have.been.called);
 			});
 		});
@@ -896,13 +774,13 @@ describe("ApplicationController", (): void => {
 		describe("unknown state", (): void => {
 			it("should do nothing", (): void => {
 				applicationController["contentShown"]();
-				contentWrapper.hasClass("loading").should.be.false;
-				contentWrapper.hasClass("loaded").should.be.false;
-				nowLoading.hasClass("loading").should.be.true;
+				contentWrapper.classList.contains("loading").should.be.false;
+				contentWrapper.classList.contains("loaded").should.be.false;
+				nowLoading.classList.contains("loading").should.be.true;
 			});
 		});
 
-		afterEach((): JQuery => nowLoading.remove());
+		afterEach((): void => nowLoading.remove());
 	});
 
 	describe("setHeader", (): void => {
@@ -910,9 +788,9 @@ describe("ApplicationController", (): void => {
 				header: HeaderFooter,
 				leftButtonEventHandler: NavButtonEventHandler,
 				rightButtonEventHandler: NavButtonEventHandler,
-				leftButton: JQuery,
-				rightButton: JQuery,
-				label: JQuery;
+				leftButton: HTMLAnchorElement,
+				rightButton: HTMLAnchorElement,
+				label: HTMLHeadingElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -920,20 +798,19 @@ describe("ApplicationController", (): void => {
 			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as NavButtonEventHandler;
 			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as NavButtonEventHandler;
 
-			leftButton = $("<a>")
-				.attr("id", "headerLeftButton")
-				.hide()
-				.appendTo(document.body);
+			leftButton = document.createElement("a");
+			leftButton.id = "headerLeftButton";
+			leftButton.style.display = "none";
 
-			rightButton = $("<a>")
-				.attr("id", "headerRightButton")
-				.hide()
-				.appendTo(document.body);
+			rightButton = document.createElement("a");
+			rightButton.id = "headerRightButton";
+			rightButton.style.display = "none";
 
-			label = $("<h1>")
-				.attr("id", "headerLabel")
-				.hide()
-				.appendTo(document.body);
+			label = document.createElement("h1");
+			label.id = "headerLabel";
+			label.style.display = "none";
+
+			document.body.append(leftButton, label, rightButton);
 
 			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller, scrollPos: 0 });
@@ -944,19 +821,19 @@ describe("ApplicationController", (): void => {
 				beforeEach((): void => applicationController["setHeader"]());
 
 				it("should attach a click event handler", (): void => {
-					leftButton.trigger("click");
+					leftButton.dispatchEvent(new MouseEvent("click"));
 					leftButtonEventHandler.should.have.been.called;
 				});
 
 				it("should style the button", (): void => {
-					leftButton.hasClass("button").should.be.true;
-					leftButton.hasClass("header").should.be.true;
-					leftButton.hasClass("left").should.be.true;
-					leftButton.hasClass("backButton").should.be.true;
+					leftButton.classList.contains("button").should.be.true;
+					leftButton.classList.contains("header").should.be.true;
+					leftButton.classList.contains("left").should.be.true;
+					leftButton.classList.contains("backButton").should.be.true;
 				});
 
-				it("should set the button label", (): Chai.Assertion => leftButton.text().should.equal("left-button"));
-				it("should show the button", (): Chai.Assertion => leftButton.css("display").should.not.equal("none"));
+				it("should set the button label", (): Chai.Assertion => String(leftButton.textContent).should.equal("left-button"));
+				it("should show the button", (): Chai.Assertion => leftButton.style.display.should.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -967,8 +844,16 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not attach a click event handler", (): void => {
-					leftButton.trigger("click");
+					leftButton.dispatchEvent(new MouseEvent("click"));
 					leftButtonEventHandler.should.not.have.been.called;
+				});
+			});
+
+			describe("without button style", (): void => {
+				it("should not style the button", (): void => {
+					(header.leftButton as NavButton).style = undefined;
+					applicationController["setHeader"]();
+					leftButton.classList.contains("backButton").should.be.false;
 				});
 			});
 		});
@@ -980,27 +865,27 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not attach a click event handler", (): void => {
-				leftButton.trigger("click");
+				leftButton.dispatchEvent(new MouseEvent("click"));
 				leftButtonEventHandler.should.not.have.been.called;
 			});
 
 			it("should not style the button", (): void => {
-				leftButton.hasClass("button").should.be.false;
-				leftButton.hasClass("header").should.be.false;
-				leftButton.hasClass("left").should.be.false;
-				leftButton.hasClass("backButton").should.be.false;
+				leftButton.classList.contains("button").should.be.false;
+				leftButton.classList.contains("header").should.be.false;
+				leftButton.classList.contains("left").should.be.false;
+				leftButton.classList.contains("backButton").should.be.false;
 			});
 
-			it("should not set the button label", (): Chai.Assertion => leftButton.text().should.equal(""));
-			it("should not show the button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
+			it("should not set the button label", (): Chai.Assertion => String(leftButton.textContent).should.equal(""));
+			it("should not show the button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
 		describe("with header label", (): void => {
 			beforeEach((): void => applicationController["setHeader"]());
 
-			it("should set the header label", (): Chai.Assertion => label.text().should.equal("test-header"));
-			it("should show the header label", (): Chai.Assertion => label.css("display").should.not.equal("none"));
+			it("should set the header label", (): Chai.Assertion => String(label.textContent).should.equal("test-header"));
+			it("should show the header label", (): Chai.Assertion => label.style.display.should.not.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1010,8 +895,8 @@ describe("ApplicationController", (): void => {
 				applicationController["setHeader"]();
 			});
 
-			it("should not set the header label", (): Chai.Assertion => label.text().should.equal(""));
-			it("should not show the header label", (): Chai.Assertion => label.css("display").should.equal("none"));
+			it("should not set the header label", (): Chai.Assertion => String(label.textContent).should.equal(""));
+			it("should not show the header label", (): Chai.Assertion => label.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1020,19 +905,19 @@ describe("ApplicationController", (): void => {
 				beforeEach((): void => applicationController["setHeader"]());
 
 				it("should attach a click event handler", (): void => {
-					rightButton.trigger("click");
+					rightButton.dispatchEvent(new MouseEvent("click"));
 					rightButtonEventHandler.should.have.been.called;
 				});
 
 				it("should style the button", (): void => {
-					rightButton.hasClass("button").should.be.true;
-					rightButton.hasClass("header").should.be.true;
-					rightButton.hasClass("right").should.be.true;
-					rightButton.hasClass("confirmButton").should.be.true;
+					rightButton.classList.contains("button").should.be.true;
+					rightButton.classList.contains("header").should.be.true;
+					rightButton.classList.contains("right").should.be.true;
+					rightButton.classList.contains("confirmButton").should.be.true;
 				});
 
-				it("should set the button label", (): Chai.Assertion => rightButton.text().should.equal("right-button"));
-				it("should show the button", (): Chai.Assertion => rightButton.css("display").should.not.equal("none"));
+				it("should set the button label", (): Chai.Assertion => String(rightButton.textContent).should.equal("right-button"));
+				it("should show the button", (): Chai.Assertion => rightButton.style.display.should.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 			});
 
@@ -1043,8 +928,16 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not attach a click event handler", (): void => {
-					rightButton.trigger("click");
+					rightButton.dispatchEvent(new MouseEvent("click"));
 					rightButtonEventHandler.should.not.have.been.called;
+				});
+			});
+
+			describe("without button style", (): void => {
+				it("should not style the button", (): void => {
+					(header.rightButton as NavButton).style = undefined;
+					applicationController["setHeader"]();
+					rightButton.classList.contains("confirmButton").should.be.false;
 				});
 			});
 		});
@@ -1056,19 +949,19 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not attach a click event handler", (): void => {
-				rightButton.trigger("click");
+				rightButton.dispatchEvent(new MouseEvent("click"));
 				rightButtonEventHandler.should.not.have.been.called;
 			});
 
 			it("should not style the button", (): void => {
-				rightButton.hasClass("button").should.be.false;
-				rightButton.hasClass("header").should.be.false;
-				rightButton.hasClass("right").should.be.false;
-				rightButton.hasClass("confirmButton").should.be.false;
+				rightButton.classList.contains("button").should.be.false;
+				rightButton.classList.contains("header").should.be.false;
+				rightButton.classList.contains("right").should.be.false;
+				rightButton.classList.contains("confirmButton").should.be.false;
 			});
 
-			it("should not set the button label", (): Chai.Assertion => rightButton.text().should.equal(""));
-			it("should not show the button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+			it("should not set the button label", (): Chai.Assertion => String(rightButton.textContent).should.equal(""));
+			it("should not show the button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1082,35 +975,34 @@ describe("ApplicationController", (): void => {
 	describe("clearHeader", (): void => {
 		let controller: TestController,
 				header: HeaderFooter,
-				leftButtonEventHandler: (event: JQueryEventObject) => void,
-				rightButtonEventHandler: (event: JQueryEventObject) => void,
-				leftButton: JQuery,
-				rightButton: JQuery,
-				label: JQuery;
+				leftButtonEventHandler: NavButtonEventHandler,
+				rightButtonEventHandler: NavButtonEventHandler,
+				leftButton: HTMLAnchorElement,
+				rightButton: HTMLAnchorElement,
+				label: HTMLHeadingElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
 			({ header } = controller);
-			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
-			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as (event: JQueryEventObject) => void;
+			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as NavButtonEventHandler;
+			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as NavButtonEventHandler;
 
-			leftButton = $("<a>")
-				.attr("id", "headerLeftButton")
-				.on("click", leftButtonEventHandler)
-				.show()
-				.appendTo(document.body);
+			leftButton = document.createElement("a");
+			leftButton.id = "headerLeftButton";
+			leftButton.addEventListener("click", leftButtonEventHandler);
+			leftButton.style.display = "inline";
 
-			rightButton = $("<a>")
-				.attr("id", "headerRightButton")
-				.on("click", rightButtonEventHandler)
-				.show()
-				.appendTo(document.body);
+			rightButton = document.createElement("a");
+			rightButton.id = "headerRightButton";
+			rightButton.addEventListener("click", rightButtonEventHandler);
+			rightButton.style.display = "inline";
 
-			label = $("<h1>")
-				.attr("id", "headerLabel")
-				.show()
-				.val("Test header")
-				.appendTo(document.body);
+			label = document.createElement("h1");
+			label.id = "headerLabel";
+			label.style.display = "block";
+			label.textContent = "Test header";
+
+			document.body.append(leftButton, label, rightButton);
 
 			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
 			applicationController.viewStack.push({ controller, scrollPos: 0 });
@@ -1120,13 +1012,13 @@ describe("ApplicationController", (): void => {
 			beforeEach((): void => applicationController["clearHeader"]());
 
 			it("should detach the click event handler", (): void => {
-				leftButton.trigger("click");
+				leftButton.dispatchEvent(new MouseEvent("click"));
 				leftButtonEventHandler.should.not.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => label.css("display").should.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+			it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+			it("should hide the header label", (): Chai.Assertion => label.style.display.should.equal("none"));
+			it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1137,13 +1029,13 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not detach the click event handler", (): void => {
-				leftButton.trigger("click");
+				leftButton.dispatchEvent(new MouseEvent("click"));
 				leftButtonEventHandler.should.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => label.css("display").should.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+			it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+			it("should hide the header label", (): Chai.Assertion => label.style.display.should.equal("none"));
+			it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1151,13 +1043,13 @@ describe("ApplicationController", (): void => {
 			beforeEach((): void => applicationController["clearHeader"]());
 
 			it("should detach the click event handler", (): void => {
-				rightButton.trigger("click");
+				rightButton.dispatchEvent(new MouseEvent("click"));
 				rightButtonEventHandler.should.not.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => label.css("display").should.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+			it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+			it("should hide the header label", (): Chai.Assertion => label.style.display.should.equal("none"));
+			it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1168,13 +1060,13 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not detach the click event handler", (): void => {
-				rightButton.trigger("click");
+				rightButton.dispatchEvent(new MouseEvent("click"));
 				rightButtonEventHandler.should.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => leftButton.css("display").should.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => label.css("display").should.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => rightButton.css("display").should.equal("none"));
+			it("should hide the left button", (): Chai.Assertion => leftButton.style.display.should.equal("none"));
+			it("should hide the header label", (): Chai.Assertion => label.style.display.should.equal("none"));
+			it("should hide the right button", (): Chai.Assertion => rightButton.style.display.should.equal("none"));
 			it("should update the content height", (): Chai.Assertion => applicationController["setContentHeight"].should.have.been.called);
 		});
 
@@ -1186,128 +1078,132 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("setContentHeight", (): void => {
-		it("should set the height of the content area minus the header and footer", (): void => {
-			const header: JQuery = $("<div>")
-							.attr("id", "header")
-							.appendTo(document.body)
-							.outerHeight(20),
-						footer: JQuery = $("<div>")
-							.attr("id", "footer")
-							.appendTo(document.body)
-							.outerHeight(10),
-						scrollingElement: JQuery = $("<div>")
-							.appendTo(content);
+		let header: HTMLDivElement,
+				headerLabel: HTMLHeadingElement,
+				footer: HTMLDivElement,
+				footerLabel: HTMLElement,
+				scrollingElement: HTMLDivElement;
 
-			WindowMock.innerHeight = 50;
-			applicationController["setContentHeight"]();
-			Number(scrollingElement.outerHeight()).should.equal(20);
+		beforeEach((): void => {
+			header = document.createElement("div");
+			headerLabel = document.createElement("h1");
+			footer = document.createElement("div");
+			footerLabel = document.createElement("footer");
+			scrollingElement = document.createElement("div");
+
+			header.id = "header";
+			header.style.height = "20px";
+			headerLabel.id = "headerLabel";
+			headerLabel.style.height = "15px";
+			header.append(headerLabel);
+
+			footer.id = "footer";
+			footer.style.height = "20px";
+			footerLabel.id = "footerLabel";
+			footerLabel.style.height = "15px";
+			footer.append(footerLabel);
+
+			document.body.append(header, footer);
+
+			scrollingElement.style.height = "40px";
+			content.append(scrollingElement);
+
+			WindowMock.innerHeight = 70;
+		});
+
+		describe("when the header label and footer label don't wrap", (): void => {
+			it("should set the height of the content area minus the header and footer", (): void => {
+				applicationController["setContentHeight"]();
+				scrollingElement.offsetHeight.should.equal(17);
+			});
+		});
+
+		describe("when the header label wraps", (): void => {
+			it("should set the height of the content area minus the header label and footer", (): void => {
+				headerLabel.style.height = "25px";
+				applicationController["setContentHeight"]();
+				scrollingElement.offsetHeight.should.equal(12);
+			});
+		});
+
+		describe("when the footer label wraps", (): void => {
+			it("should set the height of the content area minus the header and footer label", (): void => {
+				footerLabel.style.height = "25px";
+				applicationController["setContentHeight"]();
+				scrollingElement.offsetHeight.should.equal(12);
+			});
+		});
+
+		afterEach((): void => {
 			header.remove();
 			footer.remove();
 		});
 	});
 
 	describe("hideNotice", (): void => {
-		let notice: JQuery;
-
-		beforeEach((): void => {
-			sinon.stub(applicationController, "noticeHidden" as keyof ApplicationController);
-			applicationController["noticeStack"].height = 5;
-			applicationController["noticeStack"].notice = [];
-			notice = $("<div>");
-			sinon.stub(notice, "height").returns(10);
-			sinon.stub(notice, "data");
-			sinon.stub(notice, "animate").yields();
-			applicationController["hideNotice"](notice);
-		});
-
-		it("should update the height of the notice stack to reclaim the space for the notice", (): Chai.Assertion => applicationController["noticeStack"].height.should.equal(15));
-		it("should mark the notice as acknowledged", (): Chai.Assertion => notice.data.should.have.been.calledWith("acknowledged", true));
-		it("should slide down the notice to hide it", (): Chai.Assertion => notice.animate.should.have.been.calledWith({ height: 0 }, sinon.match.func));
-		it("should invoke the completed callback", (): Chai.Assertion => applicationController["noticeHidden"].should.have.been.called);
-	});
-
-	describe("noticeHidden", (): void => {
-		let notices: JQuery;
+		let notices: HTMLDivElement,
+				notice: HTMLDivElement,
+				otherNotice: HTMLDivElement;
 
 		beforeEach((done: Mocha.Done): void => {
-			notices = $("<div>")
-				.attr("id", "notices")
-				.appendTo(document.body);
+			applicationController["noticeStack"].height = -20;
 
+			notices = document.createElement("div");
+			notices.id = "notices";
+
+			notice = document.createElement("div");
+			notice.style.height = "10px";
+			otherNotice = document.createElement("div");
+			otherNotice.style.height = "10px";
+
+			applicationController["noticeStack"].notice = [notice, otherNotice];
+			notices.append(notice, otherNotice);
+
+			document.body.append(notices);
+
+			sinon.spy(notice, "animate");
+			sinon.spy(notices, "animate");
 			sinon.stub(applicationController, "noticesMoved" as keyof ApplicationController).callsFake((): void => done());
-			sinon.spy($.fn, "animate");
-			$.fx.off = true;
-			applicationController["noticeStack"].height = 10;
-			applicationController["noticeHidden"]();
+
+			applicationController["hideNotice"](notice);
+			notice.getAnimations().forEach((animation: Animation): void => animation.finish());
+			notices.getAnimations().forEach((animation: Animation): void => animation.finish());
 		});
 
-		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion => $.fn.animate.should.have.been.calledWith({ top: "-=10" }));
-
+		it("should update the height of the notice stack to reclaim the space for the notice", (): Chai.Assertion => applicationController["noticeStack"].height.should.equal(-10));
+		it("should slide out the notice to hide it", (): Chai.Assertion => notice.animate.should.have.been.calledWith({ transform: "translateX(100%)" }, { duration: 300, easing: "ease-in", fill: "forwards" }));
+		it("should remove the notice from the DOM", (): Chai.Assertion => notices.children.length.should.equal(1));
+		it("should remove the notice from the notice stack", (): Chai.Assertion => applicationController["noticeStack"].notice.should.not.include(notice));
+		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion => notices.animate.should.have.been.calledWith({ transform: "translateY(-10px)" }, { duration: 500, delay: 300, easing: "ease", fill: "forwards" }));
 		it("should invoke the completed callback", (): Chai.Assertion => applicationController["noticesMoved"].should.have.been.called);
 
-		afterEach((): void => {
-			($.fn.animate as SinonSpy).restore();
-			notices.remove();
-			$.fx.off = false;
-		});
+		afterEach((): void => notices.remove());
 	});
 
 	describe("noticesMoved", (): void => {
-		interface Scenario {
-			description: string;
-			noticeAcknowledgements: boolean[];
-			containerVisibility: "hidden" | "visible";
-		}
-
-		const scenarios: Scenario[] = [
-			{
-				description: "all notices acknowledged",
-				noticeAcknowledgements: [true, true, true],
-				containerVisibility: "hidden"
-			},
-			{
-				description: "some notices acknowledged",
-				noticeAcknowledgements: [true, false, true],
-				containerVisibility: "visible"
-			}
-		];
-
-		let	notice: JQuery,
-				remove: SinonStub,
-				notices: JQuery,
-				acknowledged: boolean[],
-				unacknowledged: boolean[];
+		let	notices: HTMLDivElement;
 
 		beforeEach((): void => {
-			notices = $("<div>")
-				.attr("id", "notices")
-				.css("visibility", "visible")
-				.appendTo(document.body);
+			notices = document.createElement("div");
+			notices.id = "notices";
+			notices.style.visibility = "visible";
+			document.body.append(notices);
 		});
 
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				beforeEach((): void => {
-					remove = sinon.stub();
-
-					scenario.noticeAcknowledgements.forEach((noticeAcknowledged: boolean): void => {
-						notice = $("<div>").data("acknowledged", noticeAcknowledged);
-						sinon.stub(notice, "remove").callsFake(remove);
-						applicationController["noticeStack"].notice.push(notice);
-					});
-
-					acknowledged = scenario.noticeAcknowledgements.filter((noticeAcknowledged: boolean): boolean => noticeAcknowledged);
-					unacknowledged = scenario.noticeAcknowledgements.filter((noticeAcknowledged: boolean): boolean => !noticeAcknowledged);
-					applicationController["noticesMoved"]();
-				});
-
-				it("should remove any acknowledged notices from the DOM", (): Chai.Assertion => remove.callCount.should.equal(acknowledged.length));
-				it("should remove any acknowledged notices from the notice stack", (): Chai.Assertion => applicationController["noticeStack"].notice.length.should.equal(unacknowledged.length));
-				it(`should ${"hidden" === scenario.containerVisibility ? "hide" : "not hide"} the notices container`, (): Chai.Assertion => notices.css("visibility").should.equal(scenario.containerVisibility));
-			});
+		it("should hide the notices container if there are no notices", (): void => {
+			applicationController["noticesMoved"]();
+			notices.style.visibility.should.equal("hidden");
 		});
 
-		afterEach((): JQuery => notices.remove());
+		it("should not hide the notices container if there are notices", (): void => {
+			const notice = document.createElement("div");
+
+			applicationController["noticeStack"].notice.push(notice);
+			applicationController["noticesMoved"]();
+			notices.style.visibility.should.equal("visible");
+		});
+
+		afterEach((): void => notices.remove());
 	});
 
 	describe("showSyncNotice", (): void => {
@@ -1350,13 +1246,7 @@ describe("ApplicationController", (): void => {
 				it("should display a sync notice", (): void => {
 					settingValue = new Date(new Date().valueOf() - (9 * 24 * 60 * 60 * 1000));
 					applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 1);
-					applicationController.showNotice.should.have.been.calledWith({
-						label: "The last data sync was over 7 days ago",
-						leftButton: {
-							style: "cautionButton",
-							label: "OK"
-						}
-					});
+					applicationController.showNotice.should.have.been.calledWith({ label: "The last data sync was over 7 days ago" });
 				});
 			});
 

@@ -27,14 +27,12 @@ export interface View {
 
 export interface NoticeStack {
 	height: number;
-	notice: JQuery[];
+	notice: HTMLDivElement[];
 }
 
 interface Notice {
 	id?: string;
 	label: string;
-	leftButton?: NavButton;
-	rightButton?: NavButton;
 }
 
 export interface Device {

@@ -1,4 +1,3 @@
-import $ from "jquery";
 import DatabaseService from "services/database-service";
 import List from "components/list";
 import type { NavButtonEventHandler } from "controllers";
@@ -97,9 +96,8 @@ export default class ProgramsController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the delete icons next to each list item
-		$("#list")
-			.removeClass()
-			.addClass("delete");
+		this.list.className = "";
+		this.list.classList.add("delete");
 
 		// Setup the footer
 		this.footer = {
@@ -124,9 +122,8 @@ export default class ProgramsController extends ViewController {
 		this.appController.clearFooter();
 
 		// Show the edit icons next to each list item
-		$("#list")
-			.removeClass()
-			.addClass("edit");
+		this.list.className = "";
+		this.list.classList.add("edit");
 
 		// Setup the footer
 		this.footer = {
@@ -151,9 +148,8 @@ export default class ProgramsController extends ViewController {
 		this.appController.clearFooter();
 
 		// Hide the icons next to each list item, in lieu of the scroll helper
-		$("#list")
-			.removeClass()
-			.addClass("withHelper");
+		this.list.className = "";
+		this.list.classList.add("withHelper");
 
 		// Setup the footer
 		this.footer = {
@@ -171,5 +167,10 @@ export default class ProgramsController extends ViewController {
 
 		// Set the view footer
 		this.appController.setFooter();
+	}
+
+	// DOM selectors
+	private get list(): HTMLUListElement {
+		return document.querySelector("#list") as HTMLUListElement;
 	}
 }

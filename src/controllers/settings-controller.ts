@@ -2,7 +2,6 @@ import type {
 	NavButtonEventHandler,
 	ReportDataSource
 } from "controllers";
-import $ from "jquery";
 import Series from "models/series-model";
 import SettingsView from "views/settings-view.html";
 import ViewController from "controllers/view-controller";
@@ -29,12 +28,12 @@ export default class SettingsController extends ViewController {
 
 	public override async activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
-		$("#dataSyncRow").on("click", this.viewDataSync.bind(this));
-		$("#aboutRow").on("click", this.viewAbout.bind(this));
-		$("#recordedReportRow").on("click", this.viewRecordedReport.bind(this));
-		$("#expectedReportRow").on("click", this.viewExpectedReport.bind(this));
-		$("#missedReportRow").on("click", this.viewMissedReport.bind(this));
-		$("#incompleteReportRow").on("click", this.viewIncompleteReport.bind(this));
+		this.dataSyncRow.addEventListener("click", this.viewDataSync.bind(this));
+		this.aboutRow.addEventListener("click", this.viewAbout.bind(this));
+		this.recordedReportRow.addEventListener("click", this.viewRecordedReport.bind(this));
+		this.expectedReportRow.addEventListener("click", this.viewExpectedReport.bind(this));
+		this.missedReportRow.addEventListener("click", this.viewMissedReport.bind(this));
+		this.incompleteReportRow.addEventListener("click", this.viewIncompleteReport.bind(this));
 
 		return Promise.resolve();
 	}
@@ -65,5 +64,30 @@ export default class SettingsController extends ViewController {
 
 	private async viewIncompleteReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource });
+	}
+
+	// DOM selectors
+	private get dataSyncRow(): HTMLDivElement {
+		return document.querySelector("#dataSyncRow") as HTMLDivElement;
+	}
+
+	private get aboutRow(): HTMLDivElement {
+		return document.querySelector("#aboutRow") as HTMLDivElement;
+	}
+
+	private get recordedReportRow(): HTMLDivElement {
+		return document.querySelector("#recordedReportRow") as HTMLDivElement;
+	}
+
+	private get expectedReportRow(): HTMLDivElement {
+		return document.querySelector("#expectedReportRow") as HTMLDivElement;
+	}
+
+	private get missedReportRow(): HTMLDivElement {
+		return document.querySelector("#missedReportRow") as HTMLDivElement;
+	}
+
+	private get incompleteReportRow(): HTMLDivElement {
+		return document.querySelector("#incompleteReportRow") as HTMLDivElement;
 	}
 }

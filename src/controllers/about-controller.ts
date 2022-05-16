@@ -1,4 +1,3 @@
-import $ from "jquery";
 import AboutView from "views/about-view.html";
 import DatabaseService from "services/database-service";
 import Episode from "models/episode-model";
@@ -8,8 +7,6 @@ import Series from "models/series-model";
 import ViewController from "controllers/view-controller";
 
 export default class AboutController extends ViewController {
-	private episodeTotalCount = 0;
-
 	public get view(): string {
 		return AboutView;
 	}
@@ -25,17 +22,17 @@ export default class AboutController extends ViewController {
 			}
 		};
 
-		// Get the total number of programs
-		this.programCount(await Program.count());
+		// Set the total number of programs
+		this.totalPrograms.value = String(await Program.count());
 
-		// Get the total number of series
-		this.seriesCount(await Series.count());
+		// Set the total number of series
+		this.totalSeries.value = String(await Series.count());
 
-		// Get the total number of episodes
-		await this.episodeCount(await Episode.totalCount());
+		// Set the total number of episodes, and the percentage watched
+		this.totalEpisodes.value = this.watchedPercent(await Episode.totalCount(), await Episode.countByStatus("Watched"));
 
 		// Set the version information
-		$("#databaseVersion").val(`v${(await DatabaseService).version}`);
+		this.databaseVersion.value = `v${(await DatabaseService).version}`;
 
 		// Set the scroll position
 		this.appController.setScrollPosition();
@@ -45,29 +42,30 @@ export default class AboutController extends ViewController {
 		return this.appController.popView();
 	}
 
-	private programCount(count: number): void {
-		$("#totalPrograms").val(count);
-	}
-
-	private seriesCount(count: number): void {
-		$("#totalSeries").val(count);
-	}
-
-	private async episodeCount(count: number): Promise<void> {
-		// Save the total for later
-		this.episodeTotalCount = count;
-
-		// Get the total number of watched episodes
-		this.watchedCount(await Episode.countByStatus("Watched"));
-	}
-
-	private watchedCount(count: number): void {
+	private watchedPercent(totalCount: number, watchedCount: number): string {
 		// Calculate the percentage of watched episodes
 		const DECIMAL_PLACES = 2,
 					PERCENT = 100,
-					watchedPercent: string = this.episodeTotalCount > 0 ? (count / this.episodeTotalCount * PERCENT).toFixed(DECIMAL_PLACES) : "0";
+					watchedPercent: string = totalCount > 0 ? (watchedCount / totalCount * PERCENT).toFixed(DECIMAL_PLACES) : "0";
 
-		// Display the total number of episodes and percent watched
-		$("#totalEpisodes").val(`${this.episodeTotalCount} (${watchedPercent}% watched)`);
+		// Return the total number of episodes and percent watched
+		return `${totalCount} (${watchedPercent}% watched)`;
+	}
+
+	// DOM selectors
+	private get databaseVersion(): HTMLInputElement {
+		return document.querySelector("#databaseVersion") as HTMLInputElement;
+	}
+
+	private get totalPrograms(): HTMLInputElement {
+		return document.querySelector("#totalPrograms") as HTMLInputElement;
+	}
+
+	private get totalSeries(): HTMLInputElement {
+		return document.querySelector("#totalSeries") as HTMLInputElement;
+	}
+
+	private get totalEpisodes(): HTMLInputElement {
+		return document.querySelector("#totalEpisodes") as HTMLInputElement;
 	}
 }

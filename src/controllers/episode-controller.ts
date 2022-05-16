@@ -2,7 +2,6 @@ import type {
 	EpisodeListItem,
 	NavButtonEventHandler
 } from "controllers";
-import $ from "jquery";
 import Episode from "models/episode-model";
 import type { EpisodeStatus } from "models";
 import EpisodeView from "views/episode-view.html";
@@ -52,17 +51,17 @@ export default class EpisodeController extends ViewController {
 		};
 
 		// Set the episode details
-		$("#episodeName").val(String(this.listItem.episode.episodeName));
-		$("#statusDate").val(this.listItem.episode.statusDate);
-		$("#unverified").prop("checked", this.listItem.episode.unverified);
-		$("#unscheduled").prop("checked", this.listItem.episode.unscheduled);
+		this.episodeName.value = String(this.listItem.episode.episodeName);
+		this.statusDate.value = this.listItem.episode.statusDate;
+		this.unverified.checked = this.listItem.episode.unverified;
+		this.unscheduled.checked = this.listItem.episode.unscheduled;
 
 		// Bind events for all of the buttons/controls
-		$("#watched").on("click", (): void => this.setStatus("Watched"));
-		$("#recorded").on("click", (): void => this.setStatus("Recorded"));
-		$("#expected").on("click", (): void => this.setStatus("Expected"));
-		$("#missed").on("click", (): void => this.setStatus("Missed"));
-		$("#unscheduled").on("click", this.toggleStatusDateRow.bind(this));
+		this.watched.addEventListener("click", (): void => this.setStatus("Watched"));
+		this.recorded.addEventListener("click", (): void => this.setStatus("Recorded"));
+		this.expected.addEventListener("click", (): void => this.setStatus("Expected"));
+		this.missed.addEventListener("click", (): void => this.setStatus("Missed"));
+		this.unscheduled.addEventListener("click", this.toggleStatusDateRow.bind(this));
 
 		// Toggle the current status
 		const { status }: { status: EpisodeStatus; } = this.listItem.episode;
@@ -76,7 +75,7 @@ export default class EpisodeController extends ViewController {
 	public override contentShown(): void {
 		// If we're adding a new episode, focus and select the episode name
 		if (undefined === this.listItem.listIndex) {
-			$("#episodeName").select();
+			this.episodeName.select();
 		}
 	}
 
@@ -84,10 +83,10 @@ export default class EpisodeController extends ViewController {
 		const PREVIOUS_VIEW_OFFSET = 2;
 
 		// Get the episode details
-		this.listItem.episode.episodeName = String($("#episodeName").val());
-		this.listItem.episode.statusDate = String($("#statusDate").val());
-		this.listItem.episode.unverified = $("#unverified").is(":checked");
-		this.listItem.episode.unscheduled = $("#unscheduled").is(":checked");
+		this.listItem.episode.episodeName = this.episodeName.value;
+		this.listItem.episode.statusDate = this.statusDate.value;
+		this.listItem.episode.unverified = this.unverified.checked;
+		this.listItem.episode.unscheduled = this.unscheduled.checked;
 
 		// Update the database
 		await this.listItem.episode.save();
@@ -117,11 +116,11 @@ export default class EpisodeController extends ViewController {
 			this.settingStatus = true;
 
 			// Reset the current view
-			$("#watched").removeClass();
-			$("#recorded").removeClass();
-			$("#expected").removeClass();
-			$("#missed").removeClass();
-			$("#unverifiedRow").hide();
+			this.watched.className = "";
+			this.recorded.className = "";
+			this.expected.className = "";
+			this.missed.className = "";
+			this.unverifiedRow.style.display = "none";
 
 			// If the current status was passed, toggle (ie. reset) the episode status
 			if (this.listItem.episode.status === status) {
@@ -131,22 +130,22 @@ export default class EpisodeController extends ViewController {
 				this.listItem.episode.status = status;
 				switch (status) {
 					case "Watched":
-						$("#watched").addClass("status");
+						this.watched.classList.add("status");
 						break;
 
 					case "Recorded":
-						$("#recorded").addClass("status");
-						$("#unverifiedRow").show();
+						this.recorded.classList.add("status");
+						this.unverifiedRow.style.display = "block";
 						break;
 
 					case "Expected":
-						$("#expected").addClass("status");
-						$("#unverifiedRow").show();
+						this.expected.classList.add("status");
+						this.unverifiedRow.style.display = "block";
 						break;
 
 					case "Missed":
-						$("#missed").addClass("status");
-						$("#unverifiedRow").show();
+						this.missed.classList.add("status");
+						this.unverifiedRow.style.display = "block";
 						break;
 
 					default:
@@ -163,11 +162,52 @@ export default class EpisodeController extends ViewController {
 
 	private toggleStatusDateRow(): void {
 		// Hide the status date
-		$("#statusDateRow").hide();
+		this.statusDateRow.style.display = "none";
 
 		// Show the status date if certain criteria is met
-		if ($("#unscheduled").is(":checked") || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
-			$("#statusDateRow").show();
+		if (this.unscheduled.checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
+			this.statusDateRow.style.display = "block";
 		}
+	}
+
+	// DOM selectors
+	private get episodeName(): HTMLInputElement {
+		return document.querySelector("#episodeName") as HTMLInputElement;
+	}
+
+	private get watched(): HTMLDivElement {
+		return document.querySelector("#watched") as HTMLDivElement;
+	}
+
+	private get recorded(): HTMLDivElement {
+		return document.querySelector("#recorded") as HTMLDivElement;
+	}
+
+	private get expected(): HTMLDivElement {
+		return document.querySelector("#expected") as HTMLDivElement;
+	}
+
+	private get missed(): HTMLDivElement {
+		return document.querySelector("#missed") as HTMLDivElement;
+	}
+
+	private get statusDateRow(): HTMLDivElement {
+		return document.querySelector("#statusDateRow") as HTMLDivElement;
+	}
+
+	private get statusDate(): HTMLInputElement {
+		return document.querySelector("#statusDate") as HTMLInputElement;
+	}
+
+	private get unverifiedRow(): HTMLDivElement {
+		return document.querySelector("#unverifiedRow") as HTMLDivElement;
+	}
+
+	private get unverified(): HTMLInputElement {
+		return document.querySelector("#unverified") as HTMLInputElement;
+	}
+
+	private get unscheduled(): HTMLInputElement {
+		return document.querySelector("#unscheduled") as HTMLInputElement;
 	}
 }

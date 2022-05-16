@@ -2,7 +2,6 @@ import type {
 	NavButtonEventHandler,
 	ProgramListItem
 } from "controllers";
-import $ from "jquery";
 import Program from "models/program-model";
 import ProgramView from "views/program-view.html";
 import ViewController from "controllers/view-controller";
@@ -37,14 +36,14 @@ export default class ProgramController extends ViewController {
 		};
 
 		// Set the program details
-		$("#programName").val(String(this.listItem.program.programName));
+		this.programName.value = String(this.listItem.program.programName);
 
 		return Promise.resolve();
 	}
 
 	private async save(): Promise<void> {
 		// Get the program details
-		this.listItem.program.programName = String($("#programName").val());
+		this.listItem.program.programName = this.programName.value;
 
 		// Update the database and pop the view off the stack
 		await this.listItem.program.save();
@@ -54,5 +53,10 @@ export default class ProgramController extends ViewController {
 
 	private async cancel(): Promise<void> {
 		return this.appController.popView();
+	}
+
+	// DOM selectors
+	private get programName(): HTMLInputElement {
+		return document.querySelector("#programName") as HTMLInputElement;
 	}
 }

@@ -1,11 +1,11 @@
 import type {
+	NavButtonEventHandler,
 	Notice,
 	NoticeStack,
 	View,
 	ViewControllerArgs,
 	ViewControllerSet
 } from "controllers";
-import $ from "jquery";
 import AboutController from "controllers/about-controller";
 import DataSyncController from "controllers/dataSync-controller";
 import EpisodeController from "controllers/episode-controller";
@@ -32,14 +32,14 @@ export default class ApplicationController {
 	public viewStack: View[] = [];
 
 	private readonly noticeStack: NoticeStack = {
-		height: 0,
+		height: -20,
 		notice: []
 	};
 
 	private viewControllers!: ViewControllerSet;
 
 	// Set the max data age days
-	private readonly maxDataAgeDays: number = Number(MAX_DATA_AGE_DAYS);
+	private readonly maxDataAgeDays = Number(MAX_DATA_AGE_DAYS);
 
 	public constructor() {
 		// App controller is a singleton, so if an instance already exists, return it
@@ -51,7 +51,7 @@ export default class ApplicationController {
 		ApplicationController.singletonInstance = this;
 
 		// Bind a handler for transition end events
-		$("#contentWrapper").on("transitionend", this.contentShown.bind(this));
+		this.contentWrapper.addEventListener("transitionend", this.contentShown.bind(this));
 
 		return this;
 	}
@@ -99,17 +99,17 @@ export default class ApplicationController {
 	}
 
 	public getScrollPosition(): void {
-		this.currentView.scrollPos = Number($("#content").children(":first").scrollTop());
+		this.currentView.scrollPos = (this.content.firstElementChild as HTMLElement).scrollTop;
 	}
 
 	public setScrollPosition(): void {
 		// If the scroll position is -1, set it to the bottom element
 		if (-1 === this.currentView.scrollPos) {
-			this.currentView.scrollPos = $("#content").children(":first").children(":last").position().top;
+			this.currentView.scrollPos = (this.content.firstElementChild?.lastElementChild as HTMLElement).offsetTop;
 		}
 
 		// Scroll to the saved position
-		$("#content").children(":first").scrollTop(this.currentView.scrollPos);
+		(this.content.firstElementChild as HTMLElement).scrollTop = this.currentView.scrollPos;
 	}
 
 	public setFooter(): void {
@@ -119,46 +119,52 @@ export default class ApplicationController {
 			if (undefined !== this.currentView.controller.footer.leftButton) {
 				// Bind the event handler for the button
 				if (undefined !== this.currentView.controller.footer.leftButton.eventHandler) {
-					$("#footerLeftButton").on("click", this.currentView.controller.footer.leftButton.eventHandler);
+					this.footerLeftButton.addEventListener("click", this.currentView.controller.footer.leftButton.eventHandler);
 				}
 
 				// Style the button
-				$("#footerLeftButton")
-					.removeClass()
-					.addClass(`button footer left ${this.currentView.controller.footer.leftButton.style}`);
+				this.footerLeftButton.className = "";
+				this.footerLeftButton.classList.add("button", "footer", "left");
+
+				if (undefined !== this.currentView.controller.footer.leftButton.style) {
+					this.footerLeftButton.classList.add(this.currentView.controller.footer.leftButton.style);
+				}
 
 				// Set the button label
-				$("#footerLeftButton").text(this.currentView.controller.footer.leftButton.label);
+				this.footerLeftButton.textContent = this.currentView.controller.footer.leftButton.label;
 
 				// Show the button
-				$("#footerLeftButton").show();
+				this.footerLeftButton.style.display = "inline";
 			}
 
 			// If the view controller specified a footer label, set it up
 			if (undefined !== this.currentView.controller.footer.label) {
-				$("#footerLabel").text(this.currentView.controller.footer.label);
+				this.footerLabel.textContent = this.currentView.controller.footer.label;
 			}
 
 			// Show the footer label
-			$("#footerLabel").show();
+			this.footerLabel.style.display = "block";
 
 			// If the view controller specified a right-hand button, set it up
 			if (undefined !== this.currentView.controller.footer.rightButton) {
 				// Bind the event handler for the button
 				if (undefined !== this.currentView.controller.footer.rightButton.eventHandler) {
-					$("#footerRightButton").on("click", this.currentView.controller.footer.rightButton.eventHandler);
+					this.footerRightButton.addEventListener("click", this.currentView.controller.footer.rightButton.eventHandler);
 				}
 
 				// Style the button
-				$("#footerRightButton")
-					.removeClass()
-					.addClass(`button footer right ${this.currentView.controller.footer.rightButton.style}`);
+				this.footerRightButton.className = "";
+				this.footerRightButton.classList.add("button", "footer", "right");
+
+				if (undefined !== this.currentView.controller.footer.rightButton.style) {
+					this.footerRightButton.classList.add(this.currentView.controller.footer.rightButton.style);
+				}
 
 				// Set the button label
-				$("#footerRightButton").text(this.currentView.controller.footer.rightButton.label);
+				this.footerRightButton.textContent = this.currentView.controller.footer.rightButton.label;
 
 				// Show the button
-				$("#footerRightButton").show();
+				this.footerRightButton.style.display = "inline";
 			}
 
 			// Update the content height to accommodate the footer
@@ -186,69 +192,45 @@ export default class ApplicationController {
 
 	public showNotice(notice: Notice): void {
 		// Create a div for the new notice
-		const	noticeContainer: JQuery = $("<div>")
-						.addClass("notice")
-						.appendTo($("#notices")),
-					noticeLeftButton: JQuery = $("<a>").appendTo(noticeContainer),
-					noticeLabel: JQuery = $("<p>")
-						.html(notice.label)
-						.appendTo(noticeContainer),
-					noticeRightButton: JQuery = $("<a>").appendTo(noticeContainer);
+		const noticeContainer = document.createElement("div"),
+					noticeLeftButton = document.createElement("a"),
+					noticeLabel = document.createElement("p"),
+					duration = 500;
 
-		// If the notice specified a left-hand button, set it up
-		if (undefined !== notice.leftButton) {
-			// Bind the event handler for the button
-			if (undefined !== notice.leftButton.eventHandler) {
-				noticeLeftButton.on("click", notice.leftButton.eventHandler);
-			}
+		noticeContainer.classList.add("notice");
+		noticeLabel.innerHTML = notice.label;
+		noticeContainer.append(noticeLeftButton, noticeLabel);
+		this.notices.append(noticeContainer);
 
-			// Also bind a function to hide the notice when the button is clicked
-			noticeLeftButton.on("click", (): void => this.hideNotice(noticeContainer));
-
-			// Style the button
-			noticeLeftButton
-				.removeClass()
-				.addClass(`button left ${notice.leftButton.style}`);
-
-			// Set the button label
-			noticeLeftButton.text(notice.leftButton.label);
-		}
+		noticeLeftButton.addEventListener("click", (): void => this.hideNotice(noticeContainer));
+		noticeLeftButton.classList.add("button", "left", "cautionButton");
+		noticeLeftButton.textContent = "OK";
 
 		// If the notice specified an identifier, set it
 		if (undefined !== notice.id) {
-			noticeLabel.attr("id", notice.id);
-		}
-
-		// If the notice specified a right-hand button, set it up
-		if (undefined !== notice.rightButton) {
-			// Bind the event handler for the button
-			if (undefined !== notice.rightButton.eventHandler) {
-				noticeRightButton.on("click", notice.rightButton.eventHandler);
-			}
-
-			// Style the button
-			noticeRightButton
-				.removeClass()
-				.addClass(`button right ${notice.rightButton.style}`);
-
-			// Set the button label
-			noticeRightButton.text(notice.rightButton.label);
+			noticeLabel.id = notice.id;
 		}
 
 		// If there are currently no notices displayed, position the notices container just off screen (at the bottom) and make it visible
 		if (!this.noticeStack.notice.length) {
-			$("#notices").css("top", `${window.innerHeight}px`);
-			$("#notices").css("visibility", "visible");
+			this.notices.style.top = `${window.innerHeight}px`;
+			this.notices.style.visibility = "visible";
 		}
 
 		// Update the height of the notices stack to accommodate the new notice
-		this.noticeStack.height -= Number(noticeContainer.height());
+		this.noticeStack.height -= noticeContainer.offsetHeight;
 
 		// Push the notice onto the stack
 		this.noticeStack.notice.push(noticeContainer);
 
 		// Slide up the notices container to reveal the notice
-		$("#notices").animate({ top: Number($(window).height()) + this.noticeStack.height }, this.noticesMoved.bind(this));
+		this.notices.animate({
+			transform: `translateY(${this.noticeStack.height}px)`
+		}, {
+			duration,
+			easing: "ease",
+			fill: "forwards"
+		}).onfinish = this.noticesMoved.bind(this);
 	}
 
 	public clearFooter(): void {
@@ -256,20 +238,20 @@ export default class ApplicationController {
 		if (undefined !== this.currentView.controller.footer) {
 			// If the view controller specified a left-hand button, unbind the event handler
 			if (undefined !== this.currentView.controller.footer.leftButton) {
-				$("#footerLeftButton").off("click", this.currentView.controller.footer.leftButton.eventHandler);
+				this.footerLeftButton.removeEventListener("click", this.currentView.controller.footer.leftButton.eventHandler as NavButtonEventHandler);
 			}
 
 			// If the view controller specified a right-hand button, unbind the event handler
 			if (undefined !== this.currentView.controller.footer.rightButton) {
-				$("#footerRightButton").off("click", this.currentView.controller.footer.rightButton.eventHandler);
+				this.footerRightButton.removeEventListener("click", this.currentView.controller.footer.rightButton.eventHandler as NavButtonEventHandler);
 			}
 		}
 
 		// Hide the buttons and footer label
-		$("#footerLeftButton").hide();
-		$("#footerLabel").val("");
-		$("#footerLabel").hide();
-		$("#footerRightButton").hide();
+		this.footerLeftButton.style.display = "none";
+		this.footerLabel.textContent = "";
+		this.footerLabel.style.display = "none";
+		this.footerRightButton.style.display = "none";
 
 		// Update the content height to reclaim the footer space
 		this.setContentHeight();
@@ -286,40 +268,36 @@ export default class ApplicationController {
 
 	private async viewPopped(args: ViewControllerArgs): Promise<void> {
 		// Call the view controller's activate method
-		if ("function" === typeof this.currentView.controller.activate) {
-			await this.currentView.controller.activate(args);
-		}
+		await this.currentView.controller.activate?.(args);
 	}
 
 	private async show(onSuccess: (_?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
 		// Show the now loading indicator
-		$("#nowLoading").addClass("loading");
+		this.nowLoading.classList.add("loading");
 
 		// Load the view template
-		$("#content").html(this.currentView.controller.view);
+		this.content.innerHTML = this.currentView.controller.view;
 
 		// Call the success function, passing through the arguments
 		await onSuccess(args);
 
 		// Slide in the new view from the right
-		$("#contentWrapper").addClass("loading");
+		this.contentWrapper.classList.add("loading");
 
 		// Set the header (based on the configuration set by the view controller)
 		this.setHeader();
 	}
 
 	private contentShown(): void {
-		if ($("#contentWrapper").hasClass("loading")) {
-			$("#contentWrapper").removeClass("loading");
-			$("#contentWrapper").addClass("loaded");
-			$("#nowLoading").removeClass("loading");
-		} else if ($("#contentWrapper").hasClass("loaded")) {
-			$("#contentWrapper").removeClass("loaded");
+		if (this.contentWrapper.classList.contains("loading")) {
+			this.contentWrapper.classList.remove("loading");
+			this.contentWrapper.classList.add("loaded");
+			this.nowLoading.classList.remove("loading");
+		} else if (this.contentWrapper.classList.contains("loaded")) {
+			this.contentWrapper.classList.remove("loaded");
 
 			// Call the view controller's contentShown method
-			if ("function" === typeof this.currentView.controller.contentShown) {
-				this.currentView.controller.contentShown();
-			}
+			this.currentView.controller.contentShown?.();
 		}
 	}
 
@@ -328,47 +306,53 @@ export default class ApplicationController {
 		if (undefined !== this.currentView.controller.header.leftButton) {
 			// Bind the event handler for the button
 			if (undefined !== this.currentView.controller.header.leftButton.eventHandler) {
-				$("#headerLeftButton").on("click", this.currentView.controller.header.leftButton.eventHandler);
+				this.headerLeftButton.addEventListener("click", this.currentView.controller.header.leftButton.eventHandler);
 			}
 
 			// Style the button
-			$("#headerLeftButton")
-				.removeClass()
-				.addClass(`button header left ${this.currentView.controller.header.leftButton.style}`);
+			this.headerLeftButton.className = "";
+			this.headerLeftButton.classList.add("button", "header", "left");
+
+			if (undefined !== this.currentView.controller.header.leftButton.style) {
+				this.headerLeftButton.classList.add(this.currentView.controller.header.leftButton.style);
+			}
 
 			// Set the button label
-			$("#headerLeftButton").text(this.currentView.controller.header.leftButton.label);
+			this.headerLeftButton.textContent = this.currentView.controller.header.leftButton.label;
 
 			// Show the button
-			$("#headerLeftButton").show();
+			this.headerLeftButton.style.display = "inline";
 		}
 
 		// If the view controller specified a header, set up the header label
 		if (undefined !== this.currentView.controller.header.label) {
 			// Set the header label
-			$("#headerLabel").text(this.currentView.controller.header.label);
+			this.headerLabel.textContent = this.currentView.controller.header.label;
 
 			// Show the header label
-			$("#headerLabel").show();
+			this.headerLabel.style.display = "block";
 		}
 
 		// If the view controller specified a right-hand button, set it up
 		if (undefined !== this.currentView.controller.header.rightButton) {
 			// Bind the event handler for the button
 			if (undefined !== this.currentView.controller.header.rightButton.eventHandler) {
-				$("#headerRightButton").on("click", this.currentView.controller.header.rightButton.eventHandler);
+				this.headerRightButton.addEventListener("click", this.currentView.controller.header.rightButton.eventHandler);
 			}
 
 			// Style the button
-			$("#headerRightButton")
-				.removeClass()
-				.addClass(`button header right ${this.currentView.controller.header.rightButton.style}`);
+			this.headerRightButton.className = "";
+			this.headerRightButton.classList.add("button", "header", "right");
+
+			if (undefined !== this.currentView.controller.header.rightButton.style) {
+				this.headerRightButton.classList.add(this.currentView.controller.header.rightButton.style);
+			}
 
 			// Set the button label
-			$("#headerRightButton").text(this.currentView.controller.header.rightButton.label);
+			this.headerRightButton.textContent = this.currentView.controller.header.rightButton.label;
 
 			// Show the button
-			$("#headerRightButton").show();
+			this.headerRightButton.style.display = "inline";
 		}
 
 		// Update the content height to accommodate the header
@@ -378,59 +362,66 @@ export default class ApplicationController {
 	private clearHeader(): void {
 		// If the view controller specified a left-hand button, unbind the event handler
 		if (undefined !== this.currentView.controller.header.leftButton) {
-			$("#headerLeftButton").off("click", this.currentView.controller.header.leftButton.eventHandler);
+			this.headerLeftButton.removeEventListener("click", this.currentView.controller.header.leftButton.eventHandler as NavButtonEventHandler);
 		}
 
 		// If the view controller specified a right-hand button, unbind the event handler
 		if (undefined !== this.currentView.controller.header.rightButton) {
-			$("#headerRightButton").off("click", this.currentView.controller.header.rightButton.eventHandler);
+			this.headerRightButton.removeEventListener("click", this.currentView.controller.header.rightButton.eventHandler as NavButtonEventHandler);
 		}
 
 		// Hide the buttons and header label
-		$("#headerLeftButton").hide();
-		$("#headerLabel").hide();
-		$("#headerRightButton").hide();
+		this.headerLeftButton.style.display = "none";
+		this.headerLabel.style.display = "none";
+		this.headerRightButton.style.display = "none";
 
 		// Update the content height to reclaim the header space
 		this.setContentHeight();
 	}
 
 	private setContentHeight(): void {
-		$("#content").children(":first").outerHeight(window.innerHeight - Number($("#header").outerHeight()) - Number($("#footer").outerHeight()));
+		// If the label wraps, its layout height will be larger than the container's layout height, so use the biggest value
+		const headerHeight = Math.max(this.header.offsetHeight, this.headerLabel.offsetHeight),
+					footerHeight = Math.max(this.footer.offsetHeight, this.footerLabel.offsetHeight),
+					IOS_HOME_BAR_HEIGHT = 13;
+
+		(this.content.firstElementChild as HTMLElement).style.height = `${window.innerHeight - headerHeight - footerHeight - IOS_HOME_BAR_HEIGHT}px`;
 	}
 
-	private hideNotice(notice: JQuery): void {
+	private hideNotice(notice: HTMLDivElement): void {
+		const NOTICE_ANIMATION_DURATION = 300,
+					NOTICES_ANIMATION_DURATION = 500;
+
 		// Update the height of the notices stack to reclaim the space for the notice
-		this.noticeStack.height += Number(notice.height());
+		this.noticeStack.height += notice.offsetHeight;
 
-		// Mark the notice as acknowledged
-		notice.data("acknowledged", true);
+		// Slide the notice element off to the right
+		notice.animate({
+			transform: "translateX(100%)"
+		}, {
+			duration: NOTICE_ANIMATION_DURATION,
+			easing: "ease-in",
+			fill: "forwards"
+		}).onfinish = (): void => {
+			this.noticeStack.notice = this.noticeStack.notice.filter((item: HTMLDivElement): boolean => item !== notice);
+			notice.remove();
+		};
 
-		// Slide down the notice element to hide the notice
-		notice.animate({ height: 0 }, this.noticeHidden.bind(this));
-	}
-
-	private noticeHidden(): void {
 		// Slide down the notices container to the height of the notices stack
-		$("#notices").animate({ top: `-=${this.noticeStack.height}` }, this.noticesMoved.bind(this));
+		this.notices.animate({
+			transform: `translateY(${this.noticeStack.height}px)`
+		}, {
+			duration: NOTICES_ANIMATION_DURATION,
+			delay: NOTICE_ANIMATION_DURATION,
+			easing: "ease",
+			fill: "forwards"
+		}).onfinish = this.noticesMoved.bind(this);
 	}
 
 	private noticesMoved(): void {
-		// Iterate in reverse order over the notices in the stack
-		for (let i: number = this.noticeStack.notice.length - 1; i >= 0; i--) {
-			// Check if the notice has been acknowledged
-			if (this.noticeStack.notice[i].data("acknowledged") as boolean) {
-				// Remove the DOM element for the notice
-				this.noticeStack.notice[i].remove();
-
-				// Remove the notice from the stack
-				this.noticeStack.notice.splice(i, 1);
-			}
-		}
-
 		// If there are no more notices visible, hide the notices container
 		if (!this.noticeStack.notice.length) {
-			$("#notices").css("visibility", "hidden");
+			this.notices.style.visibility = "hidden";
 		}
 	}
 
@@ -443,20 +434,63 @@ export default class ApplicationController {
 						SECONDS_IN_ONE_MINUTE = 60,
 						MILLISECONDS_IN_ONE_SECOND = 1000,
 						MILLISECONDS_IN_ONE_DAY = MILLISECONDS_IN_ONE_SECOND * SECONDS_IN_ONE_MINUTE * MINUTES_IN_ONE_HOUR * HOURS_IN_ONE_DAY,
-						now: Date = new Date(),
-						lastSync: Date = new Date(lastSyncTime.settingValue);
+						now = new Date(),
+						lastSync = new Date(lastSyncTime.settingValue);
 
 			// Check if the last sync was more that the specified threshold
 			if (Math.round(Math.abs(now.getTime() - lastSync.getTime()) / MILLISECONDS_IN_ONE_DAY) > this.maxDataAgeDays) {
 				// Show a notice to the user
-				this.showNotice({
-					label: `The last data sync was over ${this.maxDataAgeDays} days ago`,
-					leftButton: {
-						style: "cautionButton",
-						label: "OK"
-					}
-				});
+				this.showNotice({ label: `The last data sync was over ${this.maxDataAgeDays} days ago` });
 			}
 		}
+	}
+
+	// DOM selectors
+	private get header(): HTMLDivElement {
+		return document.querySelector("#footer") as HTMLDivElement;
+	}
+
+	private get headerLeftButton(): HTMLAnchorElement {
+		return document.querySelector("#headerLeftButton") as HTMLAnchorElement;
+	}
+
+	private get headerLabel(): HTMLHeadingElement {
+		return document.querySelector("#headerLabel") as HTMLHeadingElement;
+	}
+
+	private get headerRightButton(): HTMLAnchorElement {
+		return document.querySelector("#headerRightButton") as HTMLAnchorElement;
+	}
+
+	private get nowLoading(): HTMLDivElement {
+		return document.querySelector("#nowLoading") as HTMLDivElement;
+	}
+
+	private get contentWrapper(): HTMLDivElement {
+		return document.querySelector("#contentWrapper") as HTMLDivElement;
+	}
+
+	private get content(): HTMLDivElement {
+		return document.querySelector("#content") as HTMLDivElement;
+	}
+
+	private get footer(): HTMLDivElement {
+		return document.querySelector("#footer") as HTMLDivElement;
+	}
+
+	private get footerLeftButton(): HTMLAnchorElement {
+		return document.querySelector("#footerLeftButton") as HTMLAnchorElement;
+	}
+
+	private get footerLabel(): HTMLElement {
+		return document.querySelector("#footerLabel") as HTMLElement;
+	}
+
+	private get footerRightButton(): HTMLAnchorElement {
+		return document.querySelector("#footerRightButton") as HTMLAnchorElement;
+	}
+
+	private get notices(): HTMLDivElement {
+		return document.querySelector("#notices") as HTMLDivElement;
 	}
 }

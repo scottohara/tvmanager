@@ -2,7 +2,6 @@ import type {
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
-import $ from "jquery";
 import Program from "models/program-model";
 import Series from "models/series-model";
 import SeriesView from "views/series-view.html";
@@ -49,29 +48,36 @@ export default class SeriesController extends ViewController {
 		};
 
 		// Populate the list of programs
-		const programs: Program[] = await Program.list(),
-					options = programs.map((program: Program): JQuery => $("<option>").val(String(program.id)).text(String(program.programName)));
+		const programs = await Program.list(),
+					options = programs.map((program: Program): HTMLOptionElement => {
+						const option = document.createElement("option");
 
-		$("#moveTo").append(options);
+						option.value = String(program.id);
+						option.textContent = String(program.programName);
+
+						return option;
+					});
+
+		this.moveTo.append(...options);
 
 		// Set the series details
-		$("#seriesName").val(String(this.listItem.series.seriesName));
-		$("#nowShowing").val(this.listItem.series.nowShowing ?? "");
-		$("#moveTo").val(String(this.listItem.series.programId));
+		this.seriesName.value = String(this.listItem.series.seriesName);
+		this.nowShowing.value = String(this.listItem.series.nowShowing ?? "");
+		this.moveTo.value = String(this.listItem.series.programId);
 	}
 
 	public override contentShown(): void {
 		// If we're adding a new series, focus and select the episode name
 		if (undefined === this.listItem.listIndex) {
-			$("#seriesName").select();
+			this.seriesName.select();
 		}
 	}
 
 	private async save(): Promise<void> {
 		// Get the series details
-		this.listItem.series.seriesName = String($("#seriesName").val());
-		this.listItem.series.nowShowing = Number($("#nowShowing").val()) || null;
-		this.listItem.series.programId = String($("#moveTo").val());
+		this.listItem.series.seriesName = this.seriesName.value;
+		this.listItem.series.nowShowing = Number(this.nowShowing.value) || null;
+		this.listItem.series.programId = this.moveTo.value;
 
 		// Update the database and pop the view off the stack
 		await this.listItem.series.save();
@@ -86,5 +92,18 @@ export default class SeriesController extends ViewController {
 
 		// Pop the view off the stack
 		return this.appController.popView();
+	}
+
+	// DOM selectors
+	private get seriesName(): HTMLInputElement {
+		return document.querySelector("#seriesName") as HTMLInputElement;
+	}
+
+	private get nowShowing(): HTMLSelectElement {
+		return document.querySelector("#nowShowing") as HTMLSelectElement;
+	}
+
+	private get moveTo(): HTMLSelectElement {
+		return document.querySelector("#moveTo") as HTMLSelectElement;
 	}
 }

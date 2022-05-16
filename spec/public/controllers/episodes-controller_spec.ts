@@ -5,7 +5,6 @@ import type {
 	NavButtonEventHandler,
 	SeriesListItem
 } from "controllers";
-import $ from "jquery";
 import ApplicationControllerMock from "mocks/application-controller-mock";
 import EpisodeMock from "mocks/episode-model-mock";
 import type { EpisodeStatus } from "models";
@@ -22,7 +21,7 @@ const appController: ApplicationControllerMock = new ApplicationControllerMock()
 describe("EpisodesController", (): void => {
 	let listItem: SeriesListItem,
 			items: EpisodeMock[],
-			episodeList: JQuery,
+			episodeList: HTMLUListElement,
 			episodesController: EpisodesController;
 
 	beforeEach((): void => {
@@ -33,9 +32,9 @@ describe("EpisodesController", (): void => {
 
 		items = [new EpisodeMock("1", "test-episode", "Watched", "")];
 
-		episodeList = $("<ul>")
-			.attr("id", "list")
-			.appendTo(document.body);
+		episodeList = document.createElement("ul");
+		episodeList.id = "list";
+		document.body.append(episodeList);
 
 		episodesController = new EpisodesController(listItem);
 	});
@@ -117,7 +116,7 @@ describe("EpisodesController", (): void => {
 				});
 
 				it("should prepare the list for sorting", (): void => {
-					episodesController["sortable"].should.equal(Sortable.get(episodeList.get(0)));
+					episodesController["sortable"].should.equal(Sortable.get(episodeList));
 					Boolean(episodesController["sortable"].option("disabled")).should.be.true;
 				});
 
@@ -335,15 +334,15 @@ describe("EpisodesController", (): void => {
 				item: EpisodeMock;
 
 		beforeEach((): void => {
+			const itemLink = document.createElement("a"),
+						episodeListItem = document.createElement("li");
+
+			itemLink.id = `item-${String(items[0].id)}`;
+			episodeListItem.append(itemLink);
+			episodeList.append(episodeListItem);
+
 			index = 0;
 			sinon.stub(episodesController, "resequenceItems" as keyof EpisodesController);
-
-			$("<a>")
-				.attr("id", items[0].id)
-				.hide()
-				.appendTo($("<li>")
-					.hide()
-					.appendTo(episodeList));
 		});
 
 		scenarios.forEach((scenario: Scenario): void => {
@@ -360,7 +359,7 @@ describe("EpisodesController", (): void => {
 					await episodesController["deleteItem"](index);
 				});
 
-				it("should remove the item from the DOM", (): Chai.Assertion => $("#list li a#1").length.should.equal(0));
+				it("should remove the item from the DOM", (): Chai.Assertion => (null === episodeList.querySelector("li a#item-1")).should.be.true);
 				it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
 				it("should remove the item from the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal([]));
 				it("should refresh the list", (): Chai.Assertion => episodesController["resequenceItems"].should.have.been.called);
@@ -385,8 +384,8 @@ describe("EpisodesController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			episodeList.hasClass("delete").should.be.true;
-			episodeList.hasClass("edit").should.be.false;
+			episodeList.classList.contains("delete").should.be.true;
+			episodeList.classList.contains("edit").should.be.false;
 		});
 
 		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
@@ -419,7 +418,16 @@ describe("EpisodesController", (): void => {
 				items[3]
 			];
 
-			episodeList.append(sortedItems.map((item: EpisodeMock): JQuery => $("<li>").append($("<a>").attr("id", item.id))));
+			episodeList.append(...sortedItems.map((item: EpisodeMock): HTMLLIElement => {
+				const itemLink = document.createElement("a"),
+							episodeListItem = document.createElement("li");
+
+				itemLink.id = `item-${String(item.id)}`;
+				episodeListItem.append(itemLink);
+
+				return episodeListItem;
+			}));
+
 			episodesController["episodeList"] = new ListMock("", "", "", items);
 			await episodesController["resequenceItems"]();
 		});
@@ -453,8 +461,8 @@ describe("EpisodesController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			episodeList.hasClass("delete").should.be.false;
-			episodeList.hasClass("edit").should.be.true;
+			episodeList.classList.contains("delete").should.be.false;
+			episodeList.classList.contains("edit").should.be.true;
 		});
 
 		it("should enable sorting", (): Chai.Assertion => Boolean(episodesController["sortable"].option("disabled")).should.be.false);
@@ -492,8 +500,8 @@ describe("EpisodesController", (): void => {
 		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			episodeList.hasClass("delete").should.be.false;
-			episodeList.hasClass("edit").should.be.false;
+			episodeList.classList.contains("delete").should.be.false;
+			episodeList.classList.contains("edit").should.be.false;
 		});
 
 		it("should disable sorting", (): Chai.Assertion => Boolean(episodesController["sortable"].option("disabled")).should.be.true);
@@ -517,5 +525,5 @@ describe("EpisodesController", (): void => {
 		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
 	});
 
-	afterEach((): JQuery => episodeList.remove());
+	afterEach((): void => episodeList.remove());
 });
