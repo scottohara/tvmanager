@@ -71,8 +71,8 @@
     "workbox-webpack-plugin": "6.3.0"
   },
   "config": {
-    "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-X",
-    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-15-2"
+    "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-13-Pro-Max",
+    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-15-5"
   },
   "scripts": {
     "start": "heroku local --procfile Procfile.dev",
