@@ -146,7 +146,7 @@ export default class DataSyncController extends ViewController {
 			// If the device has previously performed a full import, allow the Fast Import option
 			if (this.device.imported) {
 				this.importChangesOnly.checked = true;
-				this.importChangesOnlyRow.style.display = "block";
+				this.importChangesOnlyRow.style.display = "flex";
 			}
 		}
 	}
@@ -196,7 +196,7 @@ export default class DataSyncController extends ViewController {
 			this.progress.style.display = "none";
 			this.status.value = `Starting ${operation.toLowerCase()}`;
 			this.status.style.display = "inline";
-			this.statusRow.style.display = "block";
+			this.statusRow.style.display = "flex";
 
 			// Ask the user to confirm their action
 			if (window.confirm(prompt)) {

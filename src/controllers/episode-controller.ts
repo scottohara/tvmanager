@@ -135,17 +135,17 @@ export default class EpisodeController extends ViewController {
 
 					case "Recorded":
 						this.recorded.classList.add("status");
-						this.unverifiedRow.style.display = "block";
+						this.unverifiedRow.style.display = "flex";
 						break;
 
 					case "Expected":
 						this.expected.classList.add("status");
-						this.unverifiedRow.style.display = "block";
+						this.unverifiedRow.style.display = "flex";
 						break;
 
 					case "Missed":
 						this.missed.classList.add("status");
-						this.unverifiedRow.style.display = "block";
+						this.unverifiedRow.style.display = "flex";
 						break;
 
 					default:
@@ -166,7 +166,7 @@ export default class EpisodeController extends ViewController {
 
 		// Show the status date if certain criteria is met
 		if (this.unscheduled.checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
-			this.statusDateRow.style.display = "block";
+			this.statusDateRow.style.display = "flex";
 		}
 	}
 
