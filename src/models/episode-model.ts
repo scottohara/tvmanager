@@ -58,7 +58,7 @@ export default class Episode extends Base {
 				SeriesID: string | null = null;
 
 		try {
-			const ep: PersistedEpisode | undefined = await (await this.db).episodesStore.find(id);
+			const ep = await (await this.db).episodesStore.find(id);
 
 			if (undefined !== ep) {
 				({ EpisodeID, Name, Status, StatusDate, Unverified, Unscheduled, Sequence, SeriesID } = ep);

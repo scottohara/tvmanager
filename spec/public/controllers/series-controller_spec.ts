@@ -12,7 +12,7 @@ import type { SinonStub } from "sinon";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("SeriesController", (): void => {
 	let listItem: SeriesListItem,

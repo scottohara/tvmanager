@@ -60,7 +60,7 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("start", (): void => {
-		const lastSyncTime: SettingMock = new SettingMock("LastSyncTime", "1 Jan 2010");
+		const lastSyncTime = new SettingMock("LastSyncTime", "1 Jan 2010");
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(applicationController, "pushView");
@@ -1211,8 +1211,8 @@ describe("ApplicationController", (): void => {
 
 		describe("without local changes to sync", (): void => {
 			it("should do nothing", (): void => {
-				const clock: SinonFakeTimers = sinon.useFakeTimers(new Date().valueOf()),
-							settingValue: Date = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
+				const clock = sinon.useFakeTimers(new Date().valueOf()),
+							settingValue = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
 
 				applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 0);
 				applicationController["showSyncNotice"](new SettingMock(), 0);

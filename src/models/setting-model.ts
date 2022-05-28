@@ -1,5 +1,4 @@
 import Base from "models/base-model";
-import type { PersistedSetting } from "models";
 
 export default class Setting extends Base {
 	public constructor(private settingName?: string,
@@ -12,7 +11,7 @@ export default class Setting extends Base {
 				value: string | undefined;
 
 		try {
-			const persistedSetting: PersistedSetting | undefined = await (await this.db).settingsStore.get(settingName);
+			const persistedSetting = await (await this.db).settingsStore.get(settingName);
 
 			if (undefined !== persistedSetting) {
 				({ name, value } = persistedSetting);

@@ -7,7 +7,7 @@ if ("serviceWorker" in window.navigator) {
 }
 
 // Get a reference to the application controller singleton
-const appController: ApplicationController = new ApplicationController();
+const appController = new ApplicationController();
 
 // Start the application
 appController.start().catch((error: Error): string => ((document.querySelector("#content") as HTMLDivElement).textContent = error.message));

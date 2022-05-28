@@ -95,7 +95,7 @@ export default class Series extends Base {
 				ProgramID: string | null = null;
 
 		try {
-			const series: PersistedSeries | undefined = await (await this.db).seriesStore.find(id);
+			const series = await (await this.db).seriesStore.find(id);
 
 			if (undefined !== series) {
 				({ SeriesID, Name, NowShowing, ProgramID } = series);

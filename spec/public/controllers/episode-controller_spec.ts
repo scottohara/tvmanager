@@ -14,7 +14,7 @@ import TestController from "mocks/test-controller";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("EpisodeController", (): void => {
 	let listItem: EpisodeListItem,

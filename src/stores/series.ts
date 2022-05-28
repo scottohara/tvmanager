@@ -65,12 +65,12 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 
-						series: PersistedSeries[] = await Promise.all((await txSeriesStore.index("programId").getAll(programId)).map(async ({ id, name, nowShowing }: SeriesStoreObject): Promise<PersistedSeries> => {
-							const { name: ProgramName }: ProgramsStoreObject = await txProgramsStore.get(programId) as ProgramsStoreObject,
-										EpisodeCount: number = await txEpisodesStore.index("seriesId").count(id),
-										WatchedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", id], ["Watched", id])),
-										RecordedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
-										ExpectedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id]));
+						series = await Promise.all((await txSeriesStore.index("programId").getAll(programId)).map(async ({ id, name, nowShowing }: SeriesStoreObject): Promise<PersistedSeries> => {
+							const { name: ProgramName } = await txProgramsStore.get(programId) as ProgramsStoreObject,
+										EpisodeCount = await txEpisodesStore.index("seriesId").count(id),
+										WatchedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", id], ["Watched", id])),
+										RecordedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
+										ExpectedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id]));
 
 							return {
 								SeriesID: id,
@@ -106,14 +106,14 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 			(await txEpisodesStore.index("status").getAll(IDBKeyRange.bound(["Recorded"], ["Recorded", "~"]))).forEach((episode: EpisodesStoreObject): Set<string> => series.add(episode.seriesId));
 			(await txEpisodesStore.index("status").getAll(IDBKeyRange.bound(["Expected"], ["Expected", "~"]))).forEach((episode: EpisodesStoreObject): Set<string> => series.add(episode.seriesId));
 
-			const list: PersistedSeries[] = await Promise.all([...series].map(async (id: string): Promise<PersistedSeries> => {
-				const { name, programId, nowShowing }: SeriesStoreObject = await txSeriesStore.get(id) as SeriesStoreObject,
-							{ name: programName }: ProgramsStoreObject = await txProgramsStore.get(programId) as ProgramsStoreObject,
-							EpisodeCount: number = await txEpisodesStore.index("seriesId").count(id),
-							WatchedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", id], ["Watched", id])),
-							RecordedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
-							ExpectedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id])),
-							StatusWarningCount: number = await txEpisodesStore.index("statusWarning").count(IDBKeyRange.bound(["Expected", id, ""], ["Expected", id, `${year}-${month}-${day}`], true));
+			const list = await Promise.all([...series].map(async (id: string): Promise<PersistedSeries> => {
+				const { name, programId, nowShowing } = await txSeriesStore.get(id) as SeriesStoreObject,
+							{ name: programName } = await txProgramsStore.get(programId) as ProgramsStoreObject,
+							EpisodeCount = await txEpisodesStore.index("seriesId").count(id),
+							WatchedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", id], ["Watched", id])),
+							RecordedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
+							ExpectedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id])),
+							StatusWarningCount = await txEpisodesStore.index("statusWarning").count(IDBKeyRange.bound(["Expected", id, ""], ["Expected", id, `${year}-${month}-${day}`], true));
 
 				return {
 					SeriesID: id,
@@ -143,15 +143,15 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 
 			// Get set of series with at least one episode in the specified status
 			(await txEpisodesStore.index("status").getAll(IDBKeyRange.bound([status], [status, "~"]))).forEach((episode: EpisodesStoreObject): void => {
-				const count: number = series.get(episode.seriesId) ?? 0;
+				const count = series.get(episode.seriesId) ?? 0;
 
 				series.set(episode.seriesId, count + 1);
 			});
 
-			const list: PersistedSeries[] = await Promise.all([...series].map(async ([id, statusCount]: [string, number]): Promise<PersistedSeries> => {
-				const { name, programId, nowShowing }: SeriesStoreObject = await txSeriesStore.get(id) as SeriesStoreObject,
-							{ name: programName }: ProgramsStoreObject = await txProgramsStore.get(programId) as ProgramsStoreObject,
-							EpisodeCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound([status, id], [status, id]));
+			const list = await Promise.all([...series].map(async ([id, statusCount]: [string, number]): Promise<PersistedSeries> => {
+				const { name, programId, nowShowing } = await txSeriesStore.get(id) as SeriesStoreObject,
+							{ name: programName } = await txProgramsStore.get(programId) as ProgramsStoreObject,
+							EpisodeCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound([status, id], [status, id]));
 
 				return {
 					SeriesID: id,
@@ -181,19 +181,19 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 
 			// Filter out any series where all episodes are watched
 			await Promise.all([...watchedSeries].map(async (seriesId: string): Promise<void> => {
-				const episodeCount: number = await txEpisodesStore.index("seriesId").count(seriesId),
-							watchedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", seriesId], ["Watched", seriesId]));
+				const episodeCount = await txEpisodesStore.index("seriesId").count(seriesId),
+							watchedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", seriesId], ["Watched", seriesId]));
 
 				if (episodeCount > watchedCount) {
 					series.set(seriesId, { episodeCount, watchedCount });
 				}
 			}));
 
-			const list: PersistedSeries[] = await Promise.all([...series].map(async ([id, { episodeCount, watchedCount }]: [string, { episodeCount: number; watchedCount: number; }]): Promise<PersistedSeries> => {
-				const { name, programId, nowShowing }: SeriesStoreObject = await txSeriesStore.get(id) as SeriesStoreObject,
-							{ name: programName }: ProgramsStoreObject = await txProgramsStore.get(programId) as ProgramsStoreObject,
-							RecordedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
-							ExpectedCount: number = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id]));
+			const list = await Promise.all([...series].map(async ([id, { episodeCount, watchedCount }]: [string, { episodeCount: number; watchedCount: number; }]): Promise<PersistedSeries> => {
+				const { name, programId, nowShowing } = await txSeriesStore.get(id) as SeriesStoreObject,
+							{ name: programName } = await txProgramsStore.get(programId) as ProgramsStoreObject,
+							RecordedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", id], ["Recorded", id])),
+							ExpectedCount = await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", id], ["Expected", id]));
 
 				return {
 					SeriesID: id,

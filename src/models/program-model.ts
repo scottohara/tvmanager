@@ -50,7 +50,7 @@ export default class Program extends Base {
 				Name: string | null = null;
 
 		try {
-			const prog: PersistedProgram | undefined = await (await this.db).programsStore.find(id);
+			const prog = await (await this.db).programsStore.find(id);
 
 			if (undefined !== prog) {
 				({ ProgramID, Name } = prog);

@@ -6,9 +6,9 @@ interface Setting {
 	value?: string;
 }
 
-const saveStub: SinonStub = sinon.stub(),
-			removeStub: SinonStub = sinon.stub(),
-			getStub: SinonStub = sinon.stub(),
+const saveStub = sinon.stub(),
+			removeStub = sinon.stub(),
+			getStub = sinon.stub(),
 			setting: Setting = {};
 
 export default class SettingMock {

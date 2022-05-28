@@ -12,7 +12,7 @@ import SeriesMock from "mocks/series-model-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("ScheduleController", (): void => {
 	let items: SeriesMock[],

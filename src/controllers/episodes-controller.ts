@@ -69,7 +69,7 @@ export default class EpisodesController extends ViewController {
 		// If necessary, scroll to the first unwatched episode
 		if (this.scrollToFirstUnwatched) {
 			// Find the first unwatched episode
-			const firstUnwatched: PublicInterface<Episode> | undefined = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as PublicInterface<Episode> | undefined;
+			const firstUnwatched = this.episodeList.items.find((item: Episode): boolean => "Watched" !== item.status) as PublicInterface<Episode> | undefined;
 
 			if (undefined !== firstUnwatched) {
 				this.episodeList.scrollTo(String(firstUnwatched.id));

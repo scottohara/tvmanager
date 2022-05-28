@@ -13,7 +13,7 @@ export default abstract class Base {
 	}
 
 	protected makeEnumerable(property: string): void {
-		const descriptor: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), property);
+		const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), property);
 
 		if (descriptor) {
 			descriptor.enumerable = true;

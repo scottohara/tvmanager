@@ -13,7 +13,6 @@ import type {
 	SerializedModel
 } from "models";
 import type {
-	SinonFakeTimers,
 	SinonMatcher,
 	SinonStub
 } from "sinon";
@@ -29,7 +28,7 @@ import WindowMock from "mocks/window-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("DataSyncController", (): void => {
 	let dataSyncController: DataSyncController;
@@ -796,7 +795,7 @@ describe("DataSyncController", (): void => {
 		let lastSyncTime: HTMLInputElement;
 
 		beforeEach(async (): Promise<void> => {
-			const clock: SinonFakeTimers = sinon.useFakeTimers();
+			const clock = sinon.useFakeTimers();
 
 			lastSyncTime = document.createElement("input");
 			lastSyncTime.id = "lastSyncTime";

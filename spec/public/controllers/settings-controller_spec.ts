@@ -10,7 +10,7 @@ import SettingsView from "views/settings-view.html";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("SettingsController", (): void => {
 	interface ReportType {

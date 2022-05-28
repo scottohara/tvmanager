@@ -11,7 +11,7 @@ import UnscheduledView from "views/unscheduled-view.html";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("UnscheduledController", (): void => {
 	let unscheduledController: UnscheduledController,

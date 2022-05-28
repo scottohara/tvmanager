@@ -5,10 +5,10 @@ import type {
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 
-const removeStub: SinonStub = sinon.stub(),
-			listStub: SinonStub = sinon.stub(),
-			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub = sinon.stub();
+const removeStub = sinon.stub(),
+			listStub = sinon.stub(),
+			countStub = sinon.stub(),
+			removeAllStub = sinon.stub();
 
 let syncList: SyncMock[] = [];
 

@@ -34,14 +34,13 @@ function create(db: IDBPDatabase<TVManagerDB>): ProgramsStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 
-						programs: PersistedProgram[] = await Promise.all((await txProgramsStore.index("name").getAll()).map(async ({ id, name }: ProgramsStoreObject): Promise<PersistedProgram> => {
-							const series: EpisodeCounts[] = await Promise.all((await txSeriesStore.index("programId").getAllKeys(id)).map(async (seriesId: string): Promise<EpisodeCounts> => ({
+						programs = await Promise.all((await txProgramsStore.index("name").getAll()).map(async ({ id, name }: ProgramsStoreObject): Promise<PersistedProgram> => {
+							const series = await Promise.all((await txSeriesStore.index("programId").getAllKeys(id)).map(async (seriesId: string): Promise<EpisodeCounts> => ({
 											episodeCount: await txEpisodesStore.index("seriesId").count(seriesId),
 											watchedCount: await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Watched", seriesId], ["Watched", seriesId])),
 											recordedCount: await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Recorded", seriesId], ["Recorded", seriesId])),
 											expectedCount: await txEpisodesStore.index("status").count(IDBKeyRange.bound(["Expected", seriesId], ["Expected", seriesId]))
 										}))),
-
 										{
 											seriesCount,
 											episodeCount,

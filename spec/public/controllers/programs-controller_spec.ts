@@ -12,7 +12,7 @@ import ProgramsView from "views/programs-view.html";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
-const appController: ApplicationControllerMock = new ApplicationControllerMock();
+const appController = new ApplicationControllerMock();
 
 describe("ProgramsController", (): void => {
 	let items: ProgramMock[],

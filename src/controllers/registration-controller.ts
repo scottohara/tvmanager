@@ -71,7 +71,7 @@ export default class RegistrationController extends ViewController {
 	private async unregister(): Promise<void> {
 		try {
 			// Send a DELETE request to the server
-			const response: Response = await fetch(`/devices/${this.device.id}`, {
+			const response = await fetch(`/devices/${this.device.id}`, {
 				method: "DELETE",
 				headers: {
 					"X-DEVICE-ID": String(this.device.id)
@@ -79,7 +79,7 @@ export default class RegistrationController extends ViewController {
 			});
 
 			if (response.ok) {
-				const device: Setting = new Setting("Device");
+				const device = new Setting("Device");
 
 				// Remove the device from the database
 				await device.remove();
@@ -100,7 +100,7 @@ export default class RegistrationController extends ViewController {
 
 		// Send a PUT request to the server, including the device ID in the request headers
 		try {
-			const response: Response = await fetch(`/devices/${this.device.name}`, {
+			const response = await fetch(`/devices/${this.device.name}`, {
 				method: "PUT",
 				headers: {
 					"X-DEVICE-ID": String(this.device.id)
@@ -111,7 +111,7 @@ export default class RegistrationController extends ViewController {
 				// Get the device ID returned in the Location header
 				this.device.id = String(response.headers.get("Location"));
 
-				const device: Setting = new Setting("Device", JSON.stringify(this.device));
+				const device = new Setting("Device", JSON.stringify(this.device));
 
 				// Update the database
 				await device.save();
