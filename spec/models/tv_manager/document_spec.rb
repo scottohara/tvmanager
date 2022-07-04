@@ -181,7 +181,7 @@ describe ::TVManager::Document do
 				it 'should delete the document' do
 					expect(::TVManager::Device).to receive(:other_devices).with(device_id).and_return []
 					described_class.new(document_id).delete! device_id
-					expect(described_class.new(document_id).document).to be nil
+					expect(described_class.new(document_id).document).to be_nil
 				end
 			end
 
@@ -245,7 +245,7 @@ describe ::TVManager::Document do
 
 					it 'should delete the document' do
 						document.remove_pending! device_id
-						expect(described_class.new(document_id).document).to be nil
+						expect(described_class.new(document_id).document).to be_nil
 					end
 				end
 
@@ -268,7 +268,7 @@ describe ::TVManager::Document do
 
 		context 'when the document id is not found' do
 			it 'should return nil' do
-				expect(document.document).to be nil
+				expect(document.document).to be_nil
 			end
 		end
 

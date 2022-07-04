@@ -10,7 +10,7 @@ describe ::TVManager::DevicesController do
 	end
 
 	let(:device_id) { 'test_device_id' }
-	let(:device) { instance_double 'TVManager::Device' }
+	let(:device) { instance_double ::TVManager::Device }
 
 	shared_examples 'a route requiring a client device id' do
 		it 'should respond with a 400 Bad Request if a client device id is not specified' do

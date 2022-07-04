@@ -24,7 +24,7 @@ describe ::TVManager::Device do
 		end
 
 		it 'should return nil when a device id is not required and not supplied' do
-			expect(described_class.id request, required: false).to be nil
+			expect(described_class.id request, required: false).to be_nil
 		end
 
 		it 'should return the specified device id from the request' do
@@ -161,7 +161,7 @@ describe ::TVManager::Device do
 
 	describe '#delete!' do
 		let(:device) { described_class.new device_id }
-		let(:document) { instance_double 'TVManager::Document' }
+		let(:document) { instance_double ::TVManager::Document }
 
 		include_context 'database interaction' do
 			let(:documents) { Array(1..3).map { |i| {'_id' => "document_#{i}", type: 'document', pending: [device_id]} } }

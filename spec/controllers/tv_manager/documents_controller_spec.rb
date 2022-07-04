@@ -11,8 +11,8 @@ describe ::TVManager::DocumentsController do
 
 	let(:device_id) { 'test_device_id' }
 	let(:document_id) { 'test_document_id' }
-	let(:device) { instance_double 'TVManager::Device' }
-	let(:document) { instance_double 'TVManager::Document' }
+	let(:device) { instance_double ::TVManager::Device }
+	let(:document) { instance_double ::TVManager::Document }
 	let(:json) { {}.to_json }
 	let(:doc) { ::JSON.parse json }
 
