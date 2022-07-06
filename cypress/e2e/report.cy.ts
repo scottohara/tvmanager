@@ -21,7 +21,7 @@ import {
 	list,
 	listItem,
 	listItems
-} from "../support";
+} from "e2e";
 import type { EpisodeStatus } from "models";
 import { watched } from "episode";
 

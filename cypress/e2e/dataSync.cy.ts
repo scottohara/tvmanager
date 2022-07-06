@@ -23,7 +23,7 @@ import {
 	headerLeftButton,
 	headerRightButton,
 	notices
-} from "../support";
+} from "e2e";
 import {
 	totalEpisodes,
 	totalPrograms,

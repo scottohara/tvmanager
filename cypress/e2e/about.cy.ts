@@ -8,7 +8,7 @@ import {
 	footerRightButton,
 	headerLabel,
 	headerLeftButton
-} from "../support";
+} from "e2e";
 import type { TestData } from "types";
 import { aboutRow } from "settings";
 

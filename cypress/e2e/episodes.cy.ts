@@ -29,7 +29,7 @@ import {
 	listItems,
 	secondListItem,
 	thirdListItem
-} from "../support";
+} from "e2e";
 import type { EpisodeStatus } from "models";
 
 describe("Episodes", (): void => {

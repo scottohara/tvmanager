@@ -20,7 +20,7 @@ import {
 	listItem,
 	listItemSubText,
 	listItems
-} from "../support";
+} from "e2e";
 
 describe("Unscheduled", (): void => {
 	let expectedItems: EpisodeListItem[];

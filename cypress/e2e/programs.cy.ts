@@ -19,7 +19,7 @@ import {
 	listItems,
 	secondListItem,
 	thirdListItem
-} from "../support";
+} from "e2e";
 import { programName } from "program";
 
 describe("Programs", (): void => {

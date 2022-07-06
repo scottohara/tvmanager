@@ -16,7 +16,7 @@ import {
 	listItems,
 	secondListItem,
 	thirdListItem
-} from "../support";
+} from "e2e";
 import {
 	moveTo,
 	nowShowing,

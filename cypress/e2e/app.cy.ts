@@ -1,7 +1,7 @@
 import {
 	dismissNoticeButton,
 	notices
-} from "../support";
+} from "e2e";
 import type { TestData } from "types";
 
 describe("App", (): void => {

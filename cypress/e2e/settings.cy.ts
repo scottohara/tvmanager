@@ -10,7 +10,7 @@ import {
 	footerRightButton,
 	headerLabel,
 	headerLeftButton
-} from "../support";
+} from "e2e";
 
 describe("Settings", (): void => {
 	beforeEach((): void => {
