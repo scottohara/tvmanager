@@ -1,5 +1,5 @@
 import {
-	Remote,
+	type Remote,
 	expose as originalExpose,
 	wrap as originalWrap
 } from "../../../node_modules/comlink";
@@ -9,4 +9,4 @@ import sinon from "sinon";
 const wrap: SinonSpy = sinon.spy(originalWrap),
 			expose: SinonSpy = sinon.spy(originalExpose);
 
-export { Remote, wrap, expose };
+export { type Remote, wrap, expose };

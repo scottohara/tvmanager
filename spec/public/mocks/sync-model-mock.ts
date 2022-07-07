@@ -19,15 +19,6 @@ export default class SyncMock {
 		removeStub.reset();
 	}
 
-	public get remove(): SinonStub<unknown[], Promise<void>> {
-		return removeStub;
-	}
-
-	public static reset(): void {
-		syncList = [];
-		removeStub.reset();
-	}
-
 	public static get list(): SinonStub<unknown[], Promise<SyncMock[]>> {
 		return listStub.returns(Promise.resolve(syncList));
 	}
@@ -46,5 +37,14 @@ export default class SyncMock {
 
 	public static set syncList(list: SyncMock[]) {
 		syncList = list;
+	}
+
+	public get remove(): SinonStub<unknown[], Promise<void>> {
+		return removeStub;
+	}
+
+	public static reset(): void {
+		syncList = [];
+		removeStub.reset();
 	}
 }

@@ -20,6 +20,11 @@ export default class ProgramController extends ViewController {
 		return ProgramView;
 	}
 
+	// DOM selectors
+	private get programName(): HTMLInputElement {
+		return document.querySelector("#programName") as HTMLInputElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -53,10 +58,5 @@ export default class ProgramController extends ViewController {
 
 	private async cancel(): Promise<void> {
 		return this.appController.popView();
-	}
-
-	// DOM selectors
-	private get programName(): HTMLInputElement {
-		return document.querySelector("#programName") as HTMLInputElement;
 	}
 }

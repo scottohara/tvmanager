@@ -83,6 +83,14 @@ export default class SeriesMock {
 		return fromJsonStub.returns(new SeriesMock(null, null, null, null));
 	}
 
+	public static get series(): SeriesMock[] {
+		return series;
+	}
+
+	public static set series(items: SeriesMock[]) {
+		series = items;
+	}
+
 	public get save(): SinonStub<unknown[], Promise<string | undefined>> {
 		return saveStub.returns(Promise.resolve("1"));
 	}
@@ -97,13 +105,5 @@ export default class SeriesMock {
 
 	public static removeAllFail(): void {
 		removeAllOk = false;
-	}
-
-	public static get series(): SeriesMock[] {
-		return series;
-	}
-
-	public static set series(items: SeriesMock[]) {
-		series = items;
 	}
 }

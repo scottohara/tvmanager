@@ -23,6 +23,18 @@ export default class Episode extends Base {
 		["statusDateDisplay", "statusWarning", "unverifiedDisplay"].forEach(this.makeEnumerable.bind(this));
 	}
 
+	public get statusDateDisplay(): string {
+		return ("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate ? new Date(this.statusDate).toDateString() : "";
+	}
+
+	public get statusWarning(): "" | "warning" {
+		return "Expected" === this.status && this.statusDate && new Date(this.statusDate) < new Date() ? "warning" : "";
+	}
+
+	public get unverifiedDisplay(): "" | "Unverified" {
+		return "Watched" !== this.status && this.unverified ? "Unverified" : "";
+	}
+
 	public static async listBySeries(seriesId: string): Promise<Episode[]> {
 		let episodeList: Episode[] = [];
 
@@ -158,17 +170,5 @@ export default class Episode extends Base {
 			sequence: this.sequence,
 			type: "Episode"
 		};
-	}
-
-	public get statusDateDisplay(): string {
-		return ("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate ? new Date(this.statusDate).toDateString() : "";
-	}
-
-	public get statusWarning(): "" | "warning" {
-		return "Expected" === this.status && this.statusDate && new Date(this.statusDate) < new Date() ? "warning" : "";
-	}
-
-	public get unverifiedDisplay(): "" | "Unverified" {
-		return "Watched" !== this.status && this.unverified ? "Unverified" : "";
 	}
 }

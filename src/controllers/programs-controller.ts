@@ -16,6 +16,11 @@ export default class ProgramsController extends ViewController {
 		return ProgramsView;
 	}
 
+	// DOM selectors
+	private get list(): HTMLUListElement {
+		return document.querySelector("#list") as HTMLUListElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -167,10 +172,5 @@ export default class ProgramsController extends ViewController {
 
 		// Set the view footer
 		this.appController.setFooter();
-	}
-
-	// DOM selectors
-	private get list(): HTMLUListElement {
-		return document.querySelector("#list") as HTMLUListElement;
 	}
 }

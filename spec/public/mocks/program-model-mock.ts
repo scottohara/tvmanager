@@ -66,6 +66,14 @@ export default class ProgramMock {
 		return fromJsonStub.returns(new ProgramMock("", ""));
 	}
 
+	public static get programs(): ProgramMock[] {
+		return programs;
+	}
+
+	public static set programs(items: ProgramMock[]) {
+		programs = items;
+	}
+
 	public get save(): SinonStub<unknown[], Promise<string | undefined>> {
 		return saveStub.returns(Promise.resolve("1"));
 	}
@@ -80,13 +88,5 @@ export default class ProgramMock {
 
 	public static removeAllFail(): void {
 		removeAllOk = false;
-	}
-
-	public static get programs(): ProgramMock[] {
-		return programs;
-	}
-
-	public static set programs(items: ProgramMock[]) {
-		programs = items;
 	}
 }

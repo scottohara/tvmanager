@@ -15,6 +15,11 @@ export default class RegistrationController extends ViewController {
 		return RegistrationView;
 	}
 
+	// DOM selectors
+	private get deviceName(): HTMLInputElement {
+		return document.querySelector("#deviceName") as HTMLInputElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -128,10 +133,5 @@ export default class RegistrationController extends ViewController {
 
 	private async cancel(): Promise<void> {
 		return this.appController.popView();
-	}
-
-	// DOM selectors
-	private get deviceName(): HTMLInputElement {
-		return document.querySelector("#deviceName") as HTMLInputElement;
 	}
 }

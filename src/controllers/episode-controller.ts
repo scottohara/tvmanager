@@ -35,6 +35,47 @@ export default class EpisodeController extends ViewController {
 		return EpisodeView;
 	}
 
+	// DOM selectors
+	private get episodeName(): HTMLInputElement {
+		return document.querySelector("#episodeName") as HTMLInputElement;
+	}
+
+	private get watched(): HTMLDivElement {
+		return document.querySelector("#watched") as HTMLDivElement;
+	}
+
+	private get recorded(): HTMLDivElement {
+		return document.querySelector("#recorded") as HTMLDivElement;
+	}
+
+	private get expected(): HTMLDivElement {
+		return document.querySelector("#expected") as HTMLDivElement;
+	}
+
+	private get missed(): HTMLDivElement {
+		return document.querySelector("#missed") as HTMLDivElement;
+	}
+
+	private get statusDateRow(): HTMLDivElement {
+		return document.querySelector("#statusDateRow") as HTMLDivElement;
+	}
+
+	private get statusDate(): HTMLInputElement {
+		return document.querySelector("#statusDate") as HTMLInputElement;
+	}
+
+	private get unverifiedRow(): HTMLDivElement {
+		return document.querySelector("#unverifiedRow") as HTMLDivElement;
+	}
+
+	private get unverified(): HTMLInputElement {
+		return document.querySelector("#unverified") as HTMLInputElement;
+	}
+
+	private get unscheduled(): HTMLInputElement {
+		return document.querySelector("#unscheduled") as HTMLInputElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -168,46 +209,5 @@ export default class EpisodeController extends ViewController {
 		if (this.unscheduled.checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
 			this.statusDateRow.style.display = "flex";
 		}
-	}
-
-	// DOM selectors
-	private get episodeName(): HTMLInputElement {
-		return document.querySelector("#episodeName") as HTMLInputElement;
-	}
-
-	private get watched(): HTMLDivElement {
-		return document.querySelector("#watched") as HTMLDivElement;
-	}
-
-	private get recorded(): HTMLDivElement {
-		return document.querySelector("#recorded") as HTMLDivElement;
-	}
-
-	private get expected(): HTMLDivElement {
-		return document.querySelector("#expected") as HTMLDivElement;
-	}
-
-	private get missed(): HTMLDivElement {
-		return document.querySelector("#missed") as HTMLDivElement;
-	}
-
-	private get statusDateRow(): HTMLDivElement {
-		return document.querySelector("#statusDateRow") as HTMLDivElement;
-	}
-
-	private get statusDate(): HTMLInputElement {
-		return document.querySelector("#statusDate") as HTMLInputElement;
-	}
-
-	private get unverifiedRow(): HTMLDivElement {
-		return document.querySelector("#unverifiedRow") as HTMLDivElement;
-	}
-
-	private get unverified(): HTMLInputElement {
-		return document.querySelector("#unverified") as HTMLInputElement;
-	}
-
-	private get unscheduled(): HTMLInputElement {
-		return document.querySelector("#unscheduled") as HTMLInputElement;
 	}
 }

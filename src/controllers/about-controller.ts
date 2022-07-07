@@ -11,6 +11,23 @@ export default class AboutController extends ViewController {
 		return AboutView;
 	}
 
+	// DOM selectors
+	private get databaseVersion(): HTMLInputElement {
+		return document.querySelector("#databaseVersion") as HTMLInputElement;
+	}
+
+	private get totalPrograms(): HTMLInputElement {
+		return document.querySelector("#totalPrograms") as HTMLInputElement;
+	}
+
+	private get totalSeries(): HTMLInputElement {
+		return document.querySelector("#totalSeries") as HTMLInputElement;
+	}
+
+	private get totalEpisodes(): HTMLInputElement {
+		return document.querySelector("#totalEpisodes") as HTMLInputElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -50,22 +67,5 @@ export default class AboutController extends ViewController {
 
 		// Return the total number of episodes and percent watched
 		return `${totalCount} (${watchedPercent}% watched)`;
-	}
-
-	// DOM selectors
-	private get databaseVersion(): HTMLInputElement {
-		return document.querySelector("#databaseVersion") as HTMLInputElement;
-	}
-
-	private get totalPrograms(): HTMLInputElement {
-		return document.querySelector("#totalPrograms") as HTMLInputElement;
-	}
-
-	private get totalSeries(): HTMLInputElement {
-		return document.querySelector("#totalSeries") as HTMLInputElement;
-	}
-
-	private get totalEpisodes(): HTMLInputElement {
-		return document.querySelector("#totalEpisodes") as HTMLInputElement;
 	}
 }

@@ -56,6 +56,59 @@ export default class ApplicationController {
 		return this;
 	}
 
+	private get currentView(): View {
+		return this.viewStack[this.viewStack.length - 1];
+	}
+
+	// DOM selectors
+	private get header(): HTMLDivElement {
+		return document.querySelector("#footer") as HTMLDivElement;
+	}
+
+	private get headerLeftButton(): HTMLAnchorElement {
+		return document.querySelector("#headerLeftButton") as HTMLAnchorElement;
+	}
+
+	private get headerLabel(): HTMLHeadingElement {
+		return document.querySelector("#headerLabel") as HTMLHeadingElement;
+	}
+
+	private get headerRightButton(): HTMLAnchorElement {
+		return document.querySelector("#headerRightButton") as HTMLAnchorElement;
+	}
+
+	private get nowLoading(): HTMLDivElement {
+		return document.querySelector("#nowLoading") as HTMLDivElement;
+	}
+
+	private get contentWrapper(): HTMLDivElement {
+		return document.querySelector("#contentWrapper") as HTMLDivElement;
+	}
+
+	private get content(): HTMLDivElement {
+		return document.querySelector("#content") as HTMLDivElement;
+	}
+
+	private get footer(): HTMLDivElement {
+		return document.querySelector("#footer") as HTMLDivElement;
+	}
+
+	private get footerLeftButton(): HTMLAnchorElement {
+		return document.querySelector("#footerLeftButton") as HTMLAnchorElement;
+	}
+
+	private get footerLabel(): HTMLElement {
+		return document.querySelector("#footerLabel") as HTMLElement;
+	}
+
+	private get footerRightButton(): HTMLAnchorElement {
+		return document.querySelector("#footerRightButton") as HTMLAnchorElement;
+	}
+
+	private get notices(): HTMLDivElement {
+		return document.querySelector("#notices") as HTMLDivElement;
+	}
+
 	public async start(): Promise<void> {
 		// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
 		this.viewControllers = {
@@ -257,10 +310,6 @@ export default class ApplicationController {
 		this.setContentHeight();
 	}
 
-	private get currentView(): View {
-		return this.viewStack[this.viewStack.length - 1];
-	}
-
 	private async viewPushed(): Promise<void> {
 		// Call the view controller's setup method
 		await this.currentView.controller.setup();
@@ -443,54 +492,5 @@ export default class ApplicationController {
 				this.showNotice({ label: `The last data sync was over ${this.maxDataAgeDays} days ago` });
 			}
 		}
-	}
-
-	// DOM selectors
-	private get header(): HTMLDivElement {
-		return document.querySelector("#footer") as HTMLDivElement;
-	}
-
-	private get headerLeftButton(): HTMLAnchorElement {
-		return document.querySelector("#headerLeftButton") as HTMLAnchorElement;
-	}
-
-	private get headerLabel(): HTMLHeadingElement {
-		return document.querySelector("#headerLabel") as HTMLHeadingElement;
-	}
-
-	private get headerRightButton(): HTMLAnchorElement {
-		return document.querySelector("#headerRightButton") as HTMLAnchorElement;
-	}
-
-	private get nowLoading(): HTMLDivElement {
-		return document.querySelector("#nowLoading") as HTMLDivElement;
-	}
-
-	private get contentWrapper(): HTMLDivElement {
-		return document.querySelector("#contentWrapper") as HTMLDivElement;
-	}
-
-	private get content(): HTMLDivElement {
-		return document.querySelector("#content") as HTMLDivElement;
-	}
-
-	private get footer(): HTMLDivElement {
-		return document.querySelector("#footer") as HTMLDivElement;
-	}
-
-	private get footerLeftButton(): HTMLAnchorElement {
-		return document.querySelector("#footerLeftButton") as HTMLAnchorElement;
-	}
-
-	private get footerLabel(): HTMLElement {
-		return document.querySelector("#footerLabel") as HTMLElement;
-	}
-
-	private get footerRightButton(): HTMLAnchorElement {
-		return document.querySelector("#footerRightButton") as HTMLAnchorElement;
-	}
-
-	private get notices(): HTMLDivElement {
-		return document.querySelector("#notices") as HTMLDivElement;
 	}
 }

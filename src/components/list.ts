@@ -23,6 +23,15 @@ export default class List {
 		this.setAction("view");
 	}
 
+	// DOM selectors
+	private get containerElement(): HTMLUListElement {
+		return document.querySelector(`#${this.container}`) as HTMLUListElement;
+	}
+
+	private get index(): HTMLUListElement {
+		return document.querySelector("#index") as HTMLUListElement;
+	}
+
 	public refresh(): void {
 		const groupNames: HTMLLIElement[] = [];
 
@@ -184,14 +193,5 @@ export default class List {
 
 			default:
 		}
-	}
-
-	// DOM selectors
-	private get containerElement(): HTMLUListElement {
-		return document.querySelector(`#${this.container}`) as HTMLUListElement;
-	}
-
-	private get index(): HTMLUListElement {
-		return document.querySelector("#index") as HTMLUListElement;
 	}
 }

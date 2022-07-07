@@ -74,6 +74,14 @@ export default class EpisodeMock {
 		return fromJsonStub.returns(new EpisodeMock(null, null, "", ""));
 	}
 
+	public static get episodes(): EpisodeMock[] {
+		return episodes;
+	}
+
+	public static set episodes(items: EpisodeMock[]) {
+		episodes = items;
+	}
+
 	public get save(): SinonStub<unknown[], Promise<string | undefined>> {
 		return saveStub.returns(Promise.resolve("1"));
 	}
@@ -88,13 +96,5 @@ export default class EpisodeMock {
 
 	public static removeAllFail(): void {
 		removeAllOk = false;
-	}
-
-	public static get episodes(): EpisodeMock[] {
-		return episodes;
-	}
-
-	public static set episodes(items: EpisodeMock[]) {
-		episodes = items;
 	}
 }

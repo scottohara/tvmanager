@@ -63,6 +63,71 @@ export default class DataSyncController extends ViewController {
 		return DataSyncView;
 	}
 
+	private get onlyImportChanges(): boolean {
+		return this.importChangesOnly.checked;
+	}
+
+	// DOM selectors
+	private get registrationRow(): HTMLDivElement {
+		return document.querySelector("#registrationRow") as HTMLDivElement;
+	}
+
+	private get deviceName(): HTMLInputElement {
+		return document.querySelector("#deviceName") as HTMLInputElement;
+	}
+
+	private get registrationMessage(): HTMLDivElement {
+		return document.querySelector("#registrationMessage") as HTMLDivElement;
+	}
+
+	private get syncControls(): HTMLElement {
+		return document.querySelector("#syncControls") as HTMLElement;
+	}
+
+	private get lastSyncTime(): HTMLInputElement {
+		return document.querySelector("#lastSyncTime") as HTMLInputElement;
+	}
+
+	private get localChanges(): HTMLInputElement {
+		return document.querySelector("#localChanges") as HTMLInputElement;
+	}
+
+	private get importChangesOnlyRow(): HTMLDivElement {
+		return document.querySelector("#importChangesOnlyRow") as HTMLDivElement;
+	}
+
+	private get importChangesOnly(): HTMLInputElement {
+		return document.querySelector("#importChangesOnly") as HTMLInputElement;
+	}
+
+	private get import(): HTMLAnchorElement {
+		return document.querySelector("#import") as HTMLAnchorElement;
+	}
+
+	private get export(): HTMLAnchorElement {
+		return document.querySelector("#export") as HTMLAnchorElement;
+	}
+
+	private get statusRow(): HTMLDivElement {
+		return document.querySelector("#statusRow") as HTMLDivElement;
+	}
+
+	private get progress(): HTMLProgressElement {
+		return document.querySelector("#progress") as HTMLProgressElement;
+	}
+
+	private get status(): HTMLInputElement {
+		return document.querySelector("#status") as HTMLInputElement;
+	}
+
+	private get syncErrors(): HTMLElement {
+		return document.querySelector("#syncErrors") as HTMLElement;
+	}
+
+	private get errorList(): HTMLUListElement {
+		return document.querySelector("#errorList") as HTMLUListElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -677,70 +742,5 @@ export default class DataSyncController extends ViewController {
 
 		// Finish the sync operation
 		this.syncFinish(operation, false);
-	}
-
-	private get onlyImportChanges(): boolean {
-		return this.importChangesOnly.checked;
-	}
-
-	// DOM selectors
-	private get registrationRow(): HTMLDivElement {
-		return document.querySelector("#registrationRow") as HTMLDivElement;
-	}
-
-	private get deviceName(): HTMLInputElement {
-		return document.querySelector("#deviceName") as HTMLInputElement;
-	}
-
-	private get registrationMessage(): HTMLDivElement {
-		return document.querySelector("#registrationMessage") as HTMLDivElement;
-	}
-
-	private get syncControls(): HTMLElement {
-		return document.querySelector("#syncControls") as HTMLElement;
-	}
-
-	private get lastSyncTime(): HTMLInputElement {
-		return document.querySelector("#lastSyncTime") as HTMLInputElement;
-	}
-
-	private get localChanges(): HTMLInputElement {
-		return document.querySelector("#localChanges") as HTMLInputElement;
-	}
-
-	private get importChangesOnlyRow(): HTMLDivElement {
-		return document.querySelector("#importChangesOnlyRow") as HTMLDivElement;
-	}
-
-	private get importChangesOnly(): HTMLInputElement {
-		return document.querySelector("#importChangesOnly") as HTMLInputElement;
-	}
-
-	private get import(): HTMLAnchorElement {
-		return document.querySelector("#import") as HTMLAnchorElement;
-	}
-
-	private get export(): HTMLAnchorElement {
-		return document.querySelector("#export") as HTMLAnchorElement;
-	}
-
-	private get statusRow(): HTMLDivElement {
-		return document.querySelector("#statusRow") as HTMLDivElement;
-	}
-
-	private get progress(): HTMLProgressElement {
-		return document.querySelector("#progress") as HTMLProgressElement;
-	}
-
-	private get status(): HTMLInputElement {
-		return document.querySelector("#status") as HTMLInputElement;
-	}
-
-	private get syncErrors(): HTMLElement {
-		return document.querySelector("#syncErrors") as HTMLElement;
-	}
-
-	private get errorList(): HTMLUListElement {
-		return document.querySelector("#errorList") as HTMLUListElement;
 	}
 }

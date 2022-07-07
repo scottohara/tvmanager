@@ -32,6 +32,19 @@ export default class SeriesController extends ViewController {
 		return SeriesView;
 	}
 
+	// DOM selectors
+	private get seriesName(): HTMLInputElement {
+		return document.querySelector("#seriesName") as HTMLInputElement;
+	}
+
+	private get nowShowing(): HTMLSelectElement {
+		return document.querySelector("#nowShowing") as HTMLSelectElement;
+	}
+
+	private get moveTo(): HTMLSelectElement {
+		return document.querySelector("#moveTo") as HTMLSelectElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -92,18 +105,5 @@ export default class SeriesController extends ViewController {
 
 		// Pop the view off the stack
 		return this.appController.popView();
-	}
-
-	// DOM selectors
-	private get seriesName(): HTMLInputElement {
-		return document.querySelector("#seriesName") as HTMLInputElement;
-	}
-
-	private get nowShowing(): HTMLSelectElement {
-		return document.querySelector("#nowShowing") as HTMLSelectElement;
-	}
-
-	private get moveTo(): HTMLSelectElement {
-		return document.querySelector("#moveTo") as HTMLSelectElement;
 	}
 }

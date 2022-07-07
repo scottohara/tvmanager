@@ -6,11 +6,8 @@ import type {
 	ProgramsStoreObject,
 	TVManagerDB
 } from "stores";
-import type {
-	ModelType,
-	PersistedProgram
-} from "models";
 import type { IDBPDatabase } from "idb";
+import type { PersistedProgram } from "models";
 
 const	upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
@@ -114,7 +111,7 @@ function create(db: IDBPDatabase<TVManagerDB>): ProgramsStore {
 						txSyncStore = tx.objectStore("syncs"),
 
 						episodeIds: Promise<string[]>[] = [],
-						operations: Promise<unknown | [ModelType, string]>[] = [];
+						operations: Promise<unknown>[] = [];
 
 			for (const seriesId of await txSeriesStore.index("programId").getAllKeys(id)) {
 				episodeIds.push(txEpisodesStore.index("seriesId").getAllKeys(seriesId));

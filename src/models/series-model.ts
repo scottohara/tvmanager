@@ -40,6 +40,25 @@ export default class Series extends Base {
 		["statusWarning", "nowShowingDisplay"].forEach(this.makeEnumerable.bind(this));
 	}
 
+	public get statusWarning(): "" | "warning" {
+		return this.statusWarningCount > 0 ? "warning" : "";
+	}
+
+	public get nowShowingDisplay(): string {
+		const NOW_SHOWING: Record<number, string> = {
+			1: "Mondays",
+			2: "Tuesdays",
+			3: "Wednesdays",
+			4: "Thursdays",
+			5: "Fridays",
+			6: "Saturdays",
+			7: "Sundays",
+			8: "Daily"
+		};
+
+		return Number(this.nowShowing) > 0 ? NOW_SHOWING[Number(this.nowShowing)] : "Not Showing";
+	}
+
 	public static async listByProgram(programId: string): Promise<Series[]> {
 		let seriesList: Series[] = [];
 
@@ -229,25 +248,6 @@ export default class Series extends Base {
 			percent: expectedPercent,
 			style: "expected"
 		});
-	}
-
-	public get statusWarning(): "" | "warning" {
-		return this.statusWarningCount > 0 ? "warning" : "";
-	}
-
-	public get nowShowingDisplay(): string {
-		const NOW_SHOWING: Record<number, string> = {
-			1: "Mondays",
-			2: "Tuesdays",
-			3: "Wednesdays",
-			4: "Thursdays",
-			5: "Fridays",
-			6: "Saturdays",
-			7: "Sundays",
-			8: "Daily"
-		};
-
-		return Number(this.nowShowing) > 0 ? NOW_SHOWING[Number(this.nowShowing)] : "Not Showing";
 	}
 
 	private setWatchedProgress(): void {

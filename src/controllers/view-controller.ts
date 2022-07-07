@@ -16,11 +16,11 @@ export default abstract class ViewController {
 		this.appController = new ApplicationController();
 	}
 
+	public abstract get view(): string;
+
 	public activate?(args?: ViewControllerArgs): Promise<void>;
 
 	public contentShown?(): void;
 
 	public abstract setup(): Promise<void>;
-
-	public abstract get view(): string;
 }

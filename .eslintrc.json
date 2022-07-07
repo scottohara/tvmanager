@@ -5,6 +5,7 @@
 	},
 	"rules": {
 		"no-alert": "off",														// disabled to allow for import/export/delete confirmation prompts,
+		"@typescript-eslint/no-this-alias": "off",		// temporarily disabled, see https://github.com/scottohara/tvmanager/issues/83
 		"@typescript-eslint/no-type-alias": "off"			// disabled to allow for PublicInterface & StoreObject
 	}
 }

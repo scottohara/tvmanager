@@ -1,6 +1,5 @@
 import type {
 	EpisodeStatus,
-	ModelType,
 	PersistedSeries
 } from "models";
 import type {
@@ -95,7 +94,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 
-						series: Set<string> = new Set(await txSeriesStore.index("nowShowing").getAllKeys()),
+						series = new Set<string>(await txSeriesStore.index("nowShowing").getAllKeys()),
 
 						today = new Date(),
 						year = new Intl.DateTimeFormat("en-AU", { year: "numeric" }).format(today),
@@ -177,7 +176,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						series: Map<string, { episodeCount: number; watchedCount: number; }> = new Map<string, { episodeCount: number; watchedCount: number; }>(),
 
 						// Get the unique set of series with at least one watched episode
-						watchedSeries: Set<string> = new Set(await Promise.all((await txEpisodesStore.index("status").getAll(IDBKeyRange.bound(["Watched"], ["Watched", "~"]))).map(({ seriesId }: EpisodesStoreObject): string => seriesId)));
+						watchedSeries = new Set<string>(await Promise.all((await txEpisodesStore.index("status").getAll(IDBKeyRange.bound(["Watched"], ["Watched", "~"]))).map(({ seriesId }: EpisodesStoreObject): string => seriesId)));
 
 			// Filter out any series where all episodes are watched
 			await Promise.all([...watchedSeries].map(async (seriesId: string): Promise<void> => {
@@ -247,7 +246,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SeriesStore {
 						txSeriesStore = tx.objectStore("series"),
 						txEpisodesStore = tx.objectStore("episodes"),
 						txSyncStore = tx.objectStore("syncs"),
-						operations: Promise<unknown | [ModelType, string]>[] = [];
+						operations: Promise<unknown>[] = [];
 
 			for (const episodeId of await txEpisodesStore.index("seriesId").getAllKeys(id)) {
 				operations.push(txSyncStore.put({ type: "Episode", id: episodeId, action: "deleted" }));

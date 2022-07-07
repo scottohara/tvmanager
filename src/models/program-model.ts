@@ -33,6 +33,10 @@ export default class Program extends Base {
 		["programGroup"].forEach(this.makeEnumerable.bind(this));
 	}
 
+	public get programGroup(): string {
+		return this.programName?.substring(0, 1).toUpperCase() ?? "";
+	}
+
 	public static async list(): Promise<Program[]> {
 		let programList: Program[] = [];
 
@@ -125,10 +129,6 @@ export default class Program extends Base {
 			programName: this.programName,
 			type: "Program"
 		};
-	}
-
-	public get programGroup(): string {
-		return this.programName?.substring(0, 1).toUpperCase() ?? "";
 	}
 
 	public setEpisodeCount(count: number): void {

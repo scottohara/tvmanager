@@ -11,6 +11,31 @@ export default class SettingsController extends ViewController {
 		return SettingsView;
 	}
 
+	// DOM selectors
+	private get dataSyncRow(): HTMLDivElement {
+		return document.querySelector("#dataSyncRow") as HTMLDivElement;
+	}
+
+	private get aboutRow(): HTMLDivElement {
+		return document.querySelector("#aboutRow") as HTMLDivElement;
+	}
+
+	private get recordedReportRow(): HTMLDivElement {
+		return document.querySelector("#recordedReportRow") as HTMLDivElement;
+	}
+
+	private get expectedReportRow(): HTMLDivElement {
+		return document.querySelector("#expectedReportRow") as HTMLDivElement;
+	}
+
+	private get missedReportRow(): HTMLDivElement {
+		return document.querySelector("#missedReportRow") as HTMLDivElement;
+	}
+
+	private get incompleteReportRow(): HTMLDivElement {
+		return document.querySelector("#incompleteReportRow") as HTMLDivElement;
+	}
+
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
@@ -64,30 +89,5 @@ export default class SettingsController extends ViewController {
 
 	private async viewIncompleteReport(): Promise<void> {
 		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource });
-	}
-
-	// DOM selectors
-	private get dataSyncRow(): HTMLDivElement {
-		return document.querySelector("#dataSyncRow") as HTMLDivElement;
-	}
-
-	private get aboutRow(): HTMLDivElement {
-		return document.querySelector("#aboutRow") as HTMLDivElement;
-	}
-
-	private get recordedReportRow(): HTMLDivElement {
-		return document.querySelector("#recordedReportRow") as HTMLDivElement;
-	}
-
-	private get expectedReportRow(): HTMLDivElement {
-		return document.querySelector("#expectedReportRow") as HTMLDivElement;
-	}
-
-	private get missedReportRow(): HTMLDivElement {
-		return document.querySelector("#missedReportRow") as HTMLDivElement;
-	}
-
-	private get incompleteReportRow(): HTMLDivElement {
-		return document.querySelector("#incompleteReportRow") as HTMLDivElement;
 	}
 }

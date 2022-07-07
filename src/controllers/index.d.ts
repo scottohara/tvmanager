@@ -51,7 +51,7 @@ export interface ImportDoc {
 	doc: ImportObject;
 }
 
-export interface FullImport{
+export interface FullImport {
 	checksum: string;
 	data: ImportDoc[];
 }
