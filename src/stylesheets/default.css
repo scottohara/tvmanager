@@ -566,8 +566,8 @@ input:not([type="radio"]), select {
 }
 
 /* Prevent date fields on iOS from being centred */
-input[type="date"] {
-	width: auto;
+input::-webkit-date-and-time-value {
+	text-align: left;
 }
 
 /* Hide browser default checkbox style */
