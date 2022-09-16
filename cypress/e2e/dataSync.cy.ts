@@ -33,7 +33,7 @@ import type { TestData } from "types";
 
 describe("Import/Export", (): void => {
 	before((): void => {
-		cy.exec("RACK_ENV=test bundle exec rake db:recreate db:migrate");
+		cy.exec("RACK_ENV=test bundle exec dotenv rake db:recreate db:migrate");
 		cy.createTestData({});
 	});
 
@@ -102,7 +102,7 @@ describe("Import/Export", (): void => {
 				const data: TestData = { programs: [{ series: [] }], settings: [{ name: "LastSyncTime", value: "2000-01-01T09:30:20" }] };
 
 				cy.createTestData(data);
-				cy.exec("RACK_ENV=test bundle exec rake db:authorise_devices");
+				cy.exec("RACK_ENV=test bundle exec dotenv rake db:authorise_devices");
 			});
 
 			it("should show the name of the device", (): Cypress.Chainable<JQuery> => cy.get(deviceName).should("have.value", "Test device"));
@@ -210,7 +210,7 @@ describe("Import/Export", (): void => {
 		describe("fast import", (): void => {
 			before((): void => {
 				cy.createTestData({});
-				cy.exec("RACK_ENV=test bundle exec rake db:make_pending'[0-0-0]'");
+				cy.exec("RACK_ENV=test bundle exec dotenv rake db:make_pending'[0-0-0]'");
 			});
 
 			it("should do nothing if the import is not confirmed", (): void => {

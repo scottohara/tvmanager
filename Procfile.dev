@@ -1,3 +1,0 @@
-web: bundle exec rerun --dir app --background -- puma --bind tcp://localhost:3001
-db: couchdb
-dev: npm run dev

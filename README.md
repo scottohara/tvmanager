@@ -55,7 +55,7 @@ Requirements
 ============
 * Browser with support for ECMAScript 2017, Service Workers, App Manifest, Web Workers & IndexedDB
 * For development: Node.JS/npm, Ruby/RubyGems/Bundler (recommend [asdf](http://asdf-vm.com/))
-* For production/staging: somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Heroku](http://heroku.com) or similar)
+* For production/staging: somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Fly.io](http://fly.io) or similar)
 
 Installation (Development)
 ==========================
@@ -79,35 +79,23 @@ In the event of a conflict (i.e. an object modified/deleted both locally and on 
 
 An MD5 checksum verifies that the data was imported/exported succesfully.
 
-To enable the Import/Export functionality, you will need to declare the following environment variable:
+To enable the Import/Export functionality, you will need to declare the `TVMANAGER_COUCHDB_URL` environment variable.
 
-* TVMANAGER_COUCHDB_URL=http://{username}:{password}@{host}:{port}/{databasename}
+In development, the above environment variables can be saved to a `.env`, eg.
 
-In development, the above environment variables can be saved to a file (eg. ~/.tvmanager), which can then be sourced in your shell profile (eg. ~/.profile, ~/.bashrc, ~/.zshrc), eg.
-
-**~/.tvmanager**
+**.env**
 
 ```
-export TVMANAGER_COUCHDB_URL='http://user:pass@host:port/database'
+TVMANAGER_COUCHDB_URL='http://user:pass@host:port/database'
 ```
 
-**~/.profile**
+For staging/production, if you use Fly.io you can specify these as secrets using the `flyctl` CLI, eg.
 
 ```
-TVMANAGER=~/.tvmanager
-if [ -f $TVMANAGER ]; then
-	. $TVMANAGER
-fi
+fly secrets set TVMANAGER_COUCHDB_URL=http://user:pass@host:port/database --app <name staging or production app>
 ```
 
-For staging/production, if you use Heroku you can specify these config vars using the heroku toolbelt CLI, eg.
-
-```
-heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager_staging --remote staging
-heroku config:add TVMANAGER_COUCHDB_URL=http://user:pass@host:port/tvmanager --remote production
-```
-
-(Assumes you have setup two Heroku remotes, one for staging and one for production)
+(Assumes you have setup two Fly apps, one for staging and one for production)
 
 After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. This tasks automatically runs on each deployment, to ensure the latest design documents are being used.
 
@@ -156,15 +144,7 @@ Deployment (Staging/Production)
 ===============================
 Before deploying, you should first create an annotated tag (e.g. `git tag -am "Version 1.00" v1.00`).
 
-If you use use heroku, it's a simple `git push heroku master`. If there are additional commits after the tag that shouldn't be deployed, just push the tag (`git push heroku v1.00:master`).
+Then run:
 
-The `Procfile` includes a `release` phase that automatically runs `db:migrate` before release is deployed.
-
-If you use heroku pipelines, the recommendation is that your `heroku` git remote maps to a `staging` app in the pipeline. This allows you to verify the release before promoting it to a `production` app in the pipeline.
-
-Note: You must configure your heroku app to use both the `heroku/nodejs` and `heroku/ruby` buildpacks (ruby must be last), e.g.
-
-```
-heroku buildpacks:add --index 1 heroku/nodejs
-heroku buildpacks:add --index 2 heroku/ruby
-```
+* `npm run deploy:staging` to deploy to the staging app
+* `npm run deploy:production` to deploy to the production app

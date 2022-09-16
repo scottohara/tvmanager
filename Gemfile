@@ -8,9 +8,6 @@ source 'https://rubygems.org'
 # Interface to CouchDb database
 gem 'couchrest', '2.0.1'
 
-# JSON parsing
-gem 'json', '2.6.2'
-
 # Web server
 gem 'puma', '5.6.4'
 

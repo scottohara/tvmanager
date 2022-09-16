@@ -1,3 +1,0 @@
-web: RACK_ENV=test bundle exec puma --bind tcp://localhost:3001
-db: couchdb
-cypress: cypress open --e2e --browser chrome
