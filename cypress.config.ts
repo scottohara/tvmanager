@@ -5,6 +5,7 @@ export default defineConfig({
 	viewportWidth: 375,
 	chromeWebSecurity: false,
 	e2e: {
-		baseUrl: "http://localhost:3001"
+		baseUrl: "http://localhost:3001",
+		experimentalRunAllSpecs: true
 	}
 });
