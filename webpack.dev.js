@@ -1,6 +1,5 @@
 const { merge } = require("webpack-merge"),
 			{
-				output,
 				cssRule,
 				iconRule,
 				imageRule,
@@ -13,8 +12,10 @@ const { merge } = require("webpack-merge"),
 			} = require("./webpack.common");
 
 module.exports = merge(config, {
-	// Use default output, with no hash in file names
-	output,
+	// No hash in file names
+	output: {
+		assetModuleFilename: "[name][ext]"
+	},
 
 	module: {
 		rules: [

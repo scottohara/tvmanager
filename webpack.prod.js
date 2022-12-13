@@ -1,8 +1,8 @@
-const { merge } = require("webpack-merge"),
+const path = require("path"),
+			{ merge } = require("webpack-merge"),
 			{ GenerateSW } = require("workbox-webpack-plugin"),
 			packageJson = require("./package"),
 			{
-				output,
 				cssRule,
 				iconRule,
 				imageRule,
@@ -18,11 +18,13 @@ module.exports = merge(config, {
 	mode: "production",
 
 	// Use default output with chunk hash in file names
-	output: merge(output, {
+	output: {
+		path: path.resolve(__dirname, "public"),
 		hashDigestLength: 6,
 		filename: "[name]-[chunkhash].js",
-		assetModuleFilename: "[name]-[contenthash][ext]"
-	}),
+		assetModuleFilename: "[name]-[contenthash][ext]",
+		clean: true
+	},
 
 	module: {
 		rules: [

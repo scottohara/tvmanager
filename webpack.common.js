@@ -5,13 +5,6 @@ const path = require("path"),
 
 const MAX_DATA_AGE_DAYS = 7,
 
-			// Default output
-			output = {
-				path: path.resolve(__dirname, "public"),
-				assetModuleFilename: "[name][ext]",
-				clean: true
-			},
-
 			// Rule for *.ts processing
 			tsRule = {
 				test: /\.ts$/u,
@@ -112,7 +105,6 @@ function defineAppConfig({ maxDataAgeDays } = { maxDataAgeDays: MAX_DATA_AGE_DAY
 }
 
 module.exports = {
-	output,
 	cssRule,
 	iconRule,
 	imageRule,
