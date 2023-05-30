@@ -1,8 +1,8 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require 'rubygems'
 require 'bundler/setup'
+require 'rubygems'
 require_relative 'app/models/error'
 require_relative 'db/tasks'
 

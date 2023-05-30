@@ -2,8 +2,8 @@
 # frozen_string_literal: true
 
 require_relative 'app/controllers/application_controller'
-require_relative 'app/controllers/documents_controller'
 require_relative 'app/controllers/devices_controller'
+require_relative 'app/controllers/documents_controller'
 
 map '/documents' do
 	run ::TVManager::DocumentsController

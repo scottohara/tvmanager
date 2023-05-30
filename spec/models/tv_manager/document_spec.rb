@@ -1,8 +1,8 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative '../../spec_helper'
 require_relative '../../../app/models/document'
+require_relative '../../spec_helper'
 
 describe ::TVManager::Document do
 	let(:device_id) { 'test_device_id' }

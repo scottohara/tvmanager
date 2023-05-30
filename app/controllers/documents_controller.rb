@@ -1,9 +1,9 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative 'base_controller'
 require_relative '../models/device'
 require_relative '../models/document'
+require_relative 'base_controller'
 
 module TVManager
 	# Routes for importing to/exporting from the client

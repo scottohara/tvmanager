@@ -3,11 +3,11 @@
 
 ::ENV['RACK_ENV'] = 'test'
 
+require 'couchrest'
 require 'dotenv/load'
 require 'rack/test'
 require 'rspec'
 require 'simplecov'
-require 'couchrest'
 
 ::SimpleCov.start do
 	coverage_dir 'coverage/backend'

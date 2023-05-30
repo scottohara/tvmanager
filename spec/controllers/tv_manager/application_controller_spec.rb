@@ -1,8 +1,8 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative '../../spec_helper'
 require_relative '../../../app/controllers/application_controller'
+require_relative '../../spec_helper'
 
 describe ::TVManager::ApplicationController do
 	def app
