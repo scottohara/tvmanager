@@ -342,7 +342,7 @@ describe("Series", (): void => {
 					}
 
 					seriesToSave = {
-						SeriesID: String(series.id),
+						SeriesID: "ignored",
 						Name: String(series.seriesName),
 						NowShowing: series.nowShowing,
 						ProgramID: String(series.programId)

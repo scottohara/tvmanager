@@ -4,7 +4,6 @@ import type {
 	SerializedEpisode
 } from "models";
 import Base from "models/base-model";
-import { v4 } from "uuid";
 
 export default class Episode extends Base {
 	public constructor(public id: string | null,
@@ -124,7 +123,7 @@ export default class Episode extends Base {
 
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new episode to be added), generate a new UUID
-		this.id ??= v4();
+		this.id ??= crypto.randomUUID();
 
 		try {
 			await (await this.db).episodesStore.save({

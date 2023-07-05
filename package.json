@@ -21,11 +21,10 @@
     "comlink": "4.3.1",
     "idb": "7.0.2",
     "md5": "2.3.0",
-    "sortablejs": "1.15.0",
-    "uuid": "8.3.2"
+    "sortablejs": "1.15.0"
   },
   "devDependencies": {
-		"@4tw/cypress-drag-drop": "2.2.3",
+    "@4tw/cypress-drag-drop": "2.2.3",
     "@types/chai": "4.3.1",
     "@types/md5": "2.3.2",
     "@types/mini-css-extract-plugin": "2.4.0",
@@ -33,14 +32,13 @@
     "@types/sinon": "10.0.12",
     "@types/sinon-chai": "3.2.8",
     "@types/sortablejs": "1.13.0",
-    "@types/uuid": "8.3.4",
     "@typescript-eslint/eslint-plugin": "5.30.5",
     "@typescript-eslint/parser": "5.30.5",
     "chai": "4.3.6",
-		"concurrently": "7.4.0",
+    "concurrently": "7.4.0",
     "coverage-istanbul-loader": "3.0.5",
     "css-loader": "6.4.0",
-		"cypress": "12.1.0",
+    "cypress": "12.1.0",
     "eslint": "8.19.0",
     "eslint-config-oharagroup": "3.9.0",
     "html-loader": "2.1.2",
@@ -72,34 +70,34 @@
     "workbox-webpack-plugin": "6.3.0"
   },
   "config": {
-    "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-13-Pro-Max",
-    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-15-5"
+    "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-14-Pro-Max",
+    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-16-4"
   },
   "scripts": {
-		"start": "concurrently --prefix-colors bgBlue.bold,bgYellow.bold,bgGreen.bold npm:web:dev npm:db npm:dev",
-		"web:dev": "bundle exec dotenv rerun --dir app --background -- puma --bind tcp://localhost:3001",
-		"web:test": "RACK_ENV=test bundle exec dotenv puma --bind tcp://localhost:3001",
-		"db": "couchdb",
+    "start": "concurrently --prefix-colors bgBlue.bold,bgYellow.bold,bgGreen.bold npm:web:dev npm:db npm:dev",
+    "web:dev": "bundle exec dotenv rerun --dir app --background -- puma --bind tcp://localhost:3001",
+    "web:test": "RACK_ENV=test bundle exec dotenv puma --bind tcp://localhost:3001",
+    "db": "couchdb",
     "start:simulator": "xcrun simctl delete tvm-simulator; xcrun simctl bootstatus $(xcrun simctl create tvm-simulator $npm_package_config_DEVICE_TYPE_ID $npm_package_config_RUNTIME_ID) -b",
     "show:simulator": "npm run start:simulator && open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app",
     "build": "webpack --progress --config webpack.prod.js",
     "dev": "webpack serve --config webpack.dev.js",
     "lint": "eslint 'src/**/*.{ts,js}' 'spec/public/**/*.{ts,js}' 'cypress/**/*.{ts,js}' '*.{ts,js}'",
-		"cypress": "cypress open --e2e --browser chrome",
+    "cypress": "cypress open --e2e --browser chrome",
     "test": "npm run lint && npm run test:coverage:mobile",
     "test:bdd": "karma start karma-bdd.conf.js",
     "test:coverage": "karma start",
     "test:coverage:chrome": "karma start --browsers ChromeHeadless",
     "test:coverage:mobile": "ENV_CMD='sleep 600' npm run start:simulator && karma start --browsers MobileSafari",
-		"test:e2e": "npm run build && concurrently --prefix-colors bgBlue.bold,bgYellow.bold,bgGreen.bold npm:web:test npm:db npm:cypress",
-		"generate:splash": "rm src/images/apple-splash-*; pwa-asset-generator build/tv-splash.svg src/images --splash-only --background black --padding 0 --type png --xhtml --path-override \"<%=require('images\"",
-		"deploy": "fly deploy --build-arg NODE_VERSION=$npm_package_engines_node --build-arg NPM_VERSION=$npm_package_engines_npm --build-arg RUBY_VERSION=$npm_package_engines_ruby",
-		"deploy:staging": "npm run deploy -- --app tvmanagertest",
-		"deploy:production": "npm run deploy -- --app tvmanager"
+    "test:e2e": "npm run build && concurrently --prefix-colors bgBlue.bold,bgYellow.bold,bgGreen.bold npm:web:test npm:db npm:cypress",
+    "generate:splash": "rm src/images/apple-splash-*; pwa-asset-generator build/tv-splash.svg src/images --splash-only --background black --padding 0 --type png --xhtml --path-override \"<%=require('images\"",
+    "deploy": "fly deploy --build-arg NODE_VERSION=$npm_package_engines_node --build-arg NPM_VERSION=$npm_package_engines_npm --build-arg RUBY_VERSION=$npm_package_engines_ruby",
+    "deploy:staging": "npm run deploy -- --app tvmanagertest",
+    "deploy:production": "npm run deploy -- --app tvmanager"
   },
   "engines": {
-		"node": "20.2.0",
-		"npm": "9.6.7",
-		"ruby": "3.2.2"
+    "node": "20.2.0",
+    "npm": "9.6.7",
+    "ruby": "3.2.2"
   }
 }

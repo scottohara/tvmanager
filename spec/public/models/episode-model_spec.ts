@@ -303,7 +303,7 @@ describe("Episode", (): void => {
 					episode.unscheduled = scenario.unscheduled;
 
 					episodeToSave = {
-						EpisodeID: String(episode.id),
+						EpisodeID: "ignored",
 						Name: String(episode.episodeName),
 						Status: episode.status,
 						StatusDate: episode.statusDate,

@@ -5,7 +5,6 @@ import type {
 } from "models";
 import Base from "models/base-model";
 import ProgressBar from "components/progressbar";
-import { v4 } from "uuid";
 
 export default class Series extends Base {
 	public progressBarDisplay!: string;
@@ -156,7 +155,7 @@ export default class Series extends Base {
 
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new series to be added), generate a new UUID
-		this.id ??= v4();
+		this.id ??= crypto.randomUUID();
 
 		try {
 			await (await this.db).seriesStore.save({

@@ -4,7 +4,6 @@ import type {
 } from "models";
 import Base from "models/base-model";
 import ProgressBar from "components/progressbar";
-import { v4 } from "uuid";
 
 export default class Program extends Base {
 	public progressBarDisplay!: string;
@@ -96,7 +95,7 @@ export default class Program extends Base {
 
 	public async save(): Promise<string | undefined> {
 		// If an id has not been set (ie. is a new program to be added), generate a new UUID
-		this.id ??= v4();
+		this.id ??= crypto.randomUUID();
 
 		try {
 			await (await this.db).programsStore.save({

@@ -38,8 +38,7 @@ module.exports = merge(config, {
 			"stores/syncs": "mocks/syncs-store-mock",
 			"stores/worker": "mocks/worker-store-mock",
 			comlink: "mocks/comlink-mock",
-			md5: "mocks/md5-mock",
-			"uuid/v4": "mocks/uuid-mock"
+			md5: "mocks/md5-mock"
 		},
 		modules: [
 			path.resolve(__dirname, "src"),
