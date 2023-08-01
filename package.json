@@ -38,7 +38,7 @@
     "concurrently": "7.4.0",
     "coverage-istanbul-loader": "3.0.5",
     "css-loader": "6.4.0",
-    "cypress": "12.1.0",
+    "cypress": "12.17.2",
     "eslint": "8.19.0",
     "eslint-config-oharagroup": "3.9.0",
     "html-loader": "2.1.2",
