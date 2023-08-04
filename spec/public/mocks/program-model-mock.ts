@@ -32,11 +32,11 @@ export default class ProgramMock {
 
 	public constructor(public readonly id: string | null,
 						public programName: string | null,
-						public seriesCount: number = 0,
-						public readonly episodeCount: number = 0,
-						public readonly watchedCount: number = 0,
-						public readonly recordedCount: number = 0,
-						public readonly expectedCount: number = 0) {
+						public seriesCount = 0,
+						public readonly episodeCount = 0,
+						public readonly watchedCount = 0,
+						public readonly recordedCount = 0,
+						public readonly expectedCount = 0) {
 		this.toJson = sinon.stub().returns({});
 		saveStub.resetHistory();
 		removeStub.reset();

@@ -32,9 +32,9 @@ export default class EpisodeMock {
 						public status: EpisodeStatus,
 						public statusDate: string,
 						public readonly seriesId: string | null = null,
-						public unverified: boolean = false,
-						public unscheduled: boolean = false,
-						public sequence: number = 0,
+						public unverified = false,
+						public unscheduled = false,
+						public sequence = 0,
 						public readonly seriesName: string | undefined = undefined,
 						public readonly programName: string | undefined = undefined) {
 		this.toJson = sinon.stub().returns({});

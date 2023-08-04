@@ -32,14 +32,8 @@ function byNowShowingThenProgramNameThenSeriesName(a: PersistedSeries, b: Persis
 	let diff: number;
 
 	diff = String(a.NowShowing).localeCompare(String(b.NowShowing), "en", { numeric: true });
-
-	if (!diff) {
-		diff = String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
-	}
-
-	if (!diff) {
-		diff = String(a.Name).localeCompare(String(b.Name), "en", { sensitivity: "base" });
-	}
+	diff ||= String(a.ProgramName).localeCompare(String(b.ProgramName), "en", { sensitivity: "base" });
+	diff ||= String(a.Name).localeCompare(String(b.Name), "en", { sensitivity: "base" });
 
 	return diff;
 }
