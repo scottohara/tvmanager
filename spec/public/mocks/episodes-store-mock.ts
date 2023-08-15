@@ -1,4 +1,4 @@
-import type { EpisodesStore } from "stores";
+import type { EpisodesStore } from "~/stores";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 

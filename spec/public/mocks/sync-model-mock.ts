@@ -1,7 +1,7 @@
 import type {
 	ModelType,
 	SyncAction
-} from "models";
+} from "~/models";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 

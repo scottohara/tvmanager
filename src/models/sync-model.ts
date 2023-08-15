@@ -2,8 +2,8 @@ import type {
 	ModelType,
 	PersistedSync,
 	SyncAction
-} from "models";
-import Base from "models/base-model";
+} from "~/models";
+import Base from "~/models/base-model";
 
 export default class Sync extends Base {
 	public constructor(public type: ModelType | null,

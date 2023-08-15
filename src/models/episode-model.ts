@@ -2,8 +2,8 @@ import type {
 	EpisodeStatus,
 	PersistedEpisode,
 	SerializedEpisode
-} from "models";
-import Base from "models/base-model";
+} from "~/models";
+import Base from "~/models/base-model";
 
 export default class Episode extends Base {
 	public constructor(public id: string | null,

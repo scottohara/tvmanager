@@ -1,12 +1,12 @@
 import type {
 	EpisodeListItem,
 	NavButtonEventHandler
-} from "controllers";
-import Episode from "models/episode-model";
-import type { EpisodeStatus } from "models";
-import EpisodeView from "views/episode-view.html";
-import type Series from "models/series-model";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import Episode from "~/models/episode-model";
+import type { EpisodeStatus } from "~/models";
+import EpisodeView from "~/views/episode-view.html";
+import type Series from "~/models/series-model";
+import ViewController from "~/controllers/view-controller";
 
 export default class EpisodeController extends ViewController {
 	private readonly listItem: EpisodeListItem;
@@ -133,7 +133,7 @@ export default class EpisodeController extends ViewController {
 		await this.listItem.episode.save();
 
 		// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
-		if (isNaN(Number(this.listItem.listIndex)) || Number(this.listItem.listIndex) < 0) {
+		if (Number.isNaN(Number(this.listItem.listIndex)) || Number(this.listItem.listIndex) < 0) {
 			this.appController.viewStack[this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
 		}
 

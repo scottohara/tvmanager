@@ -1,14 +1,14 @@
-import * as EpisodesStore from "mocks/episodes-store-mock";
-import * as ProgramsStore from "mocks/programs-store-mock";
-import * as SeriesStore from "mocks/series-store-mock";
-import * as SettingsStore from "mocks/settings-store-mock";
-import * as SyncsStore from "mocks/syncs-store-mock";
+import * as EpisodesStore from "~/mocks/episodes-store-mock";
+import * as ProgramsStore from "~/mocks/programs-store-mock";
+import * as SeriesStore from "~/mocks/series-store-mock";
+import * as SettingsStore from "~/mocks/settings-store-mock";
+import * as SyncsStore from "~/mocks/syncs-store-mock";
 import { connect, disconnect } from "../../../src/stores/db";
 import {
 	deleteDB,
 	openDB
 } from "idb";
-import { expose } from "mocks/comlink-mock";
+import { expose } from "~/mocks/comlink-mock";
 import sinon from "sinon";
 
 describe("db", (): void => {

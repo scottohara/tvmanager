@@ -1,11 +1,11 @@
-import DatabaseService from "services/database-service";
-import Episode from "models/episode-model";
-import List from "components/list";
-import type { NavButtonEventHandler } from "controllers";
-import type { PublicInterface } from "global";
-import UnscheduledListTemplate from "views/unscheduledListTemplate.html";
-import UnscheduledView from "views/unscheduled-view.html";
-import ViewController from "controllers/view-controller";
+import DatabaseService from "~/services/database-service";
+import Episode from "~/models/episode-model";
+import List from "~/components/list";
+import type { NavButtonEventHandler } from "~/controllers";
+import type { PublicInterface } from "~/global";
+import UnscheduledListTemplate from "~/views/unscheduledListTemplate.html";
+import UnscheduledView from "~/views/unscheduled-view.html";
+import ViewController from "~/controllers/view-controller";
 
 export default class UnscheduledController extends ViewController {
 	private unscheduledList!: PublicInterface<List>;

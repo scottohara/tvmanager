@@ -2,9 +2,9 @@ import type {
 	ListAction,
 	ListEventHandler,
 	ListItem
-} from "components";
-import ApplicationController from "controllers/application-controller";
-import window from "components/window";
+} from "~/components";
+import ApplicationController from "~/controllers/application-controller";
+import window from "~/components/window";
 
 export default class List {
 	private readonly appController: ApplicationController;
@@ -147,9 +147,6 @@ export default class List {
 		// Check that a valid action was specified
 		switch (action) {
 			case "edit":
-				validAction = true;
-				savePosition = true;
-				break;
 			case "delete":
 				validAction = true;
 				savePosition = true;

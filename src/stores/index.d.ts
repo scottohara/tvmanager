@@ -13,7 +13,7 @@ import type {
 	PersistedSetting,
 	PersistedSync,
 	SyncAction
-} from "models";
+} from "~/models";
 
 export type IDBStoreUpgrade<T> = (db: IDBPDatabase<T>, transaction?: IDBPTransaction<T, StoreNames<T>[], "versionchange">) => void;
 

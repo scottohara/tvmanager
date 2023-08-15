@@ -2,13 +2,13 @@ import type {
 	ListItem,
 	Progress,
 	TestData
-} from "types";
+} from "~/support/types";
 import {
 	allExpectedRow,
 	allIncompleteRow,
 	allMissedRow,
 	allRecordedRow
-} from "settings";
+} from "~/support/settings";
 import {
 	checkProgress,
 	firstListItem,
@@ -21,9 +21,9 @@ import {
 	list,
 	listItem,
 	listItems
-} from "e2e";
-import type { EpisodeStatus } from "models";
-import { watched } from "episode";
+} from "~/support/e2e";
+import type { EpisodeStatus } from "~/models";
+import { watched } from "~/support/episode";
 
 const reports: { status: EpisodeStatus | "Incomplete"; selector: string; }[] = [
 	{ status: "Recorded", selector: allRecordedRow },

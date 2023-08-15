@@ -1,4 +1,4 @@
-import type { SettingsStore } from "stores";
+import type { SettingsStore } from "~/stores";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 

@@ -1,5 +1,5 @@
 import type { SinonStub } from "sinon";
-import type { View } from "controllers";
+import type { View } from "~/controllers";
 import sinon from "sinon";
 
 export default class ApplicationControllerMock {

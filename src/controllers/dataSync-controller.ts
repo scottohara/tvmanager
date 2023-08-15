@@ -6,22 +6,22 @@ import type {
 	NavButtonEventHandler,
 	SyncErrorType,
 	SyncOperation
-} from "controllers";
+} from "~/controllers";
 import type {
 	Model,
 	ModelType,
 	SerializedModel
-} from "models";
-import DataSyncView from "views/dataSync-view.html";
-import Episode from "models/episode-model";
-import Program from "models/program-model";
-import type { PublicInterface } from "global";
-import Series from "models/series-model";
-import Setting from "models/setting-model";
-import Sync from "models/sync-model";
-import ViewController from "controllers/view-controller";
+} from "~/models";
+import DataSyncView from "~/views/dataSync-view.html";
+import Episode from "~/models/episode-model";
+import Program from "~/models/program-model";
+import type { PublicInterface } from "~/global";
+import Series from "~/models/series-model";
+import Setting from "~/models/setting-model";
+import Sync from "~/models/sync-model";
+import ViewController from "~/controllers/view-controller";
 import md5 from "md5";
-import window from "components/window";
+import window from "~/components/window";
 
 enum Months {
 	Jan = 0,

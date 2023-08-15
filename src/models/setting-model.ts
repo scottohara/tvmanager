@@ -1,4 +1,4 @@
-import Base from "models/base-model";
+import Base from "~/models/base-model";
 
 export default class Setting extends Base {
 	public constructor(private settingName?: string,

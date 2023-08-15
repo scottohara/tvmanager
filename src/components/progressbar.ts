@@ -1,4 +1,4 @@
-import type { Section } from "components";
+import type { Section } from "~/components";
 
 export default class ProgressBar {
 	private total = 0;

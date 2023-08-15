@@ -2,7 +2,7 @@ import type {
 	IDBStoreUpgrade,
 	SettingsStore,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import {
 	create,
 	upgradeTo
@@ -12,7 +12,7 @@ import {
 	openDB
 } from "idb";
 import type {	IDBPDatabase } from "idb";
-import type { PersistedSetting } from "models";
+import type { PersistedSetting } from "~/models";
 
 describe("settings", (): void => {
 	let db: IDBPDatabase<TVManagerDB>;

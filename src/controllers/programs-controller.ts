@@ -1,11 +1,11 @@
-import DatabaseService from "services/database-service";
-import List from "components/list";
-import type { NavButtonEventHandler } from "controllers";
-import Program from "models/program-model";
-import ProgramListTemplate from "views/programListTemplate.html";
-import ProgramsView from "views/programs-view.html";
-import type { PublicInterface } from "global";
-import ViewController from "controllers/view-controller";
+import DatabaseService from "~/services/database-service";
+import List from "~/components/list";
+import type { NavButtonEventHandler } from "~/controllers";
+import Program from "~/models/program-model";
+import ProgramListTemplate from "~/views/programListTemplate.html";
+import ProgramsView from "~/views/programs-view.html";
+import type { PublicInterface } from "~/global";
+import ViewController from "~/controllers/view-controller";
 
 export default class ProgramsController extends ViewController {
 	private programList!: PublicInterface<List>;

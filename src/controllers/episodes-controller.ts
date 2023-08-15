@@ -1,15 +1,15 @@
 import type {
 	NavButtonEventHandler,
 	SeriesListItem
-} from "controllers";
-import DatabaseService from "services/database-service";
-import Episode from "models/episode-model";
-import EpisodeListTemplate from "views/episodeListTemplate.html";
-import EpisodesView from "views/episodes-view.html";
-import List from "components/list";
-import type { PublicInterface } from "global";
+} from "~/controllers";
+import DatabaseService from "~/services/database-service";
+import Episode from "~/models/episode-model";
+import EpisodeListTemplate from "~/views/episodeListTemplate.html";
+import EpisodesView from "~/views/episodes-view.html";
+import List from "~/components/list";
+import type { PublicInterface } from "~/global";
 import Sortable from "sortablejs";
-import ViewController from "controllers/view-controller";
+import ViewController from "~/controllers/view-controller";
 
 export default class EpisodesController extends ViewController {
 	private scrollToFirstUnwatched = true;

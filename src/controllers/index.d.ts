@@ -1,9 +1,9 @@
-import type Episode from "models/episode-model";
-import type Program from "models/program-model";
-import type { PublicInterface } from "global";
-import type { SerializedModel } from "models";
-import type Series from "models/series-model";
-import type ViewController from "controllers/view-controller";
+import type Episode from "~/models/episode-model";
+import type Program from "~/models/program-model";
+import type { PublicInterface } from "~/global";
+import type { SerializedModel } from "~/models";
+import type Series from "~/models/series-model";
+import type ViewController from "~/controllers/view-controller";
 
 export type NavButtonEventHandler = () => void;
 export type NavButtonAsyncEventHandler = () => Promise<void>;

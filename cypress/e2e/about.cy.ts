@@ -3,14 +3,14 @@ import {
 	totalEpisodes,
 	totalPrograms,
 	totalSeries
-} from "about";
+} from "~/support/about";
 import {
 	footerRightButton,
 	headerLabel,
 	headerLeftButton
-} from "e2e";
-import type { TestData } from "types";
-import { aboutRow } from "settings";
+} from "~/support/e2e";
+import type { TestData } from "~/support/types";
+import { aboutRow } from "~/support/settings";
 
 describe("About", (): void => {
 	before((): void => {

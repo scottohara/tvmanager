@@ -1,6 +1,6 @@
 
 declare namespace Cypress {
 	interface Chainable {
-		createTestData: (data: import("types").TestData) => void;
+		createTestData: (data: import("~/support/types").TestData) => void;
 	}
 }

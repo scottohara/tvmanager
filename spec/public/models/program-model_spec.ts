@@ -1,4 +1,4 @@
-import DatabaseServiceMock from "mocks/database-service-mock";
+import DatabaseServiceMock from "~/mocks/database-service-mock";
 import Program from "../../../src/models/program-model";
 import type { SinonStub } from "sinon";
 

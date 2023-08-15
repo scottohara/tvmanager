@@ -3,12 +3,12 @@ import type {
 	NavButton,
 	NavButtonEventHandler,
 	Report
-} from "controllers";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import ListMock from "mocks/list-mock";
-import ReportController from "controllers/report-controller";
-import ReportView from "views/report-view.html";
-import SeriesMock from "mocks/series-model-mock";
+} from "~/controllers";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import ListMock from "~/mocks/list-mock";
+import ReportController from "~/controllers/report-controller";
+import ReportView from "~/views/report-view.html";
+import SeriesMock from "~/mocks/series-model-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

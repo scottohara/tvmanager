@@ -6,9 +6,9 @@ import type {
 	SyncsStore,
 	TVManagerStore,
 	TVManagerStoreProxy
-} from "stores";
+} from "~/stores";
 import type { Remote } from "comlink";
-import worker from "stores/worker";
+import worker from "~/stores/worker";
 import { wrap } from "comlink";
 
 const	version = 1,

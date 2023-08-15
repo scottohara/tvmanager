@@ -1,12 +1,12 @@
 import type {
 	EpisodeStatus,
 	PersistedEpisode
-} from "models";
+} from "~/models";
 import type {
 	SinonFakeTimers,
 	SinonStub
 } from "sinon";
-import DatabaseServiceMock from "mocks/database-service-mock";
+import DatabaseServiceMock from "~/mocks/database-service-mock";
 import Episode from "../../../src/models/episode-model";
 import sinon from "sinon";
 

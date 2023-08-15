@@ -1,12 +1,12 @@
 import type {
 	Device,
 	NavButtonEventHandler
-} from "controllers";
-import DatabaseService from "services/database-service";
-import type { PublicInterface } from "global";
-import RegistrationView from "views/registration-view.html";
-import Setting from "models/setting-model";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import DatabaseService from "~/services/database-service";
+import type { PublicInterface } from "~/global";
+import RegistrationView from "~/views/registration-view.html";
+import Setting from "~/models/setting-model";
+import ViewController from "~/controllers/view-controller";
 
 export default class RegistrationController extends ViewController {
 	private device!: Device;

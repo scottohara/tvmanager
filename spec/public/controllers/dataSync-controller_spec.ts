@@ -6,25 +6,25 @@ import type {
 	ImportObject,
 	NavButton,
 	NavButtonEventHandler
-} from "controllers";
+} from "~/controllers";
 import type {
 	Model,
 	ModelType,
 	SerializedModel
-} from "models";
+} from "~/models";
 import type {
 	SinonMatcher,
 	SinonStub
 } from "sinon";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import DataSyncController from "controllers/dataSync-controller";
-import DataSyncView from "views/dataSync-view.html";
-import EpisodeMock from "mocks/episode-model-mock";
-import ProgramMock from "mocks/program-model-mock";
-import SeriesMock from "mocks/series-model-mock";
-import SettingMock from "mocks/setting-model-mock";
-import SyncMock from "mocks/sync-model-mock";
-import WindowMock from "mocks/window-mock";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import DataSyncController from "~/controllers/dataSync-controller";
+import DataSyncView from "~/views/dataSync-view.html";
+import EpisodeMock from "~/mocks/episode-model-mock";
+import ProgramMock from "~/mocks/program-model-mock";
+import SeriesMock from "~/mocks/series-model-mock";
+import SettingMock from "~/mocks/setting-model-mock";
+import SyncMock from "~/mocks/sync-model-mock";
+import WindowMock from "~/mocks/window-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

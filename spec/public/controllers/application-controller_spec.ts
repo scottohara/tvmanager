@@ -5,17 +5,17 @@ import type {
 	Notice,
 	View,
 	ViewControllerArgs
-} from "controllers";
+} from "~/controllers";
 import type {
 	SinonFakeTimers,
 	SinonSpy,
 	SinonStub
 } from "sinon";
 import ApplicationController from "../../../src/controllers/application-controller";
-import SettingMock from "mocks/setting-model-mock";
-import SyncMock from "mocks/sync-model-mock";
-import TestController from "mocks/test-controller";
-import WindowMock from "mocks/window-mock";
+import SettingMock from "~/mocks/setting-model-mock";
+import SyncMock from "~/mocks/sync-model-mock";
+import TestController from "~/mocks/test-controller";
+import WindowMock from "~/mocks/window-mock";
 import sinon from "sinon";
 
 describe("ApplicationController", (): void => {

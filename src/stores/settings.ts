@@ -2,9 +2,9 @@ import type {
 	IDBStoreUpgrade,
 	SettingsStore,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import type { IDBPDatabase } from "idb";
-import type { PersistedSetting } from "models";
+import type { PersistedSetting } from "~/models";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1

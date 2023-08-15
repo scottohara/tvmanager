@@ -2,9 +2,9 @@ import type {
 	EpisodeStatus,
 	PersistedSeries,
 	SerializedSeries
-} from "models";
-import Base from "models/base-model";
-import ProgressBar from "components/progressbar";
+} from "~/models";
+import Base from "~/models/base-model";
+import ProgressBar from "~/components/progressbar";
 
 export default class Series extends Base {
 	public progressBarDisplay!: string;

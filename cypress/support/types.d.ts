@@ -1,4 +1,4 @@
-import type { EpisodeStatus } from "models";
+import type { EpisodeStatus } from "~/models";
 
 export interface Progress {
 	watched?: number;

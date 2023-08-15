@@ -1,9 +1,9 @@
 import "@4tw/cypress-drag-drop";
-import * as EpisodesStoreFactory from "stores/episodes";
-import * as ProgramsStoreFactory from "stores/programs";
-import * as SeriesStoreFactory from "stores/series";
-import * as SettingsStoreFactory from "stores/settings";
-import * as SyncsStoreFactory from "stores/syncs";
+import * as EpisodesStoreFactory from "~/stores/episodes";
+import * as ProgramsStoreFactory from "~/stores/programs";
+import * as SeriesStoreFactory from "~/stores/series";
+import * as SettingsStoreFactory from "~/stores/settings";
+import * as SyncsStoreFactory from "~/stores/syncs";
 import type {
 	IDBPDatabase,
 	IDBPTransaction,
@@ -12,8 +12,8 @@ import type {
 import type {
 	Progress,
 	TestData
-} from "types";
-import type { TVManagerDB } from "stores";
+} from "~/support/types";
+import type { TVManagerDB } from "~/stores";
 import { openDB } from "idb";
 
 export const headerLabel = "#headerLabel";

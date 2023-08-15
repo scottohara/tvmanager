@@ -1,5 +1,5 @@
 import ProgressBar from "../../../src/components/progressbar";
-import type { Section } from "components";
+import type { Section } from "~/components";
 
 describe("ProgressBar", (): void => {
 	let total: number,

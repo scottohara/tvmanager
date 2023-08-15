@@ -1,7 +1,7 @@
 import type {
 	EpisodeListItem,
 	TestData
-} from "types";
+} from "~/support/types";
 import {
 	episodeName,
 	expected,
@@ -13,7 +13,7 @@ import {
 	unverified,
 	unverifiedLabel,
 	watched
-} from "episode";
+} from "~/support/episode";
 import {
 	firstListItem,
 	footerLabel,
@@ -29,8 +29,8 @@ import {
 	listItems,
 	secondListItem,
 	thirdListItem
-} from "e2e";
-import type { EpisodeStatus } from "models";
+} from "~/support/e2e";
+import type { EpisodeStatus } from "~/models";
 
 describe("Episodes", (): void => {
 	let expectedItems: EpisodeListItem[];

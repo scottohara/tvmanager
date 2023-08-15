@@ -1,10 +1,10 @@
 import type {
 	NavButtonEventHandler,
 	ReportDataSource
-} from "controllers";
-import Series from "models/series-model";
-import SettingsView from "views/settings-view.html";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import Series from "~/models/series-model";
+import SettingsView from "~/views/settings-view.html";
+import ViewController from "~/controllers/view-controller";
 
 export default class SettingsController extends ViewController {
 	public get view(): string {

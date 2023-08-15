@@ -1,14 +1,14 @@
 import type {
 	NavButtonEventHandler,
 	ProgramListItem
-} from "controllers";
-import DatabaseService from "services/database-service";
-import List from "components/list";
-import type { PublicInterface } from "global";
-import Series from "models/series-model";
-import SeriesListTemplate from "views/seriesListTemplate.html";
-import SeriesListView from "views/seriesList-view.html";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import DatabaseService from "~/services/database-service";
+import List from "~/components/list";
+import type { PublicInterface } from "~/global";
+import Series from "~/models/series-model";
+import SeriesListTemplate from "~/views/seriesListTemplate.html";
+import SeriesListView from "~/views/seriesList-view.html";
+import ViewController from "~/controllers/view-controller";
 
 export default class SeriesListController extends ViewController {
 	private seriesList!: PublicInterface<List>;

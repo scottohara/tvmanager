@@ -1,13 +1,13 @@
 import type {
 	NavButton,
 	NavButtonEventHandler
-} from "controllers";
+} from "~/controllers";
 import AboutController from "../../../src/controllers/about-controller";
-import AboutView from "views/about-view.html";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import EpisodeMock from "mocks/episode-model-mock";
-import ProgramMock from "mocks/program-model-mock";
-import SeriesMock from "mocks/series-model-mock";
+import AboutView from "~/views/about-view.html";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import EpisodeMock from "~/mocks/episode-model-mock";
+import ProgramMock from "~/mocks/program-model-mock";
+import SeriesMock from "~/mocks/series-model-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

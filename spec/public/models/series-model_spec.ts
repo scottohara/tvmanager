@@ -1,8 +1,8 @@
 import type {
 	EpisodeStatus,
 	PersistedSeries
-} from "models";
-import DatabaseServiceMock from "mocks/database-service-mock";
+} from "~/models";
+import DatabaseServiceMock from "~/mocks/database-service-mock";
 import Series from "../../../src/models/series-model";
 import type { SinonStub } from "sinon";
 

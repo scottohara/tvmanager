@@ -1,7 +1,7 @@
 import {
 	aboutRow,
 	importExportRow
-} from "settings";
+} from "~/support/settings";
 import {
 	deviceName,
 	exportButton,
@@ -14,7 +14,7 @@ import {
 	registrationMessage,
 	status,
 	syncControls
-} from "dataSync";
+} from "~/support/dataSync";
 import {
 	footerLabel,
 	footerLeftButton,
@@ -23,13 +23,13 @@ import {
 	headerLeftButton,
 	headerRightButton,
 	notices
-} from "e2e";
+} from "~/support/e2e";
 import {
 	totalEpisodes,
 	totalPrograms,
 	totalSeries
-} from "about";
-import type { TestData } from "types";
+} from "~/support/about";
+import type { TestData } from "~/support/types";
 
 describe("Import/Export", (): void => {
 	before((): void => {

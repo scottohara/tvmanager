@@ -3,14 +3,14 @@ import type {
 	NavButton,
 	NavButtonEventHandler,
 	ProgramListItem
-} from "controllers";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import type { ListEventHandler } from "components";
-import ListMock from "mocks/list-mock";
-import ProgramMock from "mocks/program-model-mock";
-import SeriesListController from "controllers/seriesList-controller";
-import SeriesListView from "views/seriesList-view.html";
-import SeriesMock from "mocks/series-model-mock";
+} from "~/controllers";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import type { ListEventHandler } from "~/components";
+import ListMock from "~/mocks/list-mock";
+import ProgramMock from "~/mocks/program-model-mock";
+import SeriesListController from "~/controllers/seriesList-controller";
+import SeriesListView from "~/views/seriesList-view.html";
+import SeriesMock from "~/mocks/series-model-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

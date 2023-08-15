@@ -4,14 +4,14 @@ import type {
 	NavButtonAsyncEventHandler,
 	NavButtonEventHandler,
 	SeriesListItem
-} from "controllers";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import EpisodeMock from "mocks/episode-model-mock";
-import type { EpisodeStatus } from "models";
-import EpisodesController from "controllers/episodes-controller";
-import EpisodesView from "views/episodes-view.html";
-import ListMock from "mocks/list-mock";
-import SeriesMock from "mocks/series-model-mock";
+} from "~/controllers";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import EpisodeMock from "~/mocks/episode-model-mock";
+import type { EpisodeStatus } from "~/models";
+import EpisodesController from "~/controllers/episodes-controller";
+import EpisodesView from "~/views/episodes-view.html";
+import ListMock from "~/mocks/list-mock";
+import SeriesMock from "~/mocks/series-model-mock";
 import Sortable from "sortablejs";
 import sinon from "sinon";
 

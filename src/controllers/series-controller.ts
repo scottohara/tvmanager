@@ -1,11 +1,11 @@
 import type {
 	NavButtonEventHandler,
 	SeriesListItem
-} from "controllers";
-import Program from "models/program-model";
-import Series from "models/series-model";
-import SeriesView from "views/series-view.html";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import Program from "~/models/program-model";
+import Series from "~/models/series-model";
+import SeriesView from "~/views/series-view.html";
+import ViewController from "~/controllers/view-controller";
 
 export default class SeriesController extends ViewController {
 	private readonly listItem: SeriesListItem;

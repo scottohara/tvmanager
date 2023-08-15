@@ -1,5 +1,5 @@
 import type { SinonStub } from "sinon";
-import type { SyncsStore } from "stores";
+import type { SyncsStore } from "~/stores";
 import sinon from "sinon";
 
 const migration = sinon.stub(),

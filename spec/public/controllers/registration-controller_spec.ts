@@ -3,15 +3,15 @@ import type {
 	HeaderFooter,
 	NavButton,
 	NavButtonEventHandler
-} from "controllers";
+} from "~/controllers";
 import type {
 	SinonMatcher,
 	SinonStub
 } from "sinon";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import RegistrationController from "controllers/registration-controller";
-import RegistrationView from "views/registration-view.html";
-import SettingMock from "mocks/setting-model-mock";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import RegistrationController from "~/controllers/registration-controller";
+import RegistrationView from "~/views/registration-view.html";
+import SettingMock from "~/mocks/setting-model-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

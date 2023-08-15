@@ -5,12 +5,12 @@ import {
 	allMissedRow,
 	allRecordedRow,
 	importExportRow
-} from "settings";
+} from "~/support/settings";
 import {
 	footerRightButton,
 	headerLabel,
 	headerLeftButton
-} from "e2e";
+} from "~/support/e2e";
 
 describe("Settings", (): void => {
 	beforeEach((): void => {

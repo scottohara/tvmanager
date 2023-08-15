@@ -2,7 +2,7 @@ import type {
 	ListAction,
 	ListEventHandler,
 	ListItem
-} from "components";
+} from "~/components";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 

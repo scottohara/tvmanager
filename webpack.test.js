@@ -18,33 +18,12 @@ module.exports = merge(config, {
 		]
 	},
 	resolve: {
-		// For testing, remap all modules to their mock versions by default
 		alias: {
-			"components/list": "mocks/list-mock",
-			"components/progressbar": "mocks/progressbar-mock",
-			"components/window": "mocks/window-mock",
-			"controllers/application-controller": "mocks/application-controller-mock",
-			"models/episode-model": "mocks/episode-model-mock",
-			"models/program-model": "mocks/program-model-mock",
-			"models/series-model": "mocks/series-model-mock",
-			"models/setting-model": "mocks/setting-model-mock",
-			"models/sync-model": "mocks/sync-model-mock",
-			"services/database-service": "mocks/database-service-mock",
-			"stores/db": "mocks/db-store-mock",
-			"stores/episodes": "mocks/episodes-store-mock",
-			"stores/programs": "mocks/programs-store-mock",
-			"stores/series": "mocks/series-store-mock",
-			"stores/settings": "mocks/settings-store-mock",
-			"stores/syncs": "mocks/syncs-store-mock",
-			"stores/worker": "mocks/worker-store-mock",
-			comlink: "mocks/comlink-mock",
-			md5: "mocks/md5-mock"
+			"~": [
+				path.resolve(__dirname, "src"),
+				path.resolve(__dirname, "spec", "public")
+			]
 		},
-		modules: [
-			path.resolve(__dirname, "src"),
-			path.resolve(__dirname, "spec/public"),
-			path.resolve(__dirname, "node_modules")
-		],
 		fallback: {
 			"process/browser": require.resolve("process/browser.js")
 		}
@@ -54,6 +33,27 @@ module.exports = merge(config, {
 		new webpack.ProvidePlugin({
 			process: "process/browser"
 		}),
+
+		// For testing, remap all modules to their mock versions by default
+		new webpack.NormalModuleReplacementPlugin(/^~\/components\/list$/u, "~/mocks/list-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/components\/progressbar$/u, "~/mocks/progressbar-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/components\/window$/u, "~/mocks/window-mock"),
+		new webpack.NormalModuleReplacementPlugin(/~\/controllers\/application-controller/u, "~/mocks/application-controller-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/models\/episode-model$/u, "~/mocks/episode-model-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/models\/program-model$/u, "~/mocks/program-model-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/models\/series-model$/u, "~/mocks/series-model-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/models\/setting-model$/u, "~/mocks/setting-model-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/models\/sync-model$/u, "~/mocks/sync-model-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/services\/database-service$/u, "~/mocks/database-service-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/db$/u, "~/mocks/db-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/episodes$/u, "~/mocks/episodes-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/programs$/u, "~/mocks/programs-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/series$/u, "~/mocks/series-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/settings$/u, "~/mocks/settings-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/syncs$/u, "~/mocks/syncs-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^~\/stores\/worker$/u, "~/mocks/worker-store-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^comlink$/u, "~/mocks/comlink-mock"),
+		new webpack.NormalModuleReplacementPlugin(/^md5$/u, "~/mocks/md5-mock"),
 
 		defineAppConfig()
 	]

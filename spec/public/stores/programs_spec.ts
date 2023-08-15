@@ -4,7 +4,7 @@ import type {
 	ProgramsStoreObject,
 	SyncsStoreObject,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import {
 	create,
 	upgradeTo
@@ -14,7 +14,7 @@ import {
 	openDB
 } from "idb";
 import type { IDBPDatabase } from "idb";
-import type { PersistedProgram } from "models";
+import type { PersistedProgram } from "~/models";
 import { upgradeTo as episodesUpgradeTo } from "../../../src/stores/episodes";
 import { upgradeTo as seriesUpgradeTo } from "../../../src/stores/series";
 import { upgradeTo as syncsUpgradeTo } from "../../../src/stores/syncs";

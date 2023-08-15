@@ -1,14 +1,14 @@
 import type {
 	NavButtonEventHandler,
 	Report
-} from "controllers";
-import DatabaseService from "services/database-service";
-import List from "components/list";
-import type { PublicInterface } from "global";
-import ReportListTemplate from "views/reportListTemplate.html";
-import ReportView from "views/report-view.html";
-import type Series from "models/series-model";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import DatabaseService from "~/services/database-service";
+import List from "~/components/list";
+import type { PublicInterface } from "~/global";
+import ReportListTemplate from "~/views/reportListTemplate.html";
+import ReportView from "~/views/report-view.html";
+import type Series from "~/models/series-model";
+import ViewController from "~/controllers/view-controller";
 
 export default class ReportController extends ViewController {
 	private reportList!: PublicInterface<List>;

@@ -1,4 +1,4 @@
-import type { SerializedModel } from "models";
+import type { SerializedModel } from "~/models";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 

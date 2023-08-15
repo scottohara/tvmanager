@@ -2,12 +2,12 @@ import type {
 	HeaderFooter,
 	NavButton,
 	NavButtonEventHandler
-} from "controllers";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import EpisodeMock from "mocks/episode-model-mock";
-import ListMock from "mocks/list-mock";
-import UnscheduledController from "controllers/unscheduled-controller";
-import UnscheduledView from "views/unscheduled-view.html";
+} from "~/controllers";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import EpisodeMock from "~/mocks/episode-model-mock";
+import ListMock from "~/mocks/list-mock";
+import UnscheduledController from "~/controllers/unscheduled-controller";
+import UnscheduledView from "~/views/unscheduled-view.html";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

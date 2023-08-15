@@ -1,9 +1,9 @@
 import type {
 	PersistedProgram,
 	SerializedProgram
-} from "models";
-import Base from "models/base-model";
-import ProgressBar from "components/progressbar";
+} from "~/models";
+import Base from "~/models/base-model";
+import ProgressBar from "~/components/progressbar";
 
 export default class Program extends Base {
 	public progressBarDisplay!: string;

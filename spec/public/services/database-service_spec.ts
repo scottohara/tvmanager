@@ -1,9 +1,9 @@
 import DatabaseService from "../../../src/services/database-service";
 import type {	SinonSpyCall } from "sinon";
-import type { TVManagerStore } from "stores";
+import type { TVManagerStore } from "~/stores";
 import sinon from "sinon";
-import worker from "mocks/worker-store-mock";
-import { wrap } from "mocks/comlink-mock";
+import worker from "~/mocks/worker-store-mock";
+import { wrap } from "~/mocks/comlink-mock";
 
 describe("DatabaseService", (): void => {
 	let db: TVManagerStore,

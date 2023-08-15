@@ -1,6 +1,6 @@
-import type Episode from "models/episode-model";
-import type Program from "models/program-model";
-import type Series from "models/series-model";
+import type Episode from "~/models/episode-model";
+import type Program from "~/models/program-model";
+import type Series from "~/models/series-model";
 
 export type EpisodeStatus = "" | "Expected" | "Missed" | "Recorded" | "Watched";
 

@@ -1,7 +1,7 @@
 import type {
 	ListItem,
 	TestData
-} from "types";
+} from "~/support/types";
 import {
 	checkGroup,
 	checkProgress,
@@ -16,12 +16,12 @@ import {
 	listItem,
 	listItems,
 	secondListItem
-} from "e2e";
+} from "~/support/e2e";
 import {
 	moveTo,
 	nowShowing,
 	seriesName
-} from "series";
+} from "~/support/series";
 
 describe("Schedule", (): void => {
 	let expectedItems: (ListItem | string)[];

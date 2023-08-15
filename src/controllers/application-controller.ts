@@ -5,24 +5,24 @@ import type {
 	View,
 	ViewControllerArgs,
 	ViewControllerSet
-} from "controllers";
-import AboutController from "controllers/about-controller";
-import DataSyncController from "controllers/dataSync-controller";
-import EpisodeController from "controllers/episode-controller";
-import EpisodesController from "controllers/episodes-controller";
-import ProgramController from "controllers/program-controller";
-import ProgramsController from "controllers/programs-controller";
-import type { PublicInterface } from "global";
-import RegistrationController from "controllers/registration-controller";
-import ReportController from "controllers/report-controller";
-import ScheduleController from "controllers/schedule-controller";
-import SeriesController from "controllers/series-controller";
-import SeriesListController from "controllers/seriesList-controller";
-import Setting from "models/setting-model";
-import SettingsController from "controllers/settings-controller";
-import Sync from "models/sync-model";
-import UnscheduledController from "controllers/unscheduled-controller";
-import window from "components/window";
+} from "~/controllers";
+import AboutController from "~/controllers/about-controller";
+import DataSyncController from "~/controllers/dataSync-controller";
+import EpisodeController from "~/controllers/episode-controller";
+import EpisodesController from "~/controllers/episodes-controller";
+import ProgramController from "~/controllers/program-controller";
+import ProgramsController from "~/controllers/programs-controller";
+import type { PublicInterface } from "~/global";
+import RegistrationController from "~/controllers/registration-controller";
+import ReportController from "~/controllers/report-controller";
+import ScheduleController from "~/controllers/schedule-controller";
+import SeriesController from "~/controllers/series-controller";
+import SeriesListController from "~/controllers/seriesList-controller";
+import Setting from "~/models/setting-model";
+import SettingsController from "~/controllers/settings-controller";
+import Sync from "~/models/sync-model";
+import UnscheduledController from "~/controllers/unscheduled-controller";
+import window from "~/components/window";
 
 declare const MAX_DATA_AGE_DAYS: number;
 

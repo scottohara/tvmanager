@@ -1,5 +1,5 @@
-import DatabaseService from "services/database-service";
-import type { TVManagerStore } from "stores";
+import DatabaseService from "~/services/database-service";
+import type { TVManagerStore } from "~/stores";
 
 export default abstract class Base {
 	protected static get db(): Promise<TVManagerStore> {

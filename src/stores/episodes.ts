@@ -1,7 +1,7 @@
 import type {
 	EpisodeStatus,
 	PersistedEpisode
-} from "models";
+} from "~/models";
 import type {
 	EpisodesStore,
 	EpisodesStoreObject,
@@ -9,7 +9,7 @@ import type {
 	ProgramsStoreObject,
 	SeriesStoreObject,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import type { IDBPDatabase } from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [

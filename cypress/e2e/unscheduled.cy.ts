@@ -1,14 +1,14 @@
 import type {
 	EpisodeListItem,
 	TestData
-} from "types";
+} from "~/support/types";
 import {
 	episodeName,
 	recorded,
 	statusDate,
 	unscheduledLabel,
 	unverifiedLabel
-} from "episode";
+} from "~/support/episode";
 import {
 	firstListItem,
 	footerLabel,
@@ -20,7 +20,7 @@ import {
 	listItem,
 	listItemSubText,
 	listItems
-} from "e2e";
+} from "~/support/e2e";
 
 describe("Unscheduled", (): void => {
 	let expectedItems: EpisodeListItem[];

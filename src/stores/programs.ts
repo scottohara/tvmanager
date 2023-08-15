@@ -5,9 +5,9 @@ import type {
 	ProgramsStore,
 	ProgramsStoreObject,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import type { IDBPDatabase } from "idb";
-import type { PersistedProgram } from "models";
+import type { PersistedProgram } from "~/models";
 
 const	upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1

@@ -1,8 +1,8 @@
 import type {
 	ModelType,
 	SyncAction
-} from "models";
-import DatabaseServiceMock from "mocks/database-service-mock";
+} from "~/models";
+import DatabaseServiceMock from "~/mocks/database-service-mock";
 import type { SinonStub } from "sinon";
 import Sync from "../../../src/models/sync-model";
 

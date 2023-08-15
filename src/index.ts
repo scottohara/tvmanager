@@ -1,6 +1,6 @@
-import "stylesheets/default.css";
-import ApplicationController from "controllers/application-controller";
-import window from "components/window";
+import "~/stylesheets/default.css";
+import ApplicationController from "~/controllers/application-controller";
+import window from "~/components/window";
 
 if ("serviceWorker" in window.navigator) {
 	window.navigator.serviceWorker.register("/service-worker.js").then((registration: ServiceWorkerRegistration): void => window.console.log(`ServiceWorker registration successful with scope: ${registration.scope}`), (error: string): void => window.console.log(`ServiceWorker registration failed: ${error}`));

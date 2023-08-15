@@ -3,11 +3,11 @@ import type {
 	SyncsStore,
 	SyncsStoreObject,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import type {
 	ModelType,
 	PersistedSync
-} from "models";
+} from "~/models";
 import type { IDBPDatabase } from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [

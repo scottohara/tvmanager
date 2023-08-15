@@ -1,10 +1,10 @@
 import type {
 	NavButtonEventHandler,
 	ProgramListItem
-} from "controllers";
-import Program from "models/program-model";
-import ProgramView from "views/program-view.html";
-import ViewController from "controllers/view-controller";
+} from "~/controllers";
+import Program from "~/models/program-model";
+import ProgramView from "~/views/program-view.html";
+import ViewController from "~/controllers/view-controller";
 
 export default class ProgramController extends ViewController {
 	private readonly listItem: ProgramListItem;

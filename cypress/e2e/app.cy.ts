@@ -1,8 +1,8 @@
 import {
 	dismissNoticeButton,
 	notices
-} from "e2e";
-import type { TestData } from "types";
+} from "~/support/e2e";
+import type { TestData } from "~/support/types";
 
 describe("App", (): void => {
 	it("should show a notice when the last data sync was over 7 days ago and there are changes to sync", (): void => {

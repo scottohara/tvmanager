@@ -1,11 +1,11 @@
-import DatabaseService from "services/database-service";
-import List from "components/list";
-import type { NavButtonEventHandler } from "controllers";
-import type { PublicInterface } from "global";
-import ScheduleListTemplate from "views/scheduleListTemplate.html";
-import ScheduleView from "views/schedule-view.html";
-import Series from "models/series-model";
-import ViewController from "controllers/view-controller";
+import DatabaseService from "~/services/database-service";
+import List from "~/components/list";
+import type { NavButtonEventHandler } from "~/controllers";
+import type { PublicInterface } from "~/global";
+import ScheduleListTemplate from "~/views/scheduleListTemplate.html";
+import ScheduleView from "~/views/schedule-view.html";
+import Series from "~/models/series-model";
+import ViewController from "~/controllers/view-controller";
 
 export default class ScheduleController extends ViewController {
 	private scheduleList!: PublicInterface<List>;

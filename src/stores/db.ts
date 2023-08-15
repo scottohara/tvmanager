@@ -1,8 +1,8 @@
-import * as EpisodesStoreFactory from "stores/episodes";
-import * as ProgramsStoreFactory from "stores/programs";
-import * as SeriesStoreFactory from "stores/series";
-import * as SettingsStoreFactory from "stores/settings";
-import * as SyncsStoreFactory from "stores/syncs";
+import * as EpisodesStoreFactory from "~/stores/episodes";
+import * as ProgramsStoreFactory from "~/stores/programs";
+import * as SeriesStoreFactory from "~/stores/series";
+import * as SettingsStoreFactory from "~/stores/settings";
+import * as SyncsStoreFactory from "~/stores/syncs";
 import type {
 	EpisodesStore,
 	ProgramsStore,
@@ -12,7 +12,7 @@ import type {
 	SyncsStore,
 	TVManagerDB,
 	TVManagerStoreProxy
-} from "stores";
+} from "~/stores";
 import type {
 	IDBPDatabase,
 	IDBPTransaction,

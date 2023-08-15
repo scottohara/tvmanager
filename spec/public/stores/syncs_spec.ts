@@ -2,7 +2,7 @@ import type {
 	IDBStoreUpgrade,
 	SyncsStore,
 	TVManagerDB
-} from "stores";
+} from "~/stores";
 import {
 	create,
 	upgradeTo
@@ -12,7 +12,7 @@ import {
 	openDB
 } from "idb";
 import type {	IDBPDatabase } from "idb";
-import type { ModelType } from "models";
+import type { ModelType } from "~/models";
 
 describe("syncs", (): void => {
 	let db: IDBPDatabase<TVManagerDB>;

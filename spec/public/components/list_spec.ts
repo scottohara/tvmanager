@@ -1,14 +1,14 @@
 import type {
 	ListAction,
 	ListItem
-} from "components";
-import ApplicationControllerMock from "mocks/application-controller-mock";
+} from "~/components";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import List from "../../../src/components/list";
-import ListTemplate from "views/listTemplate.html";
+import ListTemplate from "~/views/listTemplate.html";
 import type { SinonStub } from "sinon";
-import TestController from "mocks/test-controller";
-import type { View } from "controllers";
-import WindowMock from "mocks/window-mock";
+import TestController from "~/mocks/test-controller";
+import type { View } from "~/controllers";
+import WindowMock from "~/mocks/window-mock";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton

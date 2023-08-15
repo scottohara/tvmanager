@@ -2,11 +2,11 @@ import type {
 	NavButton,
 	NavButtonEventHandler,
 	ProgramListItem
-} from "controllers";
-import ApplicationControllerMock from "mocks/application-controller-mock";
-import ProgramController from "controllers/program-controller";
-import ProgramMock from "mocks/program-model-mock";
-import ProgramView from "views/program-view.html";
+} from "~/controllers";
+import ApplicationControllerMock from "~/mocks/application-controller-mock";
+import ProgramController from "~/controllers/program-controller";
+import ProgramMock from "~/mocks/program-model-mock";
+import ProgramView from "~/views/program-view.html";
 import sinon from "sinon";
 
 // Get a reference to the application controller singleton
