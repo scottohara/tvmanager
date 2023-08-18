@@ -28,7 +28,7 @@ describe("syncs", (): void => {
 
 	describe("upgradeTo", (): void => {
 		describe("version 1", (): void => {
-			it("should create the syncs store", (): Chai.Assertion => [...db.objectStoreNames].includes("syncs").should.be.true);
+			it("should create the syncs store", (): Chai.Assertion => expect([...db.objectStoreNames].includes("syncs")).to.be.true);
 		});
 	});
 
@@ -48,24 +48,24 @@ describe("syncs", (): void => {
 		});
 
 		describe("list", (): void => {
-			it("should return a list of all sync records", async (): Promise<Chai.Assertion> => (await syncsStore.list()).should.deep.equal([
+			it("should return a list of all sync records", async (): Promise<Chai.Assertion> => expect(await syncsStore.list()).to.deep.equal([
 				{ Type: "Episode", ID: id, Action: "deleted" },
 				{ Type: "Program", ID: id, Action: "modified" }
 			]));
 		});
 
 		describe("count", (): void => {
-			it("should return the total number of sync records", async (): Promise<Chai.Assertion> => (await syncsStore.count()).should.equal(2));
+			it("should return the total number of sync records", async (): Promise<Chai.Assertion> => expect(await syncsStore.count()).to.equal(2));
 		});
 
 		describe("removeAll", (): void => {
 			beforeEach(async (): Promise<void> => syncsStore.removeAll());
-			it("should remove all sync records", async (): Promise<Chai.Assertion> => (await db.count("syncs")).should.equal(0));
+			it("should remove all sync records", async (): Promise<Chai.Assertion> => expect(await db.count("syncs")).to.equal(0));
 		});
 
 		describe("remove", (): void => {
 			beforeEach(async (): Promise<void> => syncsStore.remove(type, id));
-			it("should remove a sync record", async (): Promise<Chai.Assertion> => (await db.get("syncs", [type, id]) === undefined).should.be.true);
+			it("should remove a sync record", async (): Promise<Chai.Assertion> => expect(await db.get("syncs", [type, id])).to.be.undefined);
 		});
 	});
 

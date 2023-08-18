@@ -12,7 +12,7 @@ import { expose } from "~/mocks/comlink-mock";
 import sinon from "sinon";
 
 describe("db", (): void => {
-	it("should expose the connect function and stores to the main thread", (): Chai.Assertion => expose.should.have.been.calledWith({
+	it("should expose the connect function and stores to the main thread", (): Chai.Assertion => expect(expose).to.have.been.calledWith({
 		connect,
 		programsStore: undefined,
 		seriesStore: undefined,
@@ -33,20 +33,20 @@ describe("db", (): void => {
 
 		describe("success", (): void => {
 			beforeEach(async (): Promise<void> => connect(version));
-			it("should create the programs store", (): Chai.Assertion => ProgramsStore.create.should.have.been.calledWith(idbDb));
-			it("should create the series store", (): Chai.Assertion => SeriesStore.create.should.have.been.calledWith(idbDb));
-			it("should create the episodes store", (): Chai.Assertion => EpisodesStore.create.should.have.been.calledWith(idbDb));
-			it("should create the settings store", (): Chai.Assertion => SettingsStore.create.should.have.been.calledWith(idbDb));
-			it("should create the syncs store", (): Chai.Assertion => SyncsStore.create.should.have.been.calledWith(idbDb));
+			it("should create the programs store", (): Chai.Assertion => expect(ProgramsStore.create).to.have.been.calledWith(idbDb));
+			it("should create the series store", (): Chai.Assertion => expect(SeriesStore.create).to.have.been.calledWith(idbDb));
+			it("should create the episodes store", (): Chai.Assertion => expect(EpisodesStore.create).to.have.been.calledWith(idbDb));
+			it("should create the settings store", (): Chai.Assertion => expect(SettingsStore.create).to.have.been.calledWith(idbDb));
+			it("should create the syncs store", (): Chai.Assertion => expect(SyncsStore.create).to.have.been.calledWith(idbDb));
 		});
 
 		describe("with full upgrade", (): void => {
 			beforeEach(async (): Promise<void> => connect(version));
-			it("should perform all migrations on the programs store", (): Chai.Assertion => ProgramsStore.upgradeTo[0].callCount.should.equal(version));
-			it("should perform all migrations on the series store", (): Chai.Assertion => SeriesStore.upgradeTo[0].callCount.should.equal(version));
-			it("should perform all migrations on the episodes store", (): Chai.Assertion => EpisodesStore.upgradeTo[0].callCount.should.equal(version));
-			it("should perform all migrations on the settings store", (): Chai.Assertion => SettingsStore.upgradeTo[0].callCount.should.equal(version));
-			it("should perform all migrations on the syncs store", (): Chai.Assertion => SyncsStore.upgradeTo[0].callCount.should.equal(version));
+			it("should perform all migrations on the programs store", (): Chai.Assertion => expect(ProgramsStore.upgradeTo[0].callCount).to.equal(version));
+			it("should perform all migrations on the series store", (): Chai.Assertion => expect(SeriesStore.upgradeTo[0].callCount).to.equal(version));
+			it("should perform all migrations on the episodes store", (): Chai.Assertion => expect(EpisodesStore.upgradeTo[0].callCount).to.equal(version));
+			it("should perform all migrations on the settings store", (): Chai.Assertion => expect(SettingsStore.upgradeTo[0].callCount).to.equal(version));
+			it("should perform all migrations on the syncs store", (): Chai.Assertion => expect(SyncsStore.upgradeTo[0].callCount).to.equal(version));
 		});
 
 		describe("with partial upgrade", (): void => {
@@ -57,11 +57,11 @@ describe("db", (): void => {
 				await connect(version);
 			});
 
-			it("should perform some migrations on the programs store", (): Chai.Assertion => ProgramsStore.upgradeTo[0].callCount.should.equal(version - 1));
-			it("should perform some migrations on the series store", (): Chai.Assertion => SeriesStore.upgradeTo[0].callCount.should.equal(version - 1));
-			it("should perform some migrations on the episodes store", (): Chai.Assertion => EpisodesStore.upgradeTo[0].callCount.should.equal(version - 1));
-			it("should perform some migrations on the settings store", (): Chai.Assertion => SettingsStore.upgradeTo[0].callCount.should.equal(version - 1));
-			it("should perform some migrations on the syncs store", (): Chai.Assertion => SyncsStore.upgradeTo[0].callCount.should.equal(version - 1));
+			it("should perform some migrations on the programs store", (): Chai.Assertion => expect(ProgramsStore.upgradeTo[0].callCount).to.equal(version - 1));
+			it("should perform some migrations on the series store", (): Chai.Assertion => expect(SeriesStore.upgradeTo[0].callCount).to.equal(version - 1));
+			it("should perform some migrations on the episodes store", (): Chai.Assertion => expect(EpisodesStore.upgradeTo[0].callCount).to.equal(version - 1));
+			it("should perform some migrations on the settings store", (): Chai.Assertion => expect(SettingsStore.upgradeTo[0].callCount).to.equal(version - 1));
+			it("should perform some migrations on the syncs store", (): Chai.Assertion => expect(SyncsStore.upgradeTo[0].callCount).to.equal(version - 1));
 		});
 
 		describe("without upgrade", (): void => {
@@ -72,11 +72,11 @@ describe("db", (): void => {
 				await connect(version);
 			});
 
-			it("should perform no migrations on the programs store", (): Chai.Assertion => ProgramsStore.upgradeTo[0].should.not.have.been.called);
-			it("should perform no migrations on the series store", (): Chai.Assertion => SeriesStore.upgradeTo[0].should.not.have.been.called);
-			it("should perform no migrations on the episodes store", (): Chai.Assertion => EpisodesStore.upgradeTo[0].should.not.have.been.called);
-			it("should perform no migrations on the settings store", (): Chai.Assertion => SettingsStore.upgradeTo[0].should.not.have.been.called);
-			it("should perform no migrations on the syncs store", (): Chai.Assertion => SyncsStore.upgradeTo[0].should.not.have.been.called);
+			it("should perform no migrations on the programs store", (): Chai.Assertion => expect(ProgramsStore.upgradeTo[0]).to.not.have.been.called);
+			it("should perform no migrations on the series store", (): Chai.Assertion => expect(SeriesStore.upgradeTo[0]).to.not.have.been.called);
+			it("should perform no migrations on the episodes store", (): Chai.Assertion => expect(EpisodesStore.upgradeTo[0]).to.not.have.been.called);
+			it("should perform no migrations on the settings store", (): Chai.Assertion => expect(SettingsStore.upgradeTo[0]).to.not.have.been.called);
+			it("should perform no migrations on the syncs store", (): Chai.Assertion => expect(SyncsStore.upgradeTo[0]).to.not.have.been.called);
 		});
 
 		afterEach((): void => {

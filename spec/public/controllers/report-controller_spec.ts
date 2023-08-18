@@ -36,12 +36,12 @@ describe("ReportController", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a ReportController instance", (): Chai.Assertion => reportController.should.be.an.instanceOf(ReportController));
-		it("should set the report", (): Chai.Assertion => reportController["report"].should.deep.equal(report));
+		it("should return a ReportController instance", (): Chai.Assertion => expect(reportController).to.be.an.instanceOf(ReportController));
+		it("should set the report", (): Chai.Assertion => expect(reportController["report"]).to.deep.equal(report));
 	});
 
 	describe("view", (): void => {
-		it("should return the report view", (): Chai.Assertion => reportController.view.should.equal(ReportView));
+		it("should return the report view", (): Chai.Assertion => expect(reportController.view).to.equal(ReportView));
 	});
 
 	describe("setup", (): void => {
@@ -55,22 +55,22 @@ describe("ReportController", (): void => {
 			leftButton = reportController.header.leftButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(reportController.header.label).should.equal(report.reportName));
+		it("should set the header label", (): Chai.Assertion => expect(String(reportController.header.label)).to.equal(report.reportName));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			reportController["goBack"].should.have.been.called;
+			expect(reportController["goBack"]).to.have.been.called;
 		});
 
-		it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Settings"));
+		it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Settings"));
 
 		it("should attach a view event handler to the report list", (): void => {
 			(reportController["reportList"] as ListMock).viewEventHandler(0);
-			reportController["viewItem"].should.have.been.calledWith(0);
+			expect(reportController["viewItem"]).to.have.been.calledWith(0);
 		});
 
-		it("should activate the controller", (): Chai.Assertion => reportController.activate.should.have.been.called);
+		it("should activate the controller", (): Chai.Assertion => expect(reportController["activate"]).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
@@ -81,18 +81,18 @@ describe("ReportController", (): void => {
 		});
 
 		it("should get the list for the report", (): void => {
-			report.dataSource.should.have.been.calledWith(report.args);
-			reportController["reportList"].items.should.deep.equal(items);
+			expect(report.dataSource).to.have.been.calledWith(report.args);
+			expect(reportController["reportList"].items).to.deep.equal(items);
 		});
 
-		it("should refresh the list", (): Chai.Assertion => reportController["reportList"].refresh.should.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion => reportController["viewItems"].should.have.been.called);
+		it("should refresh the list", (): Chai.Assertion => expect(reportController["reportList"].refresh).to.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect(reportController["viewItems"]).to.have.been.called);
 	});
 
 	describe("goBack", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await reportController["goBack"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 
@@ -102,7 +102,7 @@ describe("ReportController", (): void => {
 
 			reportController["reportList"] = new ListMock("", "", "", items);
 			await reportController["viewItem"](index);
-			appController.pushView.should.have.been.calledWith("episodes", {
+			expect(appController.pushView).to.have.been.calledWith("episodes", {
 				source: "Report",
 				listIndex: index,
 				series: items[index]
@@ -117,9 +117,9 @@ describe("ReportController", (): void => {
 			await reportController["viewItems"]();
 		});
 
-		it("should set the list to view mode", (): Chai.Assertion => (reportController["reportList"] as ListMock).action.should.equal("view"));
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
-		it("should set the footer label", (): Chai.Assertion => String((reportController.footer as HeaderFooter).label).should.equal("v1"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect((reportController["reportList"] as ListMock).action).to.equal("view"));
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
+		it("should set the footer label", (): Chai.Assertion => expect(String((reportController.footer as HeaderFooter).label)).to.equal("v1"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 });

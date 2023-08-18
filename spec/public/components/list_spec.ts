@@ -63,15 +63,15 @@ describe("List", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a List instance", (): Chai.Assertion => list.should.be.an.instanceOf(List));
-		it("should set the container", (): Chai.Assertion => list["container"].should.equal(container));
-		it("should set the item template", (): Chai.Assertion => list["itemTemplate"].should.equal(itemTemplate));
-		it("should set the group by", (): Chai.Assertion => (list["groupBy"] as string).should.equal(groupBy));
-		it("should set the list items", (): Chai.Assertion => list.items.should.deep.equal(items));
-		it("should attach a view event handler", (): Chai.Assertion => list["viewEventHandler"].should.equal(eventHandler));
-		it("should attach an edit event handler", (): Chai.Assertion => (list["editEventHandler"] as SinonStub).should.equal(eventHandler));
-		it("should attach a delete event handler", (): Chai.Assertion => (list["deleteEventHandler"] as SinonStub).should.equal(eventHandler));
-		it("should set the action", (): Chai.Assertion => (list["action"] as ListAction).should.equal(action));
+		it("should return a List instance", (): Chai.Assertion => expect(list).to.be.an.instanceOf(List));
+		it("should set the container", (): Chai.Assertion => expect(list["container"]).to.equal(container));
+		it("should set the item template", (): Chai.Assertion => expect(list["itemTemplate"]).to.equal(itemTemplate));
+		it("should set the group by", (): Chai.Assertion => expect(list["groupBy"] as string).to.equal(groupBy));
+		it("should set the list items", (): Chai.Assertion => expect(list.items).to.deep.equal(items));
+		it("should attach a view event handler", (): Chai.Assertion => expect(list["viewEventHandler"]).to.equal(eventHandler));
+		it("should attach an edit event handler", (): Chai.Assertion => expect(list["editEventHandler"] as SinonStub).to.equal(eventHandler));
+		it("should attach a delete event handler", (): Chai.Assertion => expect(list["deleteEventHandler"] as SinonStub).to.equal(eventHandler));
+		it("should set the action", (): Chai.Assertion => expect(list["action"] as ListAction).to.equal(action));
 	});
 
 	describe("refresh", (): void => {
@@ -86,14 +86,14 @@ describe("List", (): void => {
 				list.refresh();
 			});
 
-			it("should render the list", (): Chai.Assertion => containerElement.innerHTML.should.equal(renderHtml));
+			it("should render the list", (): Chai.Assertion => expect(containerElement.innerHTML).to.equal(renderHtml));
 
 			it("should attach a click handler to each item", (): void => {
 				document.querySelectorAll(`#${container} li:not([id])`).forEach((element: HTMLLIElement, index: number): void => {
 					element.dispatchEvent(new MouseEvent("click"));
-					tap.should.have.been.calledWith(index);
+					expect(tap).to.have.been.calledWith(index);
 				});
-				tap.callCount.should.equal(3);
+				expect(tap.callCount).to.equal(3);
 			});
 		});
 
@@ -104,14 +104,14 @@ describe("List", (): void => {
 				list.refresh();
 			});
 
-			it("should render the list", (): Chai.Assertion => containerElement.innerHTML.should.equal(renderHtml));
+			it("should render the list", (): Chai.Assertion => expect(containerElement.innerHTML).to.equal(renderHtml));
 
 			it("should attach a click handler to each item", (): void => {
 				document.querySelectorAll(`#${container} > li:not([id])`).forEach((element: HTMLLIElement, index: number): void => {
 					element.dispatchEvent(new MouseEvent("click"));
-					tap.should.have.been.calledWith(index);
+					expect(tap).to.have.been.calledWith(index);
 				});
-				tap.callCount.should.equal(3);
+				expect(tap.callCount).to.equal(3);
 			});
 		});
 
@@ -126,9 +126,11 @@ describe("List", (): void => {
 
 			it("should prevent the default touchstart behavour", (): void => {
 				event = new MouseEvent("touchstart");
-				sinon.spy(event, "preventDefault");
+
+				const preventDefault = sinon.spy(event, "preventDefault");
+
 				list["index"].dispatchEvent(event);
-				event.preventDefault.should.have.been.called;
+				expect(preventDefault).to.have.been.called;
 			});
 
 			describe("without active button state", (): void => {
@@ -137,7 +139,7 @@ describe("List", (): void => {
 					list["index"].dispatchEvent(event);
 				});
 
-				it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
+				it("should do nothing", (): Chai.Assertion => expect(scrollIntoView).to.not.have.been.called);
 			});
 
 			describe("with active button state", (): void => {
@@ -157,7 +159,7 @@ describe("List", (): void => {
 						list["index"].dispatchEvent(event);
 					});
 
-					it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
+					it("should do nothing", (): Chai.Assertion => expect(scrollIntoView).to.not.have.been.called);
 				});
 
 				describe("element not within index", (): void => {
@@ -167,7 +169,7 @@ describe("List", (): void => {
 						list["index"].dispatchEvent(event);
 					});
 
-					it("should do nothing", (): Chai.Assertion => scrollIntoView.should.not.have.been.called);
+					it("should do nothing", (): Chai.Assertion => expect(scrollIntoView).to.not.have.been.called);
 				});
 
 				describe("element within index", (): void => {
@@ -177,7 +179,7 @@ describe("List", (): void => {
 						list["index"].dispatchEvent(event);
 					});
 
-					it("should scroll the corresponding group into view", (): Chai.Assertion => scrollIntoView.should.have.been.calledWith(true));
+					it("should scroll the corresponding group into view", (): Chai.Assertion => expect(scrollIntoView).to.have.been.calledWith(true));
 				});
 
 				afterEach((): void => {
@@ -199,7 +201,7 @@ describe("List", (): void => {
 			list.showIndex();
 		});
 
-		it("should show the index", (): Chai.Assertion => index.style.display.should.equal("block"));
+		it("should show the index", (): Chai.Assertion => expect(index.style.display).to.equal("block"));
 
 		afterEach((): void => index.remove());
 	});
@@ -215,7 +217,7 @@ describe("List", (): void => {
 			list.hideIndex();
 		});
 
-		it("should hide the index", (): Chai.Assertion => index.style.display.should.equal("none"));
+		it("should hide the index", (): Chai.Assertion => expect(index.style.display).to.equal("none"));
 
 		afterEach((): void => index.remove());
 	});
@@ -242,22 +244,22 @@ describe("List", (): void => {
 		describe("item above view", (): void => {
 			beforeEach((): void => list.scrollTo("1"));
 
-			it("should update the scroll position", (): Chai.Assertion => (appController.viewStack.pop() as View).scrollPos.should.equal(20 + BODY_PADDING));
-			it("should set the scroll position", (): Chai.Assertion => appController.setScrollPosition.should.have.been.called);
+			it("should update the scroll position", (): Chai.Assertion => expect((appController.viewStack.pop() as View).scrollPos).to.equal(20 + BODY_PADDING));
+			it("should set the scroll position", (): Chai.Assertion => expect(appController.setScrollPosition).to.have.been.called);
 		});
 
 		describe("item in view", (): void => {
 			beforeEach((): void => list.scrollTo("5"));
 
-			it("should not update the scroll position", (): Chai.Assertion => (appController.viewStack.pop() as View).scrollPos.should.equal(40));
-			it("should not set the scroll position", (): Chai.Assertion => appController.setScrollPosition.should.not.have.been.called);
+			it("should not update the scroll position", (): Chai.Assertion => expect((appController.viewStack.pop() as View).scrollPos).to.equal(40));
+			it("should not set the scroll position", (): Chai.Assertion => expect(appController.setScrollPosition).to.not.have.been.called);
 		});
 
 		describe("item below view", (): void => {
 			beforeEach((): void => list.scrollTo("8"));
 
-			it("should update the scroll position", (): Chai.Assertion => (appController.viewStack.pop() as View).scrollPos.should.equal(80 + BODY_PADDING));
-			it("should set the scroll position", (): Chai.Assertion => appController.setScrollPosition.should.have.been.called);
+			it("should update the scroll position", (): Chai.Assertion => expect((appController.viewStack.pop() as View).scrollPos).to.equal(80 + BODY_PADDING));
+			it("should set the scroll position", (): Chai.Assertion => expect(appController.setScrollPosition).to.have.been.called);
 		});
 	});
 
@@ -271,23 +273,23 @@ describe("List", (): void => {
 			describe(validAction, (): void => {
 				beforeEach((): void => list.setAction(validAction));
 
-				it("should set the action", (): Chai.Assertion => (list["action"] as ListAction).should.equal(validAction));
+				it("should set the action", (): Chai.Assertion => expect(list["action"] as ListAction).to.equal(validAction));
 
 				if ("view" === validAction) {
-					it("should not save the scroll position", (): Chai.Assertion => appController.getScrollPosition.should.not.have.been.called);
+					it("should not save the scroll position", (): Chai.Assertion => expect(appController.getScrollPosition).to.not.have.been.called);
 				} else {
-					it("should save the scroll position", (): Chai.Assertion => appController.getScrollPosition.should.have.been.called);
+					it("should save the scroll position", (): Chai.Assertion => expect(appController.getScrollPosition).to.have.been.called);
 				}
 
-				it("should not show an alert", (): Chai.Assertion => WindowMock.alert.should.not.have.been.called);
+				it("should not show an alert", (): Chai.Assertion => expect(WindowMock.alert).to.not.have.been.called);
 			});
 		});
 
 		describe("invalid action", (): void => {
 			beforeEach((): void => list.setAction("invalid" as ListAction));
-			it("should not save the scroll position", (): Chai.Assertion => appController.getScrollPosition.should.not.have.been.called);
-			it("should show an alert", (): Chai.Assertion => WindowMock.alert.should.have.been.calledWith("invalid is not a valid action"));
-			it("should not set the action", (): Chai.Assertion => (undefined === list["action"]).should.be.true);
+			it("should not save the scroll position", (): Chai.Assertion => expect(appController.getScrollPosition).to.not.have.been.called);
+			it("should show an alert", (): Chai.Assertion => expect(WindowMock.alert).to.have.been.calledWith("invalid is not a valid action"));
+			it("should not set the action", (): Chai.Assertion => expect(list["action"]).to.be.undefined);
 		});
 	});
 
@@ -313,8 +315,8 @@ describe("List", (): void => {
 							list["tap"](0);
 						});
 
-						it("should not trigger a confirm prompt", (): Chai.Assertion => WindowMock.confirm.should.not.have.been.called);
-						it("should not trigger the event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
+						it("should not trigger a confirm prompt", (): Chai.Assertion => expect(WindowMock.confirm).to.not.have.been.called);
+						it("should not trigger the event handler", (): Chai.Assertion => expect(eventHandler).to.not.have.been.called);
 					});
 				}
 
@@ -332,8 +334,8 @@ describe("List", (): void => {
 								list["tap"](0);
 							});
 
-							it("should trigger a confirm prompt", (): Chai.Assertion => WindowMock.confirm.should.have.been.calledWith("Delete this item?"));
-							it("should trigger the event handler", (): Chai.Assertion => eventHandler.should.have.been.called);
+							it("should trigger a confirm prompt", (): Chai.Assertion => expect(WindowMock.confirm).to.have.been.calledWith("Delete this item?"));
+							it("should trigger the event handler", (): Chai.Assertion => expect(eventHandler).to.have.been.called);
 						});
 
 						describe("aborted", (): void => {
@@ -343,8 +345,8 @@ describe("List", (): void => {
 								list["tap"](0);
 							});
 
-							it("should trigger a confirm prompt", (): Chai.Assertion => WindowMock.confirm.should.have.been.calledWith("Delete this item?"));
-							it("should not trigger the event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
+							it("should trigger a confirm prompt", (): Chai.Assertion => expect(WindowMock.confirm).to.have.been.calledWith("Delete this item?"));
+							it("should not trigger the event handler", (): Chai.Assertion => expect(eventHandler).to.not.have.been.called);
 						});
 					} else {
 						beforeEach((): void => {
@@ -352,8 +354,8 @@ describe("List", (): void => {
 							list["tap"](0);
 						});
 
-						it("should not trigger a confirm prompt", (): Chai.Assertion => WindowMock.confirm.should.not.have.been.called);
-						it("should trigger the event handler", (): Chai.Assertion => eventHandler.should.have.been.called);
+						it("should not trigger a confirm prompt", (): Chai.Assertion => expect(WindowMock.confirm).to.not.have.been.called);
+						it("should trigger the event handler", (): Chai.Assertion => expect(eventHandler).to.have.been.called);
 					}
 				});
 			});
@@ -365,8 +367,8 @@ describe("List", (): void => {
 				list["tap"](0);
 			});
 
-			it("should not trigger a confirm prompt", (): Chai.Assertion => WindowMock.confirm.should.not.have.been.called);
-			it("should not trigger the event handler", (): Chai.Assertion => eventHandler.should.not.have.been.called);
+			it("should not trigger a confirm prompt", (): Chai.Assertion => expect(WindowMock.confirm).to.not.have.been.called);
+			it("should not trigger the event handler", (): Chai.Assertion => expect(eventHandler).to.not.have.been.called);
 		});
 	});
 

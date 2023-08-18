@@ -36,11 +36,11 @@ describe("DataSyncController", (): void => {
 	beforeEach((): DataSyncController => (dataSyncController = new DataSyncController()));
 
 	describe("object constructor", (): void => {
-		it("should return a DataSyncController instance", (): Chai.Assertion => dataSyncController.should.be.an.instanceOf(DataSyncController));
+		it("should return a DataSyncController instance", (): Chai.Assertion => expect(dataSyncController).to.be.an.instanceOf(DataSyncController));
 	});
 
 	describe("view", (): void => {
-		it("should return the data sync view", (): Chai.Assertion => dataSyncController.view.should.equal(DataSyncView));
+		it("should return the data sync view", (): Chai.Assertion => expect(dataSyncController.view).to.equal(DataSyncView));
 	});
 
 	describe("setup", (): void => {
@@ -53,17 +53,17 @@ describe("DataSyncController", (): void => {
 			leftButton = dataSyncController.header.leftButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(dataSyncController.header.label).should.equal("Import/Export"));
+		it("should set the header label", (): Chai.Assertion => expect(String(dataSyncController.header.label)).to.equal("Import/Export"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			dataSyncController["goBack"].should.have.been.called;
+			expect(dataSyncController["goBack"]).to.have.been.called;
 		});
 
-		it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Settings"));
+		it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Settings"));
 
-		it("should activate the controller", (): Chai.Assertion => dataSyncController.activate.should.have.been.called);
+		it("should activate the controller", (): Chai.Assertion => expect(dataSyncController["activate"]).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
@@ -109,23 +109,23 @@ describe("DataSyncController", (): void => {
 
 		it("should attach a registration click event handler", (): void => {
 			registrationRow.dispatchEvent(new MouseEvent("click"));
-			dataSyncController["viewRegistration"].should.have.been.called;
+			expect(dataSyncController["viewRegistration"]).to.have.been.called;
 		});
 
 		it("should attach an import click event handler", (): void => {
 			importButton.dispatchEvent(new MouseEvent("click"));
-			dataSyncController["dataImport"].should.have.been.called;
+			expect(dataSyncController["dataImport"]).to.have.been.called;
 		});
 
 		it("should attach an export click event handler", (): void => {
 			exportButton.dispatchEvent(new MouseEvent("click"));
-			dataSyncController["dataExport"].should.have.been.called;
+			expect(dataSyncController["dataExport"]).to.have.been.called;
 		});
 
-		it("should set the initial status message", (): Chai.Assertion => localChanges.value.should.equal("Checking..."));
-		it("should set the last sync time", (): Chai.Assertion => lastSyncTime.value.should.equal("1-Jan-2010 00:00:00"));
-		it("should get the registered device", (): Chai.Assertion => dataSyncController["gotDevice"].should.have.been.calledWith(device));
-		it("should count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
+		it("should set the initial status message", (): Chai.Assertion => expect(localChanges.value).to.equal("Checking..."));
+		it("should set the last sync time", (): Chai.Assertion => expect(lastSyncTime.value).to.equal("1-Jan-2010 00:00:00"));
+		it("should get the registered device", (): Chai.Assertion => expect(dataSyncController["gotDevice"]).to.have.been.calledWith(device));
+		it("should count how many local changes there are to be synced", (): Chai.Assertion => expect(dataSyncController["checkForLocalChanges"]).to.have.been.calledWith(1));
 
 		afterEach((): void => {
 			registrationRow.remove();
@@ -139,14 +139,14 @@ describe("DataSyncController", (): void => {
 	describe("goBack", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await dataSyncController["goBack"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 
 	describe("viewRegistration", (): void => {
 		it("should push the registration view", async (): Promise<void> => {
 			await dataSyncController["viewRegistration"]();
-			appController.pushView.should.have.been.calledWith("registration");
+			expect(appController.pushView).to.have.been.calledWith("registration");
 		});
 	});
 
@@ -155,13 +155,13 @@ describe("DataSyncController", (): void => {
 			it("should display the last sync time", (): void => {
 				const settingValue = "1-Feb-2010 01:02:11";
 
-				dataSyncController["formatLastSyncTime"](new SettingMock(undefined, settingValue)).should.equal(settingValue);
+				expect(dataSyncController["formatLastSyncTime"](new SettingMock(undefined, settingValue))).to.equal(settingValue);
 			});
 		});
 
 		describe("without last sync time", (): void => {
 			it("should display unknown", (): void => {
-				dataSyncController["formatLastSyncTime"](new SettingMock()).should.equal("Unknown");
+				expect(dataSyncController["formatLastSyncTime"](new SettingMock())).to.equal("Unknown");
 			});
 		});
 	});
@@ -206,12 +206,12 @@ describe("DataSyncController", (): void => {
 			describe("first import", (): void => {
 				beforeEach((): void => dataSyncController["gotDevice"](new SettingMock(undefined, JSON.stringify(device))));
 
-				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
-				it("should display the device name", (): Chai.Assertion => deviceName.value.should.equal(device.name));
-				it("should show the sync controls", (): Chai.Assertion => syncControls.style.display.should.not.equal("none"));
-				it("should not check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.checked.should.be.false);
-				it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.style.display.should.equal("none"));
-				it("should not show the registration message", (): Chai.Assertion => registrationMessage.style.display.should.equal("none"));
+				it("should set the device", (): Chai.Assertion => expect(dataSyncController["device"]).to.deep.equal(device));
+				it("should display the device name", (): Chai.Assertion => expect(deviceName.value).to.equal(device.name));
+				it("should show the sync controls", (): Chai.Assertion => expect(syncControls.style.display).to.not.equal("none"));
+				it("should not check the import changes only checkbox", (): Chai.Assertion => expect(importChangesOnly.checked).to.be.false);
+				it("should not show the import changes only row", (): Chai.Assertion => expect(importChangesOnlyRow.style.display).to.equal("none"));
+				it("should not show the registration message", (): Chai.Assertion => expect(registrationMessage.style.display).to.equal("none"));
 			});
 
 			describe("subsequent import", (): void => {
@@ -220,24 +220,24 @@ describe("DataSyncController", (): void => {
 					dataSyncController["gotDevice"](new SettingMock(undefined, JSON.stringify(device)));
 				});
 
-				it("should set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal(device));
-				it("should display the device name", (): Chai.Assertion => deviceName.value.should.equal(device.name));
-				it("should show the sync controls", (): Chai.Assertion => syncControls.style.display.should.not.equal("none"));
-				it("should check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.checked.should.be.true);
-				it("should show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.style.display.should.not.equal("none"));
-				it("should not show the registration message", (): Chai.Assertion => registrationMessage.style.display.should.equal("none"));
+				it("should set the device", (): Chai.Assertion => expect(dataSyncController["device"]).to.deep.equal(device));
+				it("should display the device name", (): Chai.Assertion => expect(deviceName.value).to.equal(device.name));
+				it("should show the sync controls", (): Chai.Assertion => expect(syncControls.style.display).to.not.equal("none"));
+				it("should check the import changes only checkbox", (): Chai.Assertion => expect(importChangesOnly.checked).to.be.true);
+				it("should show the import changes only row", (): Chai.Assertion => expect(importChangesOnlyRow.style.display).to.not.equal("none"));
+				it("should not show the registration message", (): Chai.Assertion => expect(registrationMessage.style.display).to.equal("none"));
 			});
 		});
 
 		describe("without device", (): void => {
 			beforeEach((): void => dataSyncController["gotDevice"](new SettingMock()));
 
-			it("should not set the device", (): Chai.Assertion => dataSyncController["device"].should.deep.equal({ id: "", name: "", imported: false }));
-			it("should display unregistered", (): Chai.Assertion => deviceName.value.should.equal("< Unregistered >"));
-			it("should show the registration message", (): Chai.Assertion => registrationMessage.style.display.should.not.equal("none"));
-			it("should not show the sync controls", (): Chai.Assertion => syncControls.style.display.should.equal("none"));
-			it("should not check the import changes only checkbox", (): Chai.Assertion => importChangesOnly.checked.should.be.false);
-			it("should not show the import changes only row", (): Chai.Assertion => importChangesOnlyRow.style.display.should.equal("none"));
+			it("should not set the device", (): Chai.Assertion => expect(dataSyncController["device"]).to.deep.equal({ id: "", name: "", imported: false }));
+			it("should display unregistered", (): Chai.Assertion => expect(deviceName.value).to.equal("< Unregistered >"));
+			it("should show the registration message", (): Chai.Assertion => expect(registrationMessage.style.display).to.not.equal("none"));
+			it("should not show the sync controls", (): Chai.Assertion => expect(syncControls.style.display).to.equal("none"));
+			it("should not check the import changes only checkbox", (): Chai.Assertion => expect(importChangesOnly.checked).to.be.false);
+			it("should not show the import changes only row", (): Chai.Assertion => expect(importChangesOnlyRow.style.display).to.equal("none"));
 		});
 
 		afterEach((): void => {
@@ -265,25 +265,25 @@ describe("DataSyncController", (): void => {
 		describe("one change", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](1));
 
-			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["isLocalChanges"].should.be.true);
-			it("should display the number of changes", (): Chai.Assertion => localChanges.value.should.equal("1 change pending"));
-			it("should enable the export button", (): Chai.Assertion => exportButton.classList.contains("disabled").should.be.false);
+			it("should set the local changes flag", (): Chai.Assertion => expect(dataSyncController["isLocalChanges"]).to.be.true);
+			it("should display the number of changes", (): Chai.Assertion => expect(localChanges.value).to.equal("1 change pending"));
+			it("should enable the export button", (): Chai.Assertion => expect(exportButton.classList.contains("disabled")).to.be.false);
 		});
 
 		describe("multiple changes", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](2));
 
-			it("should set the local changes flag", (): Chai.Assertion => dataSyncController["isLocalChanges"].should.be.true);
-			it("should display the number of changes", (): Chai.Assertion => localChanges.value.should.equal("2 changes pending"));
-			it("should enable the export button", (): Chai.Assertion => exportButton.classList.contains("disabled").should.be.false);
+			it("should set the local changes flag", (): Chai.Assertion => expect(dataSyncController["isLocalChanges"]).to.be.true);
+			it("should display the number of changes", (): Chai.Assertion => expect(localChanges.value).to.equal("2 changes pending"));
+			it("should enable the export button", (): Chai.Assertion => expect(exportButton.classList.contains("disabled")).to.be.false);
 		});
 
 		describe("no changes", (): void => {
 			beforeEach((): void => dataSyncController["checkForLocalChanges"](0));
 
-			it("should not set the local changes flag", (): Chai.Assertion => dataSyncController["isLocalChanges"].should.be.false);
-			it("should display no pending changes", (): Chai.Assertion => localChanges.value.should.equal("None pending"));
-			it("should disable the export button", (): Chai.Assertion => exportButton.classList.contains("disabled").should.be.true);
+			it("should not set the local changes flag", (): Chai.Assertion => expect(dataSyncController["isLocalChanges"]).to.be.false);
+			it("should display no pending changes", (): Chai.Assertion => expect(localChanges.value).to.equal("None pending"));
+			it("should disable the export button", (): Chai.Assertion => expect(exportButton.classList.contains("disabled")).to.be.true);
 		});
 
 		afterEach((): void => {
@@ -298,7 +298,7 @@ describe("DataSyncController", (): void => {
 				dataSyncController["isLocalChanges"] = true;
 				sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
 				dataSyncController["dataExport"]();
-				dataSyncController["syncStart"].should.have.been.calledWith("Export", "Are you sure you want to export?", sinon.match.func);
+				expect(dataSyncController["syncStart"]).to.have.been.calledWith("Export", "Are you sure you want to export?", sinon.match.func);
 			});
 		});
 
@@ -307,7 +307,7 @@ describe("DataSyncController", (): void => {
 				dataSyncController["isLocalChanges"] = false;
 				sinon.stub(dataSyncController, "syncStart" as keyof DataSyncController);
 				dataSyncController["dataExport"]();
-				dataSyncController["syncStart"].should.not.have.been.called;
+				expect(dataSyncController["syncStart"]).to.not.have.been.called;
 			});
 		});
 	});
@@ -319,14 +319,14 @@ describe("DataSyncController", (): void => {
 			it("should start an import", (): void => {
 				dataSyncController["isLocalChanges"] = true;
 				dataSyncController["dataImport"]();
-				dataSyncController["syncStart"].should.have.been.calledWith("Import", "Warning: Local changes have been made. Are you sure you want to import?", sinon.match.func);
+				expect(dataSyncController["syncStart"]).to.have.been.calledWith("Import", "Warning: Local changes have been made. Are you sure you want to import?", sinon.match.func);
 			});
 		});
 
 		describe("without local changes", (): void => {
 			it("should start an import", (): void => {
 				dataSyncController["dataImport"]();
-				dataSyncController["syncStart"].should.have.been.calledWith("Import", "Are you sure you want to import?", sinon.match.func);
+				expect(dataSyncController["syncStart"]).to.have.been.calledWith("Import", "Are you sure you want to import?", sinon.match.func);
 			});
 		});
 	});
@@ -344,7 +344,7 @@ describe("DataSyncController", (): void => {
 			it("should do nothing", (): void => {
 				dataSyncController["syncing"] = true;
 				dataSyncController["syncStart"]("Import", "", sinon.stub());
-				status.value.should.equal("An import is already running");
+				expect(status.value).to.equal("An import is already running");
 			});
 		});
 
@@ -375,14 +375,14 @@ describe("DataSyncController", (): void => {
 					dataSyncController["syncStart"]("Import", "prompt", callback);
 				});
 
-				it("should set the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.true);
-				it("should hide the progress", (): Chai.Assertion => progress.style.display.should.equal("none"));
-				it("should set the status", (): Chai.Assertion => status.value.should.equal("Starting import"));
-				it("should show the status", (): Chai.Assertion => status.style.display.should.not.equal("none"));
-				it("should show the status row", (): Chai.Assertion => statusRow.style.display.should.not.equal("none"));
-				it("should prompt the user to confirm the operation", (): Chai.Assertion => WindowMock.confirm.should.have.been.calledWith("prompt"));
-				it("should invoke the sync callback", (): Chai.Assertion => callback.should.have.been.called);
-				it("should not finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.not.have.been.called);
+				it("should set the syncing flag", (): Chai.Assertion => expect(dataSyncController["syncing"]).to.be.true);
+				it("should hide the progress", (): Chai.Assertion => expect(progress.style.display).to.equal("none"));
+				it("should set the status", (): Chai.Assertion => expect(status.value).to.equal("Starting import"));
+				it("should show the status", (): Chai.Assertion => expect(status.style.display).to.not.equal("none"));
+				it("should show the status row", (): Chai.Assertion => expect(statusRow.style.display).to.not.equal("none"));
+				it("should prompt the user to confirm the operation", (): Chai.Assertion => expect(WindowMock.confirm).to.have.been.calledWith("prompt"));
+				it("should invoke the sync callback", (): Chai.Assertion => expect(callback).to.have.been.called);
+				it("should not finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.not.have.been.called);
 			});
 
 			describe("cancelled", (): void => {
@@ -391,14 +391,14 @@ describe("DataSyncController", (): void => {
 					dataSyncController["syncStart"]("Import", "prompt", callback);
 				});
 
-				it("should set the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.true);
-				it("should hide the progress", (): Chai.Assertion => progress.style.display.should.equal("none"));
-				it("should show the status", (): Chai.Assertion => status.style.display.should.not.equal("none"));
-				it("should show the status row", (): Chai.Assertion => statusRow.style.display.should.not.equal("none"));
-				it("should prompt the user to confirm the operation", (): Chai.Assertion => WindowMock.confirm.should.have.been.calledWith("prompt"));
-				it("should not invoke the sync callback", (): Chai.Assertion => callback.should.not.have.been.called);
-				it("should set the status", (): Chai.Assertion => status.value.should.equal("Import aborted"));
-				it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", false));
+				it("should set the syncing flag", (): Chai.Assertion => expect(dataSyncController["syncing"]).to.be.true);
+				it("should hide the progress", (): Chai.Assertion => expect(progress.style.display).to.equal("none"));
+				it("should show the status", (): Chai.Assertion => expect(status.style.display).to.not.equal("none"));
+				it("should show the status row", (): Chai.Assertion => expect(statusRow.style.display).to.not.equal("none"));
+				it("should prompt the user to confirm the operation", (): Chai.Assertion => expect(WindowMock.confirm).to.have.been.calledWith("prompt"));
+				it("should not invoke the sync callback", (): Chai.Assertion => expect(callback).to.not.have.been.called);
+				it("should set the status", (): Chai.Assertion => expect(status.value).to.equal("Import aborted"));
+				it("should finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.have.been.calledWith("Import", false));
 			});
 
 			afterEach((): void => {
@@ -422,21 +422,21 @@ describe("DataSyncController", (): void => {
 		describe("successful", (): void => {
 			beforeEach((): void => dataSyncController["syncFinish"]("Import", true));
 
-			it("should hide the status row", (): Chai.Assertion => statusRow.style.display.should.equal("none"));
+			it("should hide the status row", (): Chai.Assertion => expect(statusRow.style.display).to.equal("none"));
 
-			it("should display a notice to the user", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({ label: "Database has been successfully imported." }));
+			it("should display a notice to the user", (): Chai.Assertion => expect(appController.showNotice).to.have.been.calledWith({ label: "Database has been successfully imported." }));
 
-			it("should clear the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.false);
+			it("should clear the syncing flag", (): Chai.Assertion => expect(dataSyncController["syncing"]).to.be.false);
 		});
 
 		describe("not successful", (): void => {
 			beforeEach((): void => dataSyncController["syncFinish"]("Import", false));
 
-			it("should not hide the status row", (): Chai.Assertion => statusRow.style.display.should.not.equal("none"));
+			it("should not hide the status row", (): Chai.Assertion => expect(statusRow.style.display).to.not.equal("none"));
 
-			it("should display a notice to the user", (): Chai.Assertion => appController.showNotice.should.have.been.calledWith({ label: "Import failed." }));
+			it("should display a notice to the user", (): Chai.Assertion => expect(appController.showNotice).to.have.been.calledWith({ label: "Import failed." }));
 
-			it("should clear the syncing flag", (): Chai.Assertion => dataSyncController["syncing"].should.be.false);
+			it("should clear the syncing flag", (): Chai.Assertion => expect(dataSyncController["syncing"]).to.be.false);
 		});
 
 		afterEach((): void => statusRow.remove());
@@ -447,7 +447,7 @@ describe("DataSyncController", (): void => {
 			SyncMock.syncList = [new SyncMock(null, null)];
 			sinon.stub(dataSyncController, "listRetrieved" as keyof DataSyncController);
 			await dataSyncController["doExport"]();
-			dataSyncController["listRetrieved"].should.have.been.calledWith(SyncMock.syncList);
+			expect(dataSyncController["listRetrieved"]).to.have.been.calledWith(SyncMock.syncList);
 		});
 	});
 
@@ -484,22 +484,22 @@ describe("DataSyncController", (): void => {
 			await dataSyncController["listRetrieved"](syncList);
 		});
 
-		it("should reset the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(0));
-		it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
-		it("should set the list of changes to be sync", (): Chai.Assertion => dataSyncController["syncList"].should.equal(syncList));
-		it("should hide the status", (): Chai.Assertion => status.style.display.should.equal("none"));
-		it("should reset the progress", (): Chai.Assertion => progress.value.should.equal(0));
-		it("should set the progress total", (): Chai.Assertion => progress.max.should.equal(4));
-		it("should show the progress", (): Chai.Assertion => progress.style.display.should.not.equal("none"));
+		it("should reset the number of sync items processed", (): Chai.Assertion => expect(dataSyncController["syncProcessed"]).to.equal(0));
+		it("should reset the sync errors", (): Chai.Assertion => expect(dataSyncController["errors"]).to.be.empty);
+		it("should set the list of changes to be sync", (): Chai.Assertion => expect(dataSyncController["syncList"]).to.equal(syncList));
+		it("should hide the status", (): Chai.Assertion => expect(status.style.display).to.equal("none"));
+		it("should reset the progress", (): Chai.Assertion => expect(progress.value).to.equal(0));
+		it("should set the progress total", (): Chai.Assertion => expect(progress.max).to.equal(4));
+		it("should show the progress", (): Chai.Assertion => expect(progress.style.display).to.not.equal("none"));
 
 		it("should send any changes", (): void => {
-			sendChangeStub.callCount.should.equal(2);
-			sendChangeStub.should.have.been.calledWith(sinon.match({ action: "modified" }));
+			expect(sendChangeStub.callCount).to.equal(2);
+			expect(sendChangeStub).to.have.been.calledWith(sinon.match({ action: "modified" }));
 		});
 
 		it("should send any deletes", (): void => {
-			sendDeleteStub.callCount.should.equal(1);
-			sendDeleteStub.should.have.been.calledWith(sinon.match({ action: "deleted" }));
+			expect(sendDeleteStub.callCount).to.equal(1);
+			expect(sendDeleteStub).to.have.been.calledWith(sinon.match({ action: "deleted" }));
 		});
 
 		afterEach((): void => {
@@ -566,9 +566,9 @@ describe("DataSyncController", (): void => {
 							await dataSyncController["sendChange"](sync);
 						});
 
-						it("should remove the sync record", (): Chai.Assertion => sync.remove.should.have.been.called);
-						it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
-						it("should mark the change as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
+						it("should remove the sync record", (): Chai.Assertion => expect(sync.remove).to.have.been.called);
+						it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
+						it("should mark the change as sent", (): Chai.Assertion => expect(dataSyncController["changeSent"]).to.have.been.called);
 					});
 				});
 			});
@@ -586,9 +586,9 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["sendChange"](sync);
 				});
 
-				it("should not remove the sync record", (): Chai.Assertion => sync.remove.should.not.have.been.called);
-				it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Checksum mismatch", "Program", "Expected: test-hash, got: bad-hash", "1"));
-				it("should mark the change as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
+				it("should not remove the sync record", (): Chai.Assertion => expect(sync.remove).to.not.have.been.called);
+				it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Checksum mismatch", "Program", "Expected: test-hash, got: bad-hash", "1"));
+				it("should mark the change as sent", (): Chai.Assertion => expect(dataSyncController["changeSent"]).to.have.been.called);
 			});
 		});
 
@@ -602,9 +602,9 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["sendChange"](sync);
 			});
 
-			it("should not remove the sync record", (): Chai.Assertion => sync.remove.should.not.have.been.called);
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Send error", "Program", "500 (Internal Server Error)", "1"));
-			it("should mark the change as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
+			it("should not remove the sync record", (): Chai.Assertion => expect(sync.remove).to.not.have.been.called);
+			it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Send error", "Program", "500 (Internal Server Error)", "1"));
+			it("should mark the change as sent", (): Chai.Assertion => expect(dataSyncController["changeSent"]).to.have.been.called);
 		});
 
 		afterEach((): void => fakeFetch.restore());
@@ -647,9 +647,9 @@ describe("DataSyncController", (): void => {
 				});
 
 				if (scenario.model) {
-					it(`should lookup the ${scenario.type}`, (): Chai.Assertion => (model as Model).should.be.an.instanceOf(scenario.model));
+					it(`should lookup the ${scenario.type}`, (): Chai.Assertion => expect(model as Model).to.be.an.instanceOf(scenario.model));
 				} else {
-					it("should return undefined", (): Chai.Assertion => (undefined === model).should.be.true);
+					it("should return undefined", (): Chai.Assertion => expect(model).to.be.undefined);
 				}
 			});
 		});
@@ -687,9 +687,9 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["sendDelete"](sync);
 			});
 
-			it("should remove the sync record", (): Chai.Assertion => sync.remove.should.have.been.called);
-			it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
-			it("should mark the delete as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
+			it("should remove the sync record", (): Chai.Assertion => expect(sync.remove).to.have.been.called);
+			it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
+			it("should mark the delete as sent", (): Chai.Assertion => expect(dataSyncController["changeSent"]).to.have.been.called);
 		});
 
 		describe("error", (): void => {
@@ -702,9 +702,9 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["sendDelete"](sync);
 			});
 
-			it("should not remove the sync record", (): Chai.Assertion => sync.remove.should.not.have.been.called);
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Delete error", "Program", "500 (Internal Server Error)", "1"));
-			it("should mark the delete as sent", (): Chai.Assertion => dataSyncController["changeSent"].should.have.been.called);
+			it("should not remove the sync record", (): Chai.Assertion => expect(sync.remove).to.not.have.been.called);
+			it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Delete error", "Program", "500 (Internal Server Error)", "1"));
+			it("should mark the delete as sent", (): Chai.Assertion => expect(dataSyncController["changeSent"]).to.have.been.called);
 		});
 
 		afterEach((): void => fakeFetch.restore());
@@ -740,12 +740,12 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["changeSent"]();
 			});
 
-			it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
-			it("should update the progress", (): Chai.Assertion => progress.value.should.equal(1));
-			it("should not update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.not.have.been.called);
-			it("should not count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.not.have.been.called);
-			it("should not finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.not.have.been.called);
-			it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
+			it("should increment the number of sync items processed", (): Chai.Assertion => expect(dataSyncController["syncProcessed"]).to.equal(1));
+			it("should update the progress", (): Chai.Assertion => expect(progress.value).to.equal(1));
+			it("should not update the last sync time", (): Chai.Assertion => expect(dataSyncController["setLastSyncTime"]).to.not.have.been.called);
+			it("should not count how many local changes there are to be synced", (): Chai.Assertion => expect(dataSyncController["checkForLocalChanges"]).to.not.have.been.called);
+			it("should not finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.not.have.been.called);
+			it("should not show any errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.not.have.been.called);
 		});
 
 		describe("finished", (): void => {
@@ -760,13 +760,13 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["changeSent"]();
 				});
 
-				it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
-				it("should update the progress", (): Chai.Assertion => progress.value.should.equal(1));
-				it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);
-				it("should count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
-				it("should hide the sync errors", (): Chai.Assertion => syncErrors.style.display.should.equal("none"));
-				it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Export", true));
-				it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
+				it("should increment the number of sync items processed", (): Chai.Assertion => expect(dataSyncController["syncProcessed"]).to.equal(1));
+				it("should update the progress", (): Chai.Assertion => expect(progress.value).to.equal(1));
+				it("should update the last sync time", (): Chai.Assertion => expect(dataSyncController["setLastSyncTime"]).to.have.been.called);
+				it("should count how many local changes there are to be synced", (): Chai.Assertion => expect(dataSyncController["checkForLocalChanges"]).to.have.been.calledWith(1));
+				it("should hide the sync errors", (): Chai.Assertion => expect(syncErrors.style.display).to.equal("none"));
+				it("should finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.have.been.calledWith("Export", true));
+				it("should not show any errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.not.have.been.called);
 			});
 
 			describe("with errors", (): void => {
@@ -775,13 +775,13 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["changeSent"]();
 				});
 
-				it("should increment the number of sync items processed", (): Chai.Assertion => dataSyncController["syncProcessed"].should.equal(1));
-				it("should update the progress", (): Chai.Assertion => progress.value.should.equal(1));
-				it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);
-				it("should count how many local changes there are to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
-				it("should not hide the sync errors", (): Chai.Assertion => syncErrors.style.display.should.not.equal("none"));
-				it("should not finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.not.have.been.called);
-				it("should show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Export"));
+				it("should increment the number of sync items processed", (): Chai.Assertion => expect(dataSyncController["syncProcessed"]).to.equal(1));
+				it("should update the progress", (): Chai.Assertion => expect(progress.value).to.equal(1));
+				it("should update the last sync time", (): Chai.Assertion => expect(dataSyncController["setLastSyncTime"]).to.have.been.called);
+				it("should count how many local changes there are to be synced", (): Chai.Assertion => expect(dataSyncController["checkForLocalChanges"]).to.have.been.calledWith(1));
+				it("should not hide the sync errors", (): Chai.Assertion => expect(syncErrors.style.display).to.not.equal("none"));
+				it("should not finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.not.have.been.called);
+				it("should show any errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.have.been.calledWith("Export"));
 			});
 		});
 
@@ -807,9 +807,9 @@ describe("DataSyncController", (): void => {
 			clock.restore();
 		});
 
-		it("should save the last sync time", (): Chai.Assertion => SettingMock.prototype.save.should.have.been.called);
+		it("should save the last sync time", (): Chai.Assertion => expect(SettingMock.prototype.save).to.have.been.called);
 
-		it("should format the last sync time", (): Chai.Assertion => lastSyncTime.value.should.equal("2-Jan-2010 00:00:00"));
+		it("should format the last sync time", (): Chai.Assertion => expect(lastSyncTime.value).to.equal("2-Jan-2010 00:00:00"));
 
 		afterEach((): void => lastSyncTime.remove());
 	});
@@ -835,11 +835,11 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["doImport"]();
 			});
 
-			it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
-			it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["onlyImportChanges"].should.be.true);
-			it("should start the import", (): Chai.Assertion => dataSyncController["importData"].should.have.been.calledOnce);
-			it("should not add any errors to the errors list", (): Chai.Assertion => syncErrorStub.should.not.have.been.called);
-			it("should not mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.not.have.been.called);
+			it("should reset the sync errors", (): Chai.Assertion => expect(dataSyncController["errors"]).to.be.empty);
+			it("should check if fast import is selected", (): Chai.Assertion => expect(dataSyncController["onlyImportChanges"]).to.be.true);
+			it("should start the import", (): Chai.Assertion => expect(dataSyncController["importData"]).to.have.been.calledOnce);
+			it("should not add any errors to the errors list", (): Chai.Assertion => expect(syncErrorStub).to.not.have.been.called);
+			it("should not mark the import as done", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.not.have.been.called);
 		});
 
 		describe("full import", (): void => {
@@ -853,20 +853,20 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["doImport"]();
 				});
 
-				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
-				it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["onlyImportChanges"].should.be.false);
-				it("should attempt to delete all existing programs", (): Chai.Assertion => ProgramMock.removeAll.should.have.been.called);
-				it("should attempt to delete all existing series", (): Chai.Assertion => SeriesMock.removeAll.should.have.been.called);
-				it("should attempt to delete all existing episodes", (): Chai.Assertion => EpisodeMock.removeAll.should.have.been.called);
+				it("should reset the sync errors", (): Chai.Assertion => expect(dataSyncController["errors"]).to.be.empty);
+				it("should check if fast import is selected", (): Chai.Assertion => expect(dataSyncController["onlyImportChanges"]).to.be.false);
+				it("should attempt to delete all existing programs", (): Chai.Assertion => expect(ProgramMock.removeAll).to.have.been.called);
+				it("should attempt to delete all existing series", (): Chai.Assertion => expect(SeriesMock.removeAll).to.have.been.called);
+				it("should attempt to delete all existing episodes", (): Chai.Assertion => expect(EpisodeMock.removeAll).to.have.been.called);
 
 				it("should add 3 errors to the errors list", (): void => {
-					syncErrorStub.callCount.should.equal(3);
-					syncErrorStub.should.have.been.calledWith("Delete error", "Program", "Force failed");
-					syncErrorStub.should.have.been.calledWith("Delete error", "Series", "Force failed");
-					syncErrorStub.should.have.been.calledWith("Delete error", "Episode", "Force failed");
+					expect(syncErrorStub.callCount).to.equal(3);
+					expect(syncErrorStub).to.have.been.calledWith("Delete error", "Program", "Force failed");
+					expect(syncErrorStub).to.have.been.calledWith("Delete error", "Series", "Force failed");
+					expect(syncErrorStub).to.have.been.calledWith("Delete error", "Episode", "Force failed");
 				});
 
-				it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+				it("should mark the import as done", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.have.been.called);
 			});
 
 			describe("without errors", (): void => {
@@ -877,12 +877,12 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["doImport"]();
 				});
 
-				it("should reset the sync errors", (): Chai.Assertion => dataSyncController["errors"].should.be.empty);
-				it("should check if fast import is selected", (): Chai.Assertion => dataSyncController["onlyImportChanges"].should.be.false);
-				it("should attempt to delete all existing programs", (): Chai.Assertion => ProgramMock.removeAll.should.have.been.called);
-				it("should attempt to delete all existing series", (): Chai.Assertion => SeriesMock.removeAll.should.have.been.called);
-				it("should attempt to delete all existing episodes", (): Chai.Assertion => EpisodeMock.removeAll.should.have.been.called);
-				it("should start the import", (): Chai.Assertion => dataSyncController["importData"].should.have.been.called);
+				it("should reset the sync errors", (): Chai.Assertion => expect(dataSyncController["errors"]).to.be.empty);
+				it("should check if fast import is selected", (): Chai.Assertion => expect(dataSyncController["onlyImportChanges"]).to.be.false);
+				it("should attempt to delete all existing programs", (): Chai.Assertion => expect(ProgramMock.removeAll).to.have.been.called);
+				it("should attempt to delete all existing series", (): Chai.Assertion => expect(SeriesMock.removeAll).to.have.been.called);
+				it("should attempt to delete all existing episodes", (): Chai.Assertion => expect(EpisodeMock.removeAll).to.have.been.called);
+				it("should start the import", (): Chai.Assertion => expect(dataSyncController["importData"]).to.have.been.called);
 			});
 		});
 
@@ -969,13 +969,13 @@ describe("DataSyncController", (): void => {
 								await dataSyncController["importData"]();
 							});
 
-							it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-							it("should set the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(2));
-							it("should hide the status", (): Chai.Assertion => status.style.display.should.equal("none"));
-							it("should reset the progress", (): Chai.Assertion => progress.value.should.equal(0));
-							it("should set the progress total", (): Chai.Assertion => progress.max.should.equal(2));
-							it("should show the progress", (): Chai.Assertion => progress.style.display.should.not.equal("none"));
-							it("should process each object to import", (): Chai.Assertion => dataSyncController["importObject"].should.have.been.calledTwice);
+							it("should reset the number of objects imported", (): Chai.Assertion => expect(dataSyncController["objectsImported"]).to.equal(0));
+							it("should set the number of objects to import", (): Chai.Assertion => expect(dataSyncController["objectsToImport"]).to.equal(2));
+							it("should hide the status", (): Chai.Assertion => expect(status.style.display).to.equal("none"));
+							it("should reset the progress", (): Chai.Assertion => expect(progress.value).to.equal(0));
+							it("should set the progress total", (): Chai.Assertion => expect(progress.max).to.equal(2));
+							it("should show the progress", (): Chai.Assertion => expect(progress.style.display).to.not.equal("none"));
+							it("should process each object to import", (): Chai.Assertion => expect(dataSyncController["importObject"]).to.have.been.calledTwice);
 
 							afterEach((): void => {
 								status.remove();
@@ -996,16 +996,16 @@ describe("DataSyncController", (): void => {
 								await dataSyncController["importData"]();
 							});
 
-							it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
-							it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
+							it("should reset the number of objects to import", (): Chai.Assertion => expect(dataSyncController["objectsToImport"]).to.equal(0));
+							it("should reset the number of objects imported", (): Chai.Assertion => expect(dataSyncController["objectsImported"]).to.equal(0));
 
 							if (scenario.importChangesOnly) {
-								it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+								it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
 							} else {
-								it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Receive error", "Sync", "No data found"));
+								it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Receive error", "Sync", "No data found"));
 							}
 
-							it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+							it("should mark the import as done", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.have.been.called);
 						});
 					});
 
@@ -1022,10 +1022,10 @@ describe("DataSyncController", (): void => {
 							await dataSyncController["importData"]();
 						});
 
-						it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
-						it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-						it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Checksum mismatch", "Sync", "Expected: test-hash, got: bad-hash"));
-						it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+						it("should reset the number of objects to import", (): Chai.Assertion => expect(dataSyncController["objectsToImport"]).to.equal(0));
+						it("should reset the number of objects imported", (): Chai.Assertion => expect(dataSyncController["objectsImported"]).to.equal(0));
+						it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Checksum mismatch", "Sync", "Expected: test-hash, got: bad-hash"));
+						it("should mark the import as done", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.have.been.called);
 					});
 				});
 
@@ -1039,10 +1039,10 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["importData"]();
 					});
 
-					it("should reset the number of objects to import", (): Chai.Assertion => dataSyncController["objectsToImport"].should.equal(0));
-					it("should reset the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(0));
-					it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Receive error", "Sync", "500 (Internal Server Error)"));
-					it("should mark the import as done", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+					it("should reset the number of objects to import", (): Chai.Assertion => expect(dataSyncController["objectsToImport"]).to.equal(0));
+					it("should reset the number of objects imported", (): Chai.Assertion => expect(dataSyncController["objectsImported"]).to.equal(0));
+					it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Receive error", "Sync", "500 (Internal Server Error)"));
+					it("should mark the import as done", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.have.been.called);
 				});
 			});
 		});
@@ -1099,8 +1099,8 @@ describe("DataSyncController", (): void => {
 					result = dataSyncController["getImportData"](scenario.importData, scenario.eTag);
 				});
 
-				it("should return the object JSON", (): Chai.Assertion => result.importJson.should.deep.equal(data));
-				it("should return the checksum", (): Chai.Assertion => result.returnedHash.should.equal(checksum));
+				it("should return the object JSON", (): Chai.Assertion => expect(result.importJson).to.deep.equal(data));
+				it("should return the checksum", (): Chai.Assertion => expect(result.returnedHash).to.equal(checksum));
 
 				afterEach((): void => importChangesOnly.remove());
 			});
@@ -1156,9 +1156,9 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["importObject"]({ doc: scenario.doc });
 					});
 
-					it("should create an instance from the JSON", (): Chai.Assertion => scenario.model.fromJson.should.have.been.calledWith(scenario.doc));
-					it("should remove the object", (): Chai.Assertion => scenario.model.prototype.remove.should.have.been.called);
-					it("should mark the object as saved", (): Chai.Assertion => dataSyncController["objectSaved"].should.have.been.calledWith(scenario.doc.id, scenario.doc.type, scenario.isPending));
+					it("should create an instance from the JSON", (): Chai.Assertion => expect(scenario.model.fromJson).to.have.been.calledWith(scenario.doc));
+					it("should remove the object", (): Chai.Assertion => expect(scenario.model.prototype.remove).to.have.been.called);
+					it("should mark the object as saved", (): Chai.Assertion => expect(dataSyncController["objectSaved"]).to.have.been.calledWith(scenario.doc.id, scenario.doc.type, scenario.isPending));
 				});
 
 				describe("created or updated", (): void => {
@@ -1167,9 +1167,9 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["importObject"]({ doc: scenario.doc });
 					});
 
-					it("should create an instance from the JSON", (): Chai.Assertion => scenario.model.fromJson.should.have.been.calledWith(scenario.doc));
-					it("should save the object", (): Chai.Assertion => scenario.model.prototype.save.should.have.been.called);
-					it("should mark the object as saved", (): Chai.Assertion => dataSyncController["objectSaved"].should.have.been.calledWith(sinon.match.string, scenario.doc.type, scenario.isPending));
+					it("should create an instance from the JSON", (): Chai.Assertion => expect(scenario.model.fromJson).to.have.been.calledWith(scenario.doc));
+					it("should save the object", (): Chai.Assertion => expect(scenario.model.prototype.save).to.have.been.called);
+					it("should mark the object as saved", (): Chai.Assertion => expect(dataSyncController["objectSaved"]).to.have.been.calledWith(sinon.match.string, scenario.doc.type, scenario.isPending));
 				});
 			});
 		});
@@ -1198,7 +1198,7 @@ describe("DataSyncController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.type, (): void => {
-				it(`should convert the JSON to an instance of ${scenario.type}`, (): Chai.Assertion => dataSyncController["jsonToModel"]({ type: scenario.type } as SerializedModel).should.be.an.instanceOf(scenario.model));
+				it(`should convert the JSON to an instance of ${scenario.type}`, (): Chai.Assertion => expect(dataSyncController["jsonToModel"]({ type: scenario.type } as SerializedModel)).to.be.an.instanceOf(scenario.model));
 			});
 		});
 	});
@@ -1226,10 +1226,10 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["objectSaved"]("1", "Program", true);
 					});
 
-					it("should clear any sync record for the imported object", (): Chai.Assertion => SyncMock.prototype.remove.should.have.been.called);
-					it("should clear the pending status for the imported object", (): Chai.Assertion => dataSyncController["removePending"].should.have.been.calledWith("1", "Program"));
-					it("should return early", (): Chai.Assertion => dataSyncController["dataImported"].should.not.have.been.called);
-					it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+					it("should clear any sync record for the imported object", (): Chai.Assertion => expect(SyncMock.prototype.remove).to.have.been.called);
+					it("should clear the pending status for the imported object", (): Chai.Assertion => expect(dataSyncController["removePending"]).to.have.been.calledWith("1", "Program"));
+					it("should return early", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.not.have.been.called);
+					it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
 				});
 
 				describe("full import", (): void => {
@@ -1238,10 +1238,10 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["objectSaved"]("1", "Program", true);
 					});
 
-					it("should not clear any sync record for the imported object", (): Chai.Assertion => SyncMock.prototype.remove.should.not.have.been.called);
-					it("should clear the pending status for the imported object", (): Chai.Assertion => dataSyncController["removePending"].should.have.been.calledWith("1", "Program"));
-					it("should return early", (): Chai.Assertion => dataSyncController["dataImported"].should.not.have.been.called);
-					it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+					it("should not clear any sync record for the imported object", (): Chai.Assertion => expect(SyncMock.prototype.remove).to.not.have.been.called);
+					it("should clear the pending status for the imported object", (): Chai.Assertion => expect(dataSyncController["removePending"]).to.have.been.calledWith("1", "Program"));
+					it("should return early", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.not.have.been.called);
+					it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
 				});
 			});
 
@@ -1252,10 +1252,10 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["objectSaved"]("1", "Program", false);
 					});
 
-					it("should clear any sync record for the imported object", (): Chai.Assertion => SyncMock.prototype.remove.should.have.been.called);
-					it("should not clear the pending status for the imported object", (): Chai.Assertion => dataSyncController["removePending"].should.not.have.been.called);
-					it("should not return early", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
-					it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+					it("should clear any sync record for the imported object", (): Chai.Assertion => expect(SyncMock.prototype.remove).to.have.been.called);
+					it("should not clear the pending status for the imported object", (): Chai.Assertion => expect(dataSyncController["removePending"]).to.not.have.been.called);
+					it("should not return early", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.have.been.called);
+					it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
 				});
 
 				describe("full import", (): void => {
@@ -1265,13 +1265,13 @@ describe("DataSyncController", (): void => {
 					});
 
 					it("should not clear any sync record for the imported object", (): void => {
-						SyncMock.syncList.should.be.empty;
-						SyncMock.prototype.remove.should.not.have.been.called;
+						expect(SyncMock.syncList).to.be.empty;
+						expect(SyncMock.prototype.remove).to.not.have.been.called;
 					});
 
-					it("should not clear the pending status for the imported object", (): Chai.Assertion => dataSyncController["removePending"].should.not.have.been.called);
-					it("should not return early", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
-					it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
+					it("should not clear the pending status for the imported object", (): Chai.Assertion => expect(dataSyncController["removePending"]).to.not.have.been.called);
+					it("should not return early", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.have.been.called);
+					it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
 				});
 			});
 		});
@@ -1280,13 +1280,13 @@ describe("DataSyncController", (): void => {
 			beforeEach(async (): Promise<void> => dataSyncController["objectSaved"](undefined, "Program", false));
 
 			it("should not clear any sync record for the imported object", (): void => {
-				SyncMock.syncList.should.be.empty;
-				SyncMock.prototype.remove.should.not.have.been.called;
+				expect(SyncMock.syncList).to.be.empty;
+				expect(SyncMock.prototype.remove).to.not.have.been.called;
 			});
 
-			it("should not clear the pending status for the imported object", (): Chai.Assertion => dataSyncController["removePending"].should.not.have.been.called);
-			it("should not return early", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Save error", "Program", "Error saving program"));
+			it("should not clear the pending status for the imported object", (): Chai.Assertion => expect(dataSyncController["removePending"]).to.not.have.been.called);
+			it("should not return early", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.have.been.called);
+			it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Save error", "Program", "Error saving program"));
 		});
 
 		afterEach((): void => importChangesOnly.remove());
@@ -1322,8 +1322,8 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["removePending"]("1", "Program");
 			});
 
-			it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
-			it("should continue processing", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
+			it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
+			it("should continue processing", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.have.been.called);
 		});
 
 		describe("error", (): void => {
@@ -1336,8 +1336,8 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["removePending"]("1", "Program");
 			});
 
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Save error", "Program", "Error saving program"));
-			it("should continue processing", (): Chai.Assertion => dataSyncController["dataImported"].should.have.been.called);
+			it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Save error", "Program", "Error saving program"));
+			it("should continue processing", (): Chai.Assertion => expect(dataSyncController["dataImported"]).to.have.been.called);
 		});
 
 		afterEach((): void => fakeFetch.restore());
@@ -1362,9 +1362,9 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["dataImported"]();
 			});
 
-			it("should increment the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(1));
-			it("should update the import progress", (): Chai.Assertion => progress.value.should.equal(1));
-			it("should not finalise the import", (): Chai.Assertion => dataSyncController["importDone"].should.not.have.been.called);
+			it("should increment the number of objects imported", (): Chai.Assertion => expect(dataSyncController["objectsImported"]).to.equal(1));
+			it("should update the import progress", (): Chai.Assertion => expect(progress.value).to.equal(1));
+			it("should not finalise the import", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.not.have.been.called);
 		});
 
 		describe("finished", (): void => {
@@ -1374,9 +1374,9 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["dataImported"]();
 			});
 
-			it("should increment the number of objects imported", (): Chai.Assertion => dataSyncController["objectsImported"].should.equal(2));
-			it("should update the import progress", (): Chai.Assertion => progress.value.should.equal(2));
-			it("should not finalise the import", (): Chai.Assertion => dataSyncController["importDone"].should.have.been.called);
+			it("should increment the number of objects imported", (): Chai.Assertion => expect(dataSyncController["objectsImported"]).to.equal(2));
+			it("should update the import progress", (): Chai.Assertion => expect(progress.value).to.equal(2));
+			it("should not finalise the import", (): Chai.Assertion => expect(dataSyncController["importDone"]).to.have.been.called);
 		});
 
 		afterEach((): void => progress.remove());
@@ -1394,9 +1394,9 @@ describe("DataSyncController", (): void => {
 				await dataSyncController["importDone"]();
 			});
 
-			it("should not mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.not.have.been.called);
-			it("should not clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.not.have.been.called);
-			it("should show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Import"));
+			it("should not mark the import as successful", (): Chai.Assertion => expect(dataSyncController["importSuccessful"]).to.not.have.been.called);
+			it("should not clear all pending local changes", (): Chai.Assertion => expect(SyncMock.removeAll).to.not.have.been.called);
+			it("should show the errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.have.been.calledWith("Import"));
 		});
 
 		describe("without errors", (): void => {
@@ -1417,9 +1417,9 @@ describe("DataSyncController", (): void => {
 					await dataSyncController["importDone"]();
 				});
 
-				it("should mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.have.been.called);
-				it("should not clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.not.have.been.called);
-				it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
+				it("should mark the import as successful", (): Chai.Assertion => expect(dataSyncController["importSuccessful"]).to.have.been.called);
+				it("should not clear all pending local changes", (): Chai.Assertion => expect(SyncMock.removeAll).to.not.have.been.called);
+				it("should not show any errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.not.have.been.called);
 			});
 
 			describe("full import", (): void => {
@@ -1432,13 +1432,13 @@ describe("DataSyncController", (): void => {
 					});
 
 					it("should mark the device as having imported", (): void => {
-						dataSyncController["device"].imported.should.be.true;
-						SettingMock.setting.should.deep.equal({ name: "Device", value: JSON.stringify({ id: "", name: "", imported: true }) });
-						SettingMock.prototype.save.should.have.been.called;
+						expect(dataSyncController["device"].imported).to.be.true;
+						expect(SettingMock.setting).to.deep.equal({ name: "Device", value: JSON.stringify({ id: "", name: "", imported: true }) });
+						expect(SettingMock.prototype.save).to.have.been.called;
 					});
 
-					it("should clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.have.been.called);
-					it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
+					it("should clear all pending local changes", (): Chai.Assertion => expect(SyncMock.removeAll).to.have.been.called);
+					it("should not show any errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.not.have.been.called);
 				});
 
 				describe("subsequent import", (): void => {
@@ -1448,9 +1448,9 @@ describe("DataSyncController", (): void => {
 						await dataSyncController["importDone"]();
 					});
 
-					it("should not mark the device as having imported", (): Chai.Assertion => SettingMock.prototype.save.should.not.have.been.called);
-					it("should clear all pending local changes", (): Chai.Assertion => SyncMock.removeAll.should.have.been.called);
-					it("should not show any errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
+					it("should not mark the device as having imported", (): Chai.Assertion => expect(SettingMock.prototype.save).to.not.have.been.called);
+					it("should clear all pending local changes", (): Chai.Assertion => expect(SyncMock.removeAll).to.have.been.called);
+					it("should not show any errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.not.have.been.called);
 				});
 			});
 
@@ -1468,17 +1468,17 @@ describe("DataSyncController", (): void => {
 		describe("with error", (): void => {
 			beforeEach(async (): Promise<void> => dataSyncController["pendingChangesCleared"]("error"));
 
-			it("should add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.have.been.calledWith("Delete error", "Sync", "error"));
-			it("should show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.have.been.calledWith("Import"));
-			it("should not mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.not.have.been.called);
+			it("should add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.have.been.calledWith("Delete error", "Sync", "error"));
+			it("should show the errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.have.been.calledWith("Import"));
+			it("should not mark the import as successful", (): Chai.Assertion => expect(dataSyncController["importSuccessful"]).to.not.have.been.called);
 		});
 
 		describe("without error", (): void => {
 			beforeEach(async (): Promise<void> => dataSyncController["pendingChangesCleared"]());
 
-			it("should not add an error to the errors list", (): Chai.Assertion => dataSyncController["syncError"].should.not.have.been.called);
-			it("should not show the errors", (): Chai.Assertion => dataSyncController["showErrors"].should.not.have.been.called);
-			it("should mark the import as successful", (): Chai.Assertion => dataSyncController["importSuccessful"].should.have.been.called);
+			it("should not add an error to the errors list", (): Chai.Assertion => expect(dataSyncController["syncError"]).to.not.have.been.called);
+			it("should not show the errors", (): Chai.Assertion => expect(dataSyncController["showErrors"]).to.not.have.been.called);
+			it("should mark the import as successful", (): Chai.Assertion => expect(dataSyncController["importSuccessful"]).to.have.been.called);
 		});
 	});
 
@@ -1498,10 +1498,10 @@ describe("DataSyncController", (): void => {
 			await dataSyncController["importSuccessful"]();
 		});
 
-		it("should update the last sync time", (): Chai.Assertion => dataSyncController["setLastSyncTime"].should.have.been.called);
-		it("should update the number of local changes to be synced", (): Chai.Assertion => dataSyncController["checkForLocalChanges"].should.have.been.calledWith(1));
-		it("should hide the errors container", (): Chai.Assertion => syncErrors.style.display.should.equal("none"));
-		it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", true));
+		it("should update the last sync time", (): Chai.Assertion => expect(dataSyncController["setLastSyncTime"]).to.have.been.called);
+		it("should update the number of local changes to be synced", (): Chai.Assertion => expect(dataSyncController["checkForLocalChanges"]).to.have.been.calledWith(1));
+		it("should hide the errors container", (): Chai.Assertion => expect(syncErrors.style.display).to.equal("none"));
+		it("should finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.have.been.calledWith("Import", true));
 
 		afterEach((): void => syncErrors.remove());
 	});
@@ -1514,8 +1514,8 @@ describe("DataSyncController", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message", "id");
 				const error = dataSyncController["errors"].pop() as HTMLLIElement;
 
-				error.tagName.should.equal("LI");
-				error.innerHTML.should.equal("Send error<br>Type: Program id<br>message");
+				expect(error.tagName).to.equal("LI");
+				expect(error.innerHTML).to.equal("Send error<br>Type: Program id<br>message");
 			});
 		});
 
@@ -1524,8 +1524,8 @@ describe("DataSyncController", (): void => {
 				dataSyncController["syncError"]("Send error", "Program", "message");
 				const error = dataSyncController["errors"].pop() as HTMLLIElement;
 
-				error.tagName.should.equal("LI");
-				error.innerHTML.should.equal("Send error<br>Type: Program<br>message");
+				expect(error.tagName).to.equal("LI");
+				expect(error.innerHTML).to.equal("Send error<br>Type: Program<br>message");
 			});
 		});
 	});
@@ -1561,11 +1561,11 @@ describe("DataSyncController", (): void => {
 			dataSyncController["showErrors"]("Import");
 		});
 
-		it("should clear any old errors", (): Chai.Assertion => (null === errorList.querySelector("#oldError")).should.be.true);
-		it("should add any new errors", (): Chai.Assertion => (null === errorList.querySelector("#newError")).should.be.false);
-		it("should display the errors container", (): Chai.Assertion => syncErrors.style.display.should.not.equal("none"));
-		it("should update the list height", (): Chai.Assertion => errorList.offsetHeight.should.equal(20));
-		it("should finish the sync", (): Chai.Assertion => dataSyncController["syncFinish"].should.have.been.calledWith("Import", false));
+		it("should clear any old errors", (): Chai.Assertion => expect(errorList.querySelector("#oldError")).to.be.null);
+		it("should add any new errors", (): Chai.Assertion => expect(errorList.querySelector("#newError")).to.not.be.null);
+		it("should display the errors container", (): Chai.Assertion => expect(syncErrors.style.display).to.not.equal("none"));
+		it("should update the list height", (): Chai.Assertion => expect(errorList.offsetHeight).to.equal(20));
+		it("should finish the sync", (): Chai.Assertion => expect(dataSyncController["syncFinish"]).to.have.been.calledWith("Import", false));
 
 		afterEach((): void => syncErrors.remove());
 	});

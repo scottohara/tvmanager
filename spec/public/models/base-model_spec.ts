@@ -14,6 +14,6 @@ describe("Base", (): void => {
 	beforeEach((): TestModel => (testModel = new TestModel()));
 
 	describe("makeEnumerable", (): void => {
-		it("should do nothing if the property doesn't exist", (): Chai.Assertion => (undefined === Object.getOwnPropertyDescriptor(testModel, "nonExistentProperty")).should.be.true);
+		it("should do nothing if the property doesn't exist", (): Chai.Assertion => expect(Object.getOwnPropertyDescriptor(testModel, "nonExistentProperty")).to.be.undefined);
 	});
 });

@@ -33,11 +33,11 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a ProgramsController instance", (): Chai.Assertion => programsController.should.be.an.instanceOf(ProgramsController));
+		it("should return a ProgramsController instance", (): Chai.Assertion => expect(programsController).to.be.an.instanceOf(ProgramsController));
 	});
 
 	describe("view", (): void => {
-		it("should return the programs view", (): Chai.Assertion => programsController.view.should.equal(ProgramsView));
+		it("should return the programs view", (): Chai.Assertion => expect(programsController.view).to.equal(ProgramsView));
 	});
 
 	describe("setup", (): void => {
@@ -56,39 +56,39 @@ describe("ProgramsController", (): void => {
 			rightButton = programsController.header.rightButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(programsController.header.label).should.equal("Programs"));
+		it("should set the header label", (): Chai.Assertion => expect(String(programsController.header.label)).to.equal("Programs"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			programsController["goBack"].should.have.been.called;
+			expect(programsController["goBack"]).to.have.been.called;
 		});
 
-		it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Schedule"));
+		it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Schedule"));
 
 		it("should attach a header right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			programsController["addItem"].should.have.been.called;
+			expect(programsController["addItem"]).to.have.been.called;
 		});
 
-		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("+"));
+		it("should set the header right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("+"));
 
 		it("should attach a view event handler to the programs list", (): void => {
 			(programsController["programList"] as ListMock).viewEventHandler(0);
-			programsController["viewItem"].should.have.been.calledWith(0);
+			expect(programsController["viewItem"]).to.have.been.calledWith(0);
 		});
 
 		it("should attach an edit event handler to the programs list", (): void => {
 			((programsController["programList"] as ListMock).editEventHandler as ListEventHandler)(0);
-			programsController["editItem"].should.have.been.calledWith(0);
+			expect(programsController["editItem"]).to.have.been.calledWith(0);
 		});
 
 		it("should attach a delete event handler to the programs list", (): void => {
 			(programsController["programList"] as ListMock).deleteEventHandler(0);
-			programsController["deleteItem"].should.have.been.calledWith(0);
+			expect(programsController["deleteItem"]).to.have.been.calledWith(0);
 		});
 
-		it("should activate the controller", (): Chai.Assertion => programsController.activate.should.have.been.called);
+		it("should activate the controller", (): Chai.Assertion => expect(programsController["activate"]).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
@@ -100,12 +100,12 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should get the list of programs", (): void => {
-			ProgramMock.list.should.have.been.called;
-			programsController["programList"].items.should.deep.equal(items);
+			expect(ProgramMock.list).to.have.been.called;
+			expect(programsController["programList"].items).to.deep.equal(items);
 		});
 
-		it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion => programsController["viewItems"].should.have.been.called);
+		it("should refresh the list", (): Chai.Assertion => expect(programsController["programList"].refresh).to.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect(programsController["viewItems"]).to.have.been.called);
 	});
 
 	describe("contentShown", (): void => {
@@ -117,7 +117,7 @@ describe("ProgramsController", (): void => {
 				programsController.contentShown();
 			});
 
-			it("should scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.have.been.calledWith("1"));
+			it("should scroll the list", (): Chai.Assertion => expect(programsController["programList"].scrollTo).to.have.been.calledWith("1"));
 		});
 
 		describe("without active list item", (): void => {
@@ -126,14 +126,14 @@ describe("ProgramsController", (): void => {
 				programsController.contentShown();
 			});
 
-			it("should not scroll the list", (): Chai.Assertion => programsController["programList"].scrollTo.should.not.have.been.called);
+			it("should not scroll the list", (): Chai.Assertion => expect(programsController["programList"].scrollTo).to.not.have.been.called);
 		});
 	});
 
 	describe("goBack", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await programsController["goBack"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 
@@ -145,8 +145,8 @@ describe("ProgramsController", (): void => {
 			await programsController["viewItem"](index);
 		});
 
-		it("should save the active list item", (): Chai.Assertion => (programsController["activeListItem"] as ProgramMock).should.equal(items[0]));
-		it("should push the series list view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("seriesList", {
+		it("should save the active list item", (): Chai.Assertion => expect(programsController["activeListItem"] as ProgramMock).to.equal(items[0]));
+		it("should push the series list view for the selected item", (): Chai.Assertion => expect(appController.pushView).to.have.been.calledWith("seriesList", {
 			listIndex: index,
 			program: items[index]
 		}));
@@ -155,7 +155,7 @@ describe("ProgramsController", (): void => {
 	describe("addItem", (): void => {
 		it("should push the program view with no selected item", async (): Promise<void> => {
 			await programsController["addItem"]();
-			appController.pushView.should.have.been.calledWithExactly("program");
+			expect(appController.pushView).to.have.been.calledWithExactly("program");
 		});
 	});
 
@@ -167,8 +167,8 @@ describe("ProgramsController", (): void => {
 			await programsController["editItem"](index);
 		});
 
-		it("should save the active list item", (): Chai.Assertion => (programsController["activeListItem"] as ProgramMock).should.equal(items[0]));
-		it("should push the program view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("program", {
+		it("should save the active list item", (): Chai.Assertion => expect(programsController["activeListItem"] as ProgramMock).to.equal(items[0]));
+		it("should push the program view for the selected item", (): Chai.Assertion => expect(appController.pushView).to.have.been.calledWith("program", {
 			listIndex: index,
 			program: items[index]
 		}));
@@ -185,9 +185,9 @@ describe("ProgramsController", (): void => {
 			await programsController["deleteItem"](index);
 		});
 
-		it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
-		it("should remove the item from the program list", (): Chai.Assertion => programsController["programList"].items.should.deep.equal([]));
-		it("should refresh the list", (): Chai.Assertion => programsController["programList"].refresh.should.have.been.called);
+		it("should remove the item from the database", (): Chai.Assertion => expect(item.remove).to.have.been.called);
+		it("should remove the item from the program list", (): Chai.Assertion => expect(programsController["programList"].items).to.deep.equal([]));
+		it("should refresh the list", (): Chai.Assertion => expect(programsController["programList"].refresh).to.have.been.called);
 	});
 
 	describe("deleteItems", (): void => {
@@ -203,26 +203,26 @@ describe("ProgramsController", (): void => {
 			rightButton = footer.rightButton as NavButton;
 		});
 
-		it("should set the list to delete mode", (): Chai.Assertion => (programsController["programList"] as ListMock).action.should.equal("delete"));
-		it("should hide the list index", (): Chai.Assertion => programsController["programList"].hideIndex.should.have.been.called);
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
+		it("should set the list to delete mode", (): Chai.Assertion => expect((programsController["programList"] as ListMock).action).to.equal("delete"));
+		it("should hide the list index", (): Chai.Assertion => expect(programsController["programList"].hideIndex).to.have.been.called);
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			programList.classList.contains("delete").should.be.true;
-			programList.classList.contains("edit").should.be.false;
-			programList.classList.contains("withHelper").should.be.false;
+			expect(programList.classList.contains("delete")).to.be.true;
+			expect(programList.classList.contains("edit")).to.be.false;
+			expect(programList.classList.contains("withHelper")).to.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
+		it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			programsController["viewItems"].should.have.been.called;
+			expect(programsController["viewItems"]).to.have.been.called;
 		});
 
-		it("should set the footer right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
-		it("should set the footer right button label", (): Chai.Assertion => rightButton.label.should.equal("Done"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the footer right button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("confirmButton"));
+		it("should set the footer right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Done"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 
 	describe("editItems", (): void => {
@@ -238,26 +238,26 @@ describe("ProgramsController", (): void => {
 			leftButton = footer.leftButton as NavButton;
 		});
 
-		it("should set the list to edit mode", (): Chai.Assertion => (programsController["programList"] as ListMock).action.should.equal("edit"));
-		it("should hide the list index", (): Chai.Assertion => programsController["programList"].hideIndex.should.have.been.called);
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
+		it("should set the list to edit mode", (): Chai.Assertion => expect((programsController["programList"] as ListMock).action).to.equal("edit"));
+		it("should hide the list index", (): Chai.Assertion => expect(programsController["programList"].hideIndex).to.have.been.called);
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			programList.classList.contains("delete").should.be.false;
-			programList.classList.contains("edit").should.be.true;
-			programList.classList.contains("withHelper").should.be.false;
+			expect(programList.classList.contains("delete")).to.be.false;
+			expect(programList.classList.contains("edit")).to.be.true;
+			expect(programList.classList.contains("withHelper")).to.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
+		it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			programsController["viewItems"].should.have.been.called;
+			expect(programsController["viewItems"]).to.have.been.called;
 		});
 
-		it("should set the footer left button style", (): Chai.Assertion => String(leftButton.style).should.equal("confirmButton"));
-		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Done"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the footer left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("confirmButton"));
+		it("should set the footer left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Done"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 
 	describe("viewItems", (): void => {
@@ -276,33 +276,33 @@ describe("ProgramsController", (): void => {
 			rightButton = footer.rightButton as NavButton;
 		});
 
-		it("should set the list to view mode", (): Chai.Assertion => (programsController["programList"] as ListMock).action.should.equal("view"));
-		it("should show the list index", (): Chai.Assertion => programsController["programList"].showIndex.should.have.been.called);
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect((programsController["programList"] as ListMock).action).to.equal("view"));
+		it("should show the list index", (): Chai.Assertion => expect(programsController["programList"].showIndex).to.have.been.called);
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			programList.classList.contains("delete").should.be.false;
-			programList.classList.contains("edit").should.be.false;
-			programList.classList.contains("withHelper").should.be.true;
+			expect(programList.classList.contains("delete")).to.be.false;
+			expect(programList.classList.contains("edit")).to.be.false;
+			expect(programList.classList.contains("withHelper")).to.be.true;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
+		it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			programsController["editItems"].should.have.been.called;
+			expect(programsController["editItems"]).to.have.been.called;
 		});
 
-		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Edit"));
+		it("should set the footer left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Edit"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			programsController["deleteItems"].should.have.been.called;
+			expect(programsController["deleteItems"]).to.have.been.called;
 		});
 
-		it("should set the footer left button style", (): Chai.Assertion => String(rightButton.style).should.equal("cautionButton"));
-		it("should set the footer right button label", (): Chai.Assertion => rightButton.label.should.equal("Delete"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the footer left button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("cautionButton"));
+		it("should set the footer right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Delete"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 
 	afterEach((): void => programList.remove());

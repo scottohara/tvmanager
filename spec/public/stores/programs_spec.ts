@@ -36,7 +36,7 @@ describe("programs", (): void => {
 
 	describe("upgradeTo", (): void => {
 		describe("version 1", (): void => {
-			it("should create the programs store", (): Chai.Assertion => [...db.objectStoreNames].includes("programs").should.be.true);
+			it("should create the programs store", (): Chai.Assertion => expect([...db.objectStoreNames].includes("programs")).to.be.true);
 		});
 	});
 
@@ -69,23 +69,23 @@ describe("programs", (): void => {
 		});
 
 		describe("list", (): void => {
-			it("should return a list of all programs", async (): Promise<Chai.Assertion> => (await programsStore.list()).should.deep.equal([
+			it("should return a list of all programs", async (): Promise<Chai.Assertion> => expect(await programsStore.list()).to.deep.equal([
 				{ ProgramID: "2", Name: "aa Program 2", SeriesCount: 2, EpisodeCount: 6, WatchedCount: 2, RecordedCount: 2, ExpectedCount: 2 },
 				{ ProgramID: "1", Name: "bb Program 1", SeriesCount: 1, EpisodeCount: 3, WatchedCount: 1, RecordedCount: 1, ExpectedCount: 1 }
 			]));
 		});
 
 		describe("find", (): void => {
-			it("should return a program by id", async (): Promise<Chai.Assertion> => (await programsStore.find("1") as PersistedProgram).should.deep.equal({ ProgramID: "1", Name: "bb Program 1" }));
+			it("should return a program by id", async (): Promise<Chai.Assertion> => expect(await programsStore.find("1") as PersistedProgram).to.deep.equal({ ProgramID: "1", Name: "bb Program 1" }));
 		});
 
 		describe("count", (): void => {
-			it("should return the total number of programs", async (): Promise<Chai.Assertion> => (await programsStore.count()).should.equal(2));
+			it("should return the total number of programs", async (): Promise<Chai.Assertion> => expect(await programsStore.count()).to.equal(2));
 		});
 
 		describe("removeAll", (): void => {
 			beforeEach(async (): Promise<void> => programsStore.removeAll());
-			it("should remove all programs", async (): Promise<Chai.Assertion> => (await db.count("programs")).should.equal(0));
+			it("should remove all programs", async (): Promise<Chai.Assertion> => expect(await db.count("programs")).to.equal(0));
 		});
 
 		describe("save", (): void => {
@@ -93,8 +93,8 @@ describe("programs", (): void => {
 						name = "Program 3";
 
 			beforeEach(async (): Promise<void> => programsStore.save({ ProgramID: id, Name: name }));
-			it("should save the program", async (): Promise<Chai.Assertion> => (await db.get("programs", id) as ProgramsStoreObject).should.deep.equal({ id, name }));
-			it("should add a sync record", async (): Promise<Chai.Assertion> => (await db.get("syncs", ["Program", id]) as SyncsStoreObject).should.deep.equal({ type: "Program", id, action: "modified" }));
+			it("should save the program", async (): Promise<Chai.Assertion> => expect(await db.get("programs", id) as ProgramsStoreObject).to.deep.equal({ id, name }));
+			it("should add a sync record", async (): Promise<Chai.Assertion> => expect(await db.get("syncs", ["Program", id]) as SyncsStoreObject).to.deep.equal({ type: "Program", id, action: "modified" }));
 		});
 
 		describe("remove", (): void => {
@@ -103,12 +103,12 @@ describe("programs", (): void => {
 						episodeIds = ["4", "5", "6", "7", "8", "9"];
 
 			beforeEach(async (): Promise<void> => programsStore.remove(id));
-			it("should remove the program", async (): Promise<Chai.Assertion> => (await db.get("programs", id) === undefined).should.be.true);
-			it("should add a sync record for the program", async (): Promise<Chai.Assertion> => (await db.get("syncs", ["Program", id]) as SyncsStoreObject).should.deep.equal({ type: "Program", id, action: "deleted" }));
-			it("should remove all series for the program", async (): Promise<Chai.Assertion[]> => Promise.all(seriesIds.map(async (seriesId: string): Promise<Chai.Assertion> => (await db.get("series", seriesId) === undefined).should.be.true)));
-			it("should add a sync record for each deleted series", async (): Promise<Chai.Assertion[]> => Promise.all(seriesIds.map(async (seriesId: string): Promise<Chai.Assertion> => (await db.get("syncs", ["Series", seriesId]) as SyncsStoreObject).should.deep.equal({ type: "Series", id: seriesId, action: "deleted" }))));
-			it("should remove all episodes for the program", async (): Promise<Chai.Assertion[]> => Promise.all(episodeIds.map(async (episodeId: string): Promise<Chai.Assertion> => (await db.get("episodes", episodeId) === undefined).should.be.true)));
-			it("should add a sync record for each deleted episodes", async (): Promise<Chai.Assertion[]> => Promise.all(episodeIds.map(async (episodeId: string): Promise<Chai.Assertion> => (await db.get("syncs", ["Episode", episodeId]) as SyncsStoreObject).should.deep.equal({ type: "Episode", id: episodeId, action: "deleted" }))));
+			it("should remove the program", async (): Promise<Chai.Assertion> => expect(await db.get("programs", id)).to.be.undefined);
+			it("should add a sync record for the program", async (): Promise<Chai.Assertion> => expect(await db.get("syncs", ["Program", id]) as SyncsStoreObject).to.deep.equal({ type: "Program", id, action: "deleted" }));
+			it("should remove all series for the program", async (): Promise<Chai.Assertion[]> => Promise.all(seriesIds.map(async (seriesId: string): Promise<Chai.Assertion> => expect(await db.get("series", seriesId)).to.be.undefined)));
+			it("should add a sync record for each deleted series", async (): Promise<Chai.Assertion[]> => Promise.all(seriesIds.map(async (seriesId: string): Promise<Chai.Assertion> => expect(await db.get("syncs", ["Series", seriesId]) as SyncsStoreObject).to.deep.equal({ type: "Series", id: seriesId, action: "deleted" }))));
+			it("should remove all episodes for the program", async (): Promise<Chai.Assertion[]> => Promise.all(episodeIds.map(async (episodeId: string): Promise<Chai.Assertion> => expect(await db.get("episodes", episodeId)).to.be.undefined)));
+			it("should add a sync record for each deleted episodes", async (): Promise<Chai.Assertion[]> => Promise.all(episodeIds.map(async (episodeId: string): Promise<Chai.Assertion> => expect(await db.get("syncs", ["Episode", episodeId]) as SyncsStoreObject).to.deep.equal({ type: "Episode", id: episodeId, action: "deleted" }))));
 		});
 	});
 

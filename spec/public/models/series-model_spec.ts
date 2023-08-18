@@ -36,22 +36,22 @@ describe("Series", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a Series instance", (): Chai.Assertion => series.should.be.an.instanceOf(Series));
-		it("should set the id", (): Chai.Assertion => String(series.id).should.equal(id));
-		it("should set the series name", (): Chai.Assertion => String(series.seriesName).should.equal(seriesName));
-		it("should set the now showing", (): Chai.Assertion => Number(series.nowShowing).should.equal(nowShowing));
-		it("should set the program id", (): Chai.Assertion => String(series.programId).should.equal(programId));
-		it("should set the program name", (): Chai.Assertion => String(series.programName).should.equal(programName));
-		it("should set the progress bar total", (): Chai.Assertion => series["progressBar"]["total"].should.equal(episodeCount));
-		it("should set the episode count", (): Chai.Assertion => series.episodeCount.should.equal(episodeCount));
-		it("should set the watched count", (): Chai.Assertion => series.watchedCount.should.equal(watchedCount));
-		it("should set the recorded count", (): Chai.Assertion => series.recordedCount.should.equal(recordedCount));
-		it("should set the expected count", (): Chai.Assertion => series.expectedCount.should.equal(expectedCount));
-		it("should set the missed count", (): Chai.Assertion => series["missedCount"].should.equal(missedCount));
-		it("should set the status warning count", (): Chai.Assertion => series.statusWarningCount.should.equal(statusWarningCount));
+		it("should return a Series instance", (): Chai.Assertion => expect(series).to.be.an.instanceOf(Series));
+		it("should set the id", (): Chai.Assertion => expect(String(series.id)).to.equal(id));
+		it("should set the series name", (): Chai.Assertion => expect(String(series.seriesName)).to.equal(seriesName));
+		it("should set the now showing", (): Chai.Assertion => expect(Number(series.nowShowing)).to.equal(nowShowing));
+		it("should set the program id", (): Chai.Assertion => expect(String(series.programId)).to.equal(programId));
+		it("should set the program name", (): Chai.Assertion => expect(String(series.programName)).to.equal(programName));
+		it("should set the progress bar total", (): Chai.Assertion => expect(series["progressBar"]["total"]).to.equal(episodeCount));
+		it("should set the episode count", (): Chai.Assertion => expect(series.episodeCount).to.equal(episodeCount));
+		it("should set the watched count", (): Chai.Assertion => expect(series.watchedCount).to.equal(watchedCount));
+		it("should set the recorded count", (): Chai.Assertion => expect(series.recordedCount).to.equal(recordedCount));
+		it("should set the expected count", (): Chai.Assertion => expect(series.expectedCount).to.equal(expectedCount));
+		it("should set the missed count", (): Chai.Assertion => expect(series["missedCount"]).to.equal(missedCount));
+		it("should set the status warning count", (): Chai.Assertion => expect(series.statusWarningCount).to.equal(statusWarningCount));
 
 		["statusWarning", "nowShowingDisplay"].forEach((property: string): void => {
-			it(`should make the ${property} property enumerable`, (): Chai.Assertion => Boolean((Object.getOwnPropertyDescriptor(series, property) as PropertyDescriptor).enumerable).should.be.true);
+			it(`should make the ${property} property enumerable`, (): Chai.Assertion => expect(Boolean((Object.getOwnPropertyDescriptor(series, property) as PropertyDescriptor).enumerable)).to.be.true);
 		});
 	});
 
@@ -64,8 +64,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByProgram(programId);
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByProgram.should.have.been.calledWith(programId));
-			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByProgram).to.have.been.calledWith(programId));
+			it("should return an empty array", (): Chai.Assertion => expect(seriesList).to.deep.equal([]));
 		});
 
 		describe("success", (): void => {
@@ -86,8 +86,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByProgram(programId);
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByProgram.should.have.been.calledWith(programId));
-			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByProgram).to.have.been.calledWith(programId));
+			it("should return the list of series", (): Chai.Assertion => expect(seriesList).to.deep.equal([series]));
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByProgram as SinonStub).reset());
@@ -102,8 +102,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByNowShowing();
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByNowShowing.should.have.been.called);
-			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByNowShowing).to.have.been.called);
+			it("should return an empty array", (): Chai.Assertion => expect(seriesList).to.deep.equal([]));
 		});
 
 		describe("success", (): void => {
@@ -124,8 +124,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByNowShowing();
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByNowShowing.should.have.been.called);
-			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByNowShowing).to.have.been.called);
+			it("should return the list of series", (): Chai.Assertion => expect(seriesList).to.deep.equal([series]));
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByNowShowing as SinonStub).reset());
@@ -142,8 +142,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByStatus(status);
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByStatus.should.have.been.calledWith(status));
-			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByStatus).to.have.been.calledWith(status));
+			it("should return an empty array", (): Chai.Assertion => expect(seriesList).to.deep.equal([]));
 		});
 
 		describe("success", (): void => {
@@ -164,8 +164,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByStatus(status);
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByStatus.should.have.been.calledWith(status));
-			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByStatus).to.have.been.calledWith(status));
+			it("should return the list of series", (): Chai.Assertion => expect(seriesList).to.deep.equal([series]));
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByStatus as SinonStub).reset());
@@ -180,8 +180,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByIncomplete();
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByIncomplete.should.have.been.called);
-			it("should return an empty array", (): Chai.Assertion => seriesList.should.deep.equal([]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByIncomplete).to.have.been.called);
+			it("should return an empty array", (): Chai.Assertion => expect(seriesList).to.deep.equal([]));
 		});
 
 		describe("success", (): void => {
@@ -202,8 +202,8 @@ describe("Series", (): void => {
 				seriesList = await Series.listByIncomplete();
 			});
 
-			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.listByIncomplete.should.have.been.called);
-			it("should return the list of series", (): Chai.Assertion => seriesList.should.deep.equal([series]));
+			it("should attempt to get the list of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.listByIncomplete).to.have.been.called);
+			it("should return the list of series", (): Chai.Assertion => expect(seriesList).to.deep.equal([series]));
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.listByIncomplete as SinonStub).reset());
@@ -216,8 +216,8 @@ describe("Series", (): void => {
 				series = await Series.find(id);
 			});
 
-			it("should attempt to find the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.find.should.have.been.calledWith(id));
-			it("should return a null series id", (): Chai.Assertion => (null === series.id).should.be.true);
+			it("should attempt to find the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.find).to.have.been.calledWith(id));
+			it("should return a null series id", (): Chai.Assertion => expect(series.id).to.be.null);
 		});
 
 		describe("success", (): void => {
@@ -227,8 +227,8 @@ describe("Series", (): void => {
 					series = await Series.find(id);
 				});
 
-				it("should attempt to find the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.find.should.have.been.calledWith(id));
-				it("should return a null series id", (): Chai.Assertion => (null === series.id).should.be.true);
+				it("should attempt to find the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.find).to.have.been.calledWith(id));
+				it("should return a null series id", (): Chai.Assertion => expect(series.id).to.be.null);
 			});
 
 			describe("exists", (): void => {
@@ -253,8 +253,8 @@ describe("Series", (): void => {
 					foundSeries = await Series.find(id);
 				});
 
-				it("should attempt to find the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.find.should.have.been.calledWith(id));
-				it("should return the series", (): Chai.Assertion => foundSeries.should.deep.equal(series));
+				it("should attempt to find the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.find).to.have.been.calledWith(id));
+				it("should return the series", (): Chai.Assertion => expect(foundSeries).to.deep.equal(series));
 			});
 		});
 
@@ -270,8 +270,8 @@ describe("Series", (): void => {
 				count = await Series.count();
 			});
 
-			it("should attempt to get the count of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.count.should.have.been.called);
-			it("should return zero", (): Chai.Assertion => count.should.equal(0));
+			it("should attempt to get the count of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.count).to.have.been.called);
+			it("should return zero", (): Chai.Assertion => expect(count).to.equal(0));
 		});
 
 		describe("success", (): void => {
@@ -280,8 +280,8 @@ describe("Series", (): void => {
 				count = await Series.count();
 			});
 
-			it("should attempt to get the count of series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.count.should.have.been.called);
-			it("should return the count of series", (): Chai.Assertion => count.should.equal(1));
+			it("should attempt to get the count of series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.count).to.have.been.called);
+			it("should return the count of series", (): Chai.Assertion => expect(count).to.equal(1));
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.count as SinonStub).reset());
@@ -296,22 +296,22 @@ describe("Series", (): void => {
 				errorMessage = await Series.removeAll();
 			});
 
-			it("should attempt to remove all series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.removeAll.should.have.been.called);
-			it("should return an error message", (): Chai.Assertion => String(errorMessage).should.equal("Series.removeAll: Force failed"));
+			it("should attempt to remove all series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.removeAll).to.have.been.called);
+			it("should return an error message", (): Chai.Assertion => expect(String(errorMessage)).to.equal("Series.removeAll: Force failed"));
 		});
 
 		describe("success", (): void => {
 			beforeEach(async (): Promise<string | undefined> => (errorMessage = await Series.removeAll()));
 
-			it("should attempt to remove all series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.removeAll.should.have.been.called);
-			it("should not return an error message", (): Chai.Assertion => (undefined === errorMessage).should.be.true);
+			it("should attempt to remove all series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.removeAll).to.have.been.called);
+			it("should not return an error message", (): Chai.Assertion => expect(errorMessage).to.be.undefined);
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.removeAll as SinonStub).reset());
 	});
 
 	describe("fromJson", (): void => {
-		it("should construct a Series object from the JSON", (): Chai.Assertion => Series.fromJson({ id, seriesName, nowShowing, programId, type: "Series" }).should.deep.equal(new Series(id, seriesName, nowShowing, programId)));
+		it("should construct a Series object from the JSON", (): Chai.Assertion => expect(Series.fromJson({ id, seriesName, nowShowing, programId, type: "Series" })).to.deep.equal(new Series(id, seriesName, nowShowing, programId)));
 	});
 
 	describe("save", (): void => {
@@ -355,23 +355,23 @@ describe("Series", (): void => {
 						seriesId = await series.save();
 					});
 
-					it("should attempt to save the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.save.should.have.been.calledWith({
+					it("should attempt to save the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.save).to.have.been.calledWith({
 						...seriesToSave,
 						SeriesID: series.id
 					}));
 
-					it("should not return the series id", (): Chai.Assertion => (undefined === seriesId).should.be.true);
+					it("should not return the series id", (): Chai.Assertion => expect(seriesId).to.be.undefined);
 				});
 
 				describe("success", (): void => {
 					beforeEach(async (): Promise<string | undefined> => (seriesId = await series.save()));
 
-					it("should attempt to save the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.save.should.have.been.calledWith({
+					it("should attempt to save the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.save).to.have.been.calledWith({
 						...seriesToSave,
 						SeriesID: series.id
 					}));
 
-					it("should return the series id", (): Chai.Assertion => String(seriesId).should.equal(series.id));
+					it("should return the series id", (): Chai.Assertion => expect(String(seriesId)).to.equal(series.id));
 				});
 			});
 		});
@@ -384,7 +384,7 @@ describe("Series", (): void => {
 			it("should do nothing", async (): Promise<void> => {
 				series.id = null;
 				await series.remove();
-				(await DatabaseServiceMock).seriesStore.remove.should.not.have.been.called;
+				expect((await DatabaseServiceMock).seriesStore.remove).to.not.have.been.called;
 			});
 		});
 
@@ -398,28 +398,28 @@ describe("Series", (): void => {
 				}
 			});
 
-			it("should attempt to remove the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.remove.should.have.been.calledWith(id));
-			it("should not clear the id", (): Chai.Assertion => String(series.id).should.equal(id));
-			it("should not clear the series name", (): Chai.Assertion => String(series.seriesName).should.equal(seriesName));
-			it("should not clear the now showing", (): Chai.Assertion => Number(series.nowShowing).should.equal(nowShowing));
-			it("should not clear the program id", (): Chai.Assertion => String(series.programId).should.equal(programId));
+			it("should attempt to remove the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.remove).to.have.been.calledWith(id));
+			it("should not clear the id", (): Chai.Assertion => expect(String(series.id)).to.equal(id));
+			it("should not clear the series name", (): Chai.Assertion => expect(String(series.seriesName)).to.equal(seriesName));
+			it("should not clear the now showing", (): Chai.Assertion => expect(Number(series.nowShowing)).to.equal(nowShowing));
+			it("should not clear the program id", (): Chai.Assertion => expect(String(series.programId)).to.equal(programId));
 		});
 
 		describe("success", (): void => {
 			beforeEach(async (): Promise<void> => series.remove());
 
-			it("should attempt to remove the series", async (): Promise<Chai.Assertion> => (await DatabaseServiceMock).seriesStore.remove.should.have.been.calledWith(id));
-			it("should clear the id", (): Chai.Assertion => (null === series.id).should.be.true);
-			it("should clear the series name", (): Chai.Assertion => (null === series.seriesName).should.be.true);
-			it("should clear the now showing", (): Chai.Assertion => (null === series.nowShowing).should.be.true);
-			it("should clear the program id", (): Chai.Assertion => (null === series.programId).should.be.true);
+			it("should attempt to remove the series", async (): Promise<Chai.Assertion> => expect((await DatabaseServiceMock).seriesStore.remove).to.have.been.calledWith(id));
+			it("should clear the id", (): Chai.Assertion => expect(series.id).to.be.null);
+			it("should clear the series name", (): Chai.Assertion => expect(series.seriesName).to.be.null);
+			it("should clear the now showing", (): Chai.Assertion => expect(series.nowShowing).to.be.null);
+			it("should clear the program id", (): Chai.Assertion => expect(series.programId).to.be.null);
 		});
 
 		afterEach(async (): Promise<void> => ((await DatabaseServiceMock).seriesStore.remove as SinonStub).reset());
 	});
 
 	describe("toJson", (): void => {
-		it("should return a JSON representation of the series", (): Chai.Assertion => series.toJson().should.deep.equal({ id, seriesName, nowShowing, programId, type: "Series" }));
+		it("should return a JSON representation of the series", (): Chai.Assertion => expect(series.toJson()).to.deep.equal({ id, seriesName, nowShowing, programId, type: "Series" }));
 	});
 
 	describe("setEpisodeCount", (): void => {
@@ -428,23 +428,23 @@ describe("Series", (): void => {
 			series.setEpisodeCount(episodeCount);
 		});
 
-		it("should set the episode count", (): Chai.Assertion => series.episodeCount.should.equal(episodeCount));
-		it("should set the progress bar total", (): Chai.Assertion => series["progressBar"]["total"].should.equal(episodeCount));
+		it("should set the episode count", (): Chai.Assertion => expect(series.episodeCount).to.equal(episodeCount));
+		it("should set the progress bar total", (): Chai.Assertion => expect(series["progressBar"]["total"]).to.equal(episodeCount));
 	});
 
 	describe("setWatchedCount", (): void => {
 		it("should set the watched count", (): void => {
 			watchedCount = 2;
 			series.setWatchedCount(watchedCount);
-			series.watchedCount.should.equal(watchedCount);
+			expect(series.watchedCount).to.equal(watchedCount);
 		});
 	});
 
 	describe("setRecordedCount", (): void => {
 		beforeEach((): void => series.setRecordedCount(1));
 
-		it("should set the recorded count", (): Chai.Assertion => series.recordedCount.should.equal(1));
-		it("should update the progress bar display", (): Chai.Assertion => series.progressBarDisplay.should.equal(JSON.stringify({
+		it("should set the recorded count", (): Chai.Assertion => expect(series.recordedCount).to.equal(1));
+		it("should update the progress bar display", (): Chai.Assertion => expect(series.progressBarDisplay).to.equal(JSON.stringify({
 			label: 1,
 			percent: 100,
 			style: "recorded"
@@ -454,8 +454,8 @@ describe("Series", (): void => {
 	describe("setExpectedCount", (): void => {
 		beforeEach((): void => series.setExpectedCount(1));
 
-		it("should set the expected count", (): Chai.Assertion => series.expectedCount.should.equal(1));
-		it("should update the progress bar display", (): Chai.Assertion => series.progressBarDisplay.should.equal(JSON.stringify({
+		it("should set the expected count", (): Chai.Assertion => expect(series.expectedCount).to.equal(1));
+		it("should update the progress bar display", (): Chai.Assertion => expect(series.progressBarDisplay).to.equal(JSON.stringify({
 			label: 1,
 			percent: 100,
 			style: "expected"
@@ -485,7 +485,7 @@ describe("Series", (): void => {
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
 				beforeEach((): number => (series.statusWarningCount = scenario.statusWarningCount));
-				it(`should ${scenario.statusWarningCount ? "" : "not "}highlight the series with a warning`, (): Chai.Assertion => series.statusWarning.should.equal(scenario.statusWarning));
+				it(`should ${scenario.statusWarningCount ? "" : "not "}highlight the series with a warning`, (): Chai.Assertion => expect(series.statusWarning).to.equal(scenario.statusWarning));
 			});
 		});
 	});
@@ -518,7 +518,7 @@ describe("Series", (): void => {
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
 				beforeEach((): number | null => (series.nowShowing = scenario.nowShowing));
-				it("should update the now showing display", (): Chai.Assertion => series.nowShowingDisplay.should.equal(scenario.nowShowingDisplay));
+				it("should update the now showing display", (): Chai.Assertion => expect(series.nowShowingDisplay).to.equal(scenario.nowShowingDisplay));
 			});
 		});
 	});
@@ -527,7 +527,7 @@ describe("Series", (): void => {
 		it("should update the progress bar display", (): void => {
 			series.watchedCount = 1;
 			series["setWatchedProgress"]();
-			series.progressBarDisplay.should.equal(JSON.stringify({
+			expect(series.progressBarDisplay).to.equal(JSON.stringify({
 				label: 1,
 				percent: 100,
 				style: "watched"
@@ -538,8 +538,8 @@ describe("Series", (): void => {
 	describe("setMissedCount", (): void => {
 		beforeEach((): void => series["setMissedCount"](1));
 
-		it("should set the expected count", (): Chai.Assertion => series["missedCount"].should.equal(1));
-		it("should update the progress bar display", (): Chai.Assertion => series.progressBarDisplay.should.equal(JSON.stringify({
+		it("should set the expected count", (): Chai.Assertion => expect(series["missedCount"]).to.equal(1));
+		it("should update the progress bar display", (): Chai.Assertion => expect(series.progressBarDisplay).to.equal(JSON.stringify({
 			label: 1,
 			percent: 100,
 			style: "missed"

@@ -50,14 +50,14 @@ describe("ProgramController", (): void => {
 					}
 				});
 
-				it("should return a ProgramController instance", (): Chai.Assertion => programController.should.be.an.instanceOf(ProgramController));
-				it("should set the list item", (): Chai.Assertion => String(scenario.programController["listItem"].program.programName).should.equal((scenario.listItem as ProgramListItem).program.programName));
+				it("should return a ProgramController instance", (): Chai.Assertion => expect(programController).to.be.an.instanceOf(ProgramController));
+				it("should set the list item", (): Chai.Assertion => expect(String(scenario.programController["listItem"].program.programName)).to.equal((scenario.listItem as ProgramListItem).program.programName));
 			});
 		});
 	});
 
 	describe("view", (): void => {
-		it("should return the program view", (): Chai.Assertion => programController.view.should.equal(ProgramView));
+		it("should return the program view", (): Chai.Assertion => expect(programController.view).to.equal(ProgramView));
 	});
 
 	describe("setup", (): void => {
@@ -78,24 +78,24 @@ describe("ProgramController", (): void => {
 			rightButton = programController.header.rightButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(programController.header.label).should.equal("Add/Edit Program"));
+		it("should set the header label", (): Chai.Assertion => expect(String(programController.header.label)).to.equal("Add/Edit Program"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			programController["cancel"].should.have.been.called;
+			expect(programController["cancel"]).to.have.been.called;
 		});
 
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Cancel"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			programController["save"].should.have.been.called;
+			expect(programController["save"]).to.have.been.called;
 		});
 
-		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
-		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
+		it("should set the header right button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("confirmButton"));
+		it("should set the header right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Save"));
 
-		it("should set the program name", (): Chai.Assertion => programName.value.should.equal(listItem.program.programName));
+		it("should set the program name", (): Chai.Assertion => expect(programName.value).to.equal(listItem.program.programName));
 
 		afterEach((): void => programName.remove());
 	});
@@ -115,9 +115,9 @@ describe("ProgramController", (): void => {
 			await programController["save"]();
 		});
 
-		it("should get the program name", (): Chai.Assertion => String(programController["listItem"].program.programName).should.equal(programName));
-		it("should save the program", (): Chai.Assertion => listItem.program.save.should.have.been.called);
-		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+		it("should get the program name", (): Chai.Assertion => expect(String(programController["listItem"].program.programName)).to.equal(programName));
+		it("should save the program", (): Chai.Assertion => expect(listItem.program.save).to.have.been.called);
+		it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
 
 		afterEach((): void => programNameInput.remove());
 	});
@@ -125,7 +125,7 @@ describe("ProgramController", (): void => {
 	describe("cancel", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await programController["cancel"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 });

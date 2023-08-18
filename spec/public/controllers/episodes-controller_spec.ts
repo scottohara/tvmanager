@@ -40,13 +40,13 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a EpisodesController instance", (): Chai.Assertion => episodesController.should.be.an.instanceOf(EpisodesController));
-		it("should set the list item", (): Chai.Assertion => episodesController["listItem"].should.equal(listItem));
-		it("should enable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.true);
+		it("should return a EpisodesController instance", (): Chai.Assertion => expect(episodesController).to.be.an.instanceOf(EpisodesController));
+		it("should set the list item", (): Chai.Assertion => expect(episodesController["listItem"]).to.equal(listItem));
+		it("should enable scrolling to the first unwatched episode", (): Chai.Assertion => expect(episodesController["scrollToFirstUnwatched"]).to.be.true);
 	});
 
 	describe("view", (): void => {
-		it("should return the episodes view", (): Chai.Assertion => episodesController.view.should.equal(EpisodesView));
+		it("should return the episodes view", (): Chai.Assertion => expect(episodesController.view).to.equal(EpisodesView));
 	});
 
 	describe("setup", (): void => {
@@ -88,39 +88,39 @@ describe("EpisodesController", (): void => {
 					rightButton = episodesController.header.rightButton as NavButton;
 				});
 
-				it("should set the header label", (): Chai.Assertion => String(episodesController.header.label).should.equal(`${listItem.series.programName} : ${listItem.series.seriesName}`));
+				it("should set the header label", (): Chai.Assertion => expect(String(episodesController.header.label)).to.equal(`${listItem.series.programName} : ${listItem.series.seriesName}`));
 
 				it("should attach a header left button event handler", (): void => {
 					(leftButton.eventHandler as NavButtonEventHandler)();
-					episodesController["goBack"].should.have.been.called;
+					expect(episodesController["goBack"]).to.have.been.called;
 				});
 
-				it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
-				it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal(scenario.leftButtonLabel));
+				it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
+				it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal(scenario.leftButtonLabel));
 
 				it("should attach a header right button event handler", (): void => {
 					(rightButton.eventHandler as NavButtonEventHandler)();
-					episodesController["addItem"].should.have.been.called;
+					expect(episodesController["addItem"]).to.have.been.called;
 				});
 
-				it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("+"));
+				it("should set the header right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("+"));
 
 				it("should attach a view event handler to the episodes list", (): void => {
 					(episodesController["episodeList"] as ListMock).viewEventHandler(0);
-					episodesController["viewItem"].should.have.been.calledWith(0);
+					expect(episodesController["viewItem"]).to.have.been.calledWith(0);
 				});
 
 				it("should attach a delete event handler to the episodes list", (): void => {
 					(episodesController["episodeList"] as ListMock).deleteEventHandler(0);
-					episodesController["deleteItem"].should.have.been.calledWith(0);
+					expect(episodesController["deleteItem"]).to.have.been.calledWith(0);
 				});
 
 				it("should prepare the list for sorting", (): void => {
-					episodesController["sortable"].should.equal(Sortable.get(episodeList));
-					Boolean(episodesController["sortable"].option("disabled")).should.be.true;
+					expect(episodesController["sortable"]).to.equal(Sortable.get(episodeList));
+					expect(Boolean(episodesController["sortable"].option("disabled"))).to.be.true;
 				});
 
-				it("should activate the controller", (): Chai.Assertion => episodesController.activate.should.have.been.called);
+				it("should activate the controller", (): Chai.Assertion => expect(episodesController["activate"]).to.have.been.called);
 			});
 		});
 	});
@@ -134,12 +134,12 @@ describe("EpisodesController", (): void => {
 		});
 
 		it("should get the list of episodes for the series", (): void => {
-			EpisodeMock.listBySeries.should.have.been.calledWith(listItem.series.id);
-			episodesController["episodeList"].items.should.deep.equal(items);
+			expect(EpisodeMock.listBySeries).to.have.been.calledWith(listItem.series.id);
+			expect(episodesController["episodeList"].items).to.deep.equal(items);
 		});
 
-		it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion => episodesController["viewItems"].should.have.been.called);
+		it("should refresh the list", (): Chai.Assertion => expect(episodesController["episodeList"].refresh).to.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect(episodesController["viewItems"]).to.have.been.called);
 	});
 
 	describe("contentShown", (): void => {
@@ -151,7 +151,7 @@ describe("EpisodesController", (): void => {
 				episodesController.contentShown();
 			});
 
-			it("should not scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.not.have.been.called);
+			it("should not scroll to the first unwatched episode", (): Chai.Assertion => expect(episodesController["episodeList"].scrollTo).to.not.have.been.called);
 		});
 
 		describe("scroll to first unwatched", (): void => {
@@ -160,8 +160,8 @@ describe("EpisodesController", (): void => {
 			describe("all watched", (): void => {
 				beforeEach((): void => episodesController.contentShown());
 
-				it("should not scroll", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.not.have.been.called);
-				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.false);
+				it("should not scroll", (): Chai.Assertion => expect(episodesController["episodeList"].scrollTo).to.not.have.been.called);
+				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => expect(episodesController["scrollToFirstUnwatched"]).to.be.false);
 			});
 
 			describe("none watched", (): void => {
@@ -174,8 +174,8 @@ describe("EpisodesController", (): void => {
 					episodesController.contentShown();
 				});
 
-				it("should scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.have.been.calledWith("1"));
-				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.false);
+				it("should scroll to the first unwatched episode", (): Chai.Assertion => expect(episodesController["episodeList"].scrollTo).to.have.been.calledWith("1"));
+				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => expect(episodesController["scrollToFirstUnwatched"]).to.be.false);
 			});
 
 			describe("some watched", (): void => {
@@ -188,8 +188,8 @@ describe("EpisodesController", (): void => {
 					episodesController.contentShown();
 				});
 
-				it("should scroll to the first unwatched episode", (): Chai.Assertion => episodesController["episodeList"].scrollTo.should.have.been.calledWith("3"));
-				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => episodesController["scrollToFirstUnwatched"].should.be.false);
+				it("should scroll to the first unwatched episode", (): Chai.Assertion => expect(episodesController["episodeList"].scrollTo).to.have.been.calledWith("3"));
+				it("should disable scrolling to the first unwatched episode", (): Chai.Assertion => expect(episodesController["scrollToFirstUnwatched"]).to.be.false);
 			});
 		});
 	});
@@ -197,7 +197,7 @@ describe("EpisodesController", (): void => {
 	describe("goBack", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await episodesController["goBack"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 
@@ -264,7 +264,7 @@ describe("EpisodesController", (): void => {
 					await episodesController["viewItem"](index);
 				});
 
-				it("should push the episode view for the selected item", (): Chai.Assertion => appController.pushView.should.have.been.calledWith("episode", {
+				it("should push the episode view for the selected item", (): Chai.Assertion => expect(appController.pushView).to.have.been.calledWith("episode", {
 					listIndex: index,
 					episode: items[index]
 				}));
@@ -276,7 +276,7 @@ describe("EpisodesController", (): void => {
 		it("should push the episode view with no selected item", async (): Promise<void> => {
 			episodesController["episodeList"] = new ListMock("", "", "", items);
 			await episodesController["addItem"]();
-			appController.pushView.should.have.been.calledWithExactly("episode", { series: listItem.series, sequence: 1 });
+			expect(appController.pushView).to.have.been.calledWithExactly("episode", { series: listItem.series, sequence: 1 });
 		});
 	});
 
@@ -359,10 +359,10 @@ describe("EpisodesController", (): void => {
 					await episodesController["deleteItem"](index);
 				});
 
-				it("should remove the item from the DOM", (): Chai.Assertion => (null === episodeList.querySelector("li a#item-1")).should.be.true);
-				it("should remove the item from the database", (): Chai.Assertion => item.remove.should.have.been.called);
-				it("should remove the item from the episodes list", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal([]));
-				it("should refresh the list", (): Chai.Assertion => episodesController["resequenceItems"].should.have.been.called);
+				it("should remove the item from the DOM", (): Chai.Assertion => expect(episodeList.querySelector("li a#item-1")).to.be.null);
+				it("should remove the item from the database", (): Chai.Assertion => expect(item.remove).to.have.been.called);
+				it("should remove the item from the episodes list", (): Chai.Assertion => expect(episodesController["episodeList"].items).to.deep.equal([]));
+				it("should refresh the list", (): Chai.Assertion => expect(episodesController["resequenceItems"]).to.have.been.called);
 			});
 		});
 	});
@@ -380,24 +380,24 @@ describe("EpisodesController", (): void => {
 			rightButton = footer.rightButton as NavButton;
 		});
 
-		it("should set the list to delete mode", (): Chai.Assertion => (episodesController["episodeList"] as ListMock).action.should.equal("delete"));
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
+		it("should set the list to delete mode", (): Chai.Assertion => expect((episodesController["episodeList"] as ListMock).action).to.equal("delete"));
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			episodeList.classList.contains("delete").should.be.true;
-			episodeList.classList.contains("edit").should.be.false;
+			expect(episodeList.classList.contains("delete")).to.be.true;
+			expect(episodeList.classList.contains("edit")).to.be.false;
 		});
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
+		it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			episodesController["viewItems"].should.have.been.called;
+			expect(episodesController["viewItems"]).to.have.been.called;
 		});
 
-		it("should set the footer right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
-		it("should set the footer right button label", (): Chai.Assertion => rightButton.label.should.equal("Done"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the footer right button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("confirmButton"));
+		it("should set the footer right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Done"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 
 	describe("resequenceItems", (): void => {
@@ -433,14 +433,14 @@ describe("EpisodesController", (): void => {
 		});
 
 		it("should update the sequence of items that have changed position", (): void => {
-			items[0].save.should.have.been.called;
-			items[1].save.should.have.been.called;
-			items[2].save.should.not.have.been.called;
-			items[3].save.should.not.have.been.called;
+			expect(items[0].save).to.have.been.called;
+			expect(items[1].save).to.have.been.called;
+			expect(items[2].save).to.not.have.been.called;
+			expect(items[3].save).to.not.have.been.called;
 		});
 
-		it("should sort the list by sequence", (): Chai.Assertion => episodesController["episodeList"].items.should.deep.equal(sortedItems));
-		it("should refresh the list", (): Chai.Assertion => episodesController["episodeList"].refresh.should.have.been.called);
+		it("should sort the list by sequence", (): Chai.Assertion => expect(episodesController["episodeList"].items).to.deep.equal(sortedItems));
+		it("should refresh the list", (): Chai.Assertion => expect(episodesController["episodeList"].refresh).to.have.been.called);
 	});
 
 	describe("editItems", (): void => {
@@ -457,27 +457,27 @@ describe("EpisodesController", (): void => {
 			leftButton = footer.leftButton as NavButton;
 		});
 
-		it("should set the list to edit mode", (): Chai.Assertion => (episodesController["episodeList"] as ListMock).action.should.equal("edit"));
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
+		it("should set the list to edit mode", (): Chai.Assertion => expect((episodesController["episodeList"] as ListMock).action).to.equal("edit"));
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			episodeList.classList.contains("delete").should.be.false;
-			episodeList.classList.contains("edit").should.be.true;
+			expect(episodeList.classList.contains("delete")).to.be.false;
+			expect(episodeList.classList.contains("edit")).to.be.true;
 		});
 
-		it("should enable sorting", (): Chai.Assertion => Boolean(episodesController["sortable"].option("disabled")).should.be.false);
+		it("should enable sorting", (): Chai.Assertion => expect(Boolean(episodesController["sortable"].option("disabled"))).to.be.false);
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
+		it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", async (): Promise<void> => {
 			await (leftButton.eventHandler as NavButtonAsyncEventHandler)();
-			episodesController["resequenceItems"].should.have.been.called;
-			episodesController["viewItems"].should.have.been.called;
+			expect(episodesController["resequenceItems"]).to.have.been.called;
+			expect(episodesController["viewItems"]).to.have.been.called;
 		});
 
-		it("should set the footer left button style", (): Chai.Assertion => String(leftButton.style).should.equal("confirmButton"));
-		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Done"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the footer left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("confirmButton"));
+		it("should set the footer left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Done"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 
 	describe("viewItems", (): void => {
@@ -496,33 +496,33 @@ describe("EpisodesController", (): void => {
 			rightButton = footer.rightButton as NavButton;
 		});
 
-		it("should set the list to view mode", (): Chai.Assertion => (episodesController["episodeList"] as ListMock).action.should.equal("view"));
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect((episodesController["episodeList"] as ListMock).action).to.equal("view"));
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
 
 		it("should set the list item icons", (): void => {
-			episodeList.classList.contains("delete").should.be.false;
-			episodeList.classList.contains("edit").should.be.false;
+			expect(episodeList.classList.contains("delete")).to.be.false;
+			expect(episodeList.classList.contains("edit")).to.be.false;
 		});
 
-		it("should disable sorting", (): Chai.Assertion => Boolean(episodesController["sortable"].option("disabled")).should.be.true);
+		it("should disable sorting", (): Chai.Assertion => expect(Boolean(episodesController["sortable"].option("disabled"))).to.be.true);
 
-		it("should set the footer label", (): Chai.Assertion => String(footer.label).should.equal("v1"));
+		it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			episodesController["editItems"].should.have.been.called;
+			expect(episodesController["editItems"]).to.have.been.called;
 		});
 
-		it("should set the footer left button label", (): Chai.Assertion => leftButton.label.should.equal("Sort"));
+		it("should set the footer left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Sort"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			episodesController["deleteItems"].should.have.been.called;
+			expect(episodesController["deleteItems"]).to.have.been.called;
 		});
 
-		it("should set the footer left button style", (): Chai.Assertion => String(rightButton.style).should.equal("cautionButton"));
-		it("should set the footer right button label", (): Chai.Assertion => rightButton.label.should.equal("Delete"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the footer left button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("cautionButton"));
+		it("should set the footer right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Delete"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 
 	afterEach((): void => episodeList.remove());

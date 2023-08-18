@@ -23,11 +23,11 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return an UnscheduledController instance", (): Chai.Assertion => unscheduledController.should.be.an.instanceOf(UnscheduledController));
+		it("should return an UnscheduledController instance", (): Chai.Assertion => expect(unscheduledController).to.be.an.instanceOf(UnscheduledController));
 	});
 
 	describe("view", (): void => {
-		it("should return the unscheduled view", (): Chai.Assertion => unscheduledController.view.should.equal(UnscheduledView));
+		it("should return the unscheduled view", (): Chai.Assertion => expect(unscheduledController.view).to.equal(UnscheduledView));
 	});
 
 	describe("setup", (): void => {
@@ -41,22 +41,22 @@ describe("UnscheduledController", (): void => {
 			leftButton = unscheduledController.header.leftButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(unscheduledController.header.label).should.equal("Unscheduled"));
+		it("should set the header label", (): Chai.Assertion => expect(String(unscheduledController.header.label)).to.equal("Unscheduled"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			unscheduledController["goBack"].should.have.been.called;
+			expect(unscheduledController["goBack"]).to.have.been.called;
 		});
 
-		it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Schedule"));
+		it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Schedule"));
 
 		it("should attach a view event handler to the unscheduled list", (): void => {
 			(unscheduledController["unscheduledList"] as ListMock).viewEventHandler(0);
-			unscheduledController["viewItem"].should.have.been.calledWith(0);
+			expect(unscheduledController["viewItem"]).to.have.been.calledWith(0);
 		});
 
-		it("should activate the controller", (): Chai.Assertion => unscheduledController.activate.should.have.been.called);
+		it("should activate the controller", (): Chai.Assertion => expect(unscheduledController["activate"]).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
@@ -67,18 +67,18 @@ describe("UnscheduledController", (): void => {
 		});
 
 		it("should get the list of unscheduled episodes", (): void => {
-			EpisodeMock.listByUnscheduled.should.have.been.called;
-			unscheduledController["unscheduledList"].items.should.deep.equal(items);
+			expect(EpisodeMock.listByUnscheduled).to.have.been.called;
+			expect(unscheduledController["unscheduledList"].items).to.deep.equal(items);
 		});
 
-		it("should refresh the list", (): Chai.Assertion => unscheduledController["unscheduledList"].refresh.should.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion => unscheduledController["viewItems"].should.have.been.called);
+		it("should refresh the list", (): Chai.Assertion => expect(unscheduledController["unscheduledList"].refresh).to.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect(unscheduledController["viewItems"]).to.have.been.called);
 	});
 
 	describe("goBack", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await unscheduledController["goBack"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 
@@ -88,7 +88,7 @@ describe("UnscheduledController", (): void => {
 
 			unscheduledController["unscheduledList"] = new ListMock("", "", "", items);
 			await unscheduledController["viewItem"](index);
-			appController.pushView.should.have.been.calledWith("episode", {
+			expect(appController.pushView).to.have.been.calledWith("episode", {
 				listIndex: index,
 				episode: items[index]
 			});
@@ -102,9 +102,9 @@ describe("UnscheduledController", (): void => {
 			await unscheduledController["viewItems"]();
 		});
 
-		it("should set the list to view mode", (): Chai.Assertion => String((unscheduledController["unscheduledList"] as ListMock).action).should.equal("view"));
-		it("should clear the view footer", (): Chai.Assertion => appController.clearFooter.should.have.been.called);
-		it("should set the footer label", (): Chai.Assertion => String((unscheduledController.footer as HeaderFooter).label).should.equal("v1"));
-		it("should set the view footer", (): Chai.Assertion => appController.setFooter.should.have.been.called);
+		it("should set the list to view mode", (): Chai.Assertion => expect(String((unscheduledController["unscheduledList"] as ListMock).action)).to.equal("view"));
+		it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
+		it("should set the footer label", (): Chai.Assertion => expect(String((unscheduledController.footer as HeaderFooter).label)).to.equal("v1"));
+		it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
 	});
 });

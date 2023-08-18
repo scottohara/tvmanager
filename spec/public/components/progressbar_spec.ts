@@ -13,9 +13,9 @@ describe("ProgressBar", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a ProgressBar instance", (): Chai.Assertion => progressBar.should.be.an.instanceOf(ProgressBar));
-		it("should set the total", (): Chai.Assertion => progressBar["total"].should.equal(total));
-		it("should set the sections", (): Chai.Assertion => progressBar["sections"].should.equal(sections));
+		it("should return a ProgressBar instance", (): Chai.Assertion => expect(progressBar).to.be.an.instanceOf(ProgressBar));
+		it("should set the total", (): Chai.Assertion => expect(progressBar["total"]).to.equal(total));
+		it("should set the sections", (): Chai.Assertion => expect(progressBar["sections"]).to.equal(sections));
 	});
 
 	describe("setSection", (): void => {
@@ -31,7 +31,7 @@ describe("ProgressBar", (): void => {
 				style: "style-two"
 			});
 			sections.forEach((section: Section, index: number): string => progressBar.setSection(index, section));
-			progressBar["sections"].should.deep.equal(sections);
+			expect(progressBar["sections"]).to.deep.equal(sections);
 		});
 	});
 
@@ -39,7 +39,7 @@ describe("ProgressBar", (): void => {
 		it("should set the total", (): void => {
 			total = 2;
 			progressBar.setTotal(total);
-			progressBar["total"].should.equal(total);
+			expect(progressBar["total"]).to.equal(total);
 		});
 	});
 
@@ -86,7 +86,7 @@ describe("ProgressBar", (): void => {
 		scenarios.forEach((scenario: Scenario): void => {
 			it(`should return html with ${scenario.description}`, (): void => {
 				progressBar = new ProgressBar(scenario.total, scenario.sections);
-				progressBar["render"]().should.equal(scenario.result);
+				expect(progressBar["render"]()).to.equal(scenario.result);
 			});
 		});
 	});

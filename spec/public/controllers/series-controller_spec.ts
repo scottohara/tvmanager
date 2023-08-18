@@ -29,10 +29,10 @@ describe("SeriesController", (): void => {
 
 	describe("object constructor", (): void => {
 		describe("update", (): void => {
-			it("should return a SeriesController instance", (): Chai.Assertion => seriesController.should.be.an.instanceOf(SeriesController));
-			it("should set the list item", (): Chai.Assertion => seriesController["listItem"].should.deep.equal(listItem));
-			it("should save the original now showing", (): Chai.Assertion => Number(seriesController["originalNowShowing"]).should.equal(listItem.series.nowShowing));
-			it("should save the original program id", (): Chai.Assertion => String(seriesController["originalProgramId"]).should.equal(listItem.series.programId));
+			it("should return a SeriesController instance", (): Chai.Assertion => expect(seriesController).to.be.an.instanceOf(SeriesController));
+			it("should set the list item", (): Chai.Assertion => expect(seriesController["listItem"]).to.deep.equal(listItem));
+			it("should save the original now showing", (): Chai.Assertion => expect(Number(seriesController["originalNowShowing"])).to.equal(listItem.series.nowShowing));
+			it("should save the original program id", (): Chai.Assertion => expect(String(seriesController["originalProgramId"])).to.equal(listItem.series.programId));
 		});
 
 		describe("add", (): void => {
@@ -47,18 +47,18 @@ describe("SeriesController", (): void => {
 				seriesController = new SeriesController(seriesListItem);
 			});
 
-			it("should return a SeriesController instance", (): Chai.Assertion => seriesController.should.be.an.instanceOf(SeriesController));
+			it("should return a SeriesController instance", (): Chai.Assertion => expect(seriesController).to.be.an.instanceOf(SeriesController));
 
 			it("should create a list item", (): void => {
-				String(seriesController["listItem"].series.seriesName).should.equal(`Series ${Number(seriesListItem.sequence) + 1}`);
-				String(seriesController["listItem"].series.programId).should.equal((seriesListItem.program as ProgramMock).id);
-				String(seriesController["listItem"].series.programName).should.equal((seriesListItem.program as ProgramMock).programName);
+				expect(String(seriesController["listItem"].series.seriesName)).to.equal(`Series ${Number(seriesListItem.sequence) + 1}`);
+				expect(String(seriesController["listItem"].series.programId)).to.equal((seriesListItem.program as ProgramMock).id);
+				expect(String(seriesController["listItem"].series.programName)).to.equal((seriesListItem.program as ProgramMock).programName);
 			});
 		});
 	});
 
 	describe("view", (): void => {
-		it("should return the series view", (): Chai.Assertion => seriesController.view.should.equal(SeriesView));
+		it("should return the series view", (): Chai.Assertion => expect(seriesController.view).to.equal(SeriesView));
 	});
 
 	describe("setup", (): void => {
@@ -103,31 +103,31 @@ describe("SeriesController", (): void => {
 			rightButton = seriesController.header.rightButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(seriesController.header.label).should.equal("Add/Edit Series"));
+		it("should set the header label", (): Chai.Assertion => expect(String(seriesController.header.label)).to.equal("Add/Edit Series"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			seriesController["cancel"].should.have.been.called;
+			expect(seriesController["cancel"]).to.have.been.called;
 		});
 
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Cancel"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
-			seriesController["save"].should.have.been.called;
+			expect(seriesController["save"]).to.have.been.called;
 		});
 
-		it("should set the header right button style", (): Chai.Assertion => String(rightButton.style).should.equal("confirmButton"));
-		it("should set the header right button label", (): Chai.Assertion => rightButton.label.should.equal("Save"));
+		it("should set the header right button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("confirmButton"));
+		it("should set the header right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Save"));
 
 		it("should populate the move to select with a list of programs", (): void => moveTo.querySelectorAll("option").forEach((option: HTMLOptionElement, index: number): void => {
-			option.value.should.equal(programs[index][0]);
-			String(option.textContent).should.equal(programs[index][1]);
+			expect(option.value).to.equal(programs[index][0]);
+			expect(String(option.textContent)).to.equal(programs[index][1]);
 		}));
 
-		it("should set the series name", (): Chai.Assertion => seriesName.value.should.equal(listItem.series.seriesName));
-		it("should set the now showing", (): Chai.Assertion => Number(nowShowing.value).should.equal(listItem.series.nowShowing));
-		it("should set the current program", (): Chai.Assertion => moveTo.value.should.equal(listItem.series.programId));
+		it("should set the series name", (): Chai.Assertion => expect(seriesName.value).to.equal(listItem.series.seriesName));
+		it("should set the now showing", (): Chai.Assertion => expect(Number(nowShowing.value)).to.equal(listItem.series.nowShowing));
+		it("should set the current program", (): Chai.Assertion => expect(moveTo.value).to.equal(listItem.series.programId));
 
 		describe("not showing", (): void => {
 			beforeEach(async (): Promise<void> => {
@@ -135,7 +135,7 @@ describe("SeriesController", (): void => {
 				await seriesController.setup();
 			});
 
-			it("should not set the now showing", (): Chai.Assertion => nowShowing.value.should.equal(""));
+			it("should not set the now showing", (): Chai.Assertion => expect(nowShowing.value).to.equal(""));
 		});
 
 		afterEach((): void => {
@@ -163,12 +163,12 @@ describe("SeriesController", (): void => {
 				seriesController.contentShown();
 			});
 
-			it("should select the series name text", (): Chai.Assertion => select.should.have.been.called);
+			it("should select the series name text", (): Chai.Assertion => expect(select).to.have.been.called);
 		});
 
 		describe("not adding series", (): void => {
 			beforeEach((): void => seriesController.contentShown());
-			it("should not select the series name text", (): Chai.Assertion => select.should.not.have.been.called);
+			it("should not select the series name text", (): Chai.Assertion => expect(select).to.not.have.been.called);
 		});
 
 		afterEach((): void => {
@@ -217,11 +217,11 @@ describe("SeriesController", (): void => {
 		describe("now showing", (): void => {
 			beforeEach(async (): Promise<void> => seriesController["save"]());
 
-			it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
-			it("should get the now showing", (): Chai.Assertion => Number(seriesController["listItem"].series.nowShowing).should.equal(nowShowing));
-			it("should get the current program", (): Chai.Assertion => String(seriesController["listItem"].series.programId).should.equal(programId));
-			it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
-			it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+			it("should get the series name", (): Chai.Assertion => expect(String(seriesController["listItem"].series.seriesName)).to.equal(seriesName));
+			it("should get the now showing", (): Chai.Assertion => expect(Number(seriesController["listItem"].series.nowShowing)).to.equal(nowShowing));
+			it("should get the current program", (): Chai.Assertion => expect(String(seriesController["listItem"].series.programId)).to.equal(programId));
+			it("should save the series", (): Chai.Assertion => expect(listItem.series.save).to.have.been.called);
+			it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
 		});
 
 		describe("not showing", (): void => {
@@ -230,11 +230,11 @@ describe("SeriesController", (): void => {
 				await seriesController["save"]();
 			});
 
-			it("should get the series name", (): Chai.Assertion => String(seriesController["listItem"].series.seriesName).should.equal(seriesName));
-			it("should get the now showing", (): Chai.Assertion => (null === seriesController["listItem"].series.nowShowing).should.be.true);
-			it("should get the current program", (): Chai.Assertion => String(seriesController["listItem"].series.programId).should.equal(programId));
-			it("should save the series", (): Chai.Assertion => listItem.series.save.should.have.been.called);
-			it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+			it("should get the series name", (): Chai.Assertion => expect(String(seriesController["listItem"].series.seriesName)).to.equal(seriesName));
+			it("should get the now showing", (): Chai.Assertion => expect(seriesController["listItem"].series.nowShowing).to.be.null);
+			it("should get the current program", (): Chai.Assertion => expect(String(seriesController["listItem"].series.programId)).to.equal(programId));
+			it("should save the series", (): Chai.Assertion => expect(listItem.series.save).to.have.been.called);
+			it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
 		});
 
 		afterEach((): void => {
@@ -252,10 +252,10 @@ describe("SeriesController", (): void => {
 		});
 
 		it("should revert any changes", (): void => {
-			Number(seriesController["listItem"].series.nowShowing).should.equal(1);
-			String(seriesController["listItem"].series.programId).should.equal("1");
+			expect(Number(seriesController["listItem"].series.nowShowing)).to.equal(1);
+			expect(String(seriesController["listItem"].series.programId)).to.equal("1");
 		});
 
-		it("should pop the view", (): Chai.Assertion => appController.popView.should.have.been.called);
+		it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
 	});
 });

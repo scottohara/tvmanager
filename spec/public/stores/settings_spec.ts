@@ -28,7 +28,7 @@ describe("settings", (): void => {
 
 	describe("upgradeTo", (): void => {
 		describe("version 1", (): void => {
-			it("should create the settings store", (): Chai.Assertion => [...db.objectStoreNames].includes("settings").should.be.true);
+			it("should create the settings store", (): Chai.Assertion => expect([...db.objectStoreNames].includes("settings")).to.be.true);
 		});
 	});
 
@@ -42,12 +42,12 @@ describe("settings", (): void => {
 
 		describe("get", (): void => {
 			beforeEach(async (): Promise<string> => db.put("settings", { name, value }));
-			it("should return a setting by name", async (): Promise<Chai.Assertion> => (await settingsStore.get(name) as PersistedSetting).should.deep.equal({ name, value }));
+			it("should return a setting by name", async (): Promise<Chai.Assertion> => expect(await settingsStore.get(name) as PersistedSetting).to.deep.equal({ name, value }));
 		});
 
 		describe("save", (): void => {
 			beforeEach(async (): Promise<string> => settingsStore.save(name, value));
-			it("should save the setting", async (): Promise<Chai.Assertion> => (await db.get("settings", name) as PersistedSetting).should.deep.equal({ name, value }));
+			it("should save the setting", async (): Promise<Chai.Assertion> => expect(await db.get("settings", name) as PersistedSetting).to.deep.equal({ name, value }));
 		});
 
 		describe("remove", (): void => {
@@ -57,7 +57,7 @@ describe("settings", (): void => {
 				return settingsStore.remove(name);
 			});
 
-			it("should remove a setting by name", async (): Promise<Chai.Assertion> => (await db.get("settings", name) === undefined).should.be.true);
+			it("should remove a setting by name", async (): Promise<Chai.Assertion> => expect(await db.get("settings", name)).to.be.undefined);
 		});
 	});
 

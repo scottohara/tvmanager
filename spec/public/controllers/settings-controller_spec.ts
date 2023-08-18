@@ -61,11 +61,11 @@ describe("SettingsController", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a SettingsController instance", (): Chai.Assertion => settingsController.should.be.an.instanceOf(SettingsController));
+		it("should return a SettingsController instance", (): Chai.Assertion => expect(settingsController).to.be.an.instanceOf(SettingsController));
 	});
 
 	describe("view", (): void => {
-		it("should return the settings view", (): Chai.Assertion => settingsController.view.should.equal(SettingsView));
+		it("should return the settings view", (): Chai.Assertion => expect(settingsController.view).to.equal(SettingsView));
 	});
 
 	describe("setup", (): void => {
@@ -78,17 +78,17 @@ describe("SettingsController", (): void => {
 			leftButton = settingsController.header.leftButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => String(settingsController.header.label).should.equal("Settings"));
+		it("should set the header label", (): Chai.Assertion => expect(String(settingsController.header.label)).to.equal("Settings"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
-			settingsController["goBack"].should.have.been.called;
+			expect(settingsController["goBack"]).to.have.been.called;
 		});
 
-		it("should set the header left button style", (): Chai.Assertion => String(leftButton.style).should.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion => leftButton.label.should.equal("Schedule"));
+		it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
+		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Schedule"));
 
-		it("should activate the controller", (): Chai.Assertion => settingsController.activate.should.have.been.called);
+		it("should activate the controller", (): Chai.Assertion => expect(settingsController["activate"]).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
@@ -132,32 +132,32 @@ describe("SettingsController", (): void => {
 
 		it("should attach a data sync click event handler", (): void => {
 			dataSyncRow.dispatchEvent(new MouseEvent("click"));
-			settingsController["viewDataSync"].should.have.been.called;
+			expect(settingsController["viewDataSync"]).to.have.been.called;
 		});
 
 		it("should attach an about click event handler", (): void => {
 			aboutRow.dispatchEvent(new MouseEvent("click"));
-			settingsController["viewAbout"].should.have.been.called;
+			expect(settingsController["viewAbout"]).to.have.been.called;
 		});
 
 		it("should attach a recorded report click event handler", (): void => {
 			recordedReportRow.dispatchEvent(new MouseEvent("click"));
-			settingsController["viewRecordedReport"].should.have.been.called;
+			expect(settingsController["viewRecordedReport"]).to.have.been.called;
 		});
 
 		it("should attach an expected report click event handler", (): void => {
 			expectedReportRow.dispatchEvent(new MouseEvent("click"));
-			settingsController["viewExpectedReport"].should.have.been.called;
+			expect(settingsController["viewExpectedReport"]).to.have.been.called;
 		});
 
 		it("should attach a missed report click event handler", (): void => {
 			missedReportRow.dispatchEvent(new MouseEvent("click"));
-			settingsController["viewMissedReport"].should.have.been.called;
+			expect(settingsController["viewMissedReport"]).to.have.been.called;
 		});
 
 		it("should attach an incomplete report click event handler", (): void => {
 			incompleteReportRow.dispatchEvent(new MouseEvent("click"));
-			settingsController["viewIncompleteReport"].should.have.been.called;
+			expect(settingsController["viewIncompleteReport"]).to.have.been.called;
 		});
 
 		afterEach((): void => {
@@ -173,21 +173,21 @@ describe("SettingsController", (): void => {
 	describe("goBack", (): void => {
 		it("should pop the view", async (): Promise<void> => {
 			await settingsController["goBack"]();
-			appController.popView.should.have.been.called;
+			expect(appController.popView).to.have.been.called;
 		});
 	});
 
 	describe("viewDataSync", (): void => {
 		it("should push the data sync view", async (): Promise<void> => {
 			await settingsController["viewDataSync"]();
-			appController.pushView.should.have.been.calledWith("dataSync");
+			expect(appController.pushView).to.have.been.calledWith("dataSync");
 		});
 	});
 
 	describe("viewAbout", (): void => {
 		it("should push the about view", async (): Promise<void> => {
 			await settingsController["viewAbout"]();
-			appController.pushView.should.have.been.calledWith("about");
+			expect(appController.pushView).to.have.been.calledWith("about");
 		});
 	});
 
@@ -195,7 +195,7 @@ describe("SettingsController", (): void => {
 		describe(`view${report.description}Report`, (): void => {
 			it(`should push the ${report.description.toLowerCase()} report view`, async (): Promise<void> => {
 				await settingsController[`view${report.description}Report` as ReportHandler]();
-				appController.pushView.should.have.been.calledWith("report", sinon.match({
+				expect(appController.pushView).to.have.been.calledWith("report", sinon.match({
 					reportName: report.viewArgs.reportName,
 					dataSource: sinon.match.func,
 					args: report.viewArgs.args
