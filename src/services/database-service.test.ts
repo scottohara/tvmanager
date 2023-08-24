@@ -1,4 +1,4 @@
-import DatabaseService from "../../../src/services/database-service";
+import DatabaseService from "./database-service";
 import type {	SinonSpyCall } from "sinon";
 import type { TVManagerStore } from "~/stores";
 import sinon from "sinon";

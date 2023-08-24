@@ -11,7 +11,7 @@ import type {
 	SinonSpy,
 	SinonStub
 } from "sinon";
-import ApplicationController from "../../../src/controllers/application-controller";
+import ApplicationController from "./application-controller";
 import SettingMock from "~/mocks/setting-model-mock";
 import SyncMock from "~/mocks/sync-model-mock";
 import TestController from "~/mocks/test-controller";

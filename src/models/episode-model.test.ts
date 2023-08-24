@@ -7,7 +7,7 @@ import type {
 	SinonStub
 } from "sinon";
 import DatabaseServiceMock from "~/mocks/database-service-mock";
-import Episode from "../../../src/models/episode-model";
+import Episode from "./episode-model";
 import sinon from "sinon";
 
 describe("Episode", (): void => {

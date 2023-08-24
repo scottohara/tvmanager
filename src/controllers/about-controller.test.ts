@@ -2,7 +2,7 @@ import type {
 	NavButton,
 	NavButtonEventHandler
 } from "~/controllers";
-import AboutController from "../../../src/controllers/about-controller";
+import AboutController from "~/controllers/about-controller";
 import AboutView from "~/views/about-view.html";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import EpisodeMock from "~/mocks/episode-model-mock";

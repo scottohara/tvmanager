@@ -9,7 +9,7 @@
 		{
 			"files": [
 				"**/*.test.ts",
-				"**/*-mock.ts"
+				"**/mocks/**/*"
 			],
 			"env": {
 				"mocha": true

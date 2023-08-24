@@ -3,7 +3,7 @@ import type {
 	ListItem
 } from "~/components";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
-import List from "../../../src/components/list";
+import List from "./list";
 import ListTemplate from "~/views/listTemplate.html";
 import type { SinonStub } from "sinon";
 import TestController from "~/mocks/test-controller";

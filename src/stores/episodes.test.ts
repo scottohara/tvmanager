@@ -8,16 +8,16 @@ import type {
 import {
 	create,
 	upgradeTo
-} from "../../../src/stores/episodes";
+} from "./episodes";
 import {
 	deleteDB,
 	openDB
 } from "idb";
 import type {	IDBPDatabase } from "idb";
 import type { PersistedEpisode } from "~/models";
-import { upgradeTo as programsUpgradeTo } from "../../../src/stores/programs";
-import { upgradeTo as seriesUpgradeTo } from "../../../src/stores/series";
-import { upgradeTo as syncsUpgradeTo } from "../../../src/stores/syncs";
+import { upgradeTo as programsUpgradeTo } from "./programs";
+import { upgradeTo as seriesUpgradeTo } from "./series";
+import { upgradeTo as syncsUpgradeTo } from "./syncs";
 
 describe("episodes", (): void => {
 	let db: IDBPDatabase<TVManagerDB>;

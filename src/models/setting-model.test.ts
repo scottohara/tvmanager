@@ -1,5 +1,5 @@
 import DatabaseServiceMock from "~/mocks/database-service-mock";
-import Setting from "../../../src/models/setting-model";
+import Setting from "./setting-model";
 import type { SinonStub } from "sinon";
 
 describe("Setting", (): void => {

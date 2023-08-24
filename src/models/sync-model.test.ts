@@ -4,7 +4,7 @@ import type {
 } from "~/models";
 import DatabaseServiceMock from "~/mocks/database-service-mock";
 import type { SinonStub } from "sinon";
-import Sync from "../../../src/models/sync-model";
+import Sync from "./sync-model";
 
 describe("Sync", (): void => {
 	let type: ModelType,

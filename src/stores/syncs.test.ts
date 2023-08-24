@@ -6,7 +6,7 @@ import type {
 import {
 	create,
 	upgradeTo
-} from "../../../src/stores/syncs";
+} from "./syncs";
 import {
 	deleteDB,
 	openDB

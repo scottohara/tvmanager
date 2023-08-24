@@ -1,4 +1,4 @@
-import Base from "../../../src/models/base-model";
+import Base from "~/models/base-model";
 
 describe("Base", (): void => {
 	class TestModel extends Base {

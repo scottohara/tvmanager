@@ -3,7 +3,7 @@ import * as ProgramsStore from "~/mocks/programs-store-mock";
 import * as SeriesStore from "~/mocks/series-store-mock";
 import * as SettingsStore from "~/mocks/settings-store-mock";
 import * as SyncsStore from "~/mocks/syncs-store-mock";
-import { connect, disconnect } from "../../../src/stores/db";
+import { connect, disconnect } from "./db";
 import {
 	deleteDB,
 	openDB

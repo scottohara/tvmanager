@@ -3,7 +3,7 @@ import type {
 	PersistedSeries
 } from "~/models";
 import DatabaseServiceMock from "~/mocks/database-service-mock";
-import Series from "../../../src/models/series-model";
+import Series from "./series-model";
 import type { SinonStub } from "sinon";
 
 describe("Series", (): void => {

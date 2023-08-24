@@ -2,7 +2,7 @@ import {
 	type Remote,
 	expose as originalExpose,
 	wrap as originalWrap
-} from "../../../node_modules/comlink";
+} from "../../node_modules/comlink";
 import type { SinonSpy } from "sinon";
 import sinon from "sinon";
 

@@ -15,7 +15,7 @@ module.exports = {
 
 	// List of files / patterns to load in the browser
 	files: [
-		"spec/public/**/*.test.ts",
+		"src/**/*.test.ts",
 		{
 			pattern: `${outputPath}/**/*`,
 			watched: false,
