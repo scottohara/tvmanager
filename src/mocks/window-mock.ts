@@ -4,12 +4,14 @@ import sinon from "sinon";
 interface NavigatorMock {
 	onLine: boolean;
 	serviceWorker: { register: SinonStub; };
+	storage: { persist: SinonStub; };
 }
 
 class WindowMock {
 	public readonly navigator: NavigatorMock = {
 		onLine: true,
-		serviceWorker: { register: sinon.stub() }
+		serviceWorker: { register: sinon.stub() },
+		storage: { persist: sinon.stub() }
 	};
 
 	public readonly alert: SinonStub = sinon.stub();

@@ -6,6 +6,10 @@ if ("serviceWorker" in window.navigator) {
 	window.navigator.serviceWorker.register("/service-worker.js").then((registration: ServiceWorkerRegistration): void => window.console.log(`ServiceWorker registration successful with scope: ${registration.scope}`), (error: string): void => window.console.log(`ServiceWorker registration failed: ${error}`));
 }
 
+if ("storage" in window.navigator) {
+	window.navigator.storage.persist().catch((error: string): void => window.console.log(error));
+}
+
 // Get a reference to the application controller singleton
 const appController = new ApplicationController();
 
