@@ -71,7 +71,7 @@
   },
   "config": {
     "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-14-Pro-Max",
-    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-16-4"
+    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-17-0"
   },
   "scripts": {
     "start": "concurrently --prefix-colors bgBlue.bold,bgYellow.bold,bgGreen.bold npm:web:dev npm:db npm:dev",
@@ -96,8 +96,8 @@
     "deploy:production": "npm run deploy -- --app tvmanager"
   },
   "engines": {
-    "node": "20.2.0",
-    "npm": "9.6.7",
+    "node": "20.7.0",
+    "npm": "10.1.0",
     "ruby": "3.2.2"
   }
 }
