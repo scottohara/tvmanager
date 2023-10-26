@@ -27,7 +27,7 @@ jobs:
   frontend:
     name: Test and lint frontend
     needs: setup
-    runs-on: macos-14
+    runs-on: macos-13
     outputs:
       workspace: ${{ github.workspace }}
 
