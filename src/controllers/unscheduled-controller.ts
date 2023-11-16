@@ -21,12 +21,18 @@ export default class UnscheduledController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: "Schedule"
-			}
+				label: "Schedule",
+			},
 		};
 
 		// Instantiate a List object
-		this.unscheduledList = new List("list", UnscheduledListTemplate, null, [], this.viewItem.bind(this));
+		this.unscheduledList = new List(
+			"list",
+			UnscheduledListTemplate,
+			null,
+			[],
+			this.viewItem.bind(this),
+		);
 
 		// Activate the controller
 		return this.activate();
@@ -48,7 +54,12 @@ export default class UnscheduledController extends ViewController {
 	}
 
 	private async viewItem(listIndex: number): Promise<void> {
-		return this.appController.pushView("episode", { listIndex, episode: this.unscheduledList.items[listIndex] as PublicInterface<Episode> });
+		return this.appController.pushView("episode", {
+			listIndex,
+			episode: this.unscheduledList.items[
+				listIndex
+			] as PublicInterface<Episode>,
+		});
 	}
 
 	private async viewItems(): Promise<void> {
@@ -60,7 +71,7 @@ export default class UnscheduledController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`
+			label: `v${(await DatabaseService).version}`,
 		};
 
 		// Set the view footer

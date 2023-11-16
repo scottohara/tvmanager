@@ -1,7 +1,9 @@
 const os = require("os"),
-			path = require("path"),
-			ENTROPY_SIZE = 1000000,
-			outputPath = `${path.join(os.tmpdir(), "_karma_webpack_")}${Math.floor(Math.random() * ENTROPY_SIZE)}`;
+	path = require("path"),
+	ENTROPY_SIZE = 1000000,
+	outputPath = `${path.join(os.tmpdir(), "_karma_webpack_")}${Math.floor(
+		Math.random() * ENTROPY_SIZE,
+	)}`;
 
 module.exports = {
 	// Base path that will be used to resolve all patterns (eg. files, exclude)
@@ -19,12 +21,12 @@ module.exports = {
 		{
 			pattern: `${outputPath}/**/*`,
 			watched: false,
-			included: false
-		}
+			included: false,
+		},
 	],
 
 	mochaReporter: {
-		showDiff: true
+		showDiff: true,
 	},
 
 	// Web server port
@@ -45,7 +47,7 @@ module.exports = {
 	 */
 	webpack: {
 		output: {
-			path: outputPath
-		}
-	}
+			path: outputPath,
+		},
+	},
 };

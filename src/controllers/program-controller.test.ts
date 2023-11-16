@@ -1,7 +1,7 @@
 import type {
 	NavButton,
 	NavButtonEventHandler,
-	ProgramListItem
+	ProgramListItem,
 } from "~/controllers";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import ProgramController from "~/controllers/program-controller";
@@ -13,8 +13,7 @@ import sinon from "sinon";
 const appController = new ApplicationControllerMock();
 
 describe("ProgramController", (): void => {
-	let listItem: ProgramListItem,
-			programController: ProgramController;
+	let listItem: ProgramListItem, programController: ProgramController;
 
 	beforeEach((): void => {
 		listItem = { program: new ProgramMock(null, "test-program") };
@@ -32,13 +31,13 @@ describe("ProgramController", (): void => {
 			{
 				description: "update",
 				listItem,
-				programController
+				programController,
 			},
 			{
 				description: "add",
 				listItem: { program: new ProgramMock(null, "") },
-				programController: new ProgramController()
-			}
+				programController: new ProgramController(),
+			},
 		];
 
 		scenarios.forEach((scenario: Scenario): void => {
@@ -50,20 +49,27 @@ describe("ProgramController", (): void => {
 					}
 				});
 
-				it("should return a ProgramController instance", (): Chai.Assertion => expect(programController).to.be.an.instanceOf(ProgramController));
-				it("should set the list item", (): Chai.Assertion => expect(String(scenario.programController["listItem"].program.programName)).to.equal((scenario.listItem as ProgramListItem).program.programName));
+				it("should return a ProgramController instance", (): Chai.Assertion =>
+					expect(programController).to.be.an.instanceOf(ProgramController));
+				it("should set the list item", (): Chai.Assertion =>
+					expect(
+						String(scenario.programController["listItem"].program.programName),
+					).to.equal(
+						(scenario.listItem as ProgramListItem).program.programName,
+					));
 			});
 		});
 	});
 
 	describe("view", (): void => {
-		it("should return the program view", (): Chai.Assertion => expect(programController.view).to.equal(ProgramView));
+		it("should return the program view", (): Chai.Assertion =>
+			expect(programController.view).to.equal(ProgramView));
 	});
 
 	describe("setup", (): void => {
 		let programName: HTMLInputElement,
-				leftButton: NavButton,
-				rightButton: NavButton;
+			leftButton: NavButton,
+			rightButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(programController, "cancel" as keyof ProgramController);
@@ -78,31 +84,37 @@ describe("ProgramController", (): void => {
 			rightButton = programController.header.rightButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => expect(String(programController.header.label)).to.equal("Add/Edit Program"));
+		it("should set the header label", (): Chai.Assertion =>
+			expect(String(programController.header.label)).to.equal(
+				"Add/Edit Program",
+			));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
 			expect(programController["cancel"]).to.have.been.called;
 		});
 
-		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Cancel"));
+		it("should set the header left button label", (): Chai.Assertion =>
+			expect(leftButton.label).to.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
 			expect(programController["save"]).to.have.been.called;
 		});
 
-		it("should set the header right button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("confirmButton"));
-		it("should set the header right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Save"));
+		it("should set the header right button style", (): Chai.Assertion =>
+			expect(String(rightButton.style)).to.equal("confirmButton"));
+		it("should set the header right button label", (): Chai.Assertion =>
+			expect(rightButton.label).to.equal("Save"));
 
-		it("should set the program name", (): Chai.Assertion => expect(programName.value).to.equal(listItem.program.programName));
+		it("should set the program name", (): Chai.Assertion =>
+			expect(programName.value).to.equal(listItem.program.programName));
 
 		afterEach((): void => programName.remove());
 	});
 
 	describe("save", (): void => {
-		let programName: string,
-				programNameInput: HTMLInputElement;
+		let programName: string, programNameInput: HTMLInputElement;
 
 		beforeEach(async (): Promise<void> => {
 			programName = "test-program-2";
@@ -115,9 +127,14 @@ describe("ProgramController", (): void => {
 			await programController["save"]();
 		});
 
-		it("should get the program name", (): Chai.Assertion => expect(String(programController["listItem"].program.programName)).to.equal(programName));
-		it("should save the program", (): Chai.Assertion => expect(listItem.program.save).to.have.been.called);
-		it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
+		it("should get the program name", (): Chai.Assertion =>
+			expect(
+				String(programController["listItem"].program.programName),
+			).to.equal(programName));
+		it("should save the program", (): Chai.Assertion =>
+			expect(listItem.program.save).to.have.been.called);
+		it("should pop the view", (): Chai.Assertion =>
+			expect(appController.popView).to.have.been.called);
 
 		afterEach((): void => programNameInput.remove());
 	});

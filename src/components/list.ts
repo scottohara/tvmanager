@@ -1,8 +1,4 @@
-import type {
-	ListAction,
-	ListEventHandler,
-	ListItem
-} from "~/components";
+import type { ListAction, ListEventHandler, ListItem } from "~/components";
 import ApplicationController from "~/controllers/application-controller";
 import window from "~/components/window";
 
@@ -11,13 +7,15 @@ export default class List {
 
 	private action?: ListAction;
 
-	public constructor(private readonly container: string,
-						private readonly itemTemplate: string,
-						private readonly groupBy: string | null,
-						public items: ListItem[],
-						private readonly viewEventHandler: ListEventHandler,
-						private readonly editEventHandler?: ListEventHandler | null,
-						private readonly deleteEventHandler?: (index: number) => void) {
+	public constructor(
+		private readonly container: string,
+		private readonly itemTemplate: string,
+		private readonly groupBy: string | null,
+		public items: ListItem[],
+		private readonly viewEventHandler: ListEventHandler,
+		private readonly editEventHandler?: ListEventHandler | null,
+		private readonly deleteEventHandler?: (index: number) => void,
+	) {
 		// Get a reference to the application controller singleton
 		this.appController = new ApplicationController();
 		this.setAction("view");
@@ -39,69 +37,95 @@ export default class List {
 		this.containerElement.innerHTML = "";
 
 		let itemHtml: string,
-				currentGroup = "";
+			currentGroup = "";
 
 		// Loop through the array of JSON objects
-		this.containerElement.append(...this.items.reduce((itemElements: HTMLLIElement[], item: ListItem, itemIndex: number): HTMLLIElement[] => {
-			const listItemProperties = new Map<string, unknown>(Object.entries(item));
+		this.containerElement.append(
+			...this.items.reduce(
+				(
+					itemElements: HTMLLIElement[],
+					item: ListItem,
+					itemIndex: number,
+				): HTMLLIElement[] => {
+					const listItemProperties = new Map<string, unknown>(
+						Object.entries(item),
+					);
 
-			// If grouping is required, when the property used for the group changes, output a group header item
-			if (null !== this.groupBy) {
-				const itemGroup = String(listItemProperties.get(this.groupBy));
+					// If grouping is required, when the property used for the group changes, output a group header item
+					if (null !== this.groupBy) {
+						const itemGroup = String(listItemProperties.get(this.groupBy));
 
-				if (currentGroup !== itemGroup) {
-					const group = document.createElement("li"),
+						if (currentGroup !== itemGroup) {
+							const group = document.createElement("li"),
 								groupName = document.createElement("li");
 
-					group.id = `group-${itemGroup}`;
-					group.classList.add("group");
-					group.textContent = itemGroup;
-					itemElements.push(group);
+							group.id = `group-${itemGroup}`;
+							group.classList.add("group");
+							group.textContent = itemGroup;
+							itemElements.push(group);
 
-					groupName.textContent = itemGroup;
-					groupNames.push(groupName);
-					currentGroup = itemGroup;
-				}
-			}
+							groupName.textContent = itemGroup;
+							groupNames.push(groupName);
+							currentGroup = itemGroup;
+						}
+					}
 
-			// Start with the HTML template
-			itemHtml = this.itemTemplate;
+					// Start with the HTML template
+					itemHtml = this.itemTemplate;
 
-			// Iterate over the properties of the JSON object
-			for (const [key, value] of listItemProperties) {
-				const prefix = "id" === key ? "item-" : "";
+					// Iterate over the properties of the JSON object
+					for (const [key, value] of listItemProperties) {
+						const prefix = "id" === key ? "item-" : "";
 
-				// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
-				itemHtml = itemHtml.replace(`#{${key}}`, `${prefix}${String(value)}`);
-			}
+						// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
+						itemHtml = itemHtml.replace(
+							`#{${key}}`,
+							`${prefix}${String(value)}`,
+						);
+					}
 
-			// Append the item to the list and bind the click event handler
-			const listItem = document.createElement("li");
+					// Append the item to the list and bind the click event handler
+					const listItem = document.createElement("li");
 
-			listItem.innerHTML = itemHtml;
-			listItem.addEventListener("click", (): void => this.tap(itemIndex));
-			itemElements.push(listItem);
+					listItem.innerHTML = itemHtml;
+					listItem.addEventListener("click", (): void => this.tap(itemIndex));
+					itemElements.push(listItem);
 
-			return itemElements;
-		}, []));
+					return itemElements;
+				},
+				[],
+			),
+		);
 
 		const index = document.createElement("ul");
 
 		index.id = "index";
 		index.append(...groupNames);
-		index.addEventListener("touchstart", (e: Event): void => e.preventDefault(), { passive: false });
-		index.addEventListener("pointermove", ({ buttons, clientY }: PointerEvent): void => {
-			// Only proceed if we're dragging
-			if (1 === buttons) {
-				const groupItem = document.elementFromPoint(index.offsetLeft, clientY);
+		index.addEventListener(
+			"touchstart",
+			(e: Event): void => e.preventDefault(),
+			{ passive: false },
+		);
+		index.addEventListener(
+			"pointermove",
+			({ buttons, clientY }: PointerEvent): void => {
+				// Only proceed if we're dragging
+				if (1 === buttons) {
+					const groupItem = document.elementFromPoint(
+						index.offsetLeft,
+						clientY,
+					);
 
-				// If the element under the pointer is within the index
-				if (groupItem && index.contains(groupItem)) {
-					// Find an element with an ID that matches the text and scroll it into view
-					document.querySelector(`#group-${groupItem.textContent}`)?.scrollIntoView(true);
+					// If the element under the pointer is within the index
+					if (groupItem && index.contains(groupItem)) {
+						// Find an element with an ID that matches the text and scroll it into view
+						document
+							.querySelector(`#group-${groupItem.textContent}`)
+							?.scrollIntoView(true);
+					}
 				}
-			}
-		});
+			},
+		);
 
 		this.containerElement.append(index);
 
@@ -119,10 +143,10 @@ export default class List {
 
 	public scrollTo(id: string): void {
 		const item = document.querySelector(`#item-${id}`) as HTMLLIElement,
-					itemTop = item.offsetTop,
-					itemBottom = itemTop + item.offsetHeight,
-					listTop = this.containerElement.scrollTop,
-					listBottom = listTop + this.containerElement.offsetHeight;
+			itemTop = item.offsetTop,
+			itemBottom = itemTop + item.offsetHeight,
+			listTop = this.containerElement.scrollTop,
+			listBottom = listTop + this.containerElement.offsetHeight;
 
 		let scrollPos: number | undefined;
 
@@ -135,14 +159,16 @@ export default class List {
 
 		// If we have somewhere to scroll, do it now
 		if (undefined !== scrollPos) {
-			this.appController.viewStack[this.appController.viewStack.length - 1].scrollPos = scrollPos;
+			this.appController.viewStack[
+				this.appController.viewStack.length - 1
+			].scrollPos = scrollPos;
 			this.appController.setScrollPosition();
 		}
 	}
 
 	public setAction(action: ListAction): void {
-		let	validAction = false,
-				savePosition = false;
+		let validAction = false,
+			savePosition = false;
 
 		// Check that a valid action was specified
 		switch (action) {

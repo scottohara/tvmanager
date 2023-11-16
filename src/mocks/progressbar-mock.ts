@@ -1,8 +1,10 @@
 import type { Section } from "~/components";
 
 export default class ProgressBarMock {
-	public constructor(private total: number,
-						private readonly sections: Section[]) {}
+	public constructor(
+		private total: number,
+		private readonly sections: Section[],
+	) {}
 
 	public setTotal(total: number): number {
 		this.total = total;

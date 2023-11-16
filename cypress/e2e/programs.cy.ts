@@ -1,7 +1,4 @@
-import type {
-	ListItem,
-	TestData
-} from "~/support/types";
+import type { ListItem, TestData } from "~/support/types";
 import {
 	checkGroup,
 	checkProgress,
@@ -18,7 +15,7 @@ import {
 	listItem,
 	listItems,
 	secondListItem,
-	thirdListItem
+	thirdListItem,
 } from "~/support/e2e";
 import { programName } from "~/support/program";
 
@@ -37,18 +34,16 @@ describe("Programs", (): void => {
 								{ status: "Recorded" },
 								{ status: "Expected" },
 								{ status: "Missed" },
-								{}
-							]
+								{},
+							],
 						},
 						{
-							episodes: []
+							episodes: [],
 						},
 						{
-							episodes: [
-								{ status: "Watched" }
-							]
-						}
-					]
+							episodes: [{ status: "Watched" }],
+						},
+					],
 				},
 				{ programName: "R08", series: [] },
 				{ programName: "R07", series: [] },
@@ -59,21 +54,21 @@ describe("Programs", (): void => {
 				{ programName: "R02", series: [] },
 				{ programName: "R01", series: [] },
 				{ programName: "M01", series: [] },
-				{	programName: "D15", series: [] },
-				{	programName: "D14", series: [] },
-				{	programName: "D13", series: [] },
-				{	programName: "D12", series: [] },
-				{	programName: "D11", series: [] },
-				{	programName: "D10", series: [] },
-				{	programName: "D09", series: [] },
-				{	programName: "D08", series: [] },
-				{	programName: "D07", series: [] },
-				{	programName: "D06", series: [] },
-				{	programName: "D05", series: [] },
-				{	programName: "D04", series: [] },
-				{	programName: "D03", series: [] },
-				{	programName: "D02", series: [] },
-				{	programName: "D01", series: [] },
+				{ programName: "D15", series: [] },
+				{ programName: "D14", series: [] },
+				{ programName: "D13", series: [] },
+				{ programName: "D12", series: [] },
+				{ programName: "D11", series: [] },
+				{ programName: "D10", series: [] },
+				{ programName: "D09", series: [] },
+				{ programName: "D08", series: [] },
+				{ programName: "D07", series: [] },
+				{ programName: "D06", series: [] },
+				{ programName: "D05", series: [] },
+				{ programName: "D04", series: [] },
+				{ programName: "D03", series: [] },
+				{ programName: "D02", series: [] },
+				{ programName: "D01", series: [] },
 				{
 					programName: "Another Test Program",
 					series: [
@@ -81,25 +76,25 @@ describe("Programs", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
-							episodes: [
-								{ status: "Expected", statusDate: "2000-01-01" },
-								{}
-							]
-						}
-					]
-				}
-			]
+							episodes: [{ status: "Expected", statusDate: "2000-01-01" }, {}],
+						},
+					],
+				},
+			],
 		};
 
 		cy.createTestData(data);
 
 		expectedItems = [
 			"A",
-			{ label: "Another Test Program", progress: { watched: 1, recorded: 1, expected: 2, noStatus: 1 } },
+			{
+				label: "Another Test Program",
+				progress: { watched: 1, recorded: 1, expected: 2, noStatus: 1 },
+			},
 			"D",
 			{ label: "D01" },
 			{ label: "D02" },
@@ -128,7 +123,10 @@ describe("Programs", (): void => {
 			{ label: "R07" },
 			{ label: "R08" },
 			"T",
-			{ label: "Test Program", progress: { watched: 2, recorded: 1, expected: 1, noStatus: 2 } }
+			{
+				label: "Test Program",
+				progress: { watched: 2, recorded: 1, expected: 1, noStatus: 2 },
+			},
 		];
 	});
 
@@ -183,15 +181,30 @@ describe("Programs", (): void => {
 
 	describe("index", (): void => {
 		it("should scroll the list when the index is swiped", (): void => {
-			cy.get("#group-T").should((item: JQuery): Chai.Assertion => expect(item.position().top).to.be.greaterThan(Number(Cypress.$(list).height())));
+			cy.get("#group-T").should(
+				(item: JQuery): Chai.Assertion =>
+					expect(item.position().top).to.be.greaterThan(
+						Number(Cypress.$(list).height()),
+					),
+			);
 			cy.get(index).trigger("pointerdown", "top", { buttons: 1 });
 			cy.get(index).trigger("pointermove", "bottom", { buttons: 1 });
 			cy.get(index).trigger("pointerup");
-			cy.get("#group-T").should((item: JQuery): Chai.Assertion => expect(item.position().top).to.be.lessThan(Number(Cypress.$(list).height())));
+			cy.get("#group-T").should(
+				(item: JQuery): Chai.Assertion =>
+					expect(item.position().top).to.be.lessThan(
+						Number(Cypress.$(list).height()),
+					),
+			);
 			cy.get(index).trigger("pointerdown", "bottom", { buttons: 1 });
 			cy.get(index).trigger("pointermove", "top", { buttons: 1 });
 			cy.get(index).trigger("pointerup");
-			cy.get("#group-T").should((item: JQuery): Chai.Assertion => expect(item.position().top).to.be.greaterThan(Number(Cypress.$(list).height())));
+			cy.get("#group-T").should(
+				(item: JQuery): Chai.Assertion =>
+					expect(item.position().top).to.be.greaterThan(
+						Number(Cypress.$(list).height()),
+					),
+			);
 		});
 	});
 
@@ -226,7 +239,9 @@ describe("Programs", (): void => {
 	});
 
 	describe("add program", (): void => {
-		beforeEach((): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click());
+		beforeEach(
+			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
+		);
 
 		it("should update the Programs view if the changes are saved", (): void => {
 			cy.get(programName).should("have.value", "");
@@ -267,7 +282,9 @@ describe("Programs", (): void => {
 	});
 
 	describe("delete program", (): void => {
-		beforeEach((): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click());
+		beforeEach(
+			(): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click(),
+		);
 
 		it("should do nothing if the delete is not confirmed", (): void => {
 			cy.on("window:confirm", (): boolean => false);

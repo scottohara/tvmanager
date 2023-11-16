@@ -1,7 +1,4 @@
-import type {
-	NavButtonEventHandler,
-	SeriesListItem
-} from "~/controllers";
+import type { NavButtonEventHandler, SeriesListItem } from "~/controllers";
 import Program from "~/models/program-model";
 import Series from "~/models/series-model";
 import SeriesView from "~/views/series-view.html";
@@ -24,7 +21,15 @@ export default class SeriesController extends ViewController {
 			this.originalProgramId = this.listItem.series.programId;
 		} else {
 			// Otherwise, we're adding a new series
-			this.listItem = { series: new Series(null, `Series ${Number(listItem.sequence) + 1}`, null, (listItem.program as Program).id, String((listItem.program as Program).programName)) };
+			this.listItem = {
+				series: new Series(
+					null,
+					`Series ${Number(listItem.sequence) + 1}`,
+					null,
+					(listItem.program as Program).id,
+					String((listItem.program as Program).programName),
+				),
+			};
 		}
 	}
 
@@ -51,25 +56,25 @@ export default class SeriesController extends ViewController {
 			label: "Add/Edit Series",
 			leftButton: {
 				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
-				label: "Cancel"
+				label: "Cancel",
 			},
 			rightButton: {
 				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Save"
-			}
+				label: "Save",
+			},
 		};
 
 		// Populate the list of programs
 		const programs = await Program.list(),
-					options = programs.map((program: Program): HTMLOptionElement => {
-						const option = document.createElement("option");
+			options = programs.map((program: Program): HTMLOptionElement => {
+				const option = document.createElement("option");
 
-						option.value = String(program.id);
-						option.textContent = String(program.programName);
+				option.value = String(program.id);
+				option.textContent = String(program.programName);
 
-						return option;
-					});
+				return option;
+			});
 
 		this.moveTo.append(...options);
 

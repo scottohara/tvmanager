@@ -1,21 +1,20 @@
-import type {
-	ModelType,
-	SyncAction
-} from "~/models";
+import type { ModelType, SyncAction } from "~/models";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 
 const removeStub = sinon.stub(),
-			listStub = sinon.stub(),
-			countStub = sinon.stub(),
-			removeAllStub = sinon.stub();
+	listStub = sinon.stub(),
+	countStub = sinon.stub(),
+	removeAllStub = sinon.stub();
 
 let syncList: SyncMock[] = [];
 
 export default class SyncMock {
-	public constructor(public type: ModelType | null,
-						public id: string | null,
-						public readonly action?: SyncAction) {
+	public constructor(
+		public type: ModelType | null,
+		public id: string | null,
+		public readonly action?: SyncAction,
+	) {
 		removeStub.reset();
 	}
 
@@ -27,7 +26,10 @@ export default class SyncMock {
 		return countStub.returns(Promise.resolve(syncList.length));
 	}
 
-	public static get removeAll(): SinonStub<unknown[], Promise<string | undefined>> {
+	public static get removeAll(): SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> {
 		return removeAllStub;
 	}
 

@@ -1,13 +1,9 @@
-import type {
-	ListItem,
-	Progress,
-	TestData
-} from "~/support/types";
+import type { ListItem, Progress, TestData } from "~/support/types";
 import {
 	allExpectedRow,
 	allIncompleteRow,
 	allMissedRow,
-	allRecordedRow
+	allRecordedRow,
 } from "~/support/settings";
 import {
 	checkProgress,
@@ -20,16 +16,16 @@ import {
 	lastListItem,
 	list,
 	listItem,
-	listItems
+	listItems,
 } from "~/support/e2e";
 import type { EpisodeStatus } from "~/models";
 import { watched } from "~/support/episode";
 
-const reports: { status: EpisodeStatus | "Incomplete"; selector: string; }[] = [
+const reports: { status: EpisodeStatus | "Incomplete"; selector: string }[] = [
 	{ status: "Recorded", selector: allRecordedRow },
 	{ status: "Expected", selector: allExpectedRow },
 	{ status: "Missed", selector: allMissedRow },
-	{ status: "Incomplete", selector: allIncompleteRow }
+	{ status: "Incomplete", selector: allIncompleteRow },
 ];
 
 describe("Report", (): void => {
@@ -47,28 +43,22 @@ describe("Report", (): void => {
 								programName: "Program Z",
 								series: [
 									{
-										episodes: [
-											{ status: "Watched" },
-											{ status: "Watched" }
-										]
+										episodes: [{ status: "Watched" }, { status: "Watched" }],
 									},
 									{
 										seriesName: "Series C",
 										episodes: [
 											{ status: "Watched" },
 											{ status: "Watched" },
-											{}
-										]
+											{},
+										],
 									},
 									{
 										seriesName: "Series B",
-										episodes: [
-											{ status: "Watched" },
-											{}
-										]
+										episodes: [{ status: "Watched" }, {}],
 									},
-									{ episodes: [] }
-								]
+									{ episodes: [] },
+								],
 							},
 							{
 								programName: "Program A",
@@ -81,19 +71,28 @@ describe("Report", (): void => {
 											{ status: "Recorded" },
 											{ status: "Expected" },
 											{ status: "Missed" },
-											{}
-										]
+											{},
+										],
 									},
-									{ episodes: [{}] }
-								]
-							}
-						]
+									{ episodes: [{}] },
+								],
+							},
+						],
 					};
 
 					expectedItems = [
-						{ label: "Program A:Series A", progress: { watched: 2, recorded: 1, expected: 1, noStatus: 2 } },
-						{ label: "Program Z:Series B", progress: { watched: 1, noStatus: 1 } },
-						{ label: "Program Z:Series C", progress: { watched: 2, noStatus: 1 } }
+						{
+							label: "Program A:Series A",
+							progress: { watched: 2, recorded: 1, expected: 1, noStatus: 2 },
+						},
+						{
+							label: "Program Z:Series B",
+							progress: { watched: 1, noStatus: 1 },
+						},
+						{
+							label: "Program Z:Series C",
+							progress: { watched: 2, noStatus: 1 },
+						},
 					];
 				} else {
 					data = {
@@ -103,42 +102,41 @@ describe("Report", (): void => {
 								series: [
 									{
 										seriesName: "Series C",
-										episodes: [
-											{ status },
-											{},
-											{ status }
-										]
+										episodes: [{ status }, {}, { status }],
 									},
 									{
 										seriesName: "Series B",
-										episodes: [
-											{ status },
-											{}
-										]
+										episodes: [{ status }, {}],
 									},
-									{ episodes: [] }
-								]
+									{ episodes: [] },
+								],
 							},
 							{
 								programName: "Program A",
 								series: [
 									{
 										seriesName: "Series A",
-										episodes: [
-											{ status },
-											{ status }
-										]
+										episodes: [{ status }, { status }],
 									},
-									{ episodes: [{}] }
-								]
-							}
-						]
+									{ episodes: [{}] },
+								],
+							},
+						],
 					};
 
 					expectedItems = [
-						{ label: "Program A:Series A", progress: { [status.toLowerCase()]: 2 } },
-						{ label: "Program Z:Series B", progress: { [status.toLowerCase()]: 1 } },
-						{ label: "Program Z:Series C", progress: { [status.toLowerCase()]: 2 } }
+						{
+							label: "Program A:Series A",
+							progress: { [status.toLowerCase()]: 2 },
+						},
+						{
+							label: "Program Z:Series B",
+							progress: { [status.toLowerCase()]: 1 },
+						},
+						{
+							label: "Program Z:Series C",
+							progress: { [status.toLowerCase()]: 2 },
+						},
 					];
 				}
 
@@ -192,13 +190,17 @@ describe("Report", (): void => {
 			describe("edit episode", (): void => {
 				let progress: Progress | undefined;
 
-				beforeEach((): Cypress.Chainable<JQuery> => cy.get(lastListItem).click());
+				beforeEach(
+					(): Cypress.Chainable<JQuery> => cy.get(lastListItem).click(),
+				);
 
 				it("should not update the Report view if the changes are cancelled", (): void => {
-					[,,{ progress }] = expectedItems;
+					[, , { progress }] = expectedItems;
 
 					cy.get(firstListItem).click();
-					cy.get(`#${"Incomplete" === status ? "watched" : status.toLowerCase()}`).click();
+					cy.get(
+						`#${"Incomplete" === status ? "watched" : status.toLowerCase()}`,
+					).click();
 					cy.get(headerLeftButton).click();
 					cy.get(headerLeftButton).click();
 					cy.get(lastListItem).within((): void => checkProgress(progress));

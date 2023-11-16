@@ -1,7 +1,4 @@
-import type {
-	NavButtonEventHandler,
-	ProgramListItem
-} from "~/controllers";
+import type { NavButtonEventHandler, ProgramListItem } from "~/controllers";
 import Program from "~/models/program-model";
 import ProgramView from "~/views/program-view.html";
 import ViewController from "~/controllers/view-controller";
@@ -13,7 +10,9 @@ export default class ProgramController extends ViewController {
 		super();
 
 		// If a list item was passed, we're editing an existing program, otherwise we're adding a new program
-		this.listItem = listItem ?? { program: new Program(null, "", 0, 0, 0, 0, 0) };
+		this.listItem = listItem ?? {
+			program: new Program(null, "", 0, 0, 0, 0, 0),
+		};
 	}
 
 	public get view(): string {
@@ -31,13 +30,13 @@ export default class ProgramController extends ViewController {
 			label: "Add/Edit Program",
 			leftButton: {
 				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
-				label: "Cancel"
+				label: "Cancel",
 			},
 			rightButton: {
 				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Save"
-			}
+				label: "Save",
+			},
 		};
 
 		// Set the program details

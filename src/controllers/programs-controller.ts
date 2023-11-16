@@ -28,16 +28,24 @@ export default class ProgramsController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: "Schedule"
+				label: "Schedule",
 			},
 			rightButton: {
 				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
-				label: "+"
-			}
+				label: "+",
+			},
 		};
 
 		// Instantiate a List object
-		this.programList = new List("list", ProgramListTemplate, "programGroup", [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
+		this.programList = new List(
+			"list",
+			ProgramListTemplate,
+			"programGroup",
+			[],
+			this.viewItem.bind(this),
+			this.editItem.bind(this),
+			this.deleteItem.bind(this),
+		);
 
 		// Activate the controller
 		return this.activate();
@@ -68,7 +76,10 @@ export default class ProgramsController extends ViewController {
 	private async viewItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.programList.items[listIndex] as Program;
 
-		return this.appController.pushView("seriesList", { listIndex, program: this.activeListItem });
+		return this.appController.pushView("seriesList", {
+			listIndex,
+			program: this.activeListItem,
+		});
 	}
 
 	private async addItem(): Promise<void> {
@@ -78,7 +89,10 @@ export default class ProgramsController extends ViewController {
 	private async editItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.programList.items[listIndex] as Program;
 
-		return this.appController.pushView("program", { listIndex, program: this.activeListItem });
+		return this.appController.pushView("program", {
+			listIndex,
+			program: this.activeListItem,
+		});
 	}
 
 	private async deleteItem(listIndex: number): Promise<void> {
@@ -110,8 +124,8 @@ export default class ProgramsController extends ViewController {
 			rightButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Done"
-			}
+				label: "Done",
+			},
 		};
 
 		// Set the view footer
@@ -136,8 +150,8 @@ export default class ProgramsController extends ViewController {
 			leftButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Done"
-			}
+				label: "Done",
+			},
 		};
 
 		// Set the view footer
@@ -161,13 +175,13 @@ export default class ProgramsController extends ViewController {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
-				label: "Edit"
+				label: "Edit",
 			},
 			rightButton: {
 				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
 				style: "cautionButton",
-				label: "Delete"
-			}
+				label: "Delete",
+			},
 		};
 
 		// Set the view footer

@@ -10,5 +10,5 @@ export default Promise.resolve({
 	episodesStore: EpisodesStoreMock,
 	settingsStore: SettingsStoreMock,
 	syncsStore: SyncsStoreMock,
-	version: 1
+	version: 1,
 });

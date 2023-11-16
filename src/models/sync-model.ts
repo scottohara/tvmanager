@@ -1,14 +1,12 @@
-import type {
-	ModelType,
-	PersistedSync,
-	SyncAction
-} from "~/models";
+import type { ModelType, PersistedSync, SyncAction } from "~/models";
 import Base from "~/models/base-model";
 
 export default class Sync extends Base {
-	public constructor(public type: ModelType | null,
-						public id: string | null,
-						public readonly action?: SyncAction) {
+	public constructor(
+		public type: ModelType | null,
+		public id: string | null,
+		public readonly action?: SyncAction,
+	) {
 		super();
 	}
 
@@ -16,7 +14,12 @@ export default class Sync extends Base {
 		let syncList: Sync[] = [];
 
 		try {
-			syncList = await Promise.all((await (await this.db).syncsStore.list()).map((sync: PersistedSync): Sync => new Sync(sync.Type, sync.ID, sync.Action)));
+			syncList = await Promise.all(
+				(await (await this.db).syncsStore.list()).map(
+					(sync: PersistedSync): Sync =>
+						new Sync(sync.Type, sync.ID, sync.Action),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -49,7 +52,9 @@ export default class Sync extends Base {
 	}
 
 	public async remove(): Promise<void> {
-		await (await this.db).syncsStore.remove(this.type as ModelType, String(this.id));
+		await (
+			await this.db
+		).syncsStore.remove(this.type as ModelType, String(this.id));
 
 		// Clear the instance properties
 		this.type = null;

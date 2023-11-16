@@ -35,8 +35,8 @@ export default class AboutController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: "Settings"
-			}
+				label: "Settings",
+			},
 		};
 
 		// Set the total number of programs
@@ -46,7 +46,10 @@ export default class AboutController extends ViewController {
 		this.totalSeries.value = String(await Series.count());
 
 		// Set the total number of episodes, and the percentage watched
-		this.totalEpisodes.value = this.watchedPercent(await Episode.totalCount(), await Episode.countByStatus("Watched"));
+		this.totalEpisodes.value = this.watchedPercent(
+			await Episode.totalCount(),
+			await Episode.countByStatus("Watched"),
+		);
 
 		// Set the version information
 		this.databaseVersion.value = `v${(await DatabaseService).version}`;
@@ -62,8 +65,11 @@ export default class AboutController extends ViewController {
 	private watchedPercent(totalCount: number, watchedCount: number): string {
 		// Calculate the percentage of watched episodes
 		const DECIMAL_PLACES = 2,
-					PERCENT = 100,
-					watchedPercent: string = totalCount > 0 ? (watchedCount / totalCount * PERCENT).toFixed(DECIMAL_PLACES) : "0";
+			PERCENT = 100,
+			watchedPercent: string =
+				totalCount > 0
+					? ((watchedCount / totalCount) * PERCENT).toFixed(DECIMAL_PLACES)
+					: "0";
 
 		// Return the total number of episodes and percent watched
 		return `${totalCount} (${watchedPercent}% watched)`;

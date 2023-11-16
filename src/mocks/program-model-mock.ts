@@ -2,16 +2,22 @@ import type { SerializedModel } from "~/models";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 
-const saveStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
-			removeStub: SinonStub = sinon.stub(),
-			listStub: SinonStub = sinon.stub(),
-			findStub: SinonStub<string[], Promise<ProgramMock>> = sinon.stub(),
-			countStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
-			fromJsonStub: SinonStub<[SerializedModel], ProgramMock> = sinon.stub();
+const saveStub: SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> = sinon.stub(),
+	removeStub: SinonStub = sinon.stub(),
+	listStub: SinonStub = sinon.stub(),
+	findStub: SinonStub<string[], Promise<ProgramMock>> = sinon.stub(),
+	countStub: SinonStub = sinon.stub(),
+	removeAllStub: SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> = sinon.stub(),
+	fromJsonStub: SinonStub<[SerializedModel], ProgramMock> = sinon.stub();
 
-let	programs: ProgramMock[] = [],
-		removeAllOk: boolean;
+let programs: ProgramMock[] = [],
+	removeAllOk: boolean;
 
 export default class ProgramMock {
 	public progressBarDisplay = "";
@@ -30,13 +36,15 @@ export default class ProgramMock {
 
 	public setExpectedCount: SinonStub = sinon.stub();
 
-	public constructor(public readonly id: string | null,
-						public programName: string | null,
-						public seriesCount = 0,
-						public readonly episodeCount = 0,
-						public readonly watchedCount = 0,
-						public readonly recordedCount = 0,
-						public readonly expectedCount = 0) {
+	public constructor(
+		public readonly id: string | null,
+		public programName: string | null,
+		public seriesCount = 0,
+		public readonly episodeCount = 0,
+		public readonly watchedCount = 0,
+		public readonly recordedCount = 0,
+		public readonly expectedCount = 0,
+	) {
 		this.toJson = sinon.stub().returns({});
 		saveStub.resetHistory();
 		removeStub.reset();
@@ -47,14 +55,21 @@ export default class ProgramMock {
 	}
 
 	public static get find(): SinonStub<string[], Promise<ProgramMock>> {
-		return findStub.returns(Promise.resolve(new ProgramMock(String(findStub.args[0]), "test-program")));
+		return findStub.returns(
+			Promise.resolve(
+				new ProgramMock(String(findStub.args[0]), "test-program"),
+			),
+		);
 	}
 
 	public static get count(): SinonStub<unknown[], Promise<number>> {
 		return countStub.returns(Promise.resolve(1));
 	}
 
-	public static get removeAll(): SinonStub<unknown[], Promise<string | undefined>> {
+	public static get removeAll(): SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> {
 		if (!removeAllOk) {
 			removeAllStub.returns(Promise.resolve("Force failed"));
 		}

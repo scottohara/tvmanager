@@ -8,14 +8,14 @@ import { expose } from "~/mocks/comlink-mock";
 import sinon from "sinon";
 
 const connect = sinon.stub(),
-			storeProxy: TVManagerStoreProxy = {
-				connect,
-				programsStore: ProgramsStoreMock,
-				seriesStore: SeriesStoreMock,
-				episodesStore: EpisodesStoreMock,
-				settingsStore: SettingsStoreMock,
-				syncsStore: SyncsStoreMock
-			};
+	storeProxy: TVManagerStoreProxy = {
+		connect,
+		programsStore: ProgramsStoreMock,
+		seriesStore: SeriesStoreMock,
+		episodesStore: EpisodesStoreMock,
+		settingsStore: SettingsStoreMock,
+		syncsStore: SyncsStoreMock,
+	};
 
 // This is needed because we can't seem to expose a stub directly via Comlink
 async function connectCalledWith(version: number): Promise<boolean> {
@@ -24,5 +24,5 @@ async function connectCalledWith(version: number): Promise<boolean> {
 
 expose({
 	...storeProxy,
-	connectCalledWith
+	connectCalledWith,
 });

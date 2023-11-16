@@ -4,15 +4,8 @@ import * as ProgramsStoreFactory from "~/stores/programs";
 import * as SeriesStoreFactory from "~/stores/series";
 import * as SettingsStoreFactory from "~/stores/settings";
 import * as SyncsStoreFactory from "~/stores/syncs";
-import type {
-	IDBPDatabase,
-	IDBPTransaction,
-	StoreNames
-} from "idb";
-import type {
-	Progress,
-	TestData
-} from "~/support/types";
+import type { IDBPDatabase, IDBPTransaction, StoreNames } from "idb";
+import type { Progress, TestData } from "~/support/types";
 import type { TVManagerDB } from "~/stores";
 import { openDB } from "idb";
 
@@ -42,18 +35,24 @@ export const notices = "#notices";
 export const dismissNoticeButton = "#notices > div.notice > a:first-of-type";
 
 const progressBar = `${listItem} > div.progressBar`,
-			progressTotal = `${progressBar} div.total`,
-			progressWatched = `${progressBar} div.watched`,
-			progressRecorded = `${progressBar} div.recorded`,
-			progressExpected = `${progressBar} div.expected`,
-			progressMissed = `${progressBar} div.missed`;
+	progressTotal = `${progressBar} div.total`,
+	progressWatched = `${progressBar} div.watched`,
+	progressRecorded = `${progressBar} div.recorded`,
+	progressExpected = `${progressBar} div.expected`,
+	progressMissed = `${progressBar} div.missed`;
 
 export function checkGroup(group: HTMLLIElement, label: string): void {
 	cy.wrap(group).should("have.class", "group");
 	cy.wrap(group).should("have.text", label);
 }
 
-export function checkProgress({ watched = 0, recorded = 0, expected = 0, missed = 0, noStatus = 0 }: Progress = {}): void {
+export function checkProgress({
+	watched = 0,
+	recorded = 0,
+	expected = 0,
+	missed = 0,
+	noStatus = 0,
+}: Progress = {}): void {
 	const total = watched + recorded + expected + missed + noStatus;
 
 	if (total > 0) {
@@ -88,60 +87,111 @@ export function checkProgress({ watched = 0, recorded = 0, expected = 0, missed 
 	}
 }
 
-Cypress.Commands.add("createTestData", ({ programs = [], settings = [] }: TestData): void => {
-	cy.window().then(async (): Promise<void> => {
-		const db = await openDB<TVManagerDB>("tvmanager", 1, {
-						upgrade(database: IDBPDatabase<TVManagerDB>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<TVManagerDB, StoreNames<TVManagerDB>[], "versionchange">): void {
-							for (let version: number = oldVersion; version < Number(newVersion); version++) {
-								ProgramsStoreFactory.upgradeTo[version](database, transaction);
-								SeriesStoreFactory.upgradeTo[version](database, transaction);
-								EpisodesStoreFactory.upgradeTo[version](database, transaction);
-								SyncsStoreFactory.upgradeTo[version](database, transaction);
-								SettingsStoreFactory.upgradeTo[version](database, transaction);
-							}
+Cypress.Commands.add(
+	"createTestData",
+	({ programs = [], settings = [] }: TestData): void => {
+		cy.window().then(async (): Promise<void> => {
+			const db = await openDB<TVManagerDB>("tvmanager", 1, {
+					upgrade(
+						database: IDBPDatabase<TVManagerDB>,
+						oldVersion: number,
+						newVersion: number | null,
+						transaction: IDBPTransaction<
+							TVManagerDB,
+							StoreNames<TVManagerDB>[],
+							"versionchange"
+						>,
+					): void {
+						for (
+							let version: number = oldVersion;
+							version < Number(newVersion);
+							version++
+						) {
+							ProgramsStoreFactory.upgradeTo[version](database, transaction);
+							SeriesStoreFactory.upgradeTo[version](database, transaction);
+							EpisodesStoreFactory.upgradeTo[version](database, transaction);
+							SyncsStoreFactory.upgradeTo[version](database, transaction);
+							SettingsStoreFactory.upgradeTo[version](database, transaction);
 						}
-					}),
-					programsStore = ProgramsStoreFactory.create(db),
-					seriesStore = SeriesStoreFactory.create(db),
-					episodesStore = EpisodesStoreFactory.create(db),
-					syncsStore = SyncsStoreFactory.create(db),
-					settingsStore = SettingsStoreFactory.create(db);
+					},
+				}),
+				programsStore = ProgramsStoreFactory.create(db),
+				seriesStore = SeriesStoreFactory.create(db),
+				episodesStore = EpisodesStoreFactory.create(db),
+				syncsStore = SyncsStoreFactory.create(db),
+				settingsStore = SettingsStoreFactory.create(db);
 
-		await Promise.all([programsStore.removeAll(), seriesStore.removeAll(), episodesStore.removeAll(), syncsStore.removeAll(), settingsStore.remove("LastSyncTime")]);
-		await Promise.all(settings.filter(({ value }): boolean => "" === value).map(async ({ name }): Promise<void> => settingsStore.remove(name)));
-		await Promise.all(settings.filter(({ value }): boolean => "" !== value).map(async ({ name, value }): Promise<string> => settingsStore.save(name, value)));
+			await Promise.all([
+				programsStore.removeAll(),
+				seriesStore.removeAll(),
+				episodesStore.removeAll(),
+				syncsStore.removeAll(),
+				settingsStore.remove("LastSyncTime"),
+			]);
+			await Promise.all(
+				settings
+					.filter(({ value }): boolean => "" === value)
+					.map(async ({ name }): Promise<void> => settingsStore.remove(name)),
+			);
+			await Promise.all(
+				settings
+					.filter(({ value }): boolean => "" !== value)
+					.map(
+						async ({ name, value }): Promise<string> =>
+							settingsStore.save(name, value),
+					),
+			);
 
-		programs.forEach(async ({ programName, series }, programIndex): Promise<void> => {
-			const programId = String(programIndex);
+			programs.forEach(
+				async ({ programName, series }, programIndex): Promise<void> => {
+					const programId = String(programIndex);
 
-			await programsStore.save({
-				ProgramID: programId,
-				Name: programName ?? `Program ${programIndex}`
-			});
-
-			series.forEach(async ({ seriesName, nowShowing, episodes }, seriesIndex): Promise<void> => {
-				const seriesId = `${programId}-${seriesIndex}`;
-
-				await seriesStore.save({
-					SeriesID: seriesId,
-					Name: seriesName ?? `Series ${seriesIndex}`,
-					NowShowing: nowShowing ?? null,
-					ProgramID: programId
-				});
-
-				episodes.forEach(async ({ episodeName, status = "", statusDate = "", unverified = "false", unscheduled = "false" }, episodeIndex): Promise<void> => {
-					await episodesStore.save({
-						EpisodeID: `${seriesId}-${episodeIndex}`,
-						Name: episodeName ?? `Episode ${episodeIndex}`,
-						SeriesID: seriesId,
-						Status: status,
-						StatusDate: statusDate,
-						Unverified: unverified,
-						Unscheduled: unscheduled,
-						Sequence: episodeIndex
+					await programsStore.save({
+						ProgramID: programId,
+						Name: programName ?? `Program ${programIndex}`,
 					});
-				});
-			});
+
+					series.forEach(
+						async (
+							{ seriesName, nowShowing, episodes },
+							seriesIndex,
+						): Promise<void> => {
+							const seriesId = `${programId}-${seriesIndex}`;
+
+							await seriesStore.save({
+								SeriesID: seriesId,
+								Name: seriesName ?? `Series ${seriesIndex}`,
+								NowShowing: nowShowing ?? null,
+								ProgramID: programId,
+							});
+
+							episodes.forEach(
+								async (
+									{
+										episodeName,
+										status = "",
+										statusDate = "",
+										unverified = "false",
+										unscheduled = "false",
+									},
+									episodeIndex,
+								): Promise<void> => {
+									await episodesStore.save({
+										EpisodeID: `${seriesId}-${episodeIndex}`,
+										Name: episodeName ?? `Episode ${episodeIndex}`,
+										SeriesID: seriesId,
+										Status: status,
+										StatusDate: statusDate,
+										Unverified: unverified,
+										Unscheduled: unscheduled,
+										Sequence: episodeIndex,
+									});
+								},
+							);
+						},
+					);
+				},
+			);
 		});
-	});
-});
+	},
+);

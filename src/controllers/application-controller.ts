@@ -4,7 +4,7 @@ import type {
 	NoticeStack,
 	View,
 	ViewControllerArgs,
-	ViewControllerSet
+	ViewControllerSet,
 } from "~/controllers";
 import AboutController from "~/controllers/about-controller";
 import DataSyncController from "~/controllers/dataSync-controller";
@@ -33,7 +33,7 @@ export default class ApplicationController {
 
 	private readonly noticeStack: NoticeStack = {
 		height: -20,
-		notice: []
+		notice: [],
 	};
 
 	private viewControllers!: ViewControllerSet;
@@ -51,7 +51,10 @@ export default class ApplicationController {
 		ApplicationController.singletonInstance = this;
 
 		// Bind a handler for transition end events
-		this.contentWrapper.addEventListener("transitionend", this.contentShown.bind(this));
+		this.contentWrapper.addEventListener(
+			"transitionend",
+			this.contentShown.bind(this),
+		);
 
 		return this;
 	}
@@ -124,7 +127,7 @@ export default class ApplicationController {
 			series: SeriesController,
 			seriesList: SeriesListController,
 			settings: SettingsController,
-			unscheduled: UnscheduledController
+			unscheduled: UnscheduledController,
 		};
 
 		// Display the schedule view
@@ -133,7 +136,7 @@ export default class ApplicationController {
 		// Get the last sync time and number of local changes to sync
 		const [lastSyncTime, localChanges] = await Promise.all([
 			Setting.get("LastSyncTime"),
-			Sync.count()
+			Sync.count(),
 		]);
 
 		this.showSyncNotice(lastSyncTime, localChanges);
@@ -152,17 +155,22 @@ export default class ApplicationController {
 	}
 
 	public getScrollPosition(): void {
-		this.currentView.scrollPos = (this.content.firstElementChild as HTMLElement).scrollTop;
+		this.currentView.scrollPos = (
+			this.content.firstElementChild as HTMLElement
+		).scrollTop;
 	}
 
 	public setScrollPosition(): void {
 		// If the scroll position is -1, set it to the bottom element
 		if (-1 === this.currentView.scrollPos) {
-			this.currentView.scrollPos = (this.content.firstElementChild?.lastElementChild as HTMLElement).offsetTop;
+			this.currentView.scrollPos = (
+				this.content.firstElementChild?.lastElementChild as HTMLElement
+			).offsetTop;
 		}
 
 		// Scroll to the saved position
-		(this.content.firstElementChild as HTMLElement).scrollTop = this.currentView.scrollPos;
+		(this.content.firstElementChild as HTMLElement).scrollTop =
+			this.currentView.scrollPos;
 	}
 
 	public setFooter(): void {
@@ -171,8 +179,14 @@ export default class ApplicationController {
 			// If the view controller specified a left-hand button, set it up
 			if (undefined !== this.currentView.controller.footer.leftButton) {
 				// Bind the event handler for the button
-				if (undefined !== this.currentView.controller.footer.leftButton.eventHandler) {
-					this.footerLeftButton.addEventListener("click", this.currentView.controller.footer.leftButton.eventHandler);
+				if (
+					undefined !==
+					this.currentView.controller.footer.leftButton.eventHandler
+				) {
+					this.footerLeftButton.addEventListener(
+						"click",
+						this.currentView.controller.footer.leftButton.eventHandler,
+					);
 				}
 
 				// Style the button
@@ -180,11 +194,14 @@ export default class ApplicationController {
 				this.footerLeftButton.classList.add("button", "footer", "left");
 
 				if (undefined !== this.currentView.controller.footer.leftButton.style) {
-					this.footerLeftButton.classList.add(this.currentView.controller.footer.leftButton.style);
+					this.footerLeftButton.classList.add(
+						this.currentView.controller.footer.leftButton.style,
+					);
 				}
 
 				// Set the button label
-				this.footerLeftButton.textContent = this.currentView.controller.footer.leftButton.label;
+				this.footerLeftButton.textContent =
+					this.currentView.controller.footer.leftButton.label;
 
 				// Show the button
 				this.footerLeftButton.style.display = "inline";
@@ -201,20 +218,31 @@ export default class ApplicationController {
 			// If the view controller specified a right-hand button, set it up
 			if (undefined !== this.currentView.controller.footer.rightButton) {
 				// Bind the event handler for the button
-				if (undefined !== this.currentView.controller.footer.rightButton.eventHandler) {
-					this.footerRightButton.addEventListener("click", this.currentView.controller.footer.rightButton.eventHandler);
+				if (
+					undefined !==
+					this.currentView.controller.footer.rightButton.eventHandler
+				) {
+					this.footerRightButton.addEventListener(
+						"click",
+						this.currentView.controller.footer.rightButton.eventHandler,
+					);
 				}
 
 				// Style the button
 				this.footerRightButton.className = "";
 				this.footerRightButton.classList.add("button", "footer", "right");
 
-				if (undefined !== this.currentView.controller.footer.rightButton.style) {
-					this.footerRightButton.classList.add(this.currentView.controller.footer.rightButton.style);
+				if (
+					undefined !== this.currentView.controller.footer.rightButton.style
+				) {
+					this.footerRightButton.classList.add(
+						this.currentView.controller.footer.rightButton.style,
+					);
 				}
 
 				// Set the button label
-				this.footerRightButton.textContent = this.currentView.controller.footer.rightButton.label;
+				this.footerRightButton.textContent =
+					this.currentView.controller.footer.rightButton.label;
 
 				// Show the button
 				this.footerRightButton.style.display = "inline";
@@ -225,7 +253,10 @@ export default class ApplicationController {
 		}
 	}
 
-	public async pushView(view: string, args?: ViewControllerArgs): Promise<void> {
+	public async pushView(
+		view: string,
+		args?: ViewControllerArgs,
+	): Promise<void> {
 		// If a current view is displayed, save the current scroll position and clear the existing header/footer
 		if (this.viewStack.length > 0) {
 			this.getScrollPosition();
@@ -236,7 +267,7 @@ export default class ApplicationController {
 		// Push the view onto the stack and instantiate the controller with the specified arguments
 		this.viewStack.push({
 			controller: new this.viewControllers[view](args),
-			scrollPos: 0
+			scrollPos: 0,
 		});
 
 		// Display the view
@@ -246,16 +277,18 @@ export default class ApplicationController {
 	public showNotice(notice: Notice): void {
 		// Create a div for the new notice
 		const noticeContainer = document.createElement("div"),
-					noticeLeftButton = document.createElement("a"),
-					noticeLabel = document.createElement("p"),
-					duration = 500;
+			noticeLeftButton = document.createElement("a"),
+			noticeLabel = document.createElement("p"),
+			duration = 500;
 
 		noticeContainer.classList.add("notice");
 		noticeLabel.innerHTML = notice.label;
 		noticeContainer.append(noticeLeftButton, noticeLabel);
 		this.notices.append(noticeContainer);
 
-		noticeLeftButton.addEventListener("click", (): void => this.hideNotice(noticeContainer));
+		noticeLeftButton.addEventListener("click", (): void =>
+			this.hideNotice(noticeContainer),
+		);
 		noticeLeftButton.classList.add("button", "left", "cautionButton");
 		noticeLeftButton.textContent = "OK";
 
@@ -277,13 +310,16 @@ export default class ApplicationController {
 		this.noticeStack.notice.push(noticeContainer);
 
 		// Slide up the notices container to reveal the notice
-		this.notices.animate({
-			transform: `translateY(${this.noticeStack.height}px)`
-		}, {
-			duration,
-			easing: "ease",
-			fill: "forwards"
-		}).onfinish = this.noticesMoved.bind(this);
+		this.notices.animate(
+			{
+				transform: `translateY(${this.noticeStack.height}px)`,
+			},
+			{
+				duration,
+				easing: "ease",
+				fill: "forwards",
+			},
+		).onfinish = this.noticesMoved.bind(this);
 	}
 
 	public clearFooter(): void {
@@ -291,12 +327,20 @@ export default class ApplicationController {
 		if (undefined !== this.currentView.controller.footer) {
 			// If the view controller specified a left-hand button, unbind the event handler
 			if (undefined !== this.currentView.controller.footer.leftButton) {
-				this.footerLeftButton.removeEventListener("click", this.currentView.controller.footer.leftButton.eventHandler as NavButtonEventHandler);
+				this.footerLeftButton.removeEventListener(
+					"click",
+					this.currentView.controller.footer.leftButton
+						.eventHandler as NavButtonEventHandler,
+				);
 			}
 
 			// If the view controller specified a right-hand button, unbind the event handler
 			if (undefined !== this.currentView.controller.footer.rightButton) {
-				this.footerRightButton.removeEventListener("click", this.currentView.controller.footer.rightButton.eventHandler as NavButtonEventHandler);
+				this.footerRightButton.removeEventListener(
+					"click",
+					this.currentView.controller.footer.rightButton
+						.eventHandler as NavButtonEventHandler,
+				);
 			}
 		}
 
@@ -320,7 +364,10 @@ export default class ApplicationController {
 		await this.currentView.controller.activate?.(args);
 	}
 
-	private async show(onSuccess: (_?: ViewControllerArgs) => Promise<void>, args?: ViewControllerArgs): Promise<void> {
+	private async show(
+		onSuccess: (_?: ViewControllerArgs) => Promise<void>,
+		args?: ViewControllerArgs,
+	): Promise<void> {
 		// Show the now loading indicator
 		this.nowLoading.classList.add("loading");
 
@@ -354,8 +401,13 @@ export default class ApplicationController {
 		// If the view controller specified a left-hand button, set it up
 		if (undefined !== this.currentView.controller.header.leftButton) {
 			// Bind the event handler for the button
-			if (undefined !== this.currentView.controller.header.leftButton.eventHandler) {
-				this.headerLeftButton.addEventListener("click", this.currentView.controller.header.leftButton.eventHandler);
+			if (
+				undefined !== this.currentView.controller.header.leftButton.eventHandler
+			) {
+				this.headerLeftButton.addEventListener(
+					"click",
+					this.currentView.controller.header.leftButton.eventHandler,
+				);
 			}
 
 			// Style the button
@@ -363,11 +415,14 @@ export default class ApplicationController {
 			this.headerLeftButton.classList.add("button", "header", "left");
 
 			if (undefined !== this.currentView.controller.header.leftButton.style) {
-				this.headerLeftButton.classList.add(this.currentView.controller.header.leftButton.style);
+				this.headerLeftButton.classList.add(
+					this.currentView.controller.header.leftButton.style,
+				);
 			}
 
 			// Set the button label
-			this.headerLeftButton.textContent = this.currentView.controller.header.leftButton.label;
+			this.headerLeftButton.textContent =
+				this.currentView.controller.header.leftButton.label;
 
 			// Show the button
 			this.headerLeftButton.style.display = "inline";
@@ -385,8 +440,14 @@ export default class ApplicationController {
 		// If the view controller specified a right-hand button, set it up
 		if (undefined !== this.currentView.controller.header.rightButton) {
 			// Bind the event handler for the button
-			if (undefined !== this.currentView.controller.header.rightButton.eventHandler) {
-				this.headerRightButton.addEventListener("click", this.currentView.controller.header.rightButton.eventHandler);
+			if (
+				undefined !==
+				this.currentView.controller.header.rightButton.eventHandler
+			) {
+				this.headerRightButton.addEventListener(
+					"click",
+					this.currentView.controller.header.rightButton.eventHandler,
+				);
 			}
 
 			// Style the button
@@ -394,11 +455,14 @@ export default class ApplicationController {
 			this.headerRightButton.classList.add("button", "header", "right");
 
 			if (undefined !== this.currentView.controller.header.rightButton.style) {
-				this.headerRightButton.classList.add(this.currentView.controller.header.rightButton.style);
+				this.headerRightButton.classList.add(
+					this.currentView.controller.header.rightButton.style,
+				);
 			}
 
 			// Set the button label
-			this.headerRightButton.textContent = this.currentView.controller.header.rightButton.label;
+			this.headerRightButton.textContent =
+				this.currentView.controller.header.rightButton.label;
 
 			// Show the button
 			this.headerRightButton.style.display = "inline";
@@ -411,12 +475,20 @@ export default class ApplicationController {
 	private clearHeader(): void {
 		// If the view controller specified a left-hand button, unbind the event handler
 		if (undefined !== this.currentView.controller.header.leftButton) {
-			this.headerLeftButton.removeEventListener("click", this.currentView.controller.header.leftButton.eventHandler as NavButtonEventHandler);
+			this.headerLeftButton.removeEventListener(
+				"click",
+				this.currentView.controller.header.leftButton
+					.eventHandler as NavButtonEventHandler,
+			);
 		}
 
 		// If the view controller specified a right-hand button, unbind the event handler
 		if (undefined !== this.currentView.controller.header.rightButton) {
-			this.headerRightButton.removeEventListener("click", this.currentView.controller.header.rightButton.eventHandler as NavButtonEventHandler);
+			this.headerRightButton.removeEventListener(
+				"click",
+				this.currentView.controller.header.rightButton
+					.eventHandler as NavButtonEventHandler,
+			);
 		}
 
 		// Hide the buttons and header label
@@ -430,41 +502,57 @@ export default class ApplicationController {
 
 	private setContentHeight(): void {
 		// If the label wraps, its layout height will be larger than the container's layout height, so use the biggest value
-		const headerHeight = Math.max(this.header.offsetHeight, this.headerLabel.offsetHeight),
-					footerHeight = Math.max(this.footer.offsetHeight, this.footerLabel.offsetHeight),
-					IOS_HOME_BAR_HEIGHT = 13;
+		const headerHeight = Math.max(
+				this.header.offsetHeight,
+				this.headerLabel.offsetHeight,
+			),
+			footerHeight = Math.max(
+				this.footer.offsetHeight,
+				this.footerLabel.offsetHeight,
+			),
+			IOS_HOME_BAR_HEIGHT = 13;
 
-		(this.content.firstElementChild as HTMLElement).style.height = `${window.innerHeight - headerHeight - footerHeight - IOS_HOME_BAR_HEIGHT}px`;
+		(this.content.firstElementChild as HTMLElement).style.height = `${
+			window.innerHeight - headerHeight - footerHeight - IOS_HOME_BAR_HEIGHT
+		}px`;
 	}
 
 	private hideNotice(notice: HTMLDivElement): void {
 		const NOTICE_ANIMATION_DURATION = 300,
-					NOTICES_ANIMATION_DURATION = 500;
+			NOTICES_ANIMATION_DURATION = 500;
 
 		// Update the height of the notices stack to reclaim the space for the notice
 		this.noticeStack.height += notice.offsetHeight;
 
 		// Slide the notice element off to the right
-		notice.animate({
-			transform: "translateX(100%)"
-		}, {
-			duration: NOTICE_ANIMATION_DURATION,
-			easing: "ease-in",
-			fill: "forwards"
-		}).onfinish = (): void => {
-			this.noticeStack.notice = this.noticeStack.notice.filter((item: HTMLDivElement): boolean => item !== notice);
+		notice.animate(
+			{
+				transform: "translateX(100%)",
+			},
+			{
+				duration: NOTICE_ANIMATION_DURATION,
+				easing: "ease-in",
+				fill: "forwards",
+			},
+		).onfinish = (): void => {
+			this.noticeStack.notice = this.noticeStack.notice.filter(
+				(item: HTMLDivElement): boolean => item !== notice,
+			);
 			notice.remove();
 		};
 
 		// Slide down the notices container to the height of the notices stack
-		this.notices.animate({
-			transform: `translateY(${this.noticeStack.height}px)`
-		}, {
-			duration: NOTICES_ANIMATION_DURATION,
-			delay: NOTICE_ANIMATION_DURATION,
-			easing: "ease",
-			fill: "forwards"
-		}).onfinish = this.noticesMoved.bind(this);
+		this.notices.animate(
+			{
+				transform: `translateY(${this.noticeStack.height}px)`,
+			},
+			{
+				duration: NOTICES_ANIMATION_DURATION,
+				delay: NOTICE_ANIMATION_DURATION,
+				easing: "ease",
+				fill: "forwards",
+			},
+		).onfinish = this.noticesMoved.bind(this);
 	}
 
 	private noticesMoved(): void {
@@ -474,22 +562,36 @@ export default class ApplicationController {
 		}
 	}
 
-	private showSyncNotice(lastSyncTime: PublicInterface<Setting>, localChanges: number): void {
+	private showSyncNotice(
+		lastSyncTime: PublicInterface<Setting>,
+		localChanges: number,
+	): void {
 		// Only proceed if we have a last sync time
 		if (undefined !== lastSyncTime.settingValue && localChanges > 0) {
 			// Constants for the notification threshold, current date and last sync date
 			const HOURS_IN_ONE_DAY = 24,
-						MINUTES_IN_ONE_HOUR = 60,
-						SECONDS_IN_ONE_MINUTE = 60,
-						MILLISECONDS_IN_ONE_SECOND = 1000,
-						MILLISECONDS_IN_ONE_DAY = MILLISECONDS_IN_ONE_SECOND * SECONDS_IN_ONE_MINUTE * MINUTES_IN_ONE_HOUR * HOURS_IN_ONE_DAY,
-						now = new Date(),
-						lastSync = new Date(lastSyncTime.settingValue);
+				MINUTES_IN_ONE_HOUR = 60,
+				SECONDS_IN_ONE_MINUTE = 60,
+				MILLISECONDS_IN_ONE_SECOND = 1000,
+				MILLISECONDS_IN_ONE_DAY =
+					MILLISECONDS_IN_ONE_SECOND *
+					SECONDS_IN_ONE_MINUTE *
+					MINUTES_IN_ONE_HOUR *
+					HOURS_IN_ONE_DAY,
+				now = new Date(),
+				lastSync = new Date(lastSyncTime.settingValue);
 
 			// Check if the last sync was more that the specified threshold
-			if (Math.round(Math.abs(now.getTime() - lastSync.getTime()) / MILLISECONDS_IN_ONE_DAY) > this.maxDataAgeDays) {
+			if (
+				Math.round(
+					Math.abs(now.getTime() - lastSync.getTime()) /
+						MILLISECONDS_IN_ONE_DAY,
+				) > this.maxDataAgeDays
+			) {
 				// Show a notice to the user
-				this.showNotice({ label: `The last data sync was over ${this.maxDataAgeDays} days ago` });
+				this.showNotice({
+					label: `The last data sync was over ${this.maxDataAgeDays} days ago`,
+				});
 			}
 		}
 	}

@@ -1,30 +1,24 @@
 const { merge } = require("webpack-merge"),
-			{
-				cssRule,
-				iconRule,
-				imageRule,
-				htmlRule,
-				webmanifestRule,
-				extractCss,
-				createIndexHtml,
-				defineAppConfig,
-				config
-			} = require("./webpack.common");
+	{
+		cssRule,
+		iconRule,
+		imageRule,
+		htmlRule,
+		webmanifestRule,
+		extractCss,
+		createIndexHtml,
+		defineAppConfig,
+		config,
+	} = require("./webpack.common");
 
 module.exports = merge(config, {
 	// No hash in file names
 	output: {
-		assetModuleFilename: "[name][ext]"
+		assetModuleFilename: "[name][ext]",
 	},
 
 	module: {
-		rules: [
-			cssRule,
-			iconRule,
-			imageRule,
-			htmlRule,
-			webmanifestRule
-		]
+		rules: [cssRule, iconRule, imageRule, htmlRule, webmanifestRule],
 	},
 
 	// Eval source maps
@@ -34,13 +28,13 @@ module.exports = merge(config, {
 		allowedHosts: "all",
 		open: true,
 		proxy: {
-			"/": "http://localhost:3001"
-		}
+			"/": "http://localhost:3001",
+		},
 	},
 
 	plugins: [
 		extractCss(),
 		createIndexHtml,
-		defineAppConfig({ maxDataAgeDays: 9999 })
-	]
+		defineAppConfig({ maxDataAgeDays: 9999 }),
+	],
 });

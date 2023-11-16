@@ -2,12 +2,9 @@ import type {
 	Device,
 	HeaderFooter,
 	NavButton,
-	NavButtonEventHandler
+	NavButtonEventHandler,
 } from "~/controllers";
-import type {
-	SinonMatcher,
-	SinonStub
-} from "sinon";
+import type { SinonMatcher, SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import RegistrationController from "~/controllers/registration-controller";
 import RegistrationView from "~/views/registration-view.html";
@@ -18,37 +15,51 @@ import sinon from "sinon";
 const appController = new ApplicationControllerMock();
 
 describe("RegistrationController", (): void => {
-	let device: Device,
-			registrationController: RegistrationController;
+	let device: Device, registrationController: RegistrationController;
 
 	beforeEach((): void => {
 		device = {
 			id: "1",
 			name: "test-device",
-			imported: true
+			imported: true,
 		};
 
 		registrationController = new RegistrationController();
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a RegistrationController instance", (): Chai.Assertion => expect(registrationController).to.be.an.instanceOf(RegistrationController));
+		it("should return a RegistrationController instance", (): Chai.Assertion =>
+			expect(registrationController).to.be.an.instanceOf(
+				RegistrationController,
+			));
 	});
 
 	describe("view", (): void => {
-		it("should return the registration view", (): Chai.Assertion => expect(registrationController.view).to.equal(RegistrationView));
+		it("should return the registration view", (): Chai.Assertion =>
+			expect(registrationController.view).to.equal(RegistrationView));
 	});
 
 	describe("setup", (): void => {
-		const	deviceSetting: SettingMock = new SettingMock("Device", JSON.stringify(device));
+		const deviceSetting: SettingMock = new SettingMock(
+			"Device",
+			JSON.stringify(device),
+		);
 
-		let	leftButton: NavButton,
-				rightButton: NavButton;
+		let leftButton: NavButton, rightButton: NavButton;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(registrationController, "cancel" as keyof RegistrationController);
-			sinon.stub(registrationController, "save" as keyof RegistrationController);
-			sinon.stub(registrationController, "gotDevice" as keyof RegistrationController);
+			sinon.stub(
+				registrationController,
+				"cancel" as keyof RegistrationController,
+			);
+			sinon.stub(
+				registrationController,
+				"save" as keyof RegistrationController,
+			);
+			sinon.stub(
+				registrationController,
+				"gotDevice" as keyof RegistrationController,
+			);
 			SettingMock.get.reset();
 			SettingMock.get.withArgs("Device").returns(deviceSetting);
 			await registrationController.setup();
@@ -56,75 +67,97 @@ describe("RegistrationController", (): void => {
 			rightButton = registrationController.header.rightButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => expect(String(registrationController.header.label)).to.equal("Register"));
+		it("should set the header label", (): Chai.Assertion =>
+			expect(String(registrationController.header.label)).to.equal("Register"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
 			expect(registrationController["cancel"]).to.have.been.called;
 		});
 
-		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Cancel"));
+		it("should set the header left button label", (): Chai.Assertion =>
+			expect(leftButton.label).to.equal("Cancel"));
 
 		it("should attach a header right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
 			expect(registrationController["save"]).to.have.been.called;
 		});
 
-		it("should set the header right button style", (): Chai.Assertion => expect(String(rightButton.style)).to.equal("confirmButton"));
-		it("should set the header right button label", (): Chai.Assertion => expect(rightButton.label).to.equal("Save"));
-		it("should get the device", (): Chai.Assertion => expect(registrationController["gotDevice"]).to.have.been.calledWith(deviceSetting));
+		it("should set the header right button style", (): Chai.Assertion =>
+			expect(String(rightButton.style)).to.equal("confirmButton"));
+		it("should set the header right button label", (): Chai.Assertion =>
+			expect(rightButton.label).to.equal("Save"));
+		it("should get the device", (): Chai.Assertion =>
+			expect(registrationController["gotDevice"]).to.have.been.calledWith(
+				deviceSetting,
+			));
 	});
 
 	describe("gotDevice", (): void => {
 		describe("unregistered", (): void => {
-			beforeEach(async (): Promise<void> => registrationController["gotDevice"](new SettingMock()));
+			beforeEach(
+				async (): Promise<void> =>
+					registrationController["gotDevice"](new SettingMock()),
+			);
 
-			it("should set an empty device", (): Chai.Assertion => expect(registrationController["device"]).to.deep.equal({
-				id: "",
-				name: "",
-				imported: false
-			}));
+			it("should set an empty device", (): Chai.Assertion =>
+				expect(registrationController["device"]).to.deep.equal({
+					id: "",
+					name: "",
+					imported: false,
+				}));
 
-			it("should clear the view footer", (): Chai.Assertion => expect(appController.clearFooter).to.have.been.called);
+			it("should clear the view footer", (): Chai.Assertion =>
+				expect(appController.clearFooter).to.have.been.called);
 		});
 
 		describe("registered", (): void => {
 			let deviceName: HTMLInputElement,
-					footer: HeaderFooter,
-					leftButton: NavButton;
+				footer: HeaderFooter,
+				leftButton: NavButton;
 
 			beforeEach(async (): Promise<void> => {
-				sinon.stub(registrationController, "unregister" as keyof RegistrationController);
+				sinon.stub(
+					registrationController,
+					"unregister" as keyof RegistrationController,
+				);
 
 				deviceName = document.createElement("input");
 				deviceName.id = "deviceName";
 				document.body.append(deviceName);
 
-				await registrationController["gotDevice"](new SettingMock(undefined, JSON.stringify(device)));
+				await registrationController["gotDevice"](
+					new SettingMock(undefined, JSON.stringify(device)),
+				);
 				footer = registrationController.footer as HeaderFooter;
 				leftButton = footer.leftButton as NavButton;
 			});
 
-			it("should set the device", (): Chai.Assertion => expect(registrationController["device"]).to.deep.equal(device));
-			it("should display the device name", (): Chai.Assertion => expect(deviceName.value).to.equal(device.name));
-			it("should set the footer label", (): Chai.Assertion => expect(String(footer.label)).to.equal("v1"));
+			it("should set the device", (): Chai.Assertion =>
+				expect(registrationController["device"]).to.deep.equal(device));
+			it("should display the device name", (): Chai.Assertion =>
+				expect(deviceName.value).to.equal(device.name));
+			it("should set the footer label", (): Chai.Assertion =>
+				expect(String(footer.label)).to.equal("v1"));
 
 			it("should attach a footer left button event handler", (): void => {
 				(leftButton.eventHandler as NavButtonEventHandler)();
 				expect(registrationController["unregister"]).to.have.been.called;
 			});
 
-			it("should set the footer left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("cautionButton"));
-			it("should set the footer left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Unregister"));
-			it("should set the view footer", (): Chai.Assertion => expect(appController.setFooter).to.have.been.called);
+			it("should set the footer left button style", (): Chai.Assertion =>
+				expect(String(leftButton.style)).to.equal("cautionButton"));
+			it("should set the footer left button label", (): Chai.Assertion =>
+				expect(leftButton.label).to.equal("Unregister"));
+			it("should set the view footer", (): Chai.Assertion =>
+				expect(appController.setFooter).to.have.been.called);
 
 			afterEach((): void => deviceName.remove());
 		});
 	});
 
 	describe("unregister", (): void => {
-		let fakeFetch: SinonStub,
-				fetchArgs: [SinonMatcher, RequestInit];
+		let fakeFetch: SinonStub, fetchArgs: [SinonMatcher, RequestInit];
 
 		beforeEach((): void => {
 			fakeFetch = sinon.stub(window, "fetch");
@@ -133,31 +166,41 @@ describe("RegistrationController", (): void => {
 				{
 					method: "DELETE",
 					headers: {
-						"X-DEVICE-ID": device.id
-					}
-				}
+						"X-DEVICE-ID": device.id,
+					},
+				},
 			];
 			registrationController["device"] = device;
 		});
 
 		describe("fail", (): void => {
 			it("should display a notice", async (): Promise<void> => {
-				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
-					status: 404,
-					statusText: "Not Found"
-				})));
+				fakeFetch.withArgs(...fetchArgs).returns(
+					Promise.resolve(
+						new Response("", {
+							status: 404,
+							statusText: "Not Found",
+						}),
+					),
+				);
 
 				await registrationController["unregister"]();
-				expect(appController.showNotice).to.have.been.calledWith({ label: "Unregister failed: 404 (Not Found)" });
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "Unregister failed: 404 (Not Found)",
+				});
 			});
 		});
 
 		describe("success", (): void => {
 			beforeEach(async (): Promise<void> => {
-				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
-					status: 200,
-					statusText: "OK"
-				})));
+				fakeFetch.withArgs(...fetchArgs).returns(
+					Promise.resolve(
+						new Response("", {
+							status: 200,
+							statusText: "OK",
+						}),
+					),
+				);
 
 				await registrationController["unregister"]();
 			});
@@ -168,7 +211,8 @@ describe("RegistrationController", (): void => {
 				expect(SettingMock.prototype.remove).to.have.been.called;
 			});
 
-			it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
+			it("should pop the view", (): Chai.Assertion =>
+				expect(appController.popView).to.have.been.called);
 		});
 
 		afterEach((): void => fakeFetch.restore());
@@ -176,8 +220,8 @@ describe("RegistrationController", (): void => {
 
 	describe("save", (): void => {
 		let deviceName: HTMLInputElement,
-				fakeFetch: SinonStub,
-				fetchArgs: [SinonMatcher, RequestInit];
+			fakeFetch: SinonStub,
+			fetchArgs: [SinonMatcher, RequestInit];
 
 		beforeEach((): void => {
 			fakeFetch = sinon.stub(window, "fetch");
@@ -186,9 +230,9 @@ describe("RegistrationController", (): void => {
 				{
 					method: "PUT",
 					headers: {
-						"X-DEVICE-ID": device.id
-					}
-				}
+						"X-DEVICE-ID": device.id,
+					},
+				},
 			];
 			registrationController["device"] = device;
 			deviceName = document.createElement("input");
@@ -199,39 +243,56 @@ describe("RegistrationController", (): void => {
 
 		describe("fail", (): void => {
 			beforeEach(async (): Promise<void> => {
-				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
-					status: 404,
-					statusText: "Not Found"
-				})));
+				fakeFetch.withArgs(...fetchArgs).returns(
+					Promise.resolve(
+						new Response("", {
+							status: 404,
+							statusText: "Not Found",
+						}),
+					),
+				);
 
 				await registrationController["save"]();
 			});
 
-			it("should get the device name", (): Chai.Assertion => expect(registrationController["device"].name).to.equal("new-device"));
-			it("should display a notice", (): Chai.Assertion => expect(appController.showNotice).to.have.been.calledWith({ label: "Registration failed: 404 (Not Found)" }));
+			it("should get the device name", (): Chai.Assertion =>
+				expect(registrationController["device"].name).to.equal("new-device"));
+			it("should display a notice", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "Registration failed: 404 (Not Found)",
+				}));
 		});
 
 		describe("success", (): void => {
 			beforeEach(async (): Promise<void> => {
-				fakeFetch.withArgs(...fetchArgs).returns(Promise.resolve(new Response("", {
-					status: 200,
-					statusText: "OK",
-					headers: { Location: "new-device-id" }
-				})));
+				fakeFetch.withArgs(...fetchArgs).returns(
+					Promise.resolve(
+						new Response("", {
+							status: 200,
+							statusText: "OK",
+							headers: { Location: "new-device-id" },
+						}),
+					),
+				);
 
 				await registrationController["save"]();
 			});
 
-			it("should get the device name", (): Chai.Assertion => expect(registrationController["device"].name).to.equal("new-device"));
-			it("should set the device id", (): Chai.Assertion => expect(registrationController["device"].id).to.equal("new-device-id"));
+			it("should get the device name", (): Chai.Assertion =>
+				expect(registrationController["device"].name).to.equal("new-device"));
+			it("should set the device id", (): Chai.Assertion =>
+				expect(registrationController["device"].id).to.equal("new-device-id"));
 
 			it("should save the device", (): void => {
 				expect(String(SettingMock.setting.name)).to.equal("Device");
-				expect(String(SettingMock.setting.value)).to.deep.equal(JSON.stringify(device));
+				expect(String(SettingMock.setting.value)).to.deep.equal(
+					JSON.stringify(device),
+				);
 				expect(SettingMock.prototype.save).to.have.been.called;
 			});
 
-			it("should pop the view", (): Chai.Assertion => expect(appController.popView).to.have.been.called);
+			it("should pop the view", (): Chai.Assertion =>
+				expect(appController.popView).to.have.been.called);
 		});
 
 		afterEach((): void => {

@@ -5,7 +5,8 @@ export const syncControls = "#syncControls";
 export const lastSyncTime = "#lastSyncTime";
 export const localChanges = "#localChanges";
 export const importChangesOnly = "#importChangesOnly";
-export const importChangesOnlyLabel = "#importChangesOnlyRow > label[for=importChangesOnly]";
+export const importChangesOnlyLabel =
+	"#importChangesOnlyRow > label[for=importChangesOnly]";
 export const importButton = "#import";
 export const exportButton = "#export";
 export const progress = "#progress";

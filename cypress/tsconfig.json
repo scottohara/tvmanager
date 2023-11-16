@@ -6,18 +6,12 @@
 		// Modules
 		"baseUrl": "../",
 		"paths": {
-			"~*": [
-				"cypress/*",
-				"src/*"
-			]
+			"~*": ["cypress/*", "src/*"]
 		},
-		"types": [
-			"cypress",
-			"node"
-		],
+		"types": ["cypress", "node"],
 
 		// Emit
-		"sourceMap": false,
+		"sourceMap": false
 
 		// JavaScript Support
 
@@ -41,7 +35,5 @@
 
 		// Watch Options
 	},
-	"exclude": [
-		"node_modules"
-	]
+	"exclude": ["node_modules"]
 }

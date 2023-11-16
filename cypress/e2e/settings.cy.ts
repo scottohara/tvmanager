@@ -4,12 +4,12 @@ import {
 	allIncompleteRow,
 	allMissedRow,
 	allRecordedRow,
-	importExportRow
+	importExportRow,
 } from "~/support/settings";
 import {
 	footerRightButton,
 	headerLabel,
-	headerLeftButton
+	headerLeftButton,
 } from "~/support/e2e";
 
 describe("Settings", (): void => {

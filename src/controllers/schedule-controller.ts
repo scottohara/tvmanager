@@ -25,16 +25,23 @@ export default class ScheduleController extends ViewController {
 			label: "Schedule",
 			leftButton: {
 				eventHandler: this.viewUnscheduled.bind(this) as NavButtonEventHandler,
-				label: "Unscheduled"
+				label: "Unscheduled",
 			},
 			rightButton: {
 				eventHandler: this.viewPrograms.bind(this) as NavButtonEventHandler,
-				label: "Programs"
-			}
+				label: "Programs",
+			},
 		};
 
 		// Instantiate a List object
-		this.scheduleList = new List("list", ScheduleListTemplate, "nowShowingDisplay", [], this.viewItem.bind(this), this.editItem.bind(this));
+		this.scheduleList = new List(
+			"list",
+			ScheduleListTemplate,
+			"nowShowingDisplay",
+			[],
+			this.viewItem.bind(this),
+			this.editItem.bind(this),
+		);
 
 		// Activate the controller
 		return this.activate();
@@ -52,7 +59,11 @@ export default class ScheduleController extends ViewController {
 	}
 
 	private async viewItem(listIndex: number): Promise<void> {
-		return this.appController.pushView("episodes", { source: "Schedule", listIndex, series: this.scheduleList.items[listIndex] as PublicInterface<Series> });
+		return this.appController.pushView("episodes", {
+			source: "Schedule",
+			listIndex,
+			series: this.scheduleList.items[listIndex] as PublicInterface<Series>,
+		});
 	}
 
 	private async viewUnscheduled(): Promise<void> {
@@ -91,8 +102,8 @@ export default class ScheduleController extends ViewController {
 			leftButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Done"
-			}
+				label: "Done",
+			},
 		};
 
 		// Set the view footer
@@ -114,12 +125,12 @@ export default class ScheduleController extends ViewController {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
-				label: "Edit"
+				label: "Edit",
 			},
 			rightButton: {
 				eventHandler: this.viewSettings.bind(this) as NavButtonEventHandler,
-				label: "Settings"
-			}
+				label: "Settings",
+			},
 		};
 
 		// Set the view footer

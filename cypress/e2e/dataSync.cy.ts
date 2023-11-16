@@ -1,7 +1,4 @@
-import {
-	aboutRow,
-	importExportRow
-} from "~/support/settings";
+import { aboutRow, importExportRow } from "~/support/settings";
 import {
 	deviceName,
 	exportButton,
@@ -13,7 +10,7 @@ import {
 	registerDeviceName,
 	registrationMessage,
 	status,
-	syncControls
+	syncControls,
 } from "~/support/dataSync";
 import {
 	footerLabel,
@@ -22,13 +19,9 @@ import {
 	headerLabel,
 	headerLeftButton,
 	headerRightButton,
-	notices
+	notices,
 } from "~/support/e2e";
-import {
-	totalEpisodes,
-	totalPrograms,
-	totalSeries
-} from "~/support/about";
+import { totalEpisodes, totalPrograms, totalSeries } from "~/support/about";
 import type { TestData } from "~/support/types";
 
 describe("Import/Export", (): void => {
@@ -68,20 +61,25 @@ describe("Import/Export", (): void => {
 				const data: TestData = {
 					settings: [
 						{ name: "Device", value: "" },
-						{ name: "LastSyncTime", value: "" }
-					]
+						{ name: "LastSyncTime", value: "" },
+					],
 				};
 
 				cy.createTestData(data);
 			});
 
-			it("should show the device as unregistered", (): Cypress.Chainable<JQuery> => cy.get(deviceName).should("have.value", "< Unregistered >"));
-			it("should show the registration message", (): Cypress.Chainable<JQuery> => cy.get(registrationMessage).should("be.visible"));
-			it("should not show the sync controls", (): Cypress.Chainable<JQuery> => cy.get(syncControls).should("not.be.visible"));
+			it("should show the device as unregistered", (): Cypress.Chainable<JQuery> =>
+				cy.get(deviceName).should("have.value", "< Unregistered >"));
+			it("should show the registration message", (): Cypress.Chainable<JQuery> =>
+				cy.get(registrationMessage).should("be.visible"));
+			it("should not show the sync controls", (): Cypress.Chainable<JQuery> =>
+				cy.get(syncControls).should("not.be.visible"));
 
 			it("should not register the device if the registration is cancelled", (): void => {
 				cy.get(deviceName).click();
-				cy.get(registerDeviceName).clear().type("Cancelled device registration");
+				cy.get(registerDeviceName)
+					.clear()
+					.type("Cancelled device registration");
 				cy.get(headerLeftButton).click();
 				cy.get(deviceName).should("have.value", "< Unregistered >");
 			});
@@ -99,15 +97,21 @@ describe("Import/Export", (): void => {
 
 		describe("when registered", (): void => {
 			before((): void => {
-				const data: TestData = { programs: [{ series: [] }], settings: [{ name: "LastSyncTime", value: "2000-01-01T09:30:20" }] };
+				const data: TestData = {
+					programs: [{ series: [] }],
+					settings: [{ name: "LastSyncTime", value: "2000-01-01T09:30:20" }],
+				};
 
 				cy.createTestData(data);
 				cy.exec("RACK_ENV=test bundle exec dotenv rake db:authorise_devices");
 			});
 
-			it("should show the name of the device", (): Cypress.Chainable<JQuery> => cy.get(deviceName).should("have.value", "Test device"));
-			it("should show the last sync time", (): Cypress.Chainable<JQuery> => cy.get(lastSyncTime).should("have.value", "1-Jan-2000 09:30:20"));
-			it("should show the number of pending changes when there are pending changes", (): Cypress.Chainable<JQuery> => cy.get(localChanges).should("have.value", "1 change pending"));
+			it("should show the name of the device", (): Cypress.Chainable<JQuery> =>
+				cy.get(deviceName).should("have.value", "Test device"));
+			it("should show the last sync time", (): Cypress.Chainable<JQuery> =>
+				cy.get(lastSyncTime).should("have.value", "1-Jan-2000 09:30:20"));
+			it("should show the number of pending changes when there are pending changes", (): Cypress.Chainable<JQuery> =>
+				cy.get(localChanges).should("have.value", "1 change pending"));
 
 			it("should show the database version as the label", (): void => {
 				cy.get(deviceName).click();
@@ -136,7 +140,10 @@ describe("Import/Export", (): void => {
 
 		describe("export", (): void => {
 			before((): void => {
-				const data: TestData = { programs: [{ series: [{ episodes: [{}] }] }], settings: [{ name: "LastSyncTime", value: "2000-01-01T09:30:20" }] };
+				const data: TestData = {
+					programs: [{ series: [{ episodes: [{}] }] }],
+					settings: [{ name: "LastSyncTime", value: "2000-01-01T09:30:20" }],
+				};
 
 				cy.createTestData(data);
 			});
@@ -162,7 +169,10 @@ describe("Import/Export", (): void => {
 				cy.get(exportButton).should("not.have.class", "disabled");
 				cy.get(exportButton).click();
 				cy.get(notices).should("be.visible");
-				cy.get(notices).should("contain.text", "Database has been successfully exported");
+				cy.get(notices).should(
+					"contain.text",
+					"Database has been successfully exported",
+				);
 				cy.get(lastSyncTime).should("contain.value", "2-Jan-2000 10:20:04");
 				cy.get(localChanges).should("have.value", "None pending");
 				cy.get(exportButton).should("have.class", "disabled");
@@ -196,7 +206,10 @@ describe("Import/Export", (): void => {
 				cy.clock(new Date("2000-01-02T10:20:04"));
 				cy.get(importButton).click();
 				cy.get(notices).should("be.visible");
-				cy.get(notices).should("contain.text", "Database has been successfully imported");
+				cy.get(notices).should(
+					"contain.text",
+					"Database has been successfully imported",
+				);
 				cy.get(lastSyncTime).should("contain.value", "2-Jan-2000 10:20:04");
 				cy.get(localChanges).should("have.value", "None pending");
 				cy.get(headerLeftButton).click();
@@ -210,7 +223,9 @@ describe("Import/Export", (): void => {
 		describe("fast import", (): void => {
 			before((): void => {
 				cy.createTestData({});
-				cy.exec("RACK_ENV=test bundle exec dotenv rake db:make_pending'[0-0-0]'");
+				cy.exec(
+					"RACK_ENV=test bundle exec dotenv rake db:make_pending'[0-0-0]'",
+				);
 			});
 
 			it("should do nothing if the import is not confirmed", (): void => {
@@ -238,7 +253,10 @@ describe("Import/Export", (): void => {
 				cy.clock(new Date("2000-01-02T10:20:04"));
 				cy.get(importButton).click();
 				cy.get(notices).should("be.visible");
-				cy.get(notices).should("contain.text", "Database has been successfully imported");
+				cy.get(notices).should(
+					"contain.text",
+					"Database has been successfully imported",
+				);
 				cy.get(lastSyncTime).should("contain.value", "2-Jan-2000 10:20:04");
 				cy.get(localChanges).should("have.value", "None pending");
 				cy.get(headerLeftButton).click();

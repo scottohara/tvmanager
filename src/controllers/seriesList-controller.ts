@@ -1,7 +1,4 @@
-import type {
-	NavButtonEventHandler,
-	ProgramListItem
-} from "~/controllers";
+import type { NavButtonEventHandler, ProgramListItem } from "~/controllers";
 import DatabaseService from "~/services/database-service";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
@@ -35,16 +32,24 @@ export default class SeriesListController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: "Programs"
+				label: "Programs",
 			},
 			rightButton: {
 				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
-				label: "+"
-			}
+				label: "+",
+			},
 		};
 
 		// Instantiate a List object
-		this.seriesList = new List("list", SeriesListTemplate, null, [], this.viewItem.bind(this), this.editItem.bind(this), this.deleteItem.bind(this));
+		this.seriesList = new List(
+			"list",
+			SeriesListTemplate,
+			null,
+			[],
+			this.viewItem.bind(this),
+			this.editItem.bind(this),
+			this.deleteItem.bind(this),
+		);
 
 		// Activate the controller
 		return this.activate();
@@ -52,7 +57,9 @@ export default class SeriesListController extends ViewController {
 
 	public override async activate(): Promise<void> {
 		// Get the list of series for the specified program
-		this.seriesList.items = await Series.listByProgram(String(this.listItem.program.id));
+		this.seriesList.items = await Series.listByProgram(
+			String(this.listItem.program.id),
+		);
 
 		// Refresh the list
 		this.seriesList.refresh();
@@ -63,7 +70,10 @@ export default class SeriesListController extends ViewController {
 
 	public override contentShown(): void {
 		// If there is an active list item, scroll it into view
-		if (null !== this.activeListItem && this.list.querySelector(`#item-${this.activeListItem.id}`)) {
+		if (
+			null !== this.activeListItem &&
+			this.list.querySelector(`#item-${this.activeListItem.id}`)
+		) {
 			this.seriesList.scrollTo(String(this.activeListItem.id));
 		}
 	}
@@ -76,21 +86,33 @@ export default class SeriesListController extends ViewController {
 		this.activeListItem = this.seriesList.items[listIndex] as Series;
 
 		// Display the Episodes view
-		return this.appController.pushView("episodes", { listIndex, series: this.activeListItem });
+		return this.appController.pushView("episodes", {
+			listIndex,
+			series: this.activeListItem,
+		});
 	}
 
 	private async addItem(): Promise<void> {
-		return this.appController.pushView("series", { program: this.listItem.program, sequence: this.seriesList.items.length });
+		return this.appController.pushView("series", {
+			program: this.listItem.program,
+			sequence: this.seriesList.items.length,
+		});
 	}
 
 	private async editItem(listIndex: number): Promise<void> {
 		this.activeListItem = this.seriesList.items[listIndex] as Series;
 
 		// Display the Series view
-		return this.appController.pushView("series", { listIndex, series: this.activeListItem });
+		return this.appController.pushView("series", {
+			listIndex,
+			series: this.activeListItem,
+		});
 	}
 
-	private async deleteItem(listIndex: number, dontRemove = false): Promise<void> {
+	private async deleteItem(
+		listIndex: number,
+		dontRemove = false,
+	): Promise<void> {
 		const series = this.seriesList.items[listIndex] as Series;
 
 		// Unless instructed otherwise, remove the item from the database
@@ -122,8 +144,8 @@ export default class SeriesListController extends ViewController {
 			rightButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Done"
-			}
+				label: "Done",
+			},
 		};
 
 		// Set the view footer
@@ -147,8 +169,8 @@ export default class SeriesListController extends ViewController {
 			leftButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Done"
-			}
+				label: "Done",
+			},
 		};
 
 		// Set the view footer
@@ -170,13 +192,13 @@ export default class SeriesListController extends ViewController {
 			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
-				label: "Edit"
+				label: "Edit",
 			},
 			rightButton: {
 				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
 				style: "cautionButton",
-				label: "Delete"
-			}
+				label: "Delete",
+			},
 		};
 
 		// Set the view footer

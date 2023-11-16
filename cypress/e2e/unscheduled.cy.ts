@@ -1,13 +1,10 @@
-import type {
-	EpisodeListItem,
-	TestData
-} from "~/support/types";
+import type { EpisodeListItem, TestData } from "~/support/types";
 import {
 	episodeName,
 	recorded,
 	statusDate,
 	unscheduledLabel,
-	unverifiedLabel
+	unverifiedLabel,
 } from "~/support/episode";
 import {
 	firstListItem,
@@ -19,7 +16,7 @@ import {
 	list,
 	listItem,
 	listItemSubText,
-	listItems
+	listItems,
 } from "~/support/e2e";
 
 describe("Unscheduled", (): void => {
@@ -34,38 +31,78 @@ describe("Unscheduled", (): void => {
 						{
 							seriesName: "Series A",
 							episodes: [
-								{ episodeName: "Episode A", status: "Watched", unscheduled: "true" },
-								{ episodeName: "Episode B", status: "Recorded", statusDate: "2000-01-01", unscheduled: "true" },
-								{ episodeName: "Episode C", status: "Recorded", statusDate: "2000-01-02", unverified: "true", unscheduled: "true" },
-								{ episodeName: "Episode D", status: "Expected", statusDate: "2000-01-03", unscheduled: "true" },
-								{ episodeName: "Episode E", status: "Missed", statusDate: "2000-01-04", unscheduled: "true" },
-								{ episodeName: "Episode F", status: "Missed", statusDate: "2000-01-05", unverified: "true", unscheduled: "true" },
-								{ episodeName: "Episode G", status: "Expected", statusDate: "2100-01-01", unscheduled: "true" },
-								{ episodeName: "Episode H", status: "Expected", statusDate: "2100-01-02", unverified: "true", unscheduled: "true" },
-								{ episodeName: "Episode I", unscheduled: "true" }
-							]
+								{
+									episodeName: "Episode A",
+									status: "Watched",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode B",
+									status: "Recorded",
+									statusDate: "2000-01-01",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode C",
+									status: "Recorded",
+									statusDate: "2000-01-02",
+									unverified: "true",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode D",
+									status: "Expected",
+									statusDate: "2000-01-03",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode E",
+									status: "Missed",
+									statusDate: "2000-01-04",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode F",
+									status: "Missed",
+									statusDate: "2000-01-05",
+									unverified: "true",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode G",
+									status: "Expected",
+									statusDate: "2100-01-01",
+									unscheduled: "true",
+								},
+								{
+									episodeName: "Episode H",
+									status: "Expected",
+									statusDate: "2100-01-02",
+									unverified: "true",
+									unscheduled: "true",
+								},
+								{ episodeName: "Episode I", unscheduled: "true" },
+							],
 						},
 						{
 							seriesName: "Series B",
 							episodes: [
 								{ episodeName: "Episode J" },
-								{ episodeName: "Episode K", unscheduled: "true" }
-							]
-						}
-					]
+								{ episodeName: "Episode K", unscheduled: "true" },
+							],
+						},
+					],
 				},
 				{
 					programName: "Program B",
 					series: [
 						{
 							seriesName: "Series C",
-							episodes: [
-								{ episodeName: "Episode L", unscheduled: "true" }
-							]
-						}
-					]
-				}
-			]
+							episodes: [{ episodeName: "Episode L", unscheduled: "true" }],
+						},
+					],
+				},
+			],
 		};
 
 		cy.createTestData(data);
@@ -75,13 +112,45 @@ describe("Unscheduled", (): void => {
 			{ label: "Program A:Series A:Episode I" },
 			{ label: "Program A:Series B:Episode K" },
 			{ label: "Program B:Series C:Episode L" },
-			{ label: "Program A:Series A:Episode B", status: "Recorded", statusDateSubText: "Sat Jan 01 2000" },
-			{ label: "Program A:Series A:Episode C", status: "Recorded", statusDateSubText: "Sun Jan 02 2000", unverifiedClass: true },
-			{ label: "Program A:Series A:Episode D", status: "Expected", statusDateSubText: "Mon Jan 03 2000", warning: true },
-			{ label: "Program A:Series A:Episode E", status: "Missed", statusDateSubText: "Tue Jan 04 2000" },
-			{ label: "Program A:Series A:Episode F", status: "Missed", statusDateSubText: "Wed Jan 05 2000", unverifiedClass: true },
-			{ label: "Program A:Series A:Episode G", status: "Expected", statusDateSubText: "Fri Jan 01 2100" },
-			{ label: "Program A:Series A:Episode H", status: "Expected", statusDateSubText: "Sat Jan 02 2100", unverifiedClass: true }
+			{
+				label: "Program A:Series A:Episode B",
+				status: "Recorded",
+				statusDateSubText: "Sat Jan 01 2000",
+			},
+			{
+				label: "Program A:Series A:Episode C",
+				status: "Recorded",
+				statusDateSubText: "Sun Jan 02 2000",
+				unverifiedClass: true,
+			},
+			{
+				label: "Program A:Series A:Episode D",
+				status: "Expected",
+				statusDateSubText: "Mon Jan 03 2000",
+				warning: true,
+			},
+			{
+				label: "Program A:Series A:Episode E",
+				status: "Missed",
+				statusDateSubText: "Tue Jan 04 2000",
+			},
+			{
+				label: "Program A:Series A:Episode F",
+				status: "Missed",
+				statusDateSubText: "Wed Jan 05 2000",
+				unverifiedClass: true,
+			},
+			{
+				label: "Program A:Series A:Episode G",
+				status: "Expected",
+				statusDateSubText: "Fri Jan 01 2100",
+			},
+			{
+				label: "Program A:Series A:Episode H",
+				status: "Expected",
+				statusDateSubText: "Sat Jan 02 2100",
+				unverifiedClass: true,
+			},
 		];
 	});
 
@@ -107,13 +176,28 @@ describe("Unscheduled", (): void => {
 			cy.get(listItems).should("have.length", expectedItems.length);
 
 			cy.get(listItems).each((item: HTMLLIElement, index: number): void => {
-				const { label, status, statusDateSubText = "", unverifiedClass, warning } = expectedItems[index];
+				const {
+					label,
+					status,
+					statusDateSubText = "",
+					unverifiedClass,
+					warning,
+				} = expectedItems[index];
 
 				cy.wrap(item).within((): void => {
 					cy.get(listItem).should("contain.text", label);
-					cy.get(listItem).should(`${undefined === status ? "not." : ""}have.class`, status);
-					cy.get(listItem).should(`${true === unverifiedClass ? "" : "not."}have.class`, "Unverified");
-					cy.get(listItem).should(`${true === warning ? "" : "not."}have.class`, "warning");
+					cy.get(listItem).should(
+						`${undefined === status ? "not." : ""}have.class`,
+						status,
+					);
+					cy.get(listItem).should(
+						`${true === unverifiedClass ? "" : "not."}have.class`,
+						"Unverified",
+					);
+					cy.get(listItem).should(
+						`${true === warning ? "" : "not."}have.class`,
+						"warning",
+					);
 					cy.get(listItemSubText).should("have.text", statusDateSubText);
 				});
 			});
@@ -153,7 +237,10 @@ describe("Unscheduled", (): void => {
 		it("should not update the Unscheduled view if the changes are cancelled", (): void => {
 			cy.get(episodeName).clear().type("Cancelled series edit");
 			cy.get(headerLeftButton).click();
-			cy.get(firstListItem).should("contain.text", "Program A:Series A:Episode I");
+			cy.get(firstListItem).should(
+				"contain.text",
+				"Program A:Series A:Episode I",
+			);
 		});
 
 		it("should not show an item that is no longer unscheduled", (): void => {

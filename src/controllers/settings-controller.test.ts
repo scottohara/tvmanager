@@ -1,8 +1,4 @@
-import type {
-	NavButton,
-	NavButtonEventHandler,
-	Report
-} from "~/controllers";
+import type { NavButton, NavButtonEventHandler, Report } from "~/controllers";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import SeriesMock from "~/mocks/series-model-mock";
 import SettingsController from "~/controllers/settings-controller";
@@ -18,7 +14,11 @@ describe("SettingsController", (): void => {
 		viewArgs: Report;
 	}
 
-	type ReportHandler = "viewExpectedReport" | "viewIncompleteReport" | "viewMissedReport" | "viewRecordedReport";
+	type ReportHandler =
+		| "viewExpectedReport"
+		| "viewIncompleteReport"
+		| "viewMissedReport"
+		| "viewRecordedReport";
 
 	const reports: ReportType[] = [
 		{
@@ -26,32 +26,32 @@ describe("SettingsController", (): void => {
 			viewArgs: {
 				reportName: "All Recorded",
 				dataSource: SeriesMock.listByStatus,
-				args: "Recorded"
-			}
+				args: "Recorded",
+			},
 		},
 		{
 			description: "Expected",
 			viewArgs: {
 				reportName: "All Expected",
 				dataSource: SeriesMock.listByStatus,
-				args: "Expected"
-			}
+				args: "Expected",
+			},
 		},
 		{
 			description: "Missed",
 			viewArgs: {
 				reportName: "All Missed",
 				dataSource: SeriesMock.listByStatus,
-				args: "Missed"
-			}
+				args: "Missed",
+			},
 		},
 		{
 			description: "Incomplete",
 			viewArgs: {
 				reportName: "All Incomplete",
-				dataSource: SeriesMock.listByIncomplete
-			}
-		}
+				dataSource: SeriesMock.listByIncomplete,
+			},
+		},
 	];
 
 	let settingsController: SettingsController;
@@ -61,11 +61,13 @@ describe("SettingsController", (): void => {
 	});
 
 	describe("object constructor", (): void => {
-		it("should return a SettingsController instance", (): Chai.Assertion => expect(settingsController).to.be.an.instanceOf(SettingsController));
+		it("should return a SettingsController instance", (): Chai.Assertion =>
+			expect(settingsController).to.be.an.instanceOf(SettingsController));
 	});
 
 	describe("view", (): void => {
-		it("should return the settings view", (): Chai.Assertion => expect(settingsController.view).to.equal(SettingsView));
+		it("should return the settings view", (): Chai.Assertion =>
+			expect(settingsController.view).to.equal(SettingsView));
 	});
 
 	describe("setup", (): void => {
@@ -78,26 +80,30 @@ describe("SettingsController", (): void => {
 			leftButton = settingsController.header.leftButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion => expect(String(settingsController.header.label)).to.equal("Settings"));
+		it("should set the header label", (): Chai.Assertion =>
+			expect(String(settingsController.header.label)).to.equal("Settings"));
 
 		it("should attach a header left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
 			expect(settingsController["goBack"]).to.have.been.called;
 		});
 
-		it("should set the header left button style", (): Chai.Assertion => expect(String(leftButton.style)).to.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion => expect(leftButton.label).to.equal("Schedule"));
+		it("should set the header left button style", (): Chai.Assertion =>
+			expect(String(leftButton.style)).to.equal("backButton"));
+		it("should set the header left button label", (): Chai.Assertion =>
+			expect(leftButton.label).to.equal("Schedule"));
 
-		it("should activate the controller", (): Chai.Assertion => expect(settingsController["activate"]).to.have.been.called);
+		it("should activate the controller", (): Chai.Assertion =>
+			expect(settingsController["activate"]).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
 		let dataSyncRow: HTMLDivElement,
-				aboutRow: HTMLDivElement,
-				recordedReportRow: HTMLDivElement,
-				expectedReportRow: HTMLDivElement,
-				missedReportRow: HTMLDivElement,
-				incompleteReportRow: HTMLDivElement;
+			aboutRow: HTMLDivElement,
+			recordedReportRow: HTMLDivElement,
+			expectedReportRow: HTMLDivElement,
+			missedReportRow: HTMLDivElement,
+			incompleteReportRow: HTMLDivElement;
 
 		beforeEach(async (): Promise<void> => {
 			dataSyncRow = document.createElement("div");
@@ -118,14 +124,36 @@ describe("SettingsController", (): void => {
 			incompleteReportRow = document.createElement("div");
 			incompleteReportRow.id = "incompleteReportRow";
 
-			document.body.append(dataSyncRow, aboutRow, recordedReportRow, expectedReportRow, missedReportRow, incompleteReportRow);
+			document.body.append(
+				dataSyncRow,
+				aboutRow,
+				recordedReportRow,
+				expectedReportRow,
+				missedReportRow,
+				incompleteReportRow,
+			);
 
-			sinon.stub(settingsController, "viewDataSync" as keyof SettingsController);
+			sinon.stub(
+				settingsController,
+				"viewDataSync" as keyof SettingsController,
+			);
 			sinon.stub(settingsController, "viewAbout" as keyof SettingsController);
-			sinon.stub(settingsController, "viewRecordedReport" as keyof SettingsController);
-			sinon.stub(settingsController, "viewExpectedReport" as keyof SettingsController);
-			sinon.stub(settingsController, "viewMissedReport" as keyof SettingsController);
-			sinon.stub(settingsController, "viewIncompleteReport" as keyof SettingsController);
+			sinon.stub(
+				settingsController,
+				"viewRecordedReport" as keyof SettingsController,
+			);
+			sinon.stub(
+				settingsController,
+				"viewExpectedReport" as keyof SettingsController,
+			);
+			sinon.stub(
+				settingsController,
+				"viewMissedReport" as keyof SettingsController,
+			);
+			sinon.stub(
+				settingsController,
+				"viewIncompleteReport" as keyof SettingsController,
+			);
 
 			await settingsController.activate();
 		});
@@ -194,12 +222,17 @@ describe("SettingsController", (): void => {
 	reports.forEach((report: ReportType): void => {
 		describe(`view${report.description}Report`, (): void => {
 			it(`should push the ${report.description.toLowerCase()} report view`, async (): Promise<void> => {
-				await settingsController[`view${report.description}Report` as ReportHandler]();
-				expect(appController.pushView).to.have.been.calledWith("report", sinon.match({
-					reportName: report.viewArgs.reportName,
-					dataSource: sinon.match.func,
-					args: report.viewArgs.args
-				}));
+				await settingsController[
+					`view${report.description}Report` as ReportHandler
+				]();
+				expect(appController.pushView).to.have.been.calledWith(
+					"report",
+					sinon.match({
+						reportName: report.viewArgs.reportName,
+						dataSource: sinon.match.func,
+						args: report.viewArgs.args,
+					}),
+				);
 			});
 		});
 	});

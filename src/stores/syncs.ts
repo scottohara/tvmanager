@@ -2,29 +2,28 @@ import type {
 	IDBStoreUpgrade,
 	SyncsStore,
 	SyncsStoreObject,
-	TVManagerDB
+	TVManagerDB,
 } from "~/stores";
-import type {
-	ModelType,
-	PersistedSync
-} from "~/models";
+import type { ModelType, PersistedSync } from "~/models";
 import type { IDBPDatabase } from "idb";
 
 const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
 	(db: IDBPDatabase<TVManagerDB>): void => {
 		db.createObjectStore("syncs", { keyPath: ["type", "id"] });
-	}
+	},
 ];
 
 function create(db: IDBPDatabase<TVManagerDB>): SyncsStore {
 	return {
 		async list(): Promise<PersistedSync[]> {
-			return (await db.getAll("syncs")).map((sync: SyncsStoreObject): PersistedSync => ({
-				Type: sync.type,
-				ID: sync.id,
-				Action: sync.action
-			}));
+			return (await db.getAll("syncs")).map(
+				(sync: SyncsStoreObject): PersistedSync => ({
+					Type: sync.type,
+					ID: sync.id,
+					Action: sync.action,
+				}),
+			);
 		},
 
 		async count(): Promise<number> {
@@ -37,7 +36,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SyncsStore {
 
 		async remove(type: ModelType, id: string): Promise<void> {
 			return db.delete("syncs", [type, id]);
-		}
+		},
 	};
 }
 

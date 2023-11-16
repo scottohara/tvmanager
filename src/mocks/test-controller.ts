@@ -17,26 +17,26 @@ export default class TestController extends ViewController {
 			leftButton: {
 				eventHandler: sinon.stub(),
 				style: "backButton",
-				label: "left-button"
+				label: "left-button",
 			},
 			rightButton: {
 				eventHandler: sinon.stub(),
 				style: "confirmButton",
-				label: "right-button"
-			}
+				label: "right-button",
+			},
 		};
 		this.footer = {
 			label: "test-footer",
 			leftButton: {
 				eventHandler: sinon.stub(),
 				style: "backButton",
-				label: "left-button"
+				label: "left-button",
 			},
 			rightButton: {
 				eventHandler: sinon.stub(),
 				style: "confirmButton",
-				label: "right-button"
-			}
+				label: "right-button",
+			},
 		};
 	}
 }

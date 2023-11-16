@@ -92,4 +92,7 @@ export interface SerializedEpisode {
 	type: "Episode";
 }
 
-export type SerializedModel = SerializedEpisode | SerializedProgram | SerializedSeries;
+export type SerializedModel =
+	| SerializedEpisode
+	| SerializedProgram
+	| SerializedSeries;

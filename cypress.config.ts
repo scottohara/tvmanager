@@ -6,6 +6,6 @@ export default defineConfig({
 	chromeWebSecurity: false,
 	e2e: {
 		baseUrl: "http://localhost:3001",
-		experimentalRunAllSpecs: true
-	}
+		experimentalRunAllSpecs: true,
+	},
 });

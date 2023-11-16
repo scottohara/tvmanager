@@ -1,18 +1,18 @@
 const path = require("path"),
-			{ merge } = require("webpack-merge"),
-			{ GenerateSW } = require("workbox-webpack-plugin"),
-			packageJson = require("./package"),
-			{
-				cssRule,
-				iconRule,
-				imageRule,
-				htmlRule,
-				webmanifestRule,
-				extractCss,
-				createIndexHtml,
-				defineAppConfig,
-				config
-			} = require("./webpack.common");
+	{ merge } = require("webpack-merge"),
+	{ GenerateSW } = require("workbox-webpack-plugin"),
+	packageJson = require("./package"),
+	{
+		cssRule,
+		iconRule,
+		imageRule,
+		htmlRule,
+		webmanifestRule,
+		extractCss,
+		createIndexHtml,
+		defineAppConfig,
+		config,
+	} = require("./webpack.common");
 
 module.exports = merge(config, {
 	mode: "production",
@@ -23,7 +23,7 @@ module.exports = merge(config, {
 		hashDigestLength: 6,
 		filename: "[name]-[chunkhash].js",
 		assetModuleFilename: "[name]-[contenthash][ext]",
-		clean: true
+		clean: true,
 	},
 
 	module: {
@@ -33,12 +33,12 @@ module.exports = merge(config, {
 			merge(imageRule, {
 				generator: {
 					// Include hash in file names
-					filename: "images/[name]-[contenthash][ext]"
-				}
+					filename: "images/[name]-[contenthash][ext]",
+				},
 			}),
 			htmlRule,
-			webmanifestRule
-		]
+			webmanifestRule,
+		],
 	},
 
 	// Extract full, separate source maps
@@ -51,12 +51,12 @@ module.exports = merge(config, {
 		new GenerateSW({
 			cacheId: packageJson.name,
 			skipWaiting: true,
-			clientsClaim: true
-		})
+			clientsClaim: true,
+		}),
 	],
 
 	// Fail if any chunks exceed performance budget
 	performance: {
-		hints: "error"
-	}
+		hints: "error",
+	},
 });

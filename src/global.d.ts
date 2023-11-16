@@ -1,3 +1,3 @@
 export type PublicInterface<Class> = {
-	[Member in keyof Class]: Class[Member]
+	[Member in keyof Class]: Class[Member];
 };

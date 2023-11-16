@@ -31,7 +31,7 @@
 
 		--toggle-switch-track-color: rgb(233, 233, 235);
 		--toggle-switch-thumb-color: rgb(255, 255, 255);
-		--toggle-switch-shadow-color: rgba(0, 0, 0, .2);
+		--toggle-switch-shadow-color: rgba(0, 0, 0, 0.2);
 		--toggle-switch-checked-color: rgb(52, 199, 89);
 
 		--notices-background-color: rgb(0, 0, 0);
@@ -72,7 +72,7 @@
 
 		--toggle-switch-track-color: rgb(68, 68, 72);
 		--toggle-switch-thumb-color: rgb(255, 255, 255);
-		--toggle-switch-shadow-color: rgba(0, 0, 0, .2);
+		--toggle-switch-shadow-color: rgba(0, 0, 0, 0.2);
 		--toggle-switch-checked-color: rgb(48, 209, 88);
 
 		--notices-background-color: rgb(90, 90, 95);
@@ -99,7 +99,8 @@ body {
 }
 
 /* Hide the header & footer content by default */
-#header *, #footer * {
+#header *,
+#footer * {
 	display: none;
 }
 
@@ -204,7 +205,7 @@ a.backButton {
 /* Chevron glyph for back navigation buttons */
 a.backButton:before {
 	content: "";
-	position:absolute;
+	position: absolute;
 	width: 10px;
 	height: 10px;
 	top: 8px;
@@ -231,7 +232,8 @@ a.disabled {
 }
 
 /* Scrolling lists & dialogs */
-ul, #dialog {
+ul,
+#dialog {
 	overflow-y: scroll;
 }
 
@@ -260,7 +262,8 @@ ul li.group {
 }
 
 /* No top border for the first item in a list or list group */
-ul li.group + li, ul li:first-child:not(.group) {
+ul li.group + li,
+ul li:first-child:not(.group) {
 	border-top: 0;
 }
 
@@ -274,9 +277,10 @@ ul li a {
 }
 
 /* Chevron glyph for list items and navigating to a subview */
-ul li a:before, .toView:before {
+ul li a:before,
+.toView:before {
 	content: "";
-	position:absolute;
+	position: absolute;
 	width: 7px;
 	height: 7px;
 	right: 0;
@@ -310,7 +314,7 @@ ul.withHelper li a {
 /* Chevron image for list items in edit mode */
 ul.edit li a:before {
 	content: "i";
-	position:absolute;
+	position: absolute;
 	width: 20px;
 	height: 20px;
 	top: 12px;
@@ -328,7 +332,7 @@ ul.edit li a:before {
 /* Delete image for list items in delete mode */
 ul.delete li a:before {
 	content: "\2013";
-	position:absolute;
+	position: absolute;
 	width: 20px;
 	height: 20px;
 	top: 12px;
@@ -432,7 +436,7 @@ div.progressBar div.expected {
 
 /* Dialog sections */
 section {
-	padding-top: 20px
+	padding-top: 20px;
 }
 
 /* Dialog titles */
@@ -445,7 +449,7 @@ h2 {
 }
 
 /* Dialog rows */
-.row  {
+.row {
 	background: var(--default-alternate-background-color);
 	min-height: 42px;
 	padding-left: 15px;
@@ -457,7 +461,8 @@ h2 {
 }
 
 /* Top border for first row in a dialog or dialog section */
-h2 + .row, .row:first-child {
+h2 + .row,
+.row:first-child {
 	border-top: 1px solid var(--default-separator-color);
 }
 
@@ -490,7 +495,8 @@ p {
 }
 
 /* Dialog fields */
-input:not([type="radio"]), select {
+input:not([type="radio"]),
+select {
 	border: none;
 	height: 40px;
 	width: 100%;
@@ -507,7 +513,10 @@ input:not([type="radio"]), select {
 }
 
 /* Episode status toggles */
-.row #watched, .row #recorded, .row #expected, .row #missed {
+.row #watched,
+.row #recorded,
+.row #expected,
+.row #missed {
 	height: 25px;
 	width: 25px;
 	border-width: 2px;
@@ -517,7 +526,7 @@ input:not([type="radio"]), select {
 	margin-right: 10px;
 	position: relative;
 	top: 7px;
-	transition: background-color .25s ease-in-out;
+	transition: background-color 0.25s ease-in-out;
 }
 
 /* Watched episode status toggle (unselected) */
@@ -601,7 +610,7 @@ input[type="checkbox"] + label:before {
 	left: 0;
 	border-radius: 15px;
 	transition-property: width, background-color;
-	transition-duration: .25s;
+	transition-duration: 0.25s;
 	transition-timing-function: ease-in-out;
 }
 
@@ -617,7 +626,7 @@ input[type="checkbox"] + label:after {
 	background-color: var(--toggle-switch-thumb-color);
 	box-shadow: inset 0 0 0 1px var(--toggle-switch-shadow-color);
 	transition-property: left, box-shadow;
-	transition-duration: .25s;
+	transition-duration: 0.25s;
 	transition-timing-function: ease-in-out;
 }
 
@@ -634,7 +643,12 @@ input[type="checkbox"]:checked + label:after {
 }
 
 /* Hide registration message, sync controls, progress bar, status row, sync error & import changes only rows by default */
-#registrationMessage, #syncControls, #progress, #statusRow, #syncErrors, #importChangesOnlyRow {
+#registrationMessage,
+#syncControls,
+#progress,
+#statusRow,
+#syncErrors,
+#importChangesOnlyRow {
 	display: none;
 }
 
@@ -698,5 +712,5 @@ div.notice p {
 }
 
 #index li:first-child {
-	padding-top:6px;
+	padding-top: 6px;
 }

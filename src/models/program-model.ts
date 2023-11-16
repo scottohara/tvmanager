@@ -1,7 +1,4 @@
-import type {
-	PersistedProgram,
-	SerializedProgram
-} from "~/models";
+import type { PersistedProgram, SerializedProgram } from "~/models";
 import Base from "~/models/base-model";
 import ProgressBar from "~/components/progressbar";
 
@@ -18,9 +15,15 @@ export default class Program extends Base {
 
 	private readonly progressBar: ProgressBar;
 
-	public constructor(public id: string | null,
-						public programName: string | null,
-						public seriesCount = 0, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0) {
+	public constructor(
+		public id: string | null,
+		public programName: string | null,
+		public seriesCount = 0,
+		episodeCount = 0,
+		watchedCount = 0,
+		recordedCount = 0,
+		expectedCount = 0,
+	) {
 		super();
 		this.progressBar = new ProgressBar(episodeCount, []);
 		this.setEpisodeCount(episodeCount);
@@ -40,7 +43,20 @@ export default class Program extends Base {
 		let programList: Program[] = [];
 
 		try {
-			programList = await Promise.all((await (await this.db).programsStore.list()).map((prog: PersistedProgram): Program => new Program(prog.ProgramID, prog.Name, prog.SeriesCount, prog.EpisodeCount, prog.WatchedCount, prog.RecordedCount, prog.ExpectedCount)));
+			programList = await Promise.all(
+				(await (await this.db).programsStore.list()).map(
+					(prog: PersistedProgram): Program =>
+						new Program(
+							prog.ProgramID,
+							prog.Name,
+							prog.SeriesCount,
+							prog.EpisodeCount,
+							prog.WatchedCount,
+							prog.RecordedCount,
+							prog.ExpectedCount,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -50,7 +66,7 @@ export default class Program extends Base {
 
 	public static async find(id: string): Promise<Program> {
 		let ProgramID: string | null = null,
-				Name: string | null = null;
+			Name: string | null = null;
 
 		try {
 			const prog = await (await this.db).programsStore.find(id);
@@ -98,9 +114,11 @@ export default class Program extends Base {
 		this.id ??= crypto.randomUUID();
 
 		try {
-			await (await this.db).programsStore.save({
+			await (
+				await this.db
+			).programsStore.save({
 				ProgramID: this.id,
-				Name: String(this.programName)
+				Name: String(this.programName),
 			});
 
 			return this.id;
@@ -126,7 +144,7 @@ export default class Program extends Base {
 		return {
 			id: this.id,
 			programName: this.programName,
-			type: "Program"
+			type: "Program",
 		};
 	}
 
@@ -149,53 +167,53 @@ export default class Program extends Base {
 
 	public setRecordedCount(count: number): void {
 		const PERCENT = 100,
-					RECORDED = 1;
+			RECORDED = 1;
 		let recordedPercent = 0;
 
 		this.recordedCount = count;
 
 		// Calculate the percentage of episodes that are recorded
-		recordedPercent = this.recordedCount / this.episodeCount * PERCENT;
+		recordedPercent = (this.recordedCount / this.episodeCount) * PERCENT;
 
 		// Update the recorded section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(RECORDED, {
 			label: this.recordedCount,
 			percent: recordedPercent,
-			style: "recorded"
+			style: "recorded",
 		});
 	}
 
 	public setExpectedCount(count: number): void {
 		const PERCENT = 100,
-					EXPECTED = 2;
+			EXPECTED = 2;
 		let expectedPercent = 0;
 
 		this.expectedCount = count;
 
 		// Calculate the percentage of episodes that are expected
-		expectedPercent = this.expectedCount / this.episodeCount * PERCENT;
+		expectedPercent = (this.expectedCount / this.episodeCount) * PERCENT;
 
 		// Update the expected section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(EXPECTED, {
 			label: this.expectedCount,
 			percent: expectedPercent,
-			style: "expected"
+			style: "expected",
 		});
 	}
 
 	private setWatchedProgress(): void {
 		const PERCENT = 100,
-					WATCHED = 0;
+			WATCHED = 0;
 		let watchedPercent = 0;
 
 		// Calculate the percentage of episodes that are watched
-		watchedPercent = this.watchedCount / this.episodeCount * PERCENT;
+		watchedPercent = (this.watchedCount / this.episodeCount) * PERCENT;
 
 		// Update the watched section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(WATCHED, {
 			label: this.watchedCount,
 			percent: watchedPercent,
-			style: "watched"
+			style: "watched",
 		});
 	}
 }

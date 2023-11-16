@@ -3,27 +3,36 @@
 		<h2>Registration</h2>
 		<div class="row toView" id="registrationRow">
 			<label>Device</label>
-			<input type="text" id="deviceName" readonly="true" value=""/>
+			<input type="text" id="deviceName" readonly="true" value="" />
 		</div>
 		<div id="registrationMessage">
-			<p>Before you can backup/restore data to the cloud, you must first register your device.</p>
-			<p>Once registered, you will be able to import data from the cloud to this device immediately.</p>
-			<p>Later, when your registration has been approved, you will be able to export changes you make on this device to the cloud.</p>
+			<p>
+				Before you can backup/restore data to the cloud, you must first register
+				your device.
+			</p>
+			<p>
+				Once registered, you will be able to import data from the cloud to this
+				device immediately.
+			</p>
+			<p>
+				Later, when your registration has been approved, you will be able to
+				export changes you make on this device to the cloud.
+			</p>
 		</div>
 	</section>
 	<section id="syncControls">
 		<h2>Sync</h2>
 		<div class="row">
 			<label>Last Sync</label>
-			<input type="text" id="lastSyncTime" readonly="true" value=""/>
+			<input type="text" id="lastSyncTime" readonly="true" value="" />
 		</div>
 		<div class="row">
 			<label>Changes</label>
-			<input type="text" id="localChanges" readonly="true" value=""/>
+			<input type="text" id="localChanges" readonly="true" value="" />
 		</div>
 		<div class="row" id="importChangesOnlyRow">
 			<label>Fast Import</label>
-			<input type="checkbox" id="importChangesOnly"/>
+			<input type="checkbox" id="importChangesOnly" />
 			<label for="importChangesOnly"></label>
 		</div>
 		<div class="row">
@@ -33,12 +42,12 @@
 		<div class="row" id="statusRow">
 			<label>Status</label>
 			<progress id="progress"></progress>
-			<input type="text" id="status" readonly="true" value=""/>
+			<input type="text" id="status" readonly="true" value="" />
 		</div>
 		<section id="syncErrors">
 			<h2>Errors</h2>
 			<div class="row">
-				<ul id="errorList"/>
+				<ul id="errorList" />
 			</div>
 		</section>
 	</section>

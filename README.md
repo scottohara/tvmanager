@@ -1,19 +1,19 @@
-| Service					| Status																																																																																										|
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GitHub  				| [![Build Status](https://github.com/scottohara/tvmanager/workflows/Build/badge.svg)](https://github.com/scottohara/tvmanager/actions?workflow=Build)																																|
-| Code Climate		| [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)																														|
-| Code Climate		| [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)																					|
-| Snyk (npm)			| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)																									|
-| Snyk (Gemfile)	| [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/scottohara/tvmanager?targetFile=Gemfile.lock)	|
+| Service        | Status                                                                                                                                                                                   |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub         | [![Build Status](https://github.com/scottohara/tvmanager/workflows/Build/badge.svg)](https://github.com/scottohara/tvmanager/actions?workflow=Build)                                     |
+| Code Climate   | [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)                                                          |
+| Code Climate   | [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)                                         |
+| Snyk (npm)     | [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)                                                 |
+| Snyk (Gemfile) | [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/scottohara/tvmanager?targetFile=Gemfile.lock) |
 
-What is TV Manager?
-===================
+# What is TV Manager?
+
 TV Manager is a Progressive Web App (PWA) that keeps track of which episodes of your favourite TV shows you:
 
-* have seen,
-* have recorded to your DVR (or downloaded by other means),
-* expect to be broadcast in the near future, or
-* missed
+- have seen,
+- have recorded to your DVR (or downloaded by other means),
+- expect to be broadcast in the near future, or
+- missed
 
 The data model is very simple:
 **Programs consist of zero or more Series, which consist of zero or more Episodes.**
@@ -22,7 +22,7 @@ The data model is very simple:
 
 **Series** have a name (eg. "Series 1" or "Season 1") and optionally a broadcast frequency (eg. "Daily" or "Mondays" or "Tuesdays", etc.)
 
-**Episodes** have a name, a status (eg. Watched/Recorded/Expected/Missed), a date (ie. *when* the episode was recorded/expected/missed), plus some attributes to indicate whether it is unverified (eg. you *think* this is the eposide you recorded, but you're not 100% sure) or unscheduled (don't forget to set your DVR!)
+**Episodes** have a name, a status (eg. Watched/Recorded/Expected/Missed), a date (ie. _when_ the episode was recorded/expected/missed), plus some attributes to indicate whether it is unverified (eg. you _think_ this is the eposide you recorded, but you're not 100% sure) or unscheduled (don't forget to set your DVR!)
 
 The main view is the **Schedule**, which lists all series that are currently airing (ie. have a frequency other than "Not Showing"), plus any other series that may not be currently airing but have one or more recorded or upcoming episodes expected.
 
@@ -30,8 +30,7 @@ The other main view is **Unscheduled**, which lists any upcoming episodes that f
 
 The rest of the app consists of data management views (add/edit/delete programs, series & episodes), basic reports (eg. "All recorded", "All Expected", "All Missed" etc.), and some utility functions such as importing/exporting the database to/from a backend NoSQL database (CouchDB) etc.
 
-Screenshots
-===========
+# Screenshots
 
 ![Schedule](http://scottohara.github.io/tvmanager/schedule.png "Schedule")
 
@@ -41,8 +40,8 @@ Screenshots
 
 ![Edit Episode](http://scottohara.github.io/tvmanager/episode-edit.png "Edit Episode")
 
-Architecture
-============
+# Architecture
+
 The PWA uses a service worker, application manifest and a local IndexedDB database. When installed to the homescreen of a device, it functions like an app including when offline/disconnected or in airplane mode.
 
 The code is developed in an MVC-style architecture, with a custom "view stack" for navigating through the screens (ie. opening a view 'pushes' it onto the top of the stack; closing the view 'pops' it off the stack, revealing the previous view underneath).
@@ -51,22 +50,22 @@ On the server side it's a Ruby Sinatra app, however as all of the static resourc
 
 Database schema changes are managed via an upgrade routine on startup (similar to Rails-style migrations).
 
-Requirements
-============
-* Browser with support for ECMAScript 2017, Service Workers, App Manifest, Web Workers & IndexedDB
-* For development: Node.JS/npm, Ruby/RubyGems/Bundler (recommend [asdf](http://asdf-vm.com/))
-* For production/staging: somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Fly.io](http://fly.io) or similar)
+# Requirements
 
-Installation (Development)
-==========================
+- Browser with support for ECMAScript 2017, Service Workers, App Manifest, Web Workers & IndexedDB
+- For development: Node.JS/npm, Ruby/RubyGems/Bundler (recommend [asdf](http://asdf-vm.com/))
+- For production/staging: somewhere to host the Ruby app and public HTML/JS/CSS files (recommend [Fly.io](http://fly.io) or similar)
+
+# Installation (Development)
+
 1. Clone the repository (`git clone git://github.com/scottohara/tvmanager.git`)
 2. Install the dependencies (`cd tvmanager && bundle config --local path vendor/bundle && bundle install && npm install`) (`path vendor/bundle` ensures that gems are installed locally in the project)
 3. Start the server (`npm start`)
 
 (Tip: On the iPhone, use the "Add to Home Screen" option to create a permanent icon that runs the app in fullscreen mode without the Safari chrome)
 
-Import/Export
-=============
+# Import/Export
+
 The app includes a backup/restore facility. A log of all changes made to the local IndexedDB database since the last export is kept, and when an export is initiated, those changes are serialized to a JSON-representation and sent to a CouchDB database configured on the server.
 
 Restoring the database does the reverse, pulling JSON objects from CouchDB (via the server) and loading them into the local database.
@@ -97,13 +96,13 @@ fly secrets set TVMANAGER_COUCHDB_URL=http://user:pass@host:port/database --app 
 
 (Assumes you have setup two Fly apps, one for staging and one for production)
 
-After creating an empty CouchDB database, you need to load the design documents from /db/design/*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. This tasks automatically runs on each deployment, to ensure the latest design documents are being used.
+After creating an empty CouchDB database, you need to load the design documents from /db/design/\*.json. You can load these manually using Futon or via a cURL script if you like, or there is rake task (`db:migrate`) that does this for you. This tasks automatically runs on each deployment, to ensure the latest design documents are being used.
 
 To remind users to backup regularly, a warning prompt appears at startup if the last backup was more than 7 days ago.
 In development, this prompt is configured to appear after 9999 days so that you are not constantly prompted to backup.
 
-Running Tests
-=============
+# Running Tests
+
 Frontend specs are implemented using [mocha](https://mochajs.org/)+[chai](http://chaijs.com/)+[sinon](http://sinonjs.org/).
 
 Four [karma](http://karma-runner.github.io/0.12/index.html) configurations are available to run the frontend test suite:
@@ -116,9 +115,10 @@ Four [karma](http://karma-runner.github.io/0.12/index.html) configurations are a
 By default, the `test:bdd` suite is run in Chrome, and the `test:coverage` suite is run in headless Chrome and iOS Simulator.
 
 To run the tests in Mobile Safari on a physical device:
-* start the test runner *without* launching the default browsers (`npm run test:coverage -- --browsers`)
-* the Karma server will pause waiting for a browser connection
-* manually launch Mobile Safari and browse to the URL shown in the terminal window (eg. `http://localhost:9876`)
+
+- start the test runner _without_ launching the default browsers (`npm run test:coverage -- --browsers`)
+- the Karma server will pause waiting for a browser connection
+- manually launch Mobile Safari and browse to the URL shown in the terminal window (eg. `http://localhost:9876`)
 
 Backend specs are implemented using [RSpec](http://rspec.info/):
 
@@ -130,21 +130,21 @@ Integration tests are implemented using [Cypress](http://cypress.io/):
 1. Start the database server and app server in test mode, and launch Cypress (`npm run test:e2e`)
 2. Optionally run Cypress in headless mode (`cypress run --browser chrome`)
 
-Code Quality
-============
+# Code Quality
+
 Frontend checks are implemented using [eslint](http://eslint.org):
 
-* `npm run lint`
+- `npm run lint`
 
 Backend checks are implemented using [rubocop](http://batsov.com/rubocop/):
 
-* `bundle exec rubocop`
+- `bundle exec rubocop`
 
-Deployment (Staging/Production)
-===============================
+# Deployment (Staging/Production)
+
 Before deploying, you should first create an annotated tag (e.g. `git tag -am "Version 1.00" v1.00`).
 
 Then run:
 
-* `npm run deploy:staging` to deploy to the staging app
-* `npm run deploy:production` to deploy to the production app
+- `npm run deploy:staging` to deploy to the staging app
+- `npm run deploy:production` to deploy to the production app

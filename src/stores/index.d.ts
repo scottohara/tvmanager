@@ -1,9 +1,4 @@
-import type {
-	DBSchema,
-	IDBPDatabase,
-	IDBPTransaction,
-	StoreNames
-} from "idb";
+import type { DBSchema, IDBPDatabase, IDBPTransaction, StoreNames } from "idb";
 import type {
 	EpisodeStatus,
 	ModelType,
@@ -12,10 +7,13 @@ import type {
 	PersistedSeries,
 	PersistedSetting,
 	PersistedSync,
-	SyncAction
+	SyncAction,
 } from "~/models";
 
-export type IDBStoreUpgrade<T> = (db: IDBPDatabase<T>, transaction?: IDBPTransaction<T, StoreNames<T>[], "versionchange">) => void;
+export type IDBStoreUpgrade<T> = (
+	db: IDBPDatabase<T>,
+	transaction?: IDBPTransaction<T, StoreNames<T>[], "versionchange">,
+) => void;
 
 // Interfaces for store objects
 

@@ -4,13 +4,9 @@ import type {
 	NavButtonEventHandler,
 	Notice,
 	View,
-	ViewControllerArgs
+	ViewControllerArgs,
 } from "~/controllers";
-import type {
-	SinonFakeTimers,
-	SinonSpy,
-	SinonStub
-} from "sinon";
+import type { SinonFakeTimers, SinonSpy, SinonStub } from "sinon";
 import ApplicationController from "./application-controller";
 import SettingMock from "~/mocks/setting-model-mock";
 import SyncMock from "~/mocks/sync-model-mock";
@@ -20,8 +16,8 @@ import sinon from "sinon";
 
 describe("ApplicationController", (): void => {
 	let contentWrapper: HTMLDivElement,
-			content: HTMLDivElement,
-			applicationController: ApplicationController;
+		content: HTMLDivElement,
+		applicationController: ApplicationController;
 
 	beforeEach((): void => {
 		contentWrapper = document.createElement("div");
@@ -32,17 +28,30 @@ describe("ApplicationController", (): void => {
 		content.id = "content";
 		contentWrapper.append(content);
 
-		sinon.spy(ApplicationController.prototype, "contentShown" as keyof ApplicationController);
+		sinon.spy(
+			ApplicationController.prototype,
+			"contentShown" as keyof ApplicationController,
+		);
 		ApplicationController["singletonInstance"] = undefined;
 		applicationController = new ApplicationController();
 	});
 
 	describe("object constructor", (): void => {
-		it("should return an ApplicationController instance", (): Chai.Assertion => expect(applicationController).to.be.an.instanceOf(ApplicationController));
-		it("should make the instance a singleton", (): Chai.Assertion => expect(applicationController).to.equal(ApplicationController["singletonInstance"]));
-		it("should initialise the view stack", (): Chai.Assertion => expect(applicationController.viewStack).to.deep.equal([]));
-		it("should initialise the notice stack", (): Chai.Assertion => expect(applicationController["noticeStack"]).to.deep.equal({ height: -20, notice: [] }));
-		it("should set the max data age days", (): Chai.Assertion => expect(applicationController["maxDataAgeDays"]).to.equal(7));
+		it("should return an ApplicationController instance", (): Chai.Assertion =>
+			expect(applicationController).to.be.an.instanceOf(ApplicationController));
+		it("should make the instance a singleton", (): Chai.Assertion =>
+			expect(applicationController).to.equal(
+				ApplicationController["singletonInstance"],
+			));
+		it("should initialise the view stack", (): Chai.Assertion =>
+			expect(applicationController.viewStack).to.deep.equal([]));
+		it("should initialise the notice stack", (): Chai.Assertion =>
+			expect(applicationController["noticeStack"]).to.deep.equal({
+				height: -20,
+				notice: [],
+			}));
+		it("should set the max data age days", (): Chai.Assertion =>
+			expect(applicationController["maxDataAgeDays"]).to.equal(7));
 
 		it("should attach a transition end event handler", (): void => {
 			contentWrapper.dispatchEvent(new Event("transitionend"));
@@ -52,10 +61,17 @@ describe("ApplicationController", (): void => {
 		describe("instance already exists", (): void => {
 			let anotherApplicationController: ApplicationController;
 
-			beforeEach((): ApplicationController => (anotherApplicationController = new ApplicationController()));
+			beforeEach(
+				(): ApplicationController =>
+					(anotherApplicationController = new ApplicationController()),
+			);
 
-			it("should return an ApplicationController instance", (): Chai.Assertion => expect(anotherApplicationController).to.be.an.instanceOf(ApplicationController));
-			it("should be the same instance", (): Chai.Assertion => expect(anotherApplicationController).to.equal(applicationController));
+			it("should return an ApplicationController instance", (): Chai.Assertion =>
+				expect(anotherApplicationController).to.be.an.instanceOf(
+					ApplicationController,
+				));
+			it("should be the same instance", (): Chai.Assertion =>
+				expect(anotherApplicationController).to.equal(applicationController));
 		});
 	});
 
@@ -64,33 +80,62 @@ describe("ApplicationController", (): void => {
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(applicationController, "pushView");
-			sinon.stub(applicationController, "showSyncNotice" as keyof ApplicationController);
+			sinon.stub(
+				applicationController,
+				"showSyncNotice" as keyof ApplicationController,
+			);
 			SettingMock.get.reset();
 			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTime);
 			SyncMock.syncList = [new SyncMock(null, null)];
 			await applicationController.start();
 		});
 
-		it("should load all view controllers", (): Chai.Assertion => expect(Object.keys(applicationController["viewControllers"]).length).to.equal(13));
-		it("should display the schedule view", (): Chai.Assertion => expect(applicationController["pushView"]).to.have.been.calledWith("schedule"));
-		it("should get the last sync time", (): Chai.Assertion => expect(applicationController["showSyncNotice"]).to.have.been.calledWith(lastSyncTime, 1));
+		it("should load all view controllers", (): Chai.Assertion =>
+			expect(
+				Object.keys(applicationController["viewControllers"]).length,
+			).to.equal(13));
+		it("should display the schedule view", (): Chai.Assertion =>
+			expect(applicationController["pushView"]).to.have.been.calledWith(
+				"schedule",
+			));
+		it("should get the last sync time", (): Chai.Assertion =>
+			expect(applicationController["showSyncNotice"]).to.have.been.calledWith(
+				lastSyncTime,
+				1,
+			));
 	});
 
 	describe("popView", (): void => {
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(applicationController, "clearFooter");
-			sinon.stub(applicationController, "clearHeader" as keyof ApplicationController);
-			sinon.stub(applicationController, "viewPopped" as keyof ApplicationController);
-			sinon.stub(applicationController, "show" as keyof ApplicationController).yields({});
-			applicationController["viewStack"] = [{ controller: new TestController(), scrollPos: 0 }];
+			sinon.stub(
+				applicationController,
+				"clearHeader" as keyof ApplicationController,
+			);
+			sinon.stub(
+				applicationController,
+				"viewPopped" as keyof ApplicationController,
+			);
+			sinon
+				.stub(applicationController, "show" as keyof ApplicationController)
+				.yields({});
+			applicationController["viewStack"] = [
+				{ controller: new TestController(), scrollPos: 0 },
+			];
 			await applicationController.popView({} as ViewControllerArgs);
 		});
 
-		it("should clear the footer", (): Chai.Assertion => expect(applicationController["clearFooter"]).to.have.been.called);
-		it("should clear the header", (): Chai.Assertion => expect(applicationController["clearHeader"]).to.have.been.called);
-		it("should pop the view off the view stack", (): Chai.Assertion => expect(applicationController.viewStack).to.be.empty);
+		it("should clear the footer", (): Chai.Assertion =>
+			expect(applicationController["clearFooter"]).to.have.been.called);
+		it("should clear the header", (): Chai.Assertion =>
+			expect(applicationController["clearHeader"]).to.have.been.called);
+		it("should pop the view off the view stack", (): Chai.Assertion =>
+			expect(applicationController.viewStack).to.be.empty);
 		it("should display the previous view", (): void => {
-			expect(applicationController["show"]).to.have.been.calledWith(sinon.match.func, {});
+			expect(applicationController["show"]).to.have.been.calledWith(
+				sinon.match.func,
+				{},
+			);
 			expect(applicationController["viewPopped"]).to.have.been.calledWith({});
 		});
 	});
@@ -98,7 +143,7 @@ describe("ApplicationController", (): void => {
 	describe("getScrollPosition", (): void => {
 		it("should save the current scroll position of the active view", (): void => {
 			const scrollingElement = document.createElement("div"),
-						item = document.createElement("div");
+				item = document.createElement("div");
 
 			item.style.height = "100px";
 			scrollingElement.style.height = "50px";
@@ -108,9 +153,14 @@ describe("ApplicationController", (): void => {
 			content.append(scrollingElement);
 			scrollingElement.scrollTop = 10;
 
-			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
+			applicationController.viewStack.push({
+				controller: new TestController(),
+				scrollPos: 0,
+			});
 			applicationController.getScrollPosition();
-			expect((applicationController.viewStack.pop() as View).scrollPos).to.equal(10);
+			expect(
+				(applicationController.viewStack.pop() as View).scrollPos,
+			).to.equal(10);
 		});
 	});
 
@@ -119,7 +169,7 @@ describe("ApplicationController", (): void => {
 
 		beforeEach((): void => {
 			const item1 = document.createElement("div"),
-						item2 = document.createElement("div");
+				item2 = document.createElement("div");
 
 			item1.style.height = "100px";
 			item2.style.height = "100px";
@@ -134,15 +184,23 @@ describe("ApplicationController", (): void => {
 
 		describe("scroll position is -1", (): void => {
 			it("should scroll to the bottom", (): void => {
-				applicationController.viewStack.push({ controller: new TestController(), scrollPos: -1 });
+				applicationController.viewStack.push({
+					controller: new TestController(),
+					scrollPos: -1,
+				});
 				applicationController.setScrollPosition();
-				expect(scrollingElement.scrollTop).to.equal(100 + scrollingElement.offsetTop);
+				expect(scrollingElement.scrollTop).to.equal(
+					100 + scrollingElement.offsetTop,
+				);
 			});
 		});
 
 		describe("scoll position is not -1", (): void => {
 			it("should restore the saved scroll position of the active view", (): void => {
-				applicationController.viewStack.push({ controller: new TestController(), scrollPos: 20 });
+				applicationController.viewStack.push({
+					controller: new TestController(),
+					scrollPos: 20,
+				});
 				applicationController.setScrollPosition();
 				expect(scrollingElement.scrollTop).to.equal(20);
 			});
@@ -151,9 +209,9 @@ describe("ApplicationController", (): void => {
 
 	describe("setFooter", (): void => {
 		let controller: TestController,
-				leftButton: HTMLAnchorElement,
-				rightButton: HTMLAnchorElement,
-				label: HTMLElement;
+			leftButton: HTMLAnchorElement,
+			rightButton: HTMLAnchorElement,
+			label: HTMLElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -172,7 +230,10 @@ describe("ApplicationController", (): void => {
 
 			document.body.append(leftButton, label, rightButton);
 
-			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
+			sinon.stub(
+				applicationController,
+				"setContentHeight" as keyof ApplicationController,
+			);
 		});
 
 		describe("without footer", (): void => {
@@ -182,20 +243,25 @@ describe("ApplicationController", (): void => {
 				applicationController.setFooter();
 			});
 
-			it("should not show the footer label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should not update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.not.have.been.called);
+			it("should not show the footer label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should not update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.not.have.been
+					.called);
 		});
 
 		describe("with footer", (): void => {
 			let footer: HeaderFooter,
-					leftButtonEventHandler: NavButtonEventHandler,
-					rightButtonEventHandler: NavButtonEventHandler;
+				leftButtonEventHandler: NavButtonEventHandler,
+				rightButtonEventHandler: NavButtonEventHandler;
 
 			beforeEach((): void => {
 				applicationController.viewStack.push({ controller, scrollPos: 0 });
 				footer = controller.footer as HeaderFooter;
-				leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as NavButtonEventHandler;
-				rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as NavButtonEventHandler;
+				leftButtonEventHandler = (footer.leftButton as NavButton)
+					.eventHandler as NavButtonEventHandler;
+				rightButtonEventHandler = (footer.rightButton as NavButton)
+					.eventHandler as NavButtonEventHandler;
 			});
 
 			describe("with left button", (): void => {
@@ -214,10 +280,15 @@ describe("ApplicationController", (): void => {
 						expect(leftButton.classList.contains("backButton")).to.be.true;
 					});
 
-					it("should set the button label", (): Chai.Assertion => expect(String(leftButton.textContent)).to.equal("left-button"));
-					it("should show the button", (): Chai.Assertion => expect(leftButton.style.display).to.not.equal("none"));
-					it("should show the footer label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-					it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+					it("should set the button label", (): Chai.Assertion =>
+						expect(String(leftButton.textContent)).to.equal("left-button"));
+					it("should show the button", (): Chai.Assertion =>
+						expect(leftButton.style.display).to.not.equal("none"));
+					it("should show the footer label", (): Chai.Assertion =>
+						expect(label.style.display).to.not.equal("none"));
+					it("should update the content height", (): Chai.Assertion =>
+						expect(applicationController["setContentHeight"]).to.have.been
+							.called);
 				});
 
 				describe("without event handler", (): void => {
@@ -256,18 +327,27 @@ describe("ApplicationController", (): void => {
 					expect(leftButton.classList.contains("backButton")).to.be.false;
 				});
 
-				it("should not set the button label", (): Chai.Assertion => expect(String(leftButton.textContent)).to.equal(""));
-				it("should not show the button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-				it("should show the footer label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should not set the button label", (): Chai.Assertion =>
+					expect(String(leftButton.textContent)).to.equal(""));
+				it("should not show the button", (): Chai.Assertion =>
+					expect(leftButton.style.display).to.equal("none"));
+				it("should show the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.not.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("with footer label", (): void => {
 				beforeEach((): void => applicationController.setFooter());
 
-				it("should set the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal("test-footer"));
-				it("should show the footer label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should set the footer label", (): Chai.Assertion =>
+					expect(String(label.textContent)).to.equal("test-footer"));
+				it("should show the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.not.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("without footer label", (): void => {
@@ -276,9 +356,13 @@ describe("ApplicationController", (): void => {
 					applicationController.setFooter();
 				});
 
-				it("should not set the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-				it("should show the footer label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should not set the footer label", (): Chai.Assertion =>
+					expect(String(label.textContent)).to.equal(""));
+				it("should show the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.not.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("with right button", (): void => {
@@ -297,10 +381,15 @@ describe("ApplicationController", (): void => {
 						expect(rightButton.classList.contains("confirmButton")).to.be.true;
 					});
 
-					it("should set the button label", (): Chai.Assertion => expect(String(rightButton.textContent)).to.equal("right-button"));
-					it("should show the button", (): Chai.Assertion => expect(rightButton.style.display).to.not.equal("none"));
-					it("should show the footer label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-					it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+					it("should set the button label", (): Chai.Assertion =>
+						expect(String(rightButton.textContent)).to.equal("right-button"));
+					it("should show the button", (): Chai.Assertion =>
+						expect(rightButton.style.display).to.not.equal("none"));
+					it("should show the footer label", (): Chai.Assertion =>
+						expect(label.style.display).to.not.equal("none"));
+					it("should update the content height", (): Chai.Assertion =>
+						expect(applicationController["setContentHeight"]).to.have.been
+							.called);
 				});
 
 				describe("without event handler", (): void => {
@@ -339,10 +428,15 @@ describe("ApplicationController", (): void => {
 					expect(rightButton.classList.contains("confirmButton")).to.be.false;
 				});
 
-				it("should not set the button label", (): Chai.Assertion => expect(String(rightButton.textContent)).to.equal(""));
-				it("should not show the button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-				it("should show the footer label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should not set the button label", (): Chai.Assertion =>
+					expect(String(rightButton.textContent)).to.equal(""));
+				it("should not show the button", (): Chai.Assertion =>
+					expect(rightButton.style.display).to.equal("none"));
+				it("should show the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.not.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 		});
 
@@ -362,20 +456,28 @@ describe("ApplicationController", (): void => {
 		const scenarios: Scenario[] = [
 			{
 				description: "initial view",
-				viewStack: []
+				viewStack: [],
 			},
 			{
 				description: "subsequent view",
-				viewStack: [{ controller: new TestController(), scrollPos: 0 }]
-			}
+				viewStack: [{ controller: new TestController(), scrollPos: 0 }],
+			},
 		];
 
 		beforeEach((): void => {
 			sinon.stub(applicationController, "getScrollPosition");
 			sinon.stub(applicationController, "clearFooter");
-			sinon.stub(applicationController, "clearHeader" as keyof ApplicationController);
-			sinon.stub(applicationController, "viewPushed" as keyof ApplicationController);
-			sinon.stub(applicationController, "show" as keyof ApplicationController).yields();
+			sinon.stub(
+				applicationController,
+				"clearHeader" as keyof ApplicationController,
+			);
+			sinon.stub(
+				applicationController,
+				"viewPushed" as keyof ApplicationController,
+			);
+			sinon
+				.stub(applicationController, "show" as keyof ApplicationController)
+				.yields();
 			applicationController["viewControllers"] = { test: TestController };
 		});
 
@@ -385,18 +487,31 @@ describe("ApplicationController", (): void => {
 			describe(scenario.description, (): void => {
 				beforeEach(async (): Promise<void> => {
 					applicationController.viewStack = scenario.viewStack;
-					await applicationController.pushView("test", {} as ViewControllerArgs);
+					await applicationController.pushView(
+						"test",
+						{} as ViewControllerArgs,
+					);
 					view = applicationController.viewStack.pop() as View;
 				});
 
 				if (scenario.viewStack.length > 0) {
-					it("should get the scroll position", (): Chai.Assertion => expect(applicationController["getScrollPosition"]).to.have.been.called);
-					it("should clear the footer", (): Chai.Assertion => expect(applicationController["clearFooter"]).to.have.been.called);
-					it("should clear the header", (): Chai.Assertion => expect(applicationController["clearHeader"]).to.have.been.called);
+					it("should get the scroll position", (): Chai.Assertion =>
+						expect(applicationController["getScrollPosition"]).to.have.been
+							.called);
+					it("should clear the footer", (): Chai.Assertion =>
+						expect(applicationController["clearFooter"]).to.have.been.called);
+					it("should clear the header", (): Chai.Assertion =>
+						expect(applicationController["clearHeader"]).to.have.been.called);
 				} else {
-					it("should not get the scroll position", (): Chai.Assertion => expect(applicationController["getScrollPosition"]).to.not.have.been.called);
-					it("should not clear the footer", (): Chai.Assertion => expect(applicationController["clearFooter"]).to.not.have.been.called);
-					it("should not clear the header", (): Chai.Assertion => expect(applicationController["clearHeader"]).to.not.have.been.called);
+					it("should not get the scroll position", (): Chai.Assertion =>
+						expect(applicationController["getScrollPosition"]).to.not.have.been
+							.called);
+					it("should not clear the footer", (): Chai.Assertion =>
+						expect(applicationController["clearFooter"]).to.not.have.been
+							.called);
+					it("should not clear the header", (): Chai.Assertion =>
+						expect(applicationController["clearHeader"]).to.not.have.been
+							.called);
 				}
 
 				it("should push the view onto the view stack", (): void => {
@@ -404,7 +519,10 @@ describe("ApplicationController", (): void => {
 					expect(view.scrollPos).to.equal(0);
 				});
 
-				it("should instantiate the view controller", (): Chai.Assertion => expect((view.controller as TestController).args as ViewControllerArgs).to.deep.equal({}));
+				it("should instantiate the view controller", (): Chai.Assertion =>
+					expect(
+						(view.controller as TestController).args as ViewControllerArgs,
+					).to.deep.equal({}));
 
 				it("should display the view", (): void => {
 					expect(applicationController["show"]).to.have.been.called;
@@ -416,9 +534,9 @@ describe("ApplicationController", (): void => {
 
 	describe("showNotice", (): void => {
 		let notices: HTMLDivElement,
-				notice: Notice,
-				noticeContainer: HTMLDivElement,
-				button: HTMLAnchorElement;
+			notice: Notice,
+			noticeContainer: HTMLDivElement,
+			button: HTMLAnchorElement;
 
 		beforeEach((): void => {
 			notices = document.createElement("div");
@@ -428,8 +546,14 @@ describe("ApplicationController", (): void => {
 			notices.style.top = "0px";
 			document.body.append(notices);
 
-			sinon.stub(applicationController, "noticesMoved" as keyof ApplicationController);
-			sinon.stub(applicationController, "hideNotice" as keyof ApplicationController);
+			sinon.stub(
+				applicationController,
+				"noticesMoved" as keyof ApplicationController,
+			);
+			sinon.stub(
+				applicationController,
+				"hideNotice" as keyof ApplicationController,
+			);
 			notice = { label: "<b>test-notice</b>" };
 			applicationController["noticeStack"].height = 0;
 			applicationController["noticeStack"].notice = [];
@@ -445,10 +569,17 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should create a new notice", (): void => {
-				expect(noticeContainer.innerHTML).to.equal("<a class=\"button left cautionButton\">OK</a><p><b>test-notice</b></p>");
+				expect(noticeContainer.innerHTML).to.equal(
+					'<a class="button left cautionButton">OK</a><p><b>test-notice</b></p>',
+				);
 			});
 
-			it("should attach a hide click event handler", (): Chai.Assertion => expect(applicationController["hideNotice"]).to.have.been.calledWith(sinon.match((element: HTMLDivElement): boolean => element === noticeContainer)));
+			it("should attach a hide click event handler", (): Chai.Assertion =>
+				expect(applicationController["hideNotice"]).to.have.been.calledWith(
+					sinon.match(
+						(element: HTMLDivElement): boolean => element === noticeContainer,
+					),
+				));
 		});
 
 		describe("with notice id", (): void => {
@@ -469,48 +600,65 @@ describe("ApplicationController", (): void => {
 		describe("initial notice", (): void => {
 			beforeEach((): void => applicationController.showNotice(notice));
 
-			it("should position the notice stack off screen", (): Chai.Assertion => expect(notices.style.top).to.equal("50px"));
-			it("should make the notice stack visible", (): Chai.Assertion => expect(notices.style.visibility).to.equal("visible"));
+			it("should position the notice stack off screen", (): Chai.Assertion =>
+				expect(notices.style.top).to.equal("50px"));
+			it("should make the notice stack visible", (): Chai.Assertion =>
+				expect(notices.style.visibility).to.equal("visible"));
 		});
 
 		describe("subsequent notice", (): void => {
 			beforeEach((): void => {
-				applicationController["noticeStack"].notice.push(document.createElement("div"));
+				applicationController["noticeStack"].notice.push(
+					document.createElement("div"),
+				);
 				applicationController.showNotice(notice);
 			});
 
-			it("should not position the notice stack off screen", (): Chai.Assertion => expect(notices.style.top).to.equal("0px"));
-			it("should make the notice stack visible", (): Chai.Assertion => expect(notices.style.visibility).to.equal("hidden"));
+			it("should not position the notice stack off screen", (): Chai.Assertion =>
+				expect(notices.style.top).to.equal("0px"));
+			it("should make the notice stack visible", (): Chai.Assertion =>
+				expect(notices.style.visibility).to.equal("hidden"));
 		});
 
 		it("should update the height of the notice stack to accomodate the new notice", (): void => {
 			applicationController["noticeStack"].height = 0;
 			applicationController.showNotice(notice);
 			noticeContainer = notices.querySelector("div") as HTMLDivElement;
-			expect(applicationController["noticeStack"].height).to.equal(-noticeContainer.offsetHeight);
+			expect(applicationController["noticeStack"].height).to.equal(
+				-noticeContainer.offsetHeight,
+			);
 		});
 
 		it("should push the notice onto the stack", (): void => {
 			applicationController.showNotice(notice);
 			noticeContainer = notices.querySelector("div") as HTMLDivElement;
-			expect(applicationController["noticeStack"].notice.pop() as HTMLDivElement).to.equal(noticeContainer);
+			expect(
+				applicationController["noticeStack"].notice.pop() as HTMLDivElement,
+			).to.equal(noticeContainer);
 		});
 
 		describe("animation", (): void => {
 			beforeEach((done: Mocha.Done): void => {
-				(applicationController["noticesMoved"] as SinonStub).callsFake((): void => done());
+				(applicationController["noticesMoved"] as SinonStub).callsFake(
+					(): void => done(),
+				);
 				sinon.spy(notices, "animate");
 				applicationController["noticeStack"].height = 0;
 				applicationController.showNotice(notice);
-				notices.getAnimations().forEach((animation: Animation): void => animation.finish());
+				notices
+					.getAnimations()
+					.forEach((animation: Animation): void => animation.finish());
 			});
 
 			it("should slide up the notices container to reveal the notice", (): void => {
 				noticeContainer = notices.querySelector("div") as HTMLDivElement;
-				expect(notices["animate"]).to.have.been.calledWith({ transform: `translateY(-${noticeContainer.offsetHeight}px)` });
+				expect(notices["animate"]).to.have.been.calledWith({
+					transform: `translateY(-${noticeContainer.offsetHeight}px)`,
+				});
 			});
 
-			it("should invoke the completed callback", (): Chai.Assertion => expect(applicationController["noticesMoved"]).to.have.been.called);
+			it("should invoke the completed callback", (): Chai.Assertion =>
+				expect(applicationController["noticesMoved"]).to.have.been.called);
 
 			afterEach((): void => (notices.animate as SinonSpy).restore());
 		});
@@ -520,18 +668,20 @@ describe("ApplicationController", (): void => {
 
 	describe("clearFooter", (): void => {
 		let controller: TestController,
-				footer: HeaderFooter,
-				leftButtonEventHandler: NavButtonEventHandler,
-				rightButtonEventHandler: NavButtonEventHandler,
-				leftButton: HTMLAnchorElement,
-				rightButton: HTMLAnchorElement,
-				label: HTMLElement;
+			footer: HeaderFooter,
+			leftButtonEventHandler: NavButtonEventHandler,
+			rightButtonEventHandler: NavButtonEventHandler,
+			leftButton: HTMLAnchorElement,
+			rightButton: HTMLAnchorElement,
+			label: HTMLElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
 			footer = controller.footer as HeaderFooter;
-			leftButtonEventHandler = (footer.leftButton as NavButton).eventHandler as NavButtonEventHandler;
-			rightButtonEventHandler = (footer.rightButton as NavButton).eventHandler as NavButtonEventHandler;
+			leftButtonEventHandler = (footer.leftButton as NavButton)
+				.eventHandler as NavButtonEventHandler;
+			rightButtonEventHandler = (footer.rightButton as NavButton)
+				.eventHandler as NavButtonEventHandler;
 
 			leftButton = document.createElement("a");
 			leftButton.id = "footerLeftButton";
@@ -550,7 +700,10 @@ describe("ApplicationController", (): void => {
 
 			document.body.append(leftButton, label, rightButton);
 
-			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
+			sinon.stub(
+				applicationController,
+				"setContentHeight" as keyof ApplicationController,
+			);
 		});
 
 		describe("without footer", (): void => {
@@ -560,15 +713,22 @@ describe("ApplicationController", (): void => {
 				applicationController.clearFooter();
 			});
 
-			it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-			it("should clear the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-			it("should hide the footer label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should hide the left button", (): Chai.Assertion =>
+				expect(leftButton.style.display).to.equal("none"));
+			it("should clear the footer label", (): Chai.Assertion =>
+				expect(String(label.textContent)).to.equal(""));
+			it("should hide the footer label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should hide the right button", (): Chai.Assertion =>
+				expect(rightButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("with footer", (): void => {
-			beforeEach((): number => applicationController.viewStack.push({ controller, scrollPos: 0 }));
+			beforeEach((): number =>
+				applicationController.viewStack.push({ controller, scrollPos: 0 }),
+			);
 
 			describe("with left button", (): void => {
 				beforeEach((): void => applicationController.clearFooter());
@@ -578,16 +738,25 @@ describe("ApplicationController", (): void => {
 					expect(leftButtonEventHandler).to.not.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should hide the left button", (): Chai.Assertion =>
+					expect(leftButton.style.display).to.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion =>
+					expect(String(label.textContent)).to.equal(""));
+				it("should hide the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.equal("none"));
+				it("should hide the right button", (): Chai.Assertion =>
+					expect(rightButton.style.display).to.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("without left button", (): void => {
 				beforeEach((): void => {
-					(applicationController["currentView"].controller.footer as HeaderFooter).leftButton = undefined;
+					(
+						applicationController["currentView"].controller
+							.footer as HeaderFooter
+					).leftButton = undefined;
 					applicationController.clearFooter();
 				});
 
@@ -596,11 +765,17 @@ describe("ApplicationController", (): void => {
 					expect(leftButtonEventHandler).to.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should hide the left button", (): Chai.Assertion =>
+					expect(leftButton.style.display).to.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion =>
+					expect(String(label.textContent)).to.equal(""));
+				it("should hide the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.equal("none"));
+				it("should hide the right button", (): Chai.Assertion =>
+					expect(rightButton.style.display).to.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("with right button", (): void => {
@@ -611,16 +786,25 @@ describe("ApplicationController", (): void => {
 					expect(rightButtonEventHandler).to.not.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should hide the left button", (): Chai.Assertion =>
+					expect(leftButton.style.display).to.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion =>
+					expect(String(label.textContent)).to.equal(""));
+				it("should hide the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.equal("none"));
+				it("should hide the right button", (): Chai.Assertion =>
+					expect(rightButton.style.display).to.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("without right button", (): void => {
 				beforeEach((): void => {
-					(applicationController["currentView"].controller.footer as HeaderFooter).rightButton = undefined;
+					(
+						applicationController["currentView"].controller
+							.footer as HeaderFooter
+					).rightButton = undefined;
 					applicationController.clearFooter();
 				});
 
@@ -629,11 +813,17 @@ describe("ApplicationController", (): void => {
 					expect(rightButtonEventHandler).to.have.been.called;
 				});
 
-				it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-				it("should clear the footer label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-				it("should hide the footer label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-				it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should hide the left button", (): Chai.Assertion =>
+					expect(leftButton.style.display).to.equal("none"));
+				it("should clear the footer label", (): Chai.Assertion =>
+					expect(String(label.textContent)).to.equal(""));
+				it("should hide the footer label", (): Chai.Assertion =>
+					expect(label.style.display).to.equal("none"));
+				it("should hide the right button", (): Chai.Assertion =>
+					expect(rightButton.style.display).to.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 		});
 
@@ -662,12 +852,12 @@ describe("ApplicationController", (): void => {
 			await applicationController["viewPushed"]();
 		});
 
-		it("should setup the view controller", (): Chai.Assertion => expect(controller.setup).to.have.been.called);
+		it("should setup the view controller", (): Chai.Assertion =>
+			expect(controller.setup).to.have.been.called);
 	});
 
 	describe("viewPopped", (): void => {
-		let controller: TestController,
-				activate: SinonStub;
+		let controller: TestController, activate: SinonStub;
 
 		beforeEach((): void => {
 			controller = new TestController();
@@ -680,7 +870,8 @@ describe("ApplicationController", (): void => {
 				await applicationController["viewPopped"]({} as ViewControllerArgs);
 			});
 
-			it("should not activate the view controller", (): Chai.Assertion => expect(activate).to.not.have.been.called);
+			it("should not activate the view controller", (): Chai.Assertion =>
+				expect(activate).to.not.have.been.called);
 		});
 
 		describe("with activate", (): void => {
@@ -690,30 +881,41 @@ describe("ApplicationController", (): void => {
 				await applicationController["viewPopped"]({} as ViewControllerArgs);
 			});
 
-			it("should activate the view controller", (): Chai.Assertion => expect(activate).to.have.been.calledWith({}));
+			it("should activate the view controller", (): Chai.Assertion =>
+				expect(activate).to.have.been.calledWith({}));
 		});
 	});
 
 	describe("show", (): void => {
-		let nowLoading: HTMLDivElement,
-				callback: SinonSpy;
+		let nowLoading: HTMLDivElement, callback: SinonSpy;
 
 		beforeEach(async (): Promise<void> => {
 			nowLoading = document.createElement("div");
 			nowLoading.id = "nowLoading";
 			document.body.append(nowLoading);
 
-			sinon.stub(applicationController, "setHeader" as keyof ApplicationController);
-			applicationController.viewStack.push({ controller: new TestController(), scrollPos: 0 });
+			sinon.stub(
+				applicationController,
+				"setHeader" as keyof ApplicationController,
+			);
+			applicationController.viewStack.push({
+				controller: new TestController(),
+				scrollPos: 0,
+			});
 			callback = sinon.spy();
 			await applicationController["show"](callback, {} as ViewControllerArgs);
 		});
 
-		it("should show the now loading indicator", (): Chai.Assertion => expect(nowLoading.classList.contains("loading")).to.be.true);
-		it("should load the view template", (): Chai.Assertion => expect(content.innerHTML).to.equal("<div></div>"));
-		it("should invoke the callback", (): Chai.Assertion => expect(callback).to.have.been.calledWith({}));
-		it("should slide the new view in from the right", (): Chai.Assertion => expect(contentWrapper.classList.contains("loading")).to.be.true);
-		it("should set the header", (): Chai.Assertion => expect(applicationController["setHeader"]).to.have.been.called);
+		it("should show the now loading indicator", (): Chai.Assertion =>
+			expect(nowLoading.classList.contains("loading")).to.be.true);
+		it("should load the view template", (): Chai.Assertion =>
+			expect(content.innerHTML).to.equal("<div></div>\n"));
+		it("should invoke the callback", (): Chai.Assertion =>
+			expect(callback).to.have.been.calledWith({}));
+		it("should slide the new view in from the right", (): Chai.Assertion =>
+			expect(contentWrapper.classList.contains("loading")).to.be.true);
+		it("should set the header", (): Chai.Assertion =>
+			expect(applicationController["setHeader"]).to.have.been.called);
 
 		afterEach((): void => nowLoading.remove());
 	});
@@ -734,14 +936,16 @@ describe("ApplicationController", (): void => {
 				applicationController["contentShown"]();
 			});
 
-			it("should unmark the content wrapper as loading", (): Chai.Assertion => expect(contentWrapper.classList.contains("loading")).to.be.false);
-			it("should mark the content wrapper as loaded", (): Chai.Assertion => expect(contentWrapper.classList.contains("loaded")).to.be.true);
-			it("should hide the now loading indicator", (): Chai.Assertion => expect(nowLoading.classList.contains("loading")).to.be.false);
+			it("should unmark the content wrapper as loading", (): Chai.Assertion =>
+				expect(contentWrapper.classList.contains("loading")).to.be.false);
+			it("should mark the content wrapper as loaded", (): Chai.Assertion =>
+				expect(contentWrapper.classList.contains("loaded")).to.be.true);
+			it("should hide the now loading indicator", (): Chai.Assertion =>
+				expect(nowLoading.classList.contains("loading")).to.be.false);
 		});
 
 		describe("loaded", (): void => {
-			let controller: TestController,
-					contentShown: SinonStub;
+			let controller: TestController, contentShown: SinonStub;
 
 			beforeEach((): void => {
 				controller = new TestController();
@@ -755,19 +959,25 @@ describe("ApplicationController", (): void => {
 					applicationController["contentShown"]();
 				});
 
-				it("should unmark the content wrapper as loaded", (): Chai.Assertion => expect(contentWrapper.classList.contains("loaded")).to.be.false);
-				it("should not call contentShown on the view controller", (): Chai.Assertion => expect(contentShown).to.not.have.been.called);
+				it("should unmark the content wrapper as loaded", (): Chai.Assertion =>
+					expect(contentWrapper.classList.contains("loaded")).to.be.false);
+				it("should not call contentShown on the view controller", (): Chai.Assertion =>
+					expect(contentShown).to.not.have.been.called);
 			});
 
 			describe("with content shown", (): void => {
 				beforeEach((): void => {
-					Object.defineProperty(controller, "contentShown", { value: contentShown });
+					Object.defineProperty(controller, "contentShown", {
+						value: contentShown,
+					});
 					applicationController.viewStack.push({ controller, scrollPos: 0 });
 					applicationController["contentShown"]();
 				});
 
-				it("should unmark the content wrapper as loaded", (): Chai.Assertion => expect(contentWrapper.classList.contains("loaded")).to.be.false);
-				it("should call contentShown on the view controller", (): Chai.Assertion => expect(contentShown).to.have.been.called);
+				it("should unmark the content wrapper as loaded", (): Chai.Assertion =>
+					expect(contentWrapper.classList.contains("loaded")).to.be.false);
+				it("should call contentShown on the view controller", (): Chai.Assertion =>
+					expect(contentShown).to.have.been.called);
 			});
 		});
 
@@ -785,18 +995,20 @@ describe("ApplicationController", (): void => {
 
 	describe("setHeader", (): void => {
 		let controller: TestController,
-				header: HeaderFooter,
-				leftButtonEventHandler: NavButtonEventHandler,
-				rightButtonEventHandler: NavButtonEventHandler,
-				leftButton: HTMLAnchorElement,
-				rightButton: HTMLAnchorElement,
-				label: HTMLHeadingElement;
+			header: HeaderFooter,
+			leftButtonEventHandler: NavButtonEventHandler,
+			rightButtonEventHandler: NavButtonEventHandler,
+			leftButton: HTMLAnchorElement,
+			rightButton: HTMLAnchorElement,
+			label: HTMLHeadingElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
 			({ header } = controller);
-			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as NavButtonEventHandler;
-			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as NavButtonEventHandler;
+			leftButtonEventHandler = (header.leftButton as NavButton)
+				.eventHandler as NavButtonEventHandler;
+			rightButtonEventHandler = (header.rightButton as NavButton)
+				.eventHandler as NavButtonEventHandler;
 
 			leftButton = document.createElement("a");
 			leftButton.id = "headerLeftButton";
@@ -812,7 +1024,10 @@ describe("ApplicationController", (): void => {
 
 			document.body.append(leftButton, label, rightButton);
 
-			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
+			sinon.stub(
+				applicationController,
+				"setContentHeight" as keyof ApplicationController,
+			);
 			applicationController.viewStack.push({ controller, scrollPos: 0 });
 		});
 
@@ -832,9 +1047,13 @@ describe("ApplicationController", (): void => {
 					expect(leftButton.classList.contains("backButton")).to.be.true;
 				});
 
-				it("should set the button label", (): Chai.Assertion => expect(String(leftButton.textContent)).to.equal("left-button"));
-				it("should show the button", (): Chai.Assertion => expect(leftButton.style.display).to.not.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should set the button label", (): Chai.Assertion =>
+					expect(String(leftButton.textContent)).to.equal("left-button"));
+				it("should show the button", (): Chai.Assertion =>
+					expect(leftButton.style.display).to.not.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("without event handler", (): void => {
@@ -876,17 +1095,23 @@ describe("ApplicationController", (): void => {
 				expect(leftButton.classList.contains("backButton")).to.be.false;
 			});
 
-			it("should not set the button label", (): Chai.Assertion => expect(String(leftButton.textContent)).to.equal(""));
-			it("should not show the button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should not set the button label", (): Chai.Assertion =>
+				expect(String(leftButton.textContent)).to.equal(""));
+			it("should not show the button", (): Chai.Assertion =>
+				expect(leftButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("with header label", (): void => {
 			beforeEach((): void => applicationController["setHeader"]());
 
-			it("should set the header label", (): Chai.Assertion => expect(String(label.textContent)).to.equal("test-header"));
-			it("should show the header label", (): Chai.Assertion => expect(label.style.display).to.not.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should set the header label", (): Chai.Assertion =>
+				expect(String(label.textContent)).to.equal("test-header"));
+			it("should show the header label", (): Chai.Assertion =>
+				expect(label.style.display).to.not.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("without header label", (): void => {
@@ -895,9 +1120,12 @@ describe("ApplicationController", (): void => {
 				applicationController["setHeader"]();
 			});
 
-			it("should not set the header label", (): Chai.Assertion => expect(String(label.textContent)).to.equal(""));
-			it("should not show the header label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should not set the header label", (): Chai.Assertion =>
+				expect(String(label.textContent)).to.equal(""));
+			it("should not show the header label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("with right button", (): void => {
@@ -916,9 +1144,13 @@ describe("ApplicationController", (): void => {
 					expect(rightButton.classList.contains("confirmButton")).to.be.true;
 				});
 
-				it("should set the button label", (): Chai.Assertion => expect(String(rightButton.textContent)).to.equal("right-button"));
-				it("should show the button", (): Chai.Assertion => expect(rightButton.style.display).to.not.equal("none"));
-				it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+				it("should set the button label", (): Chai.Assertion =>
+					expect(String(rightButton.textContent)).to.equal("right-button"));
+				it("should show the button", (): Chai.Assertion =>
+					expect(rightButton.style.display).to.not.equal("none"));
+				it("should update the content height", (): Chai.Assertion =>
+					expect(applicationController["setContentHeight"]).to.have.been
+						.called);
 			});
 
 			describe("without event handler", (): void => {
@@ -960,9 +1192,12 @@ describe("ApplicationController", (): void => {
 				expect(rightButton.classList.contains("confirmButton")).to.be.false;
 			});
 
-			it("should not set the button label", (): Chai.Assertion => expect(String(rightButton.textContent)).to.equal(""));
-			it("should not show the button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should not set the button label", (): Chai.Assertion =>
+				expect(String(rightButton.textContent)).to.equal(""));
+			it("should not show the button", (): Chai.Assertion =>
+				expect(rightButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		afterEach((): void => {
@@ -974,18 +1209,20 @@ describe("ApplicationController", (): void => {
 
 	describe("clearHeader", (): void => {
 		let controller: TestController,
-				header: HeaderFooter,
-				leftButtonEventHandler: NavButtonEventHandler,
-				rightButtonEventHandler: NavButtonEventHandler,
-				leftButton: HTMLAnchorElement,
-				rightButton: HTMLAnchorElement,
-				label: HTMLHeadingElement;
+			header: HeaderFooter,
+			leftButtonEventHandler: NavButtonEventHandler,
+			rightButtonEventHandler: NavButtonEventHandler,
+			leftButton: HTMLAnchorElement,
+			rightButton: HTMLAnchorElement,
+			label: HTMLHeadingElement;
 
 		beforeEach((): void => {
 			controller = new TestController();
 			({ header } = controller);
-			leftButtonEventHandler = (header.leftButton as NavButton).eventHandler as NavButtonEventHandler;
-			rightButtonEventHandler = (header.rightButton as NavButton).eventHandler as NavButtonEventHandler;
+			leftButtonEventHandler = (header.leftButton as NavButton)
+				.eventHandler as NavButtonEventHandler;
+			rightButtonEventHandler = (header.rightButton as NavButton)
+				.eventHandler as NavButtonEventHandler;
 
 			leftButton = document.createElement("a");
 			leftButton.id = "headerLeftButton";
@@ -1004,7 +1241,10 @@ describe("ApplicationController", (): void => {
 
 			document.body.append(leftButton, label, rightButton);
 
-			sinon.stub(applicationController, "setContentHeight" as keyof ApplicationController);
+			sinon.stub(
+				applicationController,
+				"setContentHeight" as keyof ApplicationController,
+			);
 			applicationController.viewStack.push({ controller, scrollPos: 0 });
 		});
 
@@ -1016,15 +1256,20 @@ describe("ApplicationController", (): void => {
 				expect(leftButtonEventHandler).to.not.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should hide the left button", (): Chai.Assertion =>
+				expect(leftButton.style.display).to.equal("none"));
+			it("should hide the header label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should hide the right button", (): Chai.Assertion =>
+				expect(rightButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("without left button", (): void => {
 			beforeEach((): void => {
-				applicationController["currentView"].controller.header.leftButton = undefined;
+				applicationController["currentView"].controller.header.leftButton =
+					undefined;
 				applicationController["clearHeader"]();
 			});
 
@@ -1033,10 +1278,14 @@ describe("ApplicationController", (): void => {
 				expect(leftButtonEventHandler).to.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should hide the left button", (): Chai.Assertion =>
+				expect(leftButton.style.display).to.equal("none"));
+			it("should hide the header label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should hide the right button", (): Chai.Assertion =>
+				expect(rightButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("with right button", (): void => {
@@ -1047,15 +1296,20 @@ describe("ApplicationController", (): void => {
 				expect(rightButtonEventHandler).to.not.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should hide the left button", (): Chai.Assertion =>
+				expect(leftButton.style.display).to.equal("none"));
+			it("should hide the header label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should hide the right button", (): Chai.Assertion =>
+				expect(rightButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		describe("without right button", (): void => {
 			beforeEach((): void => {
-				applicationController["currentView"].controller.header.rightButton = undefined;
+				applicationController["currentView"].controller.header.rightButton =
+					undefined;
 				applicationController["clearHeader"]();
 			});
 
@@ -1064,10 +1318,14 @@ describe("ApplicationController", (): void => {
 				expect(rightButtonEventHandler).to.have.been.called;
 			});
 
-			it("should hide the left button", (): Chai.Assertion => expect(leftButton.style.display).to.equal("none"));
-			it("should hide the header label", (): Chai.Assertion => expect(label.style.display).to.equal("none"));
-			it("should hide the right button", (): Chai.Assertion => expect(rightButton.style.display).to.equal("none"));
-			it("should update the content height", (): Chai.Assertion => expect(applicationController["setContentHeight"]).to.have.been.called);
+			it("should hide the left button", (): Chai.Assertion =>
+				expect(leftButton.style.display).to.equal("none"));
+			it("should hide the header label", (): Chai.Assertion =>
+				expect(label.style.display).to.equal("none"));
+			it("should hide the right button", (): Chai.Assertion =>
+				expect(rightButton.style.display).to.equal("none"));
+			it("should update the content height", (): Chai.Assertion =>
+				expect(applicationController["setContentHeight"]).to.have.been.called);
 		});
 
 		afterEach((): void => {
@@ -1079,10 +1337,10 @@ describe("ApplicationController", (): void => {
 
 	describe("setContentHeight", (): void => {
 		let header: HTMLDivElement,
-				headerLabel: HTMLHeadingElement,
-				footer: HTMLDivElement,
-				footerLabel: HTMLElement,
-				scrollingElement: HTMLDivElement;
+			headerLabel: HTMLHeadingElement,
+			footer: HTMLDivElement,
+			footerLabel: HTMLElement,
+			scrollingElement: HTMLDivElement;
 
 		beforeEach((): void => {
 			header = document.createElement("div");
@@ -1142,8 +1400,8 @@ describe("ApplicationController", (): void => {
 
 	describe("hideNotice", (): void => {
 		let notices: HTMLDivElement,
-				notice: HTMLDivElement,
-				otherNotice: HTMLDivElement;
+			notice: HTMLDivElement,
+			otherNotice: HTMLDivElement;
 
 		beforeEach((done: Mocha.Done): void => {
 			applicationController["noticeStack"].height = -20;
@@ -1163,25 +1421,48 @@ describe("ApplicationController", (): void => {
 
 			sinon.spy(notice, "animate");
 			sinon.spy(notices, "animate");
-			sinon.stub(applicationController, "noticesMoved" as keyof ApplicationController).callsFake((): void => done());
+			sinon
+				.stub(
+					applicationController,
+					"noticesMoved" as keyof ApplicationController,
+				)
+				.callsFake((): void => done());
 
 			applicationController["hideNotice"](notice);
-			notice.getAnimations().forEach((animation: Animation): void => animation.finish());
-			notices.getAnimations().forEach((animation: Animation): void => animation.finish());
+			notice
+				.getAnimations()
+				.forEach((animation: Animation): void => animation.finish());
+			notices
+				.getAnimations()
+				.forEach((animation: Animation): void => animation.finish());
 		});
 
-		it("should update the height of the notice stack to reclaim the space for the notice", (): Chai.Assertion => expect(applicationController["noticeStack"].height).to.equal(-10));
-		it("should slide out the notice to hide it", (): Chai.Assertion => expect(notice["animate"]).to.have.been.calledWith({ transform: "translateX(100%)" }, { duration: 300, easing: "ease-in", fill: "forwards" }));
-		it("should remove the notice from the DOM", (): Chai.Assertion => expect(notices.children.length).to.equal(1));
-		it("should remove the notice from the notice stack", (): Chai.Assertion => expect(applicationController["noticeStack"].notice).to.not.include(notice));
-		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion => expect(notices["animate"]).to.have.been.calledWith({ transform: "translateY(-10px)" }, { duration: 500, delay: 300, easing: "ease", fill: "forwards" }));
-		it("should invoke the completed callback", (): Chai.Assertion => expect(applicationController["noticesMoved"]).to.have.been.called);
+		it("should update the height of the notice stack to reclaim the space for the notice", (): Chai.Assertion =>
+			expect(applicationController["noticeStack"].height).to.equal(-10));
+		it("should slide out the notice to hide it", (): Chai.Assertion =>
+			expect(notice["animate"]).to.have.been.calledWith(
+				{ transform: "translateX(100%)" },
+				{ duration: 300, easing: "ease-in", fill: "forwards" },
+			));
+		it("should remove the notice from the DOM", (): Chai.Assertion =>
+			expect(notices.children.length).to.equal(1));
+		it("should remove the notice from the notice stack", (): Chai.Assertion =>
+			expect(applicationController["noticeStack"].notice).to.not.include(
+				notice,
+			));
+		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion =>
+			expect(notices["animate"]).to.have.been.calledWith(
+				{ transform: "translateY(-10px)" },
+				{ duration: 500, delay: 300, easing: "ease", fill: "forwards" },
+			));
+		it("should invoke the completed callback", (): Chai.Assertion =>
+			expect(applicationController["noticesMoved"]).to.have.been.called);
 
 		afterEach((): void => notices.remove());
 	});
 
 	describe("noticesMoved", (): void => {
-		let	notices: HTMLDivElement;
+		let notices: HTMLDivElement;
 
 		beforeEach((): void => {
 			notices = document.createElement("div");
@@ -1207,14 +1488,25 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("showSyncNotice", (): void => {
-		beforeEach((): SinonStub => sinon.stub(applicationController, "showNotice" as keyof ApplicationController));
+		beforeEach(
+			(): SinonStub =>
+				sinon.stub(
+					applicationController,
+					"showNotice" as keyof ApplicationController,
+				),
+		);
 
 		describe("without local changes to sync", (): void => {
 			it("should do nothing", (): void => {
 				const clock = sinon.useFakeTimers(new Date().valueOf()),
-							settingValue = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
+					settingValue = new Date(
+						new Date().valueOf() - 7 * 24 * 60 * 60 * 1000,
+					);
 
-				applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 0);
+				applicationController["showSyncNotice"](
+					new SettingMock(undefined, String(settingValue)),
+					0,
+				);
 				applicationController["showSyncNotice"](new SettingMock(), 0);
 				expect(applicationController["showNotice"]).to.not.have.been.called;
 				clock.restore();
@@ -1229,24 +1521,38 @@ describe("ApplicationController", (): void => {
 		});
 
 		describe("with last sync time & local changes to sync", (): void => {
-			let clock: SinonFakeTimers,
-					settingValue: Date;
+			let clock: SinonFakeTimers, settingValue: Date;
 
-			beforeEach((): SinonFakeTimers => (clock = sinon.useFakeTimers(new Date().valueOf())));
+			beforeEach(
+				(): SinonFakeTimers =>
+					(clock = sinon.useFakeTimers(new Date().valueOf())),
+			);
 
 			describe("younger than max data data age days", (): void => {
 				it("should do nothing", (): void => {
-					settingValue = new Date(new Date().valueOf() - (7 * 24 * 60 * 60 * 1000));
-					applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 1);
+					settingValue = new Date(
+						new Date().valueOf() - 7 * 24 * 60 * 60 * 1000,
+					);
+					applicationController["showSyncNotice"](
+						new SettingMock(undefined, String(settingValue)),
+						1,
+					);
 					expect(applicationController["showNotice"]).to.not.have.been.called;
 				});
 			});
 
 			describe("older than max data age days", (): void => {
 				it("should display a sync notice", (): void => {
-					settingValue = new Date(new Date().valueOf() - (9 * 24 * 60 * 60 * 1000));
-					applicationController["showSyncNotice"](new SettingMock(undefined, String(settingValue)), 1);
-					expect(applicationController["showNotice"]).to.have.been.calledWith({ label: "The last data sync was over 7 days ago" });
+					settingValue = new Date(
+						new Date().valueOf() - 9 * 24 * 60 * 60 * 1000,
+					);
+					applicationController["showSyncNotice"](
+						new SettingMock(undefined, String(settingValue)),
+						1,
+					);
+					expect(applicationController["showNotice"]).to.have.been.calledWith({
+						label: "The last data sync was over 7 days ago",
+					});
 				});
 			});
 

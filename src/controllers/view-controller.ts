@@ -1,7 +1,4 @@
-import type {
-	HeaderFooter,
-	ViewControllerArgs
-} from "~/controllers";
+import type { HeaderFooter, ViewControllerArgs } from "~/controllers";
 import ApplicationController from "~/controllers/application-controller";
 
 export default abstract class ViewController {

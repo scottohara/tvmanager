@@ -1,8 +1,4 @@
-import type {
-	IDBStoreUpgrade,
-	SettingsStore,
-	TVManagerDB
-} from "~/stores";
+import type { IDBStoreUpgrade, SettingsStore, TVManagerDB } from "~/stores";
 import type { IDBPDatabase } from "idb";
 import type { PersistedSetting } from "~/models";
 
@@ -10,7 +6,7 @@ const upgradeTo: IDBStoreUpgrade<TVManagerDB>[] = [
 	// Version 1
 	(db: IDBPDatabase<TVManagerDB>): void => {
 		db.createObjectStore("settings", { keyPath: "name" });
-	}
+	},
 ];
 
 function create(db: IDBPDatabase<TVManagerDB>): SettingsStore {
@@ -25,7 +21,7 @@ function create(db: IDBPDatabase<TVManagerDB>): SettingsStore {
 
 		async remove(name: string): Promise<void> {
 			return db.delete("settings", name);
-		}
+		},
 	};
 }
 

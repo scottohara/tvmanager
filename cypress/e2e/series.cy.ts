@@ -1,7 +1,4 @@
-import type {
-	ListItem,
-	TestData
-} from "~/support/types";
+import type { ListItem, TestData } from "~/support/types";
 import {
 	checkProgress,
 	firstListItem,
@@ -15,13 +12,9 @@ import {
 	listItem,
 	listItems,
 	secondListItem,
-	thirdListItem
+	thirdListItem,
 } from "~/support/e2e";
-import {
-	moveTo,
-	nowShowing,
-	seriesName
-} from "~/support/series";
+import { moveTo, nowShowing, seriesName } from "~/support/series";
 
 describe("Series", (): void => {
 	let expectedItems: ListItem[];
@@ -39,34 +32,32 @@ describe("Series", (): void => {
 								{ status: "Recorded" },
 								{ status: "Expected" },
 								{ status: "Missed" },
-								{}
-							]
+								{},
+							],
 						},
 						{
 							seriesName: "Series C",
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series B",
-							episodes: [
-								{ status: "Watched" }
-							]
+							episodes: [{ status: "Watched" }],
 						},
 						{
 							seriesName: "Series A",
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
-						}
-					]
+								{ status: "Expected" },
+							],
+						},
+					],
 				},
 				{
 					programName: "Test Program 2",
-					series: []
-				}
-			]
+					series: [],
+				},
+			],
 		};
 
 		cy.createTestData(data);
@@ -75,7 +66,10 @@ describe("Series", (): void => {
 			{ label: "Series A", progress: { watched: 1, recorded: 1, expected: 1 } },
 			{ label: "Series B", progress: { watched: 1 } },
 			{ label: "Series C" },
-			{ label: "Series D", progress: { watched: 1, recorded: 1, expected: 1, noStatus: 2 } }
+			{
+				label: "Series D",
+				progress: { watched: 1, recorded: 1, expected: 1, noStatus: 2 },
+			},
 		];
 	});
 
@@ -156,7 +150,9 @@ describe("Series", (): void => {
 	});
 
 	describe("add series", (): void => {
-		beforeEach((): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click());
+		beforeEach(
+			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
+		);
 
 		it("should update the Series view if the changes are saved", (): void => {
 			cy.get(seriesName).should("have.value", "Series 5");
@@ -216,7 +212,9 @@ describe("Series", (): void => {
 	});
 
 	describe("delete series", (): void => {
-		beforeEach((): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click());
+		beforeEach(
+			(): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click(),
+		);
 
 		it("should do nothing if the delete is not confirmed", (): void => {
 			cy.on("window:confirm", (): boolean => false);

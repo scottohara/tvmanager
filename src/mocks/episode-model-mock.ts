@@ -1,22 +1,25 @@
-import type {
-	EpisodeStatus,
-	SerializedModel
-} from "~/models";
+import type { EpisodeStatus, SerializedModel } from "~/models";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 
-const saveStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
-			removeStub: SinonStub = sinon.stub(),
-			listBySeriesStub: SinonStub<string[], Promise<EpisodeMock[]>> = sinon.stub(),
-			listByUnscheduledStub: SinonStub = sinon.stub(),
-			findStub: SinonStub<string[], Promise<EpisodeMock>> = sinon.stub(),
-			totalCountStub: SinonStub = sinon.stub(),
-			countByStatusStub: SinonStub = sinon.stub(),
-			removeAllStub: SinonStub<unknown[], Promise<string | undefined>> = sinon.stub(),
-			fromJsonStub: SinonStub<[SerializedModel], EpisodeMock> = sinon.stub();
+const saveStub: SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> = sinon.stub(),
+	removeStub: SinonStub = sinon.stub(),
+	listBySeriesStub: SinonStub<string[], Promise<EpisodeMock[]>> = sinon.stub(),
+	listByUnscheduledStub: SinonStub = sinon.stub(),
+	findStub: SinonStub<string[], Promise<EpisodeMock>> = sinon.stub(),
+	totalCountStub: SinonStub = sinon.stub(),
+	countByStatusStub: SinonStub = sinon.stub(),
+	removeAllStub: SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> = sinon.stub(),
+	fromJsonStub: SinonStub<[SerializedModel], EpisodeMock> = sinon.stub();
 
 let episodes: EpisodeMock[] = [],
-		removeAllOk: boolean;
+	removeAllOk: boolean;
 
 export default class EpisodeMock {
 	public toJson: SinonStub;
@@ -27,31 +30,43 @@ export default class EpisodeMock {
 
 	public unverifiedDisplay: "" | "Unverified" = "";
 
-	public constructor(public readonly id: string | null,
-						public episodeName: string | null,
-						public status: EpisodeStatus,
-						public statusDate: string,
-						public readonly seriesId: string | null = null,
-						public unverified = false,
-						public unscheduled = false,
-						public sequence = 0,
-						public readonly seriesName: string | undefined = undefined,
-						public readonly programName: string | undefined = undefined) {
+	public constructor(
+		public readonly id: string | null,
+		public episodeName: string | null,
+		public status: EpisodeStatus,
+		public statusDate: string,
+		public readonly seriesId: string | null = null,
+		public unverified = false,
+		public unscheduled = false,
+		public sequence = 0,
+		public readonly seriesName: string | undefined = undefined,
+		public readonly programName: string | undefined = undefined,
+	) {
 		this.toJson = sinon.stub().returns({});
 		saveStub.resetHistory();
 		removeStub.reset();
 	}
 
-	public static get listBySeries(): SinonStub<string[], Promise<EpisodeMock[]>> {
+	public static get listBySeries(): SinonStub<
+		string[],
+		Promise<EpisodeMock[]>
+	> {
 		return listBySeriesStub.returns(Promise.resolve(this.episodes));
 	}
 
-	public static get listByUnscheduled(): SinonStub<unknown[], Promise<EpisodeMock[]>> {
+	public static get listByUnscheduled(): SinonStub<
+		unknown[],
+		Promise<EpisodeMock[]>
+	> {
 		return listByUnscheduledStub.returns(Promise.resolve([{}]));
 	}
 
 	public static get find(): SinonStub<string[], Promise<EpisodeMock>> {
-		return findStub.returns(Promise.resolve(new EpisodeMock(String(findStub.args[0]), "test-episode", "", "")));
+		return findStub.returns(
+			Promise.resolve(
+				new EpisodeMock(String(findStub.args[0]), "test-episode", "", ""),
+			),
+		);
 	}
 
 	public static get totalCount(): SinonStub<unknown[], Promise<number>> {
@@ -62,7 +77,10 @@ export default class EpisodeMock {
 		return countByStatusStub.withArgs("Watched").returns(Promise.resolve(1));
 	}
 
-	public static get removeAll(): SinonStub<unknown[], Promise<string | undefined>> {
+	public static get removeAll(): SinonStub<
+		unknown[],
+		Promise<string | undefined>
+	> {
 		if (!removeAllOk) {
 			removeAllStub.returns(Promise.resolve("Force failed"));
 		}

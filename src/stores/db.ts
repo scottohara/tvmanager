@@ -11,34 +11,43 @@ import type {
 	Store,
 	SyncsStore,
 	TVManagerDB,
-	TVManagerStoreProxy
+	TVManagerStoreProxy,
 } from "~/stores";
-import type {
-	IDBPDatabase,
-	IDBPTransaction,
-	StoreNames
-} from "idb";
+import type { IDBPDatabase, IDBPTransaction, StoreNames } from "idb";
 import { expose } from "comlink";
 import { openDB } from "idb";
 
-let	db!: IDBPDatabase<TVManagerDB>,
-		programsStore: Store | undefined,
-		seriesStore: Store | undefined,
-		episodesStore: Store | undefined,
-		settingsStore: Store | undefined,
-		syncsStore: Store | undefined;
+let db!: IDBPDatabase<TVManagerDB>,
+	programsStore: Store | undefined,
+	seriesStore: Store | undefined,
+	episodesStore: Store | undefined,
+	settingsStore: Store | undefined,
+	syncsStore: Store | undefined;
 
 async function connect(expectedVersion: number): Promise<void> {
 	db = await openDB<TVManagerDB>("tvmanager", expectedVersion, {
-		upgrade(database: IDBPDatabase<TVManagerDB>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<TVManagerDB, StoreNames<TVManagerDB>[], "versionchange">): void {
-			for (let version: number = oldVersion; version < Number(newVersion); version++) {
+		upgrade(
+			database: IDBPDatabase<TVManagerDB>,
+			oldVersion: number,
+			newVersion: number | null,
+			transaction: IDBPTransaction<
+				TVManagerDB,
+				StoreNames<TVManagerDB>[],
+				"versionchange"
+			>,
+		): void {
+			for (
+				let version: number = oldVersion;
+				version < Number(newVersion);
+				version++
+			) {
 				ProgramsStoreFactory.upgradeTo[version](database, transaction);
 				SeriesStoreFactory.upgradeTo[version](database, transaction);
 				EpisodesStoreFactory.upgradeTo[version](database, transaction);
 				SettingsStoreFactory.upgradeTo[version](database, transaction);
 				SyncsStoreFactory.upgradeTo[version](database, transaction);
 			}
-		}
+		},
 	});
 
 	programsStore = ProgramsStoreFactory.create(db);
@@ -68,7 +77,7 @@ const storeProxy: TVManagerStoreProxy = {
 	},
 	get syncsStore(): SyncsStore {
 		return syncsStore as SyncsStore;
-	}
+	},
 };
 
 expose(storeProxy);

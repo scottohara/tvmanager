@@ -1,7 +1,4 @@
-import type {
-	NavButtonEventHandler,
-	ReportDataSource
-} from "~/controllers";
+import type { NavButtonEventHandler, ReportDataSource } from "~/controllers";
 import Series from "~/models/series-model";
 import SettingsView from "~/views/settings-view.html";
 import ViewController from "~/controllers/view-controller";
@@ -43,8 +40,8 @@ export default class SettingsController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: "Schedule"
-			}
+				label: "Schedule",
+			},
 		};
 
 		// Activate the controller
@@ -55,10 +52,22 @@ export default class SettingsController extends ViewController {
 		// Bind events for all of the buttons/controls
 		this.dataSyncRow.addEventListener("click", this.viewDataSync.bind(this));
 		this.aboutRow.addEventListener("click", this.viewAbout.bind(this));
-		this.recordedReportRow.addEventListener("click", this.viewRecordedReport.bind(this));
-		this.expectedReportRow.addEventListener("click", this.viewExpectedReport.bind(this));
-		this.missedReportRow.addEventListener("click", this.viewMissedReport.bind(this));
-		this.incompleteReportRow.addEventListener("click", this.viewIncompleteReport.bind(this));
+		this.recordedReportRow.addEventListener(
+			"click",
+			this.viewRecordedReport.bind(this),
+		);
+		this.expectedReportRow.addEventListener(
+			"click",
+			this.viewExpectedReport.bind(this),
+		);
+		this.missedReportRow.addEventListener(
+			"click",
+			this.viewMissedReport.bind(this),
+		);
+		this.incompleteReportRow.addEventListener(
+			"click",
+			this.viewIncompleteReport.bind(this),
+		);
 
 		return Promise.resolve();
 	}
@@ -76,18 +85,33 @@ export default class SettingsController extends ViewController {
 	}
 
 	private async viewRecordedReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Recorded", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Recorded" });
+		return this.appController.pushView("report", {
+			reportName: "All Recorded",
+			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
+			args: "Recorded",
+		});
 	}
 
 	private async viewExpectedReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Expected", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Expected" });
+		return this.appController.pushView("report", {
+			reportName: "All Expected",
+			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
+			args: "Expected",
+		});
 	}
 
 	private async viewMissedReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Missed", dataSource: Series.listByStatus.bind(Series) as ReportDataSource, args: "Missed" });
+		return this.appController.pushView("report", {
+			reportName: "All Missed",
+			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
+			args: "Missed",
+		});
 	}
 
 	private async viewIncompleteReport(): Promise<void> {
-		return this.appController.pushView("report", { reportName: "All Incomplete", dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource });
+		return this.appController.pushView("report", {
+			reportName: "All Incomplete",
+			dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource,
+		});
 	}
 }

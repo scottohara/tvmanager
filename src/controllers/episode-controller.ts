@@ -1,7 +1,4 @@
-import type {
-	EpisodeListItem,
-	NavButtonEventHandler
-} from "~/controllers";
+import type { EpisodeListItem, NavButtonEventHandler } from "~/controllers";
 import Episode from "~/models/episode-model";
 import type { EpisodeStatus } from "~/models";
 import EpisodeView from "~/views/episode-view.html";
@@ -27,7 +24,18 @@ export default class EpisodeController extends ViewController {
 			this.originalStatusDate = this.listItem.episode.statusDate;
 		} else {
 			// Otherwise, we're adding a new episode
-			this.listItem = { episode: new Episode(null, `Episode ${Number(listItem.sequence) + 1}`, "", "", (listItem.series as Series).id, false, false, Number(listItem.sequence)) };
+			this.listItem = {
+				episode: new Episode(
+					null,
+					`Episode ${Number(listItem.sequence) + 1}`,
+					"",
+					"",
+					(listItem.series as Series).id,
+					false,
+					false,
+					Number(listItem.sequence),
+				),
+			};
 		}
 	}
 
@@ -82,13 +90,13 @@ export default class EpisodeController extends ViewController {
 			label: "Add/Edit Episode",
 			leftButton: {
 				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
-				label: "Cancel"
+				label: "Cancel",
 			},
 			rightButton: {
 				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Save"
-			}
+				label: "Save",
+			},
 		};
 
 		// Set the episode details
@@ -98,11 +106,20 @@ export default class EpisodeController extends ViewController {
 		this.unscheduled.checked = this.listItem.episode.unscheduled;
 
 		// Bind events for all of the buttons/controls
-		this.watched.addEventListener("click", (): void => this.setStatus("Watched"));
-		this.recorded.addEventListener("click", (): void => this.setStatus("Recorded"));
-		this.expected.addEventListener("click", (): void => this.setStatus("Expected"));
+		this.watched.addEventListener("click", (): void =>
+			this.setStatus("Watched"),
+		);
+		this.recorded.addEventListener("click", (): void =>
+			this.setStatus("Recorded"),
+		);
+		this.expected.addEventListener("click", (): void =>
+			this.setStatus("Expected"),
+		);
 		this.missed.addEventListener("click", (): void => this.setStatus("Missed"));
-		this.unscheduled.addEventListener("click", this.toggleStatusDateRow.bind(this));
+		this.unscheduled.addEventListener(
+			"click",
+			this.toggleStatusDateRow.bind(this),
+		);
 
 		// Toggle the current status
 		const { status } = this.listItem.episode;
@@ -133,8 +150,13 @@ export default class EpisodeController extends ViewController {
 		await this.listItem.episode.save();
 
 		// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
-		if (Number.isNaN(Number(this.listItem.listIndex)) || Number(this.listItem.listIndex) < 0) {
-			this.appController.viewStack[this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET].scrollPos = -1;
+		if (
+			Number.isNaN(Number(this.listItem.listIndex)) ||
+			Number(this.listItem.listIndex) < 0
+		) {
+			this.appController.viewStack[
+				this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET
+			].scrollPos = -1;
 		}
 
 		// Pop the view off the stack
@@ -206,7 +228,12 @@ export default class EpisodeController extends ViewController {
 		this.statusDateRow.style.display = "none";
 
 		// Show the status date if certain criteria is met
-		if (this.unscheduled.checked || "Recorded" === this.listItem.episode.status || "Expected" === this.listItem.episode.status || "Missed" === this.listItem.episode.status) {
+		if (
+			this.unscheduled.checked ||
+			"Recorded" === this.listItem.episode.status ||
+			"Expected" === this.listItem.episode.status ||
+			"Missed" === this.listItem.episode.status
+		) {
 			this.statusDateRow.style.display = "flex";
 		}
 	}

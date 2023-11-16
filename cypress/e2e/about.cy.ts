@@ -2,12 +2,12 @@ import {
 	databaseVersion,
 	totalEpisodes,
 	totalPrograms,
-	totalSeries
+	totalSeries,
 } from "~/support/about";
 import {
 	footerRightButton,
 	headerLabel,
-	headerLeftButton
+	headerLeftButton,
 } from "~/support/e2e";
 import type { TestData } from "~/support/types";
 import { aboutRow } from "~/support/settings";
@@ -19,11 +19,11 @@ describe("About", (): void => {
 				{
 					series: [
 						{ episodes: [{ status: "Watched" }, {}] },
-						{ episodes: [{}] }
-					]
+						{ episodes: [{}] },
+					],
 				},
-				{ series: [{ episodes: [{}] }] }
-			]
+				{ series: [{ episodes: [{}] }] },
+			],
 		};
 
 		cy.createTestData(data);
@@ -48,9 +48,13 @@ describe("About", (): void => {
 	});
 
 	describe("content", (): void => {
-		it("should show the total number of programs", (): Cypress.Chainable<JQuery> => cy.get(totalPrograms).should("have.value", "2"));
-		it("should show the total number of series", (): Cypress.Chainable<JQuery> => cy.get(totalSeries).should("have.value", "3"));
-		it("should show the total number of episodes and the percentage watched", (): Cypress.Chainable<JQuery> => cy.get(totalEpisodes).should("have.value", "4 (25.00% watched)"));
-		it("should show the database version", (): Cypress.Chainable<JQuery> => cy.get(databaseVersion).should("have.value", "v1"));
+		it("should show the total number of programs", (): Cypress.Chainable<JQuery> =>
+			cy.get(totalPrograms).should("have.value", "2"));
+		it("should show the total number of series", (): Cypress.Chainable<JQuery> =>
+			cy.get(totalSeries).should("have.value", "3"));
+		it("should show the total number of episodes and the percentage watched", (): Cypress.Chainable<JQuery> =>
+			cy.get(totalEpisodes).should("have.value", "4 (25.00% watched)"));
+		it("should show the database version", (): Cypress.Chainable<JQuery> =>
+			cy.get(databaseVersion).should("have.value", "v1"));
 	});
 });

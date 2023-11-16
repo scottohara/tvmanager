@@ -3,7 +3,10 @@ import type { Section } from "~/components";
 export default class ProgressBar {
 	private total = 0;
 
-	public constructor(total: number, private readonly sections: Section[]) {
+	public constructor(
+		total: number,
+		private readonly sections: Section[],
+	) {
 		this.setTotal(total);
 	}
 
@@ -28,26 +31,28 @@ export default class ProgressBar {
 			bar.classList.add("progressBar");
 
 			// Append any sections to display
-			bar.append(...this.sections
+			bar.append(
+				...this.sections
 
-				// Only output the section if it has a percentage set
-				.filter((section: Section): boolean => section.percent > 0)
+					// Only output the section if it has a percentage set
+					.filter((section: Section): boolean => section.percent > 0)
 
-				// Create a div for each section
-				.map((section: Section): HTMLDivElement => {
-					const div = document.createElement("div");
+					// Create a div for each section
+					.map((section: Section): HTMLDivElement => {
+						const div = document.createElement("div");
 
-					// Set the CSS class to use for the section
-					div.classList.add(section.style);
+						// Set the CSS class to use for the section
+						div.classList.add(section.style);
 
-					// Set the width of the section to the percentage of the total
-					div.style.width = `${section.percent}%`;
+						// Set the width of the section to the percentage of the total
+						div.style.width = `${section.percent}%`;
 
-					// Set the label of the section
-					div.textContent = String(section.label);
+						// Set the label of the section
+						div.textContent = String(section.label);
 
-					return div;
-				}));
+						return div;
+					}),
+			);
 
 			// Create a div for the total
 			const total = document.createElement("div");

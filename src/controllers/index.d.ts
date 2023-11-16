@@ -43,9 +43,17 @@ export interface Device {
 
 export type SyncOperation = "Export" | "Import";
 
-export type SyncErrorType = "Checksum mismatch" | "Delete error" | "Receive error" | "Save error" | "Send error";
+export type SyncErrorType =
+	| "Checksum mismatch"
+	| "Delete error"
+	| "Receive error"
+	| "Save error"
+	| "Send error";
 
-export type ImportObject = SerializedModel & { pending: string[]; isDeleted: boolean; };
+export type ImportObject = SerializedModel & {
+	pending: string[];
+	isDeleted: boolean;
+};
 
 export interface ImportDoc {
 	doc: ImportObject;
@@ -81,7 +89,9 @@ export interface ProgramListItem {
 	program: PublicInterface<Program>;
 }
 
-export type ReportDataSource = (args?: string) => Promise<PublicInterface<Series>[]>;
+export type ReportDataSource = (
+	args?: string,
+) => Promise<PublicInterface<Series>[]>;
 
 export interface Report {
 	reportName: string;
@@ -89,6 +99,12 @@ export interface Report {
 	args?: string;
 }
 
-type ViewControllerArgs = EpisodeListItem | ProgramListItem | Report | SeriesListItem;
-type ViewControllerConstructor = new(args?: ViewControllerArgs) => ViewController;
+type ViewControllerArgs =
+	| EpisodeListItem
+	| ProgramListItem
+	| Report
+	| SeriesListItem;
+type ViewControllerConstructor = new (
+	args?: ViewControllerArgs,
+) => ViewController;
 export type ViewControllerSet = Record<string, ViewControllerConstructor>;

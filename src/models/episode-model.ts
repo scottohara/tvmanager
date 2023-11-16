@@ -1,33 +1,47 @@
 import type {
 	EpisodeStatus,
 	PersistedEpisode,
-	SerializedEpisode
+	SerializedEpisode,
 } from "~/models";
 import Base from "~/models/base-model";
 
 export default class Episode extends Base {
-	public constructor(public id: string | null,
-						public episodeName: string | null,
-						public status: EpisodeStatus,
-						public statusDate: string,
-						private seriesId: string | null,
-						public unverified = false,
-						public unscheduled = false,
-						public sequence = 0,
-						public readonly seriesName: string | undefined = undefined,
-						public readonly programName: string | undefined = undefined) {
+	public constructor(
+		public id: string | null,
+		public episodeName: string | null,
+		public status: EpisodeStatus,
+		public statusDate: string,
+		private seriesId: string | null,
+		public unverified = false,
+		public unscheduled = false,
+		public sequence = 0,
+		public readonly seriesName: string | undefined = undefined,
+		public readonly programName: string | undefined = undefined,
+	) {
 		super();
 
 		// Make getters enumerable
-		["statusDateDisplay", "statusWarning", "unverifiedDisplay"].forEach(this.makeEnumerable.bind(this));
+		["statusDateDisplay", "statusWarning", "unverifiedDisplay"].forEach(
+			this.makeEnumerable.bind(this),
+		);
 	}
 
 	public get statusDateDisplay(): string {
-		return ("Recorded" === this.status || "Expected" === this.status || "Missed" === this.status || this.unscheduled) && this.statusDate ? new Date(this.statusDate).toDateString() : "";
+		return ("Recorded" === this.status ||
+			"Expected" === this.status ||
+			"Missed" === this.status ||
+			this.unscheduled) &&
+			this.statusDate
+			? new Date(this.statusDate).toDateString()
+			: "";
 	}
 
 	public get statusWarning(): "" | "warning" {
-		return "Expected" === this.status && this.statusDate && new Date(this.statusDate) < new Date() ? "warning" : "";
+		return "Expected" === this.status &&
+			this.statusDate &&
+			new Date(this.statusDate) < new Date()
+			? "warning"
+			: "";
 	}
 
 	public get unverifiedDisplay(): "" | "Unverified" {
@@ -38,7 +52,23 @@ export default class Episode extends Base {
 		let episodeList: Episode[] = [];
 
 		try {
-			episodeList = await Promise.all((await (await this.db).episodesStore.listBySeries(seriesId)).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
+			episodeList = await Promise.all(
+				(await (await this.db).episodesStore.listBySeries(seriesId)).map(
+					(ep: PersistedEpisode): Episode =>
+						new Episode(
+							ep.EpisodeID,
+							ep.Name,
+							ep.Status,
+							ep.StatusDate,
+							ep.SeriesID,
+							"true" === ep.Unverified,
+							"true" === ep.Unscheduled,
+							ep.Sequence,
+							ep.SeriesName,
+							ep.ProgramName,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -50,7 +80,23 @@ export default class Episode extends Base {
 		let episodeList: Episode[] = [];
 
 		try {
-			episodeList = await Promise.all((await (await this.db).episodesStore.listByUnscheduled()).map((ep: PersistedEpisode): Episode => new Episode(ep.EpisodeID, ep.Name, ep.Status, ep.StatusDate, ep.SeriesID, "true" === ep.Unverified, "true" === ep.Unscheduled, ep.Sequence, ep.SeriesName, ep.ProgramName)));
+			episodeList = await Promise.all(
+				(await (await this.db).episodesStore.listByUnscheduled()).map(
+					(ep: PersistedEpisode): Episode =>
+						new Episode(
+							ep.EpisodeID,
+							ep.Name,
+							ep.Status,
+							ep.StatusDate,
+							ep.SeriesID,
+							"true" === ep.Unverified,
+							"true" === ep.Unscheduled,
+							ep.Sequence,
+							ep.SeriesName,
+							ep.ProgramName,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -59,26 +105,44 @@ export default class Episode extends Base {
 	}
 
 	public static async find(id: string): Promise<Episode> {
-		let	EpisodeID: string | null = null,
-				Name: string | null = null,
-				Status: EpisodeStatus = "",
-				StatusDate = "",
-				Unverified = "false",
-				Unscheduled = "false",
-				Sequence = 0,
-				SeriesID: string | null = null;
+		let EpisodeID: string | null = null,
+			Name: string | null = null,
+			Status: EpisodeStatus = "",
+			StatusDate = "",
+			Unverified = "false",
+			Unscheduled = "false",
+			Sequence = 0,
+			SeriesID: string | null = null;
 
 		try {
 			const ep = await (await this.db).episodesStore.find(id);
 
 			if (undefined !== ep) {
-				({ EpisodeID, Name, Status, StatusDate, Unverified, Unscheduled, Sequence, SeriesID } = ep);
+				({
+					EpisodeID,
+					Name,
+					Status,
+					StatusDate,
+					Unverified,
+					Unscheduled,
+					Sequence,
+					SeriesID,
+				} = ep);
 			}
 		} catch {
 			// No op
 		}
 
-		return new Episode(EpisodeID, Name, Status, StatusDate, SeriesID, "true" === Unverified, "true" === Unscheduled, Sequence);
+		return new Episode(
+			EpisodeID,
+			Name,
+			Status,
+			StatusDate,
+			SeriesID,
+			"true" === Unverified,
+			"true" === Unscheduled,
+			Sequence,
+		);
 	}
 
 	public static async totalCount(): Promise<number> {
@@ -118,7 +182,16 @@ export default class Episode extends Base {
 	}
 
 	public static fromJson(episode: SerializedEpisode): Episode {
-		return new Episode(episode.id, episode.episodeName, episode.status, episode.statusDate, episode.seriesId, episode.unverified, episode.unscheduled, episode.sequence);
+		return new Episode(
+			episode.id,
+			episode.episodeName,
+			episode.status,
+			episode.statusDate,
+			episode.seriesId,
+			episode.unverified,
+			episode.unscheduled,
+			episode.sequence,
+		);
 	}
 
 	public async save(): Promise<string | undefined> {
@@ -126,7 +199,9 @@ export default class Episode extends Base {
 		this.id ??= crypto.randomUUID();
 
 		try {
-			await (await this.db).episodesStore.save({
+			await (
+				await this.db
+			).episodesStore.save({
 				EpisodeID: this.id,
 				Name: String(this.episodeName),
 				Status: this.status,
@@ -134,7 +209,7 @@ export default class Episode extends Base {
 				Unverified: this.unverified ? "true" : "false",
 				Unscheduled: this.unscheduled ? "true" : "false",
 				Sequence: this.sequence,
-				SeriesID: String(this.seriesId)
+				SeriesID: String(this.seriesId),
 			});
 
 			return this.id;
@@ -167,7 +242,7 @@ export default class Episode extends Base {
 			unverified: this.unverified,
 			unscheduled: this.unscheduled,
 			sequence: this.sequence,
-			type: "Episode"
+			type: "Episode",
 		};
 	}
 }

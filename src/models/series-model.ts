@@ -1,7 +1,7 @@
 import type {
 	EpisodeStatus,
 	PersistedSeries,
-	SerializedSeries
+	SerializedSeries,
 } from "~/models";
 import Base from "~/models/base-model";
 import ProgressBar from "~/components/progressbar";
@@ -21,12 +21,19 @@ export default class Series extends Base {
 
 	private missedCount = 0;
 
-	public constructor(public id: string | null,
-						public seriesName: string | null,
-						public nowShowing: number | null,
-						public programId: string | null,
-						public programName?: string, episodeCount = 0, watchedCount = 0, recordedCount = 0, expectedCount = 0, missedCount = 0,
-						public statusWarningCount = 0) {
+	public constructor(
+		public id: string | null,
+		public seriesName: string | null,
+		public nowShowing: number | null,
+		public programId: string | null,
+		public programName?: string,
+		episodeCount = 0,
+		watchedCount = 0,
+		recordedCount = 0,
+		expectedCount = 0,
+		missedCount = 0,
+		public statusWarningCount = 0,
+	) {
 		super();
 		this.progressBar = new ProgressBar(episodeCount, []);
 		this.setEpisodeCount(episodeCount);
@@ -36,7 +43,9 @@ export default class Series extends Base {
 		this.setMissedCount(missedCount);
 
 		// Make getters enumerable
-		["statusWarning", "nowShowingDisplay"].forEach(this.makeEnumerable.bind(this));
+		["statusWarning", "nowShowingDisplay"].forEach(
+			this.makeEnumerable.bind(this),
+		);
 	}
 
 	public get statusWarning(): "" | "warning" {
@@ -52,17 +61,36 @@ export default class Series extends Base {
 			5: "Fridays",
 			6: "Saturdays",
 			7: "Sundays",
-			8: "Daily"
+			8: "Daily",
 		};
 
-		return Number(this.nowShowing) > 0 ? NOW_SHOWING[Number(this.nowShowing)] : "Not Showing";
+		return Number(this.nowShowing) > 0
+			? NOW_SHOWING[Number(this.nowShowing)]
+			: "Not Showing";
 	}
 
 	public static async listByProgram(programId: string): Promise<Series[]> {
 		let seriesList: Series[] = [];
 
 		try {
-			seriesList = await Promise.all((await (await this.db).seriesStore.listByProgram(programId)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+			seriesList = await Promise.all(
+				(await (await this.db).seriesStore.listByProgram(programId)).map(
+					(series: PersistedSeries): Series =>
+						new Series(
+							series.SeriesID,
+							series.Name,
+							series.NowShowing,
+							series.ProgramID,
+							series.ProgramName,
+							series.EpisodeCount,
+							series.WatchedCount,
+							series.RecordedCount,
+							series.ExpectedCount,
+							series.MissedCount,
+							series.StatusWarningCount,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -74,7 +102,24 @@ export default class Series extends Base {
 		let seriesList: Series[] = [];
 
 		try {
-			seriesList = await Promise.all((await (await this.db).seriesStore.listByNowShowing()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+			seriesList = await Promise.all(
+				(await (await this.db).seriesStore.listByNowShowing()).map(
+					(series: PersistedSeries): Series =>
+						new Series(
+							series.SeriesID,
+							series.Name,
+							series.NowShowing,
+							series.ProgramID,
+							series.ProgramName,
+							series.EpisodeCount,
+							series.WatchedCount,
+							series.RecordedCount,
+							series.ExpectedCount,
+							series.MissedCount,
+							series.StatusWarningCount,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -86,7 +131,24 @@ export default class Series extends Base {
 		let seriesList: Series[] = [];
 
 		try {
-			seriesList = await Promise.all((await (await this.db).seriesStore.listByStatus(status)).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+			seriesList = await Promise.all(
+				(await (await this.db).seriesStore.listByStatus(status)).map(
+					(series: PersistedSeries): Series =>
+						new Series(
+							series.SeriesID,
+							series.Name,
+							series.NowShowing,
+							series.ProgramID,
+							series.ProgramName,
+							series.EpisodeCount,
+							series.WatchedCount,
+							series.RecordedCount,
+							series.ExpectedCount,
+							series.MissedCount,
+							series.StatusWarningCount,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -98,7 +160,24 @@ export default class Series extends Base {
 		let seriesList: Series[] = [];
 
 		try {
-			seriesList = await Promise.all((await (await this.db).seriesStore.listByIncomplete()).map((series: PersistedSeries): Series => new Series(series.SeriesID, series.Name, series.NowShowing, series.ProgramID, series.ProgramName, series.EpisodeCount, series.WatchedCount, series.RecordedCount, series.ExpectedCount, series.MissedCount, series.StatusWarningCount)));
+			seriesList = await Promise.all(
+				(await (await this.db).seriesStore.listByIncomplete()).map(
+					(series: PersistedSeries): Series =>
+						new Series(
+							series.SeriesID,
+							series.Name,
+							series.NowShowing,
+							series.ProgramID,
+							series.ProgramName,
+							series.EpisodeCount,
+							series.WatchedCount,
+							series.RecordedCount,
+							series.ExpectedCount,
+							series.MissedCount,
+							series.StatusWarningCount,
+						),
+				),
+			);
 		} catch {
 			// No op
 		}
@@ -107,10 +186,10 @@ export default class Series extends Base {
 	}
 
 	public static async find(id: string): Promise<Series> {
-		let	SeriesID: string | null = null,
-				Name: string | null = null,
-				NowShowing: number | null = null,
-				ProgramID: string | null = null;
+		let SeriesID: string | null = null,
+			Name: string | null = null,
+			NowShowing: number | null = null,
+			ProgramID: string | null = null;
 
 		try {
 			const series = await (await this.db).seriesStore.find(id);
@@ -150,7 +229,12 @@ export default class Series extends Base {
 	}
 
 	public static fromJson(series: SerializedSeries): Series {
-		return new Series(series.id, series.seriesName, series.nowShowing, series.programId);
+		return new Series(
+			series.id,
+			series.seriesName,
+			series.nowShowing,
+			series.programId,
+		);
 	}
 
 	public async save(): Promise<string | undefined> {
@@ -158,11 +242,13 @@ export default class Series extends Base {
 		this.id ??= crypto.randomUUID();
 
 		try {
-			await (await this.db).seriesStore.save({
+			await (
+				await this.db
+			).seriesStore.save({
 				SeriesID: this.id,
 				Name: String(this.seriesName),
 				NowShowing: this.nowShowing,
-				ProgramID: String(this.programId)
+				ProgramID: String(this.programId),
 			});
 
 			return this.id;
@@ -192,7 +278,7 @@ export default class Series extends Base {
 			seriesName: this.seriesName,
 			nowShowing: this.nowShowing,
 			programId: this.programId,
-			type: "Series"
+			type: "Series",
 		};
 	}
 
@@ -215,71 +301,71 @@ export default class Series extends Base {
 
 	public setRecordedCount(count: number): void {
 		const PERCENT = 100,
-					RECORDED = 1;
+			RECORDED = 1;
 		let recordedPercent = 0;
 
 		this.recordedCount = count;
 
 		// Calculate the percentage of episodes that are recorded
-		recordedPercent = this.recordedCount / this.episodeCount * PERCENT;
+		recordedPercent = (this.recordedCount / this.episodeCount) * PERCENT;
 
 		// Update the recorded section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(RECORDED, {
 			label: this.recordedCount,
 			percent: recordedPercent,
-			style: "recorded"
+			style: "recorded",
 		});
 	}
 
 	public setExpectedCount(count: number): void {
-		const	PERCENT = 100,
-					EXPECTED = 2;
+		const PERCENT = 100,
+			EXPECTED = 2;
 		let expectedPercent = 0;
 
 		this.expectedCount = count;
 
 		// Calculate the percentage of episodes that are expected
-		expectedPercent = this.expectedCount / this.episodeCount * PERCENT;
+		expectedPercent = (this.expectedCount / this.episodeCount) * PERCENT;
 
 		// Update the expected section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(EXPECTED, {
 			label: this.expectedCount,
 			percent: expectedPercent,
-			style: "expected"
+			style: "expected",
 		});
 	}
 
 	private setWatchedProgress(): void {
 		const PERCENT = 100,
-					WATCHED = 0;
+			WATCHED = 0;
 		let watchedPercent = 0;
 
 		// Calculate the percentage of episodes that are watched
-		watchedPercent = this.watchedCount / this.episodeCount * PERCENT;
+		watchedPercent = (this.watchedCount / this.episodeCount) * PERCENT;
 
 		// Update the watched section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(WATCHED, {
 			label: this.watchedCount,
 			percent: watchedPercent,
-			style: "watched"
+			style: "watched",
 		});
 	}
 
 	private setMissedCount(count: number): void {
 		const PERCENT = 100,
-					MISSED = 3;
+			MISSED = 3;
 		let missedPercent = 0;
 
 		this.missedCount = count;
 
 		// Calculate the percentage of episodes that are missed
-		missedPercent = this.missedCount / this.episodeCount * PERCENT;
+		missedPercent = (this.missedCount / this.episodeCount) * PERCENT;
 
 		// Update the missed section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(MISSED, {
 			label: this.missedCount,
 			percent: missedPercent,
-			style: "missed"
+			style: "missed",
 		});
 	}
 }

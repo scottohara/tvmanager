@@ -1,7 +1,4 @@
-import type {
-	ListItem,
-	TestData
-} from "~/support/types";
+import type { ListItem, TestData } from "~/support/types";
 import {
 	checkGroup,
 	checkProgress,
@@ -15,13 +12,9 @@ import {
 	list,
 	listItem,
 	listItems,
-	secondListItem
+	secondListItem,
 } from "~/support/e2e";
-import {
-	moveTo,
-	nowShowing,
-	seriesName
-} from "~/support/series";
+import { moveTo, nowShowing, seriesName } from "~/support/series";
 
 describe("Schedule", (): void => {
 	let expectedItems: (ListItem | string)[];
@@ -34,62 +27,53 @@ describe("Schedule", (): void => {
 					series: [
 						{
 							seriesName: "Series S",
-							episodes: [
-								{ status: "Expected" }
-							]
+							episodes: [{ status: "Expected" }],
 						},
 						{
 							seriesName: "Series R",
-							episodes: [
-								{ status: "Recorded" }
-							]
+							episodes: [{ status: "Recorded" }],
 						},
 						{
 							seriesName: "Series P",
 							nowShowing: 8,
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series N",
 							nowShowing: 7,
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series L",
 							nowShowing: 6,
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series J",
 							nowShowing: 5,
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series H",
 							nowShowing: 4,
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series F",
 							nowShowing: 3,
-							episodes: []
+							episodes: [],
 						},
 						{
 							seriesName: "Series D",
 							nowShowing: 2,
-							episodes: [
-								{},
-								{}
-							]
+							episodes: [{}, {}],
 						},
 						{
 							seriesName: "Series B",
 							nowShowing: 1,
-							episodes: [
-								{ status: "Watched" }
-							]
-						}
-					]
+							episodes: [{ status: "Watched" }],
+						},
+					],
 				},
 				{
 					programName: "Program A",
@@ -99,8 +83,8 @@ describe("Schedule", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
 							seriesName: "Series O",
@@ -108,8 +92,8 @@ describe("Schedule", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
 							seriesName: "Series M",
@@ -117,8 +101,8 @@ describe("Schedule", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
 							seriesName: "Series K",
@@ -126,8 +110,8 @@ describe("Schedule", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
 							seriesName: "Series I",
@@ -135,8 +119,8 @@ describe("Schedule", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
 							seriesName: "Series G",
@@ -144,15 +128,13 @@ describe("Schedule", (): void => {
 							episodes: [
 								{ status: "Watched" },
 								{ status: "Recorded" },
-								{ status: "Expected" }
-							]
+								{ status: "Expected" },
+							],
 						},
 						{
 							seriesName: "Series E",
 							nowShowing: 3,
-							episodes: [
-								{ status: "Expected" }
-							]
+							episodes: [{ status: "Expected" }],
 						},
 						{
 							seriesName: "Series C",
@@ -161,8 +143,8 @@ describe("Schedule", (): void => {
 								{ status: "Recorded" },
 								{ status: "Expected" },
 								{},
-								{}
-							]
+								{},
+							],
 						},
 						{
 							seriesName: "Series A",
@@ -172,45 +154,70 @@ describe("Schedule", (): void => {
 								{ status: "Recorded" },
 								{ status: "Expected", statusDate: "2000-01-01" },
 								{ status: "Missed" },
-								{}
-							]
-						}
-					]
-				}
-			]
+								{},
+							],
+						},
+					],
+				},
+			],
 		};
 
 		cy.createTestData(data);
 
 		expectedItems = [
 			"Mondays",
-			{ label: "Program A:Series A", progress: { watched: 1, recorded: 1, expected: 1, noStatus: 2 }, warning: true },
+			{
+				label: "Program A:Series A",
+				progress: { watched: 1, recorded: 1, expected: 1, noStatus: 2 },
+				warning: true,
+			},
 			{ label: "Program Z:Series B", progress: { watched: 1 } },
 			"Tuesdays",
-			{ label: "Program A:Series C", progress: { recorded: 1, expected: 1, noStatus: 2 } },
+			{
+				label: "Program A:Series C",
+				progress: { recorded: 1, expected: 1, noStatus: 2 },
+			},
 			{ label: "Program Z:Series D", progress: { noStatus: 2 } },
 			"Wednesdays",
 			{ label: "Program A:Series E", progress: { expected: 1 } },
 			{ label: "Program Z:Series F" },
 			"Thursdays",
-			{ label: "Program A:Series G", progress: { watched: 1, recorded: 1, expected: 1 } },
+			{
+				label: "Program A:Series G",
+				progress: { watched: 1, recorded: 1, expected: 1 },
+			},
 			{ label: "Program Z:Series H" },
 			"Fridays",
-			{ label: "Program A:Series I", progress: { watched: 1, recorded: 1, expected: 1 } },
+			{
+				label: "Program A:Series I",
+				progress: { watched: 1, recorded: 1, expected: 1 },
+			},
 			{ label: "Program Z:Series J" },
 			"Saturdays",
-			{ label: "Program A:Series K", progress: { watched: 1, recorded: 1, expected: 1 } },
+			{
+				label: "Program A:Series K",
+				progress: { watched: 1, recorded: 1, expected: 1 },
+			},
 			{ label: "Program Z:Series L" },
 			"Sundays",
-			{ label: "Program A:Series M", progress: { watched: 1, recorded: 1, expected: 1 } },
+			{
+				label: "Program A:Series M",
+				progress: { watched: 1, recorded: 1, expected: 1 },
+			},
 			{ label: "Program Z:Series N" },
 			"Daily",
-			{ label: "Program A:Series O", progress: { watched: 1, recorded: 1, expected: 1 } },
+			{
+				label: "Program A:Series O",
+				progress: { watched: 1, recorded: 1, expected: 1 },
+			},
 			{ label: "Program Z:Series P" },
 			"Not Showing",
-			{ label: "Program A:Series Q", progress: { watched: 1, recorded: 1, expected: 1 } },
+			{
+				label: "Program A:Series Q",
+				progress: { watched: 1, recorded: 1, expected: 1 },
+			},
 			{ label: "Program Z:Series R", progress: { recorded: 1 } },
-			{ label: "Program Z:Series S", progress: { expected: 1 } }
+			{ label: "Program Z:Series S", progress: { expected: 1 } },
 		];
 	});
 
@@ -246,7 +253,10 @@ describe("Schedule", (): void => {
 
 					cy.wrap(item).within((): void => {
 						cy.get(listItem).should("contain.text", label);
-						cy.get(listItem).should(`${true === warning ? "" : "not."}have.class`, "warning");
+						cy.get(listItem).should(
+							`${true === warning ? "" : "not."}have.class`,
+							"warning",
+						);
 						checkProgress(progress);
 					});
 				}
@@ -296,7 +306,10 @@ describe("Schedule", (): void => {
 			cy.get(nowShowing).select("Tuesdays");
 			cy.get(moveTo).select("Program Z");
 			cy.get(headerRightButton).click();
-			cy.get(fifthListItem).should("contain.text", "Program Z:Saved series edit");
+			cy.get(fifthListItem).should(
+				"contain.text",
+				"Program Z:Saved series edit",
+			);
 		});
 
 		it("should not update the Schedule view if the changes are cancelled", (): void => {

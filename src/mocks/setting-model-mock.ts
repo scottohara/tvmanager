@@ -7,13 +7,15 @@ interface Setting {
 }
 
 const saveStub = sinon.stub(),
-			removeStub = sinon.stub(),
-			getStub = sinon.stub(),
-			setting: Setting = {};
+	removeStub = sinon.stub(),
+	getStub = sinon.stub(),
+	setting: Setting = {};
 
 export default class SettingMock {
-	public constructor(public readonly settingName?: string,
-						public readonly settingValue?: string) {
+	public constructor(
+		public readonly settingName?: string,
+		public readonly settingValue?: string,
+	) {
 		setting.name = this.settingName;
 		setting.value = this.settingValue;
 		saveStub.reset();
@@ -24,7 +26,7 @@ export default class SettingMock {
 		return setting;
 	}
 
-	public static get "get"(): SinonStub<string[], SettingMock> {
+	public static get get(): SinonStub<string[], SettingMock> {
 		return getStub;
 	}
 

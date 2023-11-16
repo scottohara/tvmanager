@@ -1,7 +1,4 @@
-import type {
-	Device,
-	NavButtonEventHandler
-} from "~/controllers";
+import type { Device, NavButtonEventHandler } from "~/controllers";
 import DatabaseService from "~/services/database-service";
 import type { PublicInterface } from "~/global";
 import RegistrationView from "~/views/registration-view.html";
@@ -26,13 +23,13 @@ export default class RegistrationController extends ViewController {
 			label: "Register",
 			leftButton: {
 				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
-				label: "Cancel"
+				label: "Cancel",
 			},
 			rightButton: {
 				eventHandler: this.save.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
-				label: "Save"
-			}
+				label: "Save",
+			},
 		};
 
 		// Get the registered device
@@ -46,7 +43,7 @@ export default class RegistrationController extends ViewController {
 			this.device = {
 				id: "",
 				name: "",
-				imported: false
+				imported: false,
 			};
 
 			// Clear the view footer
@@ -64,8 +61,8 @@ export default class RegistrationController extends ViewController {
 				leftButton: {
 					eventHandler: this.unregister.bind(this) as NavButtonEventHandler,
 					style: "cautionButton",
-					label: "Unregister"
-				}
+					label: "Unregister",
+				},
 			};
 
 			// Set the view footer
@@ -79,8 +76,8 @@ export default class RegistrationController extends ViewController {
 			const response = await fetch(`/devices/${this.device.id}`, {
 				method: "DELETE",
 				headers: {
-					"X-DEVICE-ID": String(this.device.id)
-				}
+					"X-DEVICE-ID": String(this.device.id),
+				},
 			});
 
 			if (response.ok) {
@@ -95,7 +92,9 @@ export default class RegistrationController extends ViewController {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
 		} catch (error: unknown) {
-			this.appController.showNotice({ label: `Unregister failed: ${(error as Error).message}` });
+			this.appController.showNotice({
+				label: `Unregister failed: ${(error as Error).message}`,
+			});
 		}
 	}
 
@@ -108,8 +107,8 @@ export default class RegistrationController extends ViewController {
 			const response = await fetch(`/devices/${this.device.name}`, {
 				method: "PUT",
 				headers: {
-					"X-DEVICE-ID": String(this.device.id)
-				}
+					"X-DEVICE-ID": String(this.device.id),
+				},
 			});
 
 			if (response.ok) {
@@ -127,7 +126,9 @@ export default class RegistrationController extends ViewController {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
 		} catch (error: unknown) {
-			this.appController.showNotice({ label: `Registration failed: ${(error as Error).message}` });
+			this.appController.showNotice({
+				label: `Registration failed: ${(error as Error).message}`,
+			});
 		}
 	}
 

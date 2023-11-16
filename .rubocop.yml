@@ -12,9 +12,9 @@ inherit_gem:
 
 AllCops:
   Exclude:
-    - 'bin/*'
-    - 'node_modules/**/*'
-    - 'vendor/**/*'
+    - "bin/*"
+    - "node_modules/**/*"
+    - "vendor/**/*"
 
 # Needed for @@db
 Style/ClassVars:

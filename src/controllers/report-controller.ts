@@ -1,7 +1,4 @@
-import type {
-	NavButtonEventHandler,
-	Report
-} from "~/controllers";
+import type { NavButtonEventHandler, Report } from "~/controllers";
 import DatabaseService from "~/services/database-service";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
@@ -28,12 +25,18 @@ export default class ReportController extends ViewController {
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",
-				label: "Settings"
-			}
+				label: "Settings",
+			},
 		};
 
 		// Instantiate a List object
-		this.reportList = new List("list", ReportListTemplate, null, [], this.viewItem.bind(this));
+		this.reportList = new List(
+			"list",
+			ReportListTemplate,
+			null,
+			[],
+			this.viewItem.bind(this),
+		);
 
 		// Activate the controller
 		return this.activate();
@@ -55,7 +58,11 @@ export default class ReportController extends ViewController {
 	}
 
 	private async viewItem(listIndex: number): Promise<void> {
-		return this.appController.pushView("episodes", { source: "Report", listIndex, series: this.reportList.items[listIndex] as PublicInterface<Series> });
+		return this.appController.pushView("episodes", {
+			source: "Report",
+			listIndex,
+			series: this.reportList.items[listIndex] as PublicInterface<Series>,
+		});
 	}
 
 	private async viewItems(): Promise<void> {
@@ -67,7 +74,7 @@ export default class ReportController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`
+			label: `v${(await DatabaseService).version}`,
 		};
 
 		// Set the view footer
