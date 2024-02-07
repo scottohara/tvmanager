@@ -72,7 +72,7 @@
   },
   "config": {
     "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-14-Pro-Max",
-    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-17-0"
+    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-17-2"
   },
   "scripts": {
     "start": "concurrently --prefix-colors bgBlue.bold,bgYellow.bold,bgGreen.bold npm:web:dev npm:db npm:dev",
