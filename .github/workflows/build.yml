@@ -33,10 +33,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .tool-versions
           cache: npm
@@ -50,7 +50,7 @@ jobs:
         run: npm test
 
       - name: Upload test coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lcov.info
           path: coverage/frontend/lcov.info
@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install ruby and gem dependencies
         uses: ruby/setup-ruby@v1
@@ -91,7 +91,7 @@ jobs:
         run: bundle exec rake spec
 
       - name: Upload test coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage.json
           path: coverage/backend/coverage.json
@@ -103,7 +103,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download CodeClimate test reporter
         run: |
@@ -111,13 +111,13 @@ jobs:
           chmod +x ./cc-test-reporter
 
       - name: Download frontend test coverage artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lcov.info
           path: coverage/frontend
 
       - name: Download backend test coverage artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage.json
           path: coverage/backend
