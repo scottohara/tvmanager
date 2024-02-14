@@ -49,6 +49,7 @@ module TVManager
 			md5_received = request.env['HTTP_CONTENT_MD5']
 
 			# Create an MD5 digest of the request body
+			request.body.rewind
 			doc = request.body.read
 			md5_hex = ::Digest::MD5.hexdigest doc
 
