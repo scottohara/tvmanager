@@ -31,13 +31,13 @@ group :development, :test do
 	gem 'rspec', '3.13.0'
 
 	# Code style checker
-	gem 'rubocop', '1.51.0', require: false
+	gem 'rubocop', '1.60.2', require: false
 
 	# Rubocop Performance cops
-	gem 'rubocop-performance', '1.18.0', require: false
+	gem 'rubocop-performance', '1.20.2', require: false
 
 	# Rubocop RSpec cops
-	gem 'rubocop-rspec', '2.22.0', require: false
+	gem 'rubocop-rspec', '2.26.1', require: false
 
 	# Rubocop Rake cops
 	gem 'rubocop-rake', '0.6.0', require: false
