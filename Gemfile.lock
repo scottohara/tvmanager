@@ -9,7 +9,7 @@ GEM
       multi_json (~> 1.7)
     diff-lcs (1.5.1)
     docile (1.4.0)
-    dotenv (3.0.0)
+    dotenv (3.0.2)
     ffi (1.16.3)
     httpclient (2.8.3)
     json (2.7.1)
@@ -111,7 +111,7 @@ PLATFORMS
 
 DEPENDENCIES
   couchrest (= 2.0.1)
-  dotenv (= 3.0.0)
+  dotenv (= 3.0.2)
   puma (= 6.4.2)
   rack-test (= 2.1.0)
   rake (= 13.1.0)
