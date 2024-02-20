@@ -19,9 +19,9 @@ vendor
 .eslintignore
 .eslintrc.json
 .gitignore
+.prettierignore
 .rspec
 .rubocop.yml
-.tool-versions
 cypress.config.ts
 fly*.toml
 karma*.js
