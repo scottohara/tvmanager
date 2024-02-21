@@ -8,6 +8,8 @@ coverage
 cypress
 node_modules
 public
+src/**/*.test.ts
+src/mocks
 spec
 vendor
 **/*~
