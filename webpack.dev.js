@@ -25,11 +25,13 @@ module.exports = merge(config, {
 	devtool: "eval-source-map",
 
 	devServer: {
-		allowedHosts: "all",
 		open: true,
-		proxy: {
-			"/": "http://localhost:3001",
-		},
+		proxy: [
+			{
+				context: ["/"],
+				target: "http://localhost:3001",
+			},
+		],
 	},
 
 	plugins: [
