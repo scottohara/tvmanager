@@ -131,18 +131,18 @@ footer {
 	position: relative;
 	transition-duration: 300ms;
 	transition-property: transform;
-}
 
-/* Hide the content wrapper while content is being loaded */
-#contentWrapper.loading {
-	visibility: hidden;
-	transform: translateX(100%);
-}
+	/* Hide the content wrapper while content is being loaded */
+	&.loading {
+		visibility: hidden;
+		transform: translateX(100%);
+	}
 
-/* Show the content wrapper once the content has finished loading */
-#contentWrapper.loaded {
-	visibility: visible;
-	transform: translateX(0%);
+	/* Show the content wrapper once the content has finished loading */
+	&.loaded {
+		visibility: visible;
+		transform: translateX(0%);
+	}
 }
 
 /* Now loading indicator */
@@ -156,79 +156,81 @@ footer {
 	display: none;
 	font-weight: 400;
 	color: var(--default-secondary-text-color);
+
+	/* Show the now loading indicator while content is being loaded */
+	&.loading {
+		display: block;
+	}
 }
 
-/* Show the now loading indicator while content is being loaded */
-#nowLoading.loading {
-	display: block;
-}
+a {
+	/* Default buttons */
+	&.button {
+		position: absolute;
+		overflow: hidden;
+		padding: 0 3px;
+		line-height: 30px;
+		color: var(--default-action-color);
+		text-overflow: ellipsis;
+		text-decoration: none;
+		white-space: nowrap;
+		font-weight: 400;
+	}
 
-/* Default buttons */
-a.button {
-	position: absolute;
-	overflow: hidden;
-	padding: 0 3px;
-	line-height: 30px;
-	color: var(--default-action-color);
-	text-overflow: ellipsis;
-	text-decoration: none;
-	white-space: nowrap;
-	font-weight: 400;
-}
+	/* Position of buttons in header */
+	&.header {
+		top: 7px;
+	}
 
-/* Position of buttons in header */
-a.header {
-	top: 7px;
-}
+	/* Position of buttons in footer */
+	&.footer {
+		bottom: 20px;
+	}
 
-/* Position of buttons in footer */
-a.footer {
-	bottom: 20px;
-}
+	/* Position of left buttons */
+	&.left {
+		left: 6px;
+		right: auto;
+	}
 
-/* Position of left buttons */
-a.left {
-	left: 6px;
-	right: auto;
-}
+	/* Position of right buttons */
+	&.right {
+		right: 6px;
+	}
 
-/* Position of right buttons */
-a.right {
-	right: 6px;
-}
+	/* Padding for back navigation buttons */
+	&.backButton {
+		padding-left: 20px;
 
-/* Padding for back navigation buttons */
-a.backButton {
-	padding-left: 20px;
-}
+		/* Chevron glyph for back navigation buttons */
+		&:before {
+			content: "";
+			position: absolute;
+			width: 10px;
+			height: 10px;
+			top: 8px;
+			left: 5px;
+			border-style: solid;
+			border-color: var(--default-action-color);
+			border-width: 0 0 3px 3px;
+			transform: rotate(45deg);
+		}
+	}
 
-/* Chevron glyph for back navigation buttons */
-a.backButton:before {
-	content: "";
-	position: absolute;
-	width: 10px;
-	height: 10px;
-	top: 8px;
-	left: 5px;
-	border-style: solid;
-	border-color: var(--default-action-color);
-	border-width: 0 0 3px 3px;
-	transform: rotate(45deg);
-}
+	/* Confirm action buttons */
+	&.confirmButton {
+		font-weight: 500;
+	}
 
-/* Confirm action buttons */
-a.confirmButton {
-	font-weight: 500;
-}
+	/* Caution action buttons */
+	&.cautionButton {
+		color: var(--default-caution-color);
+	}
 
-/* Caution action buttons */
-a.cautionButton {
-	color: var(--default-caution-color);
-}
-
-/* Disabled action buttons */
-a.disabled {
-	color: var(--default-disabled-color);
+	/* Disabled action buttons */
+	&.disabled {
+		color: var(--default-disabled-color);
+	}
 }
 
 /* Scrolling lists & dialogs */
@@ -242,38 +244,107 @@ ul {
 	background-color: var(--list-background-color);
 	padding: 0;
 	margin: 0;
-}
 
-/* List items */
-ul li {
-	margin: 0 0 0 15px;
-	border-top: 1px solid var(--default-separator-color);
-	padding: 2px 0;
-	list-style: none;
-}
+	/* List items */
+	li {
+		margin: 0 0 0 15px;
+		border-top: 1px solid var(--default-separator-color);
+		padding: 2px 0;
+		list-style: none;
 
-/* List group headers */
-ul li.group {
-	padding: 1px 15px;
-	font-weight: 500;
-	background-color: var(--list-group-color);
-	border: 0;
-	margin-left: 0;
-}
+		/* List group headers */
+		&.group {
+			padding: 1px 15px;
+			font-weight: 500;
+			background-color: var(--list-group-color);
+			border: 0;
+			margin-left: 0;
+		}
 
-/* No top border for the first item in a list or list group */
-ul li.group + li,
-ul li:first-child:not(.group) {
-	border-top: 0;
-}
+		/* No top border for the first item in a list or list group */
+		&.group + li,
+		&:first-child:not(.group) {
+			border-top: 0;
+		}
 
-/* List item content */
-ul li a {
-	min-height: 40px;
-	display: block;
-	margin: -2px 0px -2px -15px;
-	padding: 2px 32px 2px 15px;
-	transform: rotate(0);
+		/* List item content */
+		a {
+			min-height: 40px;
+			display: block;
+			margin: -2px 0px -2px -15px;
+			padding: 2px 32px 2px 15px;
+			transform: rotate(0);
+
+			/* Highlighted list items */
+			&.warning {
+				background-color: var(--default-warning-color);
+			}
+
+			/* Episode status indicators for episode list */
+			&.status {
+				margin-left: -10px;
+				border-left: 5px solid transparent;
+
+				/* Use double status indicators for unverified episodes */
+				&.Unverified {
+					border-left-style: double;
+				}
+			}
+
+			/* Watched status indicators for episode list */
+			&.Watched {
+				border-left-color: var(--watched-color);
+			}
+
+			/* Recorded status indicators for episode list */
+			&.Recorded {
+				border-left-color: var(--recorded-color);
+			}
+
+			/* Expected status indicators for episode list */
+			&.Expected {
+				border-left-color: var(--expected-color);
+			}
+
+			/* Missed status indicators for episode list */
+			&.Missed {
+				border-left-color: var(--missed-color);
+			}
+
+			/* List item content subtext */
+			div.subText {
+				font-size: 12px;
+				color: var(--default-secondary-text-color);
+			}
+		}
+
+		/* Drag to sort */
+		&.sortable-ghost {
+			visibility: hidden;
+		}
+
+		&.sortable-drag {
+			background-color: var(--default-alternate-background-color);
+			opacity: 0.95;
+		}
+	}
+
+	&.withHelper {
+		/* Prevent list items from running under helper */
+		li {
+			margin-right: 27px;
+
+			/* No right padding for lists that use a helper */
+			a {
+				padding-right: 5px;
+
+				/* Hide the chevron images for lists that use a helper */
+				&:before {
+					display: none;
+				}
+			}
+		}
+	}
 }
 
 /* Chevron glyph for list items and navigating to a subview */
@@ -289,26 +360,6 @@ ul li a:before,
 	border-width: 3px 3px 0 0;
 	transform-origin: 100% 100%;
 	transform: rotate(45deg) translate(0%, 240%);
-}
-
-/* Highlighted list items */
-ul li a.warning {
-	background-color: var(--default-warning-color);
-}
-
-/* Hide the chevron images for lists that use a helper */
-ul.withHelper li a:before {
-	display: none;
-}
-
-/* Prevent list items from running under helper */
-ul.withHelper li {
-	margin-right: 27px;
-}
-
-/* No right padding for lists that use a helper */
-ul.withHelper li a {
-	padding-right: 5px;
 }
 
 /* Chevron image for list items in edit mode */
@@ -347,91 +398,44 @@ ul.delete li a:before {
 	transform: rotate(0);
 }
 
-/* Episode status indicators for episode list */
-ul li a.status {
-	margin-left: -10px;
-	border-left: 5px solid transparent;
-}
-
-/* Use double status indicators for unverified episodes */
-ul li a.status.Unverified {
-	border-left-style: double;
-}
-
-/* Watched status indicators for episode list */
-ul li a.Watched {
-	border-left-color: var(--watched-color);
-}
-
-/* Recorded status indicators for episode list */
-ul li a.Recorded {
-	border-left-color: var(--recorded-color);
-}
-
-/* Expected status indicators for episode list */
-ul li a.Expected {
-	border-left-color: var(--expected-color);
-}
-
-/* Missed status indicators for episode list */
-ul li a.Missed {
-	border-left-color: var(--missed-color);
-}
-
-/* List item content subtext */
-ul li a div.subText {
-	font-size: 12px;
-	color: var(--default-secondary-text-color);
-}
-
-/* Drag to sort */
-ul li.sortable-ghost {
-	visibility: hidden;
-}
-
-ul li.sortable-drag {
-	background-color: var(--default-alternate-background-color);
-	opacity: 0.95;
-}
-
 /* Progress bars */
 div.progressBar {
 	background-color: var(--missed-color);
 	height: 14px;
 	font-size: 12px;
 	overflow: hidden;
-}
 
-/* Progress bar sections */
-div.progressBar div {
-	float: left;
-	height: inherit;
-	text-align: center;
-}
+	/* Progress bar sections */
+	div {
+		float: left;
+		height: inherit;
+		text-align: center;
 
-/* Totals in progress bars */
-div.progressBar div.total {
-	float: right !important;
-	padding-right: 2px;
-	color: var(--missed-text-color);
-}
+		/* Totals in progress bars */
+		&.total {
+			float: right !important;
+			padding-right: 2px;
+			color: var(--missed-text-color);
+		}
 
-/* Watched section in progress bars */
-div.progressBar div.watched {
-	background-color: var(--watched-color);
-	color: var(--watched-text-color);
-}
+		/* Watched section in progress bars */
+		&.watched {
+			background-color: var(--watched-color);
+			color: var(--watched-text-color);
+		}
 
-/* Recorded section in progress bars */
-div.progressBar div.recorded {
-	background-color: var(--recorded-color);
-	color: var(--recorded-text-color);
-}
+		/* Recorded section in progress bars */
+		&.recorded {
+			background-color: var(--recorded-color);
+			color: var(--recorded-text-color);
+		}
 
-/* Expected section in progress bars */
-div.progressBar div.expected {
-	background-color: var(--expected-color);
-	color: var(--expected-text-color);
+		/* Expected section in progress bars */
+		&.expected {
+			background-color: var(--expected-color);
+			color: var(--expected-text-color);
+		}
+	}
 }
 
 /* Dialog sections */
@@ -458,29 +462,92 @@ h2 {
 	overflow: hidden;
 	transform: rotate(0);
 	display: flex;
+
+	/* Top border for first row in a dialog or dialog section */
+	h2 + &,
+	&:first-child {
+		border-top: 1px solid var(--default-separator-color);
+	}
+
+	/* First row in a dialog with no preceding header */
+	&:first-child {
+		margin-top: 33px;
+	}
+
+	/* Overlay to make offset separators between dialog rows */
+	+ &:after {
+		content: "";
+		position: absolute;
+		width: 15px;
+		height: 1px;
+		left: 0px;
+		background-color: inherit;
+		transform: translateY(-1px);
+	}
+
+	/* Episode status toggles */
+	#watched,
+	#recorded,
+	#expected,
+	#missed {
+		height: 25px;
+		width: 25px;
+		border-width: 2px;
+		border-style: solid;
+		border-radius: 14px;
+		display: inline-block;
+		margin-right: 10px;
+		position: relative;
+		top: 7px;
+		transition: background-color 0.25s ease-in-out;
+	}
+
+	/* Watched episode status toggle (unselected) */
+	#watched {
+		border-color: var(--watched-color);
+
+		/* Watched episode status toggle (selected) */
+		&.status {
+			background-color: var(--watched-color);
+		}
+	}
+
+	/* Recorded episode status toggle (unselected) */
+	#recorded {
+		border-color: var(--recorded-color);
+
+		/* Recorded episode status toggle (selected) */
+		&.status {
+			background-color: var(--recorded-color);
+		}
+	}
+
+	/* Expected episode status toggle (unselected) */
+	#expected {
+		border-color: var(--expected-color);
+
+		/* Expected episode status toggle (selected) */
+		&.status {
+			background-color: var(--expected-color);
+		}
+	}
+
+	/* Missed episode status toggle (unselected) */
+	#missed {
+		border-color: var(--missed-color);
+
+		/* Missed episode status toggle (selected) */
+		&.status {
+			background-color: var(--missed-color);
+		}
+	}
+
+	/* Buttons in dialog rows */
+	a.button {
+		line-height: 40px;
+	}
 }
 
-/* Top border for first row in a dialog or dialog section */
-h2 + .row,
-.row:first-child {
-	border-top: 1px solid var(--default-separator-color);
-}
-
-/* First row in a dialog with no preceding header */
-.row:first-child {
-	margin-top: 33px;
-}
-
-/* Overlay to make offset separators between dialog rows */
-.row + .row:after {
-	content: "";
-	position: absolute;
-	width: 15px;
-	height: 1px;
-	left: 0px;
-	background-color: inherit;
-	transform: translateY(-1px);
-}
 /* Dialog labels */
 label {
 	line-height: 40px;
@@ -512,68 +579,6 @@ select {
 	-webkit-text-fill-color: var(--default-text-color);
 }
 
-/* Episode status toggles */
-.row #watched,
-.row #recorded,
-.row #expected,
-.row #missed {
-	height: 25px;
-	width: 25px;
-	border-width: 2px;
-	border-style: solid;
-	border-radius: 14px;
-	display: inline-block;
-	margin-right: 10px;
-	position: relative;
-	top: 7px;
-	transition: background-color 0.25s ease-in-out;
-}
-
-/* Watched episode status toggle (unselected) */
-.row #watched {
-	border-color: var(--watched-color);
-}
-
-/* Watched episode status toggle (selected) */
-.row #watched.status {
-	background-color: var(--watched-color);
-}
-
-/* Recorded episode status toggle (unselected) */
-.row #recorded {
-	border-color: var(--recorded-color);
-}
-
-/* Recorded episode status toggle (selected) */
-.row #recorded.status {
-	background-color: var(--recorded-color);
-}
-
-/* Expected episode status toggle (unselected) */
-.row #expected {
-	border-color: var(--expected-color);
-}
-
-/* Expected episode status toggle (selected) */
-.row #expected.status {
-	background-color: var(--expected-color);
-}
-
-/* Missed episode status toggle (unselected) */
-.row #missed {
-	border-color: var(--missed-color);
-}
-
-/* Missed episode status toggle (selected) */
-.row #missed.status {
-	background-color: var(--missed-color);
-}
-
-/* Buttons in dialog rows */
-.row a.button {
-	line-height: 40px;
-}
-
 /* Prevent date fields on iOS from being centred */
 input::-webkit-date-and-time-value {
 	text-align: left;
@@ -585,61 +590,63 @@ input[type="checkbox"] {
 	max-width: 0;
 	opacity: 0;
 	margin: 0;
-}
 
-/* Background for checkbox sliders */
-input[type="checkbox"] + label {
-	display: inline-block;
-	position: relative;
-	background-color: var(--toggle-switch-track-color);
-	height: 30px;
-	width: 50px;
-	border-radius: 15px;
-	top: 6px;
-	min-width: 0;
-	margin-bottom: -1px;
-}
+	/* Background for checkbox sliders */
+	+ label {
+		display: inline-block;
+		position: relative;
+		background-color: var(--toggle-switch-track-color);
+		height: 30px;
+		width: 50px;
+		border-radius: 15px;
+		top: 6px;
+		min-width: 0;
+		margin-bottom: -1px;
 
-/* Left side of checkbox slider (unchecked) */
-input[type="checkbox"] + label:before {
-	content: "";
-	position: absolute;
-	display: block;
-	height: 30px;
-	width: 30px;
-	left: 0;
-	border-radius: 15px;
-	transition-property: width, background-color;
-	transition-duration: 0.25s;
-	transition-timing-function: ease-in-out;
-}
+		/* Left side of checkbox slider (unchecked) */
+		&:before {
+			content: "";
+			position: absolute;
+			display: block;
+			height: 30px;
+			width: 30px;
+			left: 0;
+			border-radius: 15px;
+			transition-property: width, background-color;
+			transition-duration: 0.25s;
+			transition-timing-function: ease-in-out;
+		}
 
-/* Right side of checkbox slider (unchecked) */
-input[type="checkbox"] + label:after {
-	content: "";
-	position: absolute;
-	display: block;
-	height: 30px;
-	width: 30px;
-	left: 0;
-	border-radius: 15px;
-	background-color: var(--toggle-switch-thumb-color);
-	box-shadow: inset 0 0 0 1px var(--toggle-switch-shadow-color);
-	transition-property: left, box-shadow;
-	transition-duration: 0.25s;
-	transition-timing-function: ease-in-out;
-}
+		/* Right side of checkbox slider (unchecked) */
+		&:after {
+			content: "";
+			position: absolute;
+			display: block;
+			height: 30px;
+			width: 30px;
+			left: 0;
+			border-radius: 15px;
+			background-color: var(--toggle-switch-thumb-color);
+			box-shadow: inset 0 0 0 1px var(--toggle-switch-shadow-color);
+			transition-property: left, box-shadow;
+			transition-duration: 0.25s;
+			transition-timing-function: ease-in-out;
+		}
+	}
 
-/* Left side of checkbox slider (checked) */
-input[type="checkbox"]:checked + label:before {
-	width: 50px;
-	background-color: var(--toggle-switch-checked-color);
-}
+	&:checked + label {
+		/* Left side of checkbox slider (checked) */
+		&:before {
+			width: 50px;
+			background-color: var(--toggle-switch-checked-color);
+		}
 
-/* Right side of checkbox slider (checked) */
-input[type="checkbox"]:checked + label:after {
-	left: 20px;
-	box-shadow: inset 0 0 0 1px var(--toggle-switch-checked-color);
+		/* Right side of checkbox slider (checked) */
+		&:after {
+			left: 20px;
+			box-shadow: inset 0 0 0 1px var(--toggle-switch-checked-color);
+		}
+	}
 }
 
 /* Hide registration message, sync controls, progress bar, status row, sync error & import changes only rows by default */
@@ -674,18 +681,18 @@ input[type="checkbox"]:checked + label:after {
 div.notice {
 	background: var(--notices-background-color);
 	border-top: 1px solid var(--default-background-color);
-}
 
-/* Notice buttons */
-div.notice a.button {
-	padding-top: 7px;
-}
+	/* Notice buttons */
+	a.button {
+		padding-top: 7px;
+	}
 
-/* Notice content */
-div.notice p {
-	padding: 11px 5px 11px 50px;
-	margin: 0;
-	color: var(--notices-text-color);
+	/* Notice content */
+	p {
+		padding: 11px 5px 11px 50px;
+		margin: 0;
+		color: var(--notices-text-color);
+	}
 }
 
 /* List index */
@@ -702,15 +709,15 @@ div.notice p {
 	background-color: transparent;
 	z-index: 100;
 	touch-action: none;
-}
 
-#index li {
-	padding: 2px 0 0 0;
-	border: 0;
-	height: 11px;
-	margin: 0;
-}
+	li {
+		padding: 2px 0 0 0;
+		border: 0;
+		height: 11px;
+		margin: 0;
 
-#index li:first-child {
-	padding-top: 6px;
+		&:first-child {
+			padding-top: 6px;
+		}
+	}
 }
