@@ -302,12 +302,11 @@ export default class Series extends Base {
 	public setRecordedCount(count: number): void {
 		const PERCENT = 100,
 			RECORDED = 1;
-		let recordedPercent = 0;
 
 		this.recordedCount = count;
 
 		// Calculate the percentage of episodes that are recorded
-		recordedPercent = (this.recordedCount / this.episodeCount) * PERCENT;
+		const recordedPercent = (this.recordedCount / this.episodeCount) * PERCENT;
 
 		// Update the recorded section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(RECORDED, {
@@ -320,12 +319,11 @@ export default class Series extends Base {
 	public setExpectedCount(count: number): void {
 		const PERCENT = 100,
 			EXPECTED = 2;
-		let expectedPercent = 0;
 
 		this.expectedCount = count;
 
 		// Calculate the percentage of episodes that are expected
-		expectedPercent = (this.expectedCount / this.episodeCount) * PERCENT;
+		const expectedPercent = (this.expectedCount / this.episodeCount) * PERCENT;
 
 		// Update the expected section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(EXPECTED, {
@@ -337,11 +335,9 @@ export default class Series extends Base {
 
 	private setWatchedProgress(): void {
 		const PERCENT = 100,
-			WATCHED = 0;
-		let watchedPercent = 0;
-
-		// Calculate the percentage of episodes that are watched
-		watchedPercent = (this.watchedCount / this.episodeCount) * PERCENT;
+			WATCHED = 0,
+			// Calculate the percentage of episodes that are watched
+			watchedPercent = (this.watchedCount / this.episodeCount) * PERCENT;
 
 		// Update the watched section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(WATCHED, {
@@ -354,12 +350,11 @@ export default class Series extends Base {
 	private setMissedCount(count: number): void {
 		const PERCENT = 100,
 			MISSED = 3;
-		let missedPercent = 0;
 
 		this.missedCount = count;
 
 		// Calculate the percentage of episodes that are missed
-		missedPercent = (this.missedCount / this.episodeCount) * PERCENT;
+		const missedPercent = (this.missedCount / this.episodeCount) * PERCENT;
 
 		// Update the missed section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(MISSED, {

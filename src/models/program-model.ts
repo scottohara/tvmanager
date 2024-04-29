@@ -168,12 +168,11 @@ export default class Program extends Base {
 	public setRecordedCount(count: number): void {
 		const PERCENT = 100,
 			RECORDED = 1;
-		let recordedPercent = 0;
 
 		this.recordedCount = count;
 
 		// Calculate the percentage of episodes that are recorded
-		recordedPercent = (this.recordedCount / this.episodeCount) * PERCENT;
+		const recordedPercent = (this.recordedCount / this.episodeCount) * PERCENT;
 
 		// Update the recorded section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(RECORDED, {
@@ -186,12 +185,11 @@ export default class Program extends Base {
 	public setExpectedCount(count: number): void {
 		const PERCENT = 100,
 			EXPECTED = 2;
-		let expectedPercent = 0;
 
 		this.expectedCount = count;
 
 		// Calculate the percentage of episodes that are expected
-		expectedPercent = (this.expectedCount / this.episodeCount) * PERCENT;
+		const expectedPercent = (this.expectedCount / this.episodeCount) * PERCENT;
 
 		// Update the expected section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(EXPECTED, {
@@ -203,11 +201,9 @@ export default class Program extends Base {
 
 	private setWatchedProgress(): void {
 		const PERCENT = 100,
-			WATCHED = 0;
-		let watchedPercent = 0;
-
-		// Calculate the percentage of episodes that are watched
-		watchedPercent = (this.watchedCount / this.episodeCount) * PERCENT;
+			WATCHED = 0,
+			// Calculate the percentage of episodes that are watched
+			watchedPercent = (this.watchedCount / this.episodeCount) * PERCENT;
 
 		// Update the watched section of the progress bar, and regenerate the progress bar HTML
 		this.progressBarDisplay = this.progressBar.setSection(WATCHED, {

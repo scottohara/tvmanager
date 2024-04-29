@@ -179,7 +179,7 @@ export default class DataSyncController extends ViewController {
 			const MIN_LENGTH = 2,
 				paddedValue = `0${value}`;
 
-			return paddedValue.substr(paddedValue.length - MIN_LENGTH);
+			return paddedValue.substring(paddedValue.length - MIN_LENGTH);
 		}
 
 		// Only proceed if we have a last sync time

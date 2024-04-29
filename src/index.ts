@@ -8,15 +8,17 @@ if ("serviceWorker" in window.navigator) {
 			window.console.log(
 				`ServiceWorker registration successful with scope: ${registration.scope}`,
 			),
-		(error: string): void =>
-			window.console.log(`ServiceWorker registration failed: ${error}`),
+		(error: unknown): void =>
+			window.console.log(
+				`ServiceWorker registration failed: ${error as string}`,
+			),
 	);
 }
 
 if ("storage" in window.navigator) {
 	window.navigator.storage
 		.persist()
-		.catch((error: string): void => window.console.log(error));
+		.catch((error: unknown): void => window.console.log(error));
 }
 
 // Get a reference to the application controller singleton
@@ -26,7 +28,8 @@ const appController = new ApplicationController();
 appController
 	.start()
 	.catch(
-		(error: Error): string =>
-			((document.querySelector("#content") as HTMLDivElement).textContent =
-				error.message),
+		(error: unknown): string =>
+			((document.querySelector("#content") as HTMLDivElement).textContent = (
+				error as Error
+			).message),
 	);
