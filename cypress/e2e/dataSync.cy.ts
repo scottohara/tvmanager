@@ -26,7 +26,9 @@ import type { TestData } from "~/support/types";
 
 describe("Import/Export", (): void => {
 	before((): void => {
-		cy.exec("RACK_ENV=test bundle exec dotenv rake db:recreate db:migrate");
+		cy.exec(
+			"RACK_ENV=test bundle exec op run --env-file=.env -- rake db:recreate db:migrate",
+		);
 		cy.createTestData({});
 	});
 
@@ -103,7 +105,9 @@ describe("Import/Export", (): void => {
 				};
 
 				cy.createTestData(data);
-				cy.exec("RACK_ENV=test bundle exec dotenv rake db:authorise_devices");
+				cy.exec(
+					"RACK_ENV=test bundle exec op run --env-file=.env -- rake db:authorise_devices",
+				);
 			});
 
 			it("should show the name of the device", (): Cypress.Chainable<JQuery> =>
@@ -224,7 +228,7 @@ describe("Import/Export", (): void => {
 			before((): void => {
 				cy.createTestData({});
 				cy.exec(
-					"RACK_ENV=test bundle exec dotenv rake db:make_pending'[0-0-0]'",
+					"RACK_ENV=test bundle exec op run --env-file=.env -- rake db:make_pending'[0-0-0]'",
 				);
 			});
 

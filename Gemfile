@@ -22,7 +22,6 @@ gem 'rerun', '0.14.0', group: :development
 
 group :development, :test do
 	# Loads environment variables from .env
-	gem 'dotenv', '3.0.2'
 
 	# HTTP testing framework (provides methods like :post, :get, :delete etc.)
 	gem 'rack-test', '2.1.0'

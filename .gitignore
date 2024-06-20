@@ -4,9 +4,6 @@
 # Ignore vscode settings
 /.vscode
 
-# Ignore env variables
-.env
-
 # Ignore all logfiles and tempfiles
 npm-debug.log
 
