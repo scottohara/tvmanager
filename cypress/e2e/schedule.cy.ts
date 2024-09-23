@@ -247,9 +247,9 @@ describe("Schedule", (): void => {
 
 			cy.get(listItems).each((item: HTMLLIElement, index: number): void => {
 				if ("string" === typeof expectedItems[index]) {
-					checkGroup(item, expectedItems[index] as string);
+					checkGroup(item, expectedItems[index]);
 				} else {
-					const { label, progress, warning } = expectedItems[index] as ListItem;
+					const { label, progress, warning } = expectedItems[index];
 
 					cy.wrap(item).within((): void => {
 						cy.get(listItem).should("contain.text", label);

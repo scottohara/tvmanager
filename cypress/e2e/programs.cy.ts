@@ -161,9 +161,9 @@ describe("Programs", (): void => {
 
 			cy.get(listItems).each((item: HTMLLIElement, i: number): void => {
 				if ("string" === typeof expectedItems[i]) {
-					checkGroup(item, expectedItems[i] as string);
+					checkGroup(item, expectedItems[i]);
 				} else {
-					const { label, progress } = expectedItems[i] as ListItem;
+					const { label, progress } = expectedItems[i];
 
 					cy.wrap(item).within((): void => {
 						cy.get(listItem).should("contain.text", label);
