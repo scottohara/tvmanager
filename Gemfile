@@ -9,10 +9,10 @@ source 'https://rubygems.org'
 gem 'couchrest', '2.0.1'
 
 # Web server
-gem 'puma', '6.4.2'
+gem 'puma', '6.4.3'
 
 # Task runner
-gem 'rake', '13.1.0'
+gem 'rake', '13.2.1'
 
 # Web application framework
 gem 'sinatra', '4.0.0'
@@ -30,19 +30,19 @@ group :development, :test do
 	gem 'rspec', '3.13.0'
 
 	# Code style checker
-	gem 'rubocop', '1.60.2', require: false
+	gem 'rubocop', '1.67.0', require: false
 
 	# Rubocop Performance cops
-	gem 'rubocop-performance', '1.20.2', require: false
+	gem 'rubocop-performance', '1.22.1', require: false
 
 	# Rubocop RSpec cops
-	gem 'rubocop-rspec', '2.26.1', require: false
+	gem 'rubocop-rspec', '3.1.0', require: false
 
 	# Rubocop Rake cops
 	gem 'rubocop-rake', '0.6.0', require: false
 
 	# Shared Rubocop config
-	gem 'rubocop-config-oharagroup', '2.4.0', require: false
+	gem 'rubocop-config-oharagroup', '2.5.0', require: false
 
 	# Code coverage
 	gem 'simplecov', '0.22.0', require: false
