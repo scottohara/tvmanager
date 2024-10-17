@@ -10,7 +10,8 @@ GEM
     diff-lcs (1.5.1)
     docile (1.4.1)
     ffi (1.17.0)
-    ffi (1.17.0-x86_64-darwin)
+    ffi (1.17.0-arm64-darwin)
+    ffi (1.17.0-x86_64-linux-gnu)
     httpclient (2.8.3)
     json (2.7.2)
     language_server-protocol (3.17.0.3)
@@ -100,8 +101,9 @@ GEM
     unicode-display_width (2.6.0)
 
 PLATFORMS
+  arm64-darwin
   ruby
-  x86_64-darwin-18
+  x86_64-linux
 
 DEPENDENCIES
   couchrest (= 2.0.1)
