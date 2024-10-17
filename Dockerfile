@@ -52,7 +52,7 @@ RUN --mount=type=cache,id=tvmanager-bundler,target=tmp/vendor/bundle \
 
 FROM ruby:${RUBY_VERSION}-alpine as app
 
-RUN adduser --system tvmanager
+RUN adduser --system --uid 100 tvmanager
 USER tvmanager
 WORKDIR /tvmanager
 ENV RACK_ENV=production
@@ -61,17 +61,17 @@ RUN \
 	bundle config set --local without development:test; \
 	bundle config set --local deployment true;
 
-COPY --link --chown=tvmanager \
+COPY --link --chown=100 \
 	.tool-versions \
 	config.ru \
 	Gemfile* \
 	Rakefile ./
 
-COPY --link --chown=tvmanager db db/
-COPY --link --chown=tvmanager config config/
-COPY --link --chown=tvmanager app app/
-COPY --link --chown=tvmanager --from=backend build/vendor/bundle vendor/bundle/
-COPY --link --chown=tvmanager --from=frontend build/public public/
+COPY --link --chown=100 db db/
+COPY --link --chown=100 config config/
+COPY --link --chown=100 app app/
+COPY --link --chown=100 --from=backend build/vendor/bundle vendor/bundle/
+COPY --link --chown=100 --from=frontend build/public public/
 
 EXPOSE 3000
 
