@@ -15,10 +15,8 @@ module TVManager
 
 			def all
 				proc do |out|
-					docs = []
-
 					# Send the first part of the JSON
-					out << '{"data":['
+					out << '['
 
 					first = true
 
@@ -26,13 +24,11 @@ module TVManager
 					db.view 'data/all', include_docs: true do |doc|
 						out << ',' unless first
 						out << doc.to_json
-						docs << doc
 						first = false
-						doc
 					end
 
-					# Finalise the JSON with the MD5 checksum
-					out << "],\"checksum\":\"#{::Digest::MD5.hexdigest docs.to_json}\"}"
+					# Finalise the JSON
+					out << ']'
 				end
 			end
 

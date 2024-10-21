@@ -100,7 +100,6 @@ module.exports = merge(config, {
 			/^comlink$/u,
 			"~/mocks/comlink-mock",
 		),
-		new webpack.NormalModuleReplacementPlugin(/^md5$/u, "~/mocks/md5-mock"),
 
 		defineAppConfig(),
 	],

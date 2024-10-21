@@ -103,7 +103,6 @@ describe ::TVManager::DocumentsController do
 
 	describe 'GET /documents/pending' do
 		let(:request) { [:get, '/pending'] }
-		let(:checksum) { ::Digest::MD5.hexdigest json }
 
 		before do
 			allow(::TVManager::Document).to receive(:pending).with(device_id).and_return doc
@@ -118,50 +117,23 @@ describe ::TVManager::DocumentsController do
 				public_send(*request)
 				expect(last_response.status).to be 200
 				expect(last_response.body).to eql json
-				expect(last_response.headers['Etag']).to eql "\"#{checksum}\""
 				expect(last_response.headers['Content-Type']).to eql 'application/json'
 			end
 		end
 	end
 
 	describe 'POST /documents' do
-		let(:headers) { {} }
-		let(:request) { [:post, '/', json, headers] }
+		let(:request) { [:post, '/', json] }
 
 		it_behaves_like 'an authorised route'
 
 		context 'route' do
 			include_context 'authorised device'
 
-			before do
-				headers['HTTP_CONTENT_MD5'] = checksum
-			end
-
-			context 'checksum mismatch' do
-				let(:checksum) { 'invalid' }
-
-				it 'should respond with a 400 Bad Request' do
-					public_send(*request)
-					expect(last_response.status).to be 400
-					expect(last_response.body).to eql "Checksum mismatch on received change (#{::Digest::MD5.hexdigest json} != #{checksum})"
-				end
-			end
-
-			context 'checksum match' do
-				let(:checksum) { ::Digest::MD5.hexdigest json }
-
-				before do
-					expect(document).to receive(:save!).with(device_id)
-					public_send(*request)
-				end
-
-				it 'should save the document' do
-					expect(last_response.status).to be 200
-				end
-
-				it 'should respond with an etag containing the MD5 checksum' do
-					expect(last_response.headers['Etag']).to eql "\"#{checksum}\""
-				end
+			it 'should save the document' do
+				expect(document).to receive(:save!).with(device_id)
+				public_send(*request)
+				expect(last_response.status).to be 200
 			end
 		end
 	end

@@ -1,7 +1,5 @@
 import type {
 	Device,
-	FullImport,
-	ImportData,
 	ImportDoc,
 	NavButtonEventHandler,
 	SyncErrorType,
@@ -16,7 +14,6 @@ import Series from "~/models/series-model";
 import Setting from "~/models/setting-model";
 import Sync from "~/models/sync-model";
 import ViewController from "~/controllers/view-controller";
-import md5 from "md5";
 import window from "~/components/window";
 
 enum Months {
@@ -355,40 +352,20 @@ export default class DataSyncController extends ViewController {
 		const instance = await this.find(sync),
 			// Get the JSON respresentation of the object, serialise to a string and calculate the MD5 sum of the content
 			instanceJson = instance.toJson(),
-			json = JSON.stringify(instanceJson),
-			hash = md5(json);
+			json = JSON.stringify(instanceJson);
 
 		try {
 			// Post to the export route, including the MD5 sum and device ID in the request headers
 			const response = await fetch("/documents", {
 				method: "POST",
 				headers: {
-					"Content-MD5": hash,
 					"X-DEVICE-ID": this.device.id,
 				},
 				body: json,
 			});
 
 			if (response.ok) {
-				// Get the Etag value returned by the server
-				const returnedHash = String(response.headers.get("Etag")).replace(
-					/^W\/|"/gu,
-					"",
-				);
-
-				// Compare the Etag with the MD5 sum we sent
-				if (hash === returnedHash) {
-					// Hash values matched meaning that the export was successful, so remove the Sync record
-					await sync.remove();
-				} else {
-					// The hash values didn't match, so that's an error
-					this.syncError(
-						"Checksum mismatch",
-						sync.type as ModelType,
-						`Expected: ${hash}, got: ${returnedHash}`,
-						sync.id,
-					);
-				}
+				await sync.remove();
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
 			}
@@ -550,46 +527,30 @@ export default class DataSyncController extends ViewController {
 			);
 
 			if (response.ok) {
-				// Extract the JSON and checksum returned, and calculate a hash of the data
-				const importObj = (await response.json()) as FullImport | ImportDoc[],
-					{ importJson, returnedHash } = this.getImportData(
-						importObj,
-						String(response.headers.get("Etag")),
-					),
-					hash = md5(JSON.stringify(importJson));
+				const importJson = (await response.json()) as ImportDoc[];
 
-				// Compare the Etag with the MD5 sum we calculated
-				if (hash === returnedHash) {
-					// Only proceed if there are objects to import
-					if (importJson.length > 0) {
-						this.objectsToImport = importJson.length;
+				// Only proceed if there are objects to import
+				if (importJson.length > 0) {
+					this.objectsToImport = importJson.length;
 
-						// Show the import progress
-						this.status.style.display = "none";
-						this.progress.value = this.objectsImported;
-						this.progress.max = this.objectsToImport;
-						this.progress.style.display = "inline";
+					// Show the import progress
+					this.status.style.display = "none";
+					this.progress.value = this.objectsImported;
+					this.progress.max = this.objectsToImport;
+					this.progress.style.display = "inline";
 
-						// Iterate over the list of objects to be imported
-						return await Promise.all(
-							importJson.map(
-								async (object: ImportDoc): Promise<void> =>
-									this.importObject(object),
-							),
-						);
-					}
-
-					// No objects to import, which is only an error for Full Imports
-					if (!this.onlyImportChanges) {
-						this.syncError("Receive error", "Sync", "No data found");
-					}
-				} else {
-					// The has values didn't match, so that's an error
-					this.syncError(
-						"Checksum mismatch",
-						"Sync",
-						`Expected: ${hash}, got: ${returnedHash}`,
+					// Iterate over the list of objects to be imported
+					return await Promise.all(
+						importJson.map(
+							async (object: ImportDoc): Promise<void> =>
+								this.importObject(object),
+						),
 					);
+				}
+
+				// No objects to import, which is only an error for Full Imports
+				if (!this.onlyImportChanges) {
+					this.syncError("Receive error", "Sync", "No data found");
 				}
 			} else {
 				throw new Error(`${response.status} (${response.statusText})`);
@@ -601,32 +562,6 @@ export default class DataSyncController extends ViewController {
 
 		// Finalise the import
 		return this.importDone();
-	}
-
-	private getImportData(
-		data: FullImport | ImportDoc[] | undefined,
-		eTag: string,
-	): ImportData {
-		let importJson: ImportDoc[], returnedHash: string;
-
-		/*
-		 * Get the Etag value returned by the server
-		 * For a fast import, look in the Etag header; for a full import there will be a checksum
-		 * property in the body content.
-		 * (This is because to avoid the full import from timing out, the response is streamed back
-		 * as it is generated; so we're unable to calculate a checksum for the response header.
-		 * Ideally, we would be able to use a HTTP Trailer header to provide this information
-		 * after the body content; but no browsers support HTTP Trailer headers)
-		 */
-		if (this.onlyImportChanges) {
-			importJson = data as ImportDoc[];
-			returnedHash = eTag.replace(/^W\/|"/gu, "");
-		} else {
-			returnedHash = (data as FullImport).checksum;
-			importJson = (data as FullImport).data;
-		}
-
-		return { importJson, returnedHash };
 	}
 
 	private async importObject(object: ImportDoc): Promise<void> {

@@ -44,7 +44,6 @@ export interface Device {
 export type SyncOperation = "Export" | "Import";
 
 export type SyncErrorType =
-	| "Checksum mismatch"
 	| "Delete error"
 	| "Receive error"
 	| "Save error"
@@ -57,16 +56,6 @@ export type ImportObject = SerializedModel & {
 
 export interface ImportDoc {
 	doc: ImportObject;
-}
-
-export interface FullImport {
-	checksum: string;
-	data: ImportDoc[];
-}
-
-export interface ImportData {
-	importJson: ImportDoc[];
-	returnedHash: string;
 }
 
 export interface EpisodeListItem {

@@ -34,33 +34,17 @@ module TVManager
 
 		# Get pending documents (for the device)
 		get '/pending' do
-			docs = ::TVManager::Document.pending @device_id
-
-			# Return a hash of the documents as the etag, and the documents themselves as the response body
-			etag ::Digest::MD5.hexdigest docs.to_json
-
 			content_type 'application/json'
-			docs.to_json
+			::TVManager::Document.pending(@device_id).to_json
 		end
 
 		# Create/update document
 		post '/' do
-			# Get the Content-MD5 header from the request
-			md5_received = request.env['HTTP_CONTENT_MD5']
-
-			# Create an MD5 digest of the request body
 			request.body.rewind
-			doc = request.body.read
-			md5_hex = ::Digest::MD5.hexdigest doc
-
-			# Check that the MD5 received matches the MD5 generated
-			raise ::TVManager::BadRequest, "Checksum mismatch on received change (#{md5_hex} != #{md5_received})" unless md5_received == md5_hex
+			doc = ::JSON.parse request.body.read
 
 			# Save the document
-			::TVManager::Document.new(::JSON.parse doc).save! @device_id
-
-			# Return the MD5 digest as the response etag
-			etag md5_hex
+			::TVManager::Document.new(doc).save! @device_id
 		end
 
 		# Delete document

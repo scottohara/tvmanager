@@ -76,8 +76,6 @@ Before a client is allowed to export changes to the server (to prevent unauthori
 
 In the event of a conflict (i.e. an object modified/deleted both locally and on the server), the conflict is resolved in the direction that data is flowing. In other words: for exporting, local changes overwrite changes on the server; and for importing, changes on the server overwrite local changes.
 
-An MD5 checksum verifies that the data was imported/exported succesfully.
-
 To enable the Import/Export functionality, you will need to declare the `TVMANAGER_COUCHDB_URL` environment variable.
 
 In development, the above environment variables can be saved to a `.env`, eg.

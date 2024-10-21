@@ -36,7 +36,7 @@ describe ::TVManager::Document do
 					}
 				end
 			end
-			let(:stream) { {data: json, checksum: ::Digest::MD5.hexdigest(json.to_json)} }
+			let(:stream) { json }
 		end
 
 		it 'should return the list of all documents' do

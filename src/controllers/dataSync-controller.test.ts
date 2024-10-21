@@ -1,8 +1,5 @@
 import type {
 	Device,
-	FullImport,
-	ImportData,
-	ImportDoc,
 	ImportObject,
 	NavButton,
 	NavButtonEventHandler,
@@ -663,7 +660,6 @@ describe("DataSyncController", (): void => {
 				{
 					method: "POST",
 					headers: {
-						"Content-MD5": "test-hash",
 						"X-DEVICE-ID": "test-device",
 					},
 					body: "{}",
@@ -684,79 +680,25 @@ describe("DataSyncController", (): void => {
 		});
 
 		describe("success", (): void => {
-			describe("hash match", (): void => {
-				interface Scenario {
-					description: string;
-					etag: string;
-				}
-				const scenarios: Scenario[] = [
-					{
-						description: "strong eTag",
-						etag: "test-hash",
-					},
-					{
-						description: "weak eTag",
-						etag: 'W/"test-hash"',
-					},
-				];
+			beforeEach(async (): Promise<void> => {
+				fakeFetch.withArgs(...fetchArgs).returns(
+					Promise.resolve(
+						new Response("", {
+							status: 200,
+							statusText: "OK",
+						}),
+					),
+				);
 
-				scenarios.forEach((scenario: Scenario): void => {
-					describe(scenario.description, (): void => {
-						beforeEach(async (): Promise<void> => {
-							fakeFetch.withArgs(...fetchArgs).returns(
-								Promise.resolve(
-									new Response("", {
-										status: 200,
-										statusText: "OK",
-										headers: {
-											Etag: scenario.etag,
-										},
-									}),
-								),
-							);
-
-							await dataSyncController["sendChange"](sync);
-						});
-
-						it("should remove the sync record", (): Chai.Assertion =>
-							expect(sync.remove).to.have.been.called);
-						it("should not add an error to the errors list", (): Chai.Assertion =>
-							expect(dataSyncController["syncError"]).to.not.have.been.called);
-						it("should mark the change as sent", (): Chai.Assertion =>
-							expect(dataSyncController["changeSent"]).to.have.been.called);
-					});
-				});
+				await dataSyncController["sendChange"](sync);
 			});
 
-			describe("hash mismatch", (): void => {
-				beforeEach(async (): Promise<void> => {
-					fakeFetch.withArgs(...fetchArgs).returns(
-						Promise.resolve(
-							new Response("", {
-								status: 200,
-								statusText: "OK",
-								headers: {
-									Etag: "bad-hash",
-								},
-							}),
-						),
-					);
-
-					await dataSyncController["sendChange"](sync);
-				});
-
-				it("should not remove the sync record", (): Chai.Assertion =>
-					expect(sync.remove).to.not.have.been.called);
-				it("should add an error to the errors list", (): Chai.Assertion =>
-					expect(dataSyncController["syncError"]).to.have.been.calledWith(
-						"Checksum mismatch",
-						"Program",
-						"Expected: test-hash, got: bad-hash",
-						"1",
-					));
-				it("should mark the change as sent", (): Chai.Assertion =>
-					expect(dataSyncController["changeSent"]).to.have.been.called);
-			});
+			it("should remove the sync record", (): Chai.Assertion =>
+				expect(sync.remove).to.have.been.called);
+			it("should not add an error to the errors list", (): Chai.Assertion =>
+				expect(dataSyncController["syncError"]).to.not.have.been.called);
+			it("should mark the change as sent", (): Chai.Assertion =>
+				expect(dataSyncController["changeSent"]).to.have.been.called);
 		});
 
 		describe("error", (): void => {
@@ -1205,14 +1147,6 @@ describe("DataSyncController", (): void => {
 			};
 			sinon.stub(dataSyncController, "syncError" as keyof DataSyncController);
 			sinon.stub(dataSyncController, "importDone" as keyof DataSyncController);
-			sinon
-				.stub(dataSyncController, "getImportData" as keyof DataSyncController)
-				.callsFake(
-					(data: FullImport): ImportData => ({
-						importJson: data.data,
-						returnedHash: data.checksum,
-					}),
-				);
 			dataSyncController["device"] = {
 				id: "test-device",
 				name: "Test Device",
@@ -1228,128 +1162,68 @@ describe("DataSyncController", (): void => {
 				);
 
 				describe("success", (): void => {
-					describe("hash match", (): void => {
-						describe("with data", (): void => {
-							let status: HTMLInputElement, progress: HTMLProgressElement;
+					describe("with data", (): void => {
+						let status: HTMLInputElement, progress: HTMLProgressElement;
 
-							beforeEach(async (): Promise<void> => {
-								fakeFetch
-									.withArgs(`/documents/${scenario.resource}`, fetchArgs)
-									.returns(
-										Promise.resolve(
-											new Response(
-												JSON.stringify({
-													data: [{}, {}],
-													checksum: "test-hash",
-												}),
-												{
-													status: 200,
-													statusText: "OK",
-													headers: {
-														Etag: "test-hash",
-													},
-												},
-											),
-										),
-									);
-
-								status = document.createElement("input");
-								status.id = "status";
-
-								progress = document.createElement("progress");
-								progress.id = "progress";
-								progress.style.display = "none";
-
-								document.body.append(status, progress);
-
-								sinon.stub(
-									dataSyncController,
-									"importObject" as keyof DataSyncController,
-								);
-								await dataSyncController["importData"]();
-							});
-
-							it("should reset the number of objects imported", (): Chai.Assertion =>
-								expect(dataSyncController["objectsImported"]).to.equal(0));
-							it("should set the number of objects to import", (): Chai.Assertion =>
-								expect(dataSyncController["objectsToImport"]).to.equal(2));
-							it("should hide the status", (): Chai.Assertion =>
-								expect(status.style.display).to.equal("none"));
-							it("should reset the progress", (): Chai.Assertion =>
-								expect(progress.value).to.equal(0));
-							it("should set the progress total", (): Chai.Assertion =>
-								expect(progress.max).to.equal(2));
-							it("should show the progress", (): Chai.Assertion =>
-								expect(progress.style.display).to.not.equal("none"));
-							it("should process each object to import", (): Chai.Assertion =>
-								expect(dataSyncController["importObject"]).to.have.been
-									.calledTwice);
-
-							afterEach((): void => {
-								status.remove();
-								progress.remove();
-							});
-						});
-
-						describe("no data", (): void => {
-							beforeEach(async (): Promise<void> => {
-								fakeFetch
-									.withArgs(`/documents/${scenario.resource}`, fetchArgs)
-									.returns(
-										Promise.resolve(
-											new Response(
-												JSON.stringify({ data: [], checksum: "test-hash" }),
-												{
-													status: 200,
-													statusText: "OK",
-													headers: {
-														Etag: "test-hash",
-													},
-												},
-											),
-										),
-									);
-
-								await dataSyncController["importData"]();
-							});
-
-							it("should reset the number of objects to import", (): Chai.Assertion =>
-								expect(dataSyncController["objectsToImport"]).to.equal(0));
-							it("should reset the number of objects imported", (): Chai.Assertion =>
-								expect(dataSyncController["objectsImported"]).to.equal(0));
-
-							if (scenario.importChangesOnly) {
-								it("should not add an error to the errors list", (): Chai.Assertion =>
-									expect(dataSyncController["syncError"]).to.not.have.been
-										.called);
-							} else {
-								it("should add an error to the errors list", (): Chai.Assertion =>
-									expect(
-										dataSyncController["syncError"],
-									).to.have.been.calledWith(
-										"Receive error",
-										"Sync",
-										"No data found",
-									));
-							}
-
-							it("should mark the import as done", (): Chai.Assertion =>
-								expect(dataSyncController["importDone"]).to.have.been.called);
-						});
-					});
-
-					describe("hash mismatch", (): void => {
 						beforeEach(async (): Promise<void> => {
 							fakeFetch
 								.withArgs(`/documents/${scenario.resource}`, fetchArgs)
 								.returns(
 									Promise.resolve(
-										new Response(JSON.stringify({ checksum: "bad-hash" }), {
+										new Response(JSON.stringify([{}, {}]), {
 											status: 200,
 											statusText: "OK",
-											headers: {
-												Etag: "test-hash",
-											},
+										}),
+									),
+								);
+
+							status = document.createElement("input");
+							status.id = "status";
+
+							progress = document.createElement("progress");
+							progress.id = "progress";
+							progress.style.display = "none";
+
+							document.body.append(status, progress);
+
+							sinon.stub(
+								dataSyncController,
+								"importObject" as keyof DataSyncController,
+							);
+							await dataSyncController["importData"]();
+						});
+
+						it("should reset the number of objects imported", (): Chai.Assertion =>
+							expect(dataSyncController["objectsImported"]).to.equal(0));
+						it("should set the number of objects to import", (): Chai.Assertion =>
+							expect(dataSyncController["objectsToImport"]).to.equal(2));
+						it("should hide the status", (): Chai.Assertion =>
+							expect(status.style.display).to.equal("none"));
+						it("should reset the progress", (): Chai.Assertion =>
+							expect(progress.value).to.equal(0));
+						it("should set the progress total", (): Chai.Assertion =>
+							expect(progress.max).to.equal(2));
+						it("should show the progress", (): Chai.Assertion =>
+							expect(progress.style.display).to.not.equal("none"));
+						it("should process each object to import", (): Chai.Assertion =>
+							expect(dataSyncController["importObject"]).to.have.been
+								.calledTwice);
+
+						afterEach((): void => {
+							status.remove();
+							progress.remove();
+						});
+					});
+
+					describe("no data", (): void => {
+						beforeEach(async (): Promise<void> => {
+							fakeFetch
+								.withArgs(`/documents/${scenario.resource}`, fetchArgs)
+								.returns(
+									Promise.resolve(
+										new Response(JSON.stringify([]), {
+											status: 200,
+											statusText: "OK",
 										}),
 									),
 								);
@@ -1361,12 +1235,20 @@ describe("DataSyncController", (): void => {
 							expect(dataSyncController["objectsToImport"]).to.equal(0));
 						it("should reset the number of objects imported", (): Chai.Assertion =>
 							expect(dataSyncController["objectsImported"]).to.equal(0));
-						it("should add an error to the errors list", (): Chai.Assertion =>
-							expect(dataSyncController["syncError"]).to.have.been.calledWith(
-								"Checksum mismatch",
-								"Sync",
-								"Expected: test-hash, got: bad-hash",
-							));
+
+						if (scenario.importChangesOnly) {
+							it("should not add an error to the errors list", (): Chai.Assertion =>
+								expect(dataSyncController["syncError"]).to.not.have.been
+									.called);
+						} else {
+							it("should add an error to the errors list", (): Chai.Assertion =>
+								expect(dataSyncController["syncError"]).to.have.been.calledWith(
+									"Receive error",
+									"Sync",
+									"No data found",
+								));
+						}
+
 						it("should mark the import as done", (): Chai.Assertion =>
 							expect(dataSyncController["importDone"]).to.have.been.called);
 					});
@@ -1407,64 +1289,6 @@ describe("DataSyncController", (): void => {
 		afterEach((): void => {
 			importChangesOnly.remove();
 			fakeFetch.restore();
-		});
-	});
-
-	describe("getImportData", (): void => {
-		interface Scenario {
-			description: string;
-			importChangesOnly: boolean;
-			importData?: FullImport | ImportDoc[];
-			eTag: string;
-		}
-
-		const data: ImportDoc[] = [],
-			checksum = "test-hash",
-			scenarios: Scenario[] = [
-				{
-					description: "fast import with strong etag",
-					importChangesOnly: true,
-					importData: data,
-					eTag: "test-hash",
-				},
-				{
-					description: "fast import with weak etag",
-					importChangesOnly: true,
-					importData: data,
-					eTag: 'W/"test-hash"',
-				},
-				{
-					description: "full import",
-					importChangesOnly: false,
-					importData: { data, checksum },
-					eTag: "test-hash",
-				},
-			];
-
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				let result: ImportData, importChangesOnly: HTMLInputElement;
-
-				beforeEach((): void => {
-					importChangesOnly = document.createElement("input");
-					importChangesOnly.type = "checkbox";
-					importChangesOnly.id = "importChangesOnly";
-					document.body.append(importChangesOnly);
-
-					importChangesOnly.checked = scenario.importChangesOnly;
-					result = dataSyncController["getImportData"](
-						scenario.importData,
-						scenario.eTag,
-					);
-				});
-
-				it("should return the object JSON", (): Chai.Assertion =>
-					expect(result.importJson).to.deep.equal(data));
-				it("should return the checksum", (): Chai.Assertion =>
-					expect(result.returnedHash).to.equal(checksum));
-
-				afterEach((): void => importChangesOnly.remove());
-			});
 		});
 	});
 
