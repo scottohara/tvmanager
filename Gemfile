@@ -46,4 +46,7 @@ group :development, :test do
 
 	# Code coverage
 	gem 'simplecov', '0.22.0', require: false
+
+	# Static analysis for security vulnerabilities
+	gem 'brakeman', '6.2.2', require: false
 end

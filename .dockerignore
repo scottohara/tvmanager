@@ -4,6 +4,7 @@
 .vscode
 bin
 build
+config/brakeman.yml
 coverage
 cypress
 node_modules

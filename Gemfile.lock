@@ -3,6 +3,8 @@ GEM
   specs:
     ast (2.4.2)
     base64 (0.2.0)
+    brakeman (6.2.2)
+      racc
     couchrest (2.0.1)
       httpclient (~> 2.8)
       mime-types (>= 1.15)
@@ -106,6 +108,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  brakeman (= 6.2.2)
   couchrest (= 2.0.1)
   puma (= 6.4.3)
   rack-test (= 2.1.0)
