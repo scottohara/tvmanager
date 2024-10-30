@@ -23,10 +23,10 @@ describe("SeriesListController", (): void => {
 		seriesListController: SeriesListController;
 
 	beforeEach((): void => {
-		listItem = { program: new ProgramMock("1", "test-program", 1, 6, 2, 2, 2) };
+		listItem = { program: new ProgramMock(1, "test-program", 1, 6, 2, 2, 2) };
 		items = [
-			new SeriesMock("1", "a-test-series", null, "1", undefined, 3, 1, 1, 1),
-			new SeriesMock("2", "z-test-series", null, "1", undefined, 3, 1, 1, 1),
+			new SeriesMock(1, "a-test-series", null, 1, undefined, 3, 1, 1, 1),
+			new SeriesMock(2, "z-test-series", null, 1, undefined, 3, 1, 1, 1),
 		];
 
 		seriesList = document.createElement("ul");
@@ -118,27 +118,49 @@ describe("SeriesListController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(
 				seriesListController,
 				"viewItems" as keyof SeriesListController,
 			);
 			seriesListController["seriesList"] = new ListMock("", "", "", []);
-			SeriesMock.series = items;
-			await seriesListController.activate();
 		});
 
-		it("should get the list of series for the program", (): void => {
-			expect(SeriesMock.listByProgram).to.have.been.calledWith(
-				listItem.program.id,
-			);
-			expect(seriesListController["seriesList"].items).to.deep.equal(items);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => {
+				SeriesMock.series = items;
+				await seriesListController.activate();
+			});
+
+			it("should get the list of series for the program", (): void => {
+				expect(SeriesMock.list).to.have.been.calledWith(listItem.program.id);
+				expect(seriesListController["seriesList"].items).to.deep.equal(items);
+			});
+
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(seriesListController["seriesList"].refresh).to.have.been.called);
+			it("should set the list to view mode", (): Chai.Assertion =>
+				expect(seriesListController["viewItems"]).to.have.been.called);
 		});
 
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(seriesListController["seriesList"].refresh).to.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion =>
-			expect(seriesListController["viewItems"]).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				SeriesMock.error = "activate failed";
+				await seriesListController.activate();
+			});
+
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(seriesListController["seriesList"].refresh).to.not.have.been
+					.called);
+			it("should not set the list to view mode", (): Chai.Assertion =>
+				expect(seriesListController["viewItems"]).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "activate failed",
+				}));
+
+			afterEach((): null => (SeriesMock.error = null));
+		});
 	});
 
 	describe("contentShown", (): void => {
@@ -151,12 +173,7 @@ describe("SeriesListController", (): void => {
 			let item: HTMLLIElement;
 
 			beforeEach((): void => {
-				seriesListController["activeListItem"] = new SeriesMock(
-					"1",
-					"",
-					null,
-					"1",
-				);
+				seriesListController["activeListItem"] = new SeriesMock(1, "", null, 1);
 				item = document.createElement("li");
 				item.id = "item-1";
 				seriesList.append(item);
@@ -174,12 +191,7 @@ describe("SeriesListController", (): void => {
 
 		describe("with active list item that no longer exists", (): void => {
 			beforeEach((): void => {
-				seriesListController["activeListItem"] = new SeriesMock(
-					"1",
-					"",
-					null,
-					"1",
-				);
+				seriesListController["activeListItem"] = new SeriesMock(1, "", null, 1);
 				seriesListController.contentShown();
 			});
 
@@ -261,51 +273,47 @@ describe("SeriesListController", (): void => {
 	});
 
 	describe("deleteItem", (): void => {
-		interface Scenario {
-			description: string;
-			dontRemove?: boolean;
-		}
+		beforeEach(
+			(): ListMock =>
+				(seriesListController["seriesList"] = new ListMock("", "", "", [
+					items[0],
+				])),
+		);
 
-		const scenarios: Scenario[] = [
-			{
-				description: "moving",
-				dontRemove: true,
-			},
-			{
-				description: "deleting (explicit)",
-				dontRemove: false,
-			},
-			{
-				description: "deleting (default)",
-			},
-		];
+		describe("success", (): void => {
+			beforeEach(
+				async (): Promise<void> => seriesListController["deleteItem"](0),
+			);
 
-		let index: number, item: SeriesMock;
-
-		beforeEach((): void => {
-			index = 0;
-			item = { ...items[0], save: sinon.stub(), remove: sinon.stub() };
-			seriesListController["seriesList"] = new ListMock("", "", "", [item]);
+			it("should remove the item from the database", (): Chai.Assertion =>
+				expect(items[0].remove).to.have.been.called);
+			it("should remove the item from the series list", (): Chai.Assertion =>
+				expect(seriesListController["seriesList"].items).to.deep.equal([]));
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(seriesListController["seriesList"].refresh).to.have.been.called);
 		});
 
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				beforeEach(
-					async (): Promise<void> =>
-						seriesListController["deleteItem"](index, scenario.dontRemove),
-				);
-
-				if (undefined === scenario.dontRemove || !scenario.dontRemove) {
-					it("should remove the item from the database", (): Chai.Assertion =>
-						expect(item.remove).to.have.been.called);
-				}
-
-				it("should remove the item from the series list", (): Chai.Assertion =>
-					expect(seriesListController["seriesList"].items).to.deep.equal([]));
-				it("should refresh the list", (): Chai.Assertion =>
-					expect(seriesListController["seriesList"].refresh).to.have.been
-						.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				SeriesMock.error = "delete failed";
+				await seriesListController["deleteItem"](0);
 			});
+
+			it("should attempt to remove the item from the database", (): Chai.Assertion =>
+				expect(items[0].remove).to.have.been.called);
+			it("should not remove the item from the series list", (): Chai.Assertion =>
+				expect(seriesListController["seriesList"].items).to.deep.equal([
+					items[0],
+				]));
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(seriesListController["seriesList"].refresh).to.not.have.been
+					.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "delete failed",
+				}));
+
+			afterEach((): null => (SeriesMock.error = null));
 		});
 	});
 
@@ -319,7 +327,7 @@ describe("SeriesListController", (): void => {
 				"viewItems" as keyof SeriesListController,
 			);
 			await seriesListController.setup();
-			await seriesListController["deleteItems"]();
+			seriesListController["deleteItems"]();
 			footer = seriesListController.footer as HeaderFooter;
 			rightButton = footer.rightButton as NavButton;
 		});
@@ -335,9 +343,6 @@ describe("SeriesListController", (): void => {
 			expect(seriesList.classList.contains("delete")).to.be.true;
 			expect(seriesList.classList.contains("edit")).to.be.false;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
@@ -362,7 +367,7 @@ describe("SeriesListController", (): void => {
 				"viewItems" as keyof SeriesListController,
 			);
 			await seriesListController.setup();
-			await seriesListController["editItems"]();
+			seriesListController["editItems"]();
 			footer = seriesListController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -378,9 +383,6 @@ describe("SeriesListController", (): void => {
 			expect(seriesList.classList.contains("delete")).to.be.false;
 			expect(seriesList.classList.contains("edit")).to.be.true;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -409,7 +411,7 @@ describe("SeriesListController", (): void => {
 				"deleteItems" as keyof SeriesListController,
 			);
 			await seriesListController.setup();
-			await seriesListController["viewItems"]();
+			seriesListController["viewItems"]();
 			footer = seriesListController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -426,9 +428,6 @@ describe("SeriesListController", (): void => {
 			expect(seriesList.classList.contains("delete")).to.be.false;
 			expect(seriesList.classList.contains("edit")).to.be.false;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -451,5 +450,9 @@ describe("SeriesListController", (): void => {
 			expect(appController.setFooter).to.have.been.called);
 	});
 
-	afterEach((): void => seriesList.remove());
+	afterEach((): void => {
+		ProgramMock.reset();
+		SeriesMock.reset();
+		seriesList.remove();
+	});
 });

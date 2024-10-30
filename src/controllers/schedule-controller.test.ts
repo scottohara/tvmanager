@@ -21,10 +21,10 @@ describe("ScheduleController", (): void => {
 
 	beforeEach((): void => {
 		items = [
-			new SeriesMock(null, "test-series", 1, "2", "test-program-2"),
-			new SeriesMock(null, "test-series", 1, "3", "test-program-3"),
-			new SeriesMock(null, "test-series", null, "1", "test-program-1"),
-			new SeriesMock(null, "test-series", null, "1", "test-program-1"),
+			new SeriesMock(null, "test-series", 1, 2, "test-program-2"),
+			new SeriesMock(null, "test-series", 1, 3, "test-program-3"),
+			new SeriesMock(null, "test-series", null, 1, "test-program-1"),
+			new SeriesMock(null, "test-series", null, 1, "test-program-1"),
 		];
 
 		scheduleList = document.createElement("ul");
@@ -101,22 +101,46 @@ describe("ScheduleController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(scheduleController, "viewItems" as keyof ScheduleController);
 			scheduleController["scheduleList"] = new ListMock("", "", "", []);
-			SeriesMock.series = items;
-			await scheduleController.activate();
 		});
 
-		it("should get the list of scheduled series", (): void => {
-			expect(SeriesMock.listByNowShowing).to.have.been.called;
-			expect(scheduleController["scheduleList"].items).to.deep.equal(items);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => {
+				SeriesMock.series = items;
+				await scheduleController.activate();
+			});
+
+			it("should get the list of series for the program", (): void => {
+				expect(SeriesMock.scheduled).to.have.been.called;
+				expect(scheduleController["scheduleList"].items).to.deep.equal(items);
+			});
+
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(scheduleController["scheduleList"].refresh).to.have.been.called);
+			it("should set the list to view mode", (): Chai.Assertion =>
+				expect(scheduleController["viewItems"]).to.have.been.called);
 		});
 
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(scheduleController["scheduleList"].refresh).to.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion =>
-			expect(scheduleController["viewItems"]).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				SeriesMock.error = "activate failed";
+				await scheduleController.activate();
+			});
+
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(scheduleController["scheduleList"].refresh).to.not.have.been
+					.called);
+			it("should not set the list to view mode", (): Chai.Assertion =>
+				expect(scheduleController["viewItems"]).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "activate failed",
+				}));
+
+			afterEach((): null => (SeriesMock.error = null));
+		});
 	});
 
 	describe("viewItem", (): void => {
@@ -179,7 +203,7 @@ describe("ScheduleController", (): void => {
 			sinon.stub(scheduleController, "activate");
 			sinon.stub(scheduleController, "viewItems" as keyof ScheduleController);
 			await scheduleController.setup();
-			await scheduleController["editItems"]();
+			scheduleController["editItems"]();
 			footer = scheduleController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -192,8 +216,6 @@ describe("ScheduleController", (): void => {
 			expect(appController.clearFooter).to.have.been.called);
 		it("should set the list item icons", (): Chai.Assertion =>
 			expect(scheduleList.classList.contains("edit")).to.be.true);
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -219,7 +241,7 @@ describe("ScheduleController", (): void => {
 				"viewSettings" as keyof ScheduleController,
 			);
 			await scheduleController.setup();
-			await scheduleController["viewItems"]();
+			scheduleController["viewItems"]();
 			footer = scheduleController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -233,8 +255,6 @@ describe("ScheduleController", (): void => {
 			expect(appController.clearFooter).to.have.been.called);
 		it("should set the list item icons", (): Chai.Assertion =>
 			expect(scheduleList.classList.contains("edit")).to.be.false);
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -256,4 +276,6 @@ describe("ScheduleController", (): void => {
 	});
 
 	afterEach((): void => scheduleList.remove());
+
+	afterEach((): void => SeriesMock.reset());
 });

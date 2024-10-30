@@ -1,5 +1,4 @@
 import AboutView from "~/views/about-view.html";
-import DatabaseService from "~/services/database-service";
 import Episode from "~/models/episode-model";
 import type { NavButtonEventHandler } from "~/controllers";
 import Program from "~/models/program-model";
@@ -12,10 +11,6 @@ export default class AboutController extends ViewController {
 	}
 
 	// DOM selectors
-	private get databaseVersion(): HTMLInputElement {
-		return document.querySelector("#databaseVersion") as HTMLInputElement;
-	}
-
 	private get totalPrograms(): HTMLInputElement {
 		return document.querySelector("#totalPrograms") as HTMLInputElement;
 	}
@@ -39,20 +34,21 @@ export default class AboutController extends ViewController {
 			},
 		};
 
-		// Set the total number of programs
-		this.totalPrograms.value = String(await Program.count());
+		try {
+			// Set the total number of programs
+			this.totalPrograms.value = String(await Program.count());
 
-		// Set the total number of series
-		this.totalSeries.value = String(await Series.count());
+			// Set the total number of series
+			this.totalSeries.value = String(await Series.count());
 
-		// Set the total number of episodes, and the percentage watched
-		this.totalEpisodes.value = this.watchedPercent(
-			await Episode.totalCount(),
-			await Episode.countByStatus("Watched"),
-		);
-
-		// Set the version information
-		this.databaseVersion.value = `v${(await DatabaseService).version}`;
+			// Set the total number of episodes, and the percentage watched
+			this.totalEpisodes.value = this.watchedPercent(
+				await Episode.count(),
+				await Episode.countByStatus("watched"),
+			);
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 
 		// Set the scroll position
 		this.appController.setScrollPosition();

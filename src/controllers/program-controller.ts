@@ -49,10 +49,13 @@ export default class ProgramController extends ViewController {
 		// Get the program details
 		this.listItem.program.programName = this.programName.value;
 
-		// Update the database and pop the view off the stack
-		await this.listItem.program.save();
-
-		return this.appController.popView(this.listItem);
+		try {
+			// Update the database and pop the view off the stack
+			await this.listItem.program.save();
+			await this.appController.popView(this.listItem);
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	private async cancel(): Promise<void> {

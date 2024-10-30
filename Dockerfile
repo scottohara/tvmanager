@@ -31,7 +31,9 @@ RUN npm run build
 
 FROM ruby:${RUBY_VERSION}-alpine as backend
 
-RUN apk add --no-cache build-base
+RUN apk add --no-cache \
+	build-base \
+	postgresql-dev
 
 WORKDIR /build
 ENV RACK_ENV=production
@@ -52,10 +54,16 @@ RUN --mount=type=cache,id=tvmanager-bundler,target=tmp/vendor/bundle \
 
 FROM ruby:${RUBY_VERSION}-alpine as app
 
+RUN apk add --no-cache \
+	libpq \
+	tzdata
+
 RUN adduser --system --uid 100 tvmanager
 USER tvmanager
 WORKDIR /tvmanager
 ENV RACK_ENV=production
+ENV RAILS_ENV=production
+ENV TZ=Australia/Sydney
 
 RUN \
 	bundle config set --local without development:test; \

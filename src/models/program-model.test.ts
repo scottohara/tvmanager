@@ -1,19 +1,20 @@
-import DatabaseServiceMock from "~/mocks/database-service-mock";
+import * as API from "~/mocks/api-service-mock";
+import type { JsonProgram } from "~/models";
 import Program from "./program-model";
-import type { SinonStub } from "sinon";
 
 describe("Program", (): void => {
-	let id: string,
-		programName: string | null,
+	let id: number,
+		programName: string,
 		seriesCount: number,
 		episodeCount: number,
 		watchedCount: number,
 		recordedCount: number,
 		expectedCount: number,
-		program: Program;
+		program: Program,
+		path: string;
 
 	beforeEach((): void => {
-		id = "1";
+		id = 1;
 		programName = "test-program";
 		seriesCount = 1;
 		episodeCount = 1;
@@ -35,9 +36,9 @@ describe("Program", (): void => {
 		it("should return a Program instance", (): Chai.Assertion =>
 			expect(program).to.be.an.instanceOf(Program));
 		it("should set the id", (): Chai.Assertion =>
-			expect(String(program.id)).to.equal(id));
+			expect(program.id).to.equal(id));
 		it("should set the program name", (): Chai.Assertion =>
-			expect(String(program.programName)).to.equal(programName));
+			expect(program.programName).to.equal(programName));
 		it("should set the progress bar total", (): Chai.Assertion =>
 			expect(program["progressBar"]["total"]).to.equal(episodeCount));
 		it("should set the series count", (): Chai.Assertion =>
@@ -69,361 +70,141 @@ describe("Program", (): void => {
 	describe("list", (): void => {
 		let programList: Program[];
 
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				((await DatabaseServiceMock).programsStore.list as SinonStub).throws();
-				programList = await Program.list();
-			});
-
-			it("should attempt to get the list of programs", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).programsStore.list).to.have.been
-					.called);
-			it("should return an empty array", (): Chai.Assertion =>
-				expect(programList).to.deep.equal([]));
+		beforeEach(async (): Promise<void> => {
+			path = "/programs";
+			API.get.withArgs(path).returns([
+				{
+					id,
+					name: programName,
+					series_count: seriesCount,
+					episode_count: episodeCount,
+					watched_count: watchedCount,
+					recorded_count: recordedCount,
+					expected_count: expectedCount,
+				},
+			]);
+			programList = await Program.list();
 		});
 
-		describe("success", (): void => {
-			beforeEach(async (): Promise<void> => {
-				((await DatabaseServiceMock).programsStore.list as SinonStub).returns([
-					{
-						ProgramID: id,
-						Name: programName,
-						SeriesCount: seriesCount,
-						EpisodeCount: episodeCount,
-						WatchedCount: watchedCount,
-						RecordedCount: recordedCount,
-						ExpectedCount: expectedCount,
-					},
-				]);
-				programList = await Program.list();
-			});
+		it("should attempt to get the list of programs", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the list of programs", (): Chai.Assertion =>
+			expect(programList).to.deep.equal([program]));
 
-			it("should attempt to get the list of programs", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).programsStore.list).to.have.been
-					.called);
-			it("should return the list of programs", (): Chai.Assertion =>
-				expect(programList).to.deep.equal([program]));
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).programsStore.list as SinonStub).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
 	describe("find", (): void => {
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				((await DatabaseServiceMock).programsStore.find as SinonStub).throws();
-				program = await Program.find(id);
-			});
+		let foundProgram: Program;
 
-			it("should attempt to find the program", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).programsStore.find,
-				).to.have.been.calledWith(id));
-			it("should return a null program id", (): Chai.Assertion =>
-				expect(program.id).to.be.null);
+		beforeEach(async (): Promise<void> => {
+			path = `/programs/${id}`;
+			API.get.withArgs(path).returns({
+				id,
+				name: programName,
+			});
+			program.seriesCount = 0;
+			program.setEpisodeCount(0);
+			program.setWatchedCount(0);
+			program.setRecordedCount(0);
+			program.setExpectedCount(0);
+			foundProgram = await Program.find(id);
 		});
 
-		describe("success", (): void => {
-			describe("doesn't exist", (): void => {
-				beforeEach(async (): Promise<void> => {
-					((await DatabaseServiceMock).programsStore.find as SinonStub).returns(
-						undefined,
-					);
-					program = await Program.find(id);
-				});
+		it("should attempt to find the program", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the program", (): Chai.Assertion =>
+			expect(foundProgram).to.deep.equal(program));
 
-				it("should attempt to find the program", async (): Promise<Chai.Assertion> =>
-					expect(
-						(await DatabaseServiceMock).programsStore.find,
-					).to.have.been.calledWith(id));
-				it("should return a null program id", (): Chai.Assertion =>
-					expect(program.id).to.be.null);
-			});
-
-			describe("exists", (): void => {
-				let foundProgram: Program;
-
-				beforeEach(async (): Promise<void> => {
-					((await DatabaseServiceMock).programsStore.find as SinonStub).returns(
-						{
-							ProgramID: id,
-							Name: programName,
-						},
-					);
-
-					program.seriesCount = 0;
-					program.setEpisodeCount(0);
-					program.setWatchedCount(0);
-					program.setRecordedCount(0);
-					program.setExpectedCount(0);
-
-					foundProgram = await Program.find(id);
-				});
-
-				it("should attempt to find the program", async (): Promise<Chai.Assertion> =>
-					expect(
-						(await DatabaseServiceMock).programsStore.find,
-					).to.have.been.calledWith(id));
-				it("should return the program", (): Chai.Assertion =>
-					expect(foundProgram).to.deep.equal(program));
-			});
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).programsStore.find as SinonStub).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
 	describe("count", (): void => {
 		let count: number;
 
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				((await DatabaseServiceMock).programsStore.count as SinonStub).throws();
-				count = await Program.count();
-			});
-
-			it("should attempt to get the count of programs", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).programsStore.count).to.have.been
-					.called);
-			it("should return zero", (): Chai.Assertion => expect(count).to.equal(0));
+		beforeEach(async (): Promise<void> => {
+			path = "/programs/count";
+			API.get.withArgs(path).returns(1);
+			count = await Program.count();
 		});
 
-		describe("success", (): void => {
-			beforeEach(async (): Promise<void> => {
-				((await DatabaseServiceMock).programsStore.count as SinonStub).returns(
-					1,
-				);
-				count = await Program.count();
-			});
+		it("should attempt to get the count of programs", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the count of programs", (): Chai.Assertion =>
+			expect(count).to.equal(1));
 
-			it("should attempt to get the count of programs", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).programsStore.count).to.have.been
-					.called);
-			it("should return the count of programs", (): Chai.Assertion =>
-				expect(count).to.equal(1));
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).programsStore.count as SinonStub).reset(),
-		);
-	});
-
-	describe("removeAll", (): void => {
-		let errorMessage: string | undefined;
-
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).programsStore.removeAll as SinonStub
-				).throws(new Error("Force failed"));
-				errorMessage = await Program.removeAll();
-			});
-
-			it("should attempt to remove all programs", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).programsStore.removeAll).to.have.been
-					.called);
-			it("should return an error message", (): Chai.Assertion =>
-				expect(String(errorMessage)).to.equal(
-					"Program.removeAll: Force failed",
-				));
-		});
-
-		describe("success", (): void => {
-			beforeEach(
-				async (): Promise<string | undefined> =>
-					(errorMessage = await Program.removeAll()),
-			);
-
-			it("should attempt to remove all programs", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).programsStore.removeAll).to.have.been
-					.called);
-			it("should not return an error message", (): Chai.Assertion =>
-				expect(errorMessage).to.be.undefined);
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				(
-					(await DatabaseServiceMock).programsStore.removeAll as SinonStub
-				).reset(),
-		);
-	});
-
-	describe("fromJson", (): void => {
-		it("should construct a Program object from the JSON", (): Chai.Assertion =>
-			expect(
-				Program.fromJson({ id, programName, type: "Program" }),
-			).to.deep.equal(new Program(id, programName)));
+		afterEach((): void => API.get.reset());
 	});
 
 	describe("save", (): void => {
-		interface Scenario {
-			description: string;
-			useId: boolean;
-		}
+		let programToSave: Omit<JsonProgram, "id">;
 
-		const scenarios: Scenario[] = [
-			{
-				description: "update",
-				useId: true,
-			},
-			{
-				description: "insert",
-				useId: false,
-			},
-		];
+		beforeEach(
+			(): Omit<JsonProgram, "id"> => (programToSave = { name: programName }),
+		);
 
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				let programId: string | undefined;
-
-				beforeEach((): void => {
-					if (!scenario.useId) {
-						program.id = null;
-					}
-				});
-
-				describe("fail", (): void => {
-					beforeEach(async (): Promise<void> => {
-						(
-							(await DatabaseServiceMock).programsStore.save as SinonStub
-						).throws();
-						programId = await program.save();
-					});
-
-					it("should attempt to save the program", async (): Promise<Chai.Assertion> =>
-						expect(
-							(await DatabaseServiceMock).programsStore.save,
-						).to.have.been.calledWith({
-							ProgramID: program.id,
-							Name: program.programName,
-						}));
-
-					it("should not return the program id", (): Chai.Assertion =>
-						expect(programId).to.be.undefined);
-				});
-
-				describe("success", (): void => {
-					beforeEach(
-						async (): Promise<string | undefined> =>
-							(programId = await program.save()),
-					);
-
-					it("should attempt to save the program", async (): Promise<Chai.Assertion> =>
-						expect(
-							(await DatabaseServiceMock).programsStore.save,
-						).to.have.been.calledWith({
-							ProgramID: program.id,
-							Name: program.programName,
-						}));
-
-					it("should return the program id", (): Chai.Assertion =>
-						expect(String(programId)).to.equal(program.id));
-				});
+		describe("insert", (): void => {
+			beforeEach(async (): Promise<void> => {
+				program.id = null;
+				path = "/programs";
+				API.create.withArgs(path).returns({ id: 1 });
+				await program.save();
 			});
+
+			it("should attempt to save the program", (): Chai.Assertion =>
+				expect(API.create).to.have.been.calledWith(path, programToSave));
+
+			it("should set the program id", (): Chai.Assertion =>
+				expect(program.id).to.equal(1));
+
+			afterEach((): void => API.create.reset());
 		});
 
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).programsStore.save as SinonStub).reset(),
-		);
+		describe("update", (): void => {
+			beforeEach(async (): Promise<void> => {
+				path = `/programs/${id}`;
+				API.update.withArgs(path).returns(true);
+				await program.save();
+			});
+
+			it("should attempt to save the program", (): Chai.Assertion =>
+				expect(API.update).to.have.been.calledWith(path, programToSave));
+		});
+
+		afterEach((): void => API.update.reset());
 	});
 
 	describe("remove", (): void => {
+		beforeEach((): string => (path = `/programs/${id}`));
+
 		describe("no ID", (): void => {
 			it("should do nothing", async (): Promise<void> => {
 				program.id = null;
 				await program.remove();
-				expect((await DatabaseServiceMock).programsStore.remove).to.not.have
-					.been.called;
+				expect(API.destroy.withArgs(path)).to.not.have.been.called;
 			});
-		});
-
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).programsStore.remove as SinonStub
-				).throws();
-				try {
-					await program.remove();
-				} catch (_e: unknown) {
-					// No op
-				}
-			});
-
-			it("should attempt to remove the program", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).programsStore.remove,
-				).to.have.been.calledWith(id));
-			it("should not clear the id", (): Chai.Assertion =>
-				expect(String(program.id)).to.equal(id));
 			it("should not clear the program name", (): Chai.Assertion =>
 				expect(String(program.programName)).to.equal(programName));
 		});
 
-		describe("success", (): void => {
+		describe("with ID", (): void => {
 			beforeEach(async (): Promise<void> => program.remove());
 
-			it("should attempt to remove the program", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).programsStore.remove,
-				).to.have.been.calledWith(id));
+			it("should attempt to remove the program", (): Chai.Assertion =>
+				expect(API.destroy).to.have.been.calledWith(path));
 			it("should clear the id", (): Chai.Assertion =>
 				expect(program.id).to.be.null);
 			it("should clear the program name", (): Chai.Assertion =>
-				expect(program.programName).to.be.null);
+				expect(program.programName).to.equal(""));
 		});
 
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).programsStore.remove as SinonStub).reset(),
-		);
-	});
-
-	describe("toJson", (): void => {
-		it("should return a JSON representation of the program", (): Chai.Assertion =>
-			expect(program.toJson()).to.deep.equal({
-				id,
-				programName,
-				type: "Program",
-			}));
+		afterEach((): void => API.destroy.reset());
 	});
 
 	describe("programGroup", (): void => {
-		interface Scenario {
-			description: string;
-			programName: string | null;
-			programGroup: string;
-		}
-
-		const scenarios: Scenario[] = [
-			{
-				description: "without name",
-				programName: null,
-				programGroup: "",
-			},
-			{
-				description: "with name",
-				programName: "another-test-program",
-				programGroup: "A",
-			},
-		];
-
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				beforeEach(
-					(): string | null => (program.programName = scenario.programName),
-				);
-				it("should return the program group", (): Chai.Assertion =>
-					expect(program.programGroup).to.equal(scenario.programGroup));
-			});
-		});
+		beforeEach((): string => (program.programName = "a-test-group"));
+		it("should return the program group", (): Chai.Assertion =>
+			expect(program.programGroup).to.equal("A"));
 	});
 
 	describe("setEpisodeCount", (): void => {

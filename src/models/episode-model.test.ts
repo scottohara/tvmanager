@@ -1,31 +1,32 @@
-import type { EpisodeStatus, PersistedEpisode } from "~/models";
-import type { SinonFakeTimers, SinonStub } from "sinon";
-import DatabaseServiceMock from "~/mocks/database-service-mock";
+import * as API from "~/mocks/api-service-mock";
+import type { EpisodeStatus, JsonEpisode } from "~/models";
 import Episode from "./episode-model";
+import type { SinonFakeTimers } from "sinon";
 import sinon from "sinon";
 
 describe("Episode", (): void => {
-	let id: string,
+	let id: number,
 		episodeName: string,
 		status: EpisodeStatus,
 		statusDate: string,
 		unverified: boolean,
 		unscheduled: boolean,
 		sequence: number,
-		seriesId: string,
+		seriesId: number,
 		seriesName: string,
 		programName: string,
-		episode: Episode;
+		episode: Episode,
+		path: string;
 
 	beforeEach((): void => {
-		id = "1";
+		id = 1;
 		episodeName = "test-episode";
-		status = "Expected";
+		status = "expected";
 		statusDate = "31-Dec";
 		unverified = true;
 		unscheduled = true;
 		sequence = 1;
-		seriesId = "2";
+		seriesId = 2;
 		seriesName = "test-series";
 		programName = "test-program";
 		episode = new Episode(
@@ -46,7 +47,7 @@ describe("Episode", (): void => {
 		it("should return an Episode instance", (): Chai.Assertion =>
 			expect(episode).to.be.an.instanceOf(Episode));
 		it("should set the id", (): Chai.Assertion =>
-			expect(String(episode.id)).to.equal(id));
+			expect(episode.id).to.equal(id));
 		it("should set the episode name", (): Chai.Assertion =>
 			expect(String(episode.episodeName)).to.equal(episodeName));
 		it("should set the status", (): Chai.Assertion =>
@@ -60,7 +61,7 @@ describe("Episode", (): void => {
 		it("should set the sequence", (): Chai.Assertion =>
 			expect(episode.sequence).to.equal(sequence));
 		it("should set the series id", (): Chai.Assertion =>
-			expect(String(episode["seriesId"])).to.equal(seriesId));
+			expect(episode["seriesId"]).to.equal(seriesId));
 		it("should set the series name", (): Chai.Assertion =>
 			expect(String(episode.seriesName)).to.equal(seriesName));
 		it("should set the program name", (): Chai.Assertion =>
@@ -106,518 +107,250 @@ describe("Episode", (): void => {
 		);
 	});
 
-	describe("listBySeries", (): void => {
+	describe("list", (): void => {
 		let episodeList: Episode[];
 
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.listBySeries as SinonStub
-				).throws();
-				episodeList = await Episode.listBySeries(seriesId);
-			});
-
-			it("should attempt to get the list of episodes", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.listBySeries,
-				).to.have.been.calledWith(seriesId));
-			it("should return an empty array", (): Chai.Assertion =>
-				expect(episodeList).to.deep.equal([]));
+		beforeEach(async (): Promise<void> => {
+			path = `/series/${seriesId}/episodes`;
+			API.get.withArgs(path).returns([
+				{
+					id,
+					name: episodeName,
+					status,
+					status_date: statusDate,
+					unverified,
+					unscheduled,
+					sequence,
+					series_id: seriesId,
+					series_name: seriesName,
+					program_name: programName,
+				},
+			]);
+			episodeList = await Episode.list(seriesId);
 		});
 
-		describe("success", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.listBySeries as SinonStub
-				).returns([
-					{
-						EpisodeID: id,
-						Name: episodeName,
-						Status: status,
-						StatusDate: statusDate,
-						Unverified: String(unverified),
-						Unscheduled: String(unscheduled),
-						Sequence: sequence,
-						SeriesID: seriesId,
-						SeriesName: seriesName,
-						ProgramName: programName,
-					},
-				]);
-				episodeList = await Episode.listBySeries(seriesId);
-			});
+		it("should attempt to get the list of episodes", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the list of episodes", (): Chai.Assertion =>
+			expect(episodeList).to.deep.equal([episode]));
 
-			it("should attempt to get the list of episodes", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.listBySeries,
-				).to.have.been.calledWith(seriesId));
-			it("should return the list of episodes", (): Chai.Assertion =>
-				expect(episodeList).to.deep.equal([episode]));
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				(
-					(await DatabaseServiceMock).episodesStore.listBySeries as SinonStub
-				).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
-	describe("listByUnscheduled", (): void => {
+	describe("unscheduled", (): void => {
 		let episodeList: Episode[];
 
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore
-						.listByUnscheduled as SinonStub
-				).throws();
-				episodeList = await Episode.listByUnscheduled();
-			});
-
-			it("should attempt to get the list of episodes", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).episodesStore.listByUnscheduled).to
-					.have.been.called);
-			it("should return an empty array", (): Chai.Assertion =>
-				expect(episodeList).to.deep.equal([]));
+		beforeEach(async (): Promise<void> => {
+			path = "/unscheduled";
+			API.get.withArgs(path).returns([
+				{
+					id,
+					name: episodeName,
+					status,
+					status_date: statusDate,
+					unverified,
+					unscheduled,
+					sequence,
+					series_id: seriesId,
+					series_name: seriesName,
+					program_name: programName,
+				},
+			]);
+			episodeList = await Episode.unscheduled();
 		});
 
-		describe("success", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore
-						.listByUnscheduled as SinonStub
-				).returns([
-					{
-						EpisodeID: id,
-						Name: episodeName,
-						Status: status,
-						StatusDate: statusDate,
-						Unverified: String(unverified),
-						Unscheduled: String(unscheduled),
-						Sequence: sequence,
-						SeriesID: seriesId,
-						SeriesName: seriesName,
-						ProgramName: programName,
-					},
-				]);
-				episodeList = await Episode.listByUnscheduled();
-			});
+		it("should attempt to get the list of episodes", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the list of episodes", (): Chai.Assertion =>
+			expect(episodeList).to.deep.equal([episode]));
 
-			it("should attempt to get the list of episodes", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).episodesStore.listByUnscheduled).to
-					.have.been.called);
-			it("should return the list of episodes", (): Chai.Assertion =>
-				expect(episodeList).to.deep.equal([episode]));
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				(
-					(await DatabaseServiceMock).episodesStore
-						.listByUnscheduled as SinonStub
-				).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
 	describe("find", (): void => {
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				((await DatabaseServiceMock).episodesStore.find as SinonStub).throws();
-				episode = await Episode.find(id);
+		let foundEpisode: Episode;
+
+		beforeEach(async (): Promise<void> => {
+			path = `/episodes/${id}`;
+			API.get.withArgs(path).returns({
+				id,
+				name: episodeName,
+				status,
+				status_date: statusDate,
+				unverified,
+				unscheduled,
+				sequence,
+				series_id: seriesId,
 			});
 
-			it("should attempt to find the episode", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.find,
-				).to.have.been.calledWith(id));
-			it("should return a null episode id", (): Chai.Assertion =>
-				expect(episode.id).to.be.null);
+			episode = new Episode(
+				id,
+				episodeName,
+				status,
+				statusDate,
+				seriesId,
+				unverified,
+				unscheduled,
+				sequence,
+			);
+
+			foundEpisode = await Episode.find(id);
 		});
 
-		describe("success", (): void => {
-			describe("doesn't exist", (): void => {
-				beforeEach(async (): Promise<void> => {
-					((await DatabaseServiceMock).episodesStore.find as SinonStub).returns(
-						undefined,
-					);
-					episode = await Episode.find(id);
-				});
+		it("should attempt to find the episode", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the episode", (): Chai.Assertion =>
+			expect(foundEpisode).to.deep.equal(episode));
 
-				it("should attempt to find the episode", async (): Promise<Chai.Assertion> =>
-					expect(
-						(await DatabaseServiceMock).episodesStore.find,
-					).to.have.been.calledWith(id));
-				it("should return a null episode id", (): Chai.Assertion =>
-					expect(episode.id).to.be.null);
-			});
-
-			describe("exists", (): void => {
-				let foundEpisode: Episode;
-
-				beforeEach(async (): Promise<void> => {
-					((await DatabaseServiceMock).episodesStore.find as SinonStub).returns(
-						{
-							EpisodeID: id,
-							Name: episodeName,
-							Status: status,
-							StatusDate: statusDate,
-							Unverified: String(unverified),
-							Unscheduled: String(unscheduled),
-							Sequence: sequence,
-							SeriesID: seriesId,
-						},
-					);
-
-					episode = new Episode(
-						id,
-						episodeName,
-						status,
-						statusDate,
-						seriesId,
-						unverified,
-						unscheduled,
-						sequence,
-					);
-
-					foundEpisode = await Episode.find(id);
-				});
-
-				it("should attempt to find the episode", async (): Promise<Chai.Assertion> =>
-					expect(
-						(await DatabaseServiceMock).episodesStore.find,
-					).to.have.been.calledWith(id));
-				it("should return the episode", (): Chai.Assertion =>
-					expect(foundEpisode).to.deep.equal(episode));
-			});
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).episodesStore.find as SinonStub).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
-	describe("totalCount", (): void => {
+	describe("count", (): void => {
 		let count: number;
 
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.totalCount as SinonStub
-				).throws();
-				count = await Episode.totalCount();
-			});
-
-			it("should attempt to get the count of episodes", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).episodesStore.totalCount).to.have
-					.been.called);
-			it("should return zero", (): Chai.Assertion => expect(count).to.equal(0));
+		beforeEach(async (): Promise<void> => {
+			path = "/episodes/count";
+			API.get.withArgs(path).returns(1);
+			count = await Episode.count();
 		});
 
-		describe("success", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.totalCount as SinonStub
-				).returns(1);
-				count = await Episode.totalCount();
-			});
+		it("should attempt to get the count of episodes", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the count of episodes", (): Chai.Assertion =>
+			expect(count).to.equal(1));
 
-			it("should attempt to get the count of episodes", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).episodesStore.totalCount).to.have
-					.been.called);
-			it("should return the count of episodes", (): Chai.Assertion =>
-				expect(count).to.equal(1));
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				(
-					(await DatabaseServiceMock).episodesStore.totalCount as SinonStub
-				).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
 	describe("countByStatus", (): void => {
 		let count: number;
 
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.countByStatus as SinonStub
-				).throws();
-				count = await Episode.countByStatus(status);
-			});
-
-			it("should attempt to get the count of episodes", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.countByStatus,
-				).to.have.been.calledWith(status));
-			it("should return zero", (): Chai.Assertion => expect(count).to.equal(0));
+		beforeEach(async (): Promise<void> => {
+			path = `/episodes/${status}/count`;
+			API.get.withArgs(path).returns(1);
+			count = await Episode.countByStatus(status);
 		});
 
-		describe("success", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.countByStatus as SinonStub
-				).returns(1);
-				count = await Episode.countByStatus(status);
-			});
+		it("should attempt to get the count of episodes", (): Chai.Assertion =>
+			expect(API.get).to.have.been.calledWith(path));
+		it("should return the count of episodes", (): Chai.Assertion =>
+			expect(count).to.equal(1));
 
-			it("should attempt to get the count of episodes", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.countByStatus,
-				).to.have.been.calledWith(status));
-			it("should return the count of episodes", (): Chai.Assertion =>
-				expect(count).to.equal(1));
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				(
-					(await DatabaseServiceMock).episodesStore.countByStatus as SinonStub
-				).reset(),
-		);
-	});
-
-	describe("removeAll", (): void => {
-		let errorMessage: string | undefined;
-
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.removeAll as SinonStub
-				).throws(new Error("Force failed"));
-				errorMessage = await Episode.removeAll();
-			});
-
-			it("should attempt to remove all episodes", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).episodesStore.removeAll).to.have.been
-					.called);
-			it("should return an error message", (): Chai.Assertion =>
-				expect(String(errorMessage)).to.equal(
-					"Episode.removeAll: Force failed",
-				));
-		});
-
-		describe("success", (): void => {
-			beforeEach(
-				async (): Promise<string | undefined> =>
-					(errorMessage = await Episode.removeAll()),
-			);
-
-			it("should attempt to remove all episodes", async (): Promise<Chai.Assertion> =>
-				expect((await DatabaseServiceMock).episodesStore.removeAll).to.have.been
-					.called);
-			it("should not return an error message", (): Chai.Assertion =>
-				expect(errorMessage).to.be.undefined);
-		});
-
-		afterEach(
-			async (): Promise<void> =>
-				(
-					(await DatabaseServiceMock).episodesStore.removeAll as SinonStub
-				).reset(),
-		);
+		afterEach((): void => API.get.reset());
 	});
 
 	describe("fromJson", (): void => {
 		it("should construct an Episode object from the JSON", (): Chai.Assertion =>
 			expect(
-				Episode.fromJson({
+				Episode["fromJson"]({
 					id,
-					episodeName,
-					seriesId,
+					name: episodeName,
 					status,
-					statusDate,
+					status_date: statusDate,
 					unverified,
 					unscheduled,
 					sequence,
-					type: "Episode",
+					series_id: seriesId,
+					series_name: seriesName,
+					program_name: programName,
 				}),
-			).to.deep.equal(
-				new Episode(
-					id,
-					episodeName,
-					status,
-					statusDate,
-					seriesId,
-					unverified,
-					unscheduled,
-					sequence,
-				),
-			));
+			).to.deep.equal(episode));
 	});
 
 	describe("save", (): void => {
-		interface Scenario {
-			description: string;
-			useId: boolean;
-			unverified: boolean;
-			unscheduled: boolean;
-		}
+		let episodeToSave: Omit<JsonEpisode, "id">;
 
-		const scenarios: Scenario[] = [
-			{
-				description: "update",
-				useId: true,
-				unverified: true,
-				unscheduled: true,
-			},
-			{
-				description: "insert",
-				useId: false,
-				unverified: false,
-				unscheduled: false,
-			},
-		];
+		beforeEach(
+			(): Omit<JsonEpisode, "id"> =>
+				(episodeToSave = {
+					name: episodeName,
+					status,
+					status_date: statusDate,
+					unverified,
+					unscheduled,
+					sequence,
+					series_id: seriesId,
+				}),
+		);
 
-		scenarios.forEach((scenario: Scenario): void => {
-			describe(scenario.description, (): void => {
-				let episodeToSave: PersistedEpisode, episodeId: string | undefined;
+		describe("status date", (): void => {
+			it("should clear the status date when watched", async (): Promise<void> => {
+				episode.status = "watched";
+				await episode.save();
+				expect(episode.statusDate).to.equal("");
+			});
 
-				beforeEach((): void => {
-					if (!scenario.useId) {
-						episode.id = null;
-					}
-
-					episode.unverified = scenario.unverified;
-					episode.unscheduled = scenario.unscheduled;
-
-					episodeToSave = {
-						EpisodeID: "ignored",
-						Name: String(episode.episodeName),
-						Status: episode.status,
-						StatusDate: episode.statusDate,
-						Unverified: episode.unverified ? "true" : "false",
-						Unscheduled: episode.unscheduled ? "true" : "false",
-						Sequence: episode.sequence,
-						SeriesID: String(episode["seriesId"]),
-					};
-				});
-
-				describe("fail", (): void => {
-					beforeEach(async (): Promise<void> => {
-						(
-							(await DatabaseServiceMock).episodesStore.save as SinonStub
-						).throws();
-						episodeId = await episode.save();
-					});
-
-					it("should attempt to save the episode", async (): Promise<Chai.Assertion> =>
-						expect(
-							(await DatabaseServiceMock).episodesStore.save,
-						).to.have.been.calledWith({
-							...episodeToSave,
-							EpisodeID: episode.id,
-						}));
-
-					it("should not return the episode id", (): Chai.Assertion =>
-						expect(episodeId).to.be.undefined);
-				});
-
-				describe("success", (): void => {
-					beforeEach(
-						async (): Promise<string | undefined> =>
-							(episodeId = await episode.save()),
-					);
-
-					it("should attempt to save the episode", async (): Promise<Chai.Assertion> =>
-						expect(
-							(await DatabaseServiceMock).episodesStore.save,
-						).to.have.been.calledWith({
-							...episodeToSave,
-							EpisodeID: episode.id,
-						}));
-
-					it("should return the episode id", (): Chai.Assertion =>
-						expect(String(episodeId)).to.equal(episode.id));
-				});
+			it("should not clear the status date when not watched", async (): Promise<void> => {
+				await episode.save();
+				expect(episode.statusDate).not.to.equal("");
 			});
 		});
 
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).episodesStore.save as SinonStub).reset(),
-		);
+		describe("insert", (): void => {
+			beforeEach(async (): Promise<void> => {
+				episode.id = null;
+				path = `/series/${seriesId}/episodes`;
+				API.create.withArgs(path).returns({ id: 1 });
+				await episode.save();
+			});
+
+			it("should attempt to save the episode", (): Chai.Assertion =>
+				expect(API.create).to.have.been.calledWith(path, episodeToSave));
+
+			it("should set the episode id", (): Chai.Assertion =>
+				expect(episode.id).to.equal(1));
+
+			afterEach((): void => API.create.reset());
+		});
+
+		describe("update", (): void => {
+			beforeEach(async (): Promise<void> => {
+				path = `/episodes/${id}`;
+				API.update.withArgs(path).returns(true);
+				await episode.save();
+			});
+
+			it("should attempt to save the episode", (): Chai.Assertion =>
+				expect(API.update).to.have.been.calledWith(path, episodeToSave));
+
+			afterEach((): void => API.update.reset());
+		});
 	});
 
 	describe("remove", (): void => {
+		beforeEach((): string => (path = `/episodes/${id}`));
+
 		describe("no ID", (): void => {
 			it("should do nothing", async (): Promise<void> => {
 				episode.id = null;
 				await episode.remove();
-				expect((await DatabaseServiceMock).episodesStore.remove).to.not.have
-					.been.called;
+				expect(API.destroy.withArgs(path)).to.not.have.been.called;
 			});
-		});
-
-		describe("fail", (): void => {
-			beforeEach(async (): Promise<void> => {
-				(
-					(await DatabaseServiceMock).episodesStore.remove as SinonStub
-				).throws();
-				try {
-					await episode.remove();
-				} catch (_e: unknown) {
-					// No op
-				}
-			});
-
-			it("should attempt to remove the episode", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.remove,
-				).to.have.been.calledWith(id));
-			it("should not clear the id", (): Chai.Assertion =>
-				expect(String(episode.id)).to.equal(id));
 			it("should not clear the episode name", (): Chai.Assertion =>
-				expect(String(episode.episodeName)).to.equal(episodeName));
-			it("should not clear the series id", (): Chai.Assertion =>
-				expect(String(episode["seriesId"])).to.equal(seriesId));
+				expect(episode.episodeName).to.equal(episodeName));
 		});
 
-		describe("success", (): void => {
+		describe("with ID", (): void => {
 			beforeEach(async (): Promise<void> => episode.remove());
 
-			it("should attempt to remove the episode", async (): Promise<Chai.Assertion> =>
-				expect(
-					(await DatabaseServiceMock).episodesStore.remove,
-				).to.have.been.calledWith(id));
+			it("should attempt to remove the episode", (): Chai.Assertion =>
+				expect(API.destroy).to.have.been.calledWith(path));
 			it("should clear the id", (): Chai.Assertion =>
 				expect(episode.id).to.be.null);
 			it("should clear the episode name", (): Chai.Assertion =>
-				expect(episode.episodeName).to.be.null);
-			it("should clear the series id", (): Chai.Assertion =>
-				expect(episode["seriesId"]).to.be.null);
+				expect(episode.episodeName).to.equal(""));
 		});
 
-		afterEach(
-			async (): Promise<void> =>
-				((await DatabaseServiceMock).episodesStore.remove as SinonStub).reset(),
-		);
-	});
-
-	describe("toJson", (): void => {
-		it("should return a JSON representation of the episode", (): Chai.Assertion =>
-			expect(episode.toJson()).to.deep.equal({
-				id,
-				episodeName,
-				seriesId,
-				status,
-				statusDate,
-				unverified,
-				unscheduled,
-				sequence,
-				type: "Episode",
-			}));
+		afterEach((): void => API.destroy.reset());
 	});
 
 	describe("statusDateDisplay", (): void => {
 		const statuses: EpisodeStatus[] = [
 			"",
-			"Watched",
-			"Recorded",
-			"Expected",
-			"Missed",
+			"watched",
+			"recorded",
+			"expected",
+			"missed",
 		];
 
 		statuses.forEach((episodeStatus: EpisodeStatus): void => {
@@ -636,7 +369,7 @@ describe("Episode", (): void => {
 					describe("with a status date", (): void => {
 						beforeEach((): string => (episode.statusDate = "2000-12-31"));
 
-						if ("Watched" === episodeStatus || "" === episodeStatus) {
+						if ("watched" === episodeStatus || "" === episodeStatus) {
 							it("should return an empty string", (): Chai.Assertion =>
 								expect(episode.statusDateDisplay).to.equal(""));
 						} else {
@@ -668,7 +401,7 @@ describe("Episode", (): void => {
 	describe("statusWarning", (): void => {
 		let clock: SinonFakeTimers;
 
-		const statuses: EpisodeStatus[] = ["Recorded", "Expected"];
+		const statuses: EpisodeStatus[] = ["recorded", "expected"];
 
 		statuses.forEach((episodeStatus: EpisodeStatus): void => {
 			describe(`${episodeStatus} episode without a status date`, (): void => {
@@ -701,7 +434,7 @@ describe("Episode", (): void => {
 					clock = sinon.useFakeTimers(new Date("2001-01-01").valueOf());
 				});
 
-				if ("Expected" === episodeStatus) {
+				if ("expected" === episodeStatus) {
 					it("should return the CSS warning class", (): Chai.Assertion =>
 						expect(episode.statusWarning).to.equal("warning"));
 				} else {
@@ -715,7 +448,7 @@ describe("Episode", (): void => {
 	});
 
 	describe("unverifiedDisplay", (): void => {
-		const statuses: EpisodeStatus[] = ["Watched", "Recorded"];
+		const statuses: EpisodeStatus[] = ["watched", "recorded"];
 
 		statuses.forEach((episodeStatus: EpisodeStatus): void => {
 			describe(`${episodeStatus} episode that is unverified`, (): void => {
@@ -724,7 +457,7 @@ describe("Episode", (): void => {
 					episode.unverified = true;
 				});
 
-				if ("Watched" === episodeStatus) {
+				if ("watched" === episodeStatus) {
 					it("should return an empty string", (): Chai.Assertion =>
 						expect(episode.unverifiedDisplay).to.equal(""));
 				} else {

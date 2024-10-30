@@ -1,18 +1,33 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative 'base_controller'
+# Application controller
+class ApplicationController < ::ActionController::API
+	before_action :authenticate_user, except: [:routing_error]
+	rescue_from ::StandardError, with: :internal_error
+	rescue_from ::ActiveRecord::RecordInvalid, with: :record_invalid
+	rescue_from ::ActiveRecord::RecordNotFound, with: :record_not_found
+	include ::ActionController::HttpAuthentication::Basic::ControllerMethods
 
-module TVManager
-	# Provides the default route and config settings needed by the client
-	class ApplicationController < BaseController
-		# ======
-		# ROUTES
-		# ======
-
-		# Default route, redirects to /public/index.html
-		get '/' do
-			redirect 'index.html'
+	def authenticate_user
+		render plain: 'Invalid login and/or password', status: :unauthorized unless authenticate_with_http_basic do |username, password|
+			username.eql?(::ENV[:TVMANAGER_USERNAME.to_s]) && password.eql?(::ENV[:TVMANAGER_PASSWORD.to_s])
 		end
+	end
+
+	def internal_error(exception)
+		render json: exception.message, status: :internal_server_error
+	end
+
+	def record_invalid(exception)
+		render json: exception.record.errors.full_messages.join(', '), status: :unprocessable_entity
+	end
+
+	def record_not_found(exception)
+		render json: exception.message, status: :not_found
+	end
+
+	def routing_error
+		render json: "Path #{params[:unmatched_route]} is not valid", status: :not_found
 	end
 end

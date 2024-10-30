@@ -1,35 +1,17 @@
 import {
-	databaseVersion,
-	totalEpisodes,
-	totalPrograms,
-	totalSeries,
-} from "~/support/about";
-import {
 	footerRightButton,
 	headerLabel,
 	headerLeftButton,
+	notices,
 } from "~/support/e2e";
-import type { TestData } from "~/support/types";
+import { totalEpisodes, totalPrograms, totalSeries } from "~/support/about";
 import { aboutRow } from "~/support/settings";
 
 describe("About", (): void => {
-	before((): void => {
-		const data: TestData = {
-			programs: [
-				{
-					series: [
-						{ episodes: [{ status: "Watched" }, {}] },
-						{ episodes: [{}] },
-					],
-				},
-				{ series: [{ episodes: [{}] }] },
-			],
-		};
-
-		cy.createTestData(data);
-	});
+	before((): void => cy.createAboutData());
 
 	beforeEach((): void => {
+		cy.login();
 		cy.visit("/");
 		cy.get(footerRightButton).click();
 		cy.get(aboutRow).click();
@@ -54,7 +36,16 @@ describe("About", (): void => {
 			cy.get(totalSeries).should("have.value", "3"));
 		it("should show the total number of episodes and the percentage watched", (): Cypress.Chainable<JQuery> =>
 			cy.get(totalEpisodes).should("have.value", "4 (25.00% watched)"));
-		it("should show the database version", (): Cypress.Chainable<JQuery> =>
-			cy.get(databaseVersion).should("have.value", "v1"));
+
+		it("should show a notice if the programs count could not be retrieved", (): void => {
+			cy.intercept("GET", "/programs/count", {
+				statusCode: 500,
+				body: "Retrieve failed",
+			});
+			cy.get(headerLeftButton).click();
+			cy.get(aboutRow).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Retrieve failed");
+		});
 	});
 });

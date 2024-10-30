@@ -20,7 +20,7 @@ describe("SeriesController", (): void => {
 	beforeEach((): void => {
 		listItem = {
 			listIndex: 0,
-			series: new SeriesMock(null, "test-series", 1, "1"),
+			series: new SeriesMock(null, "test-series", 1, 1),
 		};
 
 		seriesController = new SeriesController(listItem);
@@ -37,7 +37,7 @@ describe("SeriesController", (): void => {
 					listItem.series.nowShowing,
 				));
 			it("should save the original program id", (): Chai.Assertion =>
-				expect(String(seriesController["originalProgramId"])).to.equal(
+				expect(seriesController["originalProgramId"]).to.equal(
 					listItem.series.programId,
 				));
 		});
@@ -47,9 +47,9 @@ describe("SeriesController", (): void => {
 
 			beforeEach((): void => {
 				seriesListItem = {
-					series: new SeriesMock(null, null, null, null),
+					series: new SeriesMock(null, "", null, 1),
 					sequence: 1,
-					program: new ProgramMock("1", "test-program"),
+					program: new ProgramMock(1, "test-program"),
 				};
 				seriesController = new SeriesController(seriesListItem);
 			});
@@ -61,7 +61,7 @@ describe("SeriesController", (): void => {
 				expect(String(seriesController["listItem"].series.seriesName)).to.equal(
 					`Series ${Number(seriesListItem.sequence) + 1}`,
 				);
-				expect(String(seriesController["listItem"].series.programId)).to.equal(
+				expect(seriesController["listItem"].series.programId).to.equal(
 					(seriesListItem.program as ProgramMock).id,
 				);
 				expect(
@@ -82,10 +82,10 @@ describe("SeriesController", (): void => {
 			moveTo: HTMLSelectElement,
 			leftButton: NavButton,
 			rightButton: NavButton,
-			programs: [string, string][],
+			programs: [number, string][],
 			programList: ProgramMock[];
 
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(seriesController, "cancel" as keyof SeriesController);
 			sinon.stub(seriesController, "save" as keyof SeriesController);
 
@@ -106,58 +106,64 @@ describe("SeriesController", (): void => {
 			document.body.append(seriesName, nowShowing, moveTo);
 
 			programs = [
-				["1", "program 1"],
-				["2", "program 2"],
+				[1, "program 1"],
+				[2, "program 2"],
 			];
 
 			programList = programs.map(
-				([id, name]: [string, string]): ProgramMock =>
+				([id, name]: [number, string]): ProgramMock =>
 					new ProgramMock(id, name),
 			);
-			ProgramMock.programs = programList;
-
-			await seriesController.setup();
-			leftButton = seriesController.header.leftButton as NavButton;
-			rightButton = seriesController.header.rightButton as NavButton;
 		});
 
-		it("should set the header label", (): Chai.Assertion =>
-			expect(String(seriesController.header.label)).to.equal(
-				"Add/Edit Series",
-			));
+		describe("now showing", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.programs = programList;
+				await seriesController.setup();
+				leftButton = seriesController.header.leftButton as NavButton;
+				rightButton = seriesController.header.rightButton as NavButton;
+			});
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(seriesController["cancel"]).to.have.been.called;
+			it("should set the header label", (): Chai.Assertion =>
+				expect(String(seriesController.header.label)).to.equal(
+					"Add/Edit Series",
+				));
+
+			it("should attach a header left button event handler", (): void => {
+				(leftButton.eventHandler as NavButtonEventHandler)();
+				expect(seriesController["cancel"]).to.have.been.called;
+			});
+
+			it("should set the header left button label", (): Chai.Assertion =>
+				expect(leftButton.label).to.equal("Cancel"));
+
+			it("should attach a header right button event handler", (): void => {
+				(rightButton.eventHandler as NavButtonEventHandler)();
+				expect(seriesController["save"]).to.have.been.called;
+			});
+
+			it("should set the header right button style", (): Chai.Assertion =>
+				expect(String(rightButton.style)).to.equal("confirmButton"));
+			it("should set the header right button label", (): Chai.Assertion =>
+				expect(rightButton.label).to.equal("Save"));
+			it("should get the list of programs", (): Chai.Assertion =>
+				expect(ProgramMock.list).to.have.been.called);
+
+			it("should populate the move to select with a list of programs", (): void =>
+				moveTo
+					.querySelectorAll("option")
+					.forEach((option: HTMLOptionElement, index: number): void => {
+						expect(option.value).to.equal(String(programs[index][0]));
+						expect(String(option.textContent)).to.equal(programs[index][1]);
+					}));
+
+			it("should set the series name", (): Chai.Assertion =>
+				expect(seriesName.value).to.equal(listItem.series.seriesName));
+			it("should set the now showing", (): Chai.Assertion =>
+				expect(Number(nowShowing.value)).to.equal(listItem.series.nowShowing));
+			it("should set the current program", (): Chai.Assertion =>
+				expect(moveTo.value).to.equal(String(listItem.series.programId)));
 		});
-
-		it("should set the header left button label", (): Chai.Assertion =>
-			expect(leftButton.label).to.equal("Cancel"));
-
-		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(seriesController["save"]).to.have.been.called;
-		});
-
-		it("should set the header right button style", (): Chai.Assertion =>
-			expect(String(rightButton.style)).to.equal("confirmButton"));
-		it("should set the header right button label", (): Chai.Assertion =>
-			expect(rightButton.label).to.equal("Save"));
-
-		it("should populate the move to select with a list of programs", (): void =>
-			moveTo
-				.querySelectorAll("option")
-				.forEach((option: HTMLOptionElement, index: number): void => {
-					expect(option.value).to.equal(programs[index][0]);
-					expect(String(option.textContent)).to.equal(programs[index][1]);
-				}));
-
-		it("should set the series name", (): Chai.Assertion =>
-			expect(seriesName.value).to.equal(listItem.series.seriesName));
-		it("should set the now showing", (): Chai.Assertion =>
-			expect(Number(nowShowing.value)).to.equal(listItem.series.nowShowing));
-		it("should set the current program", (): Chai.Assertion =>
-			expect(moveTo.value).to.equal(listItem.series.programId));
 
 		describe("not showing", (): void => {
 			beforeEach(async (): Promise<void> => {
@@ -167,6 +173,24 @@ describe("SeriesController", (): void => {
 
 			it("should not set the now showing", (): Chai.Assertion =>
 				expect(nowShowing.value).to.equal(""));
+		});
+
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.error = "setup failed";
+				await seriesController.setup();
+			});
+
+			it("should attempt to get the list of programs", (): Chai.Assertion =>
+				expect(ProgramMock.list).to.have.been.called);
+			it("should not populate the move to select with a list of programs", (): Chai.Assertion =>
+				expect(moveTo.querySelectorAll("option").length).to.equal(0));
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "setup failed",
+				}));
+
+			afterEach((): null => (ProgramMock.error = null));
 		});
 
 		afterEach((): void => {
@@ -289,6 +313,36 @@ describe("SeriesController", (): void => {
 				expect(appController.popView).to.have.been.called);
 		});
 
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				SeriesMock.error = "save failed";
+				await seriesController["save"]();
+			});
+
+			it("should get the series name", (): Chai.Assertion =>
+				expect(String(seriesController["listItem"].series.seriesName)).to.equal(
+					seriesName,
+				));
+			it("should get the now showing", (): Chai.Assertion =>
+				expect(seriesController["listItem"].series.nowShowing).to.equal(
+					nowShowing,
+				));
+			it("should get the current program", (): Chai.Assertion =>
+				expect(String(seriesController["listItem"].series.programId)).to.equal(
+					programId,
+				));
+			it("should attempt to save the series", (): Chai.Assertion =>
+				expect(listItem.series.save).to.have.been.called);
+			it("should not pop the view", (): Chai.Assertion =>
+				expect(appController.popView).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "save failed",
+				}));
+
+			afterEach((): null => (SeriesMock.error = null));
+		});
+
 		afterEach((): void => {
 			seriesNameInput.remove();
 			nowShowingSelect.remove();
@@ -299,7 +353,7 @@ describe("SeriesController", (): void => {
 	describe("cancel", (): void => {
 		beforeEach(async (): Promise<void> => {
 			seriesController["listItem"].series.nowShowing = 2;
-			seriesController["listItem"].series.programId = "2";
+			seriesController["listItem"].series.programId = 2;
 			await seriesController["cancel"]();
 		});
 
@@ -314,5 +368,10 @@ describe("SeriesController", (): void => {
 
 		it("should pop the view", (): Chai.Assertion =>
 			expect(appController.popView).to.have.been.called);
+	});
+
+	afterEach((): void => {
+		ProgramMock.reset();
+		SeriesMock.reset();
 	});
 });

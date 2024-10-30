@@ -1,33 +1,27 @@
-import type { SerializedModel } from "~/models";
+import BaseMock from "~/mocks/base-model-mock";
+import type { EpisodeStatus } from "~/models";
 import type { SinonStub } from "sinon";
 import sinon from "sinon";
 
-const saveStub: SinonStub<
-		unknown[],
-		Promise<string | undefined>
+const listStub: SinonStub<[number], Promise<SeriesMock[]>> = sinon.stub(),
+	scheduledStub: SinonStub<[], Promise<SeriesMock[]>> = sinon.stub(),
+	listByStatusStub: SinonStub<
+		[EpisodeStatus],
+		Promise<SeriesMock[]>
 	> = sinon.stub(),
-	removeStub: SinonStub = sinon.stub(),
-	listByProgramStub: SinonStub<string[], Promise<SeriesMock[]>> = sinon.stub(),
-	listByNowShowingStub: SinonStub = sinon.stub(),
-	findStub: SinonStub<string[], Promise<SeriesMock>> = sinon.stub(),
-	countStub: SinonStub = sinon.stub(),
-	removeAllStub: SinonStub<
-		unknown[],
-		Promise<string | undefined>
-	> = sinon.stub(),
-	fromJsonStub: SinonStub<[SerializedModel], SeriesMock> = sinon.stub();
+	incompleteStub: SinonStub<[], Promise<SeriesMock[]>> = sinon.stub(),
+	countStub: SinonStub<[], Promise<number>> = sinon.stub(),
+	saveStub: SinonStub<[], Promise<void>> = sinon.stub(),
+	removeStub: SinonStub<[], Promise<void>> = sinon.stub();
 
-let series: SeriesMock[] = [],
-	removeAllOk: boolean;
+let series: SeriesMock[] = [];
 
-export default class SeriesMock {
+export default class SeriesMock extends BaseMock {
 	public progressBarDisplay = "";
 
 	public nowShowingDisplay = "";
 
 	public statusWarning: "" | "warning" = "";
-
-	public toJson: SinonStub;
 
 	public setEpisodeCount: SinonStub = sinon.stub();
 
@@ -38,10 +32,10 @@ export default class SeriesMock {
 	public setExpectedCount: SinonStub = sinon.stub();
 
 	public constructor(
-		public readonly id: string | null,
-		public seriesName: string | null,
+		public readonly id: number | null,
+		public seriesName: string,
 		public nowShowing: number | null,
-		public programId: string | null,
+		public programId: number,
 		public programName?: string,
 		public readonly episodeCount = 0,
 		public readonly watchedCount = 0,
@@ -50,61 +44,30 @@ export default class SeriesMock {
 		public readonly missedCount?: number,
 		public statusWarningCount = 0,
 	) {
-		this.toJson = sinon.stub().returns({});
-		saveStub.resetHistory();
-		removeStub.reset();
+		super();
 	}
 
-	public static get listByProgram(): SinonStub<
-		string[],
+	public static get list(): SinonStub<[number], Promise<SeriesMock[]>> {
+		return this.stub(listStub, this.series);
+	}
+
+	public static get scheduled(): SinonStub<[], Promise<SeriesMock[]>> {
+		return this.stub(scheduledStub, this.series);
+	}
+
+	public static get listByStatus(): SinonStub<
+		[EpisodeStatus],
 		Promise<SeriesMock[]>
 	> {
-		return listByProgramStub.returns(Promise.resolve(this.series));
+		return this.stub(listByStatusStub, this.series);
 	}
 
-	public static get listByNowShowing(): SinonStub<
-		unknown[],
-		Promise<SeriesMock[]>
-	> {
-		return listByNowShowingStub.returns(Promise.resolve(this.series));
+	public static get incomplete(): SinonStub<[], Promise<SeriesMock[]>> {
+		return this.stub(incompleteStub, this.series);
 	}
 
-	public static get listByStatus(): SinonStub<string[], Promise<SeriesMock[]>> {
-		return sinon.stub();
-	}
-
-	public static get listByIncomplete(): SinonStub<
-		undefined[],
-		Promise<SeriesMock[]>
-	> {
-		return sinon.stub();
-	}
-
-	public static get find(): SinonStub<string[], Promise<SeriesMock>> {
-		return findStub.returns(
-			Promise.resolve(
-				new SeriesMock(String(findStub.args[0]), "test-series", null, null),
-			),
-		);
-	}
-
-	public static get count(): SinonStub<unknown[], Promise<number>> {
-		return countStub.returns(Promise.resolve(1));
-	}
-
-	public static get removeAll(): SinonStub<
-		unknown[],
-		Promise<string | undefined>
-	> {
-		if (!removeAllOk) {
-			removeAllStub.returns(Promise.resolve("Force failed"));
-		}
-
-		return removeAllStub;
-	}
-
-	public static get fromJson(): SinonStub<[SerializedModel], SeriesMock> {
-		return fromJsonStub.returns(new SeriesMock(null, null, null, null));
+	public static get count(): SinonStub<[], Promise<number>> {
+		return this.stub(countStub, 1);
 	}
 
 	public static get series(): SeriesMock[] {
@@ -115,19 +78,21 @@ export default class SeriesMock {
 		series = items;
 	}
 
-	public get save(): SinonStub<unknown[], Promise<string | undefined>> {
-		return saveStub.returns(Promise.resolve("1"));
+	public get save(): SinonStub<[], Promise<void>> {
+		return SeriesMock.stub(saveStub, undefined);
 	}
 
-	public get remove(): SinonStub<unknown[], Promise<void>> {
-		return removeStub;
+	public get remove(): SinonStub<[], Promise<void>> {
+		return SeriesMock.stub(removeStub, undefined);
 	}
 
-	public static removeAllOk(): void {
-		removeAllOk = true;
-	}
-
-	public static removeAllFail(): void {
-		removeAllOk = false;
+	public static reset(): void {
+		listStub.reset();
+		scheduledStub.reset();
+		listByStatusStub.reset();
+		incompleteStub.reset();
+		countStub.reset();
+		saveStub.reset();
+		removeStub.reset();
 	}
 }

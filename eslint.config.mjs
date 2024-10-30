@@ -13,11 +13,13 @@ export default tseslint.config(
 			},
 		},
 		rules: {
+			// Disabled for camelcase in Typescript interfaces
+			camelcase: "off",
 			// Disabled to allow for import/export/delete confirmation prompts,
 			"no-alert": "off",
 			// Temporarily disabled, see https://github.com/scottohara/tvmanager/issues/83
 			"@typescript-eslint/no-this-alias": "off",
-			// Disabled to allow for PublicInterface & StoreObject
+			// Disabled to allow for PublicInterface
 			"@typescript-eslint/no-type-alias": "off",
 		},
 	},

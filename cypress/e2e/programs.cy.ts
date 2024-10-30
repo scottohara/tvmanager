@@ -1,9 +1,7 @@
-import type { ListItem, TestData } from "~/support/types";
 import {
 	checkGroup,
 	checkProgress,
 	firstListItem,
-	footerLabel,
 	footerLeftButton,
 	footerRightButton,
 	fourthListItem,
@@ -14,80 +12,18 @@ import {
 	list,
 	listItem,
 	listItems,
+	notices,
 	secondListItem,
 	thirdListItem,
 } from "~/support/e2e";
+import type { ListItem } from "~/support/types";
 import { programName } from "~/support/program";
 
 describe("Programs", (): void => {
 	let expectedItems: (ListItem | string)[];
 
 	before((): void => {
-		const data: TestData = {
-			programs: [
-				{
-					programName: "Test Program",
-					series: [
-						{
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-								{ status: "Missed" },
-								{},
-							],
-						},
-						{
-							episodes: [],
-						},
-						{
-							episodes: [{ status: "Watched" }],
-						},
-					],
-				},
-				{ programName: "R08", series: [] },
-				{ programName: "R07", series: [] },
-				{ programName: "R06", series: [] },
-				{ programName: "R05", series: [] },
-				{ programName: "R04", series: [] },
-				{ programName: "R03", series: [] },
-				{ programName: "R02", series: [] },
-				{ programName: "R01", series: [] },
-				{ programName: "M01", series: [] },
-				{ programName: "D15", series: [] },
-				{ programName: "D14", series: [] },
-				{ programName: "D13", series: [] },
-				{ programName: "D12", series: [] },
-				{ programName: "D11", series: [] },
-				{ programName: "D10", series: [] },
-				{ programName: "D09", series: [] },
-				{ programName: "D08", series: [] },
-				{ programName: "D07", series: [] },
-				{ programName: "D06", series: [] },
-				{ programName: "D05", series: [] },
-				{ programName: "D04", series: [] },
-				{ programName: "D03", series: [] },
-				{ programName: "D02", series: [] },
-				{ programName: "D01", series: [] },
-				{
-					programName: "Another Test Program",
-					series: [
-						{
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							episodes: [{ status: "Expected", statusDate: "2000-01-01" }, {}],
-						},
-					],
-				},
-			],
-		};
-
-		cy.createTestData(data);
+		cy.createProgramsData();
 
 		expectedItems = [
 			"A",
@@ -131,6 +67,7 @@ describe("Programs", (): void => {
 	});
 
 	beforeEach((): void => {
+		cy.login();
 		cy.visit("/");
 		cy.get(headerRightButton).click();
 	});
@@ -177,6 +114,17 @@ describe("Programs", (): void => {
 			cy.get(secondListItem).click();
 			cy.get(headerLabel).should("have.text", "Another Test Program");
 		});
+
+		it("should show a notice if the programs could not be retreived", (): void => {
+			cy.intercept("GET", "/programs", {
+				statusCode: 500,
+				body: "Retrieve failed",
+			});
+			cy.get(headerLeftButton).click();
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Retrieve failed");
+		});
 	});
 
 	describe("index", (): void => {
@@ -209,10 +157,6 @@ describe("Programs", (): void => {
 	});
 
 	describe("footer", (): void => {
-		it("should show the database version as the label", (): void => {
-			cy.get(footerLabel).should("have.text", "v1");
-		});
-
 		it("should toggle between edit mode when the left button is clicked", (): void => {
 			cy.get(footerLeftButton).should("have.text", "Edit");
 			cy.get(footerLeftButton).click();
@@ -257,6 +201,16 @@ describe("Programs", (): void => {
 			cy.get(thirdListItem).should("have.text", "B");
 			cy.get(fourthListItem).should("contain.text", "B01");
 		});
+
+		it("should do nothing and show a notice if the save fails", (): void => {
+			cy.intercept("POST", "/programs", {
+				statusCode: 500,
+				body: "Save failed",
+			});
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Save failed");
+		});
 	});
 
 	describe("edit program", (): void => {
@@ -279,6 +233,16 @@ describe("Programs", (): void => {
 			cy.get(firstListItem).should("have.text", "B");
 			cy.get(secondListItem).should("contain.text", "B01");
 		});
+
+		it("should do nothing and show a notice if the save fails", (): void => {
+			cy.intercept("PUT", "/programs/*", {
+				statusCode: 500,
+				body: "Save failed",
+			});
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Save failed");
+		});
 	});
 
 	describe("delete program", (): void => {
@@ -290,6 +254,17 @@ describe("Programs", (): void => {
 			cy.on("window:confirm", (): boolean => false);
 			cy.get(secondListItem).click();
 			cy.get(secondListItem).should("contain.text", "B01");
+		});
+
+		it("should do nothing and show a notice if the delete fails", (): void => {
+			cy.intercept("DELETE", "/programs/*", {
+				statusCode: 500,
+				body: "Delete failed",
+			});
+			cy.get(secondListItem).click();
+			cy.get(secondListItem).should("contain.text", "B01");
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Delete failed");
 		});
 
 		it("should not show the deleted item in the Programs view", (): void => {

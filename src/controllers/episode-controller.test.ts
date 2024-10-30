@@ -25,9 +25,9 @@ describe("EpisodeController", (): void => {
 			episode: new EpisodeMock(
 				null,
 				"test-episode",
-				"Watched",
+				"watched",
 				"2000-01-01",
-				undefined,
+				1,
 				false,
 				false,
 			),
@@ -55,9 +55,9 @@ describe("EpisodeController", (): void => {
 		describe("add", (): void => {
 			beforeEach((): void => {
 				listItem = {
-					episode: new EpisodeMock(null, null, "", ""),
+					episode: new EpisodeMock(null, "", "", "", 1),
 					sequence: 1,
-					series: new SeriesMock("1", null, null, null),
+					series: new SeriesMock(1, "", null, 2),
 				};
 				episodeController = new EpisodeController(listItem);
 			});
@@ -73,9 +73,7 @@ describe("EpisodeController", (): void => {
 					listItem.sequence,
 				);
 				expect(
-					String(
-						(episodeController["listItem"].episode as EpisodeMock).seriesId,
-					),
+					(episodeController["listItem"].episode as EpisodeMock).seriesId,
 				).to.equal((listItem.series as SeriesMock).id);
 			});
 		});
@@ -182,26 +180,26 @@ describe("EpisodeController", (): void => {
 
 		it("should attach a watched click event handler", (): void => {
 			watched.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["setStatus"]).to.have.been.calledWith("Watched");
+			expect(episodeController["setStatus"]).to.have.been.calledWith("watched");
 		});
 
 		it("should attach a recorded click event handler", (): void => {
 			recorded.dispatchEvent(new MouseEvent("click"));
 			expect(episodeController["setStatus"]).to.have.been.calledWith(
-				"Recorded",
+				"recorded",
 			);
 		});
 
 		it("should attach an expected click event handler", (): void => {
 			expected.dispatchEvent(new MouseEvent("click"));
 			expect(episodeController["setStatus"]).to.have.been.calledWith(
-				"Expected",
+				"expected",
 			);
 		});
 
 		it("should attach a missed click event handler", (): void => {
 			missed.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["setStatus"]).to.have.been.calledWith("Missed");
+			expect(episodeController["setStatus"]).to.have.been.calledWith("missed");
 		});
 
 		it("should attach an unscheduled click event handler", (): void => {
@@ -211,7 +209,7 @@ describe("EpisodeController", (): void => {
 
 		it("should toggle the current status", (): Chai.Assertion =>
 			expect(episodeController["setStatus"]).to.have.been.calledWith(
-				"Watched",
+				"watched",
 			));
 
 		afterEach((): void => {
@@ -286,41 +284,44 @@ describe("EpisodeController", (): void => {
 			unverified: HTMLInputElement,
 			unscheduled: HTMLInputElement;
 
+		beforeEach((): void => {
+			episodeName = "test-episode-2";
+			statusDate = "2000-12-31";
+
+			episodeNameInput = document.createElement("input");
+			episodeNameInput.id = "episodeName";
+			episodeNameInput.value = episodeName;
+
+			statusDateInput = document.createElement("input");
+			statusDateInput.id = "statusDate";
+			statusDateInput.value = statusDate;
+
+			unverified = document.createElement("input");
+			unverified.type = "checkbox";
+			unverified.id = "unverified";
+			unverified.checked = true;
+
+			unscheduled = document.createElement("input");
+			unscheduled.type = "checkbox";
+			unscheduled.id = "unscheduled";
+			unscheduled.checked = true;
+
+			document.body.append(
+				episodeNameInput,
+				statusDateInput,
+				unverified,
+				unscheduled,
+			);
+
+			appController.viewStack = [
+				{ controller: new TestController(), scrollPos: 0 },
+				{ controller: new TestController(), scrollPos: 0 },
+			];
+		});
+
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
 				beforeEach(async (): Promise<void> => {
-					episodeName = "test-episode-2";
-					statusDate = "2000-12-31";
-
-					episodeNameInput = document.createElement("input");
-					episodeNameInput.id = "episodeName";
-					episodeNameInput.value = episodeName;
-
-					statusDateInput = document.createElement("input");
-					statusDateInput.id = "statusDate";
-					statusDateInput.value = statusDate;
-
-					unverified = document.createElement("input");
-					unverified.type = "checkbox";
-					unverified.id = "unverified";
-					unverified.checked = true;
-
-					unscheduled = document.createElement("input");
-					unscheduled.type = "checkbox";
-					unscheduled.id = "unscheduled";
-					unscheduled.checked = true;
-
-					document.body.append(
-						episodeNameInput,
-						statusDateInput,
-						unverified,
-						unscheduled,
-					);
-
-					appController.viewStack = [
-						{ controller: new TestController(), scrollPos: 0 },
-						{ controller: new TestController(), scrollPos: 0 },
-					];
 					episodeController["listItem"].listIndex = scenario.listIndex;
 					await episodeController["save"]();
 				});
@@ -345,26 +346,58 @@ describe("EpisodeController", (): void => {
 					));
 				it("should pop the view", (): Chai.Assertion =>
 					expect(appController.popView).to.have.been.called);
-
-				afterEach((): void => {
-					episodeNameInput.remove();
-					statusDateInput.remove();
-					unverified.remove();
-					unscheduled.remove();
-				});
 			});
+		});
+
+		describe("failed", (): void => {
+			beforeEach(async (): Promise<void> => {
+				EpisodeMock.error = "save failed";
+				await episodeController["save"]();
+			});
+
+			it("should get the episode name", (): Chai.Assertion =>
+				expect(
+					String(episodeController["listItem"].episode.episodeName),
+				).to.equal(episodeName));
+			it("should get the status date", (): Chai.Assertion =>
+				expect(
+					String(episodeController["listItem"].episode.statusDate),
+				).to.equal(statusDate));
+			it("should get the unverified toggle", (): Chai.Assertion =>
+				expect(episodeController["listItem"].episode.unverified).to.be.true);
+			it("should get the unscheduled toggle", (): Chai.Assertion =>
+				expect(episodeController["listItem"].episode.unscheduled).to.be.true);
+			it("should attempt to save the episode", (): Chai.Assertion =>
+				expect(listItem.episode.save).to.have.been.called);
+			it("should not set the series list view scroll position", (): Chai.Assertion =>
+				expect(appController.viewStack[0].scrollPos).to.equal(0));
+			it("should not pop the view", (): Chai.Assertion =>
+				expect(appController.popView).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "save failed",
+				}));
+
+			afterEach((): null => (EpisodeMock.error = null));
+		});
+
+		afterEach((): void => {
+			episodeNameInput.remove();
+			statusDateInput.remove();
+			unverified.remove();
+			unscheduled.remove();
 		});
 	});
 
 	describe("cancel", (): void => {
 		beforeEach(async (): Promise<void> => {
-			episodeController["listItem"].episode.status = "Recorded";
+			episodeController["listItem"].episode.status = "recorded";
 			episodeController["listItem"].episode.statusDate = "2000-01-02";
 			await episodeController["cancel"]();
 		});
 
 		it("should revert any changes", (): void => {
-			expect(episodeController["listItem"].episode.status).to.equal("Watched");
+			expect(episodeController["listItem"].episode.status).to.equal("watched");
 			expect(episodeController["listItem"].episode.statusDate).to.equal(
 				"2000-01-01",
 			);
@@ -405,42 +438,42 @@ describe("EpisodeController", (): void => {
 			const scenarios: Scenario[] = [
 				{
 					description: "no change",
-					previousStatus: "Watched",
-					newStatus: "Watched",
+					previousStatus: "watched",
+					newStatus: "watched",
 					expectedStatus: "",
 					unverifiedRowHidden: true,
 				},
 				{
 					description: "watched",
 					previousStatus: "",
-					newStatus: "Watched",
-					expectedStatus: "Watched",
+					newStatus: "watched",
+					expectedStatus: "watched",
 					unverifiedRowHidden: true,
 				},
 				{
 					description: "recorded",
-					previousStatus: "Watched",
-					newStatus: "Recorded",
-					expectedStatus: "Recorded",
+					previousStatus: "watched",
+					newStatus: "recorded",
+					expectedStatus: "recorded",
 					unverifiedRowHidden: false,
 				},
 				{
 					description: "expected",
-					previousStatus: "Watched",
-					newStatus: "Expected",
-					expectedStatus: "Expected",
+					previousStatus: "watched",
+					newStatus: "expected",
+					expectedStatus: "expected",
 					unverifiedRowHidden: false,
 				},
 				{
 					description: "missed",
-					previousStatus: "Watched",
-					newStatus: "Missed",
-					expectedStatus: "Missed",
+					previousStatus: "watched",
+					newStatus: "missed",
+					expectedStatus: "missed",
 					unverifiedRowHidden: false,
 				},
 				{
 					description: "unknown",
-					previousStatus: "Watched",
+					previousStatus: "watched",
 					newStatus: "",
 					expectedStatus: "",
 					unverifiedRowHidden: true,
@@ -494,16 +527,16 @@ describe("EpisodeController", (): void => {
 
 					it("should toggle the status", (): void => {
 						expect(watched.classList.contains("status")).to.equal(
-							"Watched" === scenario.expectedStatus,
+							"watched" === scenario.expectedStatus,
 						);
 						expect(recorded.classList.contains("status")).to.equal(
-							"Recorded" === scenario.expectedStatus,
+							"recorded" === scenario.expectedStatus,
 						);
 						expect(expected.classList.contains("status")).to.equal(
-							"Expected" === scenario.expectedStatus,
+							"expected" === scenario.expectedStatus,
 						);
 						expect(missed.classList.contains("status")).to.equal(
-							"Missed" === scenario.expectedStatus,
+							"missed" === scenario.expectedStatus,
 						);
 					});
 
@@ -557,21 +590,21 @@ describe("EpisodeController", (): void => {
 				description: "recorded",
 				isHidden: false,
 				isUnscheduled: false,
-				status: "Recorded",
+				status: "recorded",
 				noDate: false,
 			},
 			{
 				description: "expected",
 				isHidden: false,
 				isUnscheduled: false,
-				status: "Expected",
+				status: "expected",
 				noDate: false,
 			},
 			{
 				description: "missed",
 				isHidden: false,
 				isUnscheduled: false,
-				status: "Missed",
+				status: "missed",
 				noDate: false,
 			},
 			{
@@ -620,5 +653,10 @@ describe("EpisodeController", (): void => {
 			statusDateRow.remove();
 			unscheduled.remove();
 		});
+	});
+
+	afterEach((): void => {
+		SeriesMock.reset();
+		EpisodeMock.reset();
 	});
 });

@@ -21,35 +21,3 @@ export interface EpisodeListItem {
 	unverifiedClass?: boolean;
 	warning?: boolean;
 }
-
-/*
- * Interfaces for managing test data to populate the database with
- */
-interface TestEpisode {
-	episodeName?: string;
-	status?: EpisodeStatus;
-	statusDate?: string;
-	unverified?: "false" | "true";
-	unscheduled?: "false" | "true";
-}
-
-interface TestSeries {
-	seriesName?: string;
-	nowShowing?: number | null;
-	episodes: TestEpisode[];
-}
-
-interface TestProgram {
-	programName?: string;
-	series: TestSeries[];
-}
-
-interface TestSetting {
-	name: string;
-	value: string;
-}
-
-export interface TestData {
-	programs?: TestProgram[];
-	settings?: TestSetting[];
-}

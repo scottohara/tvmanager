@@ -7,24 +7,19 @@ import type {
 	ViewControllerSet,
 } from "~/controllers";
 import AboutController from "~/controllers/about-controller";
-import DataSyncController from "~/controllers/dataSync-controller";
 import EpisodeController from "~/controllers/episode-controller";
 import EpisodesController from "~/controllers/episodes-controller";
+import Login from "~/models/login-model";
+import LoginController from "~/controllers/login-controller";
 import ProgramController from "~/controllers/program-controller";
 import ProgramsController from "~/controllers/programs-controller";
-import type { PublicInterface } from "~/global";
-import RegistrationController from "~/controllers/registration-controller";
 import ReportController from "~/controllers/report-controller";
 import ScheduleController from "~/controllers/schedule-controller";
 import SeriesController from "~/controllers/series-controller";
 import SeriesListController from "~/controllers/seriesList-controller";
-import Setting from "~/models/setting-model";
 import SettingsController from "~/controllers/settings-controller";
-import Sync from "~/models/sync-model";
 import UnscheduledController from "~/controllers/unscheduled-controller";
 import window from "~/components/window";
-
-declare const MAX_DATA_AGE_DAYS: number;
 
 export default class ApplicationController {
 	private static singletonInstance?: ApplicationController;
@@ -37,9 +32,6 @@ export default class ApplicationController {
 	};
 
 	private viewControllers!: ViewControllerSet;
-
-	// Set the max data age days
-	private readonly maxDataAgeDays = Number(MAX_DATA_AGE_DAYS);
 
 	public constructor() {
 		// App controller is a singleton, so if an instance already exists, return it
@@ -116,12 +108,11 @@ export default class ApplicationController {
 		// Populate an object with all of the view controllers, so that they can be referenced later dynamically by name
 		this.viewControllers = {
 			about: AboutController,
-			dataSync: DataSyncController,
 			episode: EpisodeController,
 			episodes: EpisodesController,
+			login: LoginController,
 			program: ProgramController,
 			programs: ProgramsController,
-			registration: RegistrationController,
 			report: ReportController,
 			schedule: ScheduleController,
 			series: SeriesController,
@@ -130,16 +121,13 @@ export default class ApplicationController {
 			unscheduled: UnscheduledController,
 		};
 
-		// Display the schedule view
-		await this.pushView("schedule");
-
-		// Get the last sync time and number of local changes to sync
-		const [lastSyncTime, localChanges] = await Promise.all([
-			Setting.get("LastSyncTime"),
-			Sync.count(),
-		]);
-
-		this.showSyncNotice(lastSyncTime, localChanges);
+		if (Login.isAuthenticated) {
+			// Display the schedule view
+			await this.pushView("schedule");
+		} else {
+			// Display the login view (on next tick, to ensure the transitionend listener is ready)
+			window.setTimeout(async (): Promise<void> => this.pushView("login"));
+		}
 	}
 
 	public async popView(args?: ViewControllerArgs): Promise<void> {
@@ -150,8 +138,10 @@ export default class ApplicationController {
 		// Pop the view off the stack
 		this.viewStack.pop();
 
-		// Display the previous view
-		return this.show(this.viewPopped.bind(this), args);
+		// Display the previous view, or schedule if none
+		return 0 === this.viewStack.length
+			? this.pushView("schedule")
+			: this.show(this.viewPopped.bind(this), args);
 	}
 
 	public getScrollPosition(): void {
@@ -559,40 +549,6 @@ export default class ApplicationController {
 		// If there are no more notices visible, hide the notices container
 		if (!this.noticeStack.notice.length) {
 			this.notices.style.visibility = "hidden";
-		}
-	}
-
-	private showSyncNotice(
-		lastSyncTime: PublicInterface<Setting>,
-		localChanges: number,
-	): void {
-		// Only proceed if we have a last sync time
-		if (undefined !== lastSyncTime.settingValue && localChanges > 0) {
-			// Constants for the notification threshold, current date and last sync date
-			const HOURS_IN_ONE_DAY = 24,
-				MINUTES_IN_ONE_HOUR = 60,
-				SECONDS_IN_ONE_MINUTE = 60,
-				MILLISECONDS_IN_ONE_SECOND = 1000,
-				MILLISECONDS_IN_ONE_DAY =
-					MILLISECONDS_IN_ONE_SECOND *
-					SECONDS_IN_ONE_MINUTE *
-					MINUTES_IN_ONE_HOUR *
-					HOURS_IN_ONE_DAY,
-				now = new Date(),
-				lastSync = new Date(lastSyncTime.settingValue);
-
-			// Check if the last sync was more that the specified threshold
-			if (
-				Math.round(
-					Math.abs(now.getTime() - lastSync.getTime()) /
-						MILLISECONDS_IN_ONE_DAY,
-				) > this.maxDataAgeDays
-			) {
-				// Show a notice to the user
-				this.showNotice({
-					label: `The last data sync was over ${this.maxDataAgeDays} days ago`,
-				});
-			}
 		}
 	}
 }

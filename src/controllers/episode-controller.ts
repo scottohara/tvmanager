@@ -30,7 +30,7 @@ export default class EpisodeController extends ViewController {
 					`Episode ${Number(listItem.sequence) + 1}`,
 					"",
 					"",
-					(listItem.series as Series).id,
+					Number((listItem.series as Series).id),
 					false,
 					false,
 					Number(listItem.sequence),
@@ -107,15 +107,15 @@ export default class EpisodeController extends ViewController {
 
 		// Bind events for all of the buttons/controls
 		this.watched.addEventListener("click", (): void =>
-			this.setStatus("Watched"),
+			this.setStatus("watched"),
 		);
 		this.recorded.addEventListener("click", (): void =>
-			this.setStatus("Recorded"),
+			this.setStatus("recorded"),
 		);
 		this.expected.addEventListener("click", (): void =>
-			this.setStatus("Expected"),
+			this.setStatus("expected"),
 		);
-		this.missed.addEventListener("click", (): void => this.setStatus("Missed"));
+		this.missed.addEventListener("click", (): void => this.setStatus("missed"));
 		this.unscheduled.addEventListener(
 			"click",
 			this.toggleStatusDateRow.bind(this),
@@ -146,21 +146,25 @@ export default class EpisodeController extends ViewController {
 		this.listItem.episode.unverified = this.unverified.checked;
 		this.listItem.episode.unscheduled = this.unscheduled.checked;
 
-		// Update the database
-		await this.listItem.episode.save();
+		try {
+			// Update the database
+			await this.listItem.episode.save();
 
-		// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
-		if (
-			Number.isNaN(Number(this.listItem.listIndex)) ||
-			Number(this.listItem.listIndex) < 0
-		) {
-			this.appController.viewStack[
-				this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET
-			].scrollPos = -1;
+			// If a new episode was added, scroll the Episodes view to the end of the list to reveal the new item
+			if (
+				Number.isNaN(Number(this.listItem.listIndex)) ||
+				Number(this.listItem.listIndex) < 0
+			) {
+				this.appController.viewStack[
+					this.appController.viewStack.length - PREVIOUS_VIEW_OFFSET
+				].scrollPos = -1;
+			}
+
+			// Pop the view off the stack
+			await this.appController.popView(this.listItem);
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
 		}
-
-		// Pop the view off the stack
-		return this.appController.popView(this.listItem);
 	}
 
 	private async cancel(): Promise<void> {
@@ -192,21 +196,21 @@ export default class EpisodeController extends ViewController {
 				// Otherwise set the status to the passed value and update the view
 				this.listItem.episode.status = status;
 				switch (status) {
-					case "Watched":
+					case "watched":
 						this.watched.classList.add("status");
 						break;
 
-					case "Recorded":
+					case "recorded":
 						this.recorded.classList.add("status");
 						this.unverifiedRow.style.display = "flex";
 						break;
 
-					case "Expected":
+					case "expected":
 						this.expected.classList.add("status");
 						this.unverifiedRow.style.display = "flex";
 						break;
 
-					case "Missed":
+					case "missed":
 						this.missed.classList.add("status");
 						this.unverifiedRow.style.display = "flex";
 						break;
@@ -230,9 +234,9 @@ export default class EpisodeController extends ViewController {
 		// Show the status date if certain criteria is met
 		if (
 			this.unscheduled.checked ||
-			"Recorded" === this.listItem.episode.status ||
-			"Expected" === this.listItem.episode.status ||
-			"Missed" === this.listItem.episode.status
+			"recorded" === this.listItem.episode.status ||
+			"expected" === this.listItem.episode.status ||
+			"missed" === this.listItem.episode.status
 		) {
 			this.statusDateRow.style.display = "flex";
 		}

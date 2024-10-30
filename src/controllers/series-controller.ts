@@ -9,7 +9,7 @@ export default class SeriesController extends ViewController {
 
 	private readonly originalNowShowing: number | null = null;
 
-	private readonly originalProgramId: string | null = null;
+	private readonly originalProgramId: number = 0;
 
 	public constructor(listItem: SeriesListItem) {
 		super();
@@ -26,7 +26,7 @@ export default class SeriesController extends ViewController {
 					null,
 					`Series ${Number(listItem.sequence) + 1}`,
 					null,
-					(listItem.program as Program).id,
+					Number((listItem.program as Program).id),
 					String((listItem.program as Program).programName),
 				),
 			};
@@ -66,17 +66,21 @@ export default class SeriesController extends ViewController {
 		};
 
 		// Populate the list of programs
-		const programs = await Program.list(),
-			options = programs.map((program: Program): HTMLOptionElement => {
-				const option = document.createElement("option");
+		try {
+			const programs = await Program.list(),
+				options = programs.map((program: Program): HTMLOptionElement => {
+					const option = document.createElement("option");
 
-				option.value = String(program.id);
-				option.textContent = String(program.programName);
+					option.value = String(program.id);
+					option.textContent = String(program.programName);
 
-				return option;
-			});
+					return option;
+				});
 
-		this.moveTo.append(...options);
+			this.moveTo.append(...options);
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 
 		// Set the series details
 		this.seriesName.value = String(this.listItem.series.seriesName);
@@ -95,12 +99,15 @@ export default class SeriesController extends ViewController {
 		// Get the series details
 		this.listItem.series.seriesName = this.seriesName.value;
 		this.listItem.series.nowShowing = Number(this.nowShowing.value) || null;
-		this.listItem.series.programId = this.moveTo.value;
+		this.listItem.series.programId = Number(this.moveTo.value);
 
-		// Update the database and pop the view off the stack
-		await this.listItem.series.save();
-
-		return this.appController.popView(this.listItem);
+		try {
+			// Update the database and pop the view off the stack
+			await this.listItem.series.save();
+			await this.appController.popView(this.listItem);
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	private async cancel(): Promise<void> {

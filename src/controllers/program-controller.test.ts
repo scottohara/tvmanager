@@ -116,25 +116,49 @@ describe("ProgramController", (): void => {
 	describe("save", (): void => {
 		let programName: string, programNameInput: HTMLInputElement;
 
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			programName = "test-program-2";
 
 			programNameInput = document.createElement("input");
 			programNameInput.id = "programName";
 			programNameInput.value = programName;
 			document.body.append(programNameInput);
-
-			await programController["save"]();
 		});
 
-		it("should get the program name", (): Chai.Assertion =>
-			expect(
-				String(programController["listItem"].program.programName),
-			).to.equal(programName));
-		it("should save the program", (): Chai.Assertion =>
-			expect(listItem.program.save).to.have.been.called);
-		it("should pop the view", (): Chai.Assertion =>
-			expect(appController.popView).to.have.been.called);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => programController["save"]());
+
+			it("should get the program name", (): Chai.Assertion =>
+				expect(
+					String(programController["listItem"].program.programName),
+				).to.equal(programName));
+			it("should save the program", (): Chai.Assertion =>
+				expect(listItem.program.save).to.have.been.called);
+			it("should pop the view", (): Chai.Assertion =>
+				expect(appController.popView).to.have.been.called);
+		});
+
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.error = "save failed";
+				await programController["save"]();
+			});
+
+			it("should get the program name", (): Chai.Assertion =>
+				expect(
+					String(programController["listItem"].program.programName),
+				).to.equal(programName));
+			it("should attempt to save the program", (): Chai.Assertion =>
+				expect(listItem.program.save).to.have.been.called);
+			it("should not pop the view", (): Chai.Assertion =>
+				expect(appController.popView).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "save failed",
+				}));
+
+			afterEach((): null => (ProgramMock.error = null));
+		});
 
 		afterEach((): void => programNameInput.remove());
 	});
@@ -145,4 +169,6 @@ describe("ProgramController", (): void => {
 			expect(appController.popView).to.have.been.called;
 		});
 	});
+
+	afterEach((): void => ProgramMock.reset());
 });

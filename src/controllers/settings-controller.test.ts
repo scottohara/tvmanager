@@ -26,7 +26,7 @@ describe("SettingsController", (): void => {
 			viewArgs: {
 				reportName: "All Recorded",
 				dataSource: SeriesMock.listByStatus,
-				args: "Recorded",
+				args: "recorded",
 			},
 		},
 		{
@@ -34,7 +34,7 @@ describe("SettingsController", (): void => {
 			viewArgs: {
 				reportName: "All Expected",
 				dataSource: SeriesMock.listByStatus,
-				args: "Expected",
+				args: "expected",
 			},
 		},
 		{
@@ -42,14 +42,14 @@ describe("SettingsController", (): void => {
 			viewArgs: {
 				reportName: "All Missed",
 				dataSource: SeriesMock.listByStatus,
-				args: "Missed",
+				args: "missed",
 			},
 		},
 		{
 			description: "Incomplete",
 			viewArgs: {
 				reportName: "All Incomplete",
-				dataSource: SeriesMock.listByIncomplete,
+				dataSource: SeriesMock.incomplete,
 			},
 		},
 	];
@@ -98,19 +98,19 @@ describe("SettingsController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		let dataSyncRow: HTMLDivElement,
-			aboutRow: HTMLDivElement,
+		let aboutRow: HTMLDivElement,
+			loginRow: HTMLDivElement,
 			recordedReportRow: HTMLDivElement,
 			expectedReportRow: HTMLDivElement,
 			missedReportRow: HTMLDivElement,
 			incompleteReportRow: HTMLDivElement;
 
 		beforeEach(async (): Promise<void> => {
-			dataSyncRow = document.createElement("div");
-			dataSyncRow.id = "dataSyncRow";
-
 			aboutRow = document.createElement("div");
 			aboutRow.id = "aboutRow";
+
+			loginRow = document.createElement("div");
+			loginRow.id = "loginRow";
 
 			recordedReportRow = document.createElement("div");
 			recordedReportRow.id = "recordedReportRow";
@@ -125,19 +125,16 @@ describe("SettingsController", (): void => {
 			incompleteReportRow.id = "incompleteReportRow";
 
 			document.body.append(
-				dataSyncRow,
 				aboutRow,
+				loginRow,
 				recordedReportRow,
 				expectedReportRow,
 				missedReportRow,
 				incompleteReportRow,
 			);
 
-			sinon.stub(
-				settingsController,
-				"viewDataSync" as keyof SettingsController,
-			);
 			sinon.stub(settingsController, "viewAbout" as keyof SettingsController);
+			sinon.stub(settingsController, "viewLogin" as keyof SettingsController);
 			sinon.stub(
 				settingsController,
 				"viewRecordedReport" as keyof SettingsController,
@@ -158,14 +155,14 @@ describe("SettingsController", (): void => {
 			await settingsController.activate();
 		});
 
-		it("should attach a data sync click event handler", (): void => {
-			dataSyncRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewDataSync"]).to.have.been.called;
-		});
-
 		it("should attach an about click event handler", (): void => {
 			aboutRow.dispatchEvent(new MouseEvent("click"));
 			expect(settingsController["viewAbout"]).to.have.been.called;
+		});
+
+		it("should attach a login click event handler", (): void => {
+			loginRow.dispatchEvent(new MouseEvent("click"));
+			expect(settingsController["viewLogin"]).to.have.been.called;
 		});
 
 		it("should attach a recorded report click event handler", (): void => {
@@ -189,8 +186,8 @@ describe("SettingsController", (): void => {
 		});
 
 		afterEach((): void => {
-			dataSyncRow.remove();
 			aboutRow.remove();
+			loginRow.remove();
 			recordedReportRow.remove();
 			expectedReportRow.remove();
 			missedReportRow.remove();
@@ -205,17 +202,17 @@ describe("SettingsController", (): void => {
 		});
 	});
 
-	describe("viewDataSync", (): void => {
-		it("should push the data sync view", async (): Promise<void> => {
-			await settingsController["viewDataSync"]();
-			expect(appController.pushView).to.have.been.calledWith("dataSync");
-		});
-	});
-
 	describe("viewAbout", (): void => {
 		it("should push the about view", async (): Promise<void> => {
 			await settingsController["viewAbout"]();
 			expect(appController.pushView).to.have.been.calledWith("about");
+		});
+	});
+
+	describe("viewLogin", (): void => {
+		it("should push the login view", async (): Promise<void> => {
+			await settingsController["viewLogin"]();
+			expect(appController.pushView).to.have.been.calledWith("login");
 		});
 	});
 
@@ -236,4 +233,6 @@ describe("SettingsController", (): void => {
 			});
 		});
 	});
+
+	afterEach((): void => SeriesMock.reset());
 });

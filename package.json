@@ -18,8 +18,6 @@
   },
   "homepage": "https://github.com/scottohara/tvmanager",
   "dependencies": {
-    "comlink": "4.4.1",
-    "idb": "8.0.0",
     "sortablejs": "1.15.2"
   },
   "devDependencies": {
@@ -71,16 +69,16 @@
   },
   "scripts": {
     "start": "concurrently --prefix-colors auto npm:api npm:db npm:ui",
-    "api": "bundle exec op run --env-file=.env -- rerun --dir app --background -- puma --bind tcp://localhost:3001",
-    "api:test": "RACK_ENV=test bundle exec op run --env-file=.env -- puma --bind tcp://localhost:3001",
-    "db": "couchdb",
+    "api": "bundle exec op run --env-file=.env -- rails server",
+    "api:test": "npm run api -- --environment=test",
+    "db": "postgres -D /opt/homebrew/var/postgres",
     "ui": "webpack serve --config webpack.dev.js",
     "build": "webpack --progress --config webpack.prod.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint",
     "rspec": "bundle exec op run --env-file=.env -- rake spec",
-    "cypress": "cypress open --e2e --browser chrome",
+    "cypress": "op run --env-file=.env -- cypress open --e2e --browser chrome",
     "start:simulator": "xcrun simctl delete tvm-simulator; xcrun simctl bootstatus $(xcrun simctl create tvm-simulator $npm_package_config_DEVICE_TYPE_ID $npm_package_config_RUNTIME_ID) -b",
     "show:simulator": "npm run start:simulator && open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app",
     "test": "npm run format:check && npm run lint && npm run test:coverage:mobile",
@@ -93,7 +91,8 @@
     "generate:splash": "rm src/images/apple-splash-*; pwa-asset-generator build/tv-splash.svg src/images --splash-only --background black --padding 0 --type png --xhtml --path-override \"<%=require('~/images\"",
     "deploy": "fly deploy --build-arg NODE_VERSION=$npm_package_engines_node --build-arg NPM_VERSION=$npm_package_engines_npm --build-arg RUBY_VERSION=$npm_package_engines_ruby",
     "deploy:staging": "npm run deploy -- --app tvmanagertest",
-    "deploy:production": "npm run deploy -- --app tvmanager"
+    "deploy:production": "npm run deploy -- --app tvmanager",
+    "swap:check": "fly ssh console --command 'free'"
   },
   "engines": {
     "node": "20.11.1",

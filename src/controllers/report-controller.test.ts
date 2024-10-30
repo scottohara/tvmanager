@@ -1,9 +1,4 @@
-import type {
-	HeaderFooter,
-	NavButton,
-	NavButtonEventHandler,
-	Report,
-} from "~/controllers";
+import type { NavButton, NavButtonEventHandler, Report } from "~/controllers";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import ListMock from "~/mocks/list-mock";
 import ReportController from "~/controllers/report-controller";
@@ -23,8 +18,8 @@ describe("ReportController", (): void => {
 	beforeEach((): void => {
 		args = "test-args";
 		items = [
-			new SeriesMock(null, "test-item-1", null, null),
-			new SeriesMock(null, "test-item-2", null, null),
+			new SeriesMock(null, "test-item-1", null, 1),
+			new SeriesMock(null, "test-item-2", null, 1),
 		];
 		report = {
 			reportName: "test-report",
@@ -83,21 +78,40 @@ describe("ReportController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(reportController, "viewItems" as keyof ReportController);
 			reportController["reportList"] = new ListMock("", "", "", []);
-			await reportController.activate();
 		});
 
-		it("should get the list for the report", (): void => {
-			expect(report.dataSource).to.have.been.calledWith(report.args);
-			expect(reportController["reportList"].items).to.deep.equal(items);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => reportController.activate());
+
+			it("should get the list for the report", (): void => {
+				expect(report.dataSource).to.have.been.calledWith(report.args);
+				expect(reportController["reportList"].items).to.deep.equal(items);
+			});
+
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(reportController["reportList"].refresh).to.have.been.called);
+			it("should set the list to view mode", (): Chai.Assertion =>
+				expect(reportController["viewItems"]).to.have.been.called);
 		});
 
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(reportController["reportList"].refresh).to.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion =>
-			expect(reportController["viewItems"]).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				report.dataSource = sinon.stub().throws(new Error("activate failed"));
+				await reportController.activate();
+			});
+
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(reportController["reportList"].refresh).to.not.have.been.called);
+			it("should not set the list to view mode", (): Chai.Assertion =>
+				expect(reportController["viewItems"]).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "activate failed",
+				}));
+		});
 	});
 
 	describe("goBack", (): void => {
@@ -125,7 +139,7 @@ describe("ReportController", (): void => {
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(reportController, "activate");
 			await reportController.setup();
-			await reportController["viewItems"]();
+			reportController["viewItems"]();
 		});
 
 		it("should set the list to view mode", (): Chai.Assertion =>
@@ -134,11 +148,7 @@ describe("ReportController", (): void => {
 			));
 		it("should clear the view footer", (): Chai.Assertion =>
 			expect(appController.clearFooter).to.have.been.called);
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String((reportController.footer as HeaderFooter).label)).to.equal(
-				"v1",
-			));
-		it("should set the view footer", (): Chai.Assertion =>
-			expect(appController.setFooter).to.have.been.called);
 	});
+
+	afterEach((): void => SeriesMock.reset());
 });

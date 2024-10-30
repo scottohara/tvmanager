@@ -7,7 +7,6 @@ const { merge } = require("webpack-merge"),
 		webmanifestRule,
 		extractCss,
 		createIndexHtml,
-		defineAppConfig,
 		config,
 	} = require("./webpack.common");
 
@@ -29,14 +28,10 @@ module.exports = merge(config, {
 		proxy: [
 			{
 				context: ["/"],
-				target: "http://localhost:3001",
+				target: "http://localhost:3000",
 			},
 		],
 	},
 
-	plugins: [
-		extractCss(),
-		createIndexHtml,
-		defineAppConfig({ maxDataAgeDays: 9999 }),
-	],
+	plugins: [extractCss(), createIndexHtml],
 });

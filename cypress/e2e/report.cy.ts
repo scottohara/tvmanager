@@ -1,4 +1,5 @@
-import type { ListItem, Progress, TestData } from "~/support/types";
+import "~/support/report";
+import type { ListItem, Progress } from "~/support/types";
 import {
 	allExpectedRow,
 	allIncompleteRow,
@@ -8,7 +9,6 @@ import {
 import {
 	checkProgress,
 	firstListItem,
-	footerLabel,
 	footerRightButton,
 	headerLabel,
 	headerLeftButton,
@@ -17,68 +17,34 @@ import {
 	list,
 	listItem,
 	listItems,
+	notices,
 } from "~/support/e2e";
 import type { EpisodeStatus } from "~/models";
 import { watched } from "~/support/episode";
 
-const reports: { status: EpisodeStatus | "Incomplete"; selector: string }[] = [
-	{ status: "Recorded", selector: allRecordedRow },
-	{ status: "Expected", selector: allExpectedRow },
-	{ status: "Missed", selector: allMissedRow },
-	{ status: "Incomplete", selector: allIncompleteRow },
+const reports: {
+	status: EpisodeStatus | "Incomplete";
+	headerText: string;
+	selector: string;
+}[] = [
+	{ status: "recorded", headerText: "All Recorded", selector: allRecordedRow },
+	{ status: "expected", headerText: "All Expected", selector: allExpectedRow },
+	{ status: "missed", headerText: "All Missed", selector: allMissedRow },
+	{
+		status: "Incomplete",
+		headerText: "All Incomplete",
+		selector: allIncompleteRow,
+	},
 ];
 
 describe("Report", (): void => {
-	reports.forEach(({ status, selector }): void => {
-		describe(`All ${status}`, (): void => {
+	reports.forEach(({ status, headerText, selector }): void => {
+		describe(headerText, (): void => {
 			let expectedItems: ListItem[];
 
 			before((): void => {
-				let data: TestData;
-
 				if ("Incomplete" === status) {
-					data = {
-						programs: [
-							{
-								programName: "Program Z",
-								series: [
-									{
-										episodes: [{ status: "Watched" }, { status: "Watched" }],
-									},
-									{
-										seriesName: "Series C",
-										episodes: [
-											{ status: "Watched" },
-											{ status: "Watched" },
-											{},
-										],
-									},
-									{
-										seriesName: "Series B",
-										episodes: [{ status: "Watched" }, {}],
-									},
-									{ episodes: [] },
-								],
-							},
-							{
-								programName: "Program A",
-								series: [
-									{
-										seriesName: "Series A",
-										episodes: [
-											{ status: "Watched" },
-											{ status: "Watched" },
-											{ status: "Recorded" },
-											{ status: "Expected" },
-											{ status: "Missed" },
-											{},
-										],
-									},
-									{ episodes: [{}] },
-								],
-							},
-						],
-					};
+					cy.createIncompleteReportData();
 
 					expectedItems = [
 						{
@@ -95,34 +61,7 @@ describe("Report", (): void => {
 						},
 					];
 				} else {
-					data = {
-						programs: [
-							{
-								programName: "Program Z",
-								series: [
-									{
-										seriesName: "Series C",
-										episodes: [{ status }, {}, { status }],
-									},
-									{
-										seriesName: "Series B",
-										episodes: [{ status }, {}],
-									},
-									{ episodes: [] },
-								],
-							},
-							{
-								programName: "Program A",
-								series: [
-									{
-										seriesName: "Series A",
-										episodes: [{ status }, { status }],
-									},
-									{ episodes: [{}] },
-								],
-							},
-						],
-					};
+					cy.createStatusReportData(status);
 
 					expectedItems = [
 						{
@@ -139,19 +78,18 @@ describe("Report", (): void => {
 						},
 					];
 				}
-
-				cy.createTestData(data);
 			});
 
 			beforeEach((): void => {
+				cy.login();
 				cy.visit("/");
 				cy.get(footerRightButton).click();
 				cy.get(selector).click();
 			});
 
 			describe("header", (): void => {
-				it(`should show 'All ${status}' as the label`, (): void => {
-					cy.get(headerLabel).should("have.text", `All ${status}`);
+				it(`should show '${headerText}' as the label`, (): void => {
+					cy.get(headerLabel).should("have.text", headerText);
 				});
 
 				it("should navigate to the Settings view when the left button is clicked", (): void => {
@@ -179,11 +117,16 @@ describe("Report", (): void => {
 					cy.get(firstListItem).click();
 					cy.get(headerLabel).should("have.text", "Program A : Series A");
 				});
-			});
 
-			describe("footer", (): void => {
-				it("should show the database version as the label", (): void => {
-					cy.get(footerLabel).should("have.text", "v1");
+				it("should show a notice if the report could not be retreived", (): void => {
+					cy.intercept("GET", "/reports/*", {
+						statusCode: 500,
+						body: "Retrieve failed",
+					});
+					cy.get(headerLeftButton).click();
+					cy.get(selector).click();
+					cy.get(notices).should("be.visible");
+					cy.get(notices).should("contain.text", "Retrieve failed");
 				});
 			});
 

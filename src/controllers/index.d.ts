@@ -1,7 +1,6 @@
 import type Episode from "~/models/episode-model";
 import type Program from "~/models/program-model";
 import type { PublicInterface } from "~/global";
-import type { SerializedModel } from "~/models";
 import type Series from "~/models/series-model";
 import type ViewController from "~/controllers/view-controller";
 
@@ -33,29 +32,6 @@ export interface NoticeStack {
 interface Notice {
 	id?: string;
 	label: string;
-}
-
-export interface Device {
-	id: string;
-	name: string;
-	imported: boolean;
-}
-
-export type SyncOperation = "Export" | "Import";
-
-export type SyncErrorType =
-	| "Delete error"
-	| "Receive error"
-	| "Save error"
-	| "Send error";
-
-export type ImportObject = SerializedModel & {
-	pending: string[];
-	isDeleted: boolean;
-};
-
-export interface ImportDoc {
-	doc: ImportObject;
 }
 
 export interface EpisodeListItem {

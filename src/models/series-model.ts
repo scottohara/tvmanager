@@ -1,8 +1,5 @@
-import type {
-	EpisodeStatus,
-	PersistedSeries,
-	SerializedSeries,
-} from "~/models";
+import * as API from "~/services/api-service";
+import type { EpisodeStatus, JsonSeries, JsonSeriesWithCounts } from "~/models";
 import Base from "~/models/base-model";
 import ProgressBar from "~/components/progressbar";
 
@@ -22,10 +19,10 @@ export default class Series extends Base {
 	private missedCount = 0;
 
 	public constructor(
-		public id: string | null,
-		public seriesName: string | null,
+		public id: number | null,
+		public seriesName: string,
 		public nowShowing: number | null,
-		public programId: string | null,
+		public programId: number,
 		public programName?: string,
 		episodeCount = 0,
 		watchedCount = 0,
@@ -69,217 +66,104 @@ export default class Series extends Base {
 			: "Not Showing";
 	}
 
-	public static async listByProgram(programId: string): Promise<Series[]> {
-		let seriesList: Series[] = [];
+	public static async list(programId: number): Promise<Series[]> {
+		const series = await API.get<JsonSeriesWithCounts[]>(
+			`/programs/${programId}/series`,
+		);
 
-		try {
-			seriesList = await Promise.all(
-				(await (await this.db).seriesStore.listByProgram(programId)).map(
-					(series: PersistedSeries): Series =>
-						new Series(
-							series.SeriesID,
-							series.Name,
-							series.NowShowing,
-							series.ProgramID,
-							series.ProgramName,
-							series.EpisodeCount,
-							series.WatchedCount,
-							series.RecordedCount,
-							series.ExpectedCount,
-							series.MissedCount,
-							series.StatusWarningCount,
-						),
-				),
-			);
-		} catch {
-			// No op
-		}
-
-		return seriesList;
+		return series.map(this.fromJson);
 	}
 
-	public static async listByNowShowing(): Promise<Series[]> {
-		let seriesList: Series[] = [];
+	public static async scheduled(): Promise<Series[]> {
+		const series = await API.get<JsonSeriesWithCounts[]>("/scheduled");
 
-		try {
-			seriesList = await Promise.all(
-				(await (await this.db).seriesStore.listByNowShowing()).map(
-					(series: PersistedSeries): Series =>
-						new Series(
-							series.SeriesID,
-							series.Name,
-							series.NowShowing,
-							series.ProgramID,
-							series.ProgramName,
-							series.EpisodeCount,
-							series.WatchedCount,
-							series.RecordedCount,
-							series.ExpectedCount,
-							series.MissedCount,
-							series.StatusWarningCount,
-						),
-				),
-			);
-		} catch {
-			// No op
-		}
-
-		return seriesList;
+		return series.map(this.fromJson);
 	}
 
 	public static async listByStatus(status: EpisodeStatus): Promise<Series[]> {
-		let seriesList: Series[] = [];
+		const series = await API.get<JsonSeriesWithCounts[]>(`/reports/${status}`);
 
-		try {
-			seriesList = await Promise.all(
-				(await (await this.db).seriesStore.listByStatus(status)).map(
-					(series: PersistedSeries): Series =>
-						new Series(
-							series.SeriesID,
-							series.Name,
-							series.NowShowing,
-							series.ProgramID,
-							series.ProgramName,
-							series.EpisodeCount,
-							series.WatchedCount,
-							series.RecordedCount,
-							series.ExpectedCount,
-							series.MissedCount,
-							series.StatusWarningCount,
-						),
-				),
-			);
-		} catch {
-			// No op
-		}
-
-		return seriesList;
+		return series.map(this.fromJson);
 	}
 
-	public static async listByIncomplete(): Promise<Series[]> {
-		let seriesList: Series[] = [];
+	public static async incomplete(): Promise<Series[]> {
+		const series = await API.get<JsonSeriesWithCounts[]>("/reports/incomplete");
 
-		try {
-			seriesList = await Promise.all(
-				(await (await this.db).seriesStore.listByIncomplete()).map(
-					(series: PersistedSeries): Series =>
-						new Series(
-							series.SeriesID,
-							series.Name,
-							series.NowShowing,
-							series.ProgramID,
-							series.ProgramName,
-							series.EpisodeCount,
-							series.WatchedCount,
-							series.RecordedCount,
-							series.ExpectedCount,
-							series.MissedCount,
-							series.StatusWarningCount,
-						),
-				),
-			);
-		} catch {
-			// No op
-		}
-
-		return seriesList;
+		return series.map(this.fromJson);
 	}
 
-	public static async find(id: string): Promise<Series> {
-		let SeriesID: string | null = null,
-			Name: string | null = null,
-			NowShowing: number | null = null,
-			ProgramID: string | null = null;
+	public static async find(id: number): Promise<Series> {
+		const {
+			id: seriesId,
+			name,
+			now_showing,
+			program_id,
+		} = await API.get<JsonSeries>(`/series/${id}`);
 
-		try {
-			const series = await (await this.db).seriesStore.find(id);
-
-			if (undefined !== series) {
-				({ SeriesID, Name, NowShowing, ProgramID } = series);
-			}
-		} catch {
-			// No op
-		}
-
-		return new Series(SeriesID, Name, NowShowing, ProgramID);
+		return new Series(seriesId, name, now_showing, program_id);
 	}
 
 	public static async count(): Promise<number> {
-		let count = 0;
-
-		try {
-			count = await (await this.db).seriesStore.count();
-		} catch {
-			// No op
-		}
-
-		return count;
+		return API.get<number>("/series/count");
 	}
 
-	public static async removeAll(): Promise<string | undefined> {
-		let errorMessage: string | undefined;
-
-		try {
-			await (await this.db).seriesStore.removeAll();
-		} catch (error: unknown) {
-			errorMessage = `Series.removeAll: ${(error as Error).message}`;
-		}
-
-		return errorMessage;
-	}
-
-	public static fromJson(series: SerializedSeries): Series {
+	private static fromJson({
+		id,
+		name,
+		now_showing,
+		program_id,
+		program_name,
+		episode_count,
+		watched_count,
+		recorded_count,
+		expected_count,
+		missed_count,
+		status_warning_count,
+	}: JsonSeriesWithCounts): Series {
 		return new Series(
-			series.id,
-			series.seriesName,
-			series.nowShowing,
-			series.programId,
+			id,
+			name,
+			now_showing,
+			program_id,
+			program_name,
+			episode_count,
+			watched_count,
+			recorded_count,
+			expected_count,
+			missed_count,
+			status_warning_count,
 		);
 	}
 
-	public async save(): Promise<string | undefined> {
-		// If an id has not been set (ie. is a new series to be added), generate a new UUID
-		this.id ??= crypto.randomUUID();
+	public async save(): Promise<void> {
+		const series: Omit<JsonSeries, "id"> = {
+			name: this.seriesName,
+			now_showing: this.nowShowing,
+			program_id: Number(this.programId),
+		};
 
-		try {
-			await (
-				await this.db
-			).seriesStore.save({
-				SeriesID: this.id,
-				Name: String(this.seriesName),
-				NowShowing: this.nowShowing,
-				ProgramID: String(this.programId),
-			});
+		if (null === this.id) {
+			const { id } = await API.create<JsonSeries>(
+				`/programs/${this.programId}/series`,
+				series,
+			);
 
-			return this.id;
-		} catch {
-			// No op
+			this.id = id;
+		} else {
+			await API.update(`/series/${this.id}`, series);
 		}
-
-		return undefined;
 	}
 
 	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
 		if (null !== this.id) {
-			await (await this.db).seriesStore.remove(this.id);
+			await API.destroy(`/series/${this.id}`);
 
 			// Clear the instance properties
 			this.id = null;
-			this.seriesName = null;
+			this.seriesName = "";
 			this.nowShowing = null;
-			this.programId = null;
 		}
-	}
-
-	public toJson(): SerializedSeries {
-		return {
-			id: this.id,
-			seriesName: this.seriesName,
-			nowShowing: this.nowShowing,
-			programId: this.programId,
-			type: "Series",
-		};
 	}
 
 	public setEpisodeCount(count: number): void {

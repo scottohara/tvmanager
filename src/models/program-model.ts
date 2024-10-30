@@ -1,4 +1,5 @@
-import type { PersistedProgram, SerializedProgram } from "~/models";
+import * as API from "~/services/api-service";
+import type { JsonProgram, JsonProgramWithCounts } from "~/models";
 import Base from "~/models/base-model";
 import ProgressBar from "~/components/progressbar";
 
@@ -16,8 +17,8 @@ export default class Program extends Base {
 	private readonly progressBar: ProgressBar;
 
 	public constructor(
-		public id: string | null,
-		public programName: string | null,
+		public id: number | null,
+		public programName: string,
 		public seriesCount = 0,
 		episodeCount = 0,
 		watchedCount = 0,
@@ -36,116 +37,69 @@ export default class Program extends Base {
 	}
 
 	public get programGroup(): string {
-		return this.programName?.substring(0, 1).toUpperCase() ?? "";
+		return this.programName.substring(0, 1).toUpperCase();
 	}
 
 	public static async list(): Promise<Program[]> {
-		let programList: Program[] = [];
+		const programs = await API.get<JsonProgramWithCounts[]>("/programs");
 
-		try {
-			programList = await Promise.all(
-				(await (await this.db).programsStore.list()).map(
-					(prog: PersistedProgram): Program =>
-						new Program(
-							prog.ProgramID,
-							prog.Name,
-							prog.SeriesCount,
-							prog.EpisodeCount,
-							prog.WatchedCount,
-							prog.RecordedCount,
-							prog.ExpectedCount,
-						),
+		return programs.map(
+			({
+				id,
+				name,
+				series_count,
+				episode_count,
+				watched_count,
+				recorded_count,
+				expected_count,
+			}: JsonProgramWithCounts): Program =>
+				new Program(
+					id,
+					name,
+					series_count,
+					episode_count,
+					watched_count,
+					recorded_count,
+					expected_count,
 				),
-			);
-		} catch {
-			// No op
-		}
-
-		return programList;
+		);
 	}
 
-	public static async find(id: string): Promise<Program> {
-		let ProgramID: string | null = null,
-			Name: string | null = null;
+	public static async find(id: number): Promise<Program> {
+		const { id: programId, name } = await API.get<JsonProgram>(
+			`/programs/${id}`,
+		);
 
-		try {
-			const prog = await (await this.db).programsStore.find(id);
-
-			if (undefined !== prog) {
-				({ ProgramID, Name } = prog);
-			}
-		} catch {
-			// No op
-		}
-
-		return new Program(ProgramID, Name);
+		return new Program(programId, name);
 	}
 
 	public static async count(): Promise<number> {
-		let count = 0;
-
-		try {
-			count = await (await this.db).programsStore.count();
-		} catch {
-			// No op
-		}
-
-		return count;
+		return API.get<number>("/programs/count");
 	}
 
-	public static async removeAll(): Promise<string | undefined> {
-		let errorMessage: string | undefined;
+	public async save(): Promise<void> {
+		const program: Omit<JsonProgram, "id"> = {
+			name: this.programName,
+		};
 
-		try {
-			await (await this.db).programsStore.removeAll();
-		} catch (error: unknown) {
-			errorMessage = `Program.removeAll: ${(error as Error).message}`;
+		if (null === this.id) {
+			const { id } = await API.create<JsonProgram>("/programs", program);
+
+			this.id = id;
+		} else {
+			await API.update(`/programs/${this.id}`, program);
 		}
-
-		return errorMessage;
-	}
-
-	public static fromJson(program: SerializedProgram): Program {
-		return new Program(program.id, program.programName);
-	}
-
-	public async save(): Promise<string | undefined> {
-		// If an id has not been set (ie. is a new program to be added), generate a new UUID
-		this.id ??= crypto.randomUUID();
-
-		try {
-			await (
-				await this.db
-			).programsStore.save({
-				ProgramID: this.id,
-				Name: String(this.programName),
-			});
-
-			return this.id;
-		} catch {
-			// No op
-		}
-
-		return undefined;
 	}
 
 	public async remove(): Promise<void> {
 		// Only proceed if there is an ID to delete
 		if (null !== this.id) {
-			await (await this.db).programsStore.remove(this.id);
+			await API.destroy(`/programs/${this.id}`);
 
 			// Clear the instance properties
 			this.id = null;
-			this.programName = null;
+			this.programName = "";
 		}
-	}
-
-	public toJson(): SerializedProgram {
-		return {
-			id: this.id,
-			programName: this.programName,
-			type: "Program",
-		};
 	}
 
 	public setEpisodeCount(count: number): void {

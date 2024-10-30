@@ -1,7 +1,7 @@
 const webpack = require("webpack"),
 	{ merge } = require("webpack-merge"),
 	path = require("path"),
-	{ htmlRule, defineAppConfig, config } = require("./webpack.common");
+	{ htmlRule, config } = require("./webpack.common");
 
 module.exports = merge(config, {
 	module: {
@@ -57,50 +57,8 @@ module.exports = merge(config, {
 			"~/mocks/series-model-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/models\/setting-model$/u,
-			"~/mocks/setting-model-mock",
+			/^~\/services\/api-service$/u,
+			"~/mocks/api-service-mock",
 		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/models\/sync-model$/u,
-			"~/mocks/sync-model-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/services\/database-service$/u,
-			"~/mocks/database-service-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/db$/u,
-			"~/mocks/db-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/episodes$/u,
-			"~/mocks/episodes-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/programs$/u,
-			"~/mocks/programs-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/series$/u,
-			"~/mocks/series-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/settings$/u,
-			"~/mocks/settings-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/syncs$/u,
-			"~/mocks/syncs-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^~\/stores\/worker$/u,
-			"~/mocks/worker-store-mock",
-		),
-		new webpack.NormalModuleReplacementPlugin(
-			/^comlink$/u,
-			"~/mocks/comlink-mock",
-		),
-
-		defineAppConfig(),
 	],
 });

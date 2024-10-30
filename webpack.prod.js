@@ -10,7 +10,6 @@ const path = require("path"),
 		webmanifestRule,
 		extractCss,
 		createIndexHtml,
-		defineAppConfig,
 		config,
 	} = require("./webpack.common");
 
@@ -47,7 +46,6 @@ module.exports = merge(config, {
 	plugins: [
 		extractCss({ filename: "[name]-[chunkhash].css" }),
 		createIndexHtml,
-		defineAppConfig(),
 		new GenerateSW({
 			cacheId: packageJson.name,
 			skipWaiting: true,

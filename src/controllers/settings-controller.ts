@@ -9,12 +9,12 @@ export default class SettingsController extends ViewController {
 	}
 
 	// DOM selectors
-	private get dataSyncRow(): HTMLDivElement {
-		return document.querySelector("#dataSyncRow") as HTMLDivElement;
-	}
-
 	private get aboutRow(): HTMLDivElement {
 		return document.querySelector("#aboutRow") as HTMLDivElement;
+	}
+
+	private get loginRow(): HTMLDivElement {
+		return document.querySelector("#loginRow") as HTMLDivElement;
 	}
 
 	private get recordedReportRow(): HTMLDivElement {
@@ -50,8 +50,8 @@ export default class SettingsController extends ViewController {
 
 	public override async activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
-		this.dataSyncRow.addEventListener("click", this.viewDataSync.bind(this));
 		this.aboutRow.addEventListener("click", this.viewAbout.bind(this));
+		this.loginRow.addEventListener("click", this.viewLogin.bind(this));
 		this.recordedReportRow.addEventListener(
 			"click",
 			this.viewRecordedReport.bind(this),
@@ -76,19 +76,19 @@ export default class SettingsController extends ViewController {
 		return this.appController.popView();
 	}
 
-	private async viewDataSync(): Promise<void> {
-		return this.appController.pushView("dataSync");
-	}
-
 	private async viewAbout(): Promise<void> {
 		return this.appController.pushView("about");
+	}
+
+	private async viewLogin(): Promise<void> {
+		return this.appController.pushView("login");
 	}
 
 	private async viewRecordedReport(): Promise<void> {
 		return this.appController.pushView("report", {
 			reportName: "All Recorded",
 			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
-			args: "Recorded",
+			args: "recorded",
 		});
 	}
 
@@ -96,7 +96,7 @@ export default class SettingsController extends ViewController {
 		return this.appController.pushView("report", {
 			reportName: "All Expected",
 			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
-			args: "Expected",
+			args: "expected",
 		});
 	}
 
@@ -104,14 +104,14 @@ export default class SettingsController extends ViewController {
 		return this.appController.pushView("report", {
 			reportName: "All Missed",
 			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
-			args: "Missed",
+			args: "missed",
 		});
 	}
 
 	private async viewIncompleteReport(): Promise<void> {
 		return this.appController.pushView("report", {
 			reportName: "All Incomplete",
-			dataSource: Series.listByIncomplete.bind(Series) as ReportDataSource,
+			dataSource: Series.incomplete.bind(Series) as ReportDataSource,
 		});
 	}
 }

@@ -1,8 +1,4 @@
-import type {
-	HeaderFooter,
-	NavButton,
-	NavButtonEventHandler,
-} from "~/controllers";
+import type { NavButton, NavButtonEventHandler } from "~/controllers";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import EpisodeMock from "~/mocks/episode-model-mock";
 import ListMock from "~/mocks/list-mock";
@@ -75,27 +71,52 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(
 				unscheduledController,
 				"viewItems" as keyof UnscheduledController,
 			);
 			unscheduledController["unscheduledList"] = new ListMock("", "", "", []);
-			await unscheduledController.activate();
 		});
 
-		it("should get the list of unscheduled episodes", (): void => {
-			expect(EpisodeMock.listByUnscheduled).to.have.been.called;
-			expect(unscheduledController["unscheduledList"].items).to.deep.equal(
-				items,
-			);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => {
+				EpisodeMock.episodes = items;
+				await unscheduledController.activate();
+			});
+
+			it("should get the list of episodes for the series", (): void => {
+				expect(EpisodeMock.unscheduled).to.have.been.called;
+				expect(unscheduledController["unscheduledList"].items).to.deep.equal(
+					items,
+				);
+			});
+
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(unscheduledController["unscheduledList"].refresh).to.have.been
+					.called);
+			it("should set the list to view mode", (): Chai.Assertion =>
+				expect(unscheduledController["viewItems"]).to.have.been.called);
 		});
 
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(unscheduledController["unscheduledList"].refresh).to.have.been
-				.called);
-		it("should set the list to view mode", (): Chai.Assertion =>
-			expect(unscheduledController["viewItems"]).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				EpisodeMock.error = "activate failed";
+				await unscheduledController.activate();
+			});
+
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(unscheduledController["unscheduledList"].refresh).to.not.have
+					.been.called);
+			it("should not set the list to view mode", (): Chai.Assertion =>
+				expect(unscheduledController["viewItems"]).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "activate failed",
+				}));
+
+			afterEach((): null => (EpisodeMock.error = null));
+		});
 	});
 
 	describe("goBack", (): void => {
@@ -127,7 +148,7 @@ describe("UnscheduledController", (): void => {
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(unscheduledController, "activate");
 			await unscheduledController.setup();
-			await unscheduledController["viewItems"]();
+			unscheduledController["viewItems"]();
 		});
 
 		it("should set the list to view mode", (): Chai.Assertion =>
@@ -136,11 +157,7 @@ describe("UnscheduledController", (): void => {
 			).to.equal("view"));
 		it("should clear the view footer", (): Chai.Assertion =>
 			expect(appController.clearFooter).to.have.been.called);
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(
-				String((unscheduledController.footer as HeaderFooter).label),
-			).to.equal("v1"));
-		it("should set the view footer", (): Chai.Assertion =>
-			expect(appController.setFooter).to.have.been.called);
 	});
+
+	afterEach((): void => EpisodeMock.reset());
 });

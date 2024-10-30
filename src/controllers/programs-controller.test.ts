@@ -21,8 +21,8 @@ describe("ProgramsController", (): void => {
 
 	beforeEach((): void => {
 		items = [
-			new ProgramMock("1", "a-test-program"),
-			new ProgramMock("2", "z-test-program"),
+			new ProgramMock(1, "a-test-program"),
+			new ProgramMock(2, "z-test-program"),
 		];
 
 		programList = document.createElement("ul");
@@ -101,22 +101,46 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
 			programsController["programList"] = new ListMock("", "", "", []);
-			ProgramMock.programs = items;
-			await programsController.activate();
 		});
 
-		it("should get the list of programs", (): void => {
-			expect(ProgramMock.list).to.have.been.called;
-			expect(programsController["programList"].items).to.deep.equal(items);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.programs = items;
+				await programsController.activate();
+			});
+
+			it("should get the list of programs", (): void => {
+				expect(ProgramMock.list).to.have.been.called;
+				expect(programsController["programList"].items).to.deep.equal(items);
+			});
+
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(programsController["programList"].refresh).to.have.been.called);
+			it("should set the list to view mode", (): Chai.Assertion =>
+				expect(programsController["viewItems"]).to.have.been.called);
 		});
 
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(programsController["programList"].refresh).to.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion =>
-			expect(programsController["viewItems"]).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.error = "activate failed";
+				await programsController.activate();
+			});
+
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(programsController["programList"].refresh).to.not.have.been
+					.called);
+			it("should not set the list to view mode", (): Chai.Assertion =>
+				expect(programsController["viewItems"]).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "activate failed",
+				}));
+
+			afterEach((): null => (ProgramMock.error = null));
+		});
 	});
 
 	describe("contentShown", (): void => {
@@ -127,7 +151,7 @@ describe("ProgramsController", (): void => {
 
 		describe("with active list item", (): void => {
 			beforeEach((): void => {
-				programsController["activeListItem"] = new ProgramMock("1", "");
+				programsController["activeListItem"] = new ProgramMock(1, "");
 				programsController.contentShown();
 			});
 
@@ -202,21 +226,48 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("deleteItem", (): void => {
-		let index: number, item: ProgramMock;
+		beforeEach(
+			(): ListMock =>
+				(programsController["programList"] = new ListMock("", "", "", [
+					items[0],
+				])),
+		);
 
-		beforeEach(async (): Promise<void> => {
-			index = 0;
-			item = new ProgramMock(null, "test-program");
-			programsController["programList"] = new ListMock("", "", "", [item]);
-			await programsController["deleteItem"](index);
+		describe("success", (): void => {
+			beforeEach(
+				async (): Promise<void> => programsController["deleteItem"](0),
+			);
+
+			it("should remove the item from the database", (): Chai.Assertion =>
+				expect(items[0].remove).to.have.been.called);
+			it("should remove the item from the program list", (): Chai.Assertion =>
+				expect(programsController["programList"].items).to.deep.equal([]));
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(programsController["programList"].refresh).to.have.been.called);
 		});
 
-		it("should remove the item from the database", (): Chai.Assertion =>
-			expect(item.remove).to.have.been.called);
-		it("should remove the item from the program list", (): Chai.Assertion =>
-			expect(programsController["programList"].items).to.deep.equal([]));
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(programsController["programList"].refresh).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.error = "delete failed";
+				await programsController["deleteItem"](0);
+			});
+
+			it("should attempt to remove the item from the database", (): Chai.Assertion =>
+				expect(items[0].remove).to.have.been.called);
+			it("should not remove the item from the program list", (): Chai.Assertion =>
+				expect(programsController["programList"].items).to.deep.equal([
+					items[0],
+				]));
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(programsController["programList"].refresh).to.not.have.been
+					.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "delete failed",
+				}));
+
+			afterEach((): null => (ProgramMock.error = null));
+		});
 	});
 
 	describe("deleteItems", (): void => {
@@ -226,7 +277,7 @@ describe("ProgramsController", (): void => {
 			sinon.stub(programsController, "activate");
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
 			await programsController.setup();
-			await programsController["deleteItems"]();
+			programsController["deleteItems"]();
 			footer = programsController.footer as HeaderFooter;
 			rightButton = footer.rightButton as NavButton;
 		});
@@ -245,9 +296,6 @@ describe("ProgramsController", (): void => {
 			expect(programList.classList.contains("edit")).to.be.false;
 			expect(programList.classList.contains("withHelper")).to.be.false;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
@@ -269,7 +317,7 @@ describe("ProgramsController", (): void => {
 			sinon.stub(programsController, "activate");
 			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
 			await programsController.setup();
-			await programsController["editItems"]();
+			programsController["editItems"]();
 			footer = programsController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -288,9 +336,6 @@ describe("ProgramsController", (): void => {
 			expect(programList.classList.contains("edit")).to.be.true;
 			expect(programList.classList.contains("withHelper")).to.be.false;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -313,7 +358,7 @@ describe("ProgramsController", (): void => {
 			sinon.stub(programsController, "editItems" as keyof ProgramsController);
 			sinon.stub(programsController, "deleteItems" as keyof ProgramsController);
 			await programsController.setup();
-			await programsController["viewItems"]();
+			programsController["viewItems"]();
 			footer = programsController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -333,9 +378,6 @@ describe("ProgramsController", (): void => {
 			expect(programList.classList.contains("edit")).to.be.false;
 			expect(programList.classList.contains("withHelper")).to.be.true;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -358,5 +400,8 @@ describe("ProgramsController", (): void => {
 			expect(appController.setFooter).to.have.been.called);
 	});
 
-	afterEach((): void => programList.remove());
+	afterEach((): void => {
+		ProgramMock.reset();
+		programList.remove();
+	});
 });

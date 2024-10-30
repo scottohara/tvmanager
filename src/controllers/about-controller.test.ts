@@ -26,15 +26,12 @@ describe("AboutController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let databaseVersion: HTMLInputElement,
-			totalPrograms: HTMLInputElement,
+		let totalPrograms: HTMLInputElement,
 			totalSeries: HTMLInputElement,
 			totalEpisodes: HTMLInputElement,
 			leftButton: NavButton;
 
-		beforeEach(async (): Promise<void> => {
-			databaseVersion = document.createElement("input");
-			databaseVersion.id = "databaseVersion";
+		beforeEach((): void => {
 			totalPrograms = document.createElement("input");
 			totalPrograms.id = "totalPrograms";
 			totalSeries = document.createElement("input");
@@ -44,52 +41,81 @@ describe("AboutController", (): void => {
 
 			sinon.stub(aboutController, "goBack" as keyof AboutController);
 
-			document.body.append(
-				databaseVersion,
-				totalPrograms,
-				totalSeries,
-				totalEpisodes,
-			);
-			await aboutController.setup();
-			leftButton = aboutController.header.leftButton as NavButton;
+			document.body.append(totalPrograms, totalSeries, totalEpisodes);
 		});
 
-		it("should set the header label", (): Chai.Assertion =>
-			expect(String(aboutController.header.label)).to.equal("About"));
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => {
+				await aboutController.setup();
+				leftButton = aboutController.header.leftButton as NavButton;
+			});
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(aboutController["goBack"]).to.have.been.called;
+			it("should set the header label", (): Chai.Assertion =>
+				expect(String(aboutController.header.label)).to.equal("About"));
+
+			it("should attach a header left button event handler", (): void => {
+				(leftButton.eventHandler as NavButtonEventHandler)();
+				expect(aboutController["goBack"]).to.have.been.called;
+			});
+
+			it("should set the header left button style", (): Chai.Assertion =>
+				expect(String(leftButton.style)).to.equal("backButton"));
+			it("should set the header left button label", (): Chai.Assertion =>
+				expect(leftButton.label).to.equal("Settings"));
+
+			it("should set the total number of programs", (): void => {
+				expect(ProgramMock.count).to.have.been.called;
+				expect(totalPrograms.value).to.equal("1");
+			});
+
+			it("should set the total number of series", (): void => {
+				expect(SeriesMock.count).to.have.been.called;
+				expect(totalSeries.value).to.equal("1");
+			});
+
+			it("should set the total number of episodes", (): void => {
+				expect(EpisodeMock.count).to.have.been.called;
+				expect(EpisodeMock.countByStatus).to.have.been.calledWith("watched");
+				expect(totalEpisodes.value).to.equal("1 (100.00% watched)");
+			});
+
+			it("should set the scroll position", (): Chai.Assertion =>
+				expect(appController.setScrollPosition).to.have.been.called);
 		});
 
-		it("should set the header left button style", (): Chai.Assertion =>
-			expect(String(leftButton.style)).to.equal("backButton"));
-		it("should set the header left button label", (): Chai.Assertion =>
-			expect(leftButton.label).to.equal("Settings"));
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				ProgramMock.error = "setup failed";
+				await aboutController.setup();
+			});
 
-		it("should set the total number of programs", (): void => {
-			expect(ProgramMock.count).to.have.been.called;
-			expect(totalPrograms.value).to.equal("1");
+			it("should not set the total number of programs", (): void => {
+				expect(ProgramMock.count).to.have.been.called;
+				expect(totalPrograms.value).to.equal("");
+			});
+
+			it("should not set the total number of series", (): void => {
+				expect(SeriesMock.count).to.not.have.been.called;
+				expect(totalSeries.value).to.equal("");
+			});
+
+			it("should not set the total number of episodes", (): void => {
+				expect(EpisodeMock.count).to.not.have.been.called;
+				expect(EpisodeMock.countByStatus).to.not.have.been.calledWith(
+					"watched",
+				);
+				expect(totalEpisodes.value).to.equal("");
+			});
+
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "setup failed",
+				}));
+
+			afterEach((): null => (ProgramMock.error = null));
 		});
-
-		it("should get the total number of series", (): void => {
-			expect(SeriesMock.count).to.have.been.called;
-			expect(totalSeries.value).to.equal("1");
-		});
-
-		it("should get the total number of episodes", (): void => {
-			expect(EpisodeMock.totalCount).to.have.been.called;
-			expect(EpisodeMock.countByStatus).to.have.been.calledWith("Watched");
-			expect(totalEpisodes.value).to.equal("1 (100.00% watched)");
-		});
-
-		it("should set the database version", (): Chai.Assertion =>
-			expect(databaseVersion.value).to.equal("v1"));
-		it("should set the scroll position", (): Chai.Assertion =>
-			expect(appController.setScrollPosition).to.have.been.called);
 
 		afterEach((): void => {
-			databaseVersion.remove();
 			totalPrograms.remove();
 			totalSeries.remove();
 			totalEpisodes.remove();
@@ -117,5 +143,11 @@ describe("AboutController", (): void => {
 					"2 (50.00% watched)",
 				));
 		});
+	});
+
+	afterEach((): void => {
+		ProgramMock.reset();
+		SeriesMock.reset();
+		EpisodeMock.reset();
 	});
 });

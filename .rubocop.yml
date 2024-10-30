@@ -1,21 +1,30 @@
 require:
+  - rubocop-factory_bot
   - rubocop-performance
+  - rubocop-rails
   - rubocop-rake
+  - rubocop-rspec_rails
   - rubocop-rspec
 
 inherit_gem:
   rubocop-config-oharagroup:
     - default.yml
+    - factory_bot.yml
     - performance.yml
+    - rails.yml
     - rake.yml
+    - rspec_rails.yml
     - rspec.yml
 
 AllCops:
   Exclude:
     - "bin/*"
+    - "config/**/*"
+    - "db/migrate/*"
+    - "db/schema.rb"
     - "node_modules/**/*"
     - "vendor/**/*"
 
-# Needed for @@db
-Style/ClassVars:
-  Enabled: false
+# Allow reading of ENV vars for authentication
+Rails/EnvironmentVariableAccess:
+  AllowReads: true

@@ -1,18 +1,9 @@
 # Copyright (c) 2016 Scott O'Hara, oharagroup.net
 # frozen_string_literal: true
 
-require_relative 'app/controllers/application_controller'
-require_relative 'app/controllers/devices_controller'
-require_relative 'app/controllers/documents_controller'
+# This file is used by Rack-based servers to start the application.
 
-map '/documents' do
-	run ::TVManager::DocumentsController
-end
+require_relative 'config/environment'
 
-map '/devices' do
-	run ::TVManager::DevicesController
-end
-
-map '/' do
-	run ::TVManager::ApplicationController
-end
+run ::Rails.application
+::Rails.application.load_server

@@ -1,9 +1,0 @@
-{
-	"_id": "_design/devices",
-	"language": "javascript",
-	"views": {
-		"all": {
-			"map": "function(doc) { if ('device' === doc.type) { emit(doc._id, null); } }"
-		}
-	}
-}

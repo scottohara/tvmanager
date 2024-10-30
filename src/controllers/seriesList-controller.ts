@@ -1,5 +1,4 @@
 import type { NavButtonEventHandler, ProgramListItem } from "~/controllers";
-import DatabaseService from "~/services/database-service";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
 import Series from "~/models/series-model";
@@ -56,16 +55,20 @@ export default class SeriesListController extends ViewController {
 	}
 
 	public override async activate(): Promise<void> {
-		// Get the list of series for the specified program
-		this.seriesList.items = await Series.listByProgram(
-			String(this.listItem.program.id),
-		);
+		try {
+			// Get the list of series for the specified program
+			this.seriesList.items = await Series.list(
+				Number(this.listItem.program.id),
+			);
 
-		// Refresh the list
-		this.seriesList.refresh();
+			// Refresh the list
+			this.seriesList.refresh();
 
-		// Set to view mode
-		return this.viewItems();
+			// Set to view mode
+			this.viewItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	public override contentShown(): void {
@@ -109,25 +112,24 @@ export default class SeriesListController extends ViewController {
 		});
 	}
 
-	private async deleteItem(
-		listIndex: number,
-		dontRemove = false,
-	): Promise<void> {
-		const series = this.seriesList.items[listIndex] as Series;
+	private async deleteItem(listIndex: number): Promise<void> {
+		try {
+			const series = this.seriesList.items[listIndex] as Series;
 
-		// Unless instructed otherwise, remove the item from the database
-		if (!dontRemove) {
+			// Remove the item from the database
 			await series.remove();
+
+			// Remove the item from the list
+			this.seriesList.items.splice(listIndex, 1);
+
+			// Refresh the list
+			this.seriesList.refresh();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
 		}
-
-		// Remove the item from the list
-		this.seriesList.items.splice(listIndex, 1);
-
-		// Refresh the list
-		this.seriesList.refresh();
 	}
 
-	private async deleteItems(): Promise<void> {
+	private deleteItems(): void {
 		// Set the list to delete mode
 		this.seriesList.setAction("delete");
 
@@ -140,7 +142,6 @@ export default class SeriesListController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			rightButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
@@ -152,7 +153,7 @@ export default class SeriesListController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	private async editItems(): Promise<void> {
+	private editItems(): void {
 		// Set the list to edit mode
 		this.seriesList.setAction("edit");
 
@@ -165,7 +166,6 @@ export default class SeriesListController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
@@ -177,7 +177,7 @@ export default class SeriesListController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	private async viewItems(): Promise<void> {
+	private viewItems(): void {
 		// Set the list to view mode
 		this.seriesList.setAction("view");
 
@@ -189,7 +189,6 @@ export default class SeriesListController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Edit",

@@ -4,7 +4,7 @@ import {
 	allIncompleteRow,
 	allMissedRow,
 	allRecordedRow,
-	importExportRow,
+	loginRow,
 } from "~/support/settings";
 import {
 	footerRightButton,
@@ -14,6 +14,7 @@ import {
 
 describe("Settings", (): void => {
 	beforeEach((): void => {
+		cy.login();
 		cy.visit("/");
 		cy.get(footerRightButton).click();
 	});
@@ -31,14 +32,14 @@ describe("Settings", (): void => {
 	});
 
 	describe("content", (): void => {
-		it("should navigate to the Import/Export view when the Import/Export row is clicked", (): void => {
-			cy.get(importExportRow).click();
-			cy.get(headerLabel).should("have.text", "Import/Export");
-		});
-
 		it("should navigate to the About view when the About row is clicked", (): void => {
 			cy.get(aboutRow).click();
 			cy.get(headerLabel).should("have.text", "About");
+		});
+
+		it("should navigate to the Login view when the Login row is clicked", (): void => {
+			cy.get(loginRow).click();
+			cy.get(headerLabel).should("have.text", "Login");
 		});
 
 		it("should navigate to the All Recorded report when the All Recorded row is clicked", (): void => {

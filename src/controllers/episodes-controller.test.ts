@@ -28,10 +28,10 @@ describe("EpisodesController", (): void => {
 		listItem = {
 			source: "test-source",
 			series: new SeriesMock(
-				"1",
+				1,
 				"test-series",
 				null,
-				null,
+				2,
 				"test-program",
 				6,
 				2,
@@ -42,7 +42,7 @@ describe("EpisodesController", (): void => {
 			),
 		};
 
-		items = [new EpisodeMock("1", "test-episode", "Watched", "")];
+		items = [new EpisodeMock(1, "test-episode", "watched", "", 1)];
 
 		episodeList = document.createElement("ul");
 		episodeList.id = "list";
@@ -151,24 +151,46 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("activate", (): void => {
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
 			episodesController["episodeList"] = new ListMock("", "", "", []);
-			EpisodeMock.episodes = items;
-			await episodesController.activate();
 		});
 
-		it("should get the list of episodes for the series", (): void => {
-			expect(EpisodeMock.listBySeries).to.have.been.calledWith(
-				listItem.series.id,
-			);
-			expect(episodesController["episodeList"].items).to.deep.equal(items);
+		describe("success", (): void => {
+			beforeEach(async (): Promise<void> => {
+				EpisodeMock.episodes = items;
+				await episodesController.activate();
+			});
+
+			it("should get the list of episodes for the series", (): void => {
+				expect(EpisodeMock.list).to.have.been.calledWith(listItem.series.id);
+				expect(episodesController["episodeList"].items).to.deep.equal(items);
+			});
+
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].refresh).to.have.been.called);
+			it("should set the list to view mode", (): Chai.Assertion =>
+				expect(episodesController["viewItems"]).to.have.been.called);
 		});
 
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(episodesController["episodeList"].refresh).to.have.been.called);
-		it("should set the list to view mode", (): Chai.Assertion =>
-			expect(episodesController["viewItems"]).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				EpisodeMock.error = "activate failed";
+				await episodesController.activate();
+			});
+
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].refresh).to.not.have.been
+					.called);
+			it("should not set the list to view mode", (): Chai.Assertion =>
+				expect(episodesController["viewItems"]).to.not.have.been.called);
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "activate failed",
+				}));
+
+			afterEach((): null => (EpisodeMock.error = null));
+		});
 	});
 
 	describe("contentShown", (): void => {
@@ -208,9 +230,9 @@ describe("EpisodesController", (): void => {
 			describe("none watched", (): void => {
 				beforeEach((): void => {
 					episodesController["episodeList"].items = [
-						{ id: "1" },
-						{ id: "2" },
-						{ id: "3" },
+						{ id: 1 },
+						{ id: 2 },
+						{ id: 3 },
 					] as EpisodeMock[];
 					episodesController.contentShown();
 				});
@@ -226,9 +248,9 @@ describe("EpisodesController", (): void => {
 			describe("some watched", (): void => {
 				beforeEach((): void => {
 					episodesController["episodeList"].items = [
-						{ id: "1", status: "Watched" },
-						{ id: "2", status: "Watched" },
-						{ id: "3" },
+						{ id: 1, status: "watched" },
+						{ id: 2, status: "watched" },
+						{ id: 3 },
 					] as EpisodeMock[];
 					episodesController.contentShown();
 				});
@@ -264,7 +286,7 @@ describe("EpisodesController", (): void => {
 		const scenarios: Scenario[] = [
 			{
 				description: "watched",
-				status: "Watched",
+				status: "watched",
 				watched: 1,
 				recorded: 0,
 				expected: 0,
@@ -273,7 +295,7 @@ describe("EpisodesController", (): void => {
 			},
 			{
 				description: "recorded",
-				status: "Recorded",
+				status: "recorded",
 				watched: 0,
 				recorded: 1,
 				expected: 0,
@@ -282,7 +304,7 @@ describe("EpisodesController", (): void => {
 			},
 			{
 				description: "expected",
-				status: "Expected",
+				status: "expected",
 				watched: 0,
 				recorded: 0,
 				expected: 1,
@@ -347,7 +369,7 @@ describe("EpisodesController", (): void => {
 		const scenarios: Scenario[] = [
 			{
 				description: "watched",
-				status: "Watched",
+				status: "watched",
 				watched: 1,
 				recorded: 0,
 				expected: 0,
@@ -356,7 +378,7 @@ describe("EpisodesController", (): void => {
 			},
 			{
 				description: "recorded",
-				status: "Recorded",
+				status: "recorded",
 				watched: 0,
 				recorded: 1,
 				expected: 0,
@@ -365,7 +387,7 @@ describe("EpisodesController", (): void => {
 			},
 			{
 				description: "expected",
-				status: "Expected",
+				status: "expected",
 				watched: 0,
 				recorded: 0,
 				expected: 1,
@@ -383,17 +405,16 @@ describe("EpisodesController", (): void => {
 			},
 		];
 
-		let index: number, item: EpisodeMock;
+		let itemLink: HTMLAnchorElement;
 
 		beforeEach((): void => {
-			const itemLink = document.createElement("a"),
-				episodeListItem = document.createElement("li");
+			const episodeListItem = document.createElement("li");
 
+			itemLink = document.createElement("a");
 			itemLink.id = `item-${String(items[0].id)}`;
 			episodeListItem.append(itemLink);
 			episodeList.append(episodeListItem);
 
-			index = 0;
 			sinon.stub(
 				episodesController,
 				"resequenceItems" as keyof EpisodesController,
@@ -402,26 +423,55 @@ describe("EpisodesController", (): void => {
 
 		scenarios.forEach((scenario: Scenario): void => {
 			describe(scenario.description, (): void => {
-				beforeEach(async (): Promise<void> => {
-					item = {
-						...items[0],
-						status: scenario.status,
-						statusWarning: scenario.statusWarning,
-						save: sinon.stub(),
-						remove: sinon.stub(),
-					};
-					episodesController["episodeList"] = new ListMock("", "", "", [item]);
-					await episodesController["deleteItem"](index);
+				beforeEach((): void => {
+					items[0].status = scenario.status;
+					items[0].statusWarning = scenario.statusWarning;
+					episodesController["episodeList"] = new ListMock("", "", "", [
+						items[0],
+					]);
 				});
 
-				it("should remove the item from the DOM", (): Chai.Assertion =>
-					expect(episodeList.querySelector("li a#item-1")).to.be.null);
-				it("should remove the item from the database", (): Chai.Assertion =>
-					expect(item.remove).to.have.been.called);
-				it("should remove the item from the episodes list", (): Chai.Assertion =>
-					expect(episodesController["episodeList"].items).to.deep.equal([]));
-				it("should refresh the list", (): Chai.Assertion =>
-					expect(episodesController["resequenceItems"]).to.have.been.called);
+				describe("success", (): void => {
+					beforeEach(
+						async (): Promise<void> => episodesController["deleteItem"](0),
+					);
+
+					it("should remove the item from the DOM", (): Chai.Assertion =>
+						expect(episodeList.querySelector("li a#item-1")).to.be.null);
+					it("should remove the item from the database", (): Chai.Assertion =>
+						expect(items[0].remove).to.have.been.called);
+					it("should remove the item from the episodes list", (): Chai.Assertion =>
+						expect(episodesController["episodeList"].items).to.deep.equal([]));
+					it("should refresh the list", (): Chai.Assertion =>
+						expect(episodesController["resequenceItems"]).to.have.been.called);
+				});
+
+				describe("failure", (): void => {
+					beforeEach(async (): Promise<void> => {
+						EpisodeMock.error = "delete failed";
+						await episodesController["deleteItem"](0);
+					});
+
+					it("should attempt to remove the item from the database", (): Chai.Assertion =>
+						expect(items[0].remove).to.have.been.called);
+					it("should not remove the item from the episode list", (): Chai.Assertion =>
+						expect(episodesController["episodeList"].items).to.deep.equal([
+							items[0],
+						]));
+					it("should not remove the item from the DOM", (): Chai.Assertion =>
+						expect(episodeList.querySelector("li a#item-1")).to.deep.equal(
+							itemLink,
+						));
+					it("should not refresh the list", (): Chai.Assertion =>
+						expect(episodesController["resequenceItems"]).to.not.have.been
+							.called);
+					it("should display a notice to the user", (): Chai.Assertion =>
+						expect(appController.showNotice).to.have.been.calledWith({
+							label: "delete failed",
+						}));
+
+					afterEach((): null => (EpisodeMock.error = null));
+				});
 			});
 		});
 	});
@@ -433,7 +483,7 @@ describe("EpisodesController", (): void => {
 			sinon.stub(episodesController, "activate");
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
 			await episodesController.setup();
-			await episodesController["deleteItems"]();
+			episodesController["deleteItems"]();
 			footer = episodesController.footer as HeaderFooter;
 			rightButton = footer.rightButton as NavButton;
 		});
@@ -449,9 +499,6 @@ describe("EpisodesController", (): void => {
 			expect(episodeList.classList.contains("delete")).to.be.true;
 			expect(episodeList.classList.contains("edit")).to.be.false;
 		});
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer right button event handler", (): void => {
 			(rightButton.eventHandler as NavButtonEventHandler)();
@@ -469,25 +516,21 @@ describe("EpisodesController", (): void => {
 	describe("resequenceItems", (): void => {
 		let sortedItems: EpisodeMock[];
 
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			items = [
+				new EpisodeMock(1, "", "", "", 2, false, false, 1),
 				{
-					...new EpisodeMock("1", null, "", "", "", false, false, 1),
+					...new EpisodeMock(2, "", "", "", 2, false, false, 2),
 					save: sinon.stub(),
 					remove: sinon.stub(),
 				},
 				{
-					...new EpisodeMock("2", null, "", "", "", false, false, 2),
+					...new EpisodeMock(3, "", "", "", 2, false, false, 3),
 					save: sinon.stub(),
 					remove: sinon.stub(),
 				},
 				{
-					...new EpisodeMock("3", null, "", "", "", false, false, 3),
-					save: sinon.stub(),
-					remove: sinon.stub(),
-				},
-				{
-					...new EpisodeMock("4", null, "", "", "", false, false, 3),
+					...new EpisodeMock(4, "", "", "", 2, false, false, 3),
 					save: sinon.stub(),
 					remove: sinon.stub(),
 				},
@@ -508,22 +551,54 @@ describe("EpisodesController", (): void => {
 			);
 
 			episodesController["episodeList"] = new ListMock("", "", "", items);
-			await episodesController["resequenceItems"]();
 		});
 
-		it("should update the sequence of items that have changed position", (): void => {
-			expect(items[0].save).to.have.been.called;
-			expect(items[1].save).to.have.been.called;
-			expect(items[2].save).to.not.have.been.called;
-			expect(items[3].save).to.not.have.been.called;
+		describe("success", (): void => {
+			beforeEach(
+				async (): Promise<void> => episodesController["resequenceItems"](),
+			);
+
+			it("should update the sequence of items that have changed position", (): void => {
+				expect(items[0].save).to.have.been.called;
+				expect(items[1].save).to.have.been.called;
+				expect(items[2].save).to.not.have.been.called;
+				expect(items[3].save).to.not.have.been.called;
+			});
+
+			it("should sort the list by sequence", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].items).to.deep.equal(
+					sortedItems,
+				));
+			it("should refresh the list", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].refresh).to.have.been.called);
 		});
 
-		it("should sort the list by sequence", (): Chai.Assertion =>
-			expect(episodesController["episodeList"].items).to.deep.equal(
-				sortedItems,
-			));
-		it("should refresh the list", (): Chai.Assertion =>
-			expect(episodesController["episodeList"].refresh).to.have.been.called);
+		describe("failure", (): void => {
+			beforeEach(async (): Promise<void> => {
+				EpisodeMock.error = "resequence failed";
+				await episodesController["resequenceItems"]();
+			});
+
+			it("should attempt to update the sequence of items that have changed position", (): void => {
+				expect(items[0].save).to.have.been.called;
+				expect(items[1].save).to.have.been.called;
+				expect(items[2].save).to.not.have.been.called;
+				expect(items[3].save).to.not.have.been.called;
+			});
+
+			it("should not sort the list by sequence", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].items).to.deep.equal(items));
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].refresh).to.not.have.been
+					.called);
+
+			it("should display a notice to the user", (): Chai.Assertion =>
+				expect(appController.showNotice).to.have.been.calledWith({
+					label: "resequence failed",
+				}));
+
+			afterEach((): null => (EpisodeMock.error = null));
+		});
 	});
 
 	describe("editItems", (): void => {
@@ -537,7 +612,7 @@ describe("EpisodesController", (): void => {
 			);
 			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
 			await episodesController.setup();
-			await episodesController["editItems"]();
+			episodesController["editItems"]();
 			footer = episodesController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 		});
@@ -557,9 +632,6 @@ describe("EpisodesController", (): void => {
 		it("should enable sorting", (): Chai.Assertion =>
 			expect(Boolean(episodesController["sortable"].option("disabled"))).to.be
 				.false);
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", async (): Promise<void> => {
 			await (leftButton.eventHandler as NavButtonAsyncEventHandler)();
@@ -583,7 +655,7 @@ describe("EpisodesController", (): void => {
 			sinon.stub(episodesController, "editItems" as keyof EpisodesController);
 			sinon.stub(episodesController, "deleteItems" as keyof EpisodesController);
 			await episodesController.setup();
-			await episodesController["viewItems"]();
+			episodesController["viewItems"]();
 			footer = episodesController.footer as HeaderFooter;
 			leftButton = footer.leftButton as NavButton;
 			rightButton = footer.rightButton as NavButton;
@@ -604,9 +676,6 @@ describe("EpisodesController", (): void => {
 		it("should disable sorting", (): Chai.Assertion =>
 			expect(Boolean(episodesController["sortable"].option("disabled"))).to.be
 				.true);
-
-		it("should set the footer label", (): Chai.Assertion =>
-			expect(String(footer.label)).to.equal("v1"));
 
 		it("should attach a footer left button event handler", (): void => {
 			(leftButton.eventHandler as NavButtonEventHandler)();
@@ -629,5 +698,9 @@ describe("EpisodesController", (): void => {
 			expect(appController.setFooter).to.have.been.called);
 	});
 
-	afterEach((): void => episodeList.remove());
+	afterEach((): void => {
+		SeriesMock.reset();
+		EpisodeMock.reset();
+		episodeList.remove();
+	});
 });

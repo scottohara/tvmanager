@@ -1,4 +1,3 @@
-import DatabaseService from "~/services/database-service";
 import List from "~/components/list";
 import type { NavButtonEventHandler } from "~/controllers";
 import Program from "~/models/program-model";
@@ -52,14 +51,18 @@ export default class ProgramsController extends ViewController {
 	}
 
 	public override async activate(): Promise<void> {
-		// Get the list of programs
-		this.programList.items = await Program.list();
+		try {
+			// Get the list of programs
+			this.programList.items = await Program.list();
 
-		// Refresh the list
-		this.programList.refresh();
+			// Refresh the list
+			this.programList.refresh();
 
-		// Set to view mode
-		return this.viewItems();
+			// Set to view mode
+			this.viewItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	public override contentShown(): void {
@@ -96,17 +99,21 @@ export default class ProgramsController extends ViewController {
 	}
 
 	private async deleteItem(listIndex: number): Promise<void> {
-		// Remove the item from the database
-		await (this.programList.items[listIndex] as Program).remove();
+		try {
+			// Remove the item from the database
+			await (this.programList.items[listIndex] as Program).remove();
 
-		// Remove the item from the list
-		this.programList.items.splice(listIndex, 1);
+			// Remove the item from the list
+			this.programList.items.splice(listIndex, 1);
 
-		// Refresh the list
-		this.programList.refresh();
+			// Refresh the list
+			this.programList.refresh();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
-	private async deleteItems(): Promise<void> {
+	private deleteItems(): void {
 		// Set the list to delete mode
 		this.programList.setAction("delete");
 
@@ -120,7 +127,6 @@ export default class ProgramsController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			rightButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
@@ -132,7 +138,7 @@ export default class ProgramsController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	private async editItems(): Promise<void> {
+	private editItems(): void {
 		// Set the list to edit mode
 		this.programList.setAction("edit");
 
@@ -146,7 +152,6 @@ export default class ProgramsController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
@@ -158,7 +163,7 @@ export default class ProgramsController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	private async viewItems(): Promise<void> {
+	private viewItems(): void {
 		// Set the list to view mode
 		this.programList.setAction("view");
 
@@ -172,7 +177,6 @@ export default class ProgramsController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Edit",

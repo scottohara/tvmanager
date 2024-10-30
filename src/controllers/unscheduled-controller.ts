@@ -1,4 +1,3 @@
-import DatabaseService from "~/services/database-service";
 import Episode from "~/models/episode-model";
 import List from "~/components/list";
 import type { NavButtonEventHandler } from "~/controllers";
@@ -39,14 +38,18 @@ export default class UnscheduledController extends ViewController {
 	}
 
 	public override async activate(): Promise<void> {
-		// Get the list of unscheduled episodes
-		this.unscheduledList.items = await Episode.listByUnscheduled();
+		try {
+			// Get the list of unscheduled episodes
+			this.unscheduledList.items = await Episode.unscheduled();
 
-		// Refresh the list
-		this.unscheduledList.refresh();
+			// Refresh the list
+			this.unscheduledList.refresh();
 
-		// Set to view mode
-		return this.viewItems();
+			// Set to view mode
+			this.viewItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	private async goBack(): Promise<void> {
@@ -62,19 +65,11 @@ export default class UnscheduledController extends ViewController {
 		});
 	}
 
-	private async viewItems(): Promise<void> {
+	private viewItems(): void {
 		// Set the list to view mode
 		this.unscheduledList.setAction("view");
 
 		// Clear the view footer
 		this.appController.clearFooter();
-
-		// Setup the footer
-		this.footer = {
-			label: `v${(await DatabaseService).version}`,
-		};
-
-		// Set the view footer
-		this.appController.setFooter();
 	}
 }

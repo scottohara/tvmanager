@@ -1,4 +1,3 @@
-import DatabaseService from "~/services/database-service";
 import List from "~/components/list";
 import type { NavButtonEventHandler } from "~/controllers";
 import type { PublicInterface } from "~/global";
@@ -48,14 +47,18 @@ export default class ScheduleController extends ViewController {
 	}
 
 	public override async activate(): Promise<void> {
-		// Get the list of scheduled series
-		this.scheduleList.items = await Series.listByNowShowing();
+		try {
+			// Get the list of scheduled series
+			this.scheduleList.items = await Series.scheduled();
 
-		// Refresh the list
-		this.scheduleList.refresh();
+			// Refresh the list
+			this.scheduleList.refresh();
 
-		// Set to view mode
-		return this.viewItems();
+			// Set to view mode
+			this.viewItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	private async viewItem(listIndex: number): Promise<void> {
@@ -85,7 +88,7 @@ export default class ScheduleController extends ViewController {
 		return this.appController.pushView("series", { listIndex, series });
 	}
 
-	private async editItems(): Promise<void> {
+	private editItems(): void {
 		// Set the list to edit mode
 		this.scheduleList.setAction("edit");
 
@@ -98,7 +101,6 @@ export default class ScheduleController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
@@ -110,7 +112,7 @@ export default class ScheduleController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	private async viewItems(): Promise<void> {
+	private viewItems(): void {
 		// Set the list to view mode
 		this.scheduleList.setAction("view");
 
@@ -122,7 +124,6 @@ export default class ScheduleController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Edit",

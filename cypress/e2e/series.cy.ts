@@ -1,8 +1,6 @@
-import type { ListItem, TestData } from "~/support/types";
 import {
 	checkProgress,
 	firstListItem,
-	footerLabel,
 	footerLeftButton,
 	footerRightButton,
 	headerLabel,
@@ -11,56 +9,18 @@ import {
 	list,
 	listItem,
 	listItems,
+	notices,
 	secondListItem,
 	thirdListItem,
 } from "~/support/e2e";
 import { moveTo, nowShowing, seriesName } from "~/support/series";
+import type { ListItem } from "~/support/types";
 
 describe("Series", (): void => {
 	let expectedItems: ListItem[];
 
 	before((): void => {
-		const data: TestData = {
-			programs: [
-				{
-					programName: "Test Program",
-					series: [
-						{
-							seriesName: "Series D",
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-								{ status: "Missed" },
-								{},
-							],
-						},
-						{
-							seriesName: "Series C",
-							episodes: [],
-						},
-						{
-							seriesName: "Series B",
-							episodes: [{ status: "Watched" }],
-						},
-						{
-							seriesName: "Series A",
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-					],
-				},
-				{
-					programName: "Test Program 2",
-					series: [],
-				},
-			],
-		};
-
-		cy.createTestData(data);
+		cy.createSeriesData();
 
 		expectedItems = [
 			{ label: "Series A", progress: { watched: 1, recorded: 1, expected: 1 } },
@@ -74,6 +34,7 @@ describe("Series", (): void => {
 	});
 
 	beforeEach((): void => {
+		cy.login();
 		cy.visit("/");
 		cy.get(headerRightButton).click();
 		cy.get(secondListItem).click();
@@ -117,13 +78,20 @@ describe("Series", (): void => {
 			cy.get(firstListItem).click();
 			cy.get(headerLabel).should("have.text", "Test Program : Series A");
 		});
+
+		it("should show a notice if the series could not be retreived", (): void => {
+			cy.intercept("GET", "/programs/*/series", {
+				statusCode: 500,
+				body: "Retrieve failed",
+			});
+			cy.get(headerLeftButton).click();
+			cy.get(secondListItem).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Retrieve failed");
+		});
 	});
 
 	describe("footer", (): void => {
-		it("should show the database version as the label", (): void => {
-			cy.get(footerLabel).should("have.text", "v1");
-		});
-
 		it("should toggle between edit mode when the left button is clicked", (): void => {
 			cy.get(footerLeftButton).should("have.text", "Edit");
 			cy.get(footerLeftButton).click();
@@ -136,6 +104,18 @@ describe("Series", (): void => {
 			cy.get(footerLeftButton).click();
 			cy.get(firstListItem).click();
 			cy.get(headerLabel).should("have.text", "Add/Edit Series");
+		});
+
+		it("should show a notice if populating the programs list fails", (): void => {
+			cy.intercept("GET", "/programs", {
+				statusCode: 500,
+				body: "Retrieve failed",
+			});
+			cy.get(footerLeftButton).click();
+			cy.get(firstListItem).click();
+			cy.get(headerLabel).should("have.text", "Add/Edit Series");
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Retrieve failed");
 		});
 
 		it("should toggle between delete mode when the right button is clicked", (): void => {
@@ -170,6 +150,16 @@ describe("Series", (): void => {
 			cy.get(headerLeftButton).click();
 			cy.get(firstListItem).should("contain.text", "New Series");
 		});
+
+		it("should do nothing and show a notice if the save fails", (): void => {
+			cy.intercept("POST", "/programs/*/series", {
+				statusCode: 500,
+				body: "Save failed",
+			});
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Save failed");
+		});
 	});
 
 	describe("edit series", (): void => {
@@ -192,6 +182,16 @@ describe("Series", (): void => {
 			cy.get(seriesName).clear().type("Cancelled series edit");
 			cy.get(headerLeftButton).click();
 			cy.get(firstListItem).should("contain.text", "Saved series edit");
+		});
+
+		it("should do nothing and show a notice if the save fails", (): void => {
+			cy.intercept("PUT", "/series/*", {
+				statusCode: 500,
+				body: "Save failed",
+			});
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Save failed");
 		});
 	});
 
@@ -220,6 +220,17 @@ describe("Series", (): void => {
 			cy.on("window:confirm", (): boolean => false);
 			cy.get(firstListItem).click();
 			cy.get(firstListItem).should("contain.text", "Series A");
+		});
+
+		it("should do nothing and show a notice if the delete fails", (): void => {
+			cy.intercept("DELETE", "/series/*", {
+				statusCode: 500,
+				body: "Delete failed",
+			});
+			cy.get(secondListItem).click();
+			cy.get(firstListItem).should("contain.text", "Series A");
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Delete failed");
 		});
 
 		it("should not show the deleted item in the Series view", (): void => {

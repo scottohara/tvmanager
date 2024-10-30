@@ -1,9 +1,8 @@
-import type { ListItem, TestData } from "~/support/types";
+import "~/support/schedule";
 import {
 	checkGroup,
 	checkProgress,
 	fifthListItem,
-	footerLabel,
 	footerLeftButton,
 	footerRightButton,
 	headerLabel,
@@ -12,157 +11,17 @@ import {
 	list,
 	listItem,
 	listItems,
+	notices,
 	secondListItem,
 } from "~/support/e2e";
 import { moveTo, nowShowing, seriesName } from "~/support/series";
+import type { ListItem } from "~/support/types";
 
 describe("Schedule", (): void => {
 	let expectedItems: (ListItem | string)[];
 
 	before((): void => {
-		const data: TestData = {
-			programs: [
-				{
-					programName: "Program Z",
-					series: [
-						{
-							seriesName: "Series S",
-							episodes: [{ status: "Expected" }],
-						},
-						{
-							seriesName: "Series R",
-							episodes: [{ status: "Recorded" }],
-						},
-						{
-							seriesName: "Series P",
-							nowShowing: 8,
-							episodes: [],
-						},
-						{
-							seriesName: "Series N",
-							nowShowing: 7,
-							episodes: [],
-						},
-						{
-							seriesName: "Series L",
-							nowShowing: 6,
-							episodes: [],
-						},
-						{
-							seriesName: "Series J",
-							nowShowing: 5,
-							episodes: [],
-						},
-						{
-							seriesName: "Series H",
-							nowShowing: 4,
-							episodes: [],
-						},
-						{
-							seriesName: "Series F",
-							nowShowing: 3,
-							episodes: [],
-						},
-						{
-							seriesName: "Series D",
-							nowShowing: 2,
-							episodes: [{}, {}],
-						},
-						{
-							seriesName: "Series B",
-							nowShowing: 1,
-							episodes: [{ status: "Watched" }],
-						},
-					],
-				},
-				{
-					programName: "Program A",
-					series: [
-						{
-							seriesName: "Series Q",
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							seriesName: "Series O",
-							nowShowing: 8,
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							seriesName: "Series M",
-							nowShowing: 7,
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							seriesName: "Series K",
-							nowShowing: 6,
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							seriesName: "Series I",
-							nowShowing: 5,
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							seriesName: "Series G",
-							nowShowing: 4,
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected" },
-							],
-						},
-						{
-							seriesName: "Series E",
-							nowShowing: 3,
-							episodes: [{ status: "Expected" }],
-						},
-						{
-							seriesName: "Series C",
-							nowShowing: 2,
-							episodes: [
-								{ status: "Recorded" },
-								{ status: "Expected" },
-								{},
-								{},
-							],
-						},
-						{
-							seriesName: "Series A",
-							nowShowing: 1,
-							episodes: [
-								{ status: "Watched" },
-								{ status: "Recorded" },
-								{ status: "Expected", statusDate: "2000-01-01" },
-								{ status: "Missed" },
-								{},
-							],
-						},
-					],
-				},
-			],
-		};
-
-		cy.createTestData(data);
+		cy.createScheduleData();
 
 		expectedItems = [
 			"Mondays",
@@ -221,7 +80,10 @@ describe("Schedule", (): void => {
 		];
 	});
 
-	beforeEach((): Cypress.Chainable => cy.visit("/"));
+	beforeEach((): void => {
+		cy.login();
+		cy.visit("/");
+	});
 
 	describe("header", (): void => {
 		it("should show 'Schedule' as the label", (): void => {
@@ -267,13 +129,19 @@ describe("Schedule", (): void => {
 			cy.get(secondListItem).click();
 			cy.get(headerLabel).should("have.text", "Program A : Series A");
 		});
+
+		it("should show a notice if the schedule could not be retreived", (): void => {
+			cy.intercept("GET", "/scheduled", {
+				statusCode: 500,
+				body: "Retrieve failed",
+			});
+			cy.visit("/");
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Retrieve failed");
+		});
 	});
 
 	describe("footer", (): void => {
-		it("should show the database version as the label", (): void => {
-			cy.get(footerLabel).should("have.text", "v1");
-		});
-
 		it("should toggle between edit mode when the left button is clicked", (): void => {
 			cy.get(footerLeftButton).should("have.text", "Edit");
 			cy.get(footerLeftButton).click();

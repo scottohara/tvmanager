@@ -124,6 +124,7 @@ footer {
 	font-weight: 500;
 	padding: 11px 0 11px 0;
 	text-align: center;
+	min-height: 21px;
 }
 
 /* Main content wrapper (for animating view transitions) */
@@ -292,22 +293,22 @@ ul {
 			}
 
 			/* Watched status indicators for episode list */
-			&.Watched {
+			&.watched {
 				border-left-color: var(--watched-color);
 			}
 
 			/* Recorded status indicators for episode list */
-			&.Recorded {
+			&.recorded {
 				border-left-color: var(--recorded-color);
 			}
 
 			/* Expected status indicators for episode list */
-			&.Expected {
+			&.expected {
 				border-left-color: var(--expected-color);
 			}
 
 			/* Missed status indicators for episode list */
-			&.Missed {
+			&.missed {
 				border-left-color: var(--missed-color);
 			}
 
@@ -647,25 +648,6 @@ input[type="checkbox"] {
 			box-shadow: inset 0 0 0 1px var(--toggle-switch-checked-color);
 		}
 	}
-}
-
-/* Hide registration message, sync controls, progress bar, status row, sync error & import changes only rows by default */
-#registrationMessage,
-#syncControls,
-#progress,
-#statusRow,
-#syncErrors,
-#importChangesOnlyRow {
-	display: none;
-}
-
-#progress {
-	margin: 12px 0;
-}
-
-/* Sync errors */
-#syncErrors ul li {
-	text-align: left;
 }
 
 /* Notices stack */

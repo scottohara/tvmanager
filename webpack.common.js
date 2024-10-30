@@ -1,11 +1,9 @@
 const path = require("path"),
-	webpack = require("webpack"),
 	MiniCssExtractPlugin = require("mini-css-extract-plugin"),
 	HtmlWebpackPlugin = require("html-webpack-plugin");
 
-const MAX_DATA_AGE_DAYS = 7,
-	// Rule for *.ts processing
-	tsRule = {
+// Rule for *.ts processing
+const tsRule = {
 		test: /\.ts$/u,
 		loader: "ts-loader",
 	},
@@ -83,12 +81,6 @@ function extractCss(options = undefined) {
 	return new MiniCssExtractPlugin(options);
 }
 
-function defineAppConfig(
-	{ maxDataAgeDays } = { maxDataAgeDays: MAX_DATA_AGE_DAYS },
-) {
-	return new webpack.DefinePlugin({ MAX_DATA_AGE_DAYS: maxDataAgeDays });
-}
-
 module.exports = {
 	cssRule,
 	iconRule,
@@ -97,6 +89,5 @@ module.exports = {
 	webmanifestRule,
 	extractCss,
 	createIndexHtml,
-	defineAppConfig,
 	config,
 };

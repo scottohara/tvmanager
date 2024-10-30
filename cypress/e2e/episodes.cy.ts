@@ -1,4 +1,3 @@
-import type { EpisodeListItem, TestData } from "~/support/types";
 import {
 	episodeName,
 	expected,
@@ -13,7 +12,6 @@ import {
 } from "~/support/episode";
 import {
 	firstListItem,
-	footerLabel,
 	footerLeftButton,
 	footerRightButton,
 	headerLabel,
@@ -24,111 +22,57 @@ import {
 	listItem,
 	listItemSubText,
 	listItems,
+	notices,
 	secondListItem,
 	thirdListItem,
 } from "~/support/e2e";
+import type { EpisodeListItem } from "~/support/types";
 import type { EpisodeStatus } from "~/models";
 
 describe("Episodes", (): void => {
 	let expectedItems: EpisodeListItem[];
 
 	before((): void => {
-		const data: TestData = {
-			programs: [
-				{
-					programName: "Test Program",
-					series: [
-						{
-							seriesName: "Test Series",
-							episodes: [
-								{ episodeName: "Episode A", status: "Watched" },
-								{
-									episodeName: "Episode B",
-									status: "Recorded",
-									statusDate: "2000-01-01",
-								},
-								{
-									episodeName: "Episode C",
-									status: "Recorded",
-									statusDate: "2000-01-02",
-									unverified: "true",
-									unscheduled: "true",
-								},
-								{
-									episodeName: "Episode D",
-									status: "Expected",
-									statusDate: "2000-01-03",
-								},
-								{
-									episodeName: "Episode E",
-									status: "Missed",
-									statusDate: "2000-01-04",
-								},
-								{
-									episodeName: "Episode F",
-									status: "Missed",
-									statusDate: "2000-01-05",
-									unverified: "true",
-								},
-								{
-									episodeName: "Episode G",
-									status: "Expected",
-									statusDate: "2100-01-01",
-								},
-								{
-									episodeName: "Episode H",
-									status: "Expected",
-									statusDate: "2100-01-02",
-									unverified: "true",
-								},
-								{ episodeName: "Episode I" },
-							],
-						},
-					],
-				},
-			],
-		};
-
-		cy.createTestData(data);
+		cy.createEpisodesData();
 
 		expectedItems = [
-			{ label: "Episode A", status: "Watched" },
+			{ label: "Episode A", status: "watched" },
 			{
 				label: "Episode B",
-				status: "Recorded",
+				status: "recorded",
 				statusDateSubText: "Sat Jan 01 2000",
 			},
 			{
 				label: "Episode C",
-				status: "Recorded",
+				status: "recorded",
 				statusDateSubText: "Sun Jan 02 2000",
 				unverifiedClass: true,
 			},
 			{
 				label: "Episode D",
-				status: "Expected",
+				status: "expected",
 				statusDateSubText: "Mon Jan 03 2000",
 				warning: true,
 			},
 			{
 				label: "Episode E",
-				status: "Missed",
+				status: "missed",
 				statusDateSubText: "Tue Jan 04 2000",
 			},
 			{
 				label: "Episode F",
-				status: "Missed",
+				status: "missed",
 				statusDateSubText: "Wed Jan 05 2000",
 				unverifiedClass: true,
 			},
 			{
 				label: "Episode G",
-				status: "Expected",
+				status: "expected",
 				statusDateSubText: "Fri Jan 01 2100",
 			},
 			{
 				label: "Episode H",
-				status: "Expected",
+				status: "expected",
 				statusDateSubText: "Sat Jan 02 2100",
 				unverifiedClass: true,
 			},
@@ -137,6 +81,7 @@ describe("Episodes", (): void => {
 	});
 
 	beforeEach((): void => {
+		cy.login();
 		cy.visit("/");
 		cy.get(headerRightButton).click();
 		cy.get(secondListItem).click();
@@ -199,13 +144,20 @@ describe("Episodes", (): void => {
 			cy.get(firstListItem).click();
 			cy.get(headerLabel).should("have.text", "Add/Edit Episode");
 		});
+
+		it("should show a notice if the episodes could not be retrieved", (): void => {
+			cy.intercept("GET", "/series/*/episodes", {
+				statusCode: 500,
+				body: "Retrieve failed",
+			});
+			cy.get(headerLeftButton).click();
+			cy.get(firstListItem).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Retrieve failed");
+		});
 	});
 
 	describe("footer", (): void => {
-		it("should show the database version as the label", (): void => {
-			cy.get(footerLabel).should("have.text", "v1");
-		});
-
 		it("should toggle between sort mode when the left button is clicked", (): void => {
 			cy.get(footerLeftButton).should("have.text", "Sort");
 			cy.get(footerLeftButton).click();
@@ -232,7 +184,7 @@ describe("Episodes", (): void => {
 			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
 		);
 
-		["Watched", "Recorded", "Expected", "Missed"].forEach(
+		["watched", "recorded", "expected", "missed"].forEach(
 			(status: EpisodeStatus): void => {
 				it(`should toggle the ${status} indicator when clicked`, (): void => {
 					cy.get(watched).should("not.have.class", "status");
@@ -243,26 +195,26 @@ describe("Episodes", (): void => {
 					// Toggle on
 					cy.get(`#${status.toLowerCase()}`).click();
 					cy.get(watched).should(
-						`${"Watched" === status ? "" : "not."}have.class`,
+						`${"watched" === status ? "" : "not."}have.class`,
 						"status",
 					);
 					cy.get(recorded).should(
-						`${"Recorded" === status ? "" : "not."}have.class`,
+						`${"recorded" === status ? "" : "not."}have.class`,
 						"status",
 					);
 					cy.get(expected).should(
-						`${"Expected" === status ? "" : "not."}have.class`,
+						`${"expected" === status ? "" : "not."}have.class`,
 						"status",
 					);
 					cy.get(missed).should(
-						`${"Missed" === status ? "" : "not."}have.class`,
+						`${"missed" === status ? "" : "not."}have.class`,
 						"status",
 					);
 					cy.get(statusDate).should(
-						`${"Watched" === status ? "not." : ""}be.visible`,
+						`${"watched" === status ? "not." : ""}be.visible`,
 					);
 					cy.get(unverifiedLabel).should(
-						`${"Watched" === status ? "not." : ""}be.visible`,
+						`${"watched" === status ? "not." : ""}be.visible`,
 					);
 
 					// Toggle off
@@ -312,7 +264,7 @@ describe("Episodes", (): void => {
 
 			cy.get(lastListItem).within((): void => {
 				cy.get(listItem).should("contain.text", "New Episode");
-				cy.get(listItem).should("have.class", "Expected");
+				cy.get(listItem).should("have.class", "expected");
 				cy.get(listItem).should("have.class", "Unverified");
 				cy.get(listItem).should("have.class", "warning");
 				cy.get(listItemSubText).should("have.text", "Sat Apr 01 2000");
@@ -323,6 +275,16 @@ describe("Episodes", (): void => {
 			cy.get(episodeName).clear().type("Cancelled Episode");
 			cy.get(headerLeftButton).click();
 			cy.get(lastListItem).should("contain.text", "New Episode");
+		});
+
+		it("should do nothing and show a notice if the save fails", (): void => {
+			cy.intercept("POST", "/series/*/episodes", {
+				statusCode: 500,
+				body: "Save failed",
+			});
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Save failed");
 		});
 	});
 
@@ -346,7 +308,7 @@ describe("Episodes", (): void => {
 
 			cy.get(thirdListItem).within((): void => {
 				cy.get(listItem).should("contain.text", "Saved episode edit");
-				cy.get(listItem).should("have.class", "Watched");
+				cy.get(listItem).should("have.class", "watched");
 				cy.get(listItem).should("not.have.class", "Unverified");
 				cy.get(listItemSubText).should("have.text", "");
 			});
@@ -356,6 +318,16 @@ describe("Episodes", (): void => {
 			cy.get(episodeName).clear().type("Cancelled episode edit");
 			cy.get(headerLeftButton).click();
 			cy.get(thirdListItem).should("contain.text", "Saved episode edit");
+		});
+
+		it("should do nothing and show a notice if the save fails", (): void => {
+			cy.intercept("PUT", "/episodes/*", {
+				statusCode: 500,
+				body: "Save failed",
+			});
+			cy.get(headerRightButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Save failed");
 		});
 	});
 
@@ -370,6 +342,17 @@ describe("Episodes", (): void => {
 			cy.get(firstListItem).should("contain.text", "Episode A");
 		});
 
+		it("should do nothing and show a notice if the delete fails", (): void => {
+			cy.intercept("DELETE", "/episodes/*", {
+				statusCode: 500,
+				body: "Delete failed",
+			});
+			cy.get(firstListItem).click();
+			cy.get(firstListItem).should("contain.text", "Episode A");
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "Delete failed");
+		});
+
 		it("should not show the deleted item in the Episodes view", (): void => {
 			cy.get(firstListItem).click();
 			cy.get(list).should("not.contain.text", "Episode A");
@@ -380,14 +363,24 @@ describe("Episodes", (): void => {
 		beforeEach((): void => {
 			cy.get(footerLeftButton).click();
 			cy.get(firstListItem).drag(secondListItem);
-			cy.get(footerLeftButton).click();
 		});
 
 		it("should reorder the list", (): void => {
+			cy.get(footerLeftButton).click();
 			cy.get(secondListItem).should("contain.text", "Episode B");
 			cy.get(headerLeftButton).click();
 			cy.get(firstListItem).click();
 			cy.get(secondListItem).should("contain.text", "Episode B");
+		});
+
+		it("should show a notice when an API call fails", (): void => {
+			cy.intercept("PUT", "/episodes/*", {
+				statusCode: 500,
+				body: "API call failed",
+			});
+			cy.get(footerLeftButton).click();
+			cy.get(notices).should("be.visible");
+			cy.get(notices).should("contain.text", "API call failed");
 		});
 	});
 });

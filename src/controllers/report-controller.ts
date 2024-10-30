@@ -1,5 +1,4 @@
 import type { NavButtonEventHandler, Report } from "~/controllers";
-import DatabaseService from "~/services/database-service";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
 import ReportListTemplate from "~/views/reportListTemplate.html";
@@ -43,14 +42,18 @@ export default class ReportController extends ViewController {
 	}
 
 	public override async activate(): Promise<void> {
-		// Get the data for the report
-		this.reportList.items = await this.report.dataSource(this.report.args);
+		try {
+			// Get the data for the report
+			this.reportList.items = await this.report.dataSource(this.report.args);
 
-		// Refresh the list
-		this.reportList.refresh();
+			// Refresh the list
+			this.reportList.refresh();
 
-		// Set to view mode
-		return this.viewItems();
+			// Set to view mode
+			this.viewItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	private async goBack(): Promise<void> {
@@ -65,19 +68,11 @@ export default class ReportController extends ViewController {
 		});
 	}
 
-	private async viewItems(): Promise<void> {
+	private viewItems(): void {
 		// Set the list to view mode
 		this.reportList.setAction("view");
 
 		// Clear the view footer
 		this.appController.clearFooter();
-
-		// Setup the footer
-		this.footer = {
-			label: `v${(await DatabaseService).version}`,
-		};
-
-		// Set the view footer
-		this.appController.setFooter();
 	}
 }

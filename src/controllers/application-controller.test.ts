@@ -6,10 +6,9 @@ import type {
 	View,
 	ViewControllerArgs,
 } from "~/controllers";
-import type { SinonFakeTimers, SinonSpy, SinonStub } from "sinon";
+import type { SinonSpy, SinonStub } from "sinon";
 import ApplicationController from "./application-controller";
-import SettingMock from "~/mocks/setting-model-mock";
-import SyncMock from "~/mocks/sync-model-mock";
+import Login from "~/models/login-model";
 import TestController from "~/mocks/test-controller";
 import WindowMock from "~/mocks/window-mock";
 import sinon from "sinon";
@@ -50,9 +49,6 @@ describe("ApplicationController", (): void => {
 				height: -20,
 				notice: [],
 			}));
-		it("should set the max data age days", (): Chai.Assertion =>
-			expect(applicationController["maxDataAgeDays"]).to.equal(7));
-
 		it("should attach a transition end event handler", (): void => {
 			contentWrapper.dispatchEvent(new Event("transitionend"));
 			expect(applicationController["contentShown"]).to.have.been.called;
@@ -76,33 +72,42 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("start", (): void => {
-		const lastSyncTime = new SettingMock("LastSyncTime", "1 Jan 2010");
+		let fakeIsAuthenticated: SinonStub;
 
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			sinon.stub(applicationController, "pushView");
-			sinon.stub(
-				applicationController,
-				"showSyncNotice" as keyof ApplicationController,
-			);
-			SettingMock.get.reset();
-			SettingMock.get.withArgs("LastSyncTime").returns(lastSyncTime);
-			SyncMock.syncList = [new SyncMock(null, null)];
-			await applicationController.start();
+			fakeIsAuthenticated = sinon.stub(Login, "isAuthenticated");
 		});
 
-		it("should load all view controllers", (): Chai.Assertion =>
+		it("should load all view controllers", async (): Promise<void> => {
+			await applicationController.start();
+
 			expect(
 				Object.keys(applicationController["viewControllers"]).length,
-			).to.equal(13));
-		it("should display the schedule view", (): Chai.Assertion =>
+			).to.equal(12);
+		});
+
+		it("should display the schedule view if authenticated", async (): Promise<void> => {
+			fakeIsAuthenticated.get((): boolean => true);
+
+			await applicationController.start();
+
 			expect(applicationController["pushView"]).to.have.been.calledWith(
 				"schedule",
-			));
-		it("should get the last sync time", (): Chai.Assertion =>
-			expect(applicationController["showSyncNotice"]).to.have.been.calledWith(
-				lastSyncTime,
-				1,
-			));
+			);
+		});
+
+		it("should display the login view if unauthenticated", async (): Promise<void> => {
+			fakeIsAuthenticated.get((): boolean => false);
+
+			await applicationController.start();
+
+			expect(applicationController["pushView"]).to.have.been.calledWith(
+				"login",
+			);
+		});
+
+		afterEach((): void => fakeIsAuthenticated.restore());
 	});
 
 	describe("popView", (): void => {
@@ -114,12 +119,17 @@ describe("ApplicationController", (): void => {
 			);
 			sinon.stub(
 				applicationController,
+				"pushView" as keyof ApplicationController,
+			);
+			sinon.stub(
+				applicationController,
 				"viewPopped" as keyof ApplicationController,
 			);
 			sinon
 				.stub(applicationController, "show" as keyof ApplicationController)
 				.yields({});
 			applicationController["viewStack"] = [
+				{ controller: new TestController(), scrollPos: 0 },
 				{ controller: new TestController(), scrollPos: 0 },
 			];
 			await applicationController.popView({} as ViewControllerArgs);
@@ -130,13 +140,20 @@ describe("ApplicationController", (): void => {
 		it("should clear the header", (): Chai.Assertion =>
 			expect(applicationController["clearHeader"]).to.have.been.called);
 		it("should pop the view off the view stack", (): Chai.Assertion =>
-			expect(applicationController.viewStack).to.be.empty);
+			expect(applicationController.viewStack.length).to.equal(1));
 		it("should display the previous view", (): void => {
 			expect(applicationController["show"]).to.have.been.calledWith(
 				sinon.match.func,
 				{},
 			);
 			expect(applicationController["viewPopped"]).to.have.been.calledWith({});
+		});
+		it("should push the schedule view if the view stack is empty", async (): Promise<void> => {
+			await applicationController.popView({} as ViewControllerArgs);
+
+			expect(applicationController["pushView"]).to.have.been.calledWith(
+				"schedule",
+			);
 		});
 	});
 
@@ -1485,79 +1502,6 @@ describe("ApplicationController", (): void => {
 		});
 
 		afterEach((): void => notices.remove());
-	});
-
-	describe("showSyncNotice", (): void => {
-		beforeEach(
-			(): SinonStub =>
-				sinon.stub(
-					applicationController,
-					"showNotice" as keyof ApplicationController,
-				),
-		);
-
-		describe("without local changes to sync", (): void => {
-			it("should do nothing", (): void => {
-				const clock = sinon.useFakeTimers(new Date().valueOf()),
-					settingValue = new Date(
-						new Date().valueOf() - 7 * 24 * 60 * 60 * 1000,
-					);
-
-				applicationController["showSyncNotice"](
-					new SettingMock(undefined, String(settingValue)),
-					0,
-				);
-				applicationController["showSyncNotice"](new SettingMock(), 0);
-				expect(applicationController["showNotice"]).to.not.have.been.called;
-				clock.restore();
-			});
-		});
-
-		describe("without last sync time", (): void => {
-			it("should do nothing", (): void => {
-				applicationController["showSyncNotice"](new SettingMock(), 1);
-				expect(applicationController["showNotice"]).to.not.have.been.called;
-			});
-		});
-
-		describe("with last sync time & local changes to sync", (): void => {
-			let clock: SinonFakeTimers, settingValue: Date;
-
-			beforeEach(
-				(): SinonFakeTimers =>
-					(clock = sinon.useFakeTimers(new Date().valueOf())),
-			);
-
-			describe("younger than max data data age days", (): void => {
-				it("should do nothing", (): void => {
-					settingValue = new Date(
-						new Date().valueOf() - 7 * 24 * 60 * 60 * 1000,
-					);
-					applicationController["showSyncNotice"](
-						new SettingMock(undefined, String(settingValue)),
-						1,
-					);
-					expect(applicationController["showNotice"]).to.not.have.been.called;
-				});
-			});
-
-			describe("older than max data age days", (): void => {
-				it("should display a sync notice", (): void => {
-					settingValue = new Date(
-						new Date().valueOf() - 9 * 24 * 60 * 60 * 1000,
-					);
-					applicationController["showSyncNotice"](
-						new SettingMock(undefined, String(settingValue)),
-						1,
-					);
-					expect(applicationController["showNotice"]).to.have.been.calledWith({
-						label: "The last data sync was over 7 days ago",
-					});
-				});
-			});
-
-			afterEach((): void => clock.restore());
-		});
 	});
 
 	afterEach((): void => {

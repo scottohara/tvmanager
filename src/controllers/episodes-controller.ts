@@ -1,5 +1,4 @@
 import type { NavButtonEventHandler, SeriesListItem } from "~/controllers";
-import DatabaseService from "~/services/database-service";
 import Episode from "~/models/episode-model";
 import EpisodeListTemplate from "~/views/episodeListTemplate.html";
 import EpisodesView from "~/views/episodes-view.html";
@@ -65,16 +64,20 @@ export default class EpisodesController extends ViewController {
 	}
 
 	public override async activate(): Promise<void> {
-		// Get the list of episodes for the specified series
-		this.episodeList.items = await Episode.listBySeries(
-			String(this.listItem.series.id),
-		);
+		try {
+			// Get the list of episodes for the specified series
+			this.episodeList.items = await Episode.list(
+				Number(this.listItem.series.id),
+			);
 
-		// Refresh the list
-		this.episodeList.refresh();
+			// Refresh the list
+			this.episodeList.refresh();
 
-		// Set to view mode
-		return this.viewItems();
+			// Set to view mode
+			this.viewItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
 	public override contentShown(): void {
@@ -82,7 +85,7 @@ export default class EpisodesController extends ViewController {
 		if (this.scrollToFirstUnwatched) {
 			// Find the first unwatched episode
 			const firstUnwatched = this.episodeList.items.find(
-				(item: Episode): boolean => "Watched" !== item.status,
+				(item: Episode): boolean => "watched" !== item.status,
 			) as PublicInterface<Episode> | undefined;
 
 			if (undefined !== firstUnwatched) {
@@ -112,25 +115,28 @@ export default class EpisodesController extends ViewController {
 	}
 
 	private async deleteItem(listIndex: number): Promise<void> {
-		// Get the deleted episode
-		const episode = this.episodeList.items[listIndex] as Episode;
+		// Get the deleted episode and it's corresponding DOM item
+		const episode = this.episodeList.items[listIndex] as Episode,
+			episodeItem = this.list.querySelector(
+				`li a#item-${episode.id}`,
+			) as HTMLAnchorElement;
 
-		// Remove the item from the DOM
-		(
-			this.list.querySelector(`li a#item-${episode.id}`) as HTMLAnchorElement
-		).remove();
+		try {
+			// Remove the item from the database
+			await episode.remove();
 
-		// Remove the item from the database
-		await episode.remove();
+			// Remove the item from the list and from the DOM
+			this.episodeList.items.splice(listIndex, 1);
+			episodeItem.remove();
 
-		// Remove the item from the list
-		this.episodeList.items.splice(listIndex, 1);
-
-		// Resequence the remaining items
-		return this.resequenceItems();
+			// Resequence the remaining items
+			await this.resequenceItems();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
-	private async deleteItems(): Promise<void> {
+	private deleteItems(): void {
 		// Set the list to delete mode
 		this.episodeList.setAction("delete");
 
@@ -143,7 +149,6 @@ export default class EpisodesController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			rightButton: {
 				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
 				style: "confirmButton",
@@ -157,43 +162,47 @@ export default class EpisodesController extends ViewController {
 
 	private async resequenceItems(): Promise<void> {
 		const self: this = this,
-			episodes: Promise<string | undefined>[] = [];
+			episodes: Promise<void>[] = [];
 
-		// Iterate over the HTML DOM elements in the list
-		this.list
-			.querySelectorAll("li a")
-			.forEach((item: HTMLElement, index: number): void => {
-				// Only update items that have changed position
-				if (
-					item.id !== `item-${(self.episodeList.items[index] as Episode).id}`
-				) {
-					// Iterate over the list items array
-					for (const episode of self.episodeList.items as Episode[]) {
-						// If the array item at this position is not the same as the HTML DOM element at the same position, update the item's sequence in the database
-						if (`item-${episode.id}` === item.id) {
-							episode.sequence = index;
-							episodes.push(episode.save());
+		try {
+			// Iterate over the HTML DOM elements in the list
+			this.list
+				.querySelectorAll("li a")
+				.forEach((item: HTMLElement, index: number): void => {
+					// Only update items that have changed position
+					if (
+						item.id !== `item-${(self.episodeList.items[index] as Episode).id}`
+					) {
+						// Iterate over the list items array
+						for (const episode of self.episodeList.items as Episode[]) {
+							// If the array item at this position is not the same as the HTML DOM element at the same position, update the item's sequence in the database
+							if (`item-${episode.id}` === item.id) {
+								episode.sequence = index;
+								episodes.push(episode.save());
 
-							// Stop after the first update
-							break;
+								// Stop after the first update
+								break;
+							}
 						}
 					}
-				}
-			});
+				});
 
-		await Promise.all(episodes);
+			await Promise.all(episodes);
 
-		// Resort the list items based on the update sequences
-		this.episodeList.items = this.episodeList.items.sort(
-			(a: Episode, b: Episode): number =>
-				a.sequence < b.sequence ? -1 : a.sequence > b.sequence ? 1 : 0,
-		);
+			// Resort the list items based on the update sequences
+			this.episodeList.items = this.episodeList.items.sort(
+				(a: Episode, b: Episode): number =>
+					a.sequence < b.sequence ? -1 : a.sequence > b.sequence ? 1 : 0,
+			);
 
-		// Refresh the list
-		this.episodeList.refresh();
+			// Refresh the list
+			this.episodeList.refresh();
+		} catch (e: unknown) {
+			this.appController.showNotice({ label: (e as Error).message });
+		}
 	}
 
-	private async editItems(): Promise<void> {
+	private editItems(): void {
 		// Set the list to edit mode
 		this.episodeList.setAction("edit");
 
@@ -209,12 +218,11 @@ export default class EpisodesController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: async (): Promise<void> => {
 					await this.resequenceItems();
 
-					return this.viewItems();
+					this.viewItems();
 				},
 				style: "confirmButton",
 				label: "Done",
@@ -225,7 +233,7 @@ export default class EpisodesController extends ViewController {
 		this.appController.setFooter();
 	}
 
-	private async viewItems(): Promise<void> {
+	private viewItems(): void {
 		// Set the list to view mode
 		this.episodeList.setAction("view");
 
@@ -240,7 +248,6 @@ export default class EpisodesController extends ViewController {
 
 		// Setup the footer
 		this.footer = {
-			label: `v${(await DatabaseService).version}`,
 			leftButton: {
 				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
 				label: "Sort",

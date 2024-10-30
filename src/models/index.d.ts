@@ -1,98 +1,45 @@
-import type Episode from "~/models/episode-model";
-import type Program from "~/models/program-model";
-import type Series from "~/models/series-model";
+export type EpisodeStatus = "" | "expected" | "missed" | "recorded" | "watched";
 
-export type EpisodeStatus = "" | "Expected" | "Missed" | "Recorded" | "Watched";
-
-export type SyncAction = "deleted" | "modified";
-
-export type ModelType = "Episode" | "Program" | "Series";
-
-export type Model = Episode | Program | Series;
-
-// Interfaces for persisting to local storage (IndexedDb)
-
-export interface PersistedProgram {
-	rowid?: number;
-	ProgramID: string;
-	Name: string;
-	SeriesCount?: number;
-	EpisodeCount?: number;
-	WatchedCount?: number;
-	RecordedCount?: number;
-	ExpectedCount?: number;
-}
-
-export interface PersistedSeries {
-	rowid?: number;
-	SeriesID: string;
-	Name: string;
-	NowShowing: number | null;
-	ProgramID: string;
-	ProgramName?: string;
-	EpisodeCount?: number;
-	WatchedCount?: number;
-	RecordedCount?: number;
-	ExpectedCount?: number;
-	MissedCount?: number;
-	StatusWarningCount?: number;
-}
-
-export interface PersistedEpisode {
-	rowid?: number;
-	EpisodeID: string;
-	Name: string;
-	Status: EpisodeStatus;
-	StatusDate: string;
-	Unverified: "false" | "true";
-	Unscheduled: "false" | "true";
-	Sequence: number;
-	SeriesID: string;
-	SeriesName?: string;
-	ProgramID?: string;
-	ProgramName?: string;
-}
-
-export interface PersistedSync {
-	Type: ModelType;
-	ID: string;
-	Action: SyncAction;
-}
-
-interface PersistedSetting {
+interface JsonModel {
+	id: number | null;
 	name: string;
-	value: string;
 }
 
-// Interfaces for import/exporting to remote storage (CouchDb)
+type JsonProgram = JsonModel;
 
-export interface SerializedProgram {
-	id: string | null;
-	programName: string | null;
-	type: "Program";
+export interface JsonProgramWithCounts extends JsonProgram {
+	series_count: number;
+	episode_count: number;
+	watched_count: number;
+	recorded_count: number;
+	expected_count: number;
 }
 
-export interface SerializedSeries {
-	id: string | null;
-	seriesName: string | null;
-	nowShowing: number | null;
-	programId: string | null;
-	type: "Series";
+export interface JsonSeries extends JsonModel {
+	now_showing: number | null;
+	program_id: number;
 }
 
-export interface SerializedEpisode {
-	id: string | null;
-	episodeName: string | null;
-	seriesId: string | null;
+export interface JsonSeriesWithCounts extends JsonSeries {
+	program_name: string;
+	episode_count: number;
+	watched_count?: number;
+	recorded_count?: number;
+	expected_count?: number;
+	missed_count?: number;
+	status_warning_count?: number;
+}
+
+export interface JsonEpisode extends JsonModel {
 	status: EpisodeStatus;
-	statusDate: string;
+	status_date: string;
 	unverified: boolean;
 	unscheduled: boolean;
 	sequence: number;
-	type: "Episode";
+	series_id: number;
 }
 
-export type SerializedModel =
-	| SerializedEpisode
-	| SerializedProgram
-	| SerializedSeries;
+export interface JsonEpisodeWithNames extends JsonEpisode {
+	series_name: string;
+	program_name: string;
+}
