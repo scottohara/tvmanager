@@ -1,6 +1,6 @@
 | Service        | Status                                                                                                                                                                                   |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GitHub         | [![Build Status](https://github.com/scottohara/tvmanager/workflows/Build/badge.svg)](https://github.com/scottohara/tvmanager/actions?workflow=Build)                                     |
+| GitHub         | [![Build Status](https://github.com/scottohara/tvmanager/workflows/CI/badge.svg)](https://github.com/scottohara/tvmanager/actions?workflow=CI)                                           |
 | Code Climate   | [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)                                                          |
 | Code Climate   | [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)                                         |
 | Snyk (npm)     | [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)                                                 |
