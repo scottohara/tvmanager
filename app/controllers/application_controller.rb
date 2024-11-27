@@ -9,6 +9,12 @@ class ApplicationController < ::ActionController::API
 	rescue_from ::ActiveRecord::RecordNotFound, with: :record_not_found
 	include ::ActionController::HttpAuthentication::Basic::ControllerMethods
 
+	def routing_error
+		render json: "Path #{params[:unmatched_route]} is not valid", status: :not_found
+	end
+
+	private
+
 	def authenticate_user
 		render plain: 'Invalid login and/or password', status: :unauthorized unless authenticate_with_http_basic do |username, password|
 			username.eql?(::ENV[:TVMANAGER_USERNAME.to_s]) && password.eql?(::ENV[:TVMANAGER_PASSWORD.to_s])
@@ -25,9 +31,5 @@ class ApplicationController < ::ActionController::API
 
 	def record_not_found(exception)
 		render json: exception.message, status: :not_found
-	end
-
-	def routing_error
-		render json: "Path #{params[:unmatched_route]} is not valid", status: :not_found
 	end
 end
