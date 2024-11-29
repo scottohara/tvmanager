@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby file: '.tool-versions'
 
 # Web application framework
-gem 'rails', '7.2.1.1'
+gem 'rails', '8.0.0'
 
 # Database
 gem 'pg', '1.5.8'

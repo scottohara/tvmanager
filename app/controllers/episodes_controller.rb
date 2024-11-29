@@ -39,6 +39,6 @@ class EpisodesController < ApplicationController
 	private
 
 	def episode_params
-		params.require(:episode).permit(:name, :status, :status_date, :unverified, :unscheduled, :sequence, :series_id)
+		params.expect episode: %i[name status status_date unverified unscheduled sequence series_id]
 	end
 end

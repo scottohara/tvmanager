@@ -31,6 +31,6 @@ class ProgramsController < ApplicationController
 	private
 
 	def program_params
-		params.require(:program).permit(:name)
+		params.expect program: [:name]
 	end
 end

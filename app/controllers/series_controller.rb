@@ -35,6 +35,6 @@ class SeriesController < ApplicationController
 	private
 
 	def series_params
-		params.require(:series).permit(:name, :now_showing, :program_id)
+		params.expect series: %i[name now_showing program_id]
 	end
 end
