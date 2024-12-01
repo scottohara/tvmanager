@@ -11,6 +11,10 @@ export default class AboutController extends ViewController {
 	}
 
 	// DOM selectors
+	private get statistics(): HTMLElement {
+		return document.querySelector("#statistics") as HTMLElement;
+	}
+
 	private get totalPrograms(): HTMLInputElement {
 		return document.querySelector("#totalPrograms") as HTMLInputElement;
 	}
@@ -35,23 +39,34 @@ export default class AboutController extends ViewController {
 		};
 
 		try {
+			const [totalPrograms, totalSeries, totalEpisodes, watchedEpisodes] =
+				await Promise.all([
+					Program.count(),
+					Series.count(),
+					Episode.count(),
+					Episode.countByStatus("watched"),
+				]);
+
 			// Set the total number of programs
-			this.totalPrograms.value = String(await Program.count());
+			this.totalPrograms.value = String(totalPrograms);
 
 			// Set the total number of series
-			this.totalSeries.value = String(await Series.count());
+			this.totalSeries.value = String(totalSeries);
 
 			// Set the total number of episodes, and the percentage watched
 			this.totalEpisodes.value = this.watchedPercent(
-				await Episode.count(),
-				await Episode.countByStatus("watched"),
+				totalEpisodes,
+				watchedEpisodes,
 			);
+
+			// Set the scroll position
+			this.appController.setScrollPosition();
+
+			// Show the statistics when populated
+			this.statistics.style.display = "block";
 		} catch (e: unknown) {
 			this.appController.showNotice({ label: (e as Error).message });
 		}
-
-		// Set the scroll position
-		this.appController.setScrollPosition();
 	}
 
 	private async goBack(): Promise<void> {

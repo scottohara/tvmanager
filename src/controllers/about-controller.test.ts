@@ -26,12 +26,16 @@ describe("AboutController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let totalPrograms: HTMLInputElement,
+		let statistics: HTMLElement,
+			totalPrograms: HTMLInputElement,
 			totalSeries: HTMLInputElement,
 			totalEpisodes: HTMLInputElement,
 			leftButton: NavButton;
 
 		beforeEach((): void => {
+			statistics = document.createElement("section");
+			statistics.id = "statistics";
+			statistics.style.display = "none";
 			totalPrograms = document.createElement("input");
 			totalPrograms.id = "totalPrograms";
 			totalSeries = document.createElement("input");
@@ -41,7 +45,12 @@ describe("AboutController", (): void => {
 
 			sinon.stub(aboutController, "goBack" as keyof AboutController);
 
-			document.body.append(totalPrograms, totalSeries, totalEpisodes);
+			document.body.append(
+				statistics,
+				totalPrograms,
+				totalSeries,
+				totalEpisodes,
+			);
 		});
 
 		describe("success", (): void => {
@@ -81,6 +90,8 @@ describe("AboutController", (): void => {
 
 			it("should set the scroll position", (): Chai.Assertion =>
 				expect(appController.setScrollPosition).to.have.been.called);
+			it("should show the statistics", (): Chai.Assertion =>
+				expect(statistics.style.display).to.equal("block"));
 		});
 
 		describe("failure", (): void => {
@@ -112,10 +123,16 @@ describe("AboutController", (): void => {
 					label: "setup failed",
 				}));
 
+			it("should not set the scroll position", (): Chai.Assertion =>
+				expect(appController.setScrollPosition).to.not.have.been.called);
+			it("should show the statistics", (): Chai.Assertion =>
+				expect(statistics.style.display).to.equal("none"));
+
 			afterEach((): null => (ProgramMock.error = null));
 		});
 
 		afterEach((): void => {
+			statistics.remove();
 			totalPrograms.remove();
 			totalSeries.remove();
 			totalEpisodes.remove();

@@ -444,6 +444,11 @@ section {
 	padding-top: 20px;
 }
 
+/* Hide stats section in about view initially */
+#statistics {
+	display: none;
+}
+
 /* Dialog titles */
 h2 {
 	margin: 10px 0 6px 15px;
