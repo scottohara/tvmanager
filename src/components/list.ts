@@ -214,6 +214,7 @@ export default class List {
 				}
 				break;
 
+			case undefined:
 			default:
 		}
 	}

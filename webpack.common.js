@@ -4,22 +4,22 @@ const path = require("path"),
 
 // Rule for *.ts processing
 const tsRule = {
-		test: /\.ts$/u,
+		test: /\.ts$/v,
 		loader: "ts-loader",
 	},
 	// Rule for *.css processing
 	cssRule = {
-		test: /\.css$/u,
+		test: /\.css$/v,
 		use: [MiniCssExtractPlugin.loader, "css-loader"],
 	},
 	// Rule for icon processing
 	iconRule = {
-		test: /tv-icon-.*\.png$/u,
+		test: /tv-icon-.*\.png$/v,
 		type: "asset/resource",
 	},
 	// Rule for image processing
 	imageRule = {
-		test: /(?:\.svg|apple-splash-.*\.png)$/u,
+		test: /(?:\.svg|apple-splash-.*\.png)$/v,
 		type: "asset/resource",
 		generator: {
 			filename: "images/[name][ext]",
@@ -27,13 +27,13 @@ const tsRule = {
 	},
 	// Rule for *.html processing
 	htmlRule = {
-		test: /\.html$/u,
-		include: /views/u,
+		test: /\.html$/v,
+		include: /views/v,
 		loader: "html-loader",
 	},
 	// Rule for *.webmanifest processing
 	webmanifestRule = {
-		test: /\.webmanifest$/u,
+		test: /\.webmanifest$/v,
 		loader: "webpack-webmanifest-loader",
 		type: "asset/resource",
 	},
@@ -66,7 +66,7 @@ const tsRule = {
 				cacheGroups: {
 					defaultVendors: {
 						name: "vendor",
-						test: /[\\/]node_modules[\\/]/u,
+						test: /\/node_modules\//v,
 					},
 				},
 			},

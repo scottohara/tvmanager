@@ -7,7 +7,7 @@ module.exports = merge(config, {
 	module: {
 		rules: [
 			{
-				test: /\.css$/u,
+				test: /\.css$/v,
 				loader: "ignore-loader",
 			},
 			htmlRule,
@@ -29,35 +29,35 @@ module.exports = merge(config, {
 
 		// For testing, remap all modules to their mock versions by default
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/components\/list$/u,
+			/^~\/components\/list$/v,
 			"~/mocks/list-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/components\/progressbar$/u,
+			/^~\/components\/progressbar$/v,
 			"~/mocks/progressbar-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/components\/window$/u,
+			/^~\/components\/window$/v,
 			"~/mocks/window-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/~\/controllers\/application-controller/u,
+			/~\/controllers\/application-controller/v,
 			"~/mocks/application-controller-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/models\/episode-model$/u,
+			/^~\/models\/episode-model$/v,
 			"~/mocks/episode-model-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/models\/program-model$/u,
+			/^~\/models\/program-model$/v,
 			"~/mocks/program-model-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/models\/series-model$/u,
+			/^~\/models\/series-model$/v,
 			"~/mocks/series-model-mock",
 		),
 		new webpack.NormalModuleReplacementPlugin(
-			/^~\/services\/api-service$/u,
+			/^~\/services\/api-service$/v,
 			"~/mocks/api-service-mock",
 		),
 	],

@@ -215,6 +215,7 @@ export default class EpisodeController extends ViewController {
 						this.unverifiedRow.style.display = "flex";
 						break;
 
+					case "":
 					default:
 				}
 			}
