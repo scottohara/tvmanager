@@ -1,8 +1,7 @@
 import * as API from "./api-service";
+import sinon, { type SinonStub } from "sinon";
 import Login from "~/models/login-model";
-import type { SinonStub } from "sinon";
 import WindowMock from "~/mocks/window-mock";
-import sinon from "sinon";
 
 describe("API", (): void => {
 	let options: RequestInit, fakeAuthorisation: SinonStub, json: object;

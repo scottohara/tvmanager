@@ -1,7 +1,6 @@
+import sinon, { type SinonStub } from "sinon";
 import BaseMock from "~/mocks/base-model-mock";
 import type { EpisodeStatus } from "~/models";
-import type { SinonStub } from "sinon";
-import sinon from "sinon";
 
 const listStub: SinonStub<[number], Promise<EpisodeMock[]>> = sinon.stub(),
 	unscheduledStub: SinonStub<[], Promise<EpisodeMock[]>> = sinon.stub(),

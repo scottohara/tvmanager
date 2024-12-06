@@ -1,8 +1,7 @@
-import type { SinonStub } from "sinon";
+import sinon, { type SinonStub } from "sinon";
 import TestView from "~/views/test-view.html";
 import ViewController from "~/controllers/view-controller";
 import type { ViewControllerArgs } from "~/controllers";
-import sinon from "sinon";
 
 export default class TestController extends ViewController {
 	public view: string = TestView;

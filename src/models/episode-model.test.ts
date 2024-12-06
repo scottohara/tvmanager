@@ -1,8 +1,7 @@
 import * as API from "~/mocks/api-service-mock";
 import type { EpisodeStatus, JsonEpisode } from "~/models";
+import sinon, { type SinonFakeTimers } from "sinon";
 import Episode from "./episode-model";
-import type { SinonFakeTimers } from "sinon";
-import sinon from "sinon";
 
 describe("Episode", (): void => {
 	let id: number,

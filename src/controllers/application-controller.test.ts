@@ -6,12 +6,11 @@ import type {
 	View,
 	ViewControllerArgs,
 } from "~/controllers";
-import type { SinonSpy, SinonStub } from "sinon";
+import sinon, { type SinonSpy, type SinonStub } from "sinon";
 import ApplicationController from "./application-controller";
 import Login from "~/models/login-model";
 import TestController from "~/mocks/test-controller";
 import WindowMock from "~/mocks/window-mock";
-import sinon from "sinon";
 
 describe("ApplicationController", (): void => {
 	let contentWrapper: HTMLDivElement,

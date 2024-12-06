@@ -1,5 +1,4 @@
-import type { SinonStub } from "sinon";
-import sinon from "sinon";
+import sinon, { type SinonStub } from "sinon";
 
 interface NavigatorMock {
 	onLine: boolean;

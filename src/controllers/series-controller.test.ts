@@ -3,13 +3,12 @@ import type {
 	NavButtonEventHandler,
 	SeriesListItem,
 } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import ProgramMock from "~/mocks/program-model-mock";
 import SeriesController from "~/controllers/series-controller";
 import SeriesMock from "~/mocks/series-model-mock";
 import SeriesView from "~/views/series-view.html";
-import type { SinonStub } from "sinon";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
