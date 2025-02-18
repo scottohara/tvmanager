@@ -4,7 +4,7 @@
 # Episode
 class Episode < ApplicationRecord
 	belongs_to :series
-	enum :status, %w[watched recorded expected missed].to_h { [_1.to_sym, _1] }
+	enum :status, %w[watched recorded expected missed].index_by(&:to_sym)
 	validates :name, :sequence, presence: true
 	validates :unverified, :unscheduled, inclusion: {in: [true, false]}
 	validates :sequence, numericality: {only_integer: true}
