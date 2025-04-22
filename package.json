@@ -31,7 +31,7 @@
     "concurrently": "8.2.2",
     "coverage-istanbul-loader": "3.0.5",
     "css-loader": "6.10.0",
-    "cypress": "14.0.1",
+    "cypress": "14.0.3",
     "eslint": "9.16.0",
     "eslint-config-oharagroup": "5.1.0",
     "html-loader": "5.0.0",
@@ -49,7 +49,7 @@
     "karma-webpack": "5.0.1",
     "mini-css-extract-plugin": "2.8.1",
     "mocha": "10.3.0",
-    "prettier": "3.4.2",
+    "prettier": "3.5.1",
     "process": "0.11.10",
     "pwa-asset-generator": "6.3.1",
     "sinon": "18.0.0",
@@ -93,7 +93,8 @@
     "deploy": "fly deploy --build-arg NODE_VERSION=$npm_package_engines_node --build-arg NPM_VERSION=$npm_package_engines_npm --build-arg RUBY_VERSION=$npm_package_engines_ruby",
     "deploy:staging": "npm run deploy -- --app tvmanagertest",
     "deploy:production": "npm run deploy -- --app tvmanager",
-    "swap:check": "fly ssh console --command 'free'"
+    "swap:check": "fly ssh console --command 'free'",
+    "docker:build": "docker build --build-arg NODE_VERSION=$npm_package_engines_node --build-arg NPM_VERSION=$npm_package_engines_npm --build-arg RUBY_VERSION=$npm_package_engines_ruby --tag tvmanager ."
   },
   "engines": {
     "node": "22.14.0",
