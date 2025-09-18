@@ -1,6 +1,7 @@
 .bundle
 .git
 .github
+.qlty
 .vscode
 bin
 build
@@ -19,7 +20,6 @@ src/mocks
 tmp
 vendor
 **/*~
-.codeclimate.yml
 .DS_Store
 .dccache
 .editorconfig

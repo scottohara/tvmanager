@@ -1,8 +1,8 @@
 | Service        | Status                                                                                                                                                                                   |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GitHub         | [![Build Status](https://github.com/scottohara/tvmanager/workflows/CI/badge.svg)](https://github.com/scottohara/tvmanager/actions?workflow=CI)                                           |
-| Code Climate   | [![Code Climate](https://codeclimate.com/github/scottohara/tvmanager.png)](https://codeclimate.com/github/scottohara/tvmanager)                                                          |
-| Code Climate   | [![Test Coverage](https://codeclimate.com/github/scottohara/tvmanager/badges/coverage.svg)](https://codeclimate.com/github/scottohara/tvmanager)                                         |
+| Qlty           | [![Maintainability](https://qlty.sh/gh/scottohara/projects/tvmanager/maintainability.svg)](https://qlty.sh/gh/scottohara/projects/tvmanager)                                             |
+| Qlty           | [![Code Coverage](https://qlty.sh/gh/scottohara/projects/tvmanager/coverage.svg)](https://qlty.sh/gh/scottohara/projects/tvmanager)                                                      |
 | Snyk (npm)     | [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg)](https://snyk.io/test/github/scottohara/tvmanager)                                                 |
 | Snyk (Gemfile) | [![Known Vulnerabilities](https://snyk.io/test/github/scottohara/tvmanager/badge.svg?targetFile=Gemfile.lock)](https://snyk.io/test/github/scottohara/tvmanager?targetFile=Gemfile.lock) |
 
