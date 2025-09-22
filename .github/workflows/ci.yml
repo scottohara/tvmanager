@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
-      DATABASE_URL: postgresql://postgres@localhost
+      DATABASE_URL: postgresql://postgres:postgres@localhost
       BUNDLE_WITHOUT: production
 
     services:
