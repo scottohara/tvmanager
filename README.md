@@ -64,14 +64,14 @@ The app uses basic authentication, and you will need to declare the following en
 
 **.env**
 
-```
+```properties
 TVMANAGER_USERNAME='username'
 TVMANAGER_PASSWORD='supersecret'
 ```
 
 For staging/production, if you use Fly.io you can specify these as secrets using the `flyctl` CLI, eg.
 
-```
+```shell
 fly secrets set TVMANAGER_USERNAME=username --app <name staging or production app>
 ```
 
