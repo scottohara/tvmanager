@@ -40,7 +40,7 @@ export default class ProgramController extends ViewController {
 		};
 
 		// Set the program details
-		this.programName.value = String(this.listItem.program.programName);
+		this.programName.value = this.listItem.program.programName;
 
 		return Promise.resolve();
 	}

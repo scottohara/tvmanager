@@ -27,7 +27,7 @@ export default class SeriesController extends ViewController {
 					`Series ${Number(listItem.sequence) + 1}`,
 					null,
 					Number((listItem.program as Program).id),
-					String((listItem.program as Program).programName),
+					(listItem.program as Program).programName,
 				),
 			};
 		}
@@ -72,7 +72,7 @@ export default class SeriesController extends ViewController {
 					const option = document.createElement("option");
 
 					option.value = String(program.id);
-					option.textContent = String(program.programName);
+					option.textContent = program.programName;
 
 					return option;
 				});
@@ -83,7 +83,7 @@ export default class SeriesController extends ViewController {
 		}
 
 		// Set the series details
-		this.seriesName.value = String(this.listItem.series.seriesName);
+		this.seriesName.value = this.listItem.series.seriesName;
 		this.nowShowing.value = String(this.listItem.series.nowShowing ?? "");
 		this.moveTo.value = String(this.listItem.series.programId);
 	}

@@ -333,9 +333,9 @@ describe("SeriesListController", (): void => {
 		});
 
 		it("should set the list to delete mode", (): Chai.Assertion =>
-			expect(
-				String((seriesListController["seriesList"] as ListMock).action),
-			).to.equal("delete"));
+			expect((seriesListController["seriesList"] as ListMock).action).to.equal(
+				"delete",
+			));
 		it("should clear the view footer", (): Chai.Assertion =>
 			expect(appController.clearFooter).to.have.been.called);
 

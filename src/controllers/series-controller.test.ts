@@ -57,7 +57,7 @@ describe("SeriesController", (): void => {
 				expect(seriesController).to.be.an.instanceOf(SeriesController));
 
 			it("should create a list item", (): void => {
-				expect(String(seriesController["listItem"].series.seriesName)).to.equal(
+				expect(seriesController["listItem"].series.seriesName).to.equal(
 					`Series ${Number(seriesListItem.sequence) + 1}`,
 				);
 				expect(seriesController["listItem"].series.programId).to.equal(
@@ -153,7 +153,7 @@ describe("SeriesController", (): void => {
 					.querySelectorAll("option")
 					.forEach((option: HTMLOptionElement, index: number): void => {
 						expect(option.value).to.equal(String(programs[index][0]));
-						expect(String(option.textContent)).to.equal(programs[index][1]);
+						expect(option.textContent).to.equal(programs[index][1]);
 					}));
 
 			it("should set the series name", (): Chai.Assertion =>
@@ -273,7 +273,7 @@ describe("SeriesController", (): void => {
 			beforeEach(async (): Promise<void> => seriesController["save"]());
 
 			it("should get the series name", (): Chai.Assertion =>
-				expect(String(seriesController["listItem"].series.seriesName)).to.equal(
+				expect(seriesController["listItem"].series.seriesName).to.equal(
 					seriesName,
 				));
 			it("should get the now showing", (): Chai.Assertion =>
@@ -297,7 +297,7 @@ describe("SeriesController", (): void => {
 			});
 
 			it("should get the series name", (): Chai.Assertion =>
-				expect(String(seriesController["listItem"].series.seriesName)).to.equal(
+				expect(seriesController["listItem"].series.seriesName).to.equal(
 					seriesName,
 				));
 			it("should get the now showing", (): Chai.Assertion =>
@@ -319,7 +319,7 @@ describe("SeriesController", (): void => {
 			});
 
 			it("should get the series name", (): Chai.Assertion =>
-				expect(String(seriesController["listItem"].series.seriesName)).to.equal(
+				expect(seriesController["listItem"].series.seriesName).to.equal(
 					seriesName,
 				));
 			it("should get the now showing", (): Chai.Assertion =>

@@ -21,7 +21,7 @@ async function api<T>(
 		response = await window.fetch(path, options);
 
 	if (!response.ok) {
-		const error = String(await response.text());
+		const error = await response.text();
 
 		throw new Error(error);
 	}

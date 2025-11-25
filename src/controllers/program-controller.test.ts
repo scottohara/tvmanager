@@ -53,7 +53,7 @@ describe("ProgramController", (): void => {
 					expect(programController).to.be.an.instanceOf(ProgramController));
 				it("should set the list item", (): Chai.Assertion =>
 					expect(
-						String(scenario.programController["listItem"].program.programName),
+						scenario.programController["listItem"].program.programName,
 					).to.equal(
 						(scenario.listItem as ProgramListItem).program.programName,
 					));
@@ -129,9 +129,9 @@ describe("ProgramController", (): void => {
 			beforeEach(async (): Promise<void> => programController["save"]());
 
 			it("should get the program name", (): Chai.Assertion =>
-				expect(
-					String(programController["listItem"].program.programName),
-				).to.equal(programName));
+				expect(programController["listItem"].program.programName).to.equal(
+					programName,
+				));
 			it("should save the program", (): Chai.Assertion =>
 				expect(listItem.program.save).to.have.been.called);
 			it("should pop the view", (): Chai.Assertion =>
@@ -145,9 +145,9 @@ describe("ProgramController", (): void => {
 			});
 
 			it("should get the program name", (): Chai.Assertion =>
-				expect(
-					String(programController["listItem"].program.programName),
-				).to.equal(programName));
+				expect(programController["listItem"].program.programName).to.equal(
+					programName,
+				));
 			it("should attempt to save the program", (): Chai.Assertion =>
 				expect(listItem.program.save).to.have.been.called);
 			it("should not pop the view", (): Chai.Assertion =>

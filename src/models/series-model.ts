@@ -139,7 +139,7 @@ export default class Series extends Base {
 		const series: Omit<JsonSeries, "id"> = {
 			name: this.seriesName,
 			now_showing: this.nowShowing,
-			program_id: Number(this.programId),
+			program_id: this.programId,
 		};
 
 		if (null === this.id) {

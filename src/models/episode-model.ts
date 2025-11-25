@@ -133,7 +133,7 @@ export default class Episode extends Base {
 			unverified: this.unverified,
 			unscheduled: this.unscheduled,
 			sequence: this.sequence,
-			series_id: Number(this.seriesId),
+			series_id: this.seriesId,
 		};
 
 		if (null === this.id) {

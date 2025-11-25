@@ -48,7 +48,7 @@ describe("Episode", (): void => {
 		it("should set the id", (): Chai.Assertion =>
 			expect(episode.id).to.equal(id));
 		it("should set the episode name", (): Chai.Assertion =>
-			expect(String(episode.episodeName)).to.equal(episodeName));
+			expect(episode.episodeName).to.equal(episodeName));
 		it("should set the status", (): Chai.Assertion =>
 			expect(episode.status).to.equal(status));
 		it("should set the status date", (): Chai.Assertion =>

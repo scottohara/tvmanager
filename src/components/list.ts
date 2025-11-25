@@ -53,7 +53,7 @@ export default class List {
 
 					// If grouping is required, when the property used for the group changes, output a group header item
 					if (null !== this.groupBy) {
-						const itemGroup = String(listItemProperties.get(this.groupBy));
+						const itemGroup = listItemProperties.get(this.groupBy) as string;
 
 						if (currentGroup !== itemGroup) {
 							const group = document.createElement("li"),
@@ -80,7 +80,7 @@ export default class List {
 						// Substitute any tokens in the template (ie. #{propertyName}) with the matching property value from the object
 						itemHtml = itemHtml.replace(
 							`#{${key}}`,
-							`${prefix}${String(value)}`,
+							`${prefix}${value as string}`,
 						);
 					}
 

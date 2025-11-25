@@ -50,7 +50,7 @@ describe("Series", (): void => {
 		it("should set the id", (): Chai.Assertion =>
 			expect(series.id).to.equal(id));
 		it("should set the series name", (): Chai.Assertion =>
-			expect(String(series.seriesName)).to.equal(seriesName));
+			expect(series.seriesName).to.equal(seriesName));
 		it("should set the now showing", (): Chai.Assertion =>
 			expect(Number(series.nowShowing)).to.equal(nowShowing));
 		it("should set the program id", (): Chai.Assertion =>

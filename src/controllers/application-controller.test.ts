@@ -297,7 +297,7 @@ describe("ApplicationController", (): void => {
 					});
 
 					it("should set the button label", (): Chai.Assertion =>
-						expect(String(leftButton.textContent)).to.equal("left-button"));
+						expect(leftButton.textContent).to.equal("left-button"));
 					it("should show the button", (): Chai.Assertion =>
 						expect(leftButton.style.display).to.not.equal("none"));
 					it("should show the footer label", (): Chai.Assertion =>
@@ -344,7 +344,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not set the button label", (): Chai.Assertion =>
-					expect(String(leftButton.textContent)).to.equal(""));
+					expect(leftButton.textContent).to.equal(""));
 				it("should not show the button", (): Chai.Assertion =>
 					expect(leftButton.style.display).to.equal("none"));
 				it("should show the footer label", (): Chai.Assertion =>
@@ -358,7 +358,7 @@ describe("ApplicationController", (): void => {
 				beforeEach((): void => applicationController.setFooter());
 
 				it("should set the footer label", (): Chai.Assertion =>
-					expect(String(label.textContent)).to.equal("test-footer"));
+					expect(label.textContent).to.equal("test-footer"));
 				it("should show the footer label", (): Chai.Assertion =>
 					expect(label.style.display).to.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion =>
@@ -373,7 +373,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not set the footer label", (): Chai.Assertion =>
-					expect(String(label.textContent)).to.equal(""));
+					expect(label.textContent).to.equal(""));
 				it("should show the footer label", (): Chai.Assertion =>
 					expect(label.style.display).to.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion =>
@@ -398,7 +398,7 @@ describe("ApplicationController", (): void => {
 					});
 
 					it("should set the button label", (): Chai.Assertion =>
-						expect(String(rightButton.textContent)).to.equal("right-button"));
+						expect(rightButton.textContent).to.equal("right-button"));
 					it("should show the button", (): Chai.Assertion =>
 						expect(rightButton.style.display).to.not.equal("none"));
 					it("should show the footer label", (): Chai.Assertion =>
@@ -445,7 +445,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should not set the button label", (): Chai.Assertion =>
-					expect(String(rightButton.textContent)).to.equal(""));
+					expect(rightButton.textContent).to.equal(""));
 				it("should not show the button", (): Chai.Assertion =>
 					expect(rightButton.style.display).to.equal("none"));
 				it("should show the footer label", (): Chai.Assertion =>
@@ -732,7 +732,7 @@ describe("ApplicationController", (): void => {
 			it("should hide the left button", (): Chai.Assertion =>
 				expect(leftButton.style.display).to.equal("none"));
 			it("should clear the footer label", (): Chai.Assertion =>
-				expect(String(label.textContent)).to.equal(""));
+				expect(label.textContent).to.equal(""));
 			it("should hide the footer label", (): Chai.Assertion =>
 				expect(label.style.display).to.equal("none"));
 			it("should hide the right button", (): Chai.Assertion =>
@@ -757,7 +757,7 @@ describe("ApplicationController", (): void => {
 				it("should hide the left button", (): Chai.Assertion =>
 					expect(leftButton.style.display).to.equal("none"));
 				it("should clear the footer label", (): Chai.Assertion =>
-					expect(String(label.textContent)).to.equal(""));
+					expect(label.textContent).to.equal(""));
 				it("should hide the footer label", (): Chai.Assertion =>
 					expect(label.style.display).to.equal("none"));
 				it("should hide the right button", (): Chai.Assertion =>
@@ -784,7 +784,7 @@ describe("ApplicationController", (): void => {
 				it("should hide the left button", (): Chai.Assertion =>
 					expect(leftButton.style.display).to.equal("none"));
 				it("should clear the footer label", (): Chai.Assertion =>
-					expect(String(label.textContent)).to.equal(""));
+					expect(label.textContent).to.equal(""));
 				it("should hide the footer label", (): Chai.Assertion =>
 					expect(label.style.display).to.equal("none"));
 				it("should hide the right button", (): Chai.Assertion =>
@@ -805,7 +805,7 @@ describe("ApplicationController", (): void => {
 				it("should hide the left button", (): Chai.Assertion =>
 					expect(leftButton.style.display).to.equal("none"));
 				it("should clear the footer label", (): Chai.Assertion =>
-					expect(String(label.textContent)).to.equal(""));
+					expect(label.textContent).to.equal(""));
 				it("should hide the footer label", (): Chai.Assertion =>
 					expect(label.style.display).to.equal("none"));
 				it("should hide the right button", (): Chai.Assertion =>
@@ -832,7 +832,7 @@ describe("ApplicationController", (): void => {
 				it("should hide the left button", (): Chai.Assertion =>
 					expect(leftButton.style.display).to.equal("none"));
 				it("should clear the footer label", (): Chai.Assertion =>
-					expect(String(label.textContent)).to.equal(""));
+					expect(label.textContent).to.equal(""));
 				it("should hide the footer label", (): Chai.Assertion =>
 					expect(label.style.display).to.equal("none"));
 				it("should hide the right button", (): Chai.Assertion =>
@@ -1064,7 +1064,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should set the button label", (): Chai.Assertion =>
-					expect(String(leftButton.textContent)).to.equal("left-button"));
+					expect(leftButton.textContent).to.equal("left-button"));
 				it("should show the button", (): Chai.Assertion =>
 					expect(leftButton.style.display).to.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion =>
@@ -1112,7 +1112,7 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not set the button label", (): Chai.Assertion =>
-				expect(String(leftButton.textContent)).to.equal(""));
+				expect(leftButton.textContent).to.equal(""));
 			it("should not show the button", (): Chai.Assertion =>
 				expect(leftButton.style.display).to.equal("none"));
 			it("should update the content height", (): Chai.Assertion =>
@@ -1123,7 +1123,7 @@ describe("ApplicationController", (): void => {
 			beforeEach((): void => applicationController["setHeader"]());
 
 			it("should set the header label", (): Chai.Assertion =>
-				expect(String(label.textContent)).to.equal("test-header"));
+				expect(label.textContent).to.equal("test-header"));
 			it("should show the header label", (): Chai.Assertion =>
 				expect(label.style.display).to.not.equal("none"));
 			it("should update the content height", (): Chai.Assertion =>
@@ -1137,7 +1137,7 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not set the header label", (): Chai.Assertion =>
-				expect(String(label.textContent)).to.equal(""));
+				expect(label.textContent).to.equal(""));
 			it("should not show the header label", (): Chai.Assertion =>
 				expect(label.style.display).to.equal("none"));
 			it("should update the content height", (): Chai.Assertion =>
@@ -1161,7 +1161,7 @@ describe("ApplicationController", (): void => {
 				});
 
 				it("should set the button label", (): Chai.Assertion =>
-					expect(String(rightButton.textContent)).to.equal("right-button"));
+					expect(rightButton.textContent).to.equal("right-button"));
 				it("should show the button", (): Chai.Assertion =>
 					expect(rightButton.style.display).to.not.equal("none"));
 				it("should update the content height", (): Chai.Assertion =>
@@ -1209,7 +1209,7 @@ describe("ApplicationController", (): void => {
 			});
 
 			it("should not set the button label", (): Chai.Assertion =>
-				expect(String(rightButton.textContent)).to.equal(""));
+				expect(rightButton.textContent).to.equal(""));
 			it("should not show the button", (): Chai.Assertion =>
 				expect(rightButton.style.display).to.equal("none"));
 			it("should update the content height", (): Chai.Assertion =>

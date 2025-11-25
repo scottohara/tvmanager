@@ -34,7 +34,7 @@ export default class Login {
 			});
 
 		if (!response.ok) {
-			const error = String(await response.text());
+			const error = await response.text();
 
 			throw new Error(error);
 		}

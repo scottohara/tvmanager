@@ -100,7 +100,7 @@ export default class EpisodeController extends ViewController {
 		};
 
 		// Set the episode details
-		this.episodeName.value = String(this.listItem.episode.episodeName);
+		this.episodeName.value = this.listItem.episode.episodeName;
 		this.statusDate.value = this.listItem.episode.statusDate;
 		this.unverified.checked = this.listItem.episode.unverified;
 		this.unscheduled.checked = this.listItem.episode.unscheduled;

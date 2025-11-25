@@ -197,7 +197,7 @@ describe("EpisodesController", (): void => {
 		beforeEach(
 			(): ListMock =>
 				(episodesController["episodeList"] = new ListMock("", "", "", [
-					{ ...items[0] } as EpisodeMock,
+					items[0],
 				])),
 		);
 
@@ -520,20 +520,23 @@ describe("EpisodesController", (): void => {
 			items = [
 				new EpisodeMock(1, "", "", "", 2, false, false, 1),
 				{
-					...new EpisodeMock(2, "", "", "", 2, false, false, 2),
+					id: 2,
+					sequence: 2,
 					save: sinon.stub(),
 					remove: sinon.stub(),
-				},
+				} as EpisodeMock,
 				{
-					...new EpisodeMock(3, "", "", "", 2, false, false, 3),
+					id: 3,
+					sequence: 3,
 					save: sinon.stub(),
 					remove: sinon.stub(),
-				},
+				} as EpisodeMock,
 				{
-					...new EpisodeMock(4, "", "", "", 2, false, false, 3),
+					id: 4,
+					sequence: 3,
 					save: sinon.stub(),
 					remove: sinon.stub(),
-				},
+				} as EpisodeMock,
 			];
 
 			sortedItems = [items[1], items[0], items[2], items[3]];

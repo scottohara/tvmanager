@@ -29,25 +29,23 @@ export default class ApplicationControllerMock {
 	public constructor() {
 		// App controller is a singleton, so if an instance already exists, return it
 		if (undefined !== ApplicationControllerMock.singletonInstance) {
-			ApplicationControllerMock.singletonInstance.reset();
+			const { singletonInstance } = ApplicationControllerMock;
 
-			return ApplicationControllerMock.singletonInstance;
+			singletonInstance.start.reset();
+			singletonInstance.pushView.reset();
+			singletonInstance.popView.reset();
+			singletonInstance.clearFooter.reset();
+			singletonInstance.setFooter.reset();
+			singletonInstance.getScrollPosition.reset();
+			singletonInstance.setScrollPosition.reset();
+			singletonInstance.showNotice.reset();
+			singletonInstance.showScrollHelper.reset();
+			singletonInstance.hideScrollHelper.reset();
+
+			return singletonInstance;
 		}
 
 		// No existing instance, so make this instance the singleton
 		ApplicationControllerMock.singletonInstance = this;
-	}
-
-	private reset(): void {
-		this.start.reset();
-		this.pushView.reset();
-		this.popView.reset();
-		this.clearFooter.reset();
-		this.setFooter.reset();
-		this.getScrollPosition.reset();
-		this.setScrollPosition.reset();
-		this.showNotice.reset();
-		this.showScrollHelper.reset();
-		this.hideScrollHelper.reset();
 	}
 }

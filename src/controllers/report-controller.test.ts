@@ -1,4 +1,8 @@
-import type { NavButton, NavButtonEventHandler, Report } from "~/controllers";
+import type {
+	NavButton,
+	NavButtonEventHandler,
+	ReportConfig,
+} from "~/controllers";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import ListMock from "~/mocks/list-mock";
 import ReportController from "~/controllers/report-controller";
@@ -12,7 +16,7 @@ const appController = new ApplicationControllerMock();
 describe("ReportController", (): void => {
 	let args: string,
 		items: SeriesMock[],
-		report: Report,
+		report: ReportConfig,
 		reportController: ReportController;
 
 	beforeEach((): void => {

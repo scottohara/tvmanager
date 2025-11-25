@@ -27,7 +27,7 @@ export default class SeriesListController extends ViewController {
 	public async setup(): Promise<void> {
 		// Setup the header
 		this.header = {
-			label: String(this.listItem.program.programName),
+			label: this.listItem.program.programName,
 			leftButton: {
 				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
 				style: "backButton",

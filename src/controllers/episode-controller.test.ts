@@ -65,9 +65,9 @@ describe("EpisodeController", (): void => {
 				expect(episodeController).to.be.an.instanceOf(EpisodeController));
 
 			it("should create a list item", (): void => {
-				expect(
-					String(episodeController["listItem"].episode.episodeName),
-				).to.equal(`Episode ${Number(listItem.sequence) + 1}`);
+				expect(episodeController["listItem"].episode.episodeName).to.equal(
+					`Episode ${Number(listItem.sequence) + 1}`,
+				);
 				expect(episodeController["listItem"].episode.sequence).to.equal(
 					listItem.sequence,
 				);
@@ -326,13 +326,13 @@ describe("EpisodeController", (): void => {
 				});
 
 				it("should get the episode name", (): Chai.Assertion =>
-					expect(
-						String(episodeController["listItem"].episode.episodeName),
-					).to.equal(episodeName));
+					expect(episodeController["listItem"].episode.episodeName).to.equal(
+						episodeName,
+					));
 				it("should get the status date", (): Chai.Assertion =>
-					expect(
-						String(episodeController["listItem"].episode.statusDate),
-					).to.equal(statusDate));
+					expect(episodeController["listItem"].episode.statusDate).to.equal(
+						statusDate,
+					));
 				it("should get the unverified toggle", (): Chai.Assertion =>
 					expect(episodeController["listItem"].episode.unverified).to.be.true);
 				it("should get the unscheduled toggle", (): Chai.Assertion =>
@@ -355,13 +355,13 @@ describe("EpisodeController", (): void => {
 			});
 
 			it("should get the episode name", (): Chai.Assertion =>
-				expect(
-					String(episodeController["listItem"].episode.episodeName),
-				).to.equal(episodeName));
+				expect(episodeController["listItem"].episode.episodeName).to.equal(
+					episodeName,
+				));
 			it("should get the status date", (): Chai.Assertion =>
-				expect(
-					String(episodeController["listItem"].episode.statusDate),
-				).to.equal(statusDate));
+				expect(episodeController["listItem"].episode.statusDate).to.equal(
+					statusDate,
+				));
 			it("should get the unverified toggle", (): Chai.Assertion =>
 				expect(episodeController["listItem"].episode.unverified).to.be.true);
 			it("should get the unscheduled toggle", (): Chai.Assertion =>
@@ -643,7 +643,7 @@ describe("EpisodeController", (): void => {
 					scenario.isHidden ? "hide" : "show"
 				} the status date`, (): Chai.Assertion =>
 					expect("none" === statusDateRow.style.display).to.equal(
-						Boolean(scenario.isHidden),
+						scenario.isHidden,
 					));
 			});
 		});

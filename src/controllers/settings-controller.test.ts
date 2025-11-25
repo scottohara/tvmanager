@@ -1,4 +1,8 @@
-import type { NavButton, NavButtonEventHandler, Report } from "~/controllers";
+import type {
+	NavButton,
+	NavButtonEventHandler,
+	ReportConfig,
+} from "~/controllers";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import SeriesMock from "~/mocks/series-model-mock";
 import SettingsController from "~/controllers/settings-controller";
@@ -11,7 +15,7 @@ const appController = new ApplicationControllerMock();
 describe("SettingsController", (): void => {
 	interface ReportType {
 		description: string;
-		viewArgs: Report;
+		viewArgs: ReportConfig;
 	}
 
 	type ReportHandler =

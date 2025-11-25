@@ -1,4 +1,4 @@
-import type { NavButtonEventHandler, Report } from "~/controllers";
+import type { NavButtonEventHandler, ReportConfig } from "~/controllers";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
 import ReportListTemplate from "~/views/reportListTemplate.html";
@@ -9,7 +9,7 @@ import ViewController from "~/controllers/view-controller";
 export default class ReportController extends ViewController {
 	private reportList!: PublicInterface<List>;
 
-	public constructor(private readonly report: Report) {
+	public constructor(private readonly report: ReportConfig) {
 		super();
 	}
 

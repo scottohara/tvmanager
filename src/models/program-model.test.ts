@@ -184,7 +184,7 @@ describe("Program", (): void => {
 				expect(API.destroy.withArgs(path)).to.not.have.been.called;
 			});
 			it("should not clear the program name", (): Chai.Assertion =>
-				expect(String(program.programName)).to.equal(programName));
+				expect(program.programName).to.equal(programName));
 		});
 
 		describe("with ID", (): void => {

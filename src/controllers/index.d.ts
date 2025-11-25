@@ -58,7 +58,7 @@ export type ReportDataSource = (
 	args?: string,
 ) => Promise<PublicInterface<Series>[]>;
 
-export interface Report {
+export interface ReportConfig {
 	reportName: string;
 	dataSource: ReportDataSource;
 	args?: string;
@@ -67,7 +67,7 @@ export interface Report {
 type ViewControllerArgs =
 	| EpisodeListItem
 	| ProgramListItem
-	| Report
+	| ReportConfig
 	| SeriesListItem;
 type ViewControllerConstructor = new (
 	args?: ViewControllerArgs,

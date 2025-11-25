@@ -153,7 +153,7 @@ describe("UnscheduledController", (): void => {
 
 		it("should set the list to view mode", (): Chai.Assertion =>
 			expect(
-				String((unscheduledController["unscheduledList"] as ListMock).action),
+				(unscheduledController["unscheduledList"] as ListMock).action,
 			).to.equal("view"));
 		it("should clear the view footer", (): Chai.Assertion =>
 			expect(appController.clearFooter).to.have.been.called);
