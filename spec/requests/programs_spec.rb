@@ -50,7 +50,7 @@ require 'rails_helper'
 			expect(response.parsed_body[:name]).to eq program[:name]
 		end
 
-		it 'should respond with a 422 Unprocessable Entity status if the program is invalid', :record_invalid do
+		it 'should respond with a 422 Unprocessable Content status if the program is invalid', :record_invalid do
 			program = attributes_for(:program, name: nil)
 			post(programs_path, params: {program:}, headers:)
 		end
@@ -63,7 +63,7 @@ require 'rails_helper'
 			expect(response.parsed_body).to be true
 		end
 
-		it 'should respond with a 422 Unprocessable Entity status if the program is invalid', :record_invalid do
+		it 'should respond with a 422 Unprocessable Content status if the program is invalid', :record_invalid do
 			program = create(:program)
 			program.name = nil
 			put(program_path(program), params: {program: program.attributes}, headers:)

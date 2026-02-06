@@ -26,7 +26,7 @@ class ApplicationController < ::ActionController::API
 	end
 
 	def record_invalid(exception)
-		render json: exception.record.errors.full_messages.join(', '), status: :unprocessable_entity
+		render json: exception.record.errors.full_messages.join(', '), status: :unprocessable_content
 	end
 
 	def record_not_found(exception)

@@ -66,7 +66,7 @@ require 'rails_helper'
 			expect(response.parsed_body[:name]).to eq series[:name]
 		end
 
-		it 'should respond with a 422 Unprocessable Entity status if the series is invalid', :record_invalid do
+		it 'should respond with a 422 Unprocessable Content status if the series is invalid', :record_invalid do
 			program = create(:program)
 			series = attributes_for(:series, name: nil, program_id: program.id)
 			post(program_series_index_path(program), params: {series:}, headers:)
@@ -80,7 +80,7 @@ require 'rails_helper'
 			expect(response.parsed_body).to be true
 		end
 
-		it 'should respond with a 422 Unprocessable Entity status if the series is invalid', :record_invalid do
+		it 'should respond with a 422 Unprocessable Content status if the series is invalid', :record_invalid do
 			series = create(:series)
 			series.name = nil
 			put(series_path(series), params: {series: series.attributes}, headers:)
