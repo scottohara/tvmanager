@@ -61,7 +61,7 @@ require 'rails_helper'
 			fourth_episode = create(:episode, name: 'Episode 4', seq: 4, series:)
 			second_episode = create(:episode, name: 'Episode 2', seq: 2, series:)
 
-			expect(described_class.list(series.id).map { [_1.sequence, _1.id] }).to eq [
+			expect(described_class.list(series.id).map { [it.sequence, it.id] }).to eq [
 				[1, first_episode.id],
 				[2, second_episode.id],
 				[3, third_episode.id],

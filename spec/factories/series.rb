@@ -3,7 +3,7 @@
 
 ::FactoryBot.define do
 	factory :series do
-		sequence(:name) { "Series #{_1}" }
+		sequence(:name) { "Series #{it}" }
 		program
 
 		transient do

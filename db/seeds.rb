@@ -51,7 +51,7 @@ module TVManager
 		end
 
 		def load_programs
-			programs = @documents.filter { _1['type'].eql? 'Program' }
+			programs = @documents.filter { it['type'].eql? 'Program' }
 			programs.each_with_index do |program, index|
 				@programs[program['id']] = ::Program.create!(name: program['programName'])
 				progress 'Loaded', index, 'program' if (index % 10).zero?
@@ -60,7 +60,7 @@ module TVManager
 		end
 
 		def load_series
-			series_list = @documents.filter { _1['type'].eql? 'Series' }
+			series_list = @documents.filter { it['type'].eql? 'Series' }
 			series_list.each_with_index do |series, index|
 				@series[series['id']] = ::Series.create!(
 					name: series['seriesName'],
@@ -73,7 +73,7 @@ module TVManager
 		end
 
 		def load_episodes
-			episodes = @documents.filter { _1['type'].eql? 'Episode' }
+			episodes = @documents.filter { it['type'].eql? 'Episode' }
 			episodes.each_with_index do |episode, index|
 				::Episode.create!(
 					name: episode['episodeName'],

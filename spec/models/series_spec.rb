@@ -101,7 +101,7 @@ require 'rails_helper'
 			create(:series, name: 'Series 2', program: program_one, now_showing: 8)
 			create(:series, name: 'Series 1', program: program_three, expected: 1)
 
-			expect(described_class.scheduled.map { [_1.now_showing, _1.program_name, _1.name] }).to eq [
+			expect(described_class.scheduled.map { [it.now_showing, it.program_name, it.name] }).to eq [
 				[1, 'Program 2', 'Series 3'],
 				[8, 'Program 1', 'Series 2'],
 				[8, 'Program 1', 'Series 6'],
@@ -143,7 +143,7 @@ require 'rails_helper'
 			create(:series, name: 'Series 2', program: program_one, episodes: 1, watched: 1)
 			create(:series, name: 'Series 1', program: program_two, episodes: 1, watched: 1)
 
-			expect(described_class.incomplete.map { [_1.program_name, _1.name] }).to eq [
+			expect(described_class.incomplete.map { [it.program_name, it.name] }).to eq [
 				['Program 1', 'Series 2'],
 				['Program 2', 'Series 1'],
 				['Program 2', 'Series 3']
@@ -186,7 +186,7 @@ require 'rails_helper'
 				create(:episode, series: series_two, status:)
 				create(:episode, series: series_three, status:)
 
-				expect(described_class.list_by_status(status).map { [_1.program_name, _1.name] }).to eq [
+				expect(described_class.list_by_status(status).map { [it.program_name, it.name] }).to eq [
 					['Program 1', 'Series 2'],
 					['Program 2', 'Series 1'],
 					['Program 2', 'Series 3']

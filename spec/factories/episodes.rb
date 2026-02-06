@@ -3,7 +3,7 @@
 
 ::FactoryBot.define do
 	factory :episode do
-		sequence(:name) { "Episode #{_1}" }
+		sequence(:name) { "Episode #{it}" }
 		series
 
 		transient do
@@ -39,11 +39,11 @@
 		end
 
 		trait :past_date do
-			sequence(:status_date) { ::Time.zone.today - _1 }
+			sequence(:status_date) { ::Time.zone.today - it }
 		end
 
 		trait :future_date do
-			sequence(:status_date) { ::Time.zone.today + _1 }
+			sequence(:status_date) { ::Time.zone.today + it }
 		end
 
 		trait :unverified do
