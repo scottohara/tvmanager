@@ -7,8 +7,9 @@
 
 	# Lint all factories
 	config.before :suite do
-		::DatabaseCleaner.clean_with :truncation
-		::FactoryBot.lint
-		::DatabaseCleaner.clean_with :truncation
+		::ActiveRecord::Base.transaction do
+			::FactoryBot.lint traits: true
+			raise ::ActiveRecord::Rollback
+		end
 	end
 end
