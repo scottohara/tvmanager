@@ -5,7 +5,7 @@
 ::RSpec.shared_context 'Request' do
 	let(:user_name) { 'valid user name' }
 	let(:password) { 'valid password' }
-	let(:headers) do
+	let :headers do
 		{
 			ACCEPT: (defined?(accept_header) && accept_header) || 'application/json',
 			AUTHORIZATION: ::ActionController::HttpAuthentication::Basic.encode_credentials(user_name, password)

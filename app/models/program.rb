@@ -19,7 +19,7 @@ class Program < ApplicationRecord
 			)
 				.left_outer_joins(series: :episodes)
 				.group('programs.id')
-				.order('programs.name')
+				.order 'programs.name'
 		end
 	end
 end

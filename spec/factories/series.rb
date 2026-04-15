@@ -21,7 +21,7 @@
 			create_list(:episode, evaluator.recorded, :recorded, series:)
 			create_list(:episode, evaluator.expected, :expected, series:)
 			create_list(:episode, evaluator.expected_overdue, :expected_overdue, series:)
-			create_list(:episode, evaluator.missed, :missed, series:)
+			create_list :episode, evaluator.missed, :missed, series:
 		end
 
 		trait :now_showing do

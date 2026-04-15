@@ -15,8 +15,7 @@
 		end
 
 		after :build do |program, evaluator|
-			create_list(
-				:series,
+			create_list :series,
 				evaluator.series,
 				episodes: evaluator.episodes,
 				watched: evaluator.watched,
@@ -24,7 +23,6 @@
 				expected: evaluator.expected,
 				missed: evaluator.missed,
 				program:
-			)
 		end
 	end
 end

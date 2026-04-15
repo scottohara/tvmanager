@@ -9,13 +9,13 @@ require 'rails_helper'
 	end
 
 	it 'should be invalid without a sequence' do
-		episode = build(:episode)
+		episode = build :episode
 		episode.sequence = nil
 		expect(episode).not_to be_valid
 	end
 
 	it 'should be invalid if sequence is not an integer' do
-		episode = build(:episode)
+		episode = build :episode
 		episode.sequence = 1.1
 		expect(episode).not_to be_valid
 	end
@@ -34,7 +34,7 @@ require 'rails_helper'
 
 	describe '::list' do
 		it 'should return the list of episodes for a given series' do
-			series = create(:series)
+			series = create :series
 			first_episode = create(:episode, :expected, :unverified, :unscheduled, name: 'Episode 1', series:)
 			second_episode = create(:episode, name: 'Episode 2', series:)
 
@@ -45,8 +45,8 @@ require 'rails_helper'
 		end
 
 		it 'should not include episodes for a different series' do
-			this_series = create(:series, episodes: 1)
-			other_series = create(:series, episodes: 1)
+			this_series = create :series, episodes: 1
+			other_series = create :series, episodes: 1
 
 			list = described_class.list this_series.id
 
@@ -55,7 +55,7 @@ require 'rails_helper'
 		end
 
 		it 'should return the list of episodes sorted by sequence, then by id' do
-			series = create(:series)
+			series = create :series
 			third_episode = create(:episode, name: 'Episode 3', seq: 3, series:)
 			first_episode = create(:episode, name: 'Episode 1', seq: 1, series:)
 			fourth_episode = create(:episode, name: 'Episode 4', seq: 4, series:)
@@ -72,8 +72,8 @@ require 'rails_helper'
 
 	describe '::unscheduled' do
 		it 'should return the list of episodes that are unscheduled' do
-			first_episode = create(:episode, :missed, :unscheduled)
-			second_episode = create(:episode, :expected, :unscheduled)
+			first_episode = create :episode, :missed, :unscheduled
+			second_episode = create :episode, :expected, :unscheduled
 
 			list = described_class.unscheduled
 
@@ -82,8 +82,8 @@ require 'rails_helper'
 		end
 
 		it 'should not episodes that are not unscheduled' do
-			unscheduled = create(:episode, :unscheduled)
-			not_unscheduled = create(:episode)
+			unscheduled = create :episode, :unscheduled
+			not_unscheduled = create :episode
 
 			list = described_class.unscheduled
 
@@ -92,10 +92,10 @@ require 'rails_helper'
 		end
 
 		it 'should return the list of episodes sorted by status date' do
-			create(:episode, :unscheduled, status_date: ::Date.parse('2024-01-03'))
-			create(:episode, :unscheduled, status_date: ::Date.parse('2024-01-01'))
-			create(:episode, :unscheduled, status_date: ::Date.parse('2024-01-04'))
-			create(:episode, :unscheduled, status_date: ::Date.parse('2024-01-02'))
+			create :episode, :unscheduled, status_date: ::Date.parse('2024-01-03')
+			create :episode, :unscheduled, status_date: ::Date.parse('2024-01-01')
+			create :episode, :unscheduled, status_date: ::Date.parse('2024-01-04')
+			create :episode, :unscheduled, status_date: ::Date.parse('2024-01-02')
 
 			expect(described_class.unscheduled.map(&:status_date)).to eq [
 				::Date.parse('2024-01-01'),

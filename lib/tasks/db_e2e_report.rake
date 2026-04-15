@@ -3,7 +3,7 @@
 
 require_relative 'db_e2e'
 
-::DB::E2E.create_test_data(:status_report) do |status|
+::DB::E2E.create_test_data :status_report do |status|
 	program = create :program, name: 'Program Z'
 	series = create(:series, name: 'Series C', program:)
 	create(:episode, status:, series:)
@@ -13,10 +13,10 @@ require_relative 'db_e2e'
 	create(:series, program:)
 	program = create :program, name: 'Program A'
 	create(:series, name: 'Series A', status => 2, program:)
-	create(:series, episodes: 1, program:)
+	create :series, episodes: 1, program:
 end
 
-::DB::E2E.create_test_data(:incomplete_report) do
+::DB::E2E.create_test_data :incomplete_report do
 	program = create :program, name: 'Program Z'
 	create(:series, watched: 2, program:)
 	series = create(:series, name: 'Series C', program:)
@@ -27,5 +27,5 @@ end
 	create(:series, program:)
 	program = create :program, name: 'Program A'
 	create(:series, name: 'Series A', episodes: 1, watched: 2, recorded: 1, expected: 1, missed: 1, program:)
-	create(:series, episodes: 1, program:)
+	create :series, episodes: 1, program:
 end

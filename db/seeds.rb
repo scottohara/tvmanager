@@ -53,7 +53,7 @@ module TVManager
 		def load_programs
 			programs = @documents.filter { it['type'].eql? 'Program' }
 			programs.each_with_index do |program, index|
-				@programs[program['id']] = ::Program.create!(name: program['programName'])
+				@programs[program['id']] = ::Program.create! name: program['programName']
 				progress 'Loaded', index, 'program' if (index % 10).zero?
 			end
 			progress 'Loaded', programs.size, 'program'
@@ -62,11 +62,9 @@ module TVManager
 		def load_series
 			series_list = @documents.filter { it['type'].eql? 'Series' }
 			series_list.each_with_index do |series, index|
-				@series[series['id']] = ::Series.create!(
-					name: series['seriesName'],
+				@series[series['id']] = ::Series.create! name: series['seriesName'],
 					now_showing: series['nowShowing'],
 					program: @programs[series['programId']]
-				)
 				progress 'Loaded', index, 'series' if (index % 10).zero?
 			end
 			progress 'Loaded', series_list.size, 'series'
@@ -75,11 +73,10 @@ module TVManager
 		def load_episodes
 			episodes = @documents.filter { it['type'].eql? 'Episode' }
 			episodes.each_with_index do |episode, index|
-				::Episode.create!(
-					name: episode['episodeName'],
+				::Episode.create! name: episode['episodeName'],
 					status: episode['status'].presence&.downcase,
 					status_date: begin
-						::Date.parse(episode['statusDate'])
+						::Date.parse episode['statusDate']
 					rescue ::Date::Error, ::TypeError
 						nil
 					end,
@@ -87,7 +84,6 @@ module TVManager
 					unscheduled: episode['unscheduled'],
 					sequence: episode['sequence'],
 					series: @series[episode['seriesId']]
-				)
 				progress 'Loaded', index, 'episode' if (index % 10).zero?
 			end
 			progress 'Loaded', episodes.size, 'episode'

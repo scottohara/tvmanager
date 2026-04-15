@@ -3,7 +3,7 @@
 
 require_relative 'db_e2e'
 
-::DB::E2E.create_test_data(:unscheduled) do
+::DB::E2E.create_test_data :unscheduled do
 	program = create :program, name: 'Program A'
 	series = create(:series, name: 'Series A', program:)
 	create(:episode, :watched, :unscheduled, name: 'Episode A', series:)
@@ -20,5 +20,5 @@ require_relative 'db_e2e'
 	create(:episode, :unscheduled, name: 'Episode K', series:)
 	program = create :program, name: 'Program B'
 	series = create(:series, name: 'Series C', program:)
-	create(:episode, :unscheduled, name: 'Episode L', series:)
+	create :episode, :unscheduled, name: 'Episode L', series:
 end

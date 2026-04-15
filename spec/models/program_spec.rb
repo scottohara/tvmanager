@@ -10,9 +10,9 @@ require 'rails_helper'
 
 	describe '::list' do
 		it 'should return the list of programs and their count of series and episodes by status' do
-			first_program = create(:program, name: 'Program 1', series: 2, episodes: 1, watched: 2, recorded: 3, expected: 4, missed: 5)
-			second_program = create(:program, name: 'Program 2', series: 1)
-			third_program = create(:program, name: 'Program 3')
+			first_program = create :program, name: 'Program 1', series: 2, episodes: 1, watched: 2, recorded: 3, expected: 4, missed: 5
+			second_program = create :program, name: 'Program 2', series: 1
+			third_program = create :program, name: 'Program 3'
 
 			list = described_class.list
 
@@ -22,10 +22,10 @@ require 'rails_helper'
 		end
 
 		it 'should return the list of programs sorted by name' do
-			create(:program, name: 'Program 3')
-			create(:program, name: 'Program 1')
-			create(:program, name: 'Program 4')
-			create(:program, name: 'Program 2')
+			create :program, name: 'Program 3'
+			create :program, name: 'Program 1'
+			create :program, name: 'Program 4'
+			create :program, name: 'Program 2'
 
 			expect(described_class.list.map(&:name)).to eq ['Program 1', 'Program 2', 'Program 3', 'Program 4']
 		end

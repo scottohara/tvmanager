@@ -3,7 +3,7 @@
 
 require_relative 'db_e2e'
 
-::DB::E2E.create_test_data(:programs) do
+::DB::E2E.create_test_data :programs do
 	program = create :program, name: 'Test Program'
 	create(:series, episodes: 1, watched: 1, recorded: 1, expected: 1, missed: 1, program:)
 	create(:series, program:)
@@ -35,5 +35,5 @@ require_relative 'db_e2e'
 	program = create :program, name: 'Another Test Program'
 	create(:series, watched: 1, recorded: 1, expected: 1, program:)
 	series = create(:series, episodes: 1, program:)
-	create(:episode, :expected, status_date: '2000-01-01', series:)
+	create :episode, :expected, status_date: '2000-01-01', series:
 end

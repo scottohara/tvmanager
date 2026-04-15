@@ -26,7 +26,7 @@ require 'rails_helper'
 
 	describe '::list' do
 		it 'should return the list of series for a given program and their count of episodes by status' do
-			program = create(:program)
+			program = create :program
 			first_series = create(:series, name: 'Series 1', episodes: 1, watched: 2, recorded: 3, expected: 4, missed: 5, program:)
 			second_series = create(:series, :now_showing, name: 'Series 2', program:)
 
@@ -37,8 +37,8 @@ require 'rails_helper'
 		end
 
 		it 'should not include series for a different program' do
-			this_program = create(:program, series: 1)
-			other_program = create(:program, series: 1)
+			this_program = create :program, series: 1
+			other_program = create :program, series: 1
 
 			list = described_class.list this_program.id
 
@@ -47,7 +47,7 @@ require 'rails_helper'
 		end
 
 		it 'should return the list of series sorted by name' do
-			program = create(:program)
+			program = create :program
 			create(:series, name: 'Series 3', program:)
 			create(:series, name: 'Series 1', program:)
 			create(:series, name: 'Series 4', program:)
@@ -59,7 +59,7 @@ require 'rails_helper'
 
 	describe '::scheduled' do
 		it 'should return the list of series that are now showing, or have at least one recorded or expected episode, and their count of episodes by status' do
-			program = create(:program)
+			program = create :program
 			first_series = create(:series, name: 'Series 1', now_showing: 1, episodes: 1, watched: 1, program:)
 			second_series = create(:series, name: 'Series 2', now_showing: 8, program:)
 			third_series = create(:series, name: 'Series 3', recorded: 1, program:)
@@ -76,10 +76,10 @@ require 'rails_helper'
 		end
 
 		it 'should not include series that are not showing or do not have any recorded or expected episodes' do
-			now_showing_series = create(:series, :now_showing)
-			recorded_series = create(:series, recorded: 1)
-			expected_series = create(:series, expected: 1)
-			other_series = create(:series)
+			now_showing_series = create :series, :now_showing
+			recorded_series = create :series, recorded: 1
+			expected_series = create :series, expected: 1
+			other_series = create :series
 
 			list = described_class.scheduled
 
@@ -90,16 +90,16 @@ require 'rails_helper'
 		end
 
 		it 'should return the list of series sorted by now showing, then program name, then series name' do
-			program_four = create(:program, name: 'Program 4')
-			program_one = create(:program, name: 'Program 1')
-			program_three = create(:program, name: 'Program 3')
-			program_two = create(:program, name: 'Program 2')
-			create(:series, name: 'Series 4', program: program_four, recorded: 1)
-			create(:series, name: 'Series 6', program: program_one, now_showing: 8)
-			create(:series, name: 'Series 3', program: program_two, now_showing: 1)
-			create(:series, name: 'Series 5', program: program_three, recorded: 1)
-			create(:series, name: 'Series 2', program: program_one, now_showing: 8)
-			create(:series, name: 'Series 1', program: program_three, expected: 1)
+			program_four = create :program, name: 'Program 4'
+			program_one = create :program, name: 'Program 1'
+			program_three = create :program, name: 'Program 3'
+			program_two = create :program, name: 'Program 2'
+			create :series, name: 'Series 4', program: program_four, recorded: 1
+			create :series, name: 'Series 6', program: program_one, now_showing: 8
+			create :series, name: 'Series 3', program: program_two, now_showing: 1
+			create :series, name: 'Series 5', program: program_three, recorded: 1
+			create :series, name: 'Series 2', program: program_one, now_showing: 8
+			create :series, name: 'Series 1', program: program_three, expected: 1
 
 			expect(described_class.scheduled.map { [it.now_showing, it.program_name, it.name] }).to eq [
 				[1, 'Program 2', 'Series 3'],
@@ -114,7 +114,7 @@ require 'rails_helper'
 
 	describe '::incomplete' do
 		it 'should return the list of incomplete series and their count of episodes by status' do
-			program = create(:program)
+			program = create :program
 			first_series = create(:series, name: 'Series 1', episodes: 1, watched: 2, recorded: 3, expected: 4, missed: 5, program:)
 			second_series = create(:series, :now_showing, name: 'Series 2', episodes: 2, watched: 3, program:)
 
@@ -125,9 +125,9 @@ require 'rails_helper'
 		end
 
 		it 'should not include series that are not yet started or are completed' do
-			incomplete_series = create(:series, episodes: 1, watched: 1)
-			completed_series = create(:series, watched: 1)
-			unstarted_series = create(:series, episodes: 1)
+			incomplete_series = create :series, episodes: 1, watched: 1
+			completed_series = create :series, watched: 1
+			unstarted_series = create :series, episodes: 1
 
 			list = described_class.incomplete
 
@@ -137,11 +137,11 @@ require 'rails_helper'
 		end
 
 		it 'should return the list of series sorted by program name, then series name' do
-			program_two = create(:program, name: 'Program 2')
-			program_one = create(:program, name: 'Program 1')
-			create(:series, name: 'Series 3', program: program_two, episodes: 1, watched: 1)
-			create(:series, name: 'Series 2', program: program_one, episodes: 1, watched: 1)
-			create(:series, name: 'Series 1', program: program_two, episodes: 1, watched: 1)
+			program_two = create :program, name: 'Program 2'
+			program_one = create :program, name: 'Program 1'
+			create :series, name: 'Series 3', program: program_two, episodes: 1, watched: 1
+			create :series, name: 'Series 2', program: program_one, episodes: 1, watched: 1
+			create :series, name: 'Series 1', program: program_two, episodes: 1, watched: 1
 
 			expect(described_class.incomplete.map { [it.program_name, it.name] }).to eq [
 				['Program 1', 'Series 2'],
@@ -154,7 +154,7 @@ require 'rails_helper'
 	describe '::list_by_status' do
 		shared_examples 'series list by status' do |status|
 			it "should return the list of series with at least one #{status} episode and their count of episodes by status" do
-				program = create(:program)
+				program = create :program
 				first_series = create(:series, name: 'Series 1', program:)
 				second_series = create(:series, :now_showing, name: 'Series 2', program:)
 				create(:episode, series: first_series, status:)
@@ -168,7 +168,7 @@ require 'rails_helper'
 
 			it "should not include series with no #{status} episodes" do
 				status_episode = create(:episode, status:)
-				non_status_episode = create(:episode)
+				non_status_episode = create :episode
 
 				list = described_class.list_by_status status
 
@@ -177,11 +177,11 @@ require 'rails_helper'
 			end
 
 			it 'should return the list of series sorted by program name, then series name' do
-				program_two = create(:program, name: 'Program 2')
-				program_one = create(:program, name: 'Program 1')
-				series_three = create(:series, name: 'Series 3', program: program_two)
-				series_two = create(:series, name: 'Series 2', program: program_one)
-				series_one = create(:series, name: 'Series 1', program: program_two)
+				program_two = create :program, name: 'Program 2'
+				program_one = create :program, name: 'Program 1'
+				series_three = create :series, name: 'Series 3', program: program_two
+				series_two = create :series, name: 'Series 2', program: program_one
+				series_one = create :series, name: 'Series 1', program: program_two
 				create(:episode, series: series_one, status:)
 				create(:episode, series: series_two, status:)
 				create(:episode, series: series_three, status:)

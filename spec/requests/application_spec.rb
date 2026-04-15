@@ -7,7 +7,7 @@ require 'rails_helper'
 	describe 'GET /internal/error' do
 		before do
 			klass =
-				::Class.new(::ApplicationController) do
+				::Class.new ::ApplicationController do
 					def index = raise ::StandardError, 'internal error'
 				end
 
