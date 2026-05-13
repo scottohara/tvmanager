@@ -376,8 +376,7 @@ export default class ApplicationController {
 
 	private contentShown(): void {
 		if (this.contentWrapper.classList.contains("loading")) {
-			this.contentWrapper.classList.remove("loading");
-			this.contentWrapper.classList.add("loaded");
+			this.contentWrapper.classList.replace("loading", "loaded");
 			this.nowLoading.classList.remove("loading");
 		} else if (this.contentWrapper.classList.contains("loaded")) {
 			this.contentWrapper.classList.remove("loaded");
