@@ -276,8 +276,10 @@ export default class ApplicationController {
 		noticeContainer.append(noticeLeftButton, noticeLabel);
 		this.notices.append(noticeContainer);
 
-		noticeLeftButton.addEventListener("click", (): void =>
-			this.hideNotice(noticeContainer),
+		noticeLeftButton.addEventListener(
+			"click",
+			(): void => this.hideNotice(noticeContainer),
+			{ once: true },
 		);
 		noticeLeftButton.classList.add("button", "left", "cautionButton");
 		noticeLeftButton.textContent = "OK";
