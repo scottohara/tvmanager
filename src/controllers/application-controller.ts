@@ -1,7 +1,6 @@
 import type {
 	NavButtonEventHandler,
 	Notice,
-	NoticeStack,
 	View,
 	ViewControllerArgs,
 	ViewControllerSet,
@@ -26,11 +25,6 @@ export default class ApplicationController {
 
 	public viewStack: View[] = [];
 
-	private readonly noticeStack: NoticeStack = {
-		height: -20,
-		notice: [],
-	};
-
 	private viewControllers!: ViewControllerSet;
 
 	public constructor() {
@@ -41,12 +35,6 @@ export default class ApplicationController {
 
 		// No existing instance, so make this instance the singleton
 		ApplicationController.singletonInstance = this;
-
-		// Bind a handler for transition end events
-		this.contentWrapper.addEventListener(
-			"transitionend",
-			this.contentShown.bind(this),
-		);
 
 		return this;
 	}
@@ -74,10 +62,6 @@ export default class ApplicationController {
 
 	private get nowLoading(): HTMLDivElement {
 		return document.querySelector("#nowLoading") as HTMLDivElement;
-	}
-
-	private get contentWrapper(): HTMLDivElement {
-		return document.querySelector("#contentWrapper") as HTMLDivElement;
 	}
 
 	private get content(): HTMLDivElement {
@@ -121,13 +105,8 @@ export default class ApplicationController {
 			unscheduled: UnscheduledController,
 		};
 
-		if (Login.isAuthenticated) {
-			// Display the schedule view
-			await this.pushView("schedule");
-		} else {
-			// Display the login view (on next tick, to ensure the transitionend listener is ready)
-			window.setTimeout(async (): Promise<void> => this.pushView("login"));
-		}
+		// Display the schedule view if authenticated, otherwise the login view
+		await this.pushView(Login.isAuthenticated ? "schedule" : "login");
 	}
 
 	public async popView(args?: ViewControllerArgs): Promise<void> {
@@ -141,7 +120,7 @@ export default class ApplicationController {
 		// Display the previous view, or schedule if none
 		return 0 === this.viewStack.length
 			? this.pushView("schedule")
-			: this.show(this.viewPopped.bind(this), args);
+			: this.show(this.viewPopped.bind(this), args, "pop");
 	}
 
 	public getScrollPosition(): void {
@@ -268,13 +247,11 @@ export default class ApplicationController {
 		// Create a div for the new notice
 		const noticeContainer = document.createElement("div"),
 			noticeLeftButton = document.createElement("a"),
-			noticeLabel = document.createElement("p"),
-			duration = 500;
+			noticeLabel = document.createElement("p");
 
 		noticeContainer.classList.add("notice");
 		noticeLabel.innerHTML = notice.label;
 		noticeContainer.append(noticeLeftButton, noticeLabel);
-		this.notices.append(noticeContainer);
 
 		noticeLeftButton.addEventListener(
 			"click",
@@ -289,29 +266,16 @@ export default class ApplicationController {
 			noticeLabel.id = notice.id;
 		}
 
-		// If there are currently no notices displayed, position the notices container just off screen (at the bottom) and make it visible
-		if (!this.noticeStack.notice.length) {
-			this.notices.style.top = `${window.innerHeight}px`;
-			this.notices.style.visibility = "visible";
-		}
+		// Animate the notice in via the View Transitions API
+		const transition = document.startViewTransition((): void => {
+			this.settleNotices();
+			noticeContainer.classList.add("entering");
+			this.notices.append(noticeContainer);
+		});
 
-		// Update the height of the notices stack to accommodate the new notice
-		this.noticeStack.height -= noticeContainer.offsetHeight;
-
-		// Push the notice onto the stack
-		this.noticeStack.notice.push(noticeContainer);
-
-		// Slide up the notices container to reveal the notice
-		this.notices.animate(
-			{
-				transform: `translateY(${this.noticeStack.height}px)`,
-			},
-			{
-				duration,
-				easing: "ease",
-				fill: "forwards",
-			},
-		).onfinish = this.noticesMoved.bind(this);
+		// Ignore skipped transitions
+		transition.ready.catch((): void => undefined);
+		transition.finished.catch((): void => undefined);
 	}
 
 	public clearFooter(): void {
@@ -359,33 +323,43 @@ export default class ApplicationController {
 	private async show(
 		onSuccess: (_?: ViewControllerArgs) => Promise<void>,
 		args?: ViewControllerArgs,
+		direction: "pop" | "push" = "push",
 	): Promise<void> {
 		// Show the now loading indicator
 		this.nowLoading.classList.add("loading");
 
-		// Load the view template
-		this.content.innerHTML = this.currentView.controller.view;
+		const transition = document.startViewTransition({
+			update: async (): Promise<void> => {
+				try {
+					// Load the view template
+					this.content.innerHTML = this.currentView.controller.view;
 
-		// Call the success function, passing through the arguments
-		await onSuccess(args);
+					// Call the success function, passing through the arguments
+					await onSuccess(args);
 
-		// Slide in the new view from the right
-		this.contentWrapper.classList.add("loading");
+					// Set the header (based on the configuration set by the view controller)
+					this.setHeader();
+				} finally {
+					// Hide the now loading indicator before the NEW snapshot is captured
+					this.nowLoading.classList.remove("loading");
+				}
+			},
+			types: [direction],
+		});
 
-		// Set the header (based on the configuration set by the view controller)
-		this.setHeader();
-	}
+		// Ignore skipped transitions
+		transition.ready.catch((): void => undefined);
 
-	private contentShown(): void {
-		if (this.contentWrapper.classList.contains("loading")) {
-			this.contentWrapper.classList.replace("loading", "loaded");
-			this.nowLoading.classList.remove("loading");
-		} else if (this.contentWrapper.classList.contains("loaded")) {
-			this.contentWrapper.classList.remove("loaded");
-
-			// Call the view controller's contentShown method
-			this.currentView.controller.contentShown?.();
+		// Wait for the animation to finish, then notify the view controller
+		try {
+			await transition.finished;
+		} catch (e: unknown) {
+			// Ignore skipped transitions
+			if (!(e instanceof DOMException) || "AbortError" !== e.name) {
+				throw e as Error;
+			}
 		}
+		this.currentView.controller.contentShown?.();
 	}
 
 	private setHeader(): void {
@@ -509,47 +483,23 @@ export default class ApplicationController {
 	}
 
 	private hideNotice(notice: HTMLDivElement): void {
-		const NOTICE_ANIMATION_DURATION = 300,
-			NOTICES_ANIMATION_DURATION = 500;
+		notice.classList.add("leaving");
+		const transition = document.startViewTransition({
+			update: (): void => {
+				notice.remove();
+				this.settleNotices();
+			},
+			types: ["hide-notice"],
+		});
 
-		// Update the height of the notices stack to reclaim the space for the notice
-		this.noticeStack.height += notice.offsetHeight;
-
-		// Slide the notice element off to the right
-		notice.animate(
-			{
-				transform: "translateX(100%)",
-			},
-			{
-				duration: NOTICE_ANIMATION_DURATION,
-				easing: "ease-in",
-				fill: "forwards",
-			},
-		).onfinish = (): void => {
-			this.noticeStack.notice = this.noticeStack.notice.filter(
-				(item: HTMLDivElement): boolean => item !== notice,
-			);
-			notice.remove();
-		};
-
-		// Slide down the notices container to the height of the notices stack
-		this.notices.animate(
-			{
-				transform: `translateY(${this.noticeStack.height}px)`,
-			},
-			{
-				duration: NOTICES_ANIMATION_DURATION,
-				delay: NOTICE_ANIMATION_DURATION,
-				easing: "ease",
-				fill: "forwards",
-			},
-		).onfinish = this.noticesMoved.bind(this);
+		// Ignore skipped transitions
+		transition.ready.catch((): void => undefined);
+		transition.finished.catch((): void => undefined);
 	}
 
-	private noticesMoved(): void {
-		// If there are no more notices visible, hide the notices container
-		if (!this.noticeStack.notice.length) {
-			this.notices.style.visibility = "hidden";
-		}
+	private settleNotices(): void {
+		this.notices
+			.querySelectorAll(".entering")
+			.forEach((notice: Element): void => notice.classList.remove("entering"));
 	}
 }

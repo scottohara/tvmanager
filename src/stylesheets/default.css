@@ -97,28 +97,83 @@ footer {
 	min-height: 21px;
 }
 
-/* Main content wrapper (for animating view transitions) */
-#contentWrapper {
+/* Main content area */
+#content {
 	position: relative;
-	transition-duration: 300ms;
-	transition-property: transform;
+}
 
-	/* Hide the content wrapper while content is being loaded */
-	&.loading {
-		visibility: hidden;
-		transform: translateX(100%);
+/* View transitions */
+:root {
+	&::view-transition-group(root),
+	&::view-transition-group(.notice) {
+		animation-duration: 300ms;
+		animation-fill-mode: both;
 	}
 
-	/* Show the content wrapper once the content has finished loading */
-	&.loaded {
-		visibility: visible;
-		transform: translateX(0%);
+	/* Horizontal slide between views */
+	&:active-view-transition-type(push) {
+		&::view-transition-old(root) {
+			animation-name: slide-out-left;
+		}
+		&::view-transition-new(root) {
+			animation-name: slide-in-right;
+		}
+	}
+
+	&:active-view-transition-type(pop) {
+		&::view-transition-old(root) {
+			animation-name: slide-out-right;
+		}
+		&::view-transition-new(root) {
+			animation-name: slide-in-left;
+		}
+	}
+
+	/* Notices show/hide */
+	&::view-transition-new(.entering) {
+		animation-name: slide-in-bottom;
+	}
+
+	&::view-transition-old(.leaving) {
+		animation-name: slide-out-right;
+		animation-delay: 0ms;
+	}
+
+	/* Wait for the notice to leave before settling down */
+	&:active-view-transition-type(hide-notice)::view-transition-group(.notice) {
+		animation-delay: 300ms;
+	}
+}
+
+@keyframes slide-in-right {
+	from {
+		transform: translateX(100%);
+	}
+}
+@keyframes slide-out-left {
+	to {
+		transform: translateX(-100%);
+	}
+}
+@keyframes slide-in-left {
+	from {
+		transform: translateX(-100%);
+	}
+}
+@keyframes slide-out-right {
+	to {
+		transform: translateX(100%);
+	}
+}
+@keyframes slide-in-bottom {
+	from {
+		transform: translateY(100%);
 	}
 }
 
 /* Now loading indicator */
 #nowLoading {
-	margin: 20px auto;
+	margin: 12.5px auto;
 	background: url(../images/loading.svg) no-repeat;
 	height: 20px;
 	padding-left: 25px;
@@ -628,7 +683,7 @@ input[type="checkbox"] {
 /* Notices stack */
 #notices {
 	position: absolute;
-	visibility: hidden;
+	bottom: 0px;
 	z-index: 1000;
 	width: 100%;
 	background: var(--default-background-color);
@@ -638,6 +693,16 @@ input[type="checkbox"] {
 div.notice {
 	background: var(--notices-background-color);
 	border-top: 1px solid var(--default-background-color);
+	view-transition-name: match-element;
+	view-transition-class: notice;
+
+	&.entering {
+		view-transition-class: notice entering;
+	}
+
+	&.leaving {
+		view-transition-class: notice leaving;
+	}
 
 	/* Notice buttons */
 	a.button {

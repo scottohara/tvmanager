@@ -24,11 +24,6 @@ export interface View {
 	scrollPos: number;
 }
 
-export interface NoticeStack {
-	height: number;
-	notice: HTMLDivElement[];
-}
-
 interface Notice {
 	id?: string;
 	label: string;

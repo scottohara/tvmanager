@@ -13,23 +13,13 @@ import TestController from "~/mocks/test-controller";
 import WindowMock from "~/mocks/window-mock";
 
 describe("ApplicationController", (): void => {
-	let contentWrapper: HTMLDivElement,
-		content: HTMLDivElement,
-		applicationController: ApplicationController;
+	let content: HTMLDivElement, applicationController: ApplicationController;
 
 	beforeEach((): void => {
-		contentWrapper = document.createElement("div");
-		contentWrapper.id = "contentWrapper";
-		document.body.append(contentWrapper);
-
 		content = document.createElement("div");
 		content.id = "content";
-		contentWrapper.append(content);
+		document.body.append(content);
 
-		sinon.spy(
-			ApplicationController.prototype,
-			"contentShown" as keyof ApplicationController,
-		);
 		ApplicationController["singletonInstance"] = undefined;
 		applicationController = new ApplicationController();
 	});
@@ -43,15 +33,6 @@ describe("ApplicationController", (): void => {
 			));
 		it("should initialise the view stack", (): Chai.Assertion =>
 			expect(applicationController.viewStack).to.deep.equal([]));
-		it("should initialise the notice stack", (): Chai.Assertion =>
-			expect(applicationController["noticeStack"]).to.deep.equal({
-				height: -20,
-				notice: [],
-			}));
-		it("should attach a transition end event handler", (): void => {
-			contentWrapper.dispatchEvent(new Event("transitionend"));
-			expect(applicationController["contentShown"]).to.have.been.called;
-		});
 
 		describe("instance already exists", (): void => {
 			let anotherApplicationController: ApplicationController;
@@ -144,6 +125,7 @@ describe("ApplicationController", (): void => {
 			expect(applicationController["show"]).to.have.been.calledWith(
 				sinon.match.func,
 				{},
+				"pop",
 			);
 			expect(applicationController["viewPopped"]).to.have.been.calledWith({});
 		});
@@ -552,28 +534,29 @@ describe("ApplicationController", (): void => {
 		let notices: HTMLDivElement,
 			notice: Notice,
 			noticeContainer: HTMLDivElement,
-			button: HTMLAnchorElement;
+			button: HTMLAnchorElement,
+			startViewTransition: SinonStub;
 
 		beforeEach((): void => {
 			notices = document.createElement("div");
 			notices.id = "notices";
-			notices.style.position = "absolute";
-			notices.style.visibility = "hidden";
-			notices.style.top = "0px";
 			document.body.append(notices);
 
-			sinon.stub(
-				applicationController,
-				"noticesMoved" as keyof ApplicationController,
-			);
 			sinon.stub(
 				applicationController,
 				"hideNotice" as keyof ApplicationController,
 			);
 			notice = { label: "<b>test-notice</b>" };
-			applicationController["noticeStack"].height = 0;
-			applicationController["noticeStack"].notice = [];
-			WindowMock.innerHeight = 50;
+
+			startViewTransition = sinon
+				.stub(document, "startViewTransition")
+				.callsFake(
+					(update: ViewTransitionUpdateCallback): ViewTransition =>
+						({
+							ready: Promise.resolve(),
+							finished: Promise.resolve(update()),
+						}) as unknown as ViewTransition,
+				);
 		});
 
 		describe("notice", (): void => {
@@ -596,6 +579,28 @@ describe("ApplicationController", (): void => {
 						(element: HTMLDivElement): boolean => element === noticeContainer,
 					),
 				));
+
+			it("should append the notice and show the notice container", (): void => {
+				expect(startViewTransition).to.have.been.called;
+				expect(noticeContainer.parentElement).to.equal(notices);
+			});
+
+			it("should mark the new notice as entering", (): Chai.Assertion =>
+				expect(noticeContainer.classList.contains("entering")).to.be.true);
+		});
+
+		describe("with a previously entering notice", (): void => {
+			let previousNotice: HTMLDivElement;
+
+			beforeEach((): void => {
+				previousNotice = document.createElement("div");
+				previousNotice.classList.add("notice", "entering");
+				notices.append(previousNotice);
+				applicationController.showNotice(notice);
+			});
+
+			it("should strip entering from the previous notice", (): Chai.Assertion =>
+				expect(previousNotice.classList.contains("entering")).to.be.false);
 		});
 
 		describe("with notice id", (): void => {
@@ -613,73 +618,41 @@ describe("ApplicationController", (): void => {
 			});
 		});
 
-		describe("initial notice", (): void => {
-			beforeEach((): void => applicationController.showNotice(notice));
+		describe("when the view transition is skipped", (): void => {
+			let unhandledRejection: SinonSpy;
 
-			it("should position the notice stack off screen", (): Chai.Assertion =>
-				expect(notices.style.top).to.equal("50px"));
-			it("should make the notice stack visible", (): Chai.Assertion =>
-				expect(notices.style.visibility).to.equal("visible"));
-		});
-
-		describe("subsequent notice", (): void => {
-			beforeEach((): void => {
-				applicationController["noticeStack"].notice.push(
-					document.createElement("div"),
+			beforeEach(async (): Promise<void> => {
+				unhandledRejection = sinon.spy();
+				window.addEventListener("unhandledrejection", unhandledRejection);
+				startViewTransition.callsFake(
+					(): ViewTransition =>
+						({
+							ready: Promise.reject(
+								new DOMException("Transition was skipped", "AbortError"),
+							),
+							finished: Promise.reject(
+								new DOMException("Transition was skipped", "AbortError"),
+							),
+						}) as unknown as ViewTransition,
 				);
 				applicationController.showNotice(notice);
-			});
-
-			it("should not position the notice stack off screen", (): Chai.Assertion =>
-				expect(notices.style.top).to.equal("0px"));
-			it("should make the notice stack visible", (): Chai.Assertion =>
-				expect(notices.style.visibility).to.equal("hidden"));
-		});
-
-		it("should update the height of the notice stack to accomodate the new notice", (): void => {
-			applicationController["noticeStack"].height = 0;
-			applicationController.showNotice(notice);
-			noticeContainer = notices.querySelector("div") as HTMLDivElement;
-			expect(applicationController["noticeStack"].height).to.equal(
-				-noticeContainer.offsetHeight,
-			);
-		});
-
-		it("should push the notice onto the stack", (): void => {
-			applicationController.showNotice(notice);
-			noticeContainer = notices.querySelector("div") as HTMLDivElement;
-			expect(
-				applicationController["noticeStack"].notice.pop() as HTMLDivElement,
-			).to.equal(noticeContainer);
-		});
-
-		describe("animation", (): void => {
-			beforeEach((done: Mocha.Done): void => {
-				(applicationController["noticesMoved"] as SinonStub).callsFake(
-					(): void => done(),
-				);
-				sinon.spy(notices, "animate");
-				applicationController["noticeStack"].height = 0;
-				applicationController.showNotice(notice);
-				notices
-					.getAnimations()
-					.forEach((animation: Animation): void => animation.finish());
-			});
-
-			it("should slide up the notices container to reveal the notice", (): void => {
-				noticeContainer = notices.querySelector("div") as HTMLDivElement;
-				expect(notices["animate"]).to.have.been.calledWith({
-					transform: `translateY(-${noticeContainer.offsetHeight}px)`,
+				await new Promise<void>((resolve): void => {
+					window.setTimeout(resolve, 0);
 				});
 			});
 
-			it("should invoke the completed callback", (): Chai.Assertion =>
-				expect(applicationController["noticesMoved"]).to.have.been.called);
+			afterEach((): void =>
+				window.removeEventListener("unhandledrejection", unhandledRejection),
+			);
 
-			afterEach((): void => (notices.animate as SinonSpy).restore());
+			it("should ignore skipped transitions", (): Chai.Assertion =>
+				expect(unhandledRejection).to.not.have.been.called);
 		});
 
-		afterEach((): void => notices.remove());
+		afterEach((): void => {
+			notices.remove();
+			startViewTransition.restore();
+		});
 	});
 
 	describe("clearFooter", (): void => {
@@ -903,9 +876,13 @@ describe("ApplicationController", (): void => {
 	});
 
 	describe("show", (): void => {
-		let nowLoading: HTMLDivElement, callback: SinonSpy;
+		let nowLoading: HTMLDivElement,
+			callback: SinonSpy,
+			startViewTransition: SinonStub,
+			controller: TestController,
+			viewContentShown: SinonStub;
 
-		beforeEach(async (): Promise<void> => {
+		beforeEach((): void => {
 			nowLoading = document.createElement("div");
 			nowLoading.id = "nowLoading";
 			document.body.append(nowLoading);
@@ -914,99 +891,207 @@ describe("ApplicationController", (): void => {
 				applicationController,
 				"setHeader" as keyof ApplicationController,
 			);
-			applicationController.viewStack.push({
-				controller: new TestController(),
-				scrollPos: 0,
+
+			controller = new TestController();
+			viewContentShown = sinon.stub();
+			Object.defineProperty(controller, "contentShown", {
+				value: viewContentShown,
 			});
+			applicationController.viewStack.push({ controller, scrollPos: 0 });
+
+			startViewTransition = sinon
+				.stub(document, "startViewTransition")
+				.callsFake(
+					({ update }: StartViewTransitionOptions): ViewTransition =>
+						({
+							ready: Promise.resolve(),
+							finished: Promise.resolve(update?.()),
+						}) as unknown as ViewTransition,
+				);
+
 			callback = sinon.spy();
-			await applicationController["show"](callback, {} as ViewControllerArgs);
 		});
 
-		it("should show the now loading indicator", (): Chai.Assertion =>
-			expect(nowLoading.classList.contains("loading")).to.be.true);
-		it("should load the view template", (): Chai.Assertion =>
-			expect(content.innerHTML).to.equal("<div></div>\n"));
-		it("should invoke the callback", (): Chai.Assertion =>
-			expect(callback).to.have.been.calledWith({}));
-		it("should slide the new view in from the right", (): Chai.Assertion =>
-			expect(contentWrapper.classList.contains("loading")).to.be.true);
-		it("should set the header", (): Chai.Assertion =>
-			expect(applicationController["setHeader"]).to.have.been.called);
+		describe("push", (): void => {
+			beforeEach(
+				async (): Promise<void> =>
+					applicationController["show"](callback, {} as ViewControllerArgs),
+			);
 
-		afterEach((): void => nowLoading.remove());
-	});
-
-	describe("contentShown", (): void => {
-		let nowLoading: HTMLDivElement;
-
-		beforeEach((): void => {
-			nowLoading = document.createElement("div");
-			nowLoading.id = "nowLoading";
-			nowLoading.classList.add("loading");
-			document.body.append(nowLoading);
-		});
-
-		describe("loading", (): void => {
-			beforeEach((): void => {
-				contentWrapper.classList.add("loading");
-				applicationController["contentShown"]();
-			});
-
-			it("should unmark the content wrapper as loading", (): Chai.Assertion =>
-				expect(contentWrapper.classList.contains("loading")).to.be.false);
-			it("should mark the content wrapper as loaded", (): Chai.Assertion =>
-				expect(contentWrapper.classList.contains("loaded")).to.be.true);
+			it("should call startViewTransition with the push type", (): Chai.Assertion =>
+				expect(startViewTransition).to.have.been.calledWithMatch({
+					types: ["push"],
+				}));
+			it("should load the view template", (): Chai.Assertion =>
+				expect(content.innerHTML).to.equal("<div></div>\n"));
+			it("should invoke the callback", (): Chai.Assertion =>
+				expect(callback).to.have.been.calledWith({}));
+			it("should set the header", (): Chai.Assertion =>
+				expect(applicationController["setHeader"]).to.have.been.called);
 			it("should hide the now loading indicator", (): Chai.Assertion =>
 				expect(nowLoading.classList.contains("loading")).to.be.false);
+			it("should call contentShown on the view controller", (): Chai.Assertion =>
+				expect(viewContentShown).to.have.been.called);
 		});
 
-		describe("loaded", (): void => {
-			let controller: TestController, contentShown: SinonStub;
+		describe("pop", (): void => {
+			beforeEach(
+				async (): Promise<void> =>
+					applicationController["show"](
+						callback,
+						{} as ViewControllerArgs,
+						"pop",
+					),
+			);
 
-			beforeEach((): void => {
-				controller = new TestController();
-				contentShown = sinon.stub();
-				contentWrapper.classList.add("loaded");
-			});
+			it("should call startViewTransition with the pop type", (): Chai.Assertion =>
+				expect(startViewTransition).to.have.been.calledWithMatch({
+					types: ["pop"],
+				}));
+		});
 
-			describe("without content shown", (): void => {
-				beforeEach((): void => {
-					applicationController.viewStack.push({ controller, scrollPos: 0 });
-					applicationController["contentShown"]();
+		describe("when the view transition's ready promise is skipped", (): void => {
+			let unhandledRejection: SinonSpy;
+
+			beforeEach(async (): Promise<void> => {
+				unhandledRejection = sinon.spy();
+				window.addEventListener("unhandledrejection", unhandledRejection);
+				startViewTransition.callsFake(
+					({ update }: StartViewTransitionOptions): ViewTransition =>
+						({
+							ready: Promise.reject(
+								new DOMException("Transition was skipped", "AbortError"),
+							),
+							finished: Promise.resolve(update?.()),
+						}) as unknown as ViewTransition,
+				);
+
+				await applicationController["show"](callback, {} as ViewControllerArgs);
+				await new Promise<void>((resolve): void => {
+					window.setTimeout(resolve, 0);
 				});
-
-				it("should unmark the content wrapper as loaded", (): Chai.Assertion =>
-					expect(contentWrapper.classList.contains("loaded")).to.be.false);
-				it("should not call contentShown on the view controller", (): Chai.Assertion =>
-					expect(contentShown).to.not.have.been.called);
 			});
 
-			describe("with content shown", (): void => {
-				beforeEach((): void => {
-					Object.defineProperty(controller, "contentShown", {
-						value: contentShown,
-					});
-					applicationController.viewStack.push({ controller, scrollPos: 0 });
-					applicationController["contentShown"]();
+			afterEach((): void =>
+				window.removeEventListener("unhandledrejection", unhandledRejection),
+			);
+
+			it("should ignore skipped transitions", (): Chai.Assertion =>
+				expect(unhandledRejection).to.not.have.been.called);
+		});
+
+		describe("when the view transition's finished promise is skipped", (): void => {
+			let unhandledRejection: SinonSpy;
+
+			beforeEach(async (): Promise<void> => {
+				unhandledRejection = sinon.spy();
+				window.addEventListener("unhandledrejection", unhandledRejection);
+				startViewTransition.callsFake(
+					({ update }: StartViewTransitionOptions): ViewTransition =>
+						({
+							ready: Promise.resolve(update?.()),
+							finished: Promise.reject(
+								new DOMException("Transition was skipped", "AbortError"),
+							),
+						}) as unknown as ViewTransition,
+				);
+
+				await applicationController["show"](callback, {} as ViewControllerArgs);
+				await new Promise<void>((resolve): void => {
+					window.setTimeout(resolve, 0);
 				});
-
-				it("should unmark the content wrapper as loaded", (): Chai.Assertion =>
-					expect(contentWrapper.classList.contains("loaded")).to.be.false);
-				it("should call contentShown on the view controller", (): Chai.Assertion =>
-					expect(contentShown).to.have.been.called);
 			});
+
+			afterEach((): void =>
+				window.removeEventListener("unhandledrejection", unhandledRejection),
+			);
+
+			it("should ignore skipped transitions", (): Chai.Assertion =>
+				expect(unhandledRejection).to.not.have.been.called);
+			it("should call contentShown on the view controller", (): Chai.Assertion =>
+				expect(viewContentShown).to.have.been.called);
 		});
 
-		describe("unknown state", (): void => {
-			it("should do nothing", (): void => {
-				applicationController["contentShown"]();
-				expect(contentWrapper.classList.contains("loading")).to.be.false;
-				expect(contentWrapper.classList.contains("loaded")).to.be.false;
-				expect(nowLoading.classList.contains("loading")).to.be.true;
+		describe("when the view transition's finished promise rejects with a non-AbortError DOMException", (): void => {
+			let error: Error;
+
+			beforeEach(async (): Promise<void> => {
+				startViewTransition.callsFake(
+					({ update }: StartViewTransitionOptions): ViewTransition =>
+						({
+							ready: Promise.resolve(update?.()),
+							finished: Promise.reject(
+								new DOMException("Invalid state", "InvalidStateError"),
+							),
+						}) as unknown as ViewTransition,
+				);
+
+				await applicationController["show"](
+					callback,
+					{} as ViewControllerArgs,
+				).catch((e: unknown): Error => (error = e as Error));
 			});
+
+			it("should throw the error", (): void => {
+				expect(error).to.be.an.instanceOf(DOMException);
+				expect((error as DOMException).name).to.equal("InvalidStateError");
+			});
+			it("should not call contentShown on the view controller", (): Chai.Assertion =>
+				expect(viewContentShown).to.not.have.been.called);
 		});
 
-		afterEach((): void => nowLoading.remove());
+		describe("when the view transition's finished promise rejects with a non-DOMException error", (): void => {
+			let error: Error;
+
+			beforeEach(async (): Promise<void> => {
+				startViewTransition.callsFake(
+					({ update }: StartViewTransitionOptions): ViewTransition =>
+						({
+							ready: Promise.resolve(update?.()),
+							finished: Promise.reject(new Error("transition failed")),
+						}) as unknown as ViewTransition,
+				);
+
+				await applicationController["show"](
+					callback,
+					{} as ViewControllerArgs,
+				).catch((e: unknown): Error => (error = e as Error));
+			});
+
+			it("should throw the error", (): void => {
+				expect(error).to.be.an.instanceOf(Error);
+				expect(error.message).to.equal("transition failed");
+			});
+			it("should not call contentShown on the view controller", (): Chai.Assertion =>
+				expect(viewContentShown).to.not.have.been.called);
+		});
+
+		describe("when the view update fails", (): void => {
+			let error: Error;
+
+			beforeEach(async (): Promise<void> => {
+				callback = sinon.stub().rejects(new Error("view transition failed"));
+
+				await applicationController["show"](
+					callback,
+					{} as ViewControllerArgs,
+				).catch((e: unknown): Error => (error = e as Error));
+			});
+
+			it("should hide the now loading indicator", (): Chai.Assertion =>
+				expect(nowLoading.classList.contains("loading")).to.be.false);
+			it("should throw an error", (): void => {
+				expect(error).to.be.an.instanceOf(Error);
+				expect(error.message).to.equal("view transition failed");
+			});
+			it("should not call contentShown on the view controller", (): Chai.Assertion =>
+				expect(viewContentShown).to.not.have.been.called);
+		});
+
+		afterEach((): void => {
+			nowLoading.remove();
+			startViewTransition.restore();
+		});
 	});
 
 	describe("setHeader", (): void => {
@@ -1417,94 +1502,82 @@ describe("ApplicationController", (): void => {
 	describe("hideNotice", (): void => {
 		let notices: HTMLDivElement,
 			notice: HTMLDivElement,
-			otherNotice: HTMLDivElement;
-
-		beforeEach((done: Mocha.Done): void => {
-			applicationController["noticeStack"].height = -20;
-
-			notices = document.createElement("div");
-			notices.id = "notices";
-
-			notice = document.createElement("div");
-			notice.style.height = "10px";
-			otherNotice = document.createElement("div");
-			otherNotice.style.height = "10px";
-
-			applicationController["noticeStack"].notice = [notice, otherNotice];
-			notices.append(notice, otherNotice);
-
-			document.body.append(notices);
-
-			sinon.spy(notice, "animate");
-			sinon.spy(notices, "animate");
-			sinon
-				.stub(
-					applicationController,
-					"noticesMoved" as keyof ApplicationController,
-				)
-				.callsFake((): void => done());
-
-			applicationController["hideNotice"](notice);
-			notice
-				.getAnimations()
-				.forEach((animation: Animation): void => animation.finish());
-			notices
-				.getAnimations()
-				.forEach((animation: Animation): void => animation.finish());
-		});
-
-		it("should update the height of the notice stack to reclaim the space for the notice", (): Chai.Assertion =>
-			expect(applicationController["noticeStack"].height).to.equal(-10));
-		it("should slide out the notice to hide it", (): Chai.Assertion =>
-			expect(notice["animate"]).to.have.been.calledWith(
-				{ transform: "translateX(100%)" },
-				{ duration: 300, easing: "ease-in", fill: "forwards" },
-			));
-		it("should remove the notice from the DOM", (): Chai.Assertion =>
-			expect(notices.children.length).to.equal(1));
-		it("should remove the notice from the notice stack", (): Chai.Assertion =>
-			expect(applicationController["noticeStack"].notice).to.not.include(
-				notice,
-			));
-		it("should slide down the notices container to the height of the notice stack", (): Chai.Assertion =>
-			expect(notices["animate"]).to.have.been.calledWith(
-				{ transform: "translateY(-10px)" },
-				{ duration: 500, delay: 300, easing: "ease", fill: "forwards" },
-			));
-		it("should invoke the completed callback", (): Chai.Assertion =>
-			expect(applicationController["noticesMoved"]).to.have.been.called);
-
-		afterEach((): void => notices.remove());
-	});
-
-	describe("noticesMoved", (): void => {
-		let notices: HTMLDivElement;
+			otherNotice: HTMLDivElement,
+			startViewTransition: SinonStub;
 
 		beforeEach((): void => {
 			notices = document.createElement("div");
 			notices.id = "notices";
-			notices.style.visibility = "visible";
+
+			notice = document.createElement("div");
+			otherNotice = document.createElement("div");
+			otherNotice.classList.add("notice", "entering");
+
+			notices.append(notice, otherNotice);
 			document.body.append(notices);
+
+			startViewTransition = sinon
+				.stub(document, "startViewTransition")
+				.callsFake(
+					({ update }: StartViewTransitionOptions): ViewTransition =>
+						({
+							ready: Promise.resolve(update?.()),
+							finished: Promise.resolve(),
+						}) as unknown as ViewTransition,
+				);
+
+			applicationController["hideNotice"](notice);
 		});
 
-		it("should hide the notices container if there are no notices", (): void => {
-			applicationController["noticesMoved"]();
-			expect(notices.style.visibility).to.equal("hidden");
+		it("should mark the notice as leaving", (): Chai.Assertion =>
+			expect(notice.classList.contains("leaving")).to.be.true);
+		it("should start a view transition of type hide-notice", (): Chai.Assertion =>
+			expect(startViewTransition).to.have.been.calledWithMatch({
+				types: ["hide-notice"],
+			}));
+		it("should remove the notice from the DOM", (): Chai.Assertion =>
+			expect(notices.children.length).to.equal(1));
+		it("should keep the other notice in the DOM", (): Chai.Assertion =>
+			expect(notices.firstElementChild).to.equal(otherNotice));
+		it("should strip entering from the remaining notice", (): Chai.Assertion =>
+			expect(otherNotice.classList.contains("entering")).to.be.false);
+
+		describe("when the view transition is skipped", (): void => {
+			let unhandledRejection: SinonSpy;
+
+			beforeEach(async (): Promise<void> => {
+				unhandledRejection = sinon.spy();
+				window.addEventListener("unhandledrejection", unhandledRejection);
+				startViewTransition.callsFake(
+					(): ViewTransition =>
+						({
+							ready: Promise.reject(
+								new DOMException("Transition was skipped", "AbortError"),
+							),
+							finished: Promise.reject(
+								new DOMException("Transition was skipped", "AbortError"),
+							),
+						}) as unknown as ViewTransition,
+				);
+				applicationController["hideNotice"](notice);
+				await new Promise<void>((resolve): void => {
+					window.setTimeout(resolve, 0);
+				});
+			});
+
+			afterEach((): void =>
+				window.removeEventListener("unhandledrejection", unhandledRejection),
+			);
+
+			it("should ignore skipped transitions", (): Chai.Assertion =>
+				expect(unhandledRejection).to.not.have.been.called);
 		});
 
-		it("should not hide the notices container if there are notices", (): void => {
-			const notice = document.createElement("div");
-
-			applicationController["noticeStack"].notice.push(notice);
-			applicationController["noticesMoved"]();
-			expect(notices.style.visibility).to.equal("visible");
+		afterEach((): void => {
+			notices.remove();
+			startViewTransition.restore();
 		});
-
-		afterEach((): void => notices.remove());
 	});
 
-	afterEach((): void => {
-		contentWrapper.remove();
-		(ApplicationController.prototype["contentShown"] as SinonSpy).restore();
-	});
+	afterEach((): void => content.remove());
 });
