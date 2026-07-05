@@ -1,9 +1,9 @@
-import type { NavButtonEventHandler, SeriesListItem } from "~/controllers";
 import Episode from "~/models/episode-model";
 import EpisodeListTemplate from "~/views/episodeListTemplate.html";
 import EpisodesView from "~/views/episodes-view.html";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
+import type { SeriesListItem } from "~/controllers";
 import Sortable from "sortablejs";
 import ViewController from "~/controllers/view-controller";
 
@@ -32,12 +32,12 @@ export default class EpisodesController extends ViewController {
 		this.header = {
 			label: `${this.listItem.series.programName} : ${this.listItem.series.seriesName}`,
 			leftButton: {
-				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
+				eventHandler: this.goBack.bind(this),
 				style: "backButton",
 				label: this.listItem.source ?? "Series",
 			},
 			rightButton: {
-				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
+				eventHandler: this.addItem.bind(this),
 				label: "+",
 			},
 		};
@@ -150,7 +150,7 @@ export default class EpisodesController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			rightButton: {
-				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
 				label: "Done",
 			},
@@ -161,7 +161,7 @@ export default class EpisodesController extends ViewController {
 	}
 
 	private async resequenceItems(): Promise<void> {
-		const self: this = this,
+		const self = this,
 			episodes: Promise<void>[] = [];
 
 		try {
@@ -249,11 +249,11 @@ export default class EpisodesController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			leftButton: {
-				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.editItems.bind(this),
 				label: "Sort",
 			},
 			rightButton: {
-				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.deleteItems.bind(this),
 				style: "cautionButton",
 				label: "Delete",
 			},

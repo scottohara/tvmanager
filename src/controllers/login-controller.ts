@@ -1,6 +1,5 @@
 import Login from "~/models/login-model";
 import LoginView from "~/views/login-view.html";
-import type { NavButtonEventHandler } from "~/controllers";
 import ViewController from "~/controllers/view-controller";
 
 export default class LoginController extends ViewController {
@@ -22,7 +21,7 @@ export default class LoginController extends ViewController {
 		this.header = {
 			label: "Login",
 			rightButton: {
-				eventHandler: this.login.bind(this) as NavButtonEventHandler,
+				eventHandler: this.login.bind(this),
 				style: "confirmButton",
 				label: "Login",
 			},

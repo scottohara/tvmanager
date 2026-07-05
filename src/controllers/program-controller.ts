@@ -1,5 +1,5 @@
-import type { NavButtonEventHandler, ProgramListItem } from "~/controllers";
 import Program from "~/models/program-model";
+import type { ProgramListItem } from "~/controllers";
 import ProgramView from "~/views/program-view.html";
 import ViewController from "~/controllers/view-controller";
 
@@ -29,11 +29,11 @@ export default class ProgramController extends ViewController {
 		this.header = {
 			label: "Add/Edit Program",
 			leftButton: {
-				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
+				eventHandler: this.cancel.bind(this),
 				label: "Cancel",
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this) as NavButtonEventHandler,
+				eventHandler: this.save.bind(this),
 				style: "confirmButton",
 				label: "Save",
 			},

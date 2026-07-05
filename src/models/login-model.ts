@@ -25,7 +25,7 @@ export default class Login {
 		username: string,
 		password: string,
 	): Promise<void> {
-		const authenticationKey: string = window.btoa(`${username}:${password}`),
+		const authenticationKey = window.btoa(`${username}:${password}`),
 			response = await window.fetch("/logins", {
 				method: "POST",
 				headers: {

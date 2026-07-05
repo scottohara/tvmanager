@@ -1,6 +1,6 @@
-import type { NavButtonEventHandler, ReportConfig } from "~/controllers";
 import List from "~/components/list";
 import type { PublicInterface } from "~/global";
+import type { ReportConfig } from "~/controllers";
 import ReportListTemplate from "~/views/reportListTemplate.html";
 import ReportView from "~/views/report-view.html";
 import type Series from "~/models/series-model";
@@ -22,7 +22,7 @@ export default class ReportController extends ViewController {
 		this.header = {
 			label: this.report.reportName,
 			leftButton: {
-				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
+				eventHandler: this.goBack.bind(this),
 				style: "backButton",
 				label: "Settings",
 			},

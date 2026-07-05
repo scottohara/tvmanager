@@ -1,5 +1,5 @@
-import type { NavButtonEventHandler, ProgramListItem } from "~/controllers";
 import List from "~/components/list";
+import type { ProgramListItem } from "~/controllers";
 import type { PublicInterface } from "~/global";
 import Series from "~/models/series-model";
 import SeriesListTemplate from "~/views/seriesListTemplate.html";
@@ -29,12 +29,12 @@ export default class SeriesListController extends ViewController {
 		this.header = {
 			label: this.listItem.program.programName,
 			leftButton: {
-				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
+				eventHandler: this.goBack.bind(this),
 				style: "backButton",
 				label: "Programs",
 			},
 			rightButton: {
-				eventHandler: this.addItem.bind(this) as NavButtonEventHandler,
+				eventHandler: this.addItem.bind(this),
 				label: "+",
 			},
 		};
@@ -143,7 +143,7 @@ export default class SeriesListController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			rightButton: {
-				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
 				label: "Done",
 			},
@@ -167,7 +167,7 @@ export default class SeriesListController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			leftButton: {
-				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
 				label: "Done",
 			},
@@ -190,11 +190,11 @@ export default class SeriesListController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			leftButton: {
-				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.editItems.bind(this),
 				label: "Edit",
 			},
 			rightButton: {
-				eventHandler: this.deleteItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.deleteItems.bind(this),
 				style: "cautionButton",
 				label: "Delete",
 			},

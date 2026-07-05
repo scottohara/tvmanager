@@ -1,6 +1,5 @@
 import Episode from "~/models/episode-model";
 import List from "~/components/list";
-import type { NavButtonEventHandler } from "~/controllers";
 import type { PublicInterface } from "~/global";
 import UnscheduledListTemplate from "~/views/unscheduledListTemplate.html";
 import UnscheduledView from "~/views/unscheduled-view.html";
@@ -18,7 +17,7 @@ export default class UnscheduledController extends ViewController {
 		this.header = {
 			label: "Unscheduled",
 			leftButton: {
-				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
+				eventHandler: this.goBack.bind(this),
 				style: "backButton",
 				label: "Schedule",
 			},

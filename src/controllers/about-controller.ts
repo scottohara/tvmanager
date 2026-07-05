@@ -1,6 +1,5 @@
 import AboutView from "~/views/about-view.html";
 import Episode from "~/models/episode-model";
-import type { NavButtonEventHandler } from "~/controllers";
 import Program from "~/models/program-model";
 import Series from "~/models/series-model";
 import ViewController from "~/controllers/view-controller";
@@ -32,7 +31,7 @@ export default class AboutController extends ViewController {
 		this.header = {
 			label: "About",
 			leftButton: {
-				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
+				eventHandler: this.goBack.bind(this),
 				style: "backButton",
 				label: "Settings",
 			},

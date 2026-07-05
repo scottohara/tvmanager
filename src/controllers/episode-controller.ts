@@ -1,5 +1,5 @@
-import type { EpisodeListItem, NavButtonEventHandler } from "~/controllers";
 import Episode from "~/models/episode-model";
+import type { EpisodeListItem } from "~/controllers";
 import type { EpisodeStatus } from "~/models";
 import EpisodeView from "~/views/episode-view.html";
 import type Series from "~/models/series-model";
@@ -89,11 +89,11 @@ export default class EpisodeController extends ViewController {
 		this.header = {
 			label: "Add/Edit Episode",
 			leftButton: {
-				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
+				eventHandler: this.cancel.bind(this),
 				label: "Cancel",
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this) as NavButtonEventHandler,
+				eventHandler: this.save.bind(this),
 				style: "confirmButton",
 				label: "Save",
 			},

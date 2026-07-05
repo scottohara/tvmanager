@@ -1,6 +1,6 @@
-import type { NavButtonEventHandler, SeriesListItem } from "~/controllers";
 import Program from "~/models/program-model";
 import Series from "~/models/series-model";
+import type { SeriesListItem } from "~/controllers";
 import SeriesView from "~/views/series-view.html";
 import ViewController from "~/controllers/view-controller";
 
@@ -55,11 +55,11 @@ export default class SeriesController extends ViewController {
 		this.header = {
 			label: "Add/Edit Series",
 			leftButton: {
-				eventHandler: this.cancel.bind(this) as NavButtonEventHandler,
+				eventHandler: this.cancel.bind(this),
 				label: "Cancel",
 			},
 			rightButton: {
-				eventHandler: this.save.bind(this) as NavButtonEventHandler,
+				eventHandler: this.save.bind(this),
 				style: "confirmButton",
 				label: "Save",
 			},

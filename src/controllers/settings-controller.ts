@@ -1,4 +1,3 @@
-import type { NavButtonEventHandler, ReportDataSource } from "~/controllers";
 import Series from "~/models/series-model";
 import SettingsView from "~/views/settings-view.html";
 import ViewController from "~/controllers/view-controller";
@@ -38,7 +37,7 @@ export default class SettingsController extends ViewController {
 		this.header = {
 			label: "Settings",
 			leftButton: {
-				eventHandler: this.goBack.bind(this) as NavButtonEventHandler,
+				eventHandler: this.goBack.bind(this),
 				style: "backButton",
 				label: "Schedule",
 			},
@@ -87,7 +86,7 @@ export default class SettingsController extends ViewController {
 	private async viewRecordedReport(): Promise<void> {
 		return this.appController.pushView("report", {
 			reportName: "All Recorded",
-			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
+			dataSource: Series.listByStatus.bind(Series),
 			args: "recorded",
 		});
 	}
@@ -95,7 +94,7 @@ export default class SettingsController extends ViewController {
 	private async viewExpectedReport(): Promise<void> {
 		return this.appController.pushView("report", {
 			reportName: "All Expected",
-			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
+			dataSource: Series.listByStatus.bind(Series),
 			args: "expected",
 		});
 	}
@@ -103,7 +102,7 @@ export default class SettingsController extends ViewController {
 	private async viewMissedReport(): Promise<void> {
 		return this.appController.pushView("report", {
 			reportName: "All Missed",
-			dataSource: Series.listByStatus.bind(Series) as ReportDataSource,
+			dataSource: Series.listByStatus.bind(Series),
 			args: "missed",
 		});
 	}
@@ -111,7 +110,7 @@ export default class SettingsController extends ViewController {
 	private async viewIncompleteReport(): Promise<void> {
 		return this.appController.pushView("report", {
 			reportName: "All Incomplete",
-			dataSource: Series.incomplete.bind(Series) as ReportDataSource,
+			dataSource: Series.incomplete.bind(Series),
 		});
 	}
 }

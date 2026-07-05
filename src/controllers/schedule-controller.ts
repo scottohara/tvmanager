@@ -1,5 +1,4 @@
 import List from "~/components/list";
-import type { NavButtonEventHandler } from "~/controllers";
 import type { PublicInterface } from "~/global";
 import ScheduleListTemplate from "~/views/scheduleListTemplate.html";
 import ScheduleView from "~/views/schedule-view.html";
@@ -23,11 +22,11 @@ export default class ScheduleController extends ViewController {
 		this.header = {
 			label: "Schedule",
 			leftButton: {
-				eventHandler: this.viewUnscheduled.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewUnscheduled.bind(this),
 				label: "Unscheduled",
 			},
 			rightButton: {
-				eventHandler: this.viewPrograms.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewPrograms.bind(this),
 				label: "Programs",
 			},
 		};
@@ -102,7 +101,7 @@ export default class ScheduleController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			leftButton: {
-				eventHandler: this.viewItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewItems.bind(this),
 				style: "confirmButton",
 				label: "Done",
 			},
@@ -125,11 +124,11 @@ export default class ScheduleController extends ViewController {
 		// Setup the footer
 		this.footer = {
 			leftButton: {
-				eventHandler: this.editItems.bind(this) as NavButtonEventHandler,
+				eventHandler: this.editItems.bind(this),
 				label: "Edit",
 			},
 			rightButton: {
-				eventHandler: this.viewSettings.bind(this) as NavButtonEventHandler,
+				eventHandler: this.viewSettings.bind(this),
 				label: "Settings",
 			},
 		};
