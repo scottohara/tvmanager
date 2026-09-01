@@ -70,6 +70,8 @@ class Series < ApplicationRecord
 		end
 
 		def list_by_status(status)
+			raise ::ArgumentError, "invalid status: #{status}" unless ::Episode.statuses.key? status.to_s
+
 			select(
 				*list_fields,
 				"COUNT(episodes.id) AS #{status}_count"

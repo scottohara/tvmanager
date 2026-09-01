@@ -7,10 +7,12 @@
 		get 'count', on: :collection
 	end
 
+	valid_status = ->(request) { ::Episode.statuses.key? request.path_parameters[:status] }
+
 	resources :logins, only: :create
 
 	resources :series, :episodes, only: [], concerns: :countable
-	get 'episodes/:status/count', to: 'episodes#count_by_status', as: :count_status_episodes
+	get 'episodes/:status/count', to: 'episodes#count_by_status', as: :count_status_episodes, constraints: valid_status
 
 	resources :programs, shallow: true, concerns: :countable do
 		resources :series do
@@ -20,7 +22,7 @@
 
 	resources :reports, only: [] do
 		get 'incomplete', on: :collection
-		get ':status', on: :collection, action: :status, as: :status
+		get ':status', on: :collection, action: :status, as: :status, constraints: valid_status
 	end
 
 	get 'scheduled', to: 'series#scheduled'

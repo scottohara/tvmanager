@@ -29,6 +29,10 @@ describe 'episodes routes' do
 		expect(get: '/episodes/watched/count').to route_to controller: 'episodes', action: 'count_by_status', status: 'watched'
 	end
 
+	it 'should not route GET /episodes/:status/count for an invalid status' do
+		expect(get: '/episodes/nonsense/count').to route_to controller: 'application', action: 'routing_error', unmatched_route: 'episodes/nonsense/count'
+	end
+
 	# Member routes
 	it 'should route GET /episodes/:id to episodes#show' do
 		expect(get: '/episodes/1').to route_to controller: 'episodes', action: 'show', id: '1'

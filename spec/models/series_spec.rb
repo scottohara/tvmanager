@@ -209,5 +209,9 @@ require 'rails_helper'
 		context 'missed' do
 			it_behaves_like 'series list by status', :missed
 		end
+
+		it 'should raise an error if the status is not a valid episode status' do
+			expect { described_class.list_by_status :nonsense }.to raise_error ::ArgumentError, 'invalid status: nonsense'
+		end
 	end
 end

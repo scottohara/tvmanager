@@ -22,6 +22,10 @@ describe 'reports routes' do
 		expect(get: '/reports/watched').to route_to controller: 'reports', action: 'status', status: 'watched'
 	end
 
+	it 'should not route GET /reports/:status for an invalid status' do
+		expect(get: '/reports/nonsense').to route_to controller: 'application', action: 'routing_error', unmatched_route: 'reports/nonsense'
+	end
+
 	it 'should not route GET /reports/:id/edit' do
 		expect(get: '/reports/1/edit').to route_to controller: 'application', action: 'routing_error', unmatched_route: 'reports/1/edit'
 	end
