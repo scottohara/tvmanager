@@ -5,6 +5,8 @@
 ::RSpec.shared_context 'Request' do
 	let(:user_name) { 'valid user name' }
 	let(:password) { 'valid password' }
+	let(:env_user_name) { user_name }
+	let(:env_password) { password }
 	let :headers do
 		{
 			ACCEPT: (defined?(accept_header) && accept_header) || 'application/json',
@@ -13,7 +15,9 @@
 	end
 
 	before do
-		stub_const 'ENV', 'TVMANAGER_USERNAME' => user_name, 'TVMANAGER_PASSWORD' => password
+		allow(::ENV).to receive(:[]).and_call_original
+		allow(::ENV).to receive(:[]).with('TVMANAGER_USERNAME').and_return env_user_name
+		allow(::ENV).to receive(:[]).with('TVMANAGER_PASSWORD').and_return env_password
 	end
 
 	# Standard responses

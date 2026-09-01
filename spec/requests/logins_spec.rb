@@ -44,5 +44,45 @@ require 'rails_helper'
 				it('should respond with a 401 Unauthorized status') {} # Empty block
 			end
 		end
+
+		context 'with misconfigured environment' do
+			after do
+				expect(response).to have_http_status :internal_server_error
+				expect(response.media_type).to eq 'application/json'
+				expect(response.body).to include "#{variable} environment variable must be set"
+			end
+
+			context 'user name' do
+				let(:variable) { 'TVMANAGER_USERNAME' }
+
+				context 'unset' do
+					let(:env_user_name) { nil }
+
+					it('should respond with a 500 Internal Server Error status') {} # Empty block
+				end
+
+				context 'empty' do
+					let(:env_user_name) { '' }
+
+					it('should respond with a 500 Internal Server Error status') {} # Empty block
+				end
+			end
+
+			context 'password' do
+				let(:variable) { 'TVMANAGER_PASSWORD' }
+
+				context 'unset' do
+					let(:env_password) { nil }
+
+					it('should respond with a 500 Internal Server Error status') {} # Empty block
+				end
+
+				context 'empty' do
+					let(:env_password) { '' }
+
+					it('should respond with a 500 Internal Server Error status') {} # Empty block
+				end
+			end
+		end
 	end
 end
