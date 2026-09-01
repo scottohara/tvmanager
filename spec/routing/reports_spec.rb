@@ -3,7 +3,7 @@
 
 require 'spec_helper'
 
-describe 'reports routes' do
+::RSpec.describe 'reports routes' do
 	# Collection routes
 	it 'should not route GET /reports' do
 		expect(get: '/reports').to route_to controller: 'application', action: 'routing_error', unmatched_route: 'reports'

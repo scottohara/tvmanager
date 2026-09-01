@@ -3,7 +3,7 @@
 
 require 'spec_helper'
 
-describe 'health routes' do
+::RSpec.describe 'health routes' do
 	it 'should route GET /up to rails/health#show' do
 		expect(get: '/up').to route_to controller: 'rails/health', action: 'show'
 	end

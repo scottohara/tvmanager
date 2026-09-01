@@ -3,7 +3,7 @@
 
 require 'spec_helper'
 
-describe 'logins routes' do
+::RSpec.describe 'logins routes' do
 	# Collection routes
 	it 'should not route GET /logins' do
 		expect(get: '/logins').to route_to controller: 'application', action: 'routing_error', unmatched_route: 'logins'

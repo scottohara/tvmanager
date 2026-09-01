@@ -3,7 +3,7 @@
 
 require 'spec_helper'
 
-describe 'programs routes' do
+::RSpec.describe 'programs routes' do
 	# Collection routes
 	it 'should route GET /programs to programs#index' do
 		expect(get: '/programs').to route_to controller: 'programs', action: 'index'
