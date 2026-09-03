@@ -51,9 +51,16 @@ module TVManager
 			@logger.info "Fetched #{@documents.size} documents from CouchDb"
 		end
 
+		def confirm!
+			@logger.warn "WARNING: You are about to DELETE ALL DATA and reimport #{@documents.size} documents from the CouchDb database at #{::ENV['COUCHDB_URL']}. Type 'seed' and hit enter to proceed:"
+			abort 'Seed aborted' if $stdin.gets.to_s.chomp.casecmp('seed').nonzero?
+		end
+
 		def delete_existing_data
 			@logger.info 'Deleting existing data...'
-			::Program.destroy_all
+			::Episode.delete_all
+			::Series.delete_all
+			::Program.delete_all
 			@logger.info 'done'
 		end
 
@@ -99,6 +106,7 @@ module TVManager
 end
 
 ::TVManager.fetch_documents
+::TVManager.confirm!
 ::TVManager.delete_existing_data
 ::TVManager.load_programs
 ::TVManager.load_series
