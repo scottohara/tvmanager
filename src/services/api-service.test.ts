@@ -105,20 +105,6 @@ describe("API", (): void => {
 				expect(WindowMock.fetch).to.have.been.calledWith("/example", options));
 		});
 
-		describe("update failure", (): void => {
-			it("should throw an error", async (): Promise<void> => {
-				WindowMock.fetch.returns(Promise.resolve(new Response("false")));
-
-				try {
-					await API.update("/example", {});
-				} catch (e: unknown) {
-					expect(e).to.be.an.instanceOf(Error);
-					expect((e as Error).message).to.equal(
-						"Update was unsuccessful. Please try again.",
-					);
-				}
-			});
-		});
 		describe("failure", (): void => {
 			it("should throw an error", async (): Promise<void> => {
 				WindowMock.fetch.returns(

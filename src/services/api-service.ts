@@ -42,11 +42,7 @@ export async function create<T>(path: string, body?: object): Promise<T> {
 }
 
 export async function update(path: string, body?: object): Promise<void> {
-	const success = await api<boolean>("PUT", path, body);
-
-	if (!success) {
-		throw new Error("Update was unsuccessful. Please try again.");
-	}
+	return api("PUT", path, body);
 }
 
 export async function destroy(path: string): Promise<void> {
