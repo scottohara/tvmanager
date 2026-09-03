@@ -9,15 +9,24 @@ require 'tasks/db_e2e'
 	describe '::create_test_data' do
 		before do
 			::Rake::Task.define_task :environment unless ::Rake::Task.task_defined? :environment
+			allow(::ActiveRecord::Base).to receive :establish_connection
+			allow(::ActiveRecord::Tasks::DatabaseTasks).to receive :truncate_all
 		end
 
-		after do
-			::Rake::Task.clear
-		end
+		after { ::Rake::Task.clear }
 
 		it 'should define a new rake task' do
 			described_class.create_test_data :example
 			expect(::Rake::Task.task_defined? 'db:e2e:example').to be true
+		end
+
+		it 'should connect to the test database and truncate any existing data' do
+			described_class.create_test_data(:example) { nil }
+
+			::Rake::Task['db:e2e:example'].invoke
+
+			expect(::ActiveRecord::Base).to have_received(:establish_connection).with :test
+			expect(::ActiveRecord::Tasks::DatabaseTasks).to have_received(:truncate_all).with 'test'
 		end
 
 		it 'should handle a block with no arguments' do
