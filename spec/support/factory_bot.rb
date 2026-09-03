@@ -6,10 +6,5 @@
 	config.include ::FactoryBot::Syntax::Methods
 
 	# Lint all factories
-	config.before :suite do
-		::ActiveRecord::Base.transaction do
-			::FactoryBot.lint traits: true
-			raise ::ActiveRecord::Rollback
-		end
-	end
+	config.before(:suite) { ::FactoryBot.lint traits: true }
 end

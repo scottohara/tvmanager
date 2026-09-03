@@ -14,7 +14,7 @@
 			missed { 0 }
 		end
 
-		after :build do |program, evaluator|
+		after :create do |program, evaluator|
 			create_list :series,
 				evaluator.series,
 				episodes: evaluator.episodes,

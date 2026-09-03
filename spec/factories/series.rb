@@ -15,7 +15,7 @@
 			missed { 0 }
 		end
 
-		after :build do |series, evaluator|
+		after :create do |series, evaluator|
 			create_list(:episode, evaluator.episodes, series:)
 			create_list(:episode, evaluator.watched, :watched, series:)
 			create_list(:episode, evaluator.recorded, :recorded, series:)
