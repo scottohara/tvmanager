@@ -30,15 +30,22 @@ module TVManager
 
 			http = ::Net::HTTP.new fetch_url.host, fetch_url.port
 			http.use_ssl = fetch_url.scheme.eql? 'https'
+			http.open_timeout = 5
+			http.read_timeout = 30
 			request = ::Net::HTTP::Get.new fetch_url
 			request.basic_auth couchdb_username, couchdb_password
 
 			@logger.info 'Fetching documents from CouchDb...'
-			response = http.request request
 
-			abort "Failed to fetch data: #{response.code} #{response.message}" unless response.code.eql? '200'
+			begin
+				response = http.request request
 
-			result = ::JSON.parse response.body
+				abort "Failed to fetch data: #{response.code} #{response.message}" unless response.code.eql? '200'
+
+				result = ::JSON.parse response.body
+			rescue ::SocketError, ::Errno::ECONNREFUSED, ::Errno::ECONNRESET, ::Net::OpenTimeout, ::Net::ReadTimeout, ::JSON::ParserError => e
+				abort "Failed to fetch data: #{e.class}: #{e.message}"
+			end
 
 			@documents = result['rows'].pluck 'doc'
 			@logger.info "Fetched #{@documents.size} documents from CouchDb"
