@@ -12,11 +12,11 @@ class SeriesController < ApplicationController
 	end
 
 	def create
-		render json: ::Series.create!(series_params), status: :created
+		render json: ::Program.find(params[:program_id]).series.create!(series_params), status: :created
 	end
 
 	def update
-		render json: ::Series.find(params[:id]).update!(series_params)
+		render json: ::Series.find(params[:id]).update!(series_params :program_id)
 	end
 
 	def destroy
@@ -34,7 +34,7 @@ class SeriesController < ApplicationController
 
 	private
 
-	def series_params
-		params.expect series: %i[name now_showing program_id]
+	def series_params(*additional)
+		params.expect series: [:name, :now_showing, *additional]
 	end
 end

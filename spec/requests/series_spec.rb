@@ -71,6 +71,12 @@ require 'rails_helper'
 			series = attributes_for :series, name: nil, program_id: program.id
 			post(program_series_index_path(program), params: {series:}, headers:)
 		end
+
+		it 'should respond with a 404 Not Found status if the program is not found', :record_not_found do
+			program = build :program, id: 1
+			series = attributes_for :series
+			post(program_series_index_path(program), params: {series:}, headers:)
+		end
 	end
 
 	describe 'PUT /series/:id' do

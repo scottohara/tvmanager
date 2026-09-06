@@ -84,6 +84,12 @@ require 'rails_helper'
 			episode = attributes_for :episode, name: nil, sequence: 1, series_id: series.id
 			post(series_episodes_path(series), params: {episode:}, headers:)
 		end
+
+		it 'should respond with a 404 Not Found status if the series is not found', :record_not_found do
+			series = build :series, id: 1
+			episode = attributes_for :episode, sequence: 1
+			post(series_episodes_path(series), params: {episode:}, headers:)
+		end
 	end
 
 	describe 'PUT /episodes/:id' do

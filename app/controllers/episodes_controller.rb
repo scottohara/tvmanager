@@ -12,7 +12,7 @@ class EpisodesController < ApplicationController
 	end
 
 	def create
-		render json: ::Episode.create!(episode_params), status: :created
+		render json: ::Series.find(params[:series_id]).episodes.create!(episode_params), status: :created
 	end
 
 	def update
@@ -39,6 +39,6 @@ class EpisodesController < ApplicationController
 	private
 
 	def episode_params
-		params.expect episode: %i[name status status_date unverified unscheduled sequence series_id]
+		params.expect episode: %i[name status status_date unverified unscheduled sequence]
 	end
 end
