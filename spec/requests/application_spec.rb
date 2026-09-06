@@ -25,7 +25,7 @@ require 'rails_helper'
 		it 'should respond with a 500 Internal Server Error status' do
 			get('/internal/error', headers:)
 			expect(response).to have_http_status :internal_server_error
-			expect(response.media_type).to eq 'application/json'
+			expect(response.media_type).to eq 'text/plain'
 			expect(response.body).to eq 'internal error'
 		end
 	end
@@ -34,7 +34,7 @@ require 'rails_helper'
 		it 'should respond with a 404 Not Found status' do
 			get('/unmatched/route', headers:)
 			expect(response).to have_http_status :not_found
-			expect(response.media_type).to eq 'application/json'
+			expect(response.media_type).to eq 'text/plain'
 			expect(response.body).to eq 'Path unmatched/route is not valid'
 		end
 	end

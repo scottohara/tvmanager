@@ -33,13 +33,13 @@
 
 	after :each, :record_invalid do
 		expect(response).to have_http_status :unprocessable_content
-		expect(response.media_type).to eq 'application/json'
+		expect(response.media_type).to eq 'text/plain'
 		expect(response.body).to include "can't be blank"
 	end
 
 	after :each, :record_not_found do
 		expect(response).to have_http_status :not_found
-		expect(response.media_type).to eq 'application/json'
+		expect(response.media_type).to eq 'text/plain'
 		expect(response.body).to include "Couldn't find"
 	end
 end

@@ -10,7 +10,7 @@ class ApplicationController < ::ActionController::API
 	include ::ActionController::HttpAuthentication::Basic::ControllerMethods
 
 	def routing_error
-		render json: "Path #{params[:unmatched_route]} is not valid", status: :not_found
+		render plain: "Path #{params[:unmatched_route]} is not valid", status: :not_found
 	end
 
 	private
@@ -29,14 +29,14 @@ class ApplicationController < ::ActionController::API
 	end
 
 	def internal_error(exception)
-		render json: exception.message, status: :internal_server_error
+		render plain: exception.message, status: :internal_server_error
 	end
 
 	def record_invalid(exception)
-		render json: exception.record.errors.full_messages.join(', '), status: :unprocessable_content
+		render plain: exception.record.errors.full_messages.join(', '), status: :unprocessable_content
 	end
 
 	def record_not_found(exception)
-		render json: exception.message, status: :not_found
+		render plain: exception.message, status: :not_found
 	end
 end

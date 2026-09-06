@@ -48,7 +48,7 @@ require 'rails_helper'
 		context 'with misconfigured environment' do
 			after do
 				expect(response).to have_http_status :internal_server_error
-				expect(response.media_type).to eq 'application/json'
+				expect(response.media_type).to eq 'text/plain'
 				expect(response.body).to include "#{variable} environment variable must be set"
 			end
 
