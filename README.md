@@ -72,10 +72,16 @@ TVMANAGER_PASSWORD='supersecret'
 For staging/production, if you use Fly.io you can specify these as secrets using the `flyctl` CLI, eg.
 
 ```shell
-fly secrets set TVMANAGER_USERNAME=username --app <name staging or production app>
+fly secrets set TVMANAGER_USERNAME=username --app <name of staging or production app>
 ```
 
 (Assumes you have setup two Fly apps, one for staging and one for production)
+
+Staging/production also require a `RAILS_MASTER_KEY` secret. `config/credentials.yml.enc` is committed and copied into the Docker image, but `config/master.key` is excluded (see `.dockerignore`), so the key must be supplied via the environment for the app to boot. Set it on both apps using the value from your local `config/master.key`:
+
+```shell
+fly secrets set RAILS_MASTER_KEY=$(cat config/master.key) --app <name of staging or production app>
+```
 
 # Running Tests
 

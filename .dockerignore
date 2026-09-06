@@ -8,6 +8,7 @@ build
 config/environments/development.rb
 config/environments/test.rb
 config/brakeman.yml
+config/master.key
 coverage
 cypress
 lib
