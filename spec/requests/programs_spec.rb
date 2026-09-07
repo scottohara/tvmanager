@@ -54,6 +54,16 @@ require 'rails_helper'
 			program = attributes_for :program, name: nil
 			post(programs_path, params: {program:}, headers:)
 		end
+
+		it 'should respond with a 400 Bad Request status if the program is missing', :bad_request do
+			post(programs_path, params: {}, headers:)
+			expect(response.body).to eq 'param is missing or the value is empty or invalid: program'
+		end
+
+		it 'should respond with a 400 Bad Request status if the request body cannot be parsed', :bad_request do
+			post programs_path, params: '{"program":', headers: headers.merge('CONTENT_TYPE' => 'application/json')
+			expect(response.body).to eq 'Error occurred while parsing request parameters'
+		end
 	end
 
 	describe 'PUT /programs/:id' do

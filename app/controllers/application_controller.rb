@@ -7,6 +7,7 @@ class ApplicationController < ::ActionController::API
 	rescue_from ::StandardError, with: :internal_error
 	rescue_from ::ActiveRecord::RecordInvalid, with: :record_invalid
 	rescue_from ::ActiveRecord::RecordNotFound, with: :record_not_found
+	rescue_from ::ActionController::ParameterMissing, ::ActionDispatch::Http::Parameters::ParseError, with: :bad_request
 	include ::ActionController::HttpAuthentication::Basic::ControllerMethods
 
 	def routing_error
@@ -38,5 +39,9 @@ class ApplicationController < ::ActionController::API
 
 	def record_not_found(exception)
 		render plain: exception.message, status: :not_found
+	end
+
+	def bad_request(exception)
+		render plain: exception.message, status: :bad_request
 	end
 end

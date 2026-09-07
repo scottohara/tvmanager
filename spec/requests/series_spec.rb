@@ -77,6 +77,18 @@ require 'rails_helper'
 			series = attributes_for :series
 			post(program_series_index_path(program), params: {series:}, headers:)
 		end
+
+		it 'should respond with a 400 Bad Request status if the series is missing', :bad_request do
+			program = create :program
+			post(program_series_index_path(program), params: {}, headers:)
+			expect(response.body).to eq 'param is missing or the value is empty or invalid: series'
+		end
+
+		it 'should respond with a 400 Bad Request status if the request body cannot be parsed', :bad_request do
+			program = create :program
+			post program_series_index_path(program), params: '{"series":', headers: headers.merge('CONTENT_TYPE' => 'application/json')
+			expect(response.body).to eq 'Error occurred while parsing request parameters'
+		end
 	end
 
 	describe 'PUT /series/:id' do

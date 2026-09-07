@@ -31,6 +31,11 @@
 		expect(response.media_type).to eq 'application/json'
 	end
 
+	after :each, :bad_request do
+		expect(response).to have_http_status :bad_request
+		expect(response.media_type).to eq 'text/plain'
+	end
+
 	after :each, :record_invalid do
 		expect(response).to have_http_status :unprocessable_content
 		expect(response.media_type).to eq 'text/plain'

@@ -90,6 +90,18 @@ require 'rails_helper'
 			episode = attributes_for :episode, sequence: 1
 			post(series_episodes_path(series), params: {episode:}, headers:)
 		end
+
+		it 'should respond with a 400 Bad Request status if the episode is missing', :bad_request do
+			series = create :series
+			post(series_episodes_path(series), params: {}, headers:)
+			expect(response.body).to eq 'param is missing or the value is empty or invalid: episode'
+		end
+
+		it 'should respond with a 400 Bad Request status if the request body cannot be parsed', :bad_request do
+			series = create :series
+			post series_episodes_path(series), params: '{"episode":', headers: headers.merge('CONTENT_TYPE' => 'application/json')
+			expect(response.body).to eq 'Error occurred while parsing request parameters'
+		end
 	end
 
 	describe 'PUT /episodes/:id' do
