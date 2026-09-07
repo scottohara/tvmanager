@@ -2,18 +2,11 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'rake'
 require 'tasks/db_e2e'
 
-::RSpec.describe ::DB::E2E do
+::RSpec.describe ::DB::E2E, type: :task do
 	describe '::create_test_data' do
-		before do
-			::Rake::Task.define_task :environment unless ::Rake::Task.task_defined? :environment
-			allow(::ActiveRecord::Base).to receive :establish_connection
-			allow(::ActiveRecord::Tasks::DatabaseTasks).to receive :truncate_all
-		end
-
-		after { ::Rake::Task.clear }
+		before { allow(::ActiveRecord::Tasks::DatabaseTasks).to receive :truncate_all }
 
 		it 'should define a new rake task' do
 			described_class.create_test_data :example

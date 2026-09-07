@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'rake'
 
 # The rake file each e2e task is defined in, and the rows that task should create
 E2E_TASKS = {
@@ -31,13 +30,7 @@ E2E_TASKS = {
 }.freeze
 
 ::RSpec.describe 'db:e2e rake tasks', type: :task do
-	before do
-		::Rake::Task.define_task :environment unless ::Rake::Task.task_defined? :environment
-		allow(::ActiveRecord::Base).to receive :establish_connection
-		allow(::ActiveRecord::Tasks::DatabaseTasks).to receive(:truncate_all) { ::Program.destroy_all }
-	end
-
-	after { ::Rake::Task.clear }
+	before { allow(::ActiveRecord::Tasks::DatabaseTasks).to receive(:truncate_all) { ::Program.destroy_all } }
 
 	it 'should exercise every e2e rake file' do
 		expect(::Rails.root.glob('lib/tasks/db_e2e_*.rake').map { it.basename.to_s }).to match_array ::E2E_TASKS.keys
