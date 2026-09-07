@@ -28,8 +28,14 @@ class Series < ApplicationRecord
 			select(
 				*list_fields,
 				*status_counts,
-				# Counts the number of expected episodes that have reached their expected date
-				"COUNT(CASE WHEN episodes.status = 'expected' AND episodes.status_date < CURRENT_DATE THEN 1 END) AS status_warning_count"
+				# Counts the number of expected episodes that have reached their expected date.
+				# Pass the application date instead of SQL CURRENT_DATE to avoid timezone issues.
+				sanitize_sql_array(
+					[
+						"COUNT(CASE WHEN episodes.status = 'expected' AND episodes.status_date < ? THEN 1 END) AS status_warning_count",
+						::Time.zone.today
+					]
+				)
 			)
 				.joins(:program)
 				.left_outer_joins(:episodes)
