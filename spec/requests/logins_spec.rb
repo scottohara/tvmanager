@@ -43,6 +43,18 @@ require 'rails_helper'
 
 				it('should respond with a 401 Unauthorized status') {} # Empty block
 			end
+
+			context 'no colon separating the user name and password' do
+				let(:headers) { {AUTHORIZATION: "Basic #{::Base64.strict_encode64 'user'}"} }
+
+				it('should respond with a 401 Unauthorized status') {} # Empty block
+			end
+
+			context 'undecodable credentials' do
+				let(:headers) { {AUTHORIZATION: 'Basic !!!'} }
+
+				it('should respond with a 401 Unauthorized status') {} # Empty block
+			end
 		end
 
 		context 'with misconfigured environment' do
