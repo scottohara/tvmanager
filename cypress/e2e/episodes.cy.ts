@@ -373,8 +373,8 @@ describe("Episodes", (): void => {
 			cy.get(secondListItem).should("contain.text", "Episode B");
 		});
 
-		it("should show a notice when an API call fails", (): void => {
-			cy.intercept("PUT", "/episodes/*", {
+		it("should show a notice when the resequence fails", (): void => {
+			cy.intercept("PUT", "/series/*/episodes/resequence", {
 				statusCode: 500,
 				body: "API call failed",
 			});

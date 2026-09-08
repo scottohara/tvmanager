@@ -238,6 +238,20 @@ describe("Episode", (): void => {
 		afterEach((): void => API.get.reset());
 	});
 
+	describe("resequence", (): void => {
+		beforeEach(async (): Promise<void> => {
+			path = `/series/${seriesId}/episodes/resequence`;
+			await Episode.resequence(seriesId, [3, 1, 2]);
+		});
+
+		it("should attempt to resequence the episodes", (): Chai.Assertion =>
+			expect(API.update).to.have.been.calledWith(path, {
+				episode_ids: [3, 1, 2],
+			}));
+
+		afterEach((): void => API.update.reset());
+	});
+
 	describe("fromJson", (): void => {
 		it("should construct an Episode object from the JSON", (): Chai.Assertion =>
 			expect(

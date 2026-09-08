@@ -17,6 +17,7 @@
 	resources :programs, shallow: true, concerns: :countable do
 		resources :series do
 			resources :episodes
+			put 'episodes/resequence', to: 'episodes#resequence'
 		end
 	end
 

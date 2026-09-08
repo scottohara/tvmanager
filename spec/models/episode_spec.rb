@@ -105,4 +105,36 @@ require 'rails_helper'
 			]
 		end
 	end
+
+	describe '::resequence' do
+		it 'should set the sequence of each episode to its position in the given list' do
+			series = create :series
+			first_episode = create(:episode, seq: 1, series:)
+			second_episode = create(:episode, seq: 2, series:)
+			third_episode = create(:episode, seq: 3, series:)
+
+			described_class.resequence series.id, [third_episode.id, first_episode.id, second_episode.id]
+
+			expect([first_episode, second_episode, third_episode].map { it.reload.sequence }).to eq [1, 2, 0]
+		end
+
+		it 'should update all of the episodes in a single transaction' do
+			series = create :series
+			episodes = create_list(:episode, 2, series:).reverse
+
+			expect(described_class).to receive(:transaction).and_call_original
+
+			described_class.resequence series.id, episodes.map(&:id)
+		end
+
+		it 'should raise an error if an episode is not in the series' do
+			series = create :series
+			episode = create(:episode, seq: 5, series:)
+			other_series_episode = create :episode
+
+			expect { described_class.resequence series.id, [episode.id, other_series_episode.id] }.to raise_error ::ActiveRecord::RecordNotFound
+
+			expect(episode.reload.sequence).to eq 5
+		end
+	end
 end

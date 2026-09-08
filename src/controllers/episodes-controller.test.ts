@@ -516,6 +516,18 @@ describe("EpisodesController", (): void => {
 	describe("resequenceItems", (): void => {
 		let sortedItems: EpisodeMock[];
 
+		function listItems(episodes: EpisodeMock[]): HTMLLIElement[] {
+			return episodes.map((item: EpisodeMock): HTMLLIElement => {
+				const itemLink = document.createElement("a"),
+					episodeListItem = document.createElement("li");
+
+				itemLink.id = `item-${String(item.id)}`;
+				episodeListItem.append(itemLink);
+
+				return episodeListItem;
+			});
+		}
+
 		beforeEach((): void => {
 			items = [
 				new EpisodeMock(1, "", "", "", 2, false, false, 1),
@@ -541,17 +553,7 @@ describe("EpisodesController", (): void => {
 
 			sortedItems = [items[1], items[0], items[2], items[3]];
 
-			episodeList.append(
-				...sortedItems.map((item: EpisodeMock): HTMLLIElement => {
-					const itemLink = document.createElement("a"),
-						episodeListItem = document.createElement("li");
-
-					itemLink.id = `item-${String(item.id)}`;
-					episodeListItem.append(itemLink);
-
-					return episodeListItem;
-				}),
-			);
+			episodeList.append(...listItems(sortedItems));
 
 			episodesController["episodeList"] = new ListMock("", "", "", items);
 		});
@@ -561,12 +563,16 @@ describe("EpisodesController", (): void => {
 				async (): Promise<void> => episodesController["resequenceItems"](),
 			);
 
-			it("should update the sequence of items that have changed position", (): void => {
-				expect(items[0].save).to.have.been.called;
-				expect(items[1].save).to.have.been.called;
-				expect(items[2].save).to.not.have.been.called;
-				expect(items[3].save).to.not.have.been.called;
-			});
+			it("should resequence the episodes", (): Chai.Assertion =>
+				expect(EpisodeMock.resequence).to.have.been.calledWith(
+					listItem.series.id,
+					[2, 1, 3, 4],
+				));
+
+			it("should update the sequence of the items", (): Chai.Assertion =>
+				expect(
+					sortedItems.map((item: EpisodeMock): number => item.sequence),
+				).to.deep.equal([0, 1, 2, 3]));
 
 			it("should sort the list by sequence", (): Chai.Assertion =>
 				expect(episodesController["episodeList"].items).to.deep.equal(
@@ -576,18 +582,35 @@ describe("EpisodesController", (): void => {
 				expect(episodesController["episodeList"].refresh).to.have.been.called);
 		});
 
+		describe("unchanged", (): void => {
+			beforeEach(async (): Promise<void> => {
+				episodeList.replaceChildren(...listItems(items));
+				await episodesController["resequenceItems"]();
+			});
+
+			it("should not resequence the episodes", (): Chai.Assertion =>
+				expect(EpisodeMock.resequence).to.not.have.been.called);
+			it("should not refresh the list", (): Chai.Assertion =>
+				expect(episodesController["episodeList"].refresh).to.not.have.been
+					.called);
+		});
+
 		describe("failure", (): void => {
 			beforeEach(async (): Promise<void> => {
 				EpisodeMock.error = "resequence failed";
 				await episodesController["resequenceItems"]();
 			});
 
-			it("should attempt to update the sequence of items that have changed position", (): void => {
-				expect(items[0].save).to.have.been.called;
-				expect(items[1].save).to.have.been.called;
-				expect(items[2].save).to.not.have.been.called;
-				expect(items[3].save).to.not.have.been.called;
-			});
+			it("should attempt to resequence the episodes", (): Chai.Assertion =>
+				expect(EpisodeMock.resequence).to.have.been.calledWith(
+					listItem.series.id,
+					[2, 1, 3, 4],
+				));
+
+			it("should not update the sequence of the items", (): Chai.Assertion =>
+				expect(
+					sortedItems.map((item: EpisodeMock): number => item.sequence),
+				).to.deep.equal([2, 1, 3, 3]));
 
 			it("should not sort the list by sequence", (): Chai.Assertion =>
 				expect(episodesController["episodeList"].items).to.deep.equal(items));

@@ -95,6 +95,15 @@ export default class Episode extends Base {
 		return API.get<number>(`/episodes/${status}/count`);
 	}
 
+	public static async resequence(
+		seriesId: number,
+		episodeIds: number[],
+	): Promise<void> {
+		return API.update(`/series/${seriesId}/episodes/resequence`, {
+			episode_ids: episodeIds,
+		});
+	}
+
 	private static fromJson({
 		id,
 		name,

@@ -6,6 +6,7 @@ const listStub: SinonStub<[number], Promise<EpisodeMock[]>> = sinon.stub(),
 	unscheduledStub: SinonStub<[], Promise<EpisodeMock[]>> = sinon.stub(),
 	countStub: SinonStub<[], Promise<number>> = sinon.stub(),
 	countByStatusStub: SinonStub<[EpisodeStatus], Promise<number>> = sinon.stub(),
+	resequenceStub: SinonStub<[number, number[]], Promise<void>> = sinon.stub(),
 	saveStub: SinonStub<[], Promise<void>> = sinon.stub(),
 	removeStub: SinonStub<[], Promise<void>> = sinon.stub();
 
@@ -52,6 +53,10 @@ export default class EpisodeMock extends BaseMock {
 		return this.stub(countByStatusStub.withArgs("watched"), 1);
 	}
 
+	public static get resequence(): SinonStub<[number, number[]], Promise<void>> {
+		return this.stub(resequenceStub, undefined);
+	}
+
 	public static get episodes(): EpisodeMock[] {
 		return episodes;
 	}
@@ -73,6 +78,7 @@ export default class EpisodeMock extends BaseMock {
 		unscheduledStub.reset();
 		countStub.reset();
 		countByStatusStub.reset();
+		resequenceStub.reset();
 		saveStub.reset();
 		removeStub.reset();
 	}

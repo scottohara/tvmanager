@@ -161,39 +161,37 @@ export default class EpisodesController extends ViewController {
 	}
 
 	private async resequenceItems(): Promise<void> {
-		const self = this,
-			episodes: Promise<void>[] = [];
+		const items = this.episodeList.items as Episode[],
+			// The HTML DOM elements are the source of truth for the order after sorting
+			resequencedItems = Array.from(
+				this.list.querySelectorAll("li a"),
+				(item: Element): Episode =>
+					items.find(
+						(episode: Episode): boolean =>
+							`item-${String(episode.id)}` === item.id,
+					) as Episode,
+			);
+
+		// Nothing to do if none of the items changed position
+		if (
+			resequencedItems.every(
+				(episode: Episode, index: number): boolean => episode === items[index],
+			)
+		) {
+			return;
+		}
 
 		try {
-			// Iterate over the HTML DOM elements in the list
-			this.list
-				.querySelectorAll("li a")
-				.forEach((item: HTMLElement, index: number): void => {
-					// Only update items that have changed position
-					if (
-						item.id !== `item-${(self.episodeList.items[index] as Episode).id}`
-					) {
-						// Iterate over the list items array
-						for (const episode of self.episodeList.items as Episode[]) {
-							// If the array item at this position is not the same as the HTML DOM element at the same position, update the item's sequence in the database
-							if (`item-${episode.id}` === item.id) {
-								episode.sequence = index;
-								episodes.push(episode.save());
-
-								// Stop after the first update
-								break;
-							}
-						}
-					}
-				});
-
-			await Promise.all(episodes);
-
-			// Resort the list items based on the update sequences
-			this.episodeList.items = this.episodeList.items.sort(
-				(a: Episode, b: Episode): number =>
-					a.sequence < b.sequence ? -1 : a.sequence > b.sequence ? 1 : 0,
+			await Episode.resequence(
+				Number(this.listItem.series.id),
+				resequencedItems.map((episode: Episode): number => Number(episode.id)),
 			);
+
+			resequencedItems.forEach((episode: Episode, index: number): void => {
+				episode.sequence = index;
+			});
+
+			this.episodeList.items = resequencedItems;
 
 			// Refresh the list
 			this.episodeList.refresh();

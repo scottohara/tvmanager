@@ -31,6 +31,12 @@ class Episode < ApplicationRecord
 				)
 		end
 
+		def resequence(series_id, episode_ids)
+			transaction do
+				where(series_id:).find(episode_ids).each_with_index { |episode, index| episode.update! sequence: index }
+			end
+		end
+
 		private
 
 		def list_fields

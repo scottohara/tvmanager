@@ -123,6 +123,40 @@ require 'rails_helper'
 		end
 	end
 
+	describe 'PUT /series/:id/episodes/resequence' do
+		let(:accept_header) { nil }
+
+		it 'should resequence the episodes for the series' do
+			series = create :series
+			episodes = create_list(:episode, 3, series:).reverse
+			episode_ids = episodes.map(&:id)
+			put(series_episodes_resequence_path(series), params: {episode_ids:}, headers:)
+			expect(response).to have_http_status :no_content
+			expect(response.parsed_body).to be_empty
+			get(series_episodes_path(series), headers:)
+			expect(response.parsed_body.pluck 'id').to eq episode_ids
+		end
+
+		it 'should respond with a 404 Not Found status if an episode is not in the series', :record_not_found do
+			series = create :series
+			episode = create(:episode, series:)
+			other_series_episode = create :episode
+			put series_episodes_resequence_path(series), params: {episode_ids: [episode.id, other_series_episode.id]}, headers:
+		end
+
+		it 'should respond with a 404 Not Found status if the series is not found', :record_not_found do
+			series = build :series, id: 1
+			episode = create :episode
+			put series_episodes_resequence_path(series), params: {episode_ids: [episode.id]}, headers:
+		end
+
+		it 'should respond with a 400 Bad Request status if the episode ids are missing', :bad_request do
+			series = create :series
+			put(series_episodes_resequence_path(series), params: {}, headers:)
+			expect(response.body).to eq 'param is missing or the value is empty or invalid: episode_ids'
+		end
+	end
+
 	describe 'DELETE /episodes/:id' do
 		let(:accept_header) { nil }
 

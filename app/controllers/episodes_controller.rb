@@ -24,6 +24,11 @@ class EpisodesController < ApplicationController
 		head :no_content
 	end
 
+	def resequence
+		::Episode.resequence params[:series_id], resequence_params
+		head :no_content
+	end
+
 	def count
 		render json: ::Episode.count
 	end
@@ -40,5 +45,9 @@ class EpisodesController < ApplicationController
 
 	def episode_params
 		params.expect episode: %i[name status status_date unverified unscheduled sequence]
+	end
+
+	def resequence_params
+		params.expect episode_ids: []
 	end
 end

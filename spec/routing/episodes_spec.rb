@@ -21,6 +21,10 @@ require 'rails_helper'
 		expect(post: '/series/1/episodes').to route_to controller: 'episodes', action: 'create', series_id: '1'
 	end
 
+	it 'should route PUT /series/:id/episodes/resequence to episodes#resequence' do
+		expect(put: '/series/1/episodes/resequence').to route_to controller: 'episodes', action: 'resequence', series_id: '1'
+	end
+
 	it 'should route GET /episodes/count to episodes#count' do
 		expect(get: '/episodes/count').to route_to controller: 'episodes', action: 'count'
 	end
