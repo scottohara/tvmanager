@@ -30,6 +30,7 @@ vendor
 .prettierignore
 .rspec
 .rubocop.yml
+AGENTS.md
 cypress.config.ts
 eslint.config.mjs
 fly.toml
