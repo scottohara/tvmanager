@@ -13,6 +13,14 @@ require 'tasks/db_e2e'
 			expect(::Rake::Task.task_defined? 'db:e2e:example').to be true
 		end
 
+		it 'should not define a rake task in non-local environments' do
+			allow(::Rails.env).to receive(:local?).and_return false
+
+			described_class.create_test_data :example
+
+			expect(::Rake::Task.task_defined? 'db:e2e:example').to be false
+		end
+
 		it 'should connect to the test database and truncate any existing data' do
 			described_class.create_test_data(:example) { nil }
 
