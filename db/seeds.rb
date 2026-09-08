@@ -16,7 +16,7 @@ module TVManager
 
 	class << self
 		def progress(action, count, type)
-			@logger.info "\r#{action} #{count} #{type}".pluralize
+			@logger.info "\r#{action} #{count} #{type.pluralize count}"
 		end
 
 		def fetch_documents
