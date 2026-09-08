@@ -8,6 +8,11 @@ require 'rails_helper'
 		expect(build :program, name: nil).not_to be_valid
 	end
 
+	it 'should delete its series and episodes when deleted' do
+		program = create :program, series: 2, episodes: 3
+		expect { program.destroy! }.to change(::Series, :count).by(-2).and change(::Episode, :count).by(-6)
+	end
+
 	describe '::list' do
 		it 'should return the list of programs and their count of series and episodes by status' do
 			first_program = create :program, name: 'Program 1', series: 2, episodes: 1, watched: 2, recorded: 3, expected: 4, missed: 5

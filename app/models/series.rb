@@ -4,7 +4,7 @@
 # Series
 class Series < ApplicationRecord
 	belongs_to :program
-	has_many :episodes, dependent: :destroy
+	has_many :episodes, dependent: :delete_all
 	validates :name, presence: true
 	validates :now_showing, numericality: {only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 8}, allow_nil: true
 
