@@ -12,21 +12,19 @@ require 'rails_helper'
 				end
 
 			stub_const 'TestController', klass
-
-			::Rails.application.routes.draw do
-				get '/internal/error', to: 'test#index'
-			end
-		end
-
-		after do
-			::Rails.application.reload_routes!
 		end
 
 		it 'should respond with a 500 Internal Server Error status' do
-			get('/internal/error', headers:)
-			expect(response).to have_http_status :internal_server_error
-			expect(response.media_type).to eq 'text/plain'
-			expect(response.body).to eq 'internal error'
+			with_routing do |routes|
+				routes.draw do
+					get '/internal/error', to: 'test#index'
+				end
+
+				get('/internal/error', headers:)
+				expect(response).to have_http_status :internal_server_error
+				expect(response.media_type).to eq 'text/plain'
+				expect(response.body).to eq 'internal error'
+			end
 		end
 	end
 
