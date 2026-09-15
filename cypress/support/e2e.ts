@@ -79,17 +79,23 @@ export function checkProgress({
 	}
 }
 
-Cypress.Commands.add("login", (): void => {
-	cy.window().then((window: Window): void => {
-		const authenticationKey: string = window.btoa(
-			`${String(Cypress.env("TVMANAGER_USERNAME"))}:${String(
-				Cypress.env("TVMANAGER_PASSWORD"),
-			)}`,
-		);
+Cypress.Commands.add(
+	"login",
+	(): Cypress.Chainable =>
+		cy.env(["TVMANAGER_USERNAME", "TVMANAGER_PASSWORD"]).then(
+			({
+				TVMANAGER_USERNAME,
+				TVMANAGER_PASSWORD,
+			}: Record<string, string>): Cypress.Chainable =>
+				cy.window().then((window: Window): void => {
+					const authenticationKey: string = window.btoa(
+						`${TVMANAGER_USERNAME}:${TVMANAGER_PASSWORD}`,
+					);
 
-		window.localStorage.setItem(
-			"tvManagerAuthenticationKey",
-			authenticationKey,
-		);
-	});
-});
+					window.localStorage.setItem(
+						"tvManagerAuthenticationKey",
+						authenticationKey,
+					);
+				}),
+		),
+);

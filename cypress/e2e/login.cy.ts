@@ -26,12 +26,20 @@ describe("Login", (): void => {
 	});
 
 	describe("login", (): void => {
-		it("should navigate to the Settings view if the authentication succeeds", (): void => {
-			cy.get(userName).type(String(Cypress.env("TVMANAGER_USERNAME")));
-			cy.get(password).type(String(Cypress.env("TVMANAGER_PASSWORD")));
-			cy.get(headerRightButton).click();
-			cy.get(headerLabel).should("have.text", "Settings");
-		});
+		it("should navigate to the Settings view if the authentication succeeds", (): Cypress.Chainable =>
+			cy
+				.env(["TVMANAGER_USERNAME", "TVMANAGER_PASSWORD"])
+				.then(
+					({
+						TVMANAGER_USERNAME,
+						TVMANAGER_PASSWORD,
+					}: Record<string, string>): void => {
+						cy.get(userName).type(TVMANAGER_USERNAME);
+						cy.get(password).type(TVMANAGER_PASSWORD);
+						cy.get(headerRightButton).click();
+						cy.get(headerLabel).should("have.text", "Settings");
+					},
+				));
 
 		it("should show a notice if the save fails", (): void => {
 			cy.get(userName).type("baduser");
