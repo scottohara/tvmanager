@@ -1,6 +1,7 @@
 const path = require("path"),
 	MiniCssExtractPlugin = require("mini-css-extract-plugin"),
-	HtmlWebpackPlugin = require("html-webpack-plugin");
+	HtmlWebpackPlugin = require("html-webpack-plugin"),
+	{ defineConfig } = require("webpack");
 
 // Rule for *.ts processing
 const tsRule = {
@@ -39,8 +40,10 @@ const tsRule = {
 	},
 	// Creates index.html with the bundled resources
 	createIndexHtml = new HtmlWebpackPlugin(),
+	// Extracts CSS stylesheets
+	extractCss = new MiniCssExtractPlugin(),
 	// Default config
-	config = {
+	config = defineConfig({
 		mode: "development",
 
 		// Ensure that the context is the directory where the webpack.*.js config file is
@@ -53,9 +56,7 @@ const tsRule = {
 
 		// Default resolve paths
 		resolve: {
-			alias: {
-				"~": path.resolve(__dirname, "src"),
-			},
+			tsconfig: true,
 			extensions: [".ts", "..."],
 		},
 
@@ -75,11 +76,12 @@ const tsRule = {
 
 		// Abort on first error
 		bail: true,
-	};
 
-function extractCss(options = undefined) {
-	return new MiniCssExtractPlugin(options);
-}
+		// Show progress
+		infrastructureLogging: {
+			progress: "auto",
+		},
+	});
 
 module.exports = {
 	cssRule,
@@ -87,7 +89,7 @@ module.exports = {
 	imageRule,
 	htmlRule,
 	webmanifestRule,
-	extractCss,
 	createIndexHtml,
+	extractCss,
 	config,
 };

@@ -281,8 +281,8 @@ describe("SeriesListController", (): void => {
 		);
 
 		describe("success", (): void => {
-			beforeEach(
-				async (): Promise<void> => seriesListController["deleteItem"](0),
+			beforeEach(async (): Promise<void> =>
+				seriesListController["deleteItem"](0),
 			);
 
 			it("should remove the item from the database", (): Chai.Assertion =>

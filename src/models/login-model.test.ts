@@ -18,9 +18,8 @@ describe("Login", (): void => {
 	});
 
 	describe("authenticationKey", (): void => {
-		beforeEach(
-			(): SinonStub =>
-				WindowMock.localStorage.getItem.returns("authentication key"),
+		beforeEach((): SinonStub =>
+			WindowMock.localStorage.getItem.returns("authentication key"),
 		);
 
 		it("should get & cache the key from local storage when first called", (): void => {

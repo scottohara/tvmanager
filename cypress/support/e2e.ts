@@ -79,10 +79,10 @@ export function checkProgress({
 	}
 }
 
-Cypress.Commands.add(
-	"login",
-	(): Cypress.Chainable =>
-		cy.env(["TVMANAGER_USERNAME", "TVMANAGER_PASSWORD"]).then(
+Cypress.Commands.add("login", (): Cypress.Chainable =>
+	cy
+		.env(["TVMANAGER_USERNAME", "TVMANAGER_PASSWORD"])
+		.then(
 			({
 				TVMANAGER_USERNAME,
 				TVMANAGER_PASSWORD,

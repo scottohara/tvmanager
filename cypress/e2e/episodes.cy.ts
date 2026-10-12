@@ -180,8 +180,8 @@ describe("Episodes", (): void => {
 	});
 
 	describe("Add/Edit Episode view", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(headerRightButton).click(),
 		);
 
 		["watched", "recorded", "expected", "missed"].forEach(
@@ -241,8 +241,8 @@ describe("Episodes", (): void => {
 	});
 
 	describe("add episode", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(headerRightButton).click(),
 		);
 
 		it("should update the Episodes view if the changes are saved", (): void => {
@@ -332,8 +332,8 @@ describe("Episodes", (): void => {
 	});
 
 	describe("delete episode", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(footerRightButton).click(),
 		);
 
 		it("should do nothing if the delete is not confirmed", (): void => {

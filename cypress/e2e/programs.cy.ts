@@ -129,29 +129,26 @@ describe("Programs", (): void => {
 
 	describe("index", (): void => {
 		it("should scroll the list when the index is swiped", (): void => {
-			cy.get("#group-T").should(
-				(item: JQuery): Chai.Assertion =>
-					expect(item.position().top).to.be.greaterThan(
-						Number(Cypress.$(list).height()),
-					),
+			cy.get("#group-T").should((item: JQuery): Chai.Assertion =>
+				expect(item.position().top).to.be.greaterThan(
+					Number(Cypress.$(list).height()),
+				),
 			);
 			cy.get(index).trigger("pointerdown", "top", { buttons: 1 });
 			cy.get(index).trigger("pointermove", "bottom", { buttons: 1 });
 			cy.get(index).trigger("pointerup");
-			cy.get("#group-T").should(
-				(item: JQuery): Chai.Assertion =>
-					expect(item.position().top).to.be.lessThan(
-						Number(Cypress.$(list).height()),
-					),
+			cy.get("#group-T").should((item: JQuery): Chai.Assertion =>
+				expect(item.position().top).to.be.lessThan(
+					Number(Cypress.$(list).height()),
+				),
 			);
 			cy.get(index).trigger("pointerdown", "bottom", { buttons: 1 });
 			cy.get(index).trigger("pointermove", "top", { buttons: 1 });
 			cy.get(index).trigger("pointerup");
-			cy.get("#group-T").should(
-				(item: JQuery): Chai.Assertion =>
-					expect(item.position().top).to.be.greaterThan(
-						Number(Cypress.$(list).height()),
-					),
+			cy.get("#group-T").should((item: JQuery): Chai.Assertion =>
+				expect(item.position().top).to.be.greaterThan(
+					Number(Cypress.$(list).height()),
+				),
 			);
 		});
 	});
@@ -183,8 +180,8 @@ describe("Programs", (): void => {
 	});
 
 	describe("add program", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(headerRightButton).click(),
 		);
 
 		it("should update the Programs view if the changes are saved", (): void => {
@@ -246,8 +243,8 @@ describe("Programs", (): void => {
 	});
 
 	describe("delete program", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(footerRightButton).click(),
 		);
 
 		it("should do nothing if the delete is not confirmed", (): void => {

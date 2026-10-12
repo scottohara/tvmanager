@@ -913,9 +913,8 @@ describe("ApplicationController", (): void => {
 		});
 
 		describe("push", (): void => {
-			beforeEach(
-				async (): Promise<void> =>
-					applicationController["show"](callback, {} as ViewControllerArgs),
+			beforeEach(async (): Promise<void> =>
+				applicationController["show"](callback, {} as ViewControllerArgs),
 			);
 
 			it("should call startViewTransition with the push type", (): Chai.Assertion =>
@@ -935,13 +934,12 @@ describe("ApplicationController", (): void => {
 		});
 
 		describe("pop", (): void => {
-			beforeEach(
-				async (): Promise<void> =>
-					applicationController["show"](
-						callback,
-						{} as ViewControllerArgs,
-						"pop",
-					),
+			beforeEach(async (): Promise<void> =>
+				applicationController["show"](
+					callback,
+					{} as ViewControllerArgs,
+					"pop",
+				),
 			);
 
 			it("should call startViewTransition with the pop type", (): Chai.Assertion =>

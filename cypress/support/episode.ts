@@ -9,7 +9,6 @@ export const unverifiedLabel = "#unverifiedRow > label[for=unverified]";
 export const unscheduled = "#unscheduled";
 export const unscheduledLabel = "label[for=unscheduled]";
 
-Cypress.Commands.add(
-	"createEpisodesData",
-	(): Cypress.Chainable => cy.task("createData", "episodes"),
+Cypress.Commands.add("createEpisodesData", (): Cypress.Chainable =>
+	cy.task("createData", "episodes"),
 );

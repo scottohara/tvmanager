@@ -407,12 +407,11 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("setStatus", (): void => {
-		beforeEach(
-			(): SinonStub =>
-				sinon.stub(
-					episodeController,
-					"toggleStatusDateRow" as keyof EpisodeController,
-				),
+		beforeEach((): SinonStub =>
+			sinon.stub(
+				episodeController,
+				"toggleStatusDateRow" as keyof EpisodeController,
+			),
 		);
 
 		describe("in progress", (): void => {

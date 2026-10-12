@@ -130,8 +130,8 @@ describe("Series", (): void => {
 	});
 
 	describe("add series", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(headerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(headerRightButton).click(),
 		);
 
 		it("should update the Series view if the changes are saved", (): void => {
@@ -212,8 +212,8 @@ describe("Series", (): void => {
 	});
 
 	describe("delete series", (): void => {
-		beforeEach(
-			(): Cypress.Chainable<JQuery> => cy.get(footerRightButton).click(),
+		beforeEach((): Cypress.Chainable<JQuery> =>
+			cy.get(footerRightButton).click(),
 		);
 
 		it("should do nothing if the delete is not confirmed", (): void => {

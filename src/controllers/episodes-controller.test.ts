@@ -432,8 +432,8 @@ describe("EpisodesController", (): void => {
 				});
 
 				describe("success", (): void => {
-					beforeEach(
-						async (): Promise<void> => episodesController["deleteItem"](0),
+					beforeEach(async (): Promise<void> =>
+						episodesController["deleteItem"](0),
 					);
 
 					it("should remove the item from the DOM", (): Chai.Assertion =>
@@ -559,8 +559,8 @@ describe("EpisodesController", (): void => {
 		});
 
 		describe("success", (): void => {
-			beforeEach(
-				async (): Promise<void> => episodesController["resequenceItems"](),
+			beforeEach(async (): Promise<void> =>
+				episodesController["resequenceItems"](),
 			);
 
 			it("should resequence the episodes", (): Chai.Assertion =>

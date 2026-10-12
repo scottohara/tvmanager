@@ -234,8 +234,8 @@ describe("ProgramsController", (): void => {
 		);
 
 		describe("success", (): void => {
-			beforeEach(
-				async (): Promise<void> => programsController["deleteItem"](0),
+			beforeEach(async (): Promise<void> =>
+				programsController["deleteItem"](0),
 			);
 
 			it("should remove the item from the database", (): Chai.Assertion =>

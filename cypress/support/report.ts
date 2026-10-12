@@ -1,8 +1,7 @@
 import type { EpisodeStatus } from "~/models";
 
-Cypress.Commands.add(
-	"createIncompleteReportData",
-	(): Cypress.Chainable => cy.task("createData", "incomplete_report"),
+Cypress.Commands.add("createIncompleteReportData", (): Cypress.Chainable =>
+	cy.task("createData", "incomplete_report"),
 );
 
 Cypress.Commands.add(

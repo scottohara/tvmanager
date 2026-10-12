@@ -1,4 +1,5 @@
 const path = require("path"),
+	{ defineConfig } = require("webpack"),
 	{ merge } = require("webpack-merge"),
 	{ GenerateSW } = require("workbox-webpack-plugin"),
 	packageJson = require("./package"),
@@ -8,53 +9,57 @@ const path = require("path"),
 		imageRule,
 		htmlRule,
 		webmanifestRule,
-		extractCss,
 		createIndexHtml,
+		extractCss,
 		config,
 	} = require("./webpack.common");
 
-module.exports = merge(config, {
-	mode: "production",
+module.exports = merge(
+	config,
+	defineConfig({
+		mode: "production",
 
-	// Use default output with chunk hash in file names
-	output: {
-		path: path.resolve(__dirname, "public"),
-		hashDigestLength: 6,
-		filename: "[name]-[chunkhash].js",
-		assetModuleFilename: "[name]-[contenthash][ext]",
-		clean: true,
-	},
+		// Use default output with chunk hash in file names
+		output: {
+			path: path.resolve(__dirname, "public"),
+			hashDigestLength: 6,
+			filename: "[name]-[chunkhash].js",
+			cssFilename: "[name]-[chunkhash].css",
+			assetModuleFilename: "[name]-[contenthash][ext]",
+			clean: true,
+		},
 
-	module: {
-		rules: [
-			cssRule,
-			iconRule,
-			merge(imageRule, {
-				generator: {
-					// Include hash in file names
-					filename: "images/[name]-[contenthash][ext]",
-				},
+		module: {
+			rules: [
+				cssRule,
+				iconRule,
+				merge(imageRule, {
+					generator: {
+						// Include hash in file names
+						filename: "images/[name]-[contenthash][ext]",
+					},
+				}),
+				htmlRule,
+				webmanifestRule,
+			],
+		},
+
+		// Extract full, separate source maps
+		devtool: "source-map",
+
+		plugins: [
+			extractCss,
+			createIndexHtml,
+			new GenerateSW({
+				cacheId: packageJson.name,
+				skipWaiting: true,
+				clientsClaim: true,
 			}),
-			htmlRule,
-			webmanifestRule,
 		],
-	},
 
-	// Extract full, separate source maps
-	devtool: "source-map",
-
-	plugins: [
-		extractCss({ filename: "[name]-[chunkhash].css" }),
-		createIndexHtml,
-		new GenerateSW({
-			cacheId: packageJson.name,
-			skipWaiting: true,
-			clientsClaim: true,
-		}),
-	],
-
-	// Fail if any chunks exceed performance budget
-	performance: {
-		hints: "error",
-	},
-});
+		// Fail if any chunks exceed performance budget
+		performance: {
+			hints: "error",
+		},
+	}),
+);

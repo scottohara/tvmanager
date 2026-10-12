@@ -133,8 +133,8 @@ describe("Report", (): void => {
 			describe("edit episode", (): void => {
 				let progress: Progress | undefined;
 
-				beforeEach(
-					(): Cypress.Chainable<JQuery> => cy.get(lastListItem).click(),
+				beforeEach((): Cypress.Chainable<JQuery> =>
+					cy.get(lastListItem).click(),
 				);
 
 				it("should not update the Report view if the changes are cancelled", (): void => {

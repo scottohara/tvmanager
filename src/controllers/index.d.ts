@@ -60,10 +60,7 @@ export interface ReportConfig {
 }
 
 type ViewControllerArgs =
-	| EpisodeListItem
-	| ProgramListItem
-	| ReportConfig
-	| SeriesListItem;
+	EpisodeListItem | ProgramListItem | ReportConfig | SeriesListItem;
 type ViewControllerConstructor = new (
 	args?: ViewControllerArgs,
 ) => ViewController;
