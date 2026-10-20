@@ -8,7 +8,7 @@ export default defineConfig(
 		languageOptions: {
 			parserOptions: {
 				projectService: {
-					maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 9,
+					maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 10,
 				},
 			},
 		},
@@ -29,6 +29,14 @@ export default defineConfig(
 			"@typescript-eslint/no-unused-expressions": "off",
 			// Disable due to circular type references in model mocks
 			"@typescript-eslint/no-use-before-define": "off",
+		},
+	},
+	{
+		name: "tvmanager/karma-launcher",
+		files: ["karma-mobile-safari-launcher.js"],
+		rules: {
+			// Disabled to allow overriding Karma's launcher methods (e.g. `_getCommand`)
+			"no-underscore-dangle": "off",
 		},
 	},
 );

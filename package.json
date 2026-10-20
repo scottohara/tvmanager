@@ -41,7 +41,6 @@
     "karma-chai-sinon": "0.1.5",
     "karma-chrome-launcher": "3.2.0",
     "karma-coverage-istanbul-reporter": "3.0.3",
-    "karma-ios-simulator-launcher": "0.0.4",
     "karma-mocha": "2.0.1",
     "karma-mocha-reporter": "2.2.5",
     "karma-sinon": "1.0.5",
@@ -63,10 +62,6 @@
     "webpack-webmanifest-loader": "2.0.2",
     "workbox-webpack-plugin": "7.4.1"
   },
-  "config": {
-    "DEVICE_TYPE_ID": "com.apple.CoreSimulator.SimDeviceType.iPhone-14-Pro-Max",
-    "RUNTIME_ID": "com.apple.CoreSimulator.SimRuntime.iOS-26-5"
-  },
   "scripts": {
     "start": "concurrently npm:api npm:db npm:ui",
     "api": "bundle exec op run --env-file=.env -- rails server",
@@ -79,14 +74,12 @@
     "lint": "eslint",
     "rspec": "bundle exec op run --env-file=.env -- rake spec",
     "cypress": "op run --env-file=.env -- cypress open --e2e",
-    "start:simulator": "xcrun simctl delete tvm-simulator; xcrun simctl bootstatus $(xcrun simctl create tvm-simulator $npm_package_config_DEVICE_TYPE_ID $npm_package_config_RUNTIME_ID) -b",
-    "show:simulator": "npm run start:simulator && open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app",
     "test": "npm run format:check && npm run lint && npm run test:coverage:mobile",
     "test:backend": "concurrently --hide db --kill-others npm:db npm:rspec",
     "test:bdd": "karma start karma-bdd.conf.js",
     "test:coverage": "karma start",
     "test:coverage:chrome": "karma start --browsers ChromeHeadless",
-    "test:coverage:mobile": "ENV_CMD='sleep 600' npm run start:simulator && karma start --browsers MobileSafari",
+    "test:coverage:mobile": "karma start --browsers MobileSafari",
     "test:e2e": "npm run build && concurrently --kill-others npm:api:test npm:db npm:cypress",
     "generate:splash": "rm src/images/apple-splash-*; pwa-asset-generator build/tv-splash.svg src/images --splash-only --background black --padding 0 --type png --xhtml --path-override \"<%=require('~/images\"",
     "deploy": "fly deploy --build-arg NODE_VERSION=$npm_package_engines_node --build-arg NPM_VERSION=$npm_package_engines_npm --build-arg RUBY_VERSION=$npm_package_engines_ruby",

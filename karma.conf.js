@@ -1,4 +1,5 @@
 const common = require("./karma.common"),
+	mobileSafariLauncher = require("./karma-mobile-safari-launcher"),
 	webpack = require("./webpack.coverage");
 
 module.exports = (config) => {
@@ -47,6 +48,18 @@ module.exports = (config) => {
 			 * available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
 			 */
 			browsers: ["ChromeHeadless", "MobileSafari"],
+
+			// Explicitly listing plugins disables auto-loading, so "karma-*" must be included
+			plugins: ["karma-*", mobileSafariLauncher],
+
+			// Simulator used by the MobileSafari launcher
+			mobileSafari: {
+				deviceType: "com.apple.CoreSimulator.SimDeviceType.iPhone-14-Pro-Max",
+				runtime: "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+			},
+
+			// Allow for creating and booting a fresh simulator on slow CI runners
+			captureTimeout: 300000,
 
 			/*
 			 * Continuous Integration mode
