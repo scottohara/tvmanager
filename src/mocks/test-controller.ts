@@ -8,18 +8,26 @@ export default class TestController extends ViewController {
 
 	public setup: SinonStub = sinon.stub();
 
+	public headerLeftButtonEventHandler: SinonStub = sinon.stub();
+
+	public headerRightButtonEventHandler: SinonStub = sinon.stub();
+
+	public footerLeftButtonEventHandler: SinonStub = sinon.stub();
+
+	public footerRightButtonEventHandler: SinonStub = sinon.stub();
+
 	public constructor(public args?: ViewControllerArgs) {
 		super();
 
 		this.header = {
 			label: "test-header",
 			leftButton: {
-				eventHandler: sinon.stub(),
+				eventHandler: this.headerLeftButtonEventHandler,
 				style: "backButton",
 				label: "left-button",
 			},
 			rightButton: {
-				eventHandler: sinon.stub(),
+				eventHandler: this.headerRightButtonEventHandler,
 				style: "confirmButton",
 				label: "right-button",
 			},
@@ -27,12 +35,12 @@ export default class TestController extends ViewController {
 		this.footer = {
 			label: "test-footer",
 			leftButton: {
-				eventHandler: sinon.stub(),
+				eventHandler: this.footerLeftButtonEventHandler,
 				style: "backButton",
 				label: "left-button",
 			},
 			rightButton: {
-				eventHandler: sinon.stub(),
+				eventHandler: this.footerRightButtonEventHandler,
 				style: "confirmButton",
 				label: "right-button",
 			},

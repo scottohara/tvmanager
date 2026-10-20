@@ -1,13 +1,13 @@
 import type {
+	ClickEventHandler,
 	NavButton,
-	NavButtonEventHandler,
 	ProgramListItem,
 } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import ProgramController from "~/controllers/program-controller";
 import ProgramMock from "~/mocks/program-model-mock";
 import ProgramView from "~/views/program-view.html";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -69,11 +69,16 @@ describe("ProgramController", (): void => {
 	describe("setup", (): void => {
 		let programName: HTMLInputElement,
 			leftButton: NavButton,
-			rightButton: NavButton;
+			rightButton: NavButton,
+			cancel: SinonStub,
+			save: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(programController, "cancel" as keyof ProgramController);
-			sinon.stub(programController, "save" as keyof ProgramController);
+			cancel = sinon.stub(
+				programController,
+				"cancel" as keyof ProgramController,
+			);
+			save = sinon.stub(programController, "save" as keyof ProgramController);
 
 			programName = document.createElement("input");
 			programName.id = "programName";
@@ -89,17 +94,17 @@ describe("ProgramController", (): void => {
 				"Add/Edit Program",
 			));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(programController["cancel"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(cancel).to.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Cancel"));
 
-		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(programController["save"]).to.have.been.called;
+		it("should attach a header right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(save).to.have.been.called;
 		});
 
 		it("should set the header right button style", (): Chai.Assertion =>

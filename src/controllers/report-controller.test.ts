@@ -1,14 +1,10 @@
-import type {
-	NavButton,
-	NavButtonEventHandler,
-	ReportConfig,
-} from "~/controllers";
+import type { ClickEventHandler, NavButton, ReportConfig } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import ListMock from "~/mocks/list-mock";
 import ReportController from "~/controllers/report-controller";
 import ReportView from "~/views/report-view.html";
 import SeriesMock from "~/mocks/series-model-mock";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -47,12 +43,18 @@ describe("ReportController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let leftButton: NavButton;
+		let leftButton: NavButton,
+			viewItem: SinonStub,
+			goBack: SinonStub,
+			activate: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(reportController, "viewItem" as keyof ReportController);
-			sinon.stub(reportController, "goBack" as keyof ReportController);
-			sinon.stub(reportController, "activate");
+			viewItem = sinon.stub(
+				reportController,
+				"viewItem" as keyof ReportController,
+			);
+			goBack = sinon.stub(reportController, "goBack" as keyof ReportController);
+			activate = sinon.stub(reportController, "activate");
 			await reportController.setup();
 			leftButton = reportController.header.leftButton as NavButton;
 		});
@@ -62,9 +64,9 @@ describe("ReportController", (): void => {
 				report.reportName,
 			));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(reportController["goBack"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(goBack).to.have.been.called;
 		});
 
 		it("should set the header left button style", (): Chai.Assertion =>
@@ -72,18 +74,23 @@ describe("ReportController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Settings"));
 
-		it("should attach a view event handler to the report list", (): void => {
-			(reportController["reportList"] as ListMock).viewEventHandler(0);
-			expect(reportController["viewItem"]).to.have.been.calledWith(0);
+		it("should attach a view event handler to the report list", async (): Promise<void> => {
+			await (reportController["reportList"] as ListMock).viewEventHandler(0);
+			expect(viewItem).to.have.been.calledWith(0);
 		});
 
 		it("should activate the controller", (): Chai.Assertion =>
-			expect(reportController["activate"]).to.have.been.called);
+			expect(activate).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
+		let viewItems: SinonStub;
+
 		beforeEach((): void => {
-			sinon.stub(reportController, "viewItems" as keyof ReportController);
+			viewItems = sinon.stub(
+				reportController,
+				"viewItems" as keyof ReportController,
+			);
 			reportController["reportList"] = new ListMock("", "", "", []);
 		});
 
@@ -98,7 +105,7 @@ describe("ReportController", (): void => {
 			it("should refresh the list", (): Chai.Assertion =>
 				expect(reportController["reportList"].refresh).to.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion =>
-				expect(reportController["viewItems"]).to.have.been.called);
+				expect(viewItems).to.have.been.called);
 		});
 
 		describe("failure", (): void => {
@@ -110,7 +117,7 @@ describe("ReportController", (): void => {
 			it("should not refresh the list", (): Chai.Assertion =>
 				expect(reportController["reportList"].refresh).to.not.have.been.called);
 			it("should not set the list to view mode", (): Chai.Assertion =>
-				expect(reportController["viewItems"]).to.not.have.been.called);
+				expect(viewItems).to.not.have.been.called);
 			it("should display a notice to the user", (): Chai.Assertion =>
 				expect(appController.showNotice).to.have.been.calledWith({
 					label: "activate failed",

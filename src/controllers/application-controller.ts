@@ -1,5 +1,5 @@
 import type {
-	NavButtonEventHandler,
+	ClickEventListener,
 	Notice,
 	View,
 	ViewControllerArgs,
@@ -286,7 +286,7 @@ export default class ApplicationController {
 				this.footerLeftButton.removeEventListener(
 					"click",
 					this.currentView.controller.footer.leftButton
-						.eventHandler as NavButtonEventHandler,
+						.eventHandler as ClickEventListener,
 				);
 			}
 
@@ -295,7 +295,7 @@ export default class ApplicationController {
 				this.footerRightButton.removeEventListener(
 					"click",
 					this.currentView.controller.footer.rightButton
-						.eventHandler as NavButtonEventHandler,
+						.eventHandler as ClickEventListener,
 				);
 			}
 		}
@@ -443,7 +443,7 @@ export default class ApplicationController {
 			this.headerLeftButton.removeEventListener(
 				"click",
 				this.currentView.controller.header.leftButton
-					.eventHandler as NavButtonEventHandler,
+					.eventHandler as ClickEventListener,
 			);
 		}
 
@@ -452,7 +452,7 @@ export default class ApplicationController {
 			this.headerRightButton.removeEventListener(
 				"click",
 				this.currentView.controller.header.rightButton
-					.eventHandler as NavButtonEventHandler,
+					.eventHandler as ClickEventListener,
 			);
 		}
 

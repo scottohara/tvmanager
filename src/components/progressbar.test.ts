@@ -31,9 +31,9 @@ describe("ProgressBar", (): void => {
 				percent: 25,
 				style: "style-two",
 			});
-			sections.forEach((section: Section, index: number): string =>
-				progressBar.setSection(index, section),
-			);
+			sections.forEach((section: Section, index: number): void => {
+				progressBar.setSection(index, section);
+			});
 			expect(progressBar["sections"]).to.deep.equal(sections);
 		});
 	});

@@ -1,15 +1,11 @@
-import type {
-	HeaderFooter,
-	NavButton,
-	NavButtonEventHandler,
-} from "~/controllers";
+import type { ClickEventHandler, HeaderFooter, NavButton } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import type { ListEventHandler } from "~/components";
 import ListMock from "~/mocks/list-mock";
 import ProgramMock from "~/mocks/program-model-mock";
 import ProgramsController from "~/controllers/programs-controller";
 import ProgramsView from "~/views/programs-view.html";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -43,15 +39,37 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let leftButton: NavButton, rightButton: NavButton;
+		let leftButton: NavButton,
+			rightButton: NavButton,
+			viewItem: SinonStub,
+			editItem: SinonStub,
+			deleteItem: SinonStub,
+			goBack: SinonStub,
+			addItem: SinonStub,
+			activate: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(programsController, "viewItem" as keyof ProgramsController);
-			sinon.stub(programsController, "editItem" as keyof ProgramsController);
-			sinon.stub(programsController, "deleteItem" as keyof ProgramsController);
-			sinon.stub(programsController, "goBack" as keyof ProgramsController);
-			sinon.stub(programsController, "addItem" as keyof ProgramsController);
-			sinon.stub(programsController, "activate");
+			viewItem = sinon.stub(
+				programsController,
+				"viewItem" as keyof ProgramsController,
+			);
+			editItem = sinon.stub(
+				programsController,
+				"editItem" as keyof ProgramsController,
+			);
+			deleteItem = sinon.stub(
+				programsController,
+				"deleteItem" as keyof ProgramsController,
+			);
+			goBack = sinon.stub(
+				programsController,
+				"goBack" as keyof ProgramsController,
+			);
+			addItem = sinon.stub(
+				programsController,
+				"addItem" as keyof ProgramsController,
+			);
+			activate = sinon.stub(programsController, "activate");
 			await programsController.setup();
 			leftButton = programsController.header.leftButton as NavButton;
 			rightButton = programsController.header.rightButton as NavButton;
@@ -60,9 +78,9 @@ describe("ProgramsController", (): void => {
 		it("should set the header label", (): Chai.Assertion =>
 			expect(String(programsController.header.label)).to.equal("Programs"));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(programsController["goBack"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(goBack).to.have.been.called;
 		});
 
 		it("should set the header left button style", (): Chai.Assertion =>
@@ -70,39 +88,46 @@ describe("ProgramsController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Schedule"));
 
-		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(programsController["addItem"]).to.have.been.called;
+		it("should attach a header right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(addItem).to.have.been.called;
 		});
 
 		it("should set the header right button label", (): Chai.Assertion =>
 			expect(rightButton.label).to.equal("+"));
 
-		it("should attach a view event handler to the programs list", (): void => {
-			(programsController["programList"] as ListMock).viewEventHandler(0);
-			expect(programsController["viewItem"]).to.have.been.calledWith(0);
+		it("should attach a view event handler to the programs list", async (): Promise<void> => {
+			await (programsController["programList"] as ListMock).viewEventHandler(0);
+			expect(viewItem).to.have.been.calledWith(0);
 		});
 
-		it("should attach an edit event handler to the programs list", (): void => {
-			(
+		it("should attach an edit event handler to the programs list", async (): Promise<void> => {
+			await (
 				(programsController["programList"] as ListMock)
 					.editEventHandler as ListEventHandler
 			)(0);
-			expect(programsController["editItem"]).to.have.been.calledWith(0);
+			expect(editItem).to.have.been.calledWith(0);
 		});
 
-		it("should attach a delete event handler to the programs list", (): void => {
-			(programsController["programList"] as ListMock).deleteEventHandler(0);
-			expect(programsController["deleteItem"]).to.have.been.calledWith(0);
+		it("should attach a delete event handler to the programs list", async (): Promise<void> => {
+			await (programsController["programList"] as ListMock).deleteEventHandler(
+				0,
+			);
+			expect(deleteItem).to.have.been.calledWith(0);
 		});
 
 		it("should activate the controller", (): Chai.Assertion =>
-			expect(programsController["activate"]).to.have.been.called);
+			expect(activate).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
+		let viewItems: SinonStub;
+
 		beforeEach((): void => {
-			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
+			viewItems = sinon.stub(
+				programsController,
+				"viewItems" as keyof ProgramsController,
+			);
 			programsController["programList"] = new ListMock("", "", "", []);
 		});
 
@@ -120,7 +145,7 @@ describe("ProgramsController", (): void => {
 			it("should refresh the list", (): Chai.Assertion =>
 				expect(programsController["programList"].refresh).to.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion =>
-				expect(programsController["viewItems"]).to.have.been.called);
+				expect(viewItems).to.have.been.called);
 		});
 
 		describe("failure", (): void => {
@@ -133,7 +158,7 @@ describe("ProgramsController", (): void => {
 				expect(programsController["programList"].refresh).to.not.have.been
 					.called);
 			it("should not set the list to view mode", (): Chai.Assertion =>
-				expect(programsController["viewItems"]).to.not.have.been.called);
+				expect(viewItems).to.not.have.been.called);
 			it("should display a notice to the user", (): Chai.Assertion =>
 				expect(appController.showNotice).to.have.been.calledWith({
 					label: "activate failed",
@@ -189,9 +214,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should save the active list item", (): Chai.Assertion =>
-			expect(programsController["activeListItem"] as ProgramMock).to.equal(
-				items[0],
-			));
+			expect(programsController["activeListItem"]).to.equal(items[0]));
 		it("should push the series list view for the selected item", (): Chai.Assertion =>
 			expect(appController.pushView).to.have.been.calledWith("seriesList", {
 				listIndex: index,
@@ -215,9 +238,7 @@ describe("ProgramsController", (): void => {
 		});
 
 		it("should save the active list item", (): Chai.Assertion =>
-			expect(programsController["activeListItem"] as ProgramMock).to.equal(
-				items[0],
-			));
+			expect(programsController["activeListItem"]).to.equal(items[0]));
 		it("should push the program view for the selected item", (): Chai.Assertion =>
 			expect(appController.pushView).to.have.been.calledWith("program", {
 				listIndex: index,
@@ -271,11 +292,14 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("deleteItems", (): void => {
-		let footer: HeaderFooter, rightButton: NavButton;
+		let footer: HeaderFooter, rightButton: NavButton, viewItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "activate");
-			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
+			viewItems = sinon.stub(
+				programsController,
+				"viewItems" as keyof ProgramsController,
+			);
 			await programsController.setup();
 			programsController["deleteItems"]();
 			footer = programsController.footer as HeaderFooter;
@@ -297,9 +321,9 @@ describe("ProgramsController", (): void => {
 			expect(programList.classList.contains("withHelper")).to.be.false;
 		});
 
-		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(programsController["viewItems"]).to.have.been.called;
+		it("should attach a footer right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(viewItems).to.have.been.called;
 		});
 
 		it("should set the footer right button style", (): Chai.Assertion =>
@@ -311,11 +335,14 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("editItems", (): void => {
-		let footer: HeaderFooter, leftButton: NavButton;
+		let footer: HeaderFooter, leftButton: NavButton, viewItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "activate");
-			sinon.stub(programsController, "viewItems" as keyof ProgramsController);
+			viewItems = sinon.stub(
+				programsController,
+				"viewItems" as keyof ProgramsController,
+			);
 			await programsController.setup();
 			programsController["editItems"]();
 			footer = programsController.footer as HeaderFooter;
@@ -337,9 +364,9 @@ describe("ProgramsController", (): void => {
 			expect(programList.classList.contains("withHelper")).to.be.false;
 		});
 
-		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(programsController["viewItems"]).to.have.been.called;
+		it("should attach a footer left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(viewItems).to.have.been.called;
 		});
 
 		it("should set the footer left button style", (): Chai.Assertion =>
@@ -351,12 +378,22 @@ describe("ProgramsController", (): void => {
 	});
 
 	describe("viewItems", (): void => {
-		let footer: HeaderFooter, leftButton: NavButton, rightButton: NavButton;
+		let footer: HeaderFooter,
+			leftButton: NavButton,
+			rightButton: NavButton,
+			editItems: SinonStub,
+			deleteItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(programsController, "activate");
-			sinon.stub(programsController, "editItems" as keyof ProgramsController);
-			sinon.stub(programsController, "deleteItems" as keyof ProgramsController);
+			editItems = sinon.stub(
+				programsController,
+				"editItems" as keyof ProgramsController,
+			);
+			deleteItems = sinon.stub(
+				programsController,
+				"deleteItems" as keyof ProgramsController,
+			);
 			await programsController.setup();
 			programsController["viewItems"]();
 			footer = programsController.footer as HeaderFooter;
@@ -379,17 +416,17 @@ describe("ProgramsController", (): void => {
 			expect(programList.classList.contains("withHelper")).to.be.true;
 		});
 
-		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(programsController["editItems"]).to.have.been.called;
+		it("should attach a footer left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(editItems).to.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Edit"));
 
-		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(programsController["deleteItems"]).to.have.been.called;
+		it("should attach a footer right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(deleteItems).to.have.been.called;
 		});
 
 		it("should set the footer left button style", (): Chai.Assertion =>

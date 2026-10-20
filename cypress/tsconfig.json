@@ -4,9 +4,8 @@
 		// Type Checking
 
 		// Modules
-		"baseUrl": "../",
 		"paths": {
-			"~/*": ["cypress/*", "src/*"]
+			"~/*": ["../cypress/*", "../src/*"]
 		},
 		"types": ["cypress", "node"]
 

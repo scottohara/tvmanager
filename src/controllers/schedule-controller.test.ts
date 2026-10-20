@@ -1,15 +1,11 @@
-import type {
-	HeaderFooter,
-	NavButton,
-	NavButtonEventHandler,
-} from "~/controllers";
+import type { ClickEventHandler, HeaderFooter, NavButton } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import type { ListEventHandler } from "~/components";
 import ListMock from "~/mocks/list-mock";
 import ScheduleController from "~/controllers/schedule-controller";
 import ScheduleView from "~/views/schedule-view.html";
 import SeriesMock from "~/mocks/series-model-mock";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -45,20 +41,32 @@ describe("ScheduleController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let leftButton: NavButton, rightButton: NavButton;
+		let leftButton: NavButton,
+			rightButton: NavButton,
+			viewItem: SinonStub,
+			editItem: SinonStub,
+			viewUnscheduled: SinonStub,
+			viewPrograms: SinonStub,
+			activate: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(scheduleController, "viewItem" as keyof ScheduleController);
-			sinon.stub(scheduleController, "editItem" as keyof ScheduleController);
-			sinon.stub(
+			viewItem = sinon.stub(
+				scheduleController,
+				"viewItem" as keyof ScheduleController,
+			);
+			editItem = sinon.stub(
+				scheduleController,
+				"editItem" as keyof ScheduleController,
+			);
+			viewUnscheduled = sinon.stub(
 				scheduleController,
 				"viewUnscheduled" as keyof ScheduleController,
 			);
-			sinon.stub(
+			viewPrograms = sinon.stub(
 				scheduleController,
 				"viewPrograms" as keyof ScheduleController,
 			);
-			sinon.stub(scheduleController, "activate");
+			activate = sinon.stub(scheduleController, "activate");
 			await scheduleController.setup();
 			leftButton = scheduleController.header.leftButton as NavButton;
 			rightButton = scheduleController.header.rightButton as NavButton;
@@ -67,42 +75,49 @@ describe("ScheduleController", (): void => {
 		it("should set the header label", (): Chai.Assertion =>
 			expect(String(scheduleController.header.label)).to.equal("Schedule"));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(scheduleController["viewUnscheduled"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(viewUnscheduled).to.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Unscheduled"));
 
-		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(scheduleController["viewPrograms"]).to.have.been.called;
+		it("should attach a header right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(viewPrograms).to.have.been.called;
 		});
 
 		it("should set the header right button label", (): Chai.Assertion =>
 			expect(rightButton.label).to.equal("Programs"));
 
-		it("should attach a view event handler to the schedule list", (): void => {
-			(scheduleController["scheduleList"] as ListMock).viewEventHandler(0);
-			expect(scheduleController["viewItem"]).to.have.been.calledWith(0);
+		it("should attach a view event handler to the schedule list", async (): Promise<void> => {
+			await (scheduleController["scheduleList"] as ListMock).viewEventHandler(
+				0,
+			);
+			expect(viewItem).to.have.been.calledWith(0);
 		});
 
-		it("should attach an edit event handler to the programs list", (): void => {
-			(
+		it("should attach an edit event handler to the programs list", async (): Promise<void> => {
+			await (
 				(scheduleController["scheduleList"] as ListMock)
 					.editEventHandler as ListEventHandler
 			)(0);
-			expect(scheduleController["editItem"]).to.have.been.calledWith(0);
+			expect(editItem).to.have.been.calledWith(0);
 		});
 
 		it("should activate the controller", (): Chai.Assertion =>
-			expect(scheduleController["activate"]).to.have.been.called);
+			expect(activate).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
+		let viewItems: SinonStub;
+
 		beforeEach((): void => {
-			sinon.stub(scheduleController, "viewItems" as keyof ScheduleController);
+			viewItems = sinon.stub(
+				scheduleController,
+				"viewItems" as keyof ScheduleController,
+			);
 			scheduleController["scheduleList"] = new ListMock("", "", "", []);
 		});
 
@@ -120,7 +135,7 @@ describe("ScheduleController", (): void => {
 			it("should refresh the list", (): Chai.Assertion =>
 				expect(scheduleController["scheduleList"].refresh).to.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion =>
-				expect(scheduleController["viewItems"]).to.have.been.called);
+				expect(viewItems).to.have.been.called);
 		});
 
 		describe("failure", (): void => {
@@ -133,7 +148,7 @@ describe("ScheduleController", (): void => {
 				expect(scheduleController["scheduleList"].refresh).to.not.have.been
 					.called);
 			it("should not set the list to view mode", (): Chai.Assertion =>
-				expect(scheduleController["viewItems"]).to.not.have.been.called);
+				expect(viewItems).to.not.have.been.called);
 			it("should display a notice to the user", (): Chai.Assertion =>
 				expect(appController.showNotice).to.have.been.calledWith({
 					label: "activate failed",
@@ -197,11 +212,14 @@ describe("ScheduleController", (): void => {
 	});
 
 	describe("editItems", (): void => {
-		let footer: HeaderFooter, leftButton: NavButton;
+		let footer: HeaderFooter, leftButton: NavButton, viewItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(scheduleController, "activate");
-			sinon.stub(scheduleController, "viewItems" as keyof ScheduleController);
+			viewItems = sinon.stub(
+				scheduleController,
+				"viewItems" as keyof ScheduleController,
+			);
 			await scheduleController.setup();
 			scheduleController["editItems"]();
 			footer = scheduleController.footer as HeaderFooter;
@@ -217,9 +235,9 @@ describe("ScheduleController", (): void => {
 		it("should set the list item icons", (): Chai.Assertion =>
 			expect(scheduleList.classList.contains("edit")).to.be.true);
 
-		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(scheduleController["viewItems"]).to.have.been.called;
+		it("should attach a footer left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(viewItems).to.have.been.called;
 		});
 
 		it("should set the footer left button style", (): Chai.Assertion =>
@@ -231,12 +249,19 @@ describe("ScheduleController", (): void => {
 	});
 
 	describe("viewItems", (): void => {
-		let footer: HeaderFooter, leftButton: NavButton, rightButton: NavButton;
+		let footer: HeaderFooter,
+			leftButton: NavButton,
+			rightButton: NavButton,
+			editItems: SinonStub,
+			viewSettings: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(scheduleController, "activate");
-			sinon.stub(scheduleController, "editItems" as keyof ScheduleController);
-			sinon.stub(
+			editItems = sinon.stub(
+				scheduleController,
+				"editItems" as keyof ScheduleController,
+			);
+			viewSettings = sinon.stub(
 				scheduleController,
 				"viewSettings" as keyof ScheduleController,
 			);
@@ -256,17 +281,17 @@ describe("ScheduleController", (): void => {
 		it("should set the list item icons", (): Chai.Assertion =>
 			expect(scheduleList.classList.contains("edit")).to.be.false);
 
-		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(scheduleController["editItems"]).to.have.been.called;
+		it("should attach a footer left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(editItems).to.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Edit"));
 
-		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(scheduleController["viewSettings"]).to.have.been.called;
+		it("should attach a footer right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(viewSettings).to.have.been.called;
 		});
 
 		it("should set the footer right button label", (): Chai.Assertion =>

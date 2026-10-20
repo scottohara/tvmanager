@@ -10,5 +10,5 @@ export interface Section {
 }
 
 export type ListAction = "delete" | "edit" | "view";
-export type ListEventHandler = (index: number) => void;
+export type ListEventHandler = (index: number) => Promise<void> | void;
 export type ListItem = PublicInterface<Episode | Program | Series>;

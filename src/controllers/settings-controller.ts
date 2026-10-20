@@ -49,23 +49,29 @@ export default class SettingsController extends ViewController {
 
 	public override async activate(): Promise<void> {
 		// Bind events for all of the buttons/controls
-		this.aboutRow.addEventListener("click", this.viewAbout.bind(this));
-		this.loginRow.addEventListener("click", this.viewLogin.bind(this));
+		this.aboutRow.addEventListener(
+			"click",
+			this.toEventListener(this.viewAbout.bind(this)),
+		);
+		this.loginRow.addEventListener(
+			"click",
+			this.toEventListener(this.viewLogin.bind(this)),
+		);
 		this.recordedReportRow.addEventListener(
 			"click",
-			this.viewRecordedReport.bind(this),
+			this.toEventListener(this.viewRecordedReport.bind(this)),
 		);
 		this.expectedReportRow.addEventListener(
 			"click",
-			this.viewExpectedReport.bind(this),
+			this.toEventListener(this.viewExpectedReport.bind(this)),
 		);
 		this.missedReportRow.addEventListener(
 			"click",
-			this.viewMissedReport.bind(this),
+			this.toEventListener(this.viewMissedReport.bind(this)),
 		);
 		this.incompleteReportRow.addEventListener(
 			"click",
-			this.viewIncompleteReport.bind(this),
+			this.toEventListener(this.viewIncompleteReport.bind(this)),
 		);
 
 		return Promise.resolve();

@@ -1,10 +1,10 @@
-import type { NavButton, NavButtonEventHandler } from "~/controllers";
+import type { ClickEventHandler, NavButton } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import EpisodeMock from "~/mocks/episode-model-mock";
 import ListMock from "~/mocks/list-mock";
 import UnscheduledController from "~/controllers/unscheduled-controller";
 import UnscheduledView from "~/views/unscheduled-view.html";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -28,18 +28,21 @@ describe("UnscheduledController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let leftButton: NavButton;
+		let leftButton: NavButton,
+			viewItem: SinonStub,
+			goBack: SinonStub,
+			activate: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(
+			viewItem = sinon.stub(
 				unscheduledController,
 				"viewItem" as keyof UnscheduledController,
 			);
-			sinon.stub(
+			goBack = sinon.stub(
 				unscheduledController,
 				"goBack" as keyof UnscheduledController,
 			);
-			sinon.stub(unscheduledController, "activate");
+			activate = sinon.stub(unscheduledController, "activate");
 			await unscheduledController.setup();
 			leftButton = unscheduledController.header.leftButton as NavButton;
 		});
@@ -49,9 +52,9 @@ describe("UnscheduledController", (): void => {
 				"Unscheduled",
 			));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(unscheduledController["goBack"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(goBack).to.have.been.called;
 		});
 
 		it("should set the header left button style", (): Chai.Assertion =>
@@ -59,20 +62,22 @@ describe("UnscheduledController", (): void => {
 		it("should set the header left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Schedule"));
 
-		it("should attach a view event handler to the unscheduled list", (): void => {
-			(unscheduledController["unscheduledList"] as ListMock).viewEventHandler(
-				0,
-			);
-			expect(unscheduledController["viewItem"]).to.have.been.calledWith(0);
+		it("should attach a view event handler to the unscheduled list", async (): Promise<void> => {
+			await (
+				unscheduledController["unscheduledList"] as ListMock
+			).viewEventHandler(0);
+			expect(viewItem).to.have.been.calledWith(0);
 		});
 
 		it("should activate the controller", (): Chai.Assertion =>
-			expect(unscheduledController["activate"]).to.have.been.called);
+			expect(activate).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
+		let viewItems: SinonStub;
+
 		beforeEach((): void => {
-			sinon.stub(
+			viewItems = sinon.stub(
 				unscheduledController,
 				"viewItems" as keyof UnscheduledController,
 			);
@@ -96,7 +101,7 @@ describe("UnscheduledController", (): void => {
 				expect(unscheduledController["unscheduledList"].refresh).to.have.been
 					.called);
 			it("should set the list to view mode", (): Chai.Assertion =>
-				expect(unscheduledController["viewItems"]).to.have.been.called);
+				expect(viewItems).to.have.been.called);
 		});
 
 		describe("failure", (): void => {
@@ -109,7 +114,7 @@ describe("UnscheduledController", (): void => {
 				expect(unscheduledController["unscheduledList"].refresh).to.not.have
 					.been.called);
 			it("should not set the list to view mode", (): Chai.Assertion =>
-				expect(unscheduledController["viewItems"]).to.not.have.been.called);
+				expect(viewItems).to.not.have.been.called);
 			it("should display a notice to the user", (): Chai.Assertion =>
 				expect(appController.showNotice).to.have.been.calledWith({
 					label: "activate failed",

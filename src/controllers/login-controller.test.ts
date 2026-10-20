@@ -1,4 +1,4 @@
-import type { NavButton, NavButtonEventHandler } from "~/controllers";
+import type { ClickEventHandler, NavButton } from "~/controllers";
 import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import Login from "~/models/login-model";
@@ -26,10 +26,11 @@ describe("LoginController", (): void => {
 	describe("setup", (): void => {
 		let userName: HTMLInputElement,
 			password: HTMLInputElement,
-			rightButton: NavButton;
+			rightButton: NavButton,
+			login: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(loginController, "login" as keyof LoginController);
+			login = sinon.stub(loginController, "login" as keyof LoginController);
 
 			userName = document.createElement("input");
 			userName.id = "userName";
@@ -44,9 +45,9 @@ describe("LoginController", (): void => {
 		it("should set the header label", (): Chai.Assertion =>
 			expect(String(loginController.header.label)).to.equal("Login"));
 
-		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(loginController["login"]).to.have.been.called;
+		it("should attach a header right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(login).to.have.been.called;
 		});
 
 		it("should set the header right button style", (): Chai.Assertion =>

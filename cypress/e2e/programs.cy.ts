@@ -129,27 +129,27 @@ describe("Programs", (): void => {
 
 	describe("index", (): void => {
 		it("should scroll the list when the index is swiped", (): void => {
-			cy.get("#group-T").should((item: JQuery): Chai.Assertion =>
+			cy.get("#group-T").should((item: JQuery): void => {
 				expect(item.position().top).to.be.greaterThan(
 					Number(Cypress.$(list).height()),
-				),
-			);
+				);
+			});
 			cy.get(index).trigger("pointerdown", "top", { buttons: 1 });
 			cy.get(index).trigger("pointermove", "bottom", { buttons: 1 });
 			cy.get(index).trigger("pointerup");
-			cy.get("#group-T").should((item: JQuery): Chai.Assertion =>
+			cy.get("#group-T").should((item: JQuery): void => {
 				expect(item.position().top).to.be.lessThan(
 					Number(Cypress.$(list).height()),
-				),
-			);
+				);
+			});
 			cy.get(index).trigger("pointerdown", "bottom", { buttons: 1 });
 			cy.get(index).trigger("pointermove", "top", { buttons: 1 });
 			cy.get(index).trigger("pointerup");
-			cy.get("#group-T").should((item: JQuery): Chai.Assertion =>
+			cy.get("#group-T").should((item: JQuery): void => {
 				expect(item.position().top).to.be.greaterThan(
 					Number(Cypress.$(list).height()),
-				),
-			);
+				);
+			});
 		});
 	});
 

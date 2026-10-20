@@ -14,7 +14,7 @@ export default class List {
 		public items: ListItem[],
 		private readonly viewEventHandler: ListEventHandler,
 		private readonly editEventHandler?: ListEventHandler | null,
-		private readonly deleteEventHandler?: (index: number) => void,
+		private readonly deleteEventHandler?: ListEventHandler,
 	) {
 		// Get a reference to the application controller singleton
 		this.appController = new ApplicationController();
@@ -88,7 +88,11 @@ export default class List {
 					const listItem = document.createElement("li");
 
 					listItem.innerHTML = itemHtml;
-					listItem.addEventListener("click", (): void => this.tap(itemIndex));
+					listItem.addEventListener("click", (): void => {
+						this.tap(itemIndex).catch((e: unknown): void =>
+							this.appController.showNotice({ label: (e as Error).message }),
+						);
+					});
 					itemElements.push(listItem);
 
 					return itemElements;
@@ -195,21 +199,21 @@ export default class List {
 		}
 	}
 
-	private tap(itemIndex: number): void {
+	private async tap(itemIndex: number): Promise<void> {
 		// Call the appropriate function depending on the current list mode, and whether or not a handler for that mode was specified
 		switch (this.action) {
 			case "view":
-				this.viewEventHandler(itemIndex);
+				await this.viewEventHandler(itemIndex);
 				break;
 
 			case "edit":
-				this.editEventHandler?.(itemIndex);
+				await this.editEventHandler?.(itemIndex);
 				break;
 
 			case "delete":
 				if (undefined !== this.deleteEventHandler) {
 					if (window.confirm("Delete this item?")) {
-						this.deleteEventHandler(itemIndex);
+						await this.deleteEventHandler(itemIndex);
 					}
 				}
 				break;

@@ -4,19 +4,19 @@ import type { PublicInterface } from "~/global";
 import type Series from "~/models/series-model";
 import type ViewController from "~/controllers/view-controller";
 
-export type NavButtonEventHandler = () => void;
-export type NavButtonAsyncEventHandler = () => Promise<void>;
+export type ClickEventHandler = () => Promise<void> | void;
+export type ClickEventListener = () => void;
 
-interface NavButton {
-	eventHandler?: NavButtonEventHandler;
+interface NavButton<T = ClickEventHandler> {
+	eventHandler?: T;
 	style?: "backButton" | "cautionButton" | "confirmButton";
 	label: string;
 }
 
-export interface HeaderFooter {
+export interface HeaderFooter<T = ClickEventHandler> {
 	label?: string;
-	leftButton?: NavButton;
-	rightButton?: NavButton;
+	leftButton?: NavButton<T>;
+	rightButton?: NavButton<T>;
 }
 
 export interface View {

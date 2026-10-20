@@ -1,10 +1,10 @@
 import type {
+	ClickEventHandler,
 	HeaderFooter,
 	NavButton,
-	NavButtonAsyncEventHandler,
-	NavButtonEventHandler,
 	SeriesListItem,
 } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import EpisodeMock from "~/mocks/episode-model-mock";
 import type { EpisodeStatus } from "~/models";
@@ -13,7 +13,6 @@ import EpisodesView from "~/views/episodes-view.html";
 import ListMock from "~/mocks/list-mock";
 import SeriesMock from "~/mocks/series-model-mock";
 import Sortable from "sortablejs";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -84,14 +83,32 @@ describe("EpisodesController", (): void => {
 			},
 		];
 
-		let leftButton: NavButton, rightButton: NavButton;
+		let leftButton: NavButton,
+			rightButton: NavButton,
+			viewItem: SinonStub,
+			deleteItem: SinonStub,
+			goBack: SinonStub,
+			addItem: SinonStub,
+			activate: SinonStub;
 
 		beforeEach((): void => {
-			sinon.stub(episodesController, "viewItem" as keyof EpisodesController);
-			sinon.stub(episodesController, "deleteItem" as keyof EpisodesController);
-			sinon.stub(episodesController, "goBack" as keyof EpisodesController);
-			sinon.stub(episodesController, "addItem" as keyof EpisodesController);
-			sinon.stub(episodesController, "activate");
+			viewItem = sinon.stub(
+				episodesController,
+				"viewItem" as keyof EpisodesController,
+			);
+			deleteItem = sinon.stub(
+				episodesController,
+				"deleteItem" as keyof EpisodesController,
+			);
+			goBack = sinon.stub(
+				episodesController,
+				"goBack" as keyof EpisodesController,
+			);
+			addItem = sinon.stub(
+				episodesController,
+				"addItem" as keyof EpisodesController,
+			);
+			activate = sinon.stub(episodesController, "activate");
 		});
 
 		scenarios.forEach((scenario: Scenario): void => {
@@ -108,9 +125,9 @@ describe("EpisodesController", (): void => {
 						`${listItem.series.programName} : ${listItem.series.seriesName}`,
 					));
 
-				it("should attach a header left button event handler", (): void => {
-					(leftButton.eventHandler as NavButtonEventHandler)();
-					expect(episodesController["goBack"]).to.have.been.called;
+				it("should attach a header left button event handler", async (): Promise<void> => {
+					await (leftButton.eventHandler as ClickEventHandler)();
+					expect(goBack).to.have.been.called;
 				});
 
 				it("should set the header left button style", (): Chai.Assertion =>
@@ -118,22 +135,26 @@ describe("EpisodesController", (): void => {
 				it("should set the header left button label", (): Chai.Assertion =>
 					expect(leftButton.label).to.equal(scenario.leftButtonLabel));
 
-				it("should attach a header right button event handler", (): void => {
-					(rightButton.eventHandler as NavButtonEventHandler)();
-					expect(episodesController["addItem"]).to.have.been.called;
+				it("should attach a header right button event handler", async (): Promise<void> => {
+					await (rightButton.eventHandler as ClickEventHandler)();
+					expect(addItem).to.have.been.called;
 				});
 
 				it("should set the header right button label", (): Chai.Assertion =>
 					expect(rightButton.label).to.equal("+"));
 
-				it("should attach a view event handler to the episodes list", (): void => {
-					(episodesController["episodeList"] as ListMock).viewEventHandler(0);
-					expect(episodesController["viewItem"]).to.have.been.calledWith(0);
+				it("should attach a view event handler to the episodes list", async (): Promise<void> => {
+					await (
+						episodesController["episodeList"] as ListMock
+					).viewEventHandler(0);
+					expect(viewItem).to.have.been.calledWith(0);
 				});
 
-				it("should attach a delete event handler to the episodes list", (): void => {
-					(episodesController["episodeList"] as ListMock).deleteEventHandler(0);
-					expect(episodesController["deleteItem"]).to.have.been.calledWith(0);
+				it("should attach a delete event handler to the episodes list", async (): Promise<void> => {
+					await (
+						episodesController["episodeList"] as ListMock
+					).deleteEventHandler(0);
+					expect(deleteItem).to.have.been.calledWith(0);
 				});
 
 				it("should prepare the list for sorting", (): void => {
@@ -145,14 +166,19 @@ describe("EpisodesController", (): void => {
 				});
 
 				it("should activate the controller", (): Chai.Assertion =>
-					expect(episodesController["activate"]).to.have.been.called);
+					expect(activate).to.have.been.called);
 			});
 		});
 	});
 
 	describe("activate", (): void => {
+		let viewItems: SinonStub;
+
 		beforeEach((): void => {
-			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
+			viewItems = sinon.stub(
+				episodesController,
+				"viewItems" as keyof EpisodesController,
+			);
 			episodesController["episodeList"] = new ListMock("", "", "", []);
 		});
 
@@ -170,7 +196,7 @@ describe("EpisodesController", (): void => {
 			it("should refresh the list", (): Chai.Assertion =>
 				expect(episodesController["episodeList"].refresh).to.have.been.called);
 			it("should set the list to view mode", (): Chai.Assertion =>
-				expect(episodesController["viewItems"]).to.have.been.called);
+				expect(viewItems).to.have.been.called);
 		});
 
 		describe("failure", (): void => {
@@ -183,7 +209,7 @@ describe("EpisodesController", (): void => {
 				expect(episodesController["episodeList"].refresh).to.not.have.been
 					.called);
 			it("should not set the list to view mode", (): Chai.Assertion =>
-				expect(episodesController["viewItems"]).to.not.have.been.called);
+				expect(viewItems).to.not.have.been.called);
 			it("should display a notice to the user", (): Chai.Assertion =>
 				expect(appController.showNotice).to.have.been.calledWith({
 					label: "activate failed",
@@ -405,7 +431,7 @@ describe("EpisodesController", (): void => {
 			},
 		];
 
-		let itemLink: HTMLAnchorElement;
+		let itemLink: HTMLAnchorElement, resequenceItems: SinonStub;
 
 		beforeEach((): void => {
 			const episodeListItem = document.createElement("li");
@@ -415,7 +441,7 @@ describe("EpisodesController", (): void => {
 			episodeListItem.append(itemLink);
 			episodeList.append(episodeListItem);
 
-			sinon.stub(
+			resequenceItems = sinon.stub(
 				episodesController,
 				"resequenceItems" as keyof EpisodesController,
 			);
@@ -443,7 +469,7 @@ describe("EpisodesController", (): void => {
 					it("should remove the item from the episodes list", (): Chai.Assertion =>
 						expect(episodesController["episodeList"].items).to.deep.equal([]));
 					it("should refresh the list", (): Chai.Assertion =>
-						expect(episodesController["resequenceItems"]).to.have.been.called);
+						expect(resequenceItems).to.have.been.called);
 				});
 
 				describe("failure", (): void => {
@@ -463,8 +489,7 @@ describe("EpisodesController", (): void => {
 							itemLink,
 						));
 					it("should not refresh the list", (): Chai.Assertion =>
-						expect(episodesController["resequenceItems"]).to.not.have.been
-							.called);
+						expect(resequenceItems).to.not.have.been.called);
 					it("should display a notice to the user", (): Chai.Assertion =>
 						expect(appController.showNotice).to.have.been.calledWith({
 							label: "delete failed",
@@ -477,11 +502,14 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("deleteItems", (): void => {
-		let footer: HeaderFooter, rightButton: NavButton;
+		let footer: HeaderFooter, rightButton: NavButton, viewItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "activate");
-			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
+			viewItems = sinon.stub(
+				episodesController,
+				"viewItems" as keyof EpisodesController,
+			);
 			await episodesController.setup();
 			episodesController["deleteItems"]();
 			footer = episodesController.footer as HeaderFooter;
@@ -500,9 +528,9 @@ describe("EpisodesController", (): void => {
 			expect(episodeList.classList.contains("edit")).to.be.false;
 		});
 
-		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(episodesController["viewItems"]).to.have.been.called;
+		it("should attach a footer right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(viewItems).to.have.been.called;
 		});
 
 		it("should set the footer right button style", (): Chai.Assertion =>
@@ -628,15 +656,21 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("editItems", (): void => {
-		let footer: HeaderFooter, leftButton: NavButton;
+		let footer: HeaderFooter,
+			leftButton: NavButton,
+			resequenceItems: SinonStub,
+			viewItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "activate");
-			sinon.stub(
+			resequenceItems = sinon.stub(
 				episodesController,
 				"resequenceItems" as keyof EpisodesController,
 			);
-			sinon.stub(episodesController, "viewItems" as keyof EpisodesController);
+			viewItems = sinon.stub(
+				episodesController,
+				"viewItems" as keyof EpisodesController,
+			);
 			await episodesController.setup();
 			episodesController["editItems"]();
 			footer = episodesController.footer as HeaderFooter;
@@ -660,9 +694,9 @@ describe("EpisodesController", (): void => {
 				.false);
 
 		it("should attach a footer left button event handler", async (): Promise<void> => {
-			await (leftButton.eventHandler as NavButtonAsyncEventHandler)();
-			expect(episodesController["resequenceItems"]).to.have.been.called;
-			expect(episodesController["viewItems"]).to.have.been.called;
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(resequenceItems).to.have.been.called;
+			expect(viewItems).to.have.been.called;
 		});
 
 		it("should set the footer left button style", (): Chai.Assertion =>
@@ -674,12 +708,22 @@ describe("EpisodesController", (): void => {
 	});
 
 	describe("viewItems", (): void => {
-		let footer: HeaderFooter, leftButton: NavButton, rightButton: NavButton;
+		let footer: HeaderFooter,
+			leftButton: NavButton,
+			rightButton: NavButton,
+			editItems: SinonStub,
+			deleteItems: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			sinon.stub(episodesController, "activate");
-			sinon.stub(episodesController, "editItems" as keyof EpisodesController);
-			sinon.stub(episodesController, "deleteItems" as keyof EpisodesController);
+			editItems = sinon.stub(
+				episodesController,
+				"editItems" as keyof EpisodesController,
+			);
+			deleteItems = sinon.stub(
+				episodesController,
+				"deleteItems" as keyof EpisodesController,
+			);
 			await episodesController.setup();
 			episodesController["viewItems"]();
 			footer = episodesController.footer as HeaderFooter;
@@ -703,17 +747,17 @@ describe("EpisodesController", (): void => {
 			expect(Boolean(episodesController["sortable"].option("disabled"))).to.be
 				.true);
 
-		it("should attach a footer left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(episodesController["editItems"]).to.have.been.called;
+		it("should attach a footer left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(editItems).to.have.been.called;
 		});
 
 		it("should set the footer left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Sort"));
 
-		it("should attach a footer right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(episodesController["deleteItems"]).to.have.been.called;
+		it("should attach a footer right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(deleteItems).to.have.been.called;
 		});
 
 		it("should set the footer left button style", (): Chai.Assertion =>

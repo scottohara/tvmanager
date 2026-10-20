@@ -1,7 +1,7 @@
 import type {
+	ClickEventHandler,
 	EpisodeListItem,
 	NavButton,
-	NavButtonEventHandler,
 } from "~/controllers";
 import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
@@ -93,13 +93,23 @@ describe("EpisodeController", (): void => {
 			missed: HTMLDivElement,
 			statusDate: HTMLInputElement,
 			leftButton: NavButton,
-			rightButton: NavButton;
+			rightButton: NavButton,
+			cancel: SinonStub,
+			save: SinonStub,
+			setStatus: SinonStub,
+			toggleStatusDateRow: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(episodeController, "cancel" as keyof EpisodeController);
-			sinon.stub(episodeController, "save" as keyof EpisodeController);
-			sinon.stub(episodeController, "setStatus" as keyof EpisodeController);
-			sinon.stub(
+			cancel = sinon.stub(
+				episodeController,
+				"cancel" as keyof EpisodeController,
+			);
+			save = sinon.stub(episodeController, "save" as keyof EpisodeController);
+			setStatus = sinon.stub(
+				episodeController,
+				"setStatus" as keyof EpisodeController,
+			);
+			toggleStatusDateRow = sinon.stub(
 				episodeController,
 				"toggleStatusDateRow" as keyof EpisodeController,
 			);
@@ -151,17 +161,17 @@ describe("EpisodeController", (): void => {
 				"Add/Edit Episode",
 			));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(episodeController["cancel"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(cancel).to.have.been.called;
 		});
 
 		it("should set the header left button label", (): Chai.Assertion =>
 			expect(leftButton.label).to.equal("Cancel"));
 
-		it("should attach a header right button event handler", (): void => {
-			(rightButton.eventHandler as NavButtonEventHandler)();
-			expect(episodeController["save"]).to.have.been.called;
+		it("should attach a header right button event handler", async (): Promise<void> => {
+			await (rightButton.eventHandler as ClickEventHandler)();
+			expect(save).to.have.been.called;
 		});
 
 		it("should set the header right button style", (): Chai.Assertion =>
@@ -179,37 +189,31 @@ describe("EpisodeController", (): void => {
 
 		it("should attach a watched click event handler", (): void => {
 			watched.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["setStatus"]).to.have.been.calledWith("watched");
+			expect(setStatus).to.have.been.calledWith("watched");
 		});
 
 		it("should attach a recorded click event handler", (): void => {
 			recorded.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["setStatus"]).to.have.been.calledWith(
-				"recorded",
-			);
+			expect(setStatus).to.have.been.calledWith("recorded");
 		});
 
 		it("should attach an expected click event handler", (): void => {
 			expected.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["setStatus"]).to.have.been.calledWith(
-				"expected",
-			);
+			expect(setStatus).to.have.been.calledWith("expected");
 		});
 
 		it("should attach a missed click event handler", (): void => {
 			missed.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["setStatus"]).to.have.been.calledWith("missed");
+			expect(setStatus).to.have.been.calledWith("missed");
 		});
 
 		it("should attach an unscheduled click event handler", (): void => {
 			unscheduled.dispatchEvent(new MouseEvent("click"));
-			expect(episodeController["toggleStatusDateRow"]).to.have.been.called;
+			expect(toggleStatusDateRow).to.have.been.called;
 		});
 
 		it("should toggle the current status", (): Chai.Assertion =>
-			expect(episodeController["setStatus"]).to.have.been.calledWith(
-				"watched",
-			));
+			expect(setStatus).to.have.been.calledWith("watched"));
 
 		afterEach((): void => {
 			episodeName.remove();
@@ -407,19 +411,21 @@ describe("EpisodeController", (): void => {
 	});
 
 	describe("setStatus", (): void => {
-		beforeEach((): SinonStub =>
-			sinon.stub(
-				episodeController,
-				"toggleStatusDateRow" as keyof EpisodeController,
-			),
+		let toggleStatusDateRow: SinonStub;
+
+		beforeEach(
+			(): SinonStub =>
+				(toggleStatusDateRow = sinon.stub(
+					episodeController,
+					"toggleStatusDateRow" as keyof EpisodeController,
+				)),
 		);
 
 		describe("in progress", (): void => {
 			it("should do nothing", (): void => {
 				episodeController["settingStatus"] = true;
 				episodeController["setStatus"]("");
-				expect(episodeController["toggleStatusDateRow"]).to.not.have.been
-					.called;
+				expect(toggleStatusDateRow).to.not.have.been.called;
 				expect(episodeController["settingStatus"]).to.be.true;
 			});
 		});
@@ -543,8 +549,7 @@ describe("EpisodeController", (): void => {
 							scenario.unverifiedRowHidden,
 						));
 					it("should toggle the status date row", (): Chai.Assertion =>
-						expect(episodeController["toggleStatusDateRow"]).to.have.been
-							.called);
+						expect(toggleStatusDateRow).to.have.been.called);
 					it("should clear the semaphore", (): Chai.Assertion =>
 						expect(episodeController["settingStatus"]).to.be.false);
 				});

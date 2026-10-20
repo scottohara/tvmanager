@@ -1,13 +1,9 @@
-import type {
-	NavButton,
-	NavButtonEventHandler,
-	ReportConfig,
-} from "~/controllers";
+import type { ClickEventHandler, NavButton, ReportConfig } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import SeriesMock from "~/mocks/series-model-mock";
 import SettingsController from "~/controllers/settings-controller";
 import SettingsView from "~/views/settings-view.html";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -60,9 +56,9 @@ describe("SettingsController", (): void => {
 
 	let settingsController: SettingsController;
 
-	beforeEach((): void => {
-		settingsController = new SettingsController();
-	});
+	beforeEach(
+		(): SettingsController => (settingsController = new SettingsController()),
+	);
 
 	describe("object constructor", (): void => {
 		it("should return a SettingsController instance", (): Chai.Assertion =>
@@ -75,11 +71,14 @@ describe("SettingsController", (): void => {
 	});
 
 	describe("setup", (): void => {
-		let leftButton: NavButton;
+		let leftButton: NavButton, goBack: SinonStub, activate: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
-			sinon.stub(settingsController, "goBack" as keyof SettingsController);
-			sinon.stub(settingsController, "activate");
+			goBack = sinon.stub(
+				settingsController,
+				"goBack" as keyof SettingsController,
+			);
+			activate = sinon.stub(settingsController, "activate");
 			await settingsController.setup();
 			leftButton = settingsController.header.leftButton as NavButton;
 		});
@@ -87,9 +86,9 @@ describe("SettingsController", (): void => {
 		it("should set the header label", (): Chai.Assertion =>
 			expect(String(settingsController.header.label)).to.equal("Settings"));
 
-		it("should attach a header left button event handler", (): void => {
-			(leftButton.eventHandler as NavButtonEventHandler)();
-			expect(settingsController["goBack"]).to.have.been.called;
+		it("should attach a header left button event handler", async (): Promise<void> => {
+			await (leftButton.eventHandler as ClickEventHandler)();
+			expect(goBack).to.have.been.called;
 		});
 
 		it("should set the header left button style", (): Chai.Assertion =>
@@ -98,7 +97,7 @@ describe("SettingsController", (): void => {
 			expect(leftButton.label).to.equal("Schedule"));
 
 		it("should activate the controller", (): Chai.Assertion =>
-			expect(settingsController["activate"]).to.have.been.called);
+			expect(activate).to.have.been.called);
 	});
 
 	describe("activate", (): void => {
@@ -107,7 +106,13 @@ describe("SettingsController", (): void => {
 			recordedReportRow: HTMLDivElement,
 			expectedReportRow: HTMLDivElement,
 			missedReportRow: HTMLDivElement,
-			incompleteReportRow: HTMLDivElement;
+			incompleteReportRow: HTMLDivElement,
+			viewAbout: SinonStub,
+			viewLogin: SinonStub,
+			viewRecordedReport: SinonStub,
+			viewExpectedReport: SinonStub,
+			viewMissedReport: SinonStub,
+			viewIncompleteReport: SinonStub;
 
 		beforeEach(async (): Promise<void> => {
 			aboutRow = document.createElement("div");
@@ -137,21 +142,27 @@ describe("SettingsController", (): void => {
 				incompleteReportRow,
 			);
 
-			sinon.stub(settingsController, "viewAbout" as keyof SettingsController);
-			sinon.stub(settingsController, "viewLogin" as keyof SettingsController);
-			sinon.stub(
+			viewAbout = sinon.stub(
+				settingsController,
+				"viewAbout" as keyof SettingsController,
+			);
+			viewLogin = sinon.stub(
+				settingsController,
+				"viewLogin" as keyof SettingsController,
+			);
+			viewRecordedReport = sinon.stub(
 				settingsController,
 				"viewRecordedReport" as keyof SettingsController,
 			);
-			sinon.stub(
+			viewExpectedReport = sinon.stub(
 				settingsController,
 				"viewExpectedReport" as keyof SettingsController,
 			);
-			sinon.stub(
+			viewMissedReport = sinon.stub(
 				settingsController,
 				"viewMissedReport" as keyof SettingsController,
 			);
-			sinon.stub(
+			viewIncompleteReport = sinon.stub(
 				settingsController,
 				"viewIncompleteReport" as keyof SettingsController,
 			);
@@ -161,32 +172,32 @@ describe("SettingsController", (): void => {
 
 		it("should attach an about click event handler", (): void => {
 			aboutRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewAbout"]).to.have.been.called;
+			expect(viewAbout).to.have.been.called;
 		});
 
 		it("should attach a login click event handler", (): void => {
 			loginRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewLogin"]).to.have.been.called;
+			expect(viewLogin).to.have.been.called;
 		});
 
 		it("should attach a recorded report click event handler", (): void => {
 			recordedReportRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewRecordedReport"]).to.have.been.called;
+			expect(viewRecordedReport).to.have.been.called;
 		});
 
 		it("should attach an expected report click event handler", (): void => {
 			expectedReportRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewExpectedReport"]).to.have.been.called;
+			expect(viewExpectedReport).to.have.been.called;
 		});
 
 		it("should attach a missed report click event handler", (): void => {
 			missedReportRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewMissedReport"]).to.have.been.called;
+			expect(viewMissedReport).to.have.been.called;
 		});
 
 		it("should attach an incomplete report click event handler", (): void => {
 			incompleteReportRow.dispatchEvent(new MouseEvent("click"));
-			expect(settingsController["viewIncompleteReport"]).to.have.been.called;
+			expect(viewIncompleteReport).to.have.been.called;
 		});
 
 		afterEach((): void => {

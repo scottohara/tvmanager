@@ -1,11 +1,11 @@
-import type { NavButton, NavButtonEventHandler } from "~/controllers";
+import type { ClickEventHandler, NavButton } from "~/controllers";
+import sinon, { type SinonStub } from "sinon";
 import AboutController from "~/controllers/about-controller";
 import AboutView from "~/views/about-view.html";
 import ApplicationControllerMock from "~/mocks/application-controller-mock";
 import EpisodeMock from "~/mocks/episode-model-mock";
 import ProgramMock from "~/mocks/program-model-mock";
 import SeriesMock from "~/mocks/series-model-mock";
-import sinon from "sinon";
 
 // Get a reference to the application controller singleton
 const appController = new ApplicationControllerMock();
@@ -30,7 +30,8 @@ describe("AboutController", (): void => {
 			totalPrograms: HTMLInputElement,
 			totalSeries: HTMLInputElement,
 			totalEpisodes: HTMLInputElement,
-			leftButton: NavButton;
+			leftButton: NavButton,
+			goBack: SinonStub;
 
 		beforeEach((): void => {
 			statistics = document.createElement("section");
@@ -43,7 +44,7 @@ describe("AboutController", (): void => {
 			totalEpisodes = document.createElement("input");
 			totalEpisodes.id = "totalEpisodes";
 
-			sinon.stub(aboutController, "goBack" as keyof AboutController);
+			goBack = sinon.stub(aboutController, "goBack" as keyof AboutController);
 
 			document.body.append(
 				statistics,
@@ -62,9 +63,9 @@ describe("AboutController", (): void => {
 			it("should set the header label", (): Chai.Assertion =>
 				expect(String(aboutController.header.label)).to.equal("About"));
 
-			it("should attach a header left button event handler", (): void => {
-				(leftButton.eventHandler as NavButtonEventHandler)();
-				expect(aboutController["goBack"]).to.have.been.called;
+			it("should attach a header left button event handler", async (): Promise<void> => {
+				await (leftButton.eventHandler as ClickEventHandler)();
+				expect(goBack).to.have.been.called;
 			});
 
 			it("should set the header left button style", (): Chai.Assertion =>

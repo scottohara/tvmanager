@@ -1,6 +1,6 @@
 import type {
+	ClickEventHandler,
 	NavButton,
-	NavButtonEventHandler,
 	SeriesListItem,
 } from "~/controllers";
 import sinon, { type SinonStub } from "sinon";
@@ -82,11 +82,13 @@ describe("SeriesController", (): void => {
 			leftButton: NavButton,
 			rightButton: NavButton,
 			programs: [number, string][],
-			programList: ProgramMock[];
+			programList: ProgramMock[],
+			cancel: SinonStub,
+			save: SinonStub;
 
 		beforeEach((): void => {
-			sinon.stub(seriesController, "cancel" as keyof SeriesController);
-			sinon.stub(seriesController, "save" as keyof SeriesController);
+			cancel = sinon.stub(seriesController, "cancel" as keyof SeriesController);
+			save = sinon.stub(seriesController, "save" as keyof SeriesController);
 
 			seriesName = document.createElement("input");
 			seriesName.id = "seriesName";
@@ -128,17 +130,17 @@ describe("SeriesController", (): void => {
 					"Add/Edit Series",
 				));
 
-			it("should attach a header left button event handler", (): void => {
-				(leftButton.eventHandler as NavButtonEventHandler)();
-				expect(seriesController["cancel"]).to.have.been.called;
+			it("should attach a header left button event handler", async (): Promise<void> => {
+				await (leftButton.eventHandler as ClickEventHandler)();
+				expect(cancel).to.have.been.called;
 			});
 
 			it("should set the header left button label", (): Chai.Assertion =>
 				expect(leftButton.label).to.equal("Cancel"));
 
-			it("should attach a header right button event handler", (): void => {
-				(rightButton.eventHandler as NavButtonEventHandler)();
-				expect(seriesController["save"]).to.have.been.called;
+			it("should attach a header right button event handler", async (): Promise<void> => {
+				await (rightButton.eventHandler as ClickEventHandler)();
+				expect(save).to.have.been.called;
 			});
 
 			it("should set the header right button style", (): Chai.Assertion =>

@@ -17,7 +17,7 @@ describe("List", (): void => {
 		itemTemplate: string,
 		groupBy: string,
 		items: ListItem[],
-		eventHandler: SinonStub,
+		eventHandler: SinonStub<[number], void>,
 		action: ListAction,
 		containerElement: HTMLUListElement,
 		list: List;
@@ -77,7 +77,7 @@ describe("List", (): void => {
 		it("should set the item template", (): Chai.Assertion =>
 			expect(list["itemTemplate"]).to.equal(itemTemplate));
 		it("should set the group by", (): Chai.Assertion =>
-			expect(list["groupBy"] as string).to.equal(groupBy));
+			expect(list["groupBy"]).to.equal(groupBy));
 		it("should set the list items", (): Chai.Assertion =>
 			expect(list.items).to.deep.equal(items));
 		it("should attach a view event handler", (): Chai.Assertion =>
@@ -87,7 +87,7 @@ describe("List", (): void => {
 		it("should attach a delete event handler", (): Chai.Assertion =>
 			expect(list["deleteEventHandler"] as SinonStub).to.equal(eventHandler));
 		it("should set the action", (): Chai.Assertion =>
-			expect(list["action"] as ListAction).to.equal(action));
+			expect(list["action"]).to.equal(action));
 	});
 
 	describe("refresh", (): void => {
@@ -106,7 +106,7 @@ describe("List", (): void => {
 					eventHandler,
 					eventHandler,
 				);
-				tap = sinon.stub(list, "tap" as keyof List);
+				tap = sinon.stub(list, "tap" as keyof List).resolves();
 				list.refresh();
 			});
 
@@ -122,13 +122,48 @@ describe("List", (): void => {
 					});
 				expect(tap.callCount).to.equal(3);
 			});
+
+			describe("when the click handler resolves", (): void => {
+				beforeEach(async (): Promise<void> => {
+					(
+						document.querySelector(
+							`#${container} li:not([id])`,
+						) as HTMLLIElement
+					).dispatchEvent(new MouseEvent("click"));
+					await new Promise<void>((resolve): void => {
+						window.setTimeout(resolve, 0);
+					});
+				});
+
+				it("should not show a notice", (): Chai.Assertion =>
+					expect(appController.showNotice).to.not.have.been.called);
+			});
+
+			describe("when the click handler rejects", (): void => {
+				beforeEach(async (): Promise<void> => {
+					tap.rejects(new Error("tap failed"));
+					(
+						document.querySelector(
+							`#${container} li:not([id])`,
+						) as HTMLLIElement
+					).dispatchEvent(new MouseEvent("click"));
+					await new Promise<void>((resolve): void => {
+						window.setTimeout(resolve, 0);
+					});
+				});
+
+				it("should show a notice", (): Chai.Assertion =>
+					expect(appController.showNotice).to.have.been.calledWith({
+						label: "tap failed",
+					}));
+			});
 		});
 
 		describe("with grouping", (): void => {
 			beforeEach((): void => {
 				renderHtml =
 					'<li id="group-group-one" class="group">group-one</li><li><a id="item-1">group-one:item-one</a>\n</li><li><a id="item-2">group-one:item-two</a>\n</li><li id="group-group-two" class="group">group-two</li><li><a id="item-3">group-two:item-three</a>\n</li><ul id="index"><li>group-one</li><li>group-two</li></ul>';
-				tap = sinon.stub(list, "tap" as keyof List);
+				tap = sinon.stub(list, "tap" as keyof List).resolves();
 				list.refresh();
 			});
 
@@ -324,7 +359,7 @@ describe("List", (): void => {
 				beforeEach((): void => list.setAction(validAction));
 
 				it("should set the action", (): Chai.Assertion =>
-					expect(list["action"] as ListAction).to.equal(validAction));
+					expect(list["action"]).to.equal(validAction));
 
 				if ("view" === validAction) {
 					it("should not save the scroll position", (): Chai.Assertion =>
@@ -353,9 +388,9 @@ describe("List", (): void => {
 	});
 
 	describe("tap", (): void => {
-		let viewEventHandler: SinonStub,
-			editEventHandler: SinonStub | null | undefined,
-			deleteEventHandler: SinonStub | undefined;
+		let viewEventHandler: SinonStub<[number], void>,
+			editEventHandler: SinonStub<[number], void> | null | undefined,
+			deleteEventHandler: SinonStub<[number], void> | undefined;
 
 		beforeEach((): void => {
 			viewEventHandler = sinon.stub();
@@ -368,7 +403,7 @@ describe("List", (): void => {
 			describe(validAction, (): void => {
 				if ("view" !== validAction) {
 					describe("without event handler", (): void => {
-						beforeEach((): void => {
+						beforeEach(async (): Promise<void> => {
 							list = new List(
 								container,
 								itemTemplate,
@@ -379,7 +414,7 @@ describe("List", (): void => {
 								deleteEventHandler,
 							);
 							list["action"] = validAction;
-							list["tap"](0);
+							await list["tap"](0);
 						});
 
 						it("should not trigger a confirm prompt", (): Chai.Assertion =>
@@ -397,10 +432,10 @@ describe("List", (): void => {
 
 					if ("delete" === validAction) {
 						describe("confirmed", (): void => {
-							beforeEach((): void => {
+							beforeEach(async (): Promise<void> => {
 								WindowMock.confirm.returns(true);
 								list["action"] = validAction;
-								list["tap"](0);
+								await list["tap"](0);
 							});
 
 							it("should trigger a confirm prompt", (): Chai.Assertion =>
@@ -412,10 +447,10 @@ describe("List", (): void => {
 						});
 
 						describe("aborted", (): void => {
-							beforeEach((): void => {
+							beforeEach(async (): Promise<void> => {
 								WindowMock.confirm.returns(false);
 								list["action"] = validAction;
-								list["tap"](0);
+								await list["tap"](0);
 							});
 
 							it("should trigger a confirm prompt", (): Chai.Assertion =>
@@ -426,9 +461,9 @@ describe("List", (): void => {
 								expect(eventHandler).to.not.have.been.called);
 						});
 					} else {
-						beforeEach((): void => {
+						beforeEach(async (): Promise<void> => {
 							list["action"] = validAction;
-							list["tap"](0);
+							await list["tap"](0);
 						});
 
 						it("should not trigger a confirm prompt", (): Chai.Assertion =>
@@ -441,9 +476,9 @@ describe("List", (): void => {
 		});
 
 		describe("invalid action", (): void => {
-			beforeEach((): void => {
+			beforeEach(async (): Promise<void> => {
 				list["action"] = undefined;
-				list["tap"](0);
+				await list["tap"](0);
 			});
 
 			it("should not trigger a confirm prompt", (): Chai.Assertion =>
