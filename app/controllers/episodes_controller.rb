@@ -4,28 +4,28 @@
 # Episodes controller
 class EpisodesController < ApplicationController
 	def index
-		render json: ::Episode.list(params[:series_id])
+		render json: ::Episode.list(params.expect :series_id)
 	end
 
 	def show
-		render json: ::Episode.find(params[:id])
+		render json: ::Episode.find(params.expect :id)
 	end
 
 	def create
-		render json: ::Series.find(params[:series_id]).episodes.create!(episode_params), status: :created
+		render json: ::Series.find(params.expect(:series_id)).episodes.create!(episode_params), status: :created
 	end
 
 	def update
-		render json: ::Episode.find(params[:id]).update!(episode_params)
+		render json: ::Episode.find(params.expect(:id)).update!(episode_params)
 	end
 
 	def destroy
-		::Episode.find(params[:id]).destroy!
+		::Episode.find(params.expect(:id)).destroy!
 		head :no_content
 	end
 
 	def resequence
-		::Episode.resequence params[:series_id], resequence_params
+		::Episode.resequence params.expect(:series_id), params.expect(episode_ids: [])
 		head :no_content
 	end
 
@@ -34,7 +34,7 @@ class EpisodesController < ApplicationController
 	end
 
 	def count_by_status
-		render json: ::Episode.where(status: params[:status]).count
+		render json: ::Episode.where(status: params.expect(:status)).count
 	end
 
 	def unscheduled
@@ -45,9 +45,5 @@ class EpisodesController < ApplicationController
 
 	def episode_params
 		params.expect episode: %i[name status status_date unverified unscheduled sequence]
-	end
-
-	def resequence_params
-		params.expect episode_ids: []
 	end
 end

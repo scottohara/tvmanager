@@ -1,12 +1,4 @@
 ---
-plugins:
-  - rubocop-factory_bot
-  - rubocop-performance
-  - rubocop-rails
-  - rubocop-rake
-  - rubocop-rspec
-  - rubocop-rspec_rails
-
 inherit_gem:
   rubocop-config-oharagroup:
     - default.yml
@@ -16,17 +8,3 @@ inherit_gem:
     - rake.yml
     - rspec_rails.yml
     - rspec.yml
-
-AllCops:
-  Exclude:
-    - "bin/*"
-    - "config/**/*"
-    - "db/migrate/*"
-    - "db/schema.rb"
-    - "node_modules/**/*"
-    - "spec/*_helper.rb"
-    - "vendor/**/*"
-
-# Allow reading of ENV vars for authentication
-Rails/EnvironmentVariableAccess:
-  AllowReads: true

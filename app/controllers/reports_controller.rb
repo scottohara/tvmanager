@@ -8,6 +8,6 @@ class ReportsController < ApplicationController
 	end
 
 	def status
-		render json: ::Series.list_by_status(params[:status])
+		render json: ::Series.list_by_status(params.expect :status)
 	end
 end

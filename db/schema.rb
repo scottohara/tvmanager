@@ -19,14 +19,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_104153) do
   create_enum "status", ["watched", "recorded", "expected", "missed"]
 
   create_table "episodes", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.string "name", null: false
-    t.integer "sequence", null: false
-    t.bigint "series_id", null: false
     t.enum "status", enum_type: "status"
     t.date "status_date"
-    t.boolean "unscheduled", default: false, null: false
     t.boolean "unverified", default: false, null: false
+    t.boolean "unscheduled", default: false, null: false
+    t.integer "sequence", null: false
+    t.bigint "series_id", null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["series_id"], name: "index_episodes_on_series_id"
     t.index ["status"], name: "index_episodes_on_status"
@@ -34,16 +34,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_104153) do
   end
 
   create_table "programs", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.string "name", null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "series", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.string "name", null: false
     t.integer "now_showing"
     t.bigint "program_id", null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["program_id"], name: "index_series_on_program_id"
   end

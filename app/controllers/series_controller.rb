@@ -4,23 +4,23 @@
 # Series controller
 class SeriesController < ApplicationController
 	def index
-		render json: ::Series.list(params[:program_id])
+		render json: ::Series.list(params.expect :program_id)
 	end
 
 	def show
-		render json: ::Series.find(params[:id])
+		render json: ::Series.find(params.expect :id)
 	end
 
 	def create
-		render json: ::Program.find(params[:program_id]).series.create!(series_params), status: :created
+		render json: ::Program.find(params.expect(:program_id)).series.create!(series_params), status: :created
 	end
 
 	def update
-		render json: ::Series.find(params[:id]).update!(series_params :program_id)
+		render json: ::Series.find(params.expect(:id)).update!(series_params :program_id)
 	end
 
 	def destroy
-		::Series.find(params[:id]).destroy!
+		::Series.find(params.expect(:id)).destroy!
 		head :no_content
 	end
 

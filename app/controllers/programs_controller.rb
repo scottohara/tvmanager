@@ -8,7 +8,7 @@ class ProgramsController < ApplicationController
 	end
 
 	def show
-		render json: ::Program.find(params[:id])
+		render json: ::Program.find(params.expect :id)
 	end
 
 	def create
@@ -16,11 +16,11 @@ class ProgramsController < ApplicationController
 	end
 
 	def update
-		render json: ::Program.find(params[:id]).update!(program_params)
+		render json: ::Program.find(params.expect(:id)).update!(program_params)
 	end
 
 	def destroy
-		::Program.find(params[:id]).destroy!
+		::Program.find(params.expect(:id)).destroy!
 		head :no_content
 	end
 
