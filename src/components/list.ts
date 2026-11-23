@@ -116,7 +116,7 @@ export default class List {
 				// Only proceed if we're dragging
 				if (1 === buttons) {
 					const groupItem = document.elementFromPoint(
-						index.offsetLeft,
+						index.getBoundingClientRect().left,
 						clientY,
 					);
 

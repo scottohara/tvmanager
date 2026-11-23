@@ -37,8 +37,6 @@ class WindowMock {
 		.stub()
 		.callsFake((data: string): string => `base64(${data})`);
 
-	public innerHeight = 0;
-
 	public readonly window: WindowMock;
 
 	public readonly document: Document = document;

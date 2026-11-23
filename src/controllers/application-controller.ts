@@ -18,7 +18,6 @@ import SeriesController from "~/controllers/series-controller";
 import SeriesListController from "~/controllers/seriesList-controller";
 import SettingsController from "~/controllers/settings-controller";
 import UnscheduledController from "~/controllers/unscheduled-controller";
-import window from "~/components/window";
 
 export default class ApplicationController {
 	private static singletonInstance?: ApplicationController;
@@ -44,10 +43,6 @@ export default class ApplicationController {
 	}
 
 	// DOM selectors
-	private get header(): HTMLDivElement {
-		return document.querySelector("#footer") as HTMLDivElement;
-	}
-
 	private get headerLeftButton(): HTMLAnchorElement {
 		return document.querySelector("#headerLeftButton") as HTMLAnchorElement;
 	}
@@ -66,10 +61,6 @@ export default class ApplicationController {
 
 	private get content(): HTMLDivElement {
 		return document.querySelector("#content") as HTMLDivElement;
-	}
-
-	private get footer(): HTMLDivElement {
-		return document.querySelector("#footer") as HTMLDivElement;
 	}
 
 	private get footerLeftButton(): HTMLAnchorElement {
@@ -216,9 +207,6 @@ export default class ApplicationController {
 				// Show the button
 				this.footerRightButton.style.display = "inline";
 			}
-
-			// Update the content height to accommodate the footer
-			this.setContentHeight();
 		}
 	}
 
@@ -305,9 +293,6 @@ export default class ApplicationController {
 		this.footerLabel.textContent = "";
 		this.footerLabel.style.display = "none";
 		this.footerRightButton.style.display = "none";
-
-		// Update the content height to reclaim the footer space
-		this.setContentHeight();
 	}
 
 	private async viewPushed(): Promise<void> {
@@ -432,9 +417,6 @@ export default class ApplicationController {
 			// Show the button
 			this.headerRightButton.style.display = "inline";
 		}
-
-		// Update the content height to accommodate the header
-		this.setContentHeight();
 	}
 
 	private clearHeader(): void {
@@ -460,26 +442,6 @@ export default class ApplicationController {
 		this.headerLeftButton.style.display = "none";
 		this.headerLabel.style.display = "none";
 		this.headerRightButton.style.display = "none";
-
-		// Update the content height to reclaim the header space
-		this.setContentHeight();
-	}
-
-	private setContentHeight(): void {
-		// If the label wraps, its layout height will be larger than the container's layout height, so use the biggest value
-		const headerHeight = Math.max(
-				this.header.offsetHeight,
-				this.headerLabel.offsetHeight,
-			),
-			footerHeight = Math.max(
-				this.footer.offsetHeight,
-				this.footerLabel.offsetHeight,
-			),
-			IOS_HOME_BAR_HEIGHT = 13;
-
-		(this.content.firstElementChild as HTMLElement).style.height = `${
-			window.innerHeight - headerHeight - footerHeight - IOS_HOME_BAR_HEIGHT
-		}px`;
 	}
 
 	private hideNotice(notice: HTMLDivElement): void {
