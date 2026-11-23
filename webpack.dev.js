@@ -28,10 +28,12 @@ module.exports = merge(
 
 		devServer: {
 			open: true,
+			allowedHosts: [".local"],
 			proxy: [
 				{
 					context: ["/"],
 					target: "http://localhost:3000",
+					changeOrigin: true,
 				},
 			],
 		},
